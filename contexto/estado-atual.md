@@ -1,21 +1,93 @@
-# Estado documentado em 25/10/2026
+# Estado documentado em 25/10/2026 — T01 / issue #1
 
-Origem: proposta do TCC I (29/11/2025), análise inicial (07/09/2026, versão
-modificada em 08/09) e ponto de controle (03/10/2026), preservados em fontes/legado/.
-Os hashes e as identidades dos arquivos constam em fontes/manifesto.json.
+**Situação:** reconciliação documental por Codex e decisões confirmadas pelo autor
+em 25/10/2026. Os critérios documentais de T01 estão atendidos nesta branch para
+revisão por PR. Recorte, critérios e contribuição prática foram confirmados pelo
+autor; o orientador revisará o trabalho ao final, conforme fluxo definido pelo
+autor. Essa revisão ainda não ocorreu.
 
-## Confirmado nos documentos
-- Proposta: RSL e taxonomia para geração, tradução, refatoração e depuração.
-- Análise inicial: seis estudos piloto, protocolo preliminar e matriz ainda sem avaliação.
-- Ponto de controle: busca completa, deduplicação e triagem ainda pendentes naquela data.
-- Não se documentaram experimentos próprios com LLMs nem validação da matriz concluída.
+## Origens e alcance
 
-## A confirmar pelo autor (T01)
-- Buscas, decisões de seleção, leituras e extrações executadas após 03/10.
-- Aceite do protocolo e viabilidade da matriz pelo orientador.
-- Template oficial, orientador, banca e situação da marcação da defesa.
-- Disponibilidade dos artigos, exportações das bases e eventuais fichamentos existentes.
+| ID | Origem | Alcance |
+|---|---|---|
+| L1 | [Proposta de TCC I](../fontes/legado/proposta-tcc1.txt), 29/11/2025, seções 1.1–1.2 e 4 | Objetivo, escopo e método originalmente propostos. |
+| L2 | [Análise inicial](../fontes/legado/analise-inicial.txt), 07/09/2026, versão modificada em 08/09, seções 1.2–1.5, 2.4–2.6 e Apêndice A | Relato do piloto e protocolo proposto; não comprova execução posterior. |
+| L3 | [Ponto de controle](../fontes/legado/ponto-de-controle.txt), 03/10/2026, campo «Estado atual» | Estágio declarado pelo aluno e plano de recuperação; não comprova cumprimento das metas nem avaliação/assinatura do orientador. |
+| A1 | [Issue #1, «Estado confirmado pelo autor em 25/10/2026»](https://github.com/caiofreitas1/tcc2-prompt-engineering/issues/1), consultada em 25/10/2026 | Declaração do autor de que não realizou atividades do TCC após 03/10/2026; dispensa nova pergunta sobre esse intervalo. |
+| A2 | Respostas diretas do autor neste chat em 25/10/2026, primeiro grupo | Decisões da contribuição serão tomadas pelo autor com apoio do agente; orientador revisará após o trabalho pronto. Defesa/marcação: «Ainda não». Acesso a artigos como estudante da UFMG, apenas na rede da universidade. |
+| A3 | Respostas diretas do autor neste chat em 25/10/2026, perguntas reformuladas | Confirma quatro tarefas; período de 2021 a 07/09/2026 e português/inglês; estudos com avaliação/caso concreto como evidência, apoio secundário separado e exclusão de trabalhos apenas sobre treinamento. |
+| A4 | Resposta direta do autor neste chat em 25/10/2026, entrega prática: «Sim, adotar essa entrega» | Confirma classificação das técnicas e tabela de apoio à escolha, avaliadas em oito exemplos, dois por tarefa, quanto à clareza, justificativa nas fontes e orientação concreta; revisão do orientador ao final, sem novos experimentos com modelos. |
+| R1 | Inspeção do repositório e `make check`, por Codex em 25/10/2026 | Situação dos arquivos e integridade estrutural, sem validar resultados científicos. |
 
-Os registros de S1–S6 são candidatos herdados do piloto, não estudos automaticamente
-incluídos no corpus completo. A ausência de novas evidências aqui não prova que o
-autor deixou de avançar. Atualizar este arquivo com a origem de cada confirmação.
+Os originais PDF/DOCX permanecem imutáveis em `fontes/legado/`; suas identidades e
+hashes constam em [fontes/manifesto.json](../fontes/manifesto.json). Nesta execução,
+os três hashes conferiram e todos os trechos textuais dos dois DOCX constavam nas
+transcrições. Os documentos legados sustentam o histórico do TCC, não substituem
+os artigos primários para sustentar achados científicos.
+
+## Fatos confirmados e estágio acadêmico
+
+- O objetivo é realizar uma RSL e construir uma classificação de técnicas e uma
+  tabela de apoio à escolha para geração, tradução, refatoração e depuração de
+  código (L1; A3–A4).
+- O estágio acadêmico de execução da revisão permanece no ponto de controle de
+  03/10: piloto com seis estudos e taxonomia/matriz preliminares. Busca sistemática
+  completa, deduplicação e triagem não estavam concluídas; leitura e extração do
+  corpus definitivo precisavam ser reprogramadas (L3; A1). T01 acrescenta a
+  consolidação e as confirmações atuais do protocolo, não a execução dessas etapas.
+- A avaliação da matriz em oito cenários continua por realizar. O piloto não
+  envolveu experimentos próprios com LLMs (L2, introdução e seção 2.4; L3; A1).
+- S1–S6 continuam candidatos herdados do piloto, com metadados e resultados a
+  conferir nas fontes originais. O relato de leitura em L2 não equivale à conferência
+  por este fluxo nem à inclusão no corpus definitivo (L2; R1).
+- A preparação do repositório, das skills e das issues é organização do ambiente,
+  não execução da busca, triagem, extração, síntese ou redação acadêmica (A1).
+- Buscas, triagem, qualidade, fluxos e afirmações contêm apenas cabeçalhos;
+  `dados/extracoes.jsonl` está vazio e há seis registros de estudos piloto (R1).
+  Isso descreve o repositório, não uma contagem de resultados recuperados.
+
+## Decisões confirmadas e pendências de execução
+
+Os IDs P1–P5 foram preservados para rastrear as perguntas da primeira versão do PR.
+As respostas A2–A4 substituem o estado anterior de ausência de confirmação.
+
+| ID | Item | Estado atual e origem | Trabalho restante |
+|---|---|---|---|
+| P1 | Recorte, idiomas, critérios e corte | Confirmados pelo autor (A3): quatro tarefas por prompting de modelos pré-treinados; 01/01/2021 a 07/09/2026; português/inglês; estudos primários com texto completo e avaliação empírica/caso descrito, apoio secundário separado. | Aplicar os critérios nas tarefas de busca/seleção; registrar qualquer alteração antes de aplicá-la. |
+| P2 | Contribuição prática | Confirmada pelo autor (A4): classificação multirrótulo e tabela de apoio à escolha, com oito exemplos, dois por tarefa, avaliando clareza, justificativa nas fontes e orientação concreta. | Desenvolver o instrumento e executar/documentar a avaliação nas tarefas próprias. Não declarar utilidade demonstrada ou ganhos de eficácia/produtividade. |
+| P3 | Participação do orientador | Autor definiu que as decisões serão tomadas aqui e o orientador revisará o trabalho ao final (A2; A4). Não houve aprovação documentada do orientador. | Revisão final ainda futura; não é condição prévia para concluir T01 ou iniciar as tarefas seguintes. Viabilidade do cronograma ainda não avaliada pelo orientador. |
+| P4 | Defesa e envio da marcação | Autor respondeu «Ainda não» à pergunta sobre combinar a defesa e enviar a marcação (A2). Dia, horário, modalidade e composição da banca não foram informados. | Providenciar agendamento e envio; não presumir inexistência de contatos com possíveis membros. Situação registrada para T01, sem execução de agendamento nesta issue. |
+| P5 | Disponibilidade das bases/artigos | Autor informa acesso institucional a artigos apenas na rede da UFMG (A2). Não confirma individualmente busca, exportação ou texto completo em ACM/IEEE/arXiv, nem VPN ou acesso remoto. | Testar e registrar funções e limitações por base antes da busca em escala; artigos restritos podem depender da presença na rede da UFMG. O agente não testou acesso às bases nesta T01. |
+
+O [protocolo](../protocolo/protocolo.md) preserva ACM Digital Library, IEEE Xplore,
+arXiv e rastreamento de referências/citações. Seu planejamento não comprova acesso
+atual. A evolução metodológica e as confirmações estão em [decisoes.md](decisoes.md).
+
+Os prazos históricos são: marcação em 25/10, texto inicial em 08/11, defesas em
+16–19/11 e texto final em 29/11/2026 (L2, seção 2.6 e Tabela 4). L3 propôs
+buscas/triagem até 11/10, leitura/extração até 18/10 e síntese até 24/10. Essas metas
+não foram realizadas após 03/10, conforme A1. A viabilidade e a reprogramação ainda
+precisam ser examinadas; não se fixa novo prazo nem se declara aprovação do
+orientador. Seu momento de revisão segue o fluxo definido pelo autor em A2.
+
+Template oficial e dados institucionais ainda não confirmados permanecem pendências
+de T03; não foram resolvidos nesta issue.
+
+## Verificação e aceitação da issue #1
+
+`make check` executado por Codex em 25/10/2026 após as atualizações: **zero erros
+estruturais e dez testes aprovados**. `git diff --check` também passou. Os avisos
+sobre ausência de extrações e limites das checagens permanecem aplicáveis:
+aprovação estrutural não confirma a validade científica. Nenhum resultado do
+piloto foi promovido a evidência conferida.
+
+| Critério da issue | Estado nesta branch |
+|---|---|
+| Registrar confirmados e pendentes com origem | Atendido: L1–L3, A1–A4, R1 e tabela P1–P5. |
+| Confirmar recorte, critérios, corte e contribuição com o autor | Atendido: A3–A4. |
+| Registrar situação da marcação e disponibilidade das bases | Atendido documentalmente: A2, P4–P5; marcação ainda não realizada e acesso institucional condicionado à rede da UFMG, sem alegar teste por base. |
+| Executar `make check` e relatar | Atendido; resultado acima. |
+
+A issue permanece aberta para revisão e integração do PR. As pendências de execução
+acima pertencem à continuidade do TCC e não significam atividades realizadas em
+T01. Nenhuma outra issue foi executada.
