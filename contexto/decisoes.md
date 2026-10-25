@@ -29,7 +29,28 @@ os itens abaixo detalham seu alcance. «Proposta» não significa decisão aprov
 | D09 | Organização documental por Codex, não decisão científica | Consolidar proveniência, propostas e perguntas somente nas três entregas de T01; registrar o resultado real de `make check`. | Issue #1 e inspeção R1, 25/10/2026 | Nenhuma busca, triagem, extração ou avaliação de cenário executada. Preservar dados, legado, testes e monografia; manter issue aberta enquanto houver critérios obrigatórios pendentes. |
 
 As explicitações D03–D07 tornam visíveis escolhas e mudanças já presentes no
-histórico; não registram aprovação nova. Nenhuma alteração de recorte, bases,
-critério de elegibilidade ou contribuição foi autorizada nesta execução. Para
-alterações futuras, acrescentar data, manifestação do autor/orientador, regra
+histórico; não registravam aprovação nova na primeira preparação do PR. Naquele
+momento, nenhuma alteração de recorte, bases, critério de elegibilidade ou
+contribuição havia sido autorizada. As confirmações posteriores constam abaixo.
+Para alterações futuras, acrescentar data, manifestação do autor/orientador, regra
 anterior, nova regra, motivo e efeito sobre buscas ou registros já produzidos.
+
+## Confirmações do autor após as perguntas — 25/10/2026
+
+Os registros D01–D09 descrevem a primeira preparação do PR. As respostas diretas
+A2–A4, identificadas em `estado-atual.md`, atualizam as situações então pendentes:
+
+| ID | Responsável / natureza | Decisão ou confirmação | Motivo e efeito |
+|---|---|---|---|
+| D10 | Autor, confirmação A3 | Manter geração, tradução, refatoração e depuração; português/inglês; 01/01/2021 a 07/09/2026; corpus primário com avaliação empírica/caso concreto, apoio secundário separado e exclusão de trabalhos apenas sobre treinamento/arquitetura. | Confirma o recorte e os critérios herdados, sem ampliar datas ou tema. Resolve P1 e as confirmações do autor em D02–D05. Não é execução de seleção. |
+| D11 | Autor, decisão de fluxo A2/A4 | Decisões do trabalho tomadas pelo autor com apoio do agente; revisão do orientador ao final do trabalho. | Substitui a expectativa de aprovação prévia usada como bloqueio na primeira versão do PR. A revisão final continua necessária e futura; não representa aprovação já obtida nem nova evidência científica. |
+| D12 | Autor, confirmação da proposta A4 | Adotar classificação multirrótulo e tabela de apoio à escolha, examinadas em oito exemplos (dois por tarefa) por clareza, justificativa nas fontes e orientação concreta; sem novos experimentos com LLMs nem promessa de medir ganhos de produtividade ou eficácia. | Confirma a contribuição prática herdada (D06/P2) e sua forma de avaliação, com revisão do orientador ao final. A avaliação ainda não foi executada. |
+| D13 | Autor, informação de situação A2 | Defesa/marcação ainda não realizadas; detalhes de data, horário, modalidade e banca não fornecidos. | Resolve a informação de situação em P4, sem realizar o agendamento e sem inferir ausência de contatos prévios com membros da banca. |
+| D14 | Autor, informação de recurso A2 | Acesso a artigos acadêmicos como estudante da UFMG apenas na rede da universidade. | Registrar a condição de acesso em P5. Não inferir VPN, acesso remoto ou disponibilidade individual de consulta/exportação/texto completo em ACM, IEEE ou arXiv. Verificação por base fica para a preparação da busca; nenhuma base foi substituída. |
+
+A mudança de fluxo D11 tem origem na instrução atual do autor e retira a aprovação
+prévia do orientador como condição para T01. Não altera critérios científicos,
+cobertura ou datas. A situação das bases e da defesa agora está informada, embora
+a execução da busca e a marcação permaneçam por realizar. Os quatro critérios
+documentais da issue estão atendidos nesta branch; manter a issue aberta para
+revisão e integração do PR, sem executar outras issues neste trabalho.
