@@ -54,3 +54,19 @@ cobertura ou datas. A situação das bases e da defesa agora está informada, em
 a execução da busca e a marcação permaneçam por realizar. Os quatro critérios
 documentais da issue estão atendidos nesta branch; manter a issue aberta para
 revisão e integração do PR, sem executar outras issues neste trabalho.
+
+## Conferência de S1 — T02, 26/10/2026
+
+| ID | Responsável / natureza | Registro | Motivo e impacto |
+|---|---|---|---|
+| D15 | Codex, conferência por IA | Consultado o manuscrito arXiv:2303.06689v5, versão já indicada no piloto; atualizados somente os metadados de S1 e criadas E1–E2 e afirmações A1–A5 em rascunho. | S1 permanece piloto e revisão humana pendente. Não é inclusão no corpus nem reprodução experimental. Versão editorial publicada e seus metadados não foram conferidos; campos provisórios do PDF não foram tratados como referência definitiva da TOSEM. |
+| D16 | Codex, registro de limite | Valores de Pass@1 do piloto conferem no original; condições e orçamento foram explicitados. O denominador efetivo da Table 1 continua ambíguo, conforme evidencias/S1.md. | Preservar números reportados e inferências como categorias distintas; não corrigir o artigo por suposição nem inferir ganhos de produtividade/custo. |
+| D17 | Codex, reprodutibilidade | Manter PDF em fontes/artigos/ (ignorada) e fornecer scripts/obter_s1.py com URL de versão e SHA-256. Documentar a recuperação antes de make check em checkout novo. | Permite restaurar a fonte local exigida pelas verificações sem redistribuir o PDF no repositório. Não alterar testes para dispensar a fonte. |
+| D18 | Codex, correção da preparação de testes | A primeira execução de make check validou os dados reais, mas dois testes falharam por herdar o estado real de S1 e referências A1–A5 antes de substituir extrações por dados sintéticos. A preparação agora cria tabelas sintéticas isoladas. | Preservar todas as asserções e barreiras científicas. A validação dos dados reais continua em scripts/verificar.py, executada antes dos testes; nenhum dado inválido foi aceito para contornar a falha. |
+
+Foram detalhados campos adicionais de contexto e proveniência no contrato de
+extração, sem mudar seu cabeçalho mínimo, critérios de seleção, bases, data de
+corte ou contribuição prática. Não houve execução de busca sistemática, triagem,
+avaliação formal de qualidade ou de cenários. A leitura e a extração foram
+assistidas por IA, registradas em `contexto/uso-ia.md`; não substituem a revisão
+humana nem o acompanhamento final já acordado.
