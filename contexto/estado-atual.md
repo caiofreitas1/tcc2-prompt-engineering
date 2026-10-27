@@ -110,3 +110,26 @@ Verificação de T02 em 26/10: `make check` com zero erros estruturais e dez tes
 aprovados, após correção da preparação dos dados sintéticos dos testes (D18);
 `git diff --check` passou. A revisão humana das extrações e a conferência do
 denominador efetivo permanecem pendentes e estão explicitadas no fichamento.
+
+## Atualização de T03 — 27/10/2026
+
+O autor informou o merge do PR #14, confirmado no GitHub (merge `140eef7` em
+27/10), e escolheu expressamente o IEEE Conference Template. A estrutura agora usa
+IEEEtran V1.8b em modo `conference`, A4 e português, com os seis arquivos de
+conteúdo preservados. Origem, versões, adaptações e verificação estão em
+[monografia/TEMPLATE.md](../monografia/TEMPLATE.md).
+
+`make check`: zero erros estruturais e dez testes aprovados. `make pdf`: uma página
+A4 compilada e inspecionada visualmente, com fontes incorporadas e log final sem
+avisos ou caixas overfull/underfull. O PDF continua sendo uma estrutura com
+pendências, sem novos resultados científicos. `make release-check` falhou com
+17 bloqueios esperados; o registro do template distingue as flags de entrega
+antigas das confirmações já dadas pelo autor.
+
+O formato foi escolhido pelo autor; nome do orientador e eventual exigência de
+capa/folha de aprovação ou outros elementos adicionais permanecem pendentes de
+resposta à pergunta apresentada em 27/10. `template_institucional_confirmado` não
+foi alterado para verdadeiro. O primeiro critério de T03 está parcialmente atendido;
+separação dos arquivos, compilação/inspeção e `make check` foram atendidos. Manter
+a issue #3 aberta e o PR como rascunho até completar as confirmações obrigatórias.
+Nenhuma atividade de busca, triagem ou síntese foi executada nesta tarefa.

@@ -43,7 +43,8 @@ O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
 - `python3 scripts/obter_s1.py`: obter a cópia arXiv v5 usada em T02 e conferir o
   SHA-256, sem sobrescrever arquivo divergente. Requer rede; ver evidencias/S1.md.
 - `make check`: integridade dos registros e testes das barreiras científicas.
-- `make pdf`: compilar o esqueleto em build/main.pdf (requer latexmk e TeX Live).
+- `make pdf`: compilar o artigo em formato IEEE Conference em build/main.pdf
+  (requer latexmk, TeX Live e IEEEtran). Origem e pendências em monografia/TEMPLATE.md.
 - `make release-check`: verificar pré-condições mínimas da versão para entrega.
   Deve falhar nesta estrutura inicial, pois há etapas e revisão humana pendentes.
 - `git clone https://github.com/caiofreitas1/tcc2-prompt-engineering.git`: obter a cópia
@@ -53,9 +54,11 @@ O repositório e as issues já foram publicados. scripts/publicar_github.py foi 
 como utilitário da preparação inicial; não é necessário executá-lo para começar.
 
 ## Documento e pendências
-monografia/main.tex é um esqueleto técnico compilável; não é um template institucional
-homologado nem uma monografia pronta. Incorporar o template oficial em T03 antes da
-normalização final. Os textos anteriores foram preservados sem reescrita; os números
+monografia/main.tex usa o IEEE Conference Template, escolhido pelo autor em
+27/10/2026, com a classe IEEEtran em modo conference e A4. É uma estrutura de
+artigo com redação pendente; nome do orientador e elementos institucionais
+adicionais ainda precisam ser confirmados em T03. Ver monografia/TEMPLATE.md.
+Os textos anteriores foram preservados sem reescrita; os números
 do piloto continuam sujeitos à conferência no artigo original. As referências acadêmicas
 de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão
 humana pendente; S2–S6 continuam com metadados herdados. Ver evidencias/S1.md.

@@ -70,3 +70,12 @@ corte ou contribuição prática. Não houve execução de busca sistemática, t
 avaliação formal de qualidade ou de cenários. A leitura e a extração foram
 assistidas por IA, registradas em `contexto/uso-ia.md`; não substituem a revisão
 humana nem o acompanhamento final já acordado.
+
+## Adoção do template — T03, 27/10/2026
+
+| ID | Responsável / natureza | Registro | Motivo e impacto |
+|---|---|---|---|
+| D19 | Autor, escolha expressa neste chat | Usar o IEEE Conference Template. | Substitui o esqueleto em classe article pelo formato IEEEtran/conference. Não equivale a aprovação institucional, inclusão do orientador como coautor ou publicação em evento. |
+| D20 | Codex, implementação da escolha | Adotar IEEEtran V1.8b (2015/08/26), referência bare_conf.tex V1.4b do CTAN, A4 e português. Origem e hashes em monografia/TEMPLATE.md. | Preservar A4 do projeto; usar 10 pontos, duas colunas e estilo bibliográfico IEEEtran, sem alterar margens da classe. O ZIP do domínio central IEEE não foi validado; não alegar uso de sua edição mais recente. |
+| D21 | Codex, adaptação editorial | Remover capa/sumário/cabeçalhos do corpo do artigo; conservar os seis arquivos separados e pendências científicas. Atualizar instruções de redação que ainda presumiam T01 sem confirmação ou aprovação prévia do orientador. | Adoção do formato de artigo, sem redigir resultados, adicionar citações não usadas ou modificar o protocolo da revisão. Elementos institucionais adicionais, se exigidos, ficam pendentes de confirmação. |
+| D22 | Pendência informada ao autor | Nome do orientador e exigência de capa/folha de aprovação ou outros elementos ainda não confirmados; perguntas agrupadas apresentadas em 27/10. | Avançar na adaptação técnica; não marcar homologação institucional nem encerrar T03 enquanto faltar a confirmação obrigatória. O fluxo de revisão final do orientador definido em T01 permanece. |
