@@ -56,8 +56,9 @@ como utilitário da preparação inicial; não é necessário executá-lo para c
 ## Documento e pendências
 monografia/main.tex usa o IEEE Conference Template, escolhido pelo autor em
 27/10/2026, com a classe IEEEtran em modo conference e A4. É uma estrutura de
-artigo com redação pendente; nome do orientador e elementos institucionais
-adicionais ainda precisam ser confirmados em T03. Ver monografia/TEMPLATE.md.
+artigo com redação pendente. O orientador informado pelo autor é Prof. Dr. Eduardo
+Magno Lages Figueiredo; o autor confirmou a entrega somente como artigo IEEE,
+sem capa ou folha de aprovação separadas. Ver monografia/TEMPLATE.md.
 Os textos anteriores foram preservados sem reescrita; os números
 do piloto continuam sujeitos à conferência no artigo original. As referências acadêmicas
 de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão

@@ -35,8 +35,9 @@ substituir os requisitos ou a identificação de versão da distribuição usada
   duas colunas e dimensões controladas pela classe. A4 preserva o tamanho que já
   estava configurado no projeto; não foi atribuído a uma exigência do curso.
 - O título e a autoria usam os comandos da classe. Nome, curso, universidade e
-  cidade vieram dos materiais do projeto. E-mail, ORCID, orientador ou coautores
-  não foram inventados. Orientação não equivale automaticamente a coautoria.
+  cidade vieram dos materiais do projeto. O orientador confirmado está identificado
+  em nota de orientação por `\thanks`, habilitada por `\IEEEoverridecommandlockouts`.
+  A autoria permanece do aluno; e-mail, ORCID ou coautores não foram adicionados.
 - O texto continua em português brasileiro. Resumo e palavras-chave usam os
   ambientes da classe, com rótulos em português; o resumo permanece pendente.
 - Os seis arquivos de `capitulos/` continuam separados e entram por `\input`;
@@ -72,20 +73,32 @@ cabeçalhos e números de página adicionais. O equilíbrio das colunas da últi
 página deverá ser revisto quando houver texto final. Ainda não há tabelas,
 figuras ou citações na redação para testar esses elementos com dados reais.
 
-## Confirmações ainda necessárias
+## Orientador confirmado em 27/10/2026
 
-- Nome completo do orientador.
-- Se o curso exige capa, folha de aprovação ou elementos adicionais ao artigo e,
-  em caso afirmativo, quais modelos/dados devem ser usados.
+O autor informou neste chat que seu orientador é o docente do
+[perfil Eduardo Figueiredo no DCC/UFMG](https://dcc.ufmg.br/professor/eduardo-figueiredo/).
+A relação de orientação tem origem na declaração do autor. A página institucional,
+consultada em 27/10/2026, identifica **Eduardo Magno Lages Figueiredo** nos registros
+curriculares/projetos, a formação de doutorado e o vínculo com o DCC/UFMG. No PDF,
+ele consta como **Orientador: Prof. Dr. Eduardo Magno Lages Figueiredo**, do
+Departamento de Ciência da Computação da UFMG, em nota no rodapé da primeira página.
+Não houve contato com o docente ou confirmação de revisão/aprovação do trabalho.
 
-Essas perguntas foram apresentadas ao autor em 27/10/2026; sem resposta registrada
-até esta atualização. Não são motivo para descartar a escolha de IEEE ou suspender
-a adaptação técnica já feita. O campo `template_institucional_confirmado` em
-`projeto.json` permanece falso, pois a escolha de formato não confirma os elementos
-institucionais pendentes. O primeiro critério de T03 está parcialmente atendido;
-a issue deve permanecer aberta enquanto essas confirmações obrigatórias faltarem.
+## Elementos da entrega confirmados pelo autor
 
-## Resultado da verificação de 27/10/2026
+Em 27/10/2026, à pergunta sobre capa, folha de aprovação ou outros elementos,
+o autor respondeu **«Somente o artigo IEEE»**. Assim, não haverá capa ou folha de
+aprovação separadas nesta entrega. Essa confirmação, somada à escolha do formato
+e à identificação do orientador, atende à parte informacional do primeiro critério
+de T03. A origem é a declaração do autor sobre sua entrega, sem alegar homologação
+independente por uma instância do curso ou aprovação do orientador.
+
+O campo `template_institucional_confirmado` em `projeto.json` foi atualizado para
+verdadeiro com essa origem. A implementação mantém o artigo IEEE em A4 e português,
+os dados de autoria conhecidos e a nota de orientação. T03 fica pronta para revisão
+e integração do PR; a redação e a revisão acadêmica final continuam por realizar.
+
+## Resultado da primeira verificação de 27/10/2026
 
 - `make check`: zero erros estruturais e dez testes aprovados.
 - `make pdf`: compilação concluída; `build/main.pdf` com uma página A4.
@@ -101,3 +114,15 @@ a issue deve permanecer aberta enquanto essas confirmações obrigatórias falta
   de confirmação do protocolo; a flag foi preservada fora do escopo de T03.
 - Não foram criadas tabelas, figuras ou referências fictícias para preencher a
   página. Não se declarou validação científica ou homologação institucional.
+
+### Complemento após as confirmações do autor
+
+Orientador e entrega apenas em artigo IEEE confirmados pelo autor em 27/10/2026.
+A página com a nota de orientação foi recompilada e inspecionada visualmente;
+continua com uma página A4, log sem avisos/overfull/underfull e autoria do aluno nos
+metadados. O resultado de `make check` permanece zero erros e dez testes aprovados.
+A primeira execução de `make release-check` acima precede a confirmação da flag
+do template. Após atualizar essa flag, `make release-check` falha com 16 bloqueios
+acadêmicos e de entrega, sem tratar o template como pendente. A flag antiga do
+protocolo continua fora do escopo; a confirmação do autor permanece registrada
+em T01.

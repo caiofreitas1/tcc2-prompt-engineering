@@ -122,14 +122,24 @@ conteúdo preservados. Origem, versões, adaptações e verificação estão em
 `make check`: zero erros estruturais e dez testes aprovados. `make pdf`: uma página
 A4 compilada e inspecionada visualmente, com fontes incorporadas e log final sem
 avisos ou caixas overfull/underfull. O PDF continua sendo uma estrutura com
-pendências, sem novos resultados científicos. `make release-check` falhou com
-17 bloqueios esperados; o registro do template distingue as flags de entrega
-antigas das confirmações já dadas pelo autor.
+pendências, sem novos resultados científicos. Na primeira verificação,
+`make release-check` falhou com 17 bloqueios esperados; após confirmar a flag do
+template, a nova execução apresentou 16 bloqueios. A barreira de entrega segue
+ativa; o registro do template distingue a flag antiga do protocolo das
+confirmações já dadas pelo autor.
 
-O formato foi escolhido pelo autor; nome do orientador e eventual exigência de
-capa/folha de aprovação ou outros elementos adicionais permanecem pendentes de
-resposta à pergunta apresentada em 27/10. `template_institucional_confirmado` não
-foi alterado para verdadeiro. O primeiro critério de T03 está parcialmente atendido;
-separação dos arquivos, compilação/inspeção e `make check` foram atendidos. Manter
-a issue #3 aberta e o PR como rascunho até completar as confirmações obrigatórias.
+O formato foi escolhido pelo autor. Em resposta à pergunta apresentada em 27/10,
+ele identificou seu orientador pelo [perfil institucional do DCC/UFMG](https://dcc.ufmg.br/professor/eduardo-figueiredo/).
+O nome completo conferido é **Eduardo Magno Lages Figueiredo**, identificado como
+orientador em nota no PDF. A relação de orientação foi informada pelo autor;
+a identidade e o vínculo institucional foram conferidos na página. Não se registra
+revisão ou aprovação já realizada pelo docente.
+
+O autor confirmou em seguida que a entrega é **«Somente o artigo IEEE»**. Capa,
+folha de aprovação e outros elementos separados não serão acrescentados.
+`template_institucional_confirmado` foi atualizado para verdadeiro com origem
+nessa declaração do autor, sem alegar homologação independente pelo curso.
+Os quatro critérios de T03 estão atendidos nesta branch: origem/versão e dados
+confirmados, arquivos separados, compilação/inspeção e `make check`. O PR pode
+seguir para revisão e integração; a issue permanece aberta até essa etapa.
 Nenhuma atividade de busca, triagem ou síntese foi executada nesta tarefa.
