@@ -30,3 +30,40 @@ não equivalem a revisores humanos independentes ou a concordância entre avalia
 - Revisão humana: pendente. Não foram executados experimentos com LLMs, código
   do artigo ou testes do benchmark. A avaliação humana relatada pelos autores do
   artigo não é revisão deste trabalho. Não houve atuação de segundo revisor humano.
+
+## T03 — 27/10/2026
+
+- Executor: Codex (IA); ambiente identifica GPT-6, sem expor a variante específica.
+- Entrada: decisão do autor de usar IEEE Conference Template; orientações do
+  repositório, issue #3, esqueleto existente e fontes IEEE/CTAN.
+- Saída: adoção de IEEEtran/conference em `monografia/main.tex`, ajustes editoriais
+  nos arquivos de introdução/metodologia, proveniência em `monografia/TEMPLATE.md`
+  e registros de situação/decisões. Não houve produção de resultados científicos.
+- Verificação: compilação por `make pdf` e inspeção da página completa renderizada
+  por Poppler; título, autoria, português, colunas e seções conferidos. Diagnósticos
+  e resultado de `make check` relatados no registro de T03 e no PR.
+- Revisão humana: pendente. Na primeira preparação, orientador e elementos
+  institucionais adicionais ainda não estavam confirmados. Não se certificou
+  homologação pelo curso nem submissão a evento IEEE.
+- Resultado final de T03: `make check` com zero erros e dez testes aprovados;
+  `make pdf` com uma página A4, log sem avisos/overfull/underfull, metadados e
+  quatro fontes Type 1 incorporadas. Página final inteira inspecionada visualmente.
+  `make release-check` falhou com 17 bloqueios esperados, discriminados no registro
+  do template; não se contornaram as barreiras de entrega.
+
+### Complemento de T03 — orientador
+
+Em 27/10/2026, o autor indicou o perfil institucional de seu orientador no DCC/UFMG.
+Codex conferiu o nome Eduardo Magno Lages Figueiredo na página e atualizou o
+registro de origem e a identificação em nota de orientação no documento IEEE.
+A informação não representa revisão humana do trabalho nem aprovação do docente.
+A pergunta sobre elementos institucionais adicionais permanece sem resposta.
+Em seguida, o autor confirmou «Somente o artigo IEEE» para os elementos da entrega.
+A pendência de elementos adicionais foi resolvida e a flag de template foi
+atualizada com origem nessa declaração. O orientador permanece em nota de
+orientação; não se atribuiu a ele coautoria, aceite ou revisão já executada.
+
+Verificação após os complementos: `make check` com zero erros e dez testes
+aprovados; `make pdf` recompilado, nota de orientação e página inteira inspecionadas,
+sem avisos no log. `make release-check` registra 16 bloqueios após a confirmação
+da flag do template, preservando as barreiras acadêmicas restantes.

@@ -110,3 +110,36 @@ Verificação de T02 em 26/10: `make check` com zero erros estruturais e dez tes
 aprovados, após correção da preparação dos dados sintéticos dos testes (D18);
 `git diff --check` passou. A revisão humana das extrações e a conferência do
 denominador efetivo permanecem pendentes e estão explicitadas no fichamento.
+
+## Atualização de T03 — 27/10/2026
+
+O autor informou o merge do PR #14, confirmado no GitHub (merge `140eef7` em
+27/10), e escolheu expressamente o IEEE Conference Template. A estrutura agora usa
+IEEEtran V1.8b em modo `conference`, A4 e português, com os seis arquivos de
+conteúdo preservados. Origem, versões, adaptações e verificação estão em
+[monografia/TEMPLATE.md](../monografia/TEMPLATE.md).
+
+`make check`: zero erros estruturais e dez testes aprovados. `make pdf`: uma página
+A4 compilada e inspecionada visualmente, com fontes incorporadas e log final sem
+avisos ou caixas overfull/underfull. O PDF continua sendo uma estrutura com
+pendências, sem novos resultados científicos. Na primeira verificação,
+`make release-check` falhou com 17 bloqueios esperados; após confirmar a flag do
+template, a nova execução apresentou 16 bloqueios. A barreira de entrega segue
+ativa; o registro do template distingue a flag antiga do protocolo das
+confirmações já dadas pelo autor.
+
+O formato foi escolhido pelo autor. Em resposta à pergunta apresentada em 27/10,
+ele identificou seu orientador pelo [perfil institucional do DCC/UFMG](https://dcc.ufmg.br/professor/eduardo-figueiredo/).
+O nome completo conferido é **Eduardo Magno Lages Figueiredo**, identificado como
+orientador em nota no PDF. A relação de orientação foi informada pelo autor;
+a identidade e o vínculo institucional foram conferidos na página. Não se registra
+revisão ou aprovação já realizada pelo docente.
+
+O autor confirmou em seguida que a entrega é **«Somente o artigo IEEE»**. Capa,
+folha de aprovação e outros elementos separados não serão acrescentados.
+`template_institucional_confirmado` foi atualizado para verdadeiro com origem
+nessa declaração do autor, sem alegar homologação independente pelo curso.
+Os quatro critérios de T03 estão atendidos nesta branch: origem/versão e dados
+confirmados, arquivos separados, compilação/inspeção e `make check`. O PR pode
+seguir para revisão e integração; a issue permanece aberta até essa etapa.
+Nenhuma atividade de busca, triagem ou síntese foi executada nesta tarefa.
