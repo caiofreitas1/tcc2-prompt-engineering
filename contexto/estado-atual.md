@@ -91,3 +91,22 @@ piloto foi promovido a evidência conferida.
 A issue permanece aberta para revisão e integração do PR. As pendências de execução
 acima pertencem à continuidade do TCC e não significam atividades realizadas em
 T01. Nenhuma outra issue foi executada.
+
+## Atualização de T02 — 26/10/2026
+
+O PR #13 de T01 foi integrado em 25/10 (merge `fb0987d`); os registros acima são o
+ponto de controle daquela tarefa. Em 26/10, Codex consultou o texto primário completo
+de S1, arXiv:2303.06689v5, e conferiu o recorte do piloto, seu método e orçamento.
+O detalhe, os localizadores e os limites estão em [evidencias/S1.md](../evidencias/S1.md).
+
+S1 tem metadados conferidos na versão lida; E1–E2 estão `conferido_original` por IA,
+com revisão humana pendente; A1–A5 permanecem rascunhos. S1 continua no piloto e
+S2–S6 continuam não conferidos. Não foi constituído corpus definitivo nem realizada
+busca sistemática, triagem ou avaliação da matriz. A defesa e o acesso às bases
+não foram reconfirmados nesta atividade; continuam com a última informação A2,
+sem inferir mudança desde 25/10.
+
+Verificação de T02 em 26/10: `make check` com zero erros estruturais e dez testes
+aprovados, após correção da preparação dos dados sintéticos dos testes (D18);
+`git diff --check` passou. A revisão humana das extrações e a conferência do
+denominador efetivo permanecem pendentes e estão explicitadas no fichamento.

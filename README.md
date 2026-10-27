@@ -9,7 +9,9 @@ Consultar [o índice de tarefas e dependências](tarefas/indice-github.md).
 
 ## Começar
 1. Ler contexto/estado-atual.md e confirmar o que avançou após o ponto de controle.
-2. Executar `make check` (Python 3.10+; sem bibliotecas Python externas).
+2. Em checkout sem as fontes locais, executar `python3 scripts/obter_s1.py` para
+   recuperar S1 e conferir seu hash. Depois executar `make check` (Python 3.10+;
+   sem bibliotecas Python externas). PDFs permanecem fora do Git.
 3. Iniciar pela [issue #1 (T01)](https://github.com/caiofreitas1/tcc2-prompt-engineering/issues/1).
    Os IDs Txx permanecem estáveis no backlog; o índice relaciona-os aos números das issues.
 4. Executar T02 e conferir S1 no artigo original antes de usar o fluxo em escala.
@@ -38,6 +40,8 @@ Usar as skills do repositório ao trabalhar neste projeto.
 O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
 
 ## Comandos
+- `python3 scripts/obter_s1.py`: obter a cópia arXiv v5 usada em T02 e conferir o
+  SHA-256, sem sobrescrever arquivo divergente. Requer rede; ver evidencias/S1.md.
 - `make check`: integridade dos registros e testes das barreiras científicas.
 - `make pdf`: compilar o esqueleto em build/main.pdf (requer latexmk e TeX Live).
 - `make release-check`: verificar pré-condições mínimas da versão para entrega.
@@ -53,7 +57,8 @@ monografia/main.tex é um esqueleto técnico compilável; não é um template in
 homologado nem uma monografia pronta. Incorporar o template oficial em T03 antes da
 normalização final. Os textos anteriores foram preservados sem reescrita; os números
 do piloto continuam sujeitos à conferência no artigo original. As referências acadêmicas
-ainda não foram promovidas ao .bib: os seis registros iniciais têm metadados herdados.
+de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão
+humana pendente; S2–S6 continuam com metadados herdados. Ver evidencias/S1.md.
 
 ## Datas registradas nos materiais
 Marcação da defesa: 25/10; texto inicial: 08/11; defesas: 16–19/11;

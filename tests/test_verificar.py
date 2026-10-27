@@ -18,6 +18,17 @@ class ScientificDataChecks(unittest.TestCase):
         for folder in ['dados','fontes','monografia']:
             shutil.copytree(ROOT/folder,self.root/folder)
         shutil.copyfile(ROOT/'projeto.json',self.root/'projeto.json')
+        # Os testes usam dados sintéticos, independentemente do avanço da revisão.
+        # make check valida os dados reais antes de executar esta suíte.
+        study=dict(id='S1',titulo='Estudo sintético',identificador='sintetico',
+                   versao='teste',ano='2025',origem='fixture_teste',corpus='piloto',
+                   metadados_conferidos='nao',fonte_primaria='nao_conferido')
+        for name,fields in module.HEADERS.items():
+            with (self.root/'dados'/f'{name}.csv').open('w',newline='',encoding='utf-8') as f:
+                writer=csv.DictWriter(f,fieldnames=fields)
+                writer.writeheader()
+                if name=='estudos': writer.writerow(study)
+        (self.root/'dados/extracoes.jsonl').write_text('',encoding='utf-8')
     def tearDown(self):
         self.tmp.cleanup()
     def extraction(self,**changes):
