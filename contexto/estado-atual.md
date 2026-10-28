@@ -156,6 +156,7 @@ piloto. O v2 entra em vigor com a integração do PR pelo autor.
 Situação: nenhuma busca, triagem, extração ou avaliação foi executada. As
 sondagens de volume no arXiv (1.509 registros na expressão ampla; 516 na variante
 de título) foram contagens informais da API, sem exportação, e não constituem a
-T04. `protocolo_confirmado` em projeto.json permanece falso até confirmação do
-autor. A pergunta sobre resultados parciais no texto de 08/11 ainda precisa ser
-feita ao orientador (D30).
+T04. O autor integrou o PR #17 e, após receber um resumo do protocolo v2,
+confirmou-o em 27/10 (D32); `protocolo_confirmado` passou a verdadeiro. A pergunta
+sobre resultados parciais no texto de 08/11 ainda precisa ser feita ao orientador
+(D30).
