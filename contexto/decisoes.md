@@ -108,3 +108,9 @@ são propostas técnicas submetidas ao autor pelo PR do protocolo v2.
 
 Questões, tarefas, período, idiomas e contribuição prática (D10–D12) não mudam.
 Nenhuma busca, triagem ou extração foi executada.
+
+### Confirmação do protocolo v2 — 27/10/2026
+
+| ID | Responsável / natureza | Registro | Motivo e impacto |
+|---|---|---|---|
+| D32 | Autor, confirmação | Após integrar o PR #17 (merge `7f2bd8e`) e receber resumo do protocolo v2 (critérios I1–I6/X1–X7, busca, triagem por duas IAs, pontos e amostras de verificação humana, limites da decisão de 31/10, rubrica e limitações), respondeu «Confirmado». | As propostas D28–D31 passam a decisões confirmadas pelo autor. `protocolo_confirmado` em projeto.json passa a verdadeiro. A confirmação antecede qualquer busca (T04 não iniciada). Não é aprovação do orientador, cuja revisão segue prevista para o final (D11). |

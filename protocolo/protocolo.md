@@ -3,7 +3,8 @@
 **Situação em 27/10/2026:** versão 2 preparada por Claude Code (Claude Opus 5.5) a
 partir das decisões do autor registradas em 27/10/2026 (D25–D31 em
 [decisoes.md](../contexto/decisoes.md)). Entra em vigor com a integração do PR
-pelo autor; até lá, não executar buscas. A versão 1 (consolidação de T01,
+pelo autor (PR #17, merge `7f2bd8e`) e foi confirmada por ele em 27/10/2026, antes
+de qualquer busca (D32). A versão 1 (consolidação de T01,
 commit `ba176e2`) permanece no histórico do Git. Recorte temático, questões,
 período, idiomas e contribuição prática confirmados em 25/10 (D10–D12) não mudam.
 Nenhuma busca, triagem ou extração foi executada nesta versão.
