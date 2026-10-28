@@ -89,3 +89,22 @@ humana nem o acompanhamento final já acordado.
 | ID | Responsável / natureza | Registro | Motivo e impacto |
 |---|---|---|---|
 | D24 | Autor, confirmação de elementos da entrega | À pergunta sobre capa, folha de aprovação ou outros elementos além do artigo, respondeu «Somente o artigo IEEE» em 27/10/2026. | Resolve a parte restante de D22. Não acrescentar elementos separados; atualizar template_institucional_confirmado para verdadeiro com origem na declaração do autor, sem atribuir homologação independente ou aprovação ao orientador. Os critérios de T03 estão atendidos para revisão e integração. |
+
+## Protocolo v2 — 27/10/2026
+
+Registro elaborado por Claude Code (Claude Opus 5.5) a partir de respostas diretas
+do autor neste chat em 27/10/2026. As decisões do autor estão citadas; as demais
+são propostas técnicas submetidas ao autor pelo PR do protocolo v2.
+
+| ID | Responsável / natureza | Decisão | Motivo e impacto |
+|---|---|---|---|
+| D25 | Autor, informação | «O texto inicial é para o dia 08/11, e a defesa será no dia 19/11. A entrega do texto final está prevista para o dia 29/11»; «A data de defesa já está marcada». | Atualiza D13 e P4: defesa marcada para 19/11/2026. Modalidade, horário e banca não informados. Datas usadas no cronograma (D30). |
+| D26 | Autor, decisão | «nós não vamos utilizar artigos pagos». | Novo critério I6 e exclusão X6 (texto sem versão aberta). Substitui a dependência da rede da UFMG (D14). IEEE Xplore passa a servir só para localizar estudos. O viés de disponibilidade é ameaça a relatar. |
+| D27 | Autor, decisão | Executar a RSL com IA e revisar depois («Eu vou fazer tudo com IA, e só revisar depois»); aprovou preparar o protocolo v2 para RSL completa com recuo para revisão rápida («Pode»). | IA como executora principal; verificação do autor ao fim de cada etapa (protocolo, seção 7). Decisão entre RSL completa e revisão rápida em 31/10, com dados do piloto (seção 8). |
+| D28 | Claude Code, proposta técnica | Expressão de busca v2: sem «self-planning» e «self-debugging», com sinônimos de prompting, tarefas e modelos; validação por S1–S6; variante com tarefa no título como recuo. | Os nomes de técnicas do piloto favoreciam estudos conhecidos. Calibração preliminar: S1, S2, S4 e S6 recuperados; S3 e S5 sem os termos no resumo, a buscar por *snowballing*. Volume informal no arXiv: 1.509 (ampla) e 516 (título). |
+| D29 | Claude Code, proposta técnica | Dois triadores de IA (Claude Opus 5.5 e Claude Sonnet 5.5, contextos independentes, mesmo prompt); regra de união no título e resumo; autor decide divergências e confirma toda inclusão no texto completo; amostras de verificação da seção 7. | Substitui a dupla triagem humana, que não é viável. Só a decisão humana inclui no corpus definitivo, regra aplicada pelo `make check`. Mesmo fornecedor nos dois triadores é limitação a relatar. |
+| D30 | Claude Code, proposta de cronograma | Cronograma da seção 12, com texto inicial de 08/11 contendo resultados parciais declarados. | Confirmar com o orientador se o texto inicial pode ter resultados parciais; se não, aplicar o recuo. |
+| D31 | Claude Code, proposta metodológica | Adotar Kitchenham, Budgen e Brereton (2015) e PRISMA 2020; *snowballing* de uma rodada (Wohlin, 2014); rubrica de qualidade adaptada de Dybå e Dingsøyr (2008) com `reprodutibilidade` e `contaminacao`; contrato 2 de extração com citação literal e campos da QP2; `dados/registros.csv` para o fluxo PRISMA. | Lacunas apontadas na análise da estrutura em 27/10. A rubrica ampliada substitui a de cinco critérios ainda não aplicada (D07 mantida: sem exclusão por qualidade). |
+
+Questões, tarefas, período, idiomas e contribuição prática (D10–D12) não mudam.
+Nenhuma busca, triagem ou extração foi executada.

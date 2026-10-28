@@ -22,7 +22,8 @@ class ScientificDataChecks(unittest.TestCase):
         # make check valida os dados reais antes de executar esta suíte.
         study=dict(id='S1',titulo='Estudo sintético',identificador='sintetico',
                    versao='teste',ano='2025',origem='fixture_teste',corpus='piloto',
-                   metadados_conferidos='nao',fonte_primaria='nao_conferido')
+                   metadados_conferidos='nao',fonte_primaria='nao_conferido',
+                   acesso_aberto='nao_conferido')
         for name,fields in module.HEADERS.items():
             with (self.root/'dados'/f'{name}.csv').open('w',newline='',encoding='utf-8') as f:
                 writer=csv.DictWriter(f,fieldnames=fields)
@@ -79,6 +80,59 @@ class ScientificDataChecks(unittest.TestCase):
         p=self.root/'fontes/legado/analise-inicial.docx'
         p.write_bytes(b'arquivo alterado no teste')
         self.assertTrue(any('legado alterado' in x for x in module.verify(self.root)[0]))
+    def screening(self,**changes):
+        row=dict(estudo_id='S1',fase='texto_completo',decisao='incluir',criterio='I1;I2;I3;I4;I5;I6',motivo='sintético',responsavel='ia-A',natureza='ia',prompt_versao='tc-v1',data='2026-10-27')
+        row.update(changes)
+        with (self.root/'dados/triagem.csv').open('a',newline='',encoding='utf-8') as f:
+            csv.DictWriter(f,fieldnames=module.HEADERS['triagem']).writerow(row)
+    def set_study(self,**changes):
+        p=self.root/'dados/estudos.csv'
+        with p.open(newline='',encoding='utf-8') as f:
+            reader=csv.DictReader(f);fields=reader.fieldnames;rows=list(reader)
+        rows[0].update(changes)
+        with p.open('w',newline='',encoding='utf-8') as f:
+            writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader();writer.writerows(rows)
+    def test_ai_inclusion_does_not_define_corpus(self):
+        self.set_study(corpus='definitivo',acesso_aberto='sim')
+        self.screening()
+        self.assertTrue(any('sem inclusão no texto completo' in x for x in module.verify(self.root)[0]))
+        self.screening(responsavel='autor',natureza='humano',prompt_versao='')
+        self.assertEqual([],module.verify(self.root)[0])
+    def test_definitive_corpus_requires_open_access(self):
+        self.set_study(corpus='definitivo')
+        self.screening(responsavel='autor',natureza='humano',prompt_versao='')
+        self.assertTrue(any('sem texto aberto' in x for x in module.verify(self.root)[0]))
+    def test_screening_uses_protocol_criteria(self):
+        self.screening(fase='titulo_resumo',decisao='excluir',criterio='I2')
+        errors=module.verify(self.root)[0]
+        self.assertTrue(any('exclusão sem critério X' in x for x in errors))
+        self.screening(fase='titulo_resumo',decisao='excluir',criterio='X9')
+        self.assertTrue(any('critério fora do protocolo' in x for x in module.verify(self.root)[0]))
+    def test_ai_screening_requires_prompt_version(self):
+        self.screening(prompt_versao='')
+        self.assertTrue(any('sem versão do prompt' in x for x in module.verify(self.root)[0]))
+    def test_record_requires_known_search(self):
+        with (self.root/'dados/registros.csv').open('a',newline='',encoding='utf-8') as f:
+            csv.writer(f).writerow(['R1','B_INEXISTENTE','Título sintético','2025','','','S1'])
+        self.assertTrue(any('busca desconhecida' in x for x in module.verify(self.root)[0]))
+    def contract2(self,quote):
+        text=self.root/'fontes/textos/sintetico.txt'
+        text.parent.mkdir(parents=True,exist_ok=True)
+        text.write_text('O método atingiu Pass@1 de 50,0% no bench-\nmark sintético.',encoding='utf-8')
+        source=self.root/'fontes/artigos/sintetico.txt'
+        source.parent.mkdir(parents=True,exist_ok=True)
+        source.write_text('Fonte sintética exclusiva do teste.')
+        self.set_study(metadados_conferidos='sim',fonte_primaria='fontes/artigos/sintetico.txt')
+        self.extraction(status='conferido_original',contrato=2,texto_fonte='fontes/textos/sintetico.txt',
+                        citacoes=[{'trecho':quote,'localizador':'Tabela sintética'}],riscos=[],mitigacoes=[],prompt_versao='ex-v1')
+    def test_contract2_quote_must_exist_in_source_text(self):
+        self.contract2('Pass@1 de 50,0% no benchmark sintético')
+        self.assertEqual([],module.verify(self.root)[0])
+        self.contract2('Pass@1 de 75,0% no benchmark sintético')
+        self.assertTrue(any('citação não encontrada' in x for x in module.verify(self.root)[0]))
+    def test_contract2_requires_quotes(self):
+        self.extraction(contrato=2,texto_fonte='',citacoes=[],riscos=[],mitigacoes=[],prompt_versao='ex-v1')
+        self.assertTrue(any('citações literais' in x for x in module.verify(self.root)[0]))
     def test_source_path_cannot_escape_repository(self):
         self.assertFalse(module.relative_file(self.root,'../fora.txt'))
         self.assertFalse(module.relative_file(self.root,str(ROOT/'README.md')))

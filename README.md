@@ -20,7 +20,7 @@ Consultar [o índice de tarefas e dependências](tarefas/indice-github.md).
 ## Organização
 | Pasta | Uso |
 |---|---|
-| protocolo/ | Plano da revisão, critérios e mudanças |
+| protocolo/ | Protocolo v2 (critérios, busca, triagem com IA, verificação humana) e prompts versionados |
 | dados/ | Registros em CSV e extrações JSONL |
 | evidencias/ | Fichamentos, sínteses e auditorias |
 | fontes/legado/ | Cópias imutáveis dos documentos recebidos |
@@ -64,10 +64,9 @@ do piloto continuam sujeitos à conferência no artigo original. As referências
 de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão
 humana pendente; S2–S6 continuam com metadados herdados. Ver evidencias/S1.md.
 
-## Datas registradas nos materiais
-Marcação da defesa: 25/10; texto inicial: 08/11; defesas: 16–19/11;
-texto final: 29/11/2026. Não são confirmações de entrega ou de agendamento.
-Confirmar imediatamente a situação da marcação da defesa com o orientador.
+## Datas
+Informadas pelo autor em 27/10/2026 (D25): texto inicial em 08/11, defesa marcada
+para 19/11 e texto final em 29/11/2026. Cronograma das etapas no protocolo, seção 12.
 
 ## Privacidade e compartilhamento
 Manter privado durante o desenvolvimento. Não incluir tokens, credenciais ou material

@@ -67,3 +67,18 @@ Verificação após os complementos: `make check` com zero erros e dez testes
 aprovados; `make pdf` recompilado, nota de orientação e página inteira inspecionadas,
 sem avisos no log. `make release-check` registra 16 bloqueios após a confirmação
 da flag do template, preservando as barreiras acadêmicas restantes.
+
+## Protocolo v2 — 27/10/2026
+
+- Executor: Claude Code (Claude Opus 5.5), em sessão com o autor.
+- Entradas: repositório na main `81a09e7`, respostas do autor no chat (D25–D27),
+  API do arXiv (títulos/resumos de S1–S6 e contagens), Crossref (metadados das
+  referências do método) e páginas da ACM sobre o acesso aberto à Digital Library.
+- Saídas: `protocolo/protocolo.md` v2, `protocolo/prompts/`, D25–D31, contrato de
+  dados v2 (`registros.csv`, `acesso_aberto`, `prompt_versao`, contrato 2 de
+  extração), regras novas em `scripts/verificar.py` com sete testes novos, sete
+  referências metodológicas no .bib e ajuste de T04–T07 no backlog.
+- Verificação: `make check` (zero erros estruturais, 17 testes aprovados);
+  calibração da expressão em S1–S6 por script local; DOIs conferidos no Crossref.
+- Revisão humana: pendente (revisão do PR pelo autor). Contagens do arXiv são
+  sondagens informais, não buscas registradas.

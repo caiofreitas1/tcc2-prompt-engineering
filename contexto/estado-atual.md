@@ -143,3 +143,19 @@ Os quatro critérios de T03 estão atendidos nesta branch: origem/versão e dado
 confirmados, arquivos separados, compilação/inspeção e `make check`. O PR pode
 seguir para revisão e integração; a issue permanece aberta até essa etapa.
 Nenhuma atividade de busca, triagem ou síntese foi executada nesta tarefa.
+
+## Protocolo v2 — 27/10/2026
+
+Em 27/10, o autor informou que o texto inicial é para 08/11, a defesa está marcada
+para 19/11 e o texto final para 29/11; que não serão usados artigos pagos; e que a
+revisão será executada com IA, com revisão dele depois (D25–D27). Claude Code
+analisou a estrutura e preparou o [protocolo v2](../protocolo/protocolo.md) para
+RSL completa, com recuo para revisão rápida decidido em 31/10 a partir do lote
+piloto. O v2 entra em vigor com a integração do PR pelo autor.
+
+Situação: nenhuma busca, triagem, extração ou avaliação foi executada. As
+sondagens de volume no arXiv (1.509 registros na expressão ampla; 516 na variante
+de título) foram contagens informais da API, sem exportação, e não constituem a
+T04. `protocolo_confirmado` em projeto.json permanece falso até confirmação do
+autor. A pergunta sobre resultados parciais no texto de 08/11 ainda precisa ser
+feita ao orientador (D30).
