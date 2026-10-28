@@ -9,15 +9,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 HEADERS = {
-    'estudos': ['id','titulo','identificador','versao','ano','origem','corpus','metadados_conferidos','fonte_primaria'],
+    'estudos': ['id','titulo','identificador','versao','ano','origem','corpus','metadados_conferidos','fonte_primaria','acesso_aberto'],
     'buscas': ['id','data','base','consulta','campos_filtros','total_exportado','arquivo_exportacao','executor'],
-    'triagem': ['estudo_id','fase','decisao','criterio','motivo','responsavel','natureza','data'],
+    'triagem': ['estudo_id','fase','decisao','criterio','motivo','responsavel','natureza','prompt_versao','data'],
     'afirmacoes': ['id','texto','extracao_ids','bibkey','destino','status','revisor','data_revisao'],
     'qualidade': ['estudo_id','criterio','julgamento','localizador','justificativa','avaliador','natureza','data'],
     'fluxos': ['etapa','contagem','denominador','regra','origem','data'],
+    'registros': ['id','busca_id','titulo','ano','doi','arxiv','estudo_id'],
 }
+# Códigos da seção 3 do protocolo v2.
+CRITERIA={f'I{n}' for n in range(1,7)}|{f'X{n}' for n in range(1,8)}
+QUALITY={'objetivo','procedimento','comparador','metricas','ameacas','reprodutibilidade','contaminacao'}
 UNAVAILABLE = {'','nao_conferido','nao_informado','nao_aplicavel','fonte_indisponivel'}
 EXTRACTION_FIELDS = {'id','estudo_id','tarefa','tecnica','modelo','benchmark','metrica','unidade','comparador','resultado','localizador','fonte','status','revisao_humana'}
+# Contrato 2: citação literal conferível e campos da QP2.
+EXTRACTION_FIELDS_V2 = {'citacoes','texto_fonte','riscos','mitigacoes','prompt_versao'}
+
+def normalized(text):
+    # Ignora hífens e quebras de linha: a extração de texto do PDF não distingue
+    # hifenização de fim de linha de palavras compostas.
+    return re.sub(r'\s+',' ',re.sub(r'-\s*\n\s*|-','',text)).strip()
 
 def relative_file(root, value):
     if not isinstance(value, str) or value in UNAVAILABLE:
@@ -55,6 +66,10 @@ def verify(root=ROOT, release=False):
             errors.append(f'{sid}: corpus inválido')
         if s.get('metadados_conferidos') not in {'sim','nao'}:
             errors.append(f'{sid}: situação dos metadados inválida')
+        if s.get('acesso_aberto') not in {'sim','nao','nao_conferido'}:
+            errors.append(f'{sid}: situação do acesso aberto inválida')
+        if s.get('corpus')=='definitivo' and s.get('acesso_aberto')!='sim':
+            errors.append(f'{sid}: corpus definitivo sem texto aberto (I6)')
 
     included=set()
     for row in tables['triagem']:
@@ -64,8 +79,13 @@ def verify(root=ROOT, release=False):
         if row.get('decisao') not in {'incluir','excluir','duvida'}: errors.append(f'{sid}: decisão inválida')
         if row.get('natureza') not in {'ia','humano'}: errors.append(f'{sid}: natureza inválida')
         if not all(row.get(k) for k in ('criterio','motivo','responsavel','data')): errors.append(f'{sid}: triagem incompleta')
-        if row.get('fase')=='texto_completo':
-            # O último parecer registrado determina a inclusão atual; preservar o histórico.
+        codes=[x.strip() for x in (row.get('criterio') or '').split(';') if x.strip()]
+        if any(c not in CRITERIA for c in codes): errors.append(f'{sid}: critério fora do protocolo')
+        if row.get('decisao')=='excluir' and not any(c.startswith('X') for c in codes): errors.append(f'{sid}: exclusão sem critério X')
+        if row.get('natureza')=='ia' and not row.get('prompt_versao'): errors.append(f'{sid}: decisão de IA sem versão do prompt')
+        if row.get('fase')=='texto_completo' and row.get('natureza')=='humano':
+            # Só o autor inclui no corpus (protocolo, seção 6). O último parecer humano
+            # determina a inclusão atual; preservar o histórico.
             if row.get('decisao')=='incluir': included.add(sid)
             else: included.discard(sid)
     for sid,s in studies.items():
@@ -117,6 +137,21 @@ def verify(root=ROOT, release=False):
                 if e.get('fonte')!=studies[sid].get('fonte_primaria'): errors.append(f'{eid}: fonte diferente do estudo')
             if str(e.get('fonte','')).startswith('fontes/legado/'):
                 errors.append(f'{eid}: documento legado não é artigo primário')
+        if e.get('contrato')==2:
+            missing=EXTRACTION_FIELDS_V2-e.keys()
+            if missing: errors.append(f'{eid}: contrato 2 sem {sorted(missing)}')
+            if not isinstance(e.get('riscos',[]),list) or not isinstance(e.get('mitigacoes',[]),list):
+                errors.append(f'{eid}: riscos e mitigacoes devem ser listas')
+            quotes=e.get('citacoes')
+            if not isinstance(quotes,list) or not quotes or not all(isinstance(q,dict) and q.get('trecho') and q.get('localizador') for q in quotes):
+                errors.append(f'{eid}: citações literais com localizador ausentes')
+            elif e.get('status')=='conferido_original':
+                if not relative_file(root,e.get('texto_fonte')):
+                    errors.append(f'{eid}: texto da fonte não disponível localmente')
+                else:
+                    text=normalized((root/e['texto_fonte']).read_text(encoding='utf-8'))
+                    for q in quotes:
+                        if normalized(q['trecho']) not in text: errors.append(f'{eid}: citação não encontrada no texto da fonte')
         if release and sid in included and e.get('status')!='conferido_original':
             errors.append(f'{eid}: extração do corpus sem conferência no original')
 
@@ -144,6 +179,14 @@ def verify(root=ROOT, release=False):
                 if not re.search(r'AFIRMACAO:\s*'+re.escape(aid)+r'\b',text): errors.append(f'{aid}: marcador LaTeX ausente')
         if release and a.get('status')!='sustentada': errors.append(f'{aid}: afirmação ainda em rascunho')
 
+    searches={row.get('id') for row in tables['buscas']}
+    records=set()
+    for row in tables['registros']:
+        rid=row.get('id')
+        if not rid or rid in records: errors.append(f'registro duplicado ou sem ID: {rid}')
+        records.add(rid)
+        if row.get('busca_id') not in searches: errors.append(f'registro {rid}: busca desconhecida')
+        if row.get('estudo_id') and row.get('estudo_id') not in studies: errors.append(f'registro {rid}: estudo desconhecido')
     for row in tables['buscas']:
         if not relative_file(root,row.get('arquivo_exportacao')): errors.append(f'busca {row.get("id")}: exportação ausente')
         try:
@@ -151,7 +194,7 @@ def verify(root=ROOT, release=False):
         except (ValueError,TypeError): errors.append('busca: contagem inválida')
     for row in tables['qualidade']:
         if row.get('estudo_id') not in studies: errors.append('qualidade: estudo desconhecido')
-        if row.get('criterio') not in {'objetivo','procedimento','comparador','metricas','ameacas'}: errors.append('qualidade: critério inválido')
+        if row.get('criterio') not in QUALITY: errors.append('qualidade: critério inválido')
         if row.get('julgamento') not in {'atende','parcial','nao_atende','nao_informado'}: errors.append('qualidade: julgamento inválido')
         if not all(row.get(k) for k in ('localizador','justificativa','avaliador','data')): errors.append('qualidade: registro incompleto')
     for row in tables['fluxos']:
@@ -181,7 +224,7 @@ def verify(root=ROOT, release=False):
             for e in related:
                 if e.get('revisao_humana')!='confirmada': errors.append(f'{e.get("id")}: revisão humana pendente')
             criteria={r.get('criterio') for r in tables['qualidade'] if r.get('estudo_id')==sid}
-            if criteria!={'objetivo','procedimento','comparador','metricas','ameacas'}: errors.append(f'{sid}: rubrica incompleta')
+            if criteria!=QUALITY: errors.append(f'{sid}: rubrica incompleta')
         for p in (root/'monografia').rglob('*.tex'):
             # O comando de macro é permitido; chamadas sinalizam conteúdo ainda pendente.
             if re.search(r'\\pendencia\{',p.read_text(encoding='utf-8')): errors.append(f'entrega: pendência em {p.relative_to(root)}')
