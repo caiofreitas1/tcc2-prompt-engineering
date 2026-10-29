@@ -66,7 +66,8 @@ humana pendente; S2–S6 continuam com metadados herdados. Ver evidencias/S1.md.
 
 ## Datas
 Informadas pelo autor em 27/10/2026 (D25): texto inicial em 08/11, defesa marcada
-para 19/11 e texto final em 29/11/2026. Cronograma das etapas no protocolo, seção 12.
+para 19/11 e texto final em 29/11/2026. Em 29/10 o autor decidiu que o texto de 08/11
+é o texto completo (D33). Cronograma das etapas no protocolo, seção 12.
 
 ## Privacidade e compartilhamento
 Manter privado durante o desenvolvimento. Não incluir tokens, credenciais ou material

@@ -114,3 +114,10 @@ Nenhuma busca, triagem ou extração foi executada.
 | ID | Responsável / natureza | Registro | Motivo e impacto |
 |---|---|---|---|
 | D32 | Autor, confirmação | Após integrar o PR #17 (merge `7f2bd8e`) e receber resumo do protocolo v2 (critérios I1–I6/X1–X7, busca, triagem por duas IAs, pontos e amostras de verificação humana, limites da decisão de 31/10, rubrica e limitações), respondeu «Confirmado». | As propostas D28–D31 passam a decisões confirmadas pelo autor. `protocolo_confirmado` em projeto.json passa a verdadeiro. A confirmação antecede qualquer busca (T04 não iniciada). Não é aprovação do orientador, cuja revisão segue prevista para o final (D11). |
+
+### Entrega completa em 08/11 — 29/10/2026
+
+| ID | Responsável / natureza | Registro | Motivo e impacto |
+|---|---|---|---|
+| D33 | Autor, decisão | «Vamos considerar que vamos entregar o texto completo no dia 08» (29/10/2026). | Substitui a hipótese de D30 (texto de 08/11 com resultados parciais); a consulta ao orientador sobre resultados parciais deixa de ser necessária. Busca, triagem, extração, síntese e redação precisam terminar até 08/11. Os critérios da decisão de 31/10 (protocolo, seção 8) não mudam, mas a projeção de horas do autor passa a cobrir todos os pontos de controle até o texto completo, o que torna o recuo mais provável. |
+| D34 | Claude Code, proposta de cronograma | Cronograma comprimido da seção 12 do protocolo: T05 até 02/11, T06 e *snowballing* até 04/11, T07 até 05/11, T08–T09 até 06/11, T11–T12 até 07/11; T10 em paralelo desde 29/10. | Decorre de D33. Sem folga: atraso em uma etapa reduz as seguintes. Submetido ao autor no PR da T04. |
