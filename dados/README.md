@@ -8,8 +8,10 @@ Arquivos só com cabeçalho significam estrutura vazia, nunca zero estudos recup
 ## estudos.csv
 Uma linha por estudo. titulo, identificador, versao e ano iniciais são metadados
 herdados; conferi-los antes de preencher metadados_conferidos=sim. `fonte_primaria`
-recebe caminho relativo ao texto acessível. `corpus` é piloto ou definitivo;
-só usar definitivo após decisão documentada de inclusão no texto completo.
+recebe caminho relativo ao texto acessível. `corpus` é candidato (identificado na
+busca, ainda não incluído), piloto ou definitivo; só usar definitivo após decisão
+documentada de inclusão no texto completo. Candidatos são criados por
+`scripts/deduplicar.py`, com origem busca_T04.
 nao_conferido não significa que a informação não existe no artigo.
 `acesso_aberto`: sim, nao ou nao_conferido. O corpus definitivo exige sim (critério I6).
 
@@ -18,6 +20,12 @@ Uma linha por registro exportado de uma busca (`busca_id` em buscas.csv), inclus
 de *snowballing*. `doi` e `arxiv` ficam vazios quando ausentes na exportação.
 `estudo_id` é preenchido após a deduplicação: registros com o mesmo estudo formam um
 grupo de duplicatas. As contagens PRISMA de identificação e deduplicação vêm daqui.
+
+## versoes_abertas.csv
+Versões em acesso aberto localizadas para estudos sem texto aberto evidente (I6):
+estudo_id, url, tipo (fonte no OpenAlex), versao, origem e data. Gerado por
+`scripts/versoes_abertas.py`, que preserva as respostas do OpenAlex em `dados/brutos/`.
+Registros do arXiv e da ACM (aberta desde 01/01/2026) contam como abertos sem consulta.
 
 ## buscas.csv e triagem.csv
 Buscas têm data ISO, base, consulta exata, filtros, total exportado e caminho para

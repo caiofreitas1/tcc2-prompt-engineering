@@ -62,7 +62,7 @@ def verify(root=ROOT, release=False):
         if not sid or sid in studies:
             errors.append(f'estudo duplicado ou sem ID: {sid}')
         studies[sid]=s
-        if s.get('corpus') not in {'piloto','definitivo'}:
+        if s.get('corpus') not in {'candidato','piloto','definitivo'}:
             errors.append(f'{sid}: corpus inválido')
         if s.get('metadados_conferidos') not in {'sim','nao'}:
             errors.append(f'{sid}: situação dos metadados inválida')
