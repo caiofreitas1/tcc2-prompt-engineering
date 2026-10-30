@@ -7,7 +7,8 @@
   barrado pela verificação da Cloudflare.
 - A exportação de citações é recurso Premium na edição Basic e não estava disponível.
   Os registros foram extraídos das páginas de resultados (50 por página): posição, tipo,
-  data, DOI e título. Sem resumo; os resumos serão obtidos pelo DOI antes da triagem.
+  data, DOI e título. Sem resumo; os resumos foram obtidos pelo DOI (OpenAlex, Semantic Scholar) em
+  `dados/resumos.csv` (ver `dados/brutos/resumos-2026-10-29/`).
 - `extracao-ordenada-por-relevancia.json`: primeira passada (ordem padrão). A ordem por
   relevância variou entre páginas: 2 DOIs repetidos (10.1145/3712255.3726700,
   10.1145/3808347) e 2 ausentes.

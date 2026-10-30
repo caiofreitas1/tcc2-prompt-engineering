@@ -27,6 +27,13 @@ estudo_id, url, tipo (fonte no OpenAlex), versao, origem e data. Gerado por
 `scripts/versoes_abertas.py`, que preserva as respostas do OpenAlex em `dados/brutos/`.
 Registros do arXiv e da ACM (aberta desde 01/01/2026) contam como abertos sem consulta.
 
+## resumos.csv
+Um resumo por estudo para a triagem de título e resumo: estudo_id, registro_id (registro
+de onde veio o texto), fonte (arxiv, ieee_xplore, openalex, crossref, semanticscholar ou
+nao_encontrado) e resumo. Gerado por `scripts/resumos.py` a partir das exportações e,
+na falta delas (registros só da ACM), das APIs pelo DOI, com respostas em `dados/brutos/`.
+O resumo do OpenAlex é reconstruído do índice invertido de palavras.
+
 ## buscas.csv e triagem.csv
 Buscas têm data ISO, base, consulta exata, filtros, total exportado e caminho para
 exportação original. Registro deduplicado não pode apagar a exportação original.

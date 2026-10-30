@@ -178,6 +178,10 @@ em `dados/fluxos.csv`). Acesso aberto dos 2.301 candidatos: 1.919 sim (arXiv, AC
 versão localizada no OpenAlex), 362 sem versão aberta (X6 provável), 20 não
 conferidos. O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
 
+Resumos para a triagem em `dados/resumos.csv`: 1.595 do arXiv, 446 do IEEE, 234 do
+OpenAlex e 23 do Semantic Scholar (registros só da ACM); 7 estudos sem resumo em
+nenhuma fonte (anais de workshop, painel, coluna e similares).
+
 Pendências antes da T05: verificação do autor (expressões, exportações e recuperação
-de S1, S2, S4 e S6); resumos dos registros só da ACM; conferência dos seis grupos de
-título igual sinalizados pela deduplicação. Triagem não iniciada.
+de S1, S2, S4 e S6); conferência dos seis grupos de título igual sinalizados pela
+deduplicação. Triagem não iniciada.
