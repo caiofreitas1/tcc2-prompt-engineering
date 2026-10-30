@@ -29,7 +29,23 @@ def ler_arxiv(pasta):
                    'arxiv': re.sub(r'v\d+$', '', ident)}
 
 
-LEITORES = {'arxiv': ler_arxiv}
+def ler_ris(pasta):
+    for arquivo in sorted(pasta.glob('pagina-*.ris')):
+        campos = {}
+        for linha in arquivo.read_text(encoding='utf-8-sig').splitlines():
+            marca, valor = linha[:5], linha[6:].strip()
+            if marca == 'ER  -':
+                doi = campos.get('DO', '').lower()
+                arxiv = re.search(r'arxiv\.(\d{4}\.\d{4,5})', doi)
+                yield {'titulo': limpar(campos.get('TI') or campos.get('T1')),
+                       'ano': (campos.get('PY') or campos.get('Y1') or '')[:4],
+                       'doi': doi, 'arxiv': arxiv.group(1) if arxiv else ''}
+                campos = {}
+            elif re.fullmatch(r'[A-Z][A-Z0-9]  -', marca):
+                campos.setdefault(marca[:2], valor)
+
+
+LEITORES = {'arxiv': ler_arxiv, 'ris': ler_ris}
 
 
 def manifesto(pasta):
