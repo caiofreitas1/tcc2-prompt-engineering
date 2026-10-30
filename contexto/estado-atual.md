@@ -160,3 +160,21 @@ T04. O autor integrou o PR #17 e, após receber um resumo do protocolo v2,
 confirmou-o em 27/10 (D32); `protocolo_confirmado` passou a verdadeiro. A pergunta
 sobre resultados parciais no texto de 08/11 ainda precisa ser feita ao orientador
 (D30).
+
+## T04 em andamento — 29/10/2026
+
+Em 29/10 o autor decidiu que o texto de 08/11 é o texto completo (D33); o cronograma
+foi comprimido (D34) e a consulta ao orientador sobre resultados parciais deixou de ser
+necessária. Buscas executadas por Claude Code (Claude Opus 5.5):
+
+| Busca | Base | Registros | Observação |
+|---|---|---|---|
+| B1 | arXiv (API oficial) | 1.597 | S1, S2, S4 e S6 recuperados; S3 e S5 não, como previsto (4.3) |
+| B2 | IEEE Xplore | 665 | 671 resultados menos 6 cursos sem exportação |
+| — | ACM DL | pendente | página de busca bloqueada pela verificação anti-bot da Cloudflare no navegador do app; depende do autor |
+
+Deduplicação parcial (arXiv + IEEE): 2.262 registros, 2.042 estudos (220 em duas
+bases). Um par de mesmo título com DOIs IEEE e ACM distintos (B1-0843/B2-0280) ficou
+separado para conferência. Acesso aberto: 1.595 pelo arXiv; dos 443 só do IEEE, o
+OpenAlex localizou 61 versões abertas, 366 sem versão aberta (X6 provável) e 16 não
+encontrados. Os números mudam com a ACM. Triagem não iniciada.
