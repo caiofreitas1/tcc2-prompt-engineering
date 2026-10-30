@@ -14,12 +14,22 @@ documentada de inclusão no texto completo. Candidatos são criados por
 `scripts/deduplicar.py`, com origem busca_T04.
 nao_conferido não significa que a informação não existe no artigo.
 `acesso_aberto`: sim, nao ou nao_conferido. O corpus definitivo exige sim (critério I6).
+`sim` indica versão aberta localizada (registro arXiv, DOI ACM 10.1145, pela abertura da
+ACM em 2026, ou URL em versoes_abertas.csv); o acesso ao texto é confirmado na leitura
+(T06). `nao` só depois de procurar versões abertas na T06; não localizar local aberto no
+OpenAlex mantém nao_conferido. Candidatos sem DOI nem arXiv têm identificador nao_informado.
 
 ## registros.csv
 Uma linha por registro exportado de uma busca (`busca_id` em buscas.csv), inclusive
 de *snowballing*. `doi` e `arxiv` ficam vazios quando ausentes na exportação.
 `estudo_id` é preenchido após a deduplicação: registros com o mesmo estudo formam um
 grupo de duplicatas. As contagens PRISMA de identificação e deduplicação vêm daqui.
+
+## deduplicacao.csv
+Adjudicação de grupos de título idêntico com DOIs distintos ou anos distantes, que
+`scripts/deduplicar.py` só une com decisão `unir` (protocolo, seção 5): chave (título
+normalizado), registros, decisao (unir ou separar), evidencia, fonte, responsavel,
+natureza (ia ou humano) e data. Sem adjudicação, os registros ficam separados.
 
 ## versoes_abertas.csv
 Versões em acesso aberto localizadas para estudos sem texto aberto evidente (I6):
@@ -30,7 +40,7 @@ Registros do arXiv e da ACM (aberta desde 01/01/2026) contam como abertos sem co
 ## resumos.csv
 Um resumo por estudo para a triagem de título e resumo: estudo_id, registro_id (registro
 de onde veio o texto), fonte (arxiv, ieee_xplore, openalex, crossref, semanticscholar ou
-nao_encontrado) e resumo. Gerado por `scripts/resumos.py` a partir das exportações e,
+nao_encontrado, isto é, não localizado nas fontes consultadas) e resumo. Gerado por `scripts/resumos.py` a partir das exportações e,
 na falta delas (registros só da ACM), das APIs pelo DOI, com respostas em `dados/brutos/`.
 O resumo do OpenAlex é reconstruído do índice invertido de palavras.
 

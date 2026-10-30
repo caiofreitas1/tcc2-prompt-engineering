@@ -17,4 +17,12 @@
   primeira passada foram copiados dela para `complemento-ordenado-por-data.json`.
 - `pagina-001.json` a `pagina-010.json`: primeira passada sem as 2 repetições;
   `pagina-011.json`: o complemento. Total: 482 = contagem da ACM.
+- **Limitação (auditoria do PR #20):** a segunda passada completa não foi preservada,
+  só o complemento. A comparação de conjuntos foi feita no navegador, em 29/10/2026,
+  sobre os dados das duas passadas: segunda passada com 482 DOIs distintos; união das
+  duas passadas com 482 DOIs; DOIs exclusivos da segunda passada:
+  10.1145/3637528.3671452 e 10.1145/3660605.3660944. Portanto a primeira passada está
+  contida na segunda e o conjunto final é igual ao da segunda passada. Esse resultado
+  vem de um cálculo da sessão, não de um arquivo recontável.
+- Este arquivo é documentação; o `manifesto.txt` cobre só as capturas.
 - Executor: Claude Code (Claude Opus 5.5).

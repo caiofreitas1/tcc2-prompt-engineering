@@ -3,8 +3,10 @@
 
 Consulta a API do OpenAlex pelo DOI do estudo (ou pelo título, sem DOI), guarda as
 respostas em dados/brutos/<pasta>/openalex.jsonl e registra as versões encontradas
-em dados/versoes_abertas.csv. acesso_aberto passa a sim (há local aberto), nao (o
-OpenAlex encontrou o trabalho sem local aberto) ou fica nao_conferido (não encontrado).
+em dados/versoes_abertas.csv. acesso_aberto passa a sim quando há local aberto
+registrado; caso contrário fica nao_conferido. A ausência de local aberto no OpenAlex
+não prova que não exista versão aberta: `nao` só é atribuído depois da busca de
+versões no texto completo (T06).
 """
 import argparse
 import csv
@@ -63,7 +65,7 @@ def main():
     pasta.mkdir(parents=True, exist_ok=True)
     versoes_csv = ROOT / 'dados/versoes_abertas.csv'
     novo = not versoes_csv.exists()
-    contagem = {'sim': 0, 'nao': 0, 'nao_conferido': 0}
+    contagem = {'sim': 0, 'sem_local_aberto_no_openalex': 0, 'nao_encontrado_no_openalex': 0}
     with open(pasta / 'openalex.jsonl', 'a', encoding='utf-8') as bruto, \
          open(versoes_csv, 'a', newline='', encoding='utf-8') as saida:
         w = csv.DictWriter(saida, fieldnames=CAMPOS, lineterminator='\n')
@@ -81,11 +83,14 @@ def main():
                 if norm(obra.get('title')) != norm(e['titulo']):
                     obra = None
             if obra is None:
-                contagem['nao_conferido'] += 1
+                contagem['nao_encontrado_no_openalex'] += 1
             else:
                 locais = locais_abertos(obra)
-                e['acesso_aberto'] = 'sim' if locais else 'nao'
-                contagem[e['acesso_aberto']] += 1
+                if locais:
+                    e['acesso_aberto'] = 'sim'
+                    contagem['sim'] += 1
+                else:
+                    contagem['sem_local_aberto_no_openalex'] += 1
                 for link, fonte, versao in locais:
                     w.writerow({'estudo_id': e['id'], 'url': link, 'tipo': fonte,
                                 'versao': versao, 'origem': 'openalex', 'data': a.data})

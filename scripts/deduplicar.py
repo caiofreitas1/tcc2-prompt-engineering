@@ -4,9 +4,10 @@
 Registros com o mesmo DOI, identificador arXiv ou título normalizado formam um
 grupo (versões sobrepostas também se agrupam, critério X1). Grupos já ligados a um
 estudo de dados/estudos.csv mantêm o ID; os demais recebem novo ID (S7, S8...) com
-corpus `candidato`; candidatos sem registros são removidos. Grupos unidos pelo título
-com anos distantes ou DOIs distintos são listados para conferência na triagem.
-Pode ser reexecutado depois de novas buscas.
+corpus `candidato`; candidatos sem registros são removidos. Títulos iguais com anos
+distantes ou DOIs distintos só se unem com adjudicação `unir` em
+dados/deduplicacao.csv; sem ela ficam separados e são listados como pendentes.
+Pode ser reexecutado depois de novas buscas; sem dados novos, não altera os arquivos.
 """
 import collections
 import csv
@@ -38,9 +39,10 @@ def chaves(reg):
 def chaves_estudo(s):
     ident = s['identificador']
     ks = []
-    if ident.lower().startswith('doi:'):
+    # Identificador sem valor não pode virar chave comum a vários estudos.
+    if ident.lower().startswith('doi:') and ident[4:].strip():
         ks.append('doi:' + ident[4:].lower())
-    elif ident.startswith('arXiv:'):
+    elif ident.startswith('arXiv:') and ident[6:].strip():
         ks.append('arxiv:' + ident[6:])
     if len(titulo_norm(s['titulo'])) >= 20:
         ks.append('ti:' + titulo_norm(s['titulo']))
@@ -62,20 +64,24 @@ class Uniao:
         self.pai[self.achar(a)] = self.achar(b)
 
 
-def ler(nome):
-    with open(ROOT / 'dados' / nome, encoding='utf-8') as f:
+def ler(root, nome):
+    caminho = root / 'dados' / nome
+    if not caminho.exists():
+        return []
+    with open(caminho, encoding='utf-8') as f:
         return list(csv.DictReader(f))
 
 
-def gravar(nome, campos, linhas):
-    with open(ROOT / 'dados' / nome, 'w', newline='', encoding='utf-8') as f:
+def gravar(root, nome, campos, linhas):
+    with open(root / 'dados' / nome, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=campos, lineterminator='\n')
         w.writeheader()
         w.writerows(linhas)
 
 
-def main():
-    registros, estudos = ler('registros.csv'), ler('estudos.csv')
+def main(root=ROOT):
+    registros, estudos = ler(root, 'registros.csv'), ler(root, 'estudos.csv')
+    adjudicado = {a['chave']: a['decisao'] for a in ler(root, 'deduplicacao.csv')}
     u = Uniao()
     suspeitos = []
     por_titulo = collections.defaultdict(list)
@@ -94,13 +100,16 @@ def main():
                 u.unir('s:' + s['id'], k)
             else:
                 por_titulo[k].append({'id': 's:' + s['id'], 'ano': s['ano'], 'doi': ''})
-    # Títulos iguais unem grupos, salvo indício de trabalhos distintos.
+    # Títulos iguais unem grupos; com indício de trabalhos distintos, só após adjudicação.
     for k, regs in por_titulo.items():
         anos = {int(r['ano']) for r in regs if r.get('ano', '').isdigit()}
         dois = {r['doi'] for r in regs if r.get('doi') and 'arxiv' not in r['doi']}
         nos = [r['id'] if r['id'].startswith('s:') else 'r:' + r['id'] for r in regs]
         if (anos and max(anos) - min(anos) > 2) or len(dois) > 1:
-            suspeitos.append((k, [r['id'] for r in regs], sorted(anos), sorted(dois)))
+            if adjudicado.get(k[3:]) != 'unir':
+                if k[3:] not in adjudicado:
+                    suspeitos.append((k, [r['id'] for r in regs], sorted(anos), sorted(dois)))
+                continue
         for n in nos[1:]:
             u.unir(nos[0], n)
     grupo_estudo = {}
@@ -118,7 +127,12 @@ def main():
             proximo += 1
             grupo_estudo[g] = sid
             base = next((r for r in regs if r['doi'] and 'arxiv' not in r['doi']), regs[0])
-            ident = f"doi:{base['doi']}" if base['doi'] and 'arxiv' not in base['doi'] else f"arXiv:{base['arxiv']}"
+            if base['doi'] and 'arxiv' not in base['doi']:
+                ident = f"doi:{base['doi']}"
+            elif base['arxiv']:
+                ident = f"arXiv:{base['arxiv']}"
+            else:
+                ident = 'nao_informado'
             anos = [int(r['ano']) for r in regs if r['ano'].isdigit()]
             aberto = 'sim' if any(r['arxiv'] or r['doi'].startswith('10.1145/') for r in regs) else 'nao_conferido'
             novos.append({'id': sid, 'titulo': base['titulo'], 'identificador': ident,
@@ -128,13 +142,14 @@ def main():
                           'acesso_aberto': aberto})
         for r in regs:
             r['estudo_id'] = sid
-    gravar('registros.csv', ['id', 'busca_id', 'titulo', 'ano', 'doi', 'arxiv', 'estudo_id'], registros)
+    gravar(root, 'registros.csv', ['id', 'busca_id', 'titulo', 'ano', 'doi', 'arxiv', 'estudo_id'], registros)
     usados = {r['estudo_id'] for r in registros}
     estudos = [s for s in estudos if s['corpus'] != 'candidato' or s['id'] in usados]
-    gravar('estudos.csv', CAMPOS_ESTUDOS, estudos + novos)
+    gravar(root, 'estudos.csv', CAMPOS_ESTUDOS, estudos + novos)
     print(f'{len(registros)} registros; {len(grupos)} estudos; {len(novos)} novos')
     for k, ids, anos, dois in suspeitos:
-        print('CONFERIR', k[3:60], ids, anos, dois)
+        print('PENDENTE', k[3:], ids, anos, dois)
+    return len(grupos), suspeitos
 
 
 if __name__ == '__main__':

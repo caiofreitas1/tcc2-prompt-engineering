@@ -59,8 +59,9 @@ LEITORES = {'arxiv': ler_arxiv, 'ris': ler_ris, 'acm': ler_acm}
 
 
 def manifesto(pasta):
+    # notas.md é documentação editável; o manifesto cobre só as capturas.
     linhas = [f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}'
-              for p in sorted(pasta.iterdir()) if p.name != 'manifesto.txt']
+              for p in sorted(pasta.iterdir()) if p.name not in ('manifesto.txt', 'notas.md')]
     caminho = pasta / 'manifesto.txt'
     caminho.write_text('\n'.join(linhas) + '\n')
     return caminho
@@ -85,19 +86,27 @@ def main():
     with open(ROOT / 'dados/buscas.csv', encoding='utf-8') as f:
         if any(r['id'] == a.busca_id for r in csv.DictReader(f)):
             raise SystemExit(f'Busca {a.busca_id} já registrada.')
+    with open(ROOT / 'dados/registros.csv', encoding='utf-8') as f:
+        if any(r['busca_id'] == a.busca_id for r in csv.DictReader(f)):
+            raise SystemExit(f'Há registros de {a.busca_id} sem busca: importação parcial anterior.')
+    # Ler e validar todas as entradas antes de gravar qualquer tabela.
+    consulta = (pasta / 'consulta.txt').read_text().strip()
+    if not consulta:
+        raise SystemExit('consulta.txt vazio.')
     registros = list(LEITORES[a.leitor](pasta))
+    if not registros:
+        raise SystemExit('Nenhum registro lido.')
     linhas = [{'id': f'{a.busca_id}-{n:04d}', 'busca_id': a.busca_id, 'estudo_id': '', **r}
               for n, r in enumerate(registros, 1)]
+    arquivo = manifesto(pasta).relative_to(ROOT).as_posix()
     acrescentar(ROOT / 'dados/registros.csv',
                 ['id', 'busca_id', 'titulo', 'ano', 'doi', 'arxiv', 'estudo_id'], linhas)
     acrescentar(ROOT / 'dados/buscas.csv',
                 ['id', 'data', 'base', 'consulta', 'campos_filtros', 'total_exportado',
                  'arquivo_exportacao', 'executor'],
-                [{'id': a.busca_id, 'data': a.data, 'base': a.base,
-                  'consulta': (pasta / 'consulta.txt').read_text().strip(),
+                [{'id': a.busca_id, 'data': a.data, 'base': a.base, 'consulta': consulta,
                   'campos_filtros': a.filtros, 'total_exportado': len(linhas),
-                  'arquivo_exportacao': manifesto(pasta).relative_to(ROOT).as_posix(),
-                  'executor': a.executor}])
+                  'arquivo_exportacao': arquivo, 'executor': a.executor}])
     print(f'{a.busca_id}: {len(linhas)} registros')
 
 

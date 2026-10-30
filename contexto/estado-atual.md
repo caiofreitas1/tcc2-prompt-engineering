@@ -175,13 +175,21 @@ necessária. Buscas executadas por Claude Code (Claude Opus 5.5):
 
 Deduplicação (D36): 2.744 registros, 2.305 estudos únicos (439 duplicatas; contagens
 em `dados/fluxos.csv`). Acesso aberto dos 2.301 candidatos: 1.919 sim (arXiv, ACM ou
-versão localizada no OpenAlex), 362 sem versão aberta (X6 provável), 20 não
-conferidos. O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
+versão localizada no OpenAlex) e 382 nao_conferido (362 sem local aberto no OpenAlex e
+20 não encontrados nele); I6 é confirmado no texto completo (T06). O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
 
 Resumos para a triagem em `dados/resumos.csv`: 1.595 do arXiv, 446 do IEEE, 234 do
-OpenAlex e 23 do Semantic Scholar (registros só da ACM); 7 estudos sem resumo em
-nenhuma fonte (anais de workshop, painel, coluna e similares).
+OpenAlex e 23 do Semantic Scholar (registros só da ACM); 7 estudos com resumo não
+localizado nas fontes consultadas (anais de workshop, painel, coluna e similares).
+
+Auditoria por IA do PR #20 (Codex, 29/10/2026;
+`evidencias/auditorias/PR20-T04-2026-10-29.md`): parecer "seguir após correções".
+Corrigidos por Claude Code (D37): identificadores vazios que tornavam a deduplicação
+destrutiva na reexecução; adjudicação dos seis grupos de título igual (D38); acesso
+aberto sem conclusão negativa a partir do OpenAlex; importação de buscas validada antes
+da gravação; manifestos verificados pelo `make check`. A segunda passada completa da
+ACM não foi preservada (limitação em `dados/brutos/acm-2026-10-29/notas.md`).
 
 Pendências antes da T05: verificação do autor (expressões, exportações e recuperação
-de S1, S2, S4 e S6); conferência dos seis grupos de título igual sinalizados pela
-deduplicação. Triagem não iniciada.
+de S1, S2, S4 e S6). Para o método (T10): relatar os itens de busca e as ameaças
+apontados na auditoria. Triagem não iniciada.

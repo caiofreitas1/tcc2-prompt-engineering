@@ -82,3 +82,17 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   calibração da expressão em S1–S6 por script local; DOIs conferidos no Crossref.
 - Revisão humana: pendente (revisão do PR pelo autor). Contagens do arXiv são
   sondagens informais, não buscas registradas.
+
+## T04 — buscas, auditoria e correções — 29/10/2026
+
+- Executores: Claude Code (Claude Opus 5.5) nas buscas, na deduplicação e nas
+  correções; Codex (IA) na auditoria independente do PR #20.
+- Entradas: protocolo v2, API do arXiv, IEEE Xplore (navegador do app), ACM DL (Chrome
+  do autor via Claude in Chrome), APIs do OpenAlex, Crossref e Semantic Scholar.
+- Saídas: buscas B1–B3, `dados/registros.csv`, candidatos em `dados/estudos.csv`,
+  `dados/resumos.csv`, `dados/versoes_abertas.csv`, `dados/deduplicacao.csv`,
+  contagens em `dados/fluxos.csv`, scripts de busca e deduplicação, D33–D38,
+  relatório de auditoria em `evidencias/auditorias/`.
+- Verificação: `make check` (zero erros estruturais, 22 testes aprovados); auditoria
+  por IA com parecer "seguir após correções", achados tratados em D37.
+- Revisão humana: pendente (ponto de controle da seção 7 após a busca).
