@@ -2,10 +2,11 @@
 """Agrupa os registros de dados/registros.csv em estudos (protocolo, seção 5).
 
 Registros com o mesmo DOI, identificador arXiv ou título normalizado formam um
-grupo. Grupos já ligados a um estudo de dados/estudos.csv mantêm o ID; os demais
-recebem novo ID (S7, S8...) com corpus `candidato`. Grupos unidos só pelo título
-com anos distantes ou DOIs distintos são listados para conferência e não são
-unidos automaticamente. Pode ser reexecutado depois de novas buscas.
+grupo (versões sobrepostas também se agrupam, critério X1). Grupos já ligados a um
+estudo de dados/estudos.csv mantêm o ID; os demais recebem novo ID (S7, S8...) com
+corpus `candidato`; candidatos sem registros são removidos. Grupos unidos pelo título
+com anos distantes ou DOIs distintos são listados para conferência na triagem.
+Pode ser reexecutado depois de novas buscas.
 """
 import collections
 import csv
@@ -100,7 +101,6 @@ def main():
         nos = [r['id'] if r['id'].startswith('s:') else 'r:' + r['id'] for r in regs]
         if (anos and max(anos) - min(anos) > 2) or len(dois) > 1:
             suspeitos.append((k, [r['id'] for r in regs], sorted(anos), sorted(dois)))
-            continue
         for n in nos[1:]:
             u.unir(nos[0], n)
     grupo_estudo = {}
@@ -129,6 +129,8 @@ def main():
         for r in regs:
             r['estudo_id'] = sid
     gravar('registros.csv', ['id', 'busca_id', 'titulo', 'ano', 'doi', 'arxiv', 'estudo_id'], registros)
+    usados = {r['estudo_id'] for r in registros}
+    estudos = [s for s in estudos if s['corpus'] != 'candidato' or s['id'] in usados]
     gravar('estudos.csv', CAMPOS_ESTUDOS, estudos + novos)
     print(f'{len(registros)} registros; {len(grupos)} estudos; {len(novos)} novos')
     for k, ids, anos, dois in suspeitos:

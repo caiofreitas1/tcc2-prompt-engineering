@@ -7,6 +7,7 @@ registro exportado, na ordem da exportação, sem deduplicar.
 import argparse
 import csv
 import hashlib
+import json
 import pathlib
 import re
 import xml.etree.ElementTree as ET
@@ -45,7 +46,16 @@ def ler_ris(pasta):
                 campos.setdefault(marca[:2], valor)
 
 
-LEITORES = {'arxiv': ler_arxiv, 'ris': ler_ris}
+def ler_acm(pasta):
+    # Itens extraídos das páginas de resultados: [posição, tipo, data, doi, título].
+    for arquivo in sorted(pasta.glob('pagina-*.json')):
+        for _, _, data, doi, titulo in json.loads(arquivo.read_text(encoding='utf-8')):
+            ano = re.search(r'\b(19|20)\d{2}\b', data)
+            yield {'titulo': limpar(titulo), 'ano': ano.group(0) if ano else '',
+                   'doi': doi.lower(), 'arxiv': ''}
+
+
+LEITORES = {'arxiv': ler_arxiv, 'ris': ler_ris, 'acm': ler_acm}
 
 
 def manifesto(pasta):

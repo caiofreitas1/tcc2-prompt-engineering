@@ -123,6 +123,11 @@ o resultado. Uma falha leva a ajuste documentado da expressão antes da triagem.
 Sondagem informal de volume (API do arXiv, 27/10, sem exportação nem registro
 como busca): 1.509 registros na expressão ampla e 516 na variante de título.
 
+**Resultado na T04 (29/10/2026, Claude Code):** S1 recuperado no arXiv (B1) e na ACM
+(B3, versão TOSEM); S2 e S6 no arXiv; S4 no arXiv e na ACM. S3 e S5 não foram
+recuperados, como na calibração. A expressão não precisou de ajuste. Pendente a
+verificação do autor (seção 7).
+
 ### 4.4 Snowballing
 
 Uma rodada, para trás (referências) e para a frente (citações), sobre os estudos

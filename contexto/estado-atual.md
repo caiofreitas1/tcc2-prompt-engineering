@@ -161,7 +161,7 @@ confirmou-o em 27/10 (D32); `protocolo_confirmado` passou a verdadeiro. A pergun
 sobre resultados parciais no texto de 08/11 ainda precisa ser feita ao orientador
 (D30).
 
-## T04 em andamento — 29/10/2026
+## T04 — buscas executadas em 29/10/2026
 
 Em 29/10 o autor decidiu que o texto de 08/11 é o texto completo (D33); o cronograma
 foi comprimido (D34) e a consulta ao orientador sobre resultados parciais deixou de ser
@@ -169,12 +169,15 @@ necessária. Buscas executadas por Claude Code (Claude Opus 5.5):
 
 | Busca | Base | Registros | Observação |
 |---|---|---|---|
-| B1 | arXiv (API oficial) | 1.597 | S1, S2, S4 e S6 recuperados; S3 e S5 não, como previsto (4.3) |
-| B2 | IEEE Xplore | 665 | 671 resultados menos 6 cursos sem exportação |
-| — | ACM DL | pendente | página de busca bloqueada pela verificação anti-bot da Cloudflare no navegador do app; depende do autor |
+| B1 | arXiv (API oficial) | 1.597 | S1, S2, S4 e S6 recuperados |
+| B2 | IEEE Xplore | 665 | 671 resultados menos 6 cursos; RIS com resumo |
+| B3 | ACM DL | 482 | extraído das páginas de resultados, sem resumo (D35) |
 
-Deduplicação parcial (arXiv + IEEE): 2.262 registros, 2.042 estudos (220 em duas
-bases). Um par de mesmo título com DOIs IEEE e ACM distintos (B1-0843/B2-0280) ficou
-separado para conferência. Acesso aberto: 1.595 pelo arXiv; dos 443 só do IEEE, o
-OpenAlex localizou 61 versões abertas, 366 sem versão aberta (X6 provável) e 16 não
-encontrados. Os números mudam com a ACM. Triagem não iniciada.
+Deduplicação (D36): 2.744 registros, 2.305 estudos únicos (439 duplicatas; contagens
+em `dados/fluxos.csv`). Acesso aberto dos 2.301 candidatos: 1.919 sim (arXiv, ACM ou
+versão localizada no OpenAlex), 362 sem versão aberta (X6 provável), 20 não
+conferidos. O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
+
+Pendências antes da T05: verificação do autor (expressões, exportações e recuperação
+de S1, S2, S4 e S6); resumos dos registros só da ACM; conferência dos seis grupos de
+título igual sinalizados pela deduplicação. Triagem não iniciada.
