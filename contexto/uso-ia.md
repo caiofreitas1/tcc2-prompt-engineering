@@ -174,3 +174,11 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   (Claude Opus 5.5) na extração com Ghostscript e na comparação.
 - Evidências: `evidencias/piloto/ia-a-tc-v1-texto.jsonl`, `evidencias/piloto/ia-b-tc-v1-texto.jsonl`, D55.
 - Revisão humana: não houve; aguarda o autor.
+
+## T10 — rascunho de introdução, fundamentação e metodologia — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: redação de rascunho em `monografia/capitulos/01` a `03`, com metadados conferidos na API do
+  arXiv e no Crossref. Fontes da fundamentação lidas pelo resumo (exceto Brown et al., seção 1.1, e S1).
+- Afirmações empíricas de estudos: nenhuma nova; os números da metodologia vêm dos registros do projeto.
+- Revisão humana: pendente.
