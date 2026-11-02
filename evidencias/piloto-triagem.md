@@ -2,8 +2,9 @@
 
 **Situação (02/11/2026):** duas rodadas concluídas. A amostra 1 (tr-v1) teve 6 perdas e
 acionou a regra de parada; a amostra 2 (tr-v2) não teve perdas. Elaborado por Claude Code
-(Claude Opus 5.5). O autor decidiu manter a RSL completa (D47). A viabilidade até 08/11
-segue sem medição, tr-v2 ainda não foi congelada e nenhuma triagem em lote foi iniciada.
+(Claude Opus 5.5). O autor decidiu manter a RSL completa (D47). A medição de texto completo
+foi registrada, mas o tempo aguarda confirmação do autor (D52). A viabilidade até 08/11 segue
+sem demonstração, tr-v2 não foi congelada e nenhuma triagem em lote foi iniciada.
 As seções até "Efeito do recuo na amostra" descrevem a amostra 1 e não mudam.
 
 ## Execução
@@ -229,6 +230,91 @@ Tr-v2 aumenta o volume em relação à estimativa com tr-v1 (cerca de 1.541).
 | 2. Sem perda após no máximo uma revisão | Atendido na amostra 2, com tr-v2 |
 | 3. Horas do autor | Teto retirado pelo autor (D47); projeção pendente da medição |
 
+## Medição de texto completo (tc-v1)
+
+| Item | Registro |
+|---|---|
+| Amostra | 12 de 80 estudos que seguem pela união, com acesso aberto `sim`; 209 páginas (`piloto/medicao-texto.csv`) |
+| IA-A e IA-B | claude-opus-5-5 e claude-sonnet-5-5, em subagentes, com tc-v1 (D51) |
+| Autor | Conferência cega, exportada em `piloto/autor-medicao.jsonl` (SHA-256 `46a9b94bffadec777795420036a2cba37d4707251d6c899035aea2df656bc405`) |
+| Selos | Os SHA-256 de IA-A e IA-B conferem com os de D51 na abertura |
+| Comparação | `piloto/comparacao-medicao.csv` |
+
+Estas decisões **não** colocam estudos no corpus e não entram em `dados/triagem.csv`: uma
+linha humana `incluir` em texto completo faria isso (seção 6).
+
+### Decisões
+
+| Estudo | Páginas | Tempo | Autor | IA-A | IA-B |
+|---|---:|---:|---|---|---|
+| S213 | 14 | 134 s | incluir | incluir | incluir |
+| S430 | 35 | 52 s | incluir | incluir | incluir |
+| S448 | 13 | 67 s | incluir | incluir | incluir |
+| S2261 | 7 | 77 s | incluir | duvida (I2) | duvida (I2;I3) |
+| S508 | 13 | 77 s | incluir | incluir | incluir |
+| S427 | 37 | 65 s | incluir | incluir | duvida (I2;X4) |
+| S149 | 12 | 88 s | incluir | incluir | incluir |
+| S1584 | 10 | 105 s | excluir (X2) | excluir (X2) | excluir (X2) |
+| S619 | 18 | 80 s | incluir | incluir | incluir |
+| S2128 | 23 | 92 s | excluir (X3) | excluir (X4) | excluir (X4) |
+| S1539 | 22 | 100 s | incluir | incluir | incluir |
+| S306 | 5 | 130 s | duvida (I2) | incluir | incluir |
+
+Autor × IA-A: 10 de 12 iguais; autor × IA-B: 9 de 12; IA-A × IA-B: 11 de 12. Nenhum Incluir
+do autor foi excluído pelas duas IAs. Com 12 estudos, o κ não é informativo.
+
+Pontos de calibração de tc-v1, a decidir pelo autor:
+
+- **S2128:** autor usou X3 e as IAs, X4; as duas IAs dizem que X4 é só o código mais próximo.
+  O protocolo não tem código para estudo sem prompting avaliado.
+- **S306 e S2261:** a orientação de I2 ("parte do que é avaliado") deixa em aberto estudos sem
+  comparação que isole o prompting e estudos que só observam padrões de prompts.
+
+### O tempo registrado ainda não pode sustentar a projeção
+
+Registrado: 1.067 s no total, média de 89 s e mediana de 84 s por estudo. Sinais de que esse
+tempo pode não cobrir a leitura (leitura de IA; o autor precisa esclarecer):
+
+- 209 páginas em uma sessão contínua de 19,1 min, sem pausas, cerca de 5 s por página. Entre
+  salvar um estudo e iniciar o seguinte houve de 1 a 6 s na maioria dos casos.
+- O tempo não cresce com o tamanho: correlação de −0,56 com as páginas. S430, de 35 páginas,
+  levou 52 s; S306, de 5 páginas, levou 130 s.
+- Os motivos têm em média 205 caracteres. S430 tem 193 caracteres em 52 s (3,7 caracteres por
+  segundo), ritmo próximo ao de só digitar.
+- O motivo de S1584 começa com aspas sem fechamento, compatível com texto colado.
+
+Isso é compatível com leitura feita antes de clicar em Iniciar, ou com motivos preparados à
+parte. Não permite concluir como a conferência foi feita.
+
+### Projeção provisória
+
+Proporções de 12 estudos, extrapoladas para os cerca de 1.748 que seguem (1.440–1.971), com
+intervalos de Wilson a 95%. Não descontam os 381 candidatos sem acesso aberto conferido.
+
+| Item | Estimativa |
+|---|---:|
+| Inclusões e divergências que o autor confere (10/12) | cerca de 1.457 (795–1.878) |
+| 20% das exclusões consensuais (2/12) | cerca de 58 |
+| Tamanho do corpus, se 9/12 ficarem | cerca de 1.311 (673–1.796) |
+
+| Tempo por estudo | Horas do autor no texto completo (faixa acima, sem os 58) |
+|---|---:|
+| 89 s (registrado, não validado) | cerca de 36 h (20–46) |
+| 3 min (suposição) | cerca de 73 h (40–94) |
+| 5 min (suposição) | cerca de 121 h (66–157) |
+| 10 min (suposição) | cerca de 243 h (133–313) |
+
+Não incluem a amostra de 100 exclusões (0,94–1,30 h), 20% das extrações (cerca de 262, se o
+corpus tiver 1.311 estudos) nem a conferência do texto.
+
+**IAs:** 728.349 e 726.013 tokens em 12 estudos, cerca de 60,6 mil por estudo e por IA, com
+PDFs lidos como imagem e texto. Em cerca de 1.748 estudos e duas leituras, são cerca de 212
+milhões de tokens. Cada IA levou 155 s e 187 s. Extrair só o texto pode reduzir isso; não foi
+testado.
+
+**Cronograma:** a seção 12 não foi atualizada. Depende do tempo validado e das horas que o
+autor tem até 08/11.
+
 ## Decisão do autor e próximos passos (D47)
 
 O autor manteve a RSL completa, com entrega em 08/11: o teto de 12 h deixa de decidir o
@@ -236,7 +322,7 @@ recuo, e a viabilidade precisa ser medida. A estimativa do recuo acima fica só 
 registro. A busca ampla e as verificações da seção 7 não mudam.
 
 1. **Amostra 2:** concluída, sem perdas.
-2. **Medição do texto completo (preparada, D51):** 12 estudos sorteados entre os que seguem pela união nas
+2. **Medição do texto completo (feita; tempo a confirmar, D52):** 12 estudos sorteados entre os que seguem pela união nas
    duas amostras, com acesso aberto `sim`. A amostra 2 entra porque a triagem cega já
    terminou e ela representa melhor o fluxo de tr-v2. IA-A e IA-B leem o texto com tc-v1;
    o autor confere, com início e fim marcados por estudo, e o uso de tokens é registrado.

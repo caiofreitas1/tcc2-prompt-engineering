@@ -159,3 +159,11 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   Claude Code (Claude Opus 5.5) no sorteio, na obtenção dos PDFs e no formulário.
 - Evidências: `evidencias/piloto/medicao-texto.csv`, D51.
 - Revisão humana: conferência cega do autor pendente.
+
+## T05 — análise da medição de texto completo — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, comparação das decisões, verificação do tempo e projeção.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/autor-medicao.jsonl`, D52.
+- Revisão humana: conferência feita pelo autor em 02/11/2026, com tempo a confirmar; análise
+  ainda não revisada por ele.

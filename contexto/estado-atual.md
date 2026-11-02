@@ -229,3 +229,6 @@ principal. As decisões do piloto ainda não entraram em `dados/triagem.csv`.
 
 Medição de texto completo preparada (D51): 12 estudos, decisões de IA-A e IA-B seladas;
 pendente a conferência cega do autor.
+
+Medição concluída (D52): tempo registrado sem validar. Pendentes: confirmação do autor sobre o
+tempo, horas disponíveis até 08/11, cronograma, congelamento de tr-v2 e lote principal.
