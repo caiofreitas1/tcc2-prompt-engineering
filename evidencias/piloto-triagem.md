@@ -236,7 +236,7 @@ recuo, e a viabilidade precisa ser medida. A estimativa do recuo acima fica só 
 registro. A busca ampla e as verificações da seção 7 não mudam.
 
 1. **Amostra 2:** concluída, sem perdas.
-2. **Medição do texto completo:** 12 estudos sorteados entre os que seguem pela união nas
+2. **Medição do texto completo (preparada, D51):** 12 estudos sorteados entre os que seguem pela união nas
    duas amostras, com acesso aberto `sim`. A amostra 2 entra porque a triagem cega já
    terminou e ela representa melhor o fluxo de tr-v2. IA-A e IA-B leem o texto com tc-v1;
    o autor confere, com início e fim marcados por estudo, e o uso de tokens é registrado.

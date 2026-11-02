@@ -226,3 +226,6 @@ no texto completo e a atualização da projeção e do cronograma.
 Amostra 2 concluída (D50): revocação 23/23, sem perdas, κ binário 0,700; critério 2 atendido.
 Pendentes: medição do texto completo, projeção e cronograma, congelamento de tr-v2 e lote
 principal. As decisões do piloto ainda não entraram em `dados/triagem.csv`.
+
+Medição de texto completo preparada (D51): 12 estudos, decisões de IA-A e IA-B seladas;
+pendente a conferência cega do autor.

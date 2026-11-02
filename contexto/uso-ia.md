@@ -152,3 +152,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D50.
 - Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise ainda não
   revisada por ele.
+
+## T05 — preparação da medição de texto completo — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes, com tc-v1;
+  Claude Code (Claude Opus 5.5) no sorteio, na obtenção dos PDFs e no formulário.
+- Evidências: `evidencias/piloto/medicao-texto.csv`, D51.
+- Revisão humana: conferência cega do autor pendente.
