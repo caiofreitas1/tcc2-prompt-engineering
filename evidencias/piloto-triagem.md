@@ -1,8 +1,9 @@
 # Lote piloto da triagem de título e resumo (T05)
 
 **Situação (02/11/2026):** primeira rodada concluída; a regra de parada foi acionada.
-Elaborado por Claude Code (Claude Opus 5.5). O autor ainda não decidiu o recuo nem a
-versão seguinte do prompt. Nenhuma triagem em lote foi iniciada.
+Elaborado por Claude Code (Claude Opus 5.5). O autor decidiu manter a RSL completa e
+aplicar tr-v2 em nova amostra de 50 (D47); os resultados abaixo não mudam. Nenhuma
+triagem em lote foi iniciada.
 
 ## Execução
 
@@ -80,6 +81,14 @@ auditoria D44 a retirou do guia do autor, mas tr-v1 não a proibia às IAs. O au
 registrou motivos, então não se sabe por qual razão incluiu cada estudo. O piloto não
 define quem está certo; a regra da seção 7 é acionada de qualquer forma.
 
+**Condições diferentes entre autor e IAs.** Ao atualizar o guia em 02/11, após a abertura
+dos selos, notou-se que a versão usada pelo autor dizia, sobre geração de código em
+tarefa mais ampla, que o protocolo "não exige que o código seja o produto final", e que
+X4 não se aplica se há prompting em tarefa elegível. tr-v1 não trazia essas orientações
+às IAs. Parte das perdas pode, portanto, vir dessa diferença de instruções, contrariando
+o objetivo de D44 de dar as mesmas condições aos triadores. tr-v2 reduz a diferença, mas
+não a elimina.
+
 ## Critérios da decisão RSL completa ou recuo (seção 8)
 
 | Critério | Situação |
@@ -129,29 +138,28 @@ Estimativa local: o bloco de tarefas foi aplicado aos títulos dos candidatos (s
 
 Essa perda de cobertura teria de ser relatada como limitação da revisão rápida.
 
-## Próximos passos, se o autor aprovar
+## Decisão do autor e próximos passos (D47)
 
-1. Registrar o recuo antes de qualquer triagem em lote (seção 1).
-2. Publicar tr-v2 (rascunho abaixo) e aplicá-la às IAs em nova amostra de 50, com o
-   autor cego (seção 7).
-3. Medir o tempo de texto completo em um lote pequeno e refazer a projeção.
+O autor manteve a RSL completa, com entrega em 08/11: o teto de 12 h deixa de decidir o
+recuo, e a viabilidade precisa ser medida. A estimativa do recuo acima fica só como
+registro. A busca ampla e as verificações da seção 7 não mudam.
 
-### Mudança proposta em tr-v2 (rascunho, não aplicado)
+1. **Amostra 2:** tr-v2, 50 novos estudos (`piloto/amostra-2.csv`, semente 20261102), com
+   IA-A e IA-B em subagentes novos (D48) e o autor cego.
+2. **Medição do texto completo (depois da amostra 2):** 12 estudos sorteados entre os
+   que seguem pela união na amostra 1, com acesso aberto `sim`. IA-A e IA-B leem o texto
+   com tc-v1; o autor confere e o tempo é marcado por estudo, com início e fim. Evita a
+   amostra 2 para não contaminar a triagem cega.
+3. **Projeção e cronograma:** refeitos com os tempos medidos (seção 12).
 
-Não altera I2 nem X3 ou X4 no protocolo; só envia à leitura do texto completo os casos
-que tr-v1 excluía:
-
-- Se o estudo usa prompting para gerar código, mas a tarefa final é outra (agentes,
-  matemática, perguntas), responda `duvida`, não `excluir`.
-- Use X4 só quando o estudo for centrado apenas em treinamento, ajuste fino ou
-  arquitetura. Se também avaliar prompting em uma das tarefas, ou gerar dados por
-  prompting para elas, responda `duvida`.
+Se tr-v2 tiver perda, aplica-se a seção 7, e a consequência para o critério 2 da seção 8
+volta à decisão do autor, que não tratou desse caso em D47.
 
 ## Limitações
 
 - `dados/triagem.csv` ainda não recebeu estas decisões. O validador exige critério e
   motivo, que o autor não registrou. O registro de origem é `piloto/autor-amostra-1.jsonl`;
   a forma de levá-lo ao CSV será tratada sem inventar conteúdo.
-- IA-A foi executada pelo mesmo agente que redigiu o guia, esta análise e a proposta
-  de tr-v2.
-- A leitura das perdas e a proposta são de IA e não constituem revisão humana.
+- IA-A foi executada, na amostra 1, pelo mesmo agente que redigiu o guia e esta análise.
+- A leitura das perdas é de IA e não constitui revisão humana.
+- A alteração do critério 3 ocorreu depois de conhecidos os dados e é um desvio a relatar.

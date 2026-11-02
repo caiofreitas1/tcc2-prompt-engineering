@@ -6,7 +6,8 @@ Cada arquivo tem versão no cabeçalho; a versão é registrada em `prompt_versa
 
 | Arquivo | Versão | Situação |
 |---|---|---|
-| [triagem-titulo-resumo.md](triagem-titulo-resumo.md) | tr-v1 | Rascunho; calibrar no lote piloto (T05) |
+| [triagem-titulo-resumo.md](triagem-titulo-resumo.md) | tr-v1 | Usada na amostra 1 do piloto (T05); substituída após a regra de parada |
+| [triagem-titulo-resumo-v2.md](triagem-titulo-resumo-v2.md) | tr-v2 | Em calibração na amostra 2 do piloto (D47) |
 | [triagem-texto-completo.md](triagem-texto-completo.md) | tc-v1 | Rascunho; calibrar nos primeiros textos (T06) |
 | [extracao.md](extracao.md) | ex-v1 | Rascunho; calibrar com S1 e dois estudos incluídos (T07) |
 

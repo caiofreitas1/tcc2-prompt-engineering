@@ -136,3 +136,11 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D46.
 - Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise e
   propostas ainda não revisadas por ele.
+
+## T05 — amostra 2 do piloto — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes; Claude
+  Code (Claude Opus 5.5) na preparação de tr-v2, do sorteio e do formulário.
+- Evidências: `protocolo/prompts/triagem-titulo-resumo-v2.md`,
+  `evidencias/piloto/amostra-2.csv`, D47–D49.
+- Revisão humana: tr-v2 segue a decisão do autor (D47); triagem cega dele pendente.

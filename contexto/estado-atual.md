@@ -218,3 +218,7 @@ O autor concluiu a triagem cega e os selos conferem (D46). Revocação 50/56, 6 
 κ binário autor × união 0,645: a regra de parada da seção 7 foi acionada. O critério 3
 da seção 8 não é sustentado pela projeção. Aguarda o autor: recuo e tr-v2. tr-v1 segue
 vigente e não há triagem em lote. Relatório: `evidencias/piloto-triagem.md`.
+
+Decisão do autor (D47): RSL completa mantida, sem o teto de 12 h como condição de recuo.
+Amostra 2 com tr-v2 selada (D49); pendentes a triagem cega do autor, a medição de tempo
+no texto completo e a atualização da projeção e do cronograma.

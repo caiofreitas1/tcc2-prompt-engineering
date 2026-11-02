@@ -21,7 +21,8 @@ de controle definidos na seção 7.
 o trabalho passa a revisão rápida declarada (Cartaxo, Pinto e Soares, 2020),
 aplicando a restrição de título da seção 4.2 antes da triagem em lote. O recuo
 é registrado em decisoes.md com motivo e números do piloto; não é aplicado depois
-de iniciada a triagem em lote.
+de iniciada a triagem em lote. Em 02/11/2026 o autor decidiu não aplicar o recuo
+por causa do teto de horas e manter a RSL completa (D47).
 
 ## 2. Questões de pesquisa
 
@@ -151,6 +152,8 @@ exportação preservada. Os registros novos passam pela mesma triagem.
 IA-B = Claude Sonnet 5.5 em subagente separado, com o mesmo prompt e sem acesso
 às decisões de IA-A. Modelos do mesmo fornecedor podem ter erros correlacionados;
 a verificação humana por amostragem compensa parcialmente e a limitação é relatada.
+Desde a amostra 2 do piloto, IA-A também roda em subagente separado, sem o contexto
+da sessão principal (D48).
 
 **Prompts:** versionados em [prompts/](prompts/). Cada decisão de IA registra
 `prompt_versao`. Os prompts são calibrados no lote piloto e congelados antes do
@@ -195,6 +198,14 @@ Critérios propostos para aprovação do autor no PR:
 
 Atendidos os três, segue a RSL completa. Caso contrário, aplicar o recuo da
 seção 1. A decisão, os números e a data são registrados em decisoes.md.
+
+**Alteração de 02/11/2026 (D47):** depois de conhecer os resultados do piloto, o autor
+decidiu que o teto de 12 h do critério 3 deixa de decidir o recuo, porque pode dedicar
+mais horas. Sua disponibilidade não demonstra a viabilidade: o esforço restante, com o
+tempo medido das conferências de texto completo, será projetado e o cronograma da
+seção 12, atualizado. A busca ampla e as verificações da seção 7 não mudam. O critério
+2 e a regra de parada também não mudam. Esta alteração posterior aos dados é relatada
+como desvio do protocolo.
 
 ## 9. Extração
 
@@ -244,6 +255,8 @@ justificativa nas fontes e orientação concreta; isso não mede eficácia.
 
 O texto de 08/11 é o texto completo (D33), não mais um texto com resultados
 parciais (D30). Todas as etapas da revisão precisam terminar antes dessa data.
+A tabela abaixo é a de D34; as datas de T05 em diante serão atualizadas com o esforço
+medido (D47).
 
 | Período | Etapa |
 |---|---|
