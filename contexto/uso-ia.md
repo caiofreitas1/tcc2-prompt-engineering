@@ -82,3 +82,29 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   calibração da expressão em S1–S6 por script local; DOIs conferidos no Crossref.
 - Revisão humana: pendente (revisão do PR pelo autor). Contagens do arXiv são
   sondagens informais, não buscas registradas.
+
+## T04 — buscas, auditoria e correções — 29/10/2026
+
+- Executores: Claude Code (Claude Opus 5.5) nas buscas, na deduplicação e nas
+  correções; Codex (IA) na auditoria independente do PR #20.
+- Entradas: protocolo v2, API do arXiv, IEEE Xplore (navegador do app), ACM DL (Chrome
+  do autor via Claude in Chrome), APIs do OpenAlex, Crossref e Semantic Scholar.
+- Saídas: buscas B1–B3, `dados/registros.csv`, candidatos em `dados/estudos.csv`,
+  `dados/resumos.csv`, `dados/versoes_abertas.csv`, `dados/deduplicacao.csv`,
+  contagens em `dados/fluxos.csv`, scripts de busca e deduplicação, D33–D38,
+  relatório de auditoria em `evidencias/auditorias/`.
+- Verificação: `make check` (zero erros estruturais, 22 testes aprovados); auditoria
+  por IA com parecer "seguir após correções", achados tratados em D37.
+- Revisão humana: pendente (ponto de controle da seção 7 após a busca).
+
+## T04 — verificação complementar da ACM — 01/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5), a pedido do autor (D39).
+- Entradas: busca B3 de 29/10, ACM DL (Chrome do autor via Claude in Chrome, sem login).
+- Saídas: coleta em `dados/brutos/acm-verificacao-2026-11-01/`, `scripts/verificar_acm.py`,
+  `dados/correcoes_registros.csv`, regra de correções em `scripts/deduplicar.py` e
+  `scripts/verificar.py`, recontagens em `dados/fluxos.csv`, D39–D41, ajuste do rascunho
+  tr-v1 e relatório em `evidencias/verificacoes/T04-acm-2026-11-01.md`.
+- Verificação: `make check`; reextração em Python do HTML bruto comparada à extração
+  do navegador; deduplicação reexecutada duas vezes sem alteração.
+- Revisão humana: pendente (revisão do autor; a triagem não foi liberada).

@@ -123,6 +123,11 @@ o resultado. Uma falha leva a ajuste documentado da expressão antes da triagem.
 Sondagem informal de volume (API do arXiv, 27/10, sem exportação nem registro
 como busca): 1.509 registros na expressão ampla e 516 na variante de título.
 
+**Resultado na T04 (29/10/2026, Claude Code):** S1 recuperado no arXiv (B1) e na ACM
+(B3, versão TOSEM); S2 e S6 no arXiv; S4 no arXiv e na ACM. S3 e S5 não foram
+recuperados, como na calibração. A expressão não precisou de ajuste. Pendente a
+verificação do autor (seção 7).
+
 ### 4.4 Snowballing
 
 Uma rodada, para trás (referências) e para a frente (citações), sobre os estudos
@@ -185,7 +190,8 @@ Critérios propostos para aprovação do autor no PR:
 1. registros únicos após deduplicação ≤ 2.500;
 2. lote piloto sem perda de estudo incluído pelo autor após no máximo uma revisão
    do prompt;
-3. projeção das horas do autor até 08/11 ≤ 12 h, calculada pelo tempo medido no piloto.
+3. projeção das horas do autor até 08/11 ≤ 12 h, calculada pelo tempo medido no piloto
+   e cobrindo todos os pontos de controle da seção 7 até o texto completo (D33).
 
 Atendidos os três, segue a RSL completa. Caso contrário, aplicar o recuo da
 seção 1. A decisão, os números e a data são registrados em decisoes.md.
@@ -234,19 +240,25 @@ inferência do TCC e sugestão dos autores. A taxonomia e a tabela de apoio à
 escolha são examinadas em oito cenários, dois por tarefa, quanto a clareza,
 justificativa nas fontes e orientação concreta; isso não mede eficácia.
 
-## 12. Cronograma (D30)
+## 12. Cronograma (D33–D34)
+
+O texto de 08/11 é o texto completo (D33), não mais um texto com resultados
+parciais (D30). Todas as etapas da revisão precisam terminar antes dessa data.
 
 | Período | Etapa |
 |---|---|
 | 27–28/10 | Protocolo v2 (este documento) |
-| 29–30/10 | T04: buscas, deduplicação e localização de versões abertas |
+| 29–30/10 | T04: buscas, deduplicação e localização de versões abertas; T10 em paralelo |
 | 30–31/10 | T05: lote piloto; decisão da seção 8 |
-| 01–03/11 | T05: triagem de título e resumo |
-| 04–07/11 | T06 e início da T07; T10 em paralelo |
-| **08/11** | **Texto inicial**, com resultados parciais declarados |
-| 09–17/11 | T07–T09: extração, qualidade, síntese, cenários |
+| 01–02/11 | T05: triagem de título e resumo |
+| 02–04/11 | T06: texto completo e *snowballing* |
+| 03–05/11 | T07: extração e qualidade |
+| 05–06/11 | T08 e T09: síntese e cenários |
+| 06–07/11 | T11: resultados, discussão e conclusão; T12: auditoria |
+| **08/11** | **Texto completo** |
+| 09–18/11 | Preparação da defesa |
 | **19/11** | **Defesa** |
-| 20–29/11 | Ajustes da banca, verificação final, T12 |
+| 20–29/11 | Ajustes da banca e verificação final |
 | **29/11** | **Texto final** |
 
 ## 13. Relato e uso de IA

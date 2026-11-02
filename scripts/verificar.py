@@ -16,6 +16,10 @@ HEADERS = {
     'qualidade': ['estudo_id','criterio','julgamento','localizador','justificativa','avaliador','natureza','data'],
     'fluxos': ['etapa','contagem','denominador','regra','origem','data'],
     'registros': ['id','busca_id','titulo','ano','doi','arxiv','estudo_id'],
+    'resumos': ['estudo_id','registro_id','fonte','resumo'],
+    'versoes_abertas': ['estudo_id','url','tipo','versao','origem','data'],
+    'deduplicacao': ['chave','registros','decisao','evidencia','fonte','responsavel','natureza','data'],
+    'correcoes_registros': ['registro_id','campo','valor_capturado','valor_corrigido','evidencia','fonte','responsavel','natureza','data'],
 }
 # Códigos da seção 3 do protocolo v2.
 CRITERIA={f'I{n}' for n in range(1,7)}|{f'X{n}' for n in range(1,8)}
@@ -62,7 +66,7 @@ def verify(root=ROOT, release=False):
         if not sid or sid in studies:
             errors.append(f'estudo duplicado ou sem ID: {sid}')
         studies[sid]=s
-        if s.get('corpus') not in {'piloto','definitivo'}:
+        if s.get('corpus') not in {'candidato','piloto','definitivo'}:
             errors.append(f'{sid}: corpus inválido')
         if s.get('metadados_conferidos') not in {'sim','nao'}:
             errors.append(f'{sid}: situação dos metadados inválida')
@@ -189,9 +193,43 @@ def verify(root=ROOT, release=False):
         if row.get('estudo_id') and row.get('estudo_id') not in studies: errors.append(f'registro {rid}: estudo desconhecido')
     for row in tables['buscas']:
         if not relative_file(root,row.get('arquivo_exportacao')): errors.append(f'busca {row.get("id")}: exportação ausente')
+        elif row['arquivo_exportacao'].endswith('manifesto.txt'):
+            # O manifesto fixa as capturas originais; qualquer alteração aparece aqui.
+            manifest=root/row['arquivo_exportacao']
+            for line in manifest.read_text(encoding='utf-8').splitlines():
+                digest,_,name=line.partition('  ')
+                f=manifest.parent/name
+                if not f.is_file() or hashlib.sha256(f.read_bytes()).hexdigest()!=digest:
+                    errors.append(f'busca {row.get("id")}: captura alterada ou ausente: {name}')
         try:
             if int(row.get('total_exportado',''))<0: raise ValueError
         except (ValueError,TypeError): errors.append('busca: contagem inválida')
+    record_study={r.get('id'):r.get('estudo_id') for r in tables['registros']}
+    for name in ('resumos','versoes_abertas'):
+        for row in tables[name]:
+            if row.get('estudo_id') not in studies: errors.append(f'{name}: estudo desconhecido {row.get("estudo_id")}')
+    for row in tables['resumos']:
+        if row.get('registro_id') and record_study.get(row['registro_id'])!=row.get('estudo_id'):
+            errors.append(f'resumos: registro {row.get("registro_id")} não pertence a {row.get("estudo_id")}')
+    # Coletas de verificação têm manifesto próprio, sem linha em buscas.csv.
+    searched={(root/r['arquivo_exportacao']).resolve() for r in tables['buscas'] if r.get('arquivo_exportacao')}
+    for manifest in sorted((root/'dados/brutos').glob('*/manifesto.txt')):
+        if manifest.resolve() in searched: continue
+        for line in manifest.read_text(encoding='utf-8').splitlines():
+            digest,_,name=line.partition('  ')
+            f=manifest.parent/name
+            if not f.is_file() or hashlib.sha256(f.read_bytes()).hexdigest()!=digest:
+                errors.append(f'{manifest.parent.name}: captura alterada ou ausente: {name}')
+    record_title={r.get('id'):r.get('titulo') for r in tables['registros']}
+    for row in tables['correcoes_registros']:
+        rid=row.get('registro_id')
+        if rid not in record_title: errors.append(f'correcoes_registros: registro desconhecido {rid}')
+        elif row.get('campo')!='titulo': errors.append(f'correcoes_registros: campo não previsto em {rid}')
+        elif row.get('valor_capturado')!=record_title[rid]: errors.append(f'correcoes_registros: valor capturado diverge de registros.csv em {rid}')
+        if not all(row.get(k) for k in HEADERS['correcoes_registros']): errors.append(f'correcoes_registros: correção incompleta em {rid}')
+    for row in tables['deduplicacao']:
+        if row.get('decisao') not in {'unir','separar'}: errors.append('deduplicacao: decisão inválida')
+        if not all(row.get(k) for k in ('chave','registros','evidencia','responsavel','natureza','data')): errors.append('deduplicacao: adjudicação incompleta')
     for row in tables['qualidade']:
         if row.get('estudo_id') not in studies: errors.append('qualidade: estudo desconhecido')
         if row.get('criterio') not in QUALITY: errors.append('qualidade: critério inválido')
