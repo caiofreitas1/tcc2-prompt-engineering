@@ -235,3 +235,7 @@ tempo, horas disponíveis até 08/11, cronograma, congelamento de tr-v2 e lote p
 
 Autor estimou 3 min por artigo (D53). Pela estimativa central, a RSL completa não cabe até
 08/11; aguarda decisão do autor sobre o caminho. tr-v2 não congelada; lote não iniciado.
+
+Defesa marcada para 19/11/2026, às 17h, on-line; a professora Gabriela Nunes Lopes (DEE) fará
+parte da banca (D54, atualiza P4). Orientador consultado por e-mail sobre o caminho da revisão;
+resposta pendente.
