@@ -31,6 +31,13 @@ Adjudicação de grupos de título idêntico com DOIs distintos ou anos distante
 normalizado), registros, decisao (unir ou separar), evidencia, fonte, responsavel,
 natureza (ia ou humano) e data. Sem adjudicação, os registros ficam separados.
 
+## correcoes_registros.csv
+Correções de metadados de registros que não alteram a captura: registro_id, campo
+(só `titulo`), valor_capturado (igual ao de registros.csv, conferido pelo `make check`),
+valor_corrigido, evidencia, fonte (arquivo bruto que sustenta a correção), responsavel,
+natureza e data. `scripts/deduplicar.py` usa o valor corrigido no agrupamento e no
+título do estudo candidato; registros.csv mantém o valor capturado.
+
 ## versoes_abertas.csv
 Versões em acesso aberto localizadas para estudos sem texto aberto evidente (I6):
 estudo_id, url, tipo (fonte no OpenAlex), versao, origem e data. Gerado por

@@ -131,6 +131,20 @@ class ScientificDataChecks(unittest.TestCase):
         with (self.root/'dados/deduplicacao.csv').open('a',newline='',encoding='utf-8') as f:
             csv.writer(f).writerow(['titulosintetico','R1;R2','talvez','evidência','fonte','teste','ia','2026-10-29'])
         self.assertTrue(any('deduplicacao: decisão inválida' in x for x in module.verify(self.root)[0]))
+    def test_verification_capture_manifest_is_checked(self):
+        folder=self.root/'dados/brutos/verificacao-sintetica'
+        folder.mkdir(parents=True,exist_ok=True)
+        (folder/'captura.json').write_text('{}',encoding='utf-8')
+        (folder/'manifesto.txt').write_text('0'*64+'  captura.json\n',encoding='utf-8')
+        self.assertTrue(any('verificacao-sintetica: captura alterada' in x for x in module.verify(self.root)[0]))
+    def test_record_correction_must_match_captured_value(self):
+        with (self.root/'dados/buscas.csv').open('a',newline='',encoding='utf-8') as f:
+            csv.writer(f).writerow(['B_TESTE','2026-10-29','acm_dl','consulta sintética','filtros','0','projeto.json','teste'])
+        with (self.root/'dados/registros.csv').open('a',newline='',encoding='utf-8') as f:
+            csv.writer(f).writerow(['R1','B_TESTE','Título sintético','2025','','','S1'])
+        with (self.root/'dados/correcoes_registros.csv').open('a',newline='',encoding='utf-8') as f:
+            csv.writer(f).writerow(['R1','titulo','Outro título','Título sintético: completo','evidência','fonte','teste','ia','2026-11-01'])
+        self.assertTrue(any('valor capturado diverge' in x for x in module.verify(self.root)[0]))
     def contract2(self,quote):
         text=self.root/'fontes/textos/sintetico.txt'
         text.parent.mkdir(parents=True,exist_ok=True)

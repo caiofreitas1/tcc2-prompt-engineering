@@ -7,6 +7,8 @@ estudo de dados/estudos.csv mantêm o ID; os demais recebem novo ID (S7, S8...) 
 corpus `candidato`; candidatos sem registros são removidos. Títulos iguais com anos
 distantes ou DOIs distintos só se unem com adjudicação `unir` em
 dados/deduplicacao.csv; sem ela ficam separados e são listados como pendentes.
+Correções de título em dados/correcoes_registros.csv valem para o agrupamento e
+para o título do estudo; registros.csv mantém o valor capturado.
 Pode ser reexecutado depois de novas buscas; sem dados novos, não altera os arquivos.
 """
 import collections
@@ -25,14 +27,15 @@ def titulo_norm(t):
     return re.sub(r'[^a-z0-9]', '', t.lower())
 
 
-def chaves(reg):
+def chaves(reg, titulo=None):
+    titulo = reg.get('titulo', '') if titulo is None else titulo
     ks = []
     if reg.get('doi'):
         ks.append('doi:' + reg['doi'].lower())
     if reg.get('arxiv'):
         ks.append('arxiv:' + reg['arxiv'])
-    if len(titulo_norm(reg.get('titulo', ''))) >= 20:
-        ks.append('ti:' + titulo_norm(reg['titulo']))
+    if len(titulo_norm(titulo)) >= 20:
+        ks.append('ti:' + titulo_norm(titulo))
     return ks
 
 
@@ -82,11 +85,14 @@ def gravar(root, nome, campos, linhas):
 def main(root=ROOT):
     registros, estudos = ler(root, 'registros.csv'), ler(root, 'estudos.csv')
     adjudicado = {a['chave']: a['decisao'] for a in ler(root, 'deduplicacao.csv')}
+    corrigido = {c['registro_id']: c['valor_corrigido'] for c in ler(root, 'correcoes_registros.csv')
+                 if c['campo'] == 'titulo'}
+    titulo_de = lambda r: corrigido.get(r['id'], r['titulo'])
     u = Uniao()
     suspeitos = []
     por_titulo = collections.defaultdict(list)
     for r in registros:
-        ks = chaves(r)
+        ks = chaves(r, titulo_de(r))
         for k in ks:
             if not k.startswith('ti:'):
                 u.unir('r:' + r['id'], k)
@@ -120,6 +126,7 @@ def main(root=ROOT):
     for r in registros:
         grupos[u.achar('r:' + r['id'])].append(r)
     novos = []
+    por_estudo = {}
     for g, regs in grupos.items():
         sid = grupo_estudo.get(g)
         if sid is None:
@@ -135,16 +142,23 @@ def main(root=ROOT):
                 ident = 'nao_informado'
             anos = [int(r['ano']) for r in regs if r['ano'].isdigit()]
             aberto = 'sim' if any(r['arxiv'] or r['doi'].startswith('10.1145/') for r in regs) else 'nao_conferido'
-            novos.append({'id': sid, 'titulo': base['titulo'], 'identificador': ident,
+            novos.append({'id': sid, 'titulo': titulo_de(base), 'identificador': ident,
                           'versao': 'nao_conferido', 'ano': min(anos) if anos else '',
                           'origem': 'busca_T04', 'corpus': 'candidato',
                           'metadados_conferidos': 'nao', 'fonte_primaria': 'nao_conferido',
                           'acesso_aberto': aberto})
         for r in regs:
             r['estudo_id'] = sid
+        por_estudo[sid] = regs
     gravar(root, 'registros.csv', ['id', 'busca_id', 'titulo', 'ano', 'doi', 'arxiv', 'estudo_id'], registros)
     usados = {r['estudo_id'] for r in registros}
     estudos = [s for s in estudos if s['corpus'] != 'candidato' or s['id'] in usados]
+    for s in estudos:
+        # Candidato cujo título veio de um registro corrigido passa a usar a correção.
+        r = next((r for r in por_estudo.get(s['id'], []) if r['id'] in corrigido
+                  and r['titulo'] == s['titulo']), None)
+        if s['corpus'] == 'candidato' and r:
+            s['titulo'] = corrigido[r['id']]
     gravar(root, 'estudos.csv', CAMPOS_ESTUDOS, estudos + novos)
     print(f'{len(registros)} registros; {len(grupos)} estudos; {len(novos)} novos')
     for k, ids, anos, dois in suspeitos:

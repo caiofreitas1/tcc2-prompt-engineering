@@ -11,8 +11,11 @@ Para cada registro, decida com base **apenas no título e no resumo**:
 - `duvida`: o título e o resumo não bastam para decidir.
 
 Na dúvida, prefira `duvida` a `excluir`. Não exclua só porque um termo está
-ausente do título. Os critérios I4 (período) e I6 (acesso aberto) são conferidos
-automaticamente; não decida por eles.
+ausente do título. Não decida por I4 (período) nem por I6 (acesso aberto): I4 é
+conferido fora desta etapa pela primeira versão pública do estudo, e a versão lida
+pode ser posterior (D41); I6 é conferido no texto completo.
+Se o resumo estiver ausente, responda `duvida` com o motivo "resumo ausente"; não
+exclua só pelo título.
 
 Critérios (protocolo, seção 3):
 - I1 estudo primário; I2 prompting de modelo pré-treinado em uma das quatro

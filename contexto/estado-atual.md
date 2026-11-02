@@ -173,14 +173,15 @@ necessária. Buscas executadas por Claude Code (Claude Opus 5.5):
 | B2 | IEEE Xplore | 665 | 671 resultados menos 6 cursos; RIS com resumo |
 | B3 | ACM DL | 482 | extraído das páginas de resultados, sem resumo (D35) |
 
-Deduplicação (D36): 2.744 registros, 2.305 estudos únicos (439 duplicatas; contagens
-em `dados/fluxos.csv`). Acesso aberto dos 2.301 candidatos: 1.919 sim (arXiv, ACM ou
-versão localizada no OpenAlex) e 382 nao_conferido (362 sem local aberto no OpenAlex e
-20 não encontrados nele); I6 é confirmado no texto completo (T06). O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
+Deduplicação (D36, D40): 2.744 registros, 2.304 estudos únicos (440 duplicatas; contagens
+em `dados/fluxos.csv`). Acesso aberto dos 2.300 candidatos: 1.919 sim (arXiv, ACM ou
+versão localizada no OpenAlex) e 381 nao_conferido (362 sem local aberto no OpenAlex e
+19 não encontrados nele); I6 é confirmado no texto completo (T06). O critério 1 da decisão de 31/10 (≤ 2.500 únicos) está atendido.
 
 Resumos para a triagem em `dados/resumos.csv`: 1.595 do arXiv, 446 do IEEE, 234 do
-OpenAlex e 23 do Semantic Scholar (registros só da ACM); 7 estudos com resumo não
-localizado nas fontes consultadas (anais de workshop, painel, coluna e similares).
+OpenAlex e 23 do Semantic Scholar (registros só da ACM); 6 estudos com resumo não
+localizado nas fontes consultadas (dois volumes de anais do LLM4Code e quatro trabalhos
+com DOI da ACM; eram 7 antes de D40). Pela proposta D41, nenhum deles é excluído no título e resumo.
 
 Auditoria por IA do PR #20 (Codex, 29/10/2026;
 `evidencias/auditorias/PR20-T04-2026-10-29.md`): parecer "seguir após correções".
@@ -190,6 +191,13 @@ aberto sem conclusão negativa a partir do OpenAlex; importação de buscas vali
 da gravação; manifestos verificados pelo `make check`. A segunda passada completa da
 ACM não foi preservada (limitação em `dados/brutos/acm-2026-10-29/notas.md`).
 
-Pendências antes da T05: verificação do autor (expressões, exportações e recuperação
-de S1, S2, S4 e S6). Para o método (T10): relatar os itens de busca e as ameaças
+Em 01/11 o autor informou ter feito a conferência da busca e pediu uma verificação
+complementar da ACM (D39). Nova coleta por Claude Code, ordenada por data
+(`dados/brutos/acm-verificacao-2026-11-01/`, D40): 482 exibidos e 482 DOIs distintos,
+iguais aos de 29/10. Corrigidos 3 títulos truncados na extração do navegador
+(`dados/correcoes_registros.csv`); com isso o registro ACM do PaLM agrupou-se ao S19.
+Relatório em `evidencias/verificacoes/T04-acm-2026-11-01.md`.
+
+Pendências antes da T05: o autor revisar a verificação da ACM (D40) e a proposta de
+encaminhamento de I4 e dos estudos sem resumo (D41), e autorizar a triagem. Para o método (T10): relatar os itens de busca e as ameaças
 apontados na auditoria. Triagem não iniciada.

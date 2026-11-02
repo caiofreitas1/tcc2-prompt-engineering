@@ -47,6 +47,17 @@ class Deduplication(unittest.TestCase):
                    [dict(chave='titulosinteticoidenticoemduasversoes',registros='B1-0001;B2-0001',
                          decisao='unir',evidencia='mesmos autores',fonte='sintetica',responsavel='teste',natureza='ia',data='2026-10-29')])
         self.assertEqual(module.main(self.root),(1,[]))
+    def test_title_correction_groups_without_rewriting_record(self):
+        self.records(('B1-0001','B1','Modelo sintetico: escala com caminhos','2022','','0000.00002'),
+                     ('B3-0001','B3','Modelo sintetico','2023','10.0000/c',''))
+        self.assertEqual(module.main(self.root)[0],2)
+        self.write('correcoes_registros.csv',['registro_id','campo','valor_capturado','valor_corrigido','evidencia','fonte','responsavel','natureza','data'],
+                   [dict(registro_id='B3-0001',campo='titulo',valor_capturado='Modelo sintetico',
+                         valor_corrigido='Modelo sintetico: escala com caminhos',evidencia='subtítulo no HTML',
+                         fonte='sintetica',responsavel='teste',natureza='ia',data='2026-11-01')])
+        self.assertEqual(module.main(self.root)[0],1)
+        self.assertIn('B3-0001,B3,Modelo sintetico,2023',self.read('registros.csv'))
+        self.assertEqual(self.read('estudos.csv').count('Modelo sintetico'),1)
 
 if __name__=='__main__':
     unittest.main()
