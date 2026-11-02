@@ -2,9 +2,10 @@
 
 **Situação (02/11/2026):** duas rodadas concluídas. A amostra 1 (tr-v1) teve 6 perdas e
 acionou a regra de parada; a amostra 2 (tr-v2) não teve perdas. Elaborado por Claude Code
-(Claude Opus 5.5). O autor decidiu manter a RSL completa (D47). A medição de texto completo
-foi registrada, mas o tempo aguarda confirmação do autor (D52). A viabilidade até 08/11 segue
-sem demonstração, tr-v2 não foi congelada e nenhuma triagem em lote foi iniciada.
+(Claude Opus 5.5). O autor decidiu manter a RSL completa (D47). Na medição de texto completo,
+o autor informou que o tempo do formulário não cobre toda a leitura e estimou 3 min por artigo
+(D53). A projeção não sustenta a RSL completa até 08/11; a decisão é do autor. tr-v2 não foi
+congelada e nenhuma triagem em lote foi iniciada.
 As seções até "Efeito do recuo na amostra" descrevem a amostra 1 e não mudam.
 
 ## Execução
@@ -312,8 +313,44 @@ PDFs lidos como imagem e texto. Em cerca de 1.748 estudos e duas leituras, são 
 milhões de tokens. Cada IA levou 155 s e 187 s. Extrair só o texto pode reduzir isso; não foi
 testado.
 
-**Cronograma:** a seção 12 não foi atualizada. Depende do tempo validado e das horas que o
-autor tem até 08/11.
+### Projeção com o tempo declarado pelo autor (D53)
+
+O autor informou que o tempo do formulário não cobre toda a leitura e que acredita ter levado,
+em média, 3 min por artigo. Esse número é uma **estimativa declarada, não uma medição**; o
+registro de 89 s permanece e os dois são relatados. Horas até o texto completo, sem extração,
+síntese e conferência do texto:
+
+| Cenário | Seguem ao texto completo | Autor confere | Horas do autor | Por dia, em 03–07/11 | Tokens das IAs |
+|---|---:|---:|---:|---:|---:|
+| RSL completa (2.300) | cerca de 1.748 | cerca de 1.515 (843–1.944) | cerca de 77 h (43–99) | cerca de 15 h (9–20) | cerca de 212 milhões |
+| Recuo (711) | cerca de 598 | cerca de 518 | cerca de 27 h | cerca de 5,4 h | cerca de 72 milhões |
+
+As horas somam a amostra de 100 exclusões (1,3 h). No recuo, a proporção que segue junta as
+duas amostras (37/44, parte com tr-v1); a parcela que o autor confere vem dos 12 estudos da
+medição, nem todos com a tarefa no título. Estimado o corpus do recuo: cerca de 449 estudos.
+
+**Limite das IAs.** O plano é Pro, com limites de 5 horas e semanal e sem uso adicional
+ativado (consulta de 02/11). Não foi medido quanto do limite cada leitura consome. Os dois
+cenários dependem de reduzir o custo, por exemplo extraindo só o texto dos PDFs; isso não foi
+testado.
+
+**Cobertura do recuo.** Dos 79 Incluir do autor nas duas amostras, 46 (58%) não têm a tarefa
+no título e sairiam. É uma limitação grande, a relatar.
+
+### Cronograma por cenário (seção 12 ainda não alterada)
+
+| Período | Recuo | RSL completa |
+|---|---|---|
+| 02–03/11 | Congelar tr-v2, lote de título e resumo, 100 exclusões | Idem, com cerca de 2.150 estudos |
+| 03–05/11 | T06, cerca de 9 h/dia do autor; *snowballing* | T06 ocupa de 03 a 07/11, cerca de 15 h/dia |
+| 05–06/11 | T07 | Sem período disponível |
+| 06–07/11 | T08 e T09 | Sem período disponível |
+| 07/11 | T11 e T12 | Sem período disponível |
+| 08/11 | Texto completo | Texto completo sem extração nem síntese |
+
+Sem mudar prazo, verificações ou volume, a RSL completa não cabe no calendário pela estimativa
+central. Só o limite inferior (cerca de 9 h/dia) deixaria alguma margem, ainda sem cobrir as
+etapas seguintes. O recuo cabe nas horas, mas é apertado e depende do limite das IAs.
 
 ## Decisão do autor e próximos passos (D47)
 

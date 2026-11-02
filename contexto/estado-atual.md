@@ -232,3 +232,6 @@ pendente a conferência cega do autor.
 
 Medição concluída (D52): tempo registrado sem validar. Pendentes: confirmação do autor sobre o
 tempo, horas disponíveis até 08/11, cronograma, congelamento de tr-v2 e lote principal.
+
+Autor estimou 3 min por artigo (D53). Pela estimativa central, a RSL completa não cabe até
+08/11; aguarda decisão do autor sobre o caminho. tr-v2 não congelada; lote não iniciado.
