@@ -207,5 +207,7 @@ Amostra de 100 candidatos sorteada (semente 20261101, `evidencias/piloto/amostra
 IA-A e IA-B triaram com tr-v1; decisões seladas por SHA-256 em D43 e fora do Git até o
 autor terminar a sua triagem cega no artefato indicado em D43. Pendente: triagem do
 autor, κ (autor × consenso das IAs e IA-A × IA-B), revocação, regra de parada e a
-decisão da seção 8 (que deveria ter ocorrido em 31/10). Para o método (T10): relatar os itens de busca e as ameaças
+decisão da seção 8 (que deveria ter ocorrido em 31/10). Guia de triagem para o autor em
+Claude Docs, auditado pelo Codex e corrigido em 02/11 (D44); a codificação do κ
+proposta em D44 aguarda a confirmação do autor antes da abertura dos selos. Para o método (T10): relatar os itens de busca e as ameaças
 apontados na auditoria. Triagem não iniciada.

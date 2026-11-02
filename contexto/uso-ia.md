@@ -117,3 +117,12 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Saídas: `scripts/amostrar_piloto.py`, `evidencias/piloto/amostra-1.csv`, decisões de
   IA-A e IA-B seladas (SHA-256 em D43), artefato privado para a triagem cega do autor.
 - Revisão humana: em andamento (triagem independente do autor).
+
+## T05 — guia de triagem e auditoria — 01–02/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5) no guia e nas correções; Codex (IA) na
+  auditoria do guia, a pedido do autor.
+- Entradas: protocolo (seções 3, 6–8), prompt tr-v1, D41–D43.
+- Saídas: guia em Claude Docs (https://claude.ai/artifact/4TVMdTnmvSDoW7dbL83D6b),
+  `evidencias/auditorias/T05-guia-triagem-2026-11-02.md`, D44.
+- Revisão humana: pendente (confirmação da codificação do κ pelo autor).
