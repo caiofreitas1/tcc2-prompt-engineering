@@ -352,6 +352,43 @@ Sem mudar prazo, verificações ou volume, a RSL completa não cabe no calendár
 central. Só o limite inferior (cerca de 9 h/dia) deixaria alguma margem, ainda sem cobrir as
 etapas seguintes. O recuo cabe nas horas, mas é apertado e depende do limite das IAs.
 
+## Teste de custo: leitura só pelo texto
+
+Em 02/11/2026, IA-A e IA-B releram os 12 estudos com tc-v1, em subagentes novos, a partir do texto
+extraído dos PDFs por Ghostscript (`txtwrite`, modo seguro), sem figuras e com espaços compactados
+(`piloto/ia-a-tc-v1-texto.jsonl`, `piloto/ia-b-tc-v1-texto.jsonl`). Os textos ficam em
+`fontes/textos/medicao/`, fora do Git.
+
+| Medida | IA-A | IA-B |
+|---|---:|---:|
+| Tokens lendo o PDF | 728.349 | 726.013 |
+| Tokens lendo só o texto | 433.527 | 292.414 |
+| Redução | 40% | 60% |
+| Decisões iguais às da leitura pelo PDF | 12 de 12 | 9 de 12 |
+| Decisões iguais às do autor, PDF e depois texto | 10 e 10 | 9 e 11 |
+
+IA-B mudou S2261 (dúvida para excluir), S427 (dúvida para incluir) e S306 (incluir para dúvida). IA-A
+e IA-B concordaram em 10 de 12 só pelo texto, contra 11 de 12 pelo PDF. Sem repetir a leitura pelo PDF,
+não dá para separar o efeito do formato da variação normal do modelo. Nenhum Incluir do autor foi
+excluído pelas duas IAs; em S2261, IA-B excluiu, mas a divergência iria ao autor. As IAs relataram
+tabelas embaralhadas e perda de figuras em S1584, com pouco efeito na decisão.
+
+### Consumo do limite do plano
+
+Durante o teste, a janela de 5 horas foi de 1% para 21% e a semanal, de 23% para 26%. Esses valores
+incluem o trabalho simultâneo da sessão principal e são arredondados, então são um teto aproximado. A
+partir deles, até o texto completo, só para ler pelo texto, com duas IAs:
+
+| Cenário | Tokens | Limite semanal (cerca de 0,25% por estudo) | Janelas de 5 h |
+|---|---:|---:|---:|
+| Recuo (cerca de 598) | cerca de 36 milhões | cerca de 150% | cerca de 10 |
+| RSL completa (cerca de 1.748) | cerca de 106 milhões | cerca de 437% | cerca de 29 |
+
+Havia 74% do limite semanal livres em 02/11, com renovação em 04/11, ou seja, cerca de 174% até 08/11 e
+cerca de 374% até 18/11, se as renovações forem semanais. Esse total ainda precisa cobrir triagem,
+extração e redação. No plano atual, a RSL completa não cabe nem até 18/11; o recuo cabe no limite, com
+pouca sobra. Isso é uma estimativa a partir de uma única medição.
+
 ## Decisão do autor e próximos passos (D47)
 
 O autor manteve a RSL completa, com entrega em 08/11: o teto de 12 h deixa de decidir o

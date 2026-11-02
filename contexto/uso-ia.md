@@ -167,3 +167,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/autor-medicao.jsonl`, D52.
 - Revisão humana: conferência feita pelo autor em 02/11/2026, com tempo a confirmar; análise
   ainda não revisada por ele.
+
+## T05 — teste de custo da leitura por texto — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes, com tc-v1; Claude Code
+  (Claude Opus 5.5) na extração com Ghostscript e na comparação.
+- Evidências: `evidencias/piloto/ia-a-tc-v1-texto.jsonl`, `evidencias/piloto/ia-b-tc-v1-texto.jsonl`, D55.
+- Revisão humana: não houve; aguarda o autor.
