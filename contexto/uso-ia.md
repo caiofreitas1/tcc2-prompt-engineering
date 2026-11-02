@@ -125,4 +125,5 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Entradas: protocolo (seções 3, 6–8), prompt tr-v1, D41–D43.
 - Saídas: guia em Claude Docs (https://claude.ai/artifact/4TVMdTnmvSDoW7dbL83D6b),
   `evidencias/auditorias/T05-guia-triagem-2026-11-02.md`, D44.
-- Revisão humana: pendente (confirmação da codificação do κ pelo autor).
+- Revisão humana: codificação do κ confirmada pelo autor em 02/11/2026 (D45); triagem
+  independente do autor pendente.
