@@ -144,3 +144,11 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Evidências: `protocolo/prompts/triagem-titulo-resumo-v2.md`,
   `evidencias/piloto/amostra-2.csv`, D47–D49.
 - Revisão humana: tr-v2 segue a decisão do autor (D47); triagem cega dele pendente.
+
+## T05 — análise da amostra 2 — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, cálculo de revocação e κ, extrapolação de volume.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D50.
+- Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise ainda não
+  revisada por ele.

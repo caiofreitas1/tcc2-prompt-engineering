@@ -1,9 +1,10 @@
 # Lote piloto da triagem de título e resumo (T05)
 
-**Situação (02/11/2026):** primeira rodada concluída; a regra de parada foi acionada.
-Elaborado por Claude Code (Claude Opus 5.5). O autor decidiu manter a RSL completa e
-aplicar tr-v2 em nova amostra de 50 (D47); os resultados abaixo não mudam. Nenhuma
-triagem em lote foi iniciada.
+**Situação (02/11/2026):** duas rodadas concluídas. A amostra 1 (tr-v1) teve 6 perdas e
+acionou a regra de parada; a amostra 2 (tr-v2) não teve perdas. Elaborado por Claude Code
+(Claude Opus 5.5). O autor decidiu manter a RSL completa (D47). A viabilidade até 08/11
+segue sem medição, tr-v2 ainda não foi congelada e nenhuma triagem em lote foi iniciada.
+As seções até "Efeito do recuo na amostra" descrevem a amostra 1 e não mudam.
 
 ## Execução
 
@@ -138,22 +139,110 @@ Estimativa local: o bloco de tarefas foi aplicado aos títulos dos candidatos (s
 
 Essa perda de cobertura teria de ser relatada como limitação da revisão rápida.
 
+## Amostra 2 (tr-v2)
+
+| Item | Registro |
+|---|---|
+| Amostra | 50 de 2.200 candidatos restantes, semente 20261102 (`piloto/amostra-2.csv`) |
+| IA-A e IA-B | claude-opus-5-5 e claude-sonnet-5-5, em subagentes novos, com tr-v2 (D48, D49) |
+| Autor | Triagem cega, exportada em `piloto/autor-amostra-2.jsonl` (SHA-256 `b807f7cf455bfc3059085bb4fe0d21a43f9c51883422b56eb4bdbac2b6f27cab`) |
+| Selos | Os SHA-256 de IA-A e IA-B conferem com os de D49 na abertura |
+| Comparação | `piloto/comparacao-amostra-2.csv`, com a codificação de D44/D45 |
+
+| Medida | Amostra 1 (tr-v1) | Amostra 2 (tr-v2) |
+|---|---:|---:|
+| Revocação | 50/56 | 23/23 |
+| Revocação complementar | 67/81 | 37/41 |
+| Perdas | 6 | 0 |
+| κ binário autor × regra de união (principal) | 0,645 | 0,700 |
+| κ em 3 categorias, autor × IA-A | 0,478 | 0,627 |
+| κ em 3 categorias, autor × IA-B | 0,425 | 0,494 |
+| κ em 3 categorias, IA-A × IA-B | 0,808 | 0,613 |
+| κ binário, IA-A × IA-B | 0,870 | 0,680 |
+| Seguem pela união | 67/100 | 38/50 |
+| Tempo do autor | 1,30 h (46,7 s por estudo) | 0,47 h (33,8 s por estudo) |
+
+### Autor × regra de união (amostra 2)
+
+| Autor | Segue | Sai | Total |
+|---|---:|---:|---:|
+| Incluir | 23 | 0 | 23 |
+| Dúvida | 14 | 4 | 18 |
+| Excluir | 1 | 8 | 9 |
+| Total | 38 | 12 | 50 |
+
+As quatro Dúvidas do autor que saem são S24, S539, S962 e S2112. Não são perdas pela
+seção 7. S539 e S2112 ainda citam geração de código e saíram por X3 ou X4.
+
+### Autor (linhas) × cada IA (colunas), amostra 2
+
+| Autor | IA-A incluir | IA-A dúvida | IA-A excluir | IA-B incluir | IA-B dúvida | IA-B excluir |
+|---|---:|---:|---:|---:|---:|---:|
+| Incluir | 18 | 5 | 0 | 16 | 5 | 2 |
+| Dúvida | 2 | 12 | 4 | 2 | 8 | 8 |
+| Excluir | 0 | 1 | 8 | 0 | 0 | 9 |
+
+### IA-A (linhas) × IA-B (colunas), amostra 2
+
+| IA-A | Incluir | Dúvida | Excluir |
+|---|---:|---:|---:|
+| Incluir | 16 | 4 | 0 |
+| Dúvida | 2 | 9 | 7 |
+| Excluir | 0 | 0 | 12 |
+
+### Como ler
+
+- **A regra de parada não é acionada** com tr-v2, e o critério 2 da seção 8 fica atendido
+  com uma revisão. Com 23 Incluir, zero perda não prova revocação total: o limite inferior
+  de Wilson a 95% é de 85,7% (cálculo complementar).
+- **As amostras não são um experimento controlado.** O autor já conhecia os motivos das IAs
+  na amostra 1 e participou da regra de tr-v2, que espelha a leitura dele. IA-A mudou de
+  contexto (D48). A diferença entre as rodadas não mede só o efeito do prompt.
+- **As IAs concordam menos entre si com tr-v2.** Os erros em comum podem ter diminuído, mas
+  a amostra é pequena e a causa não foi investigada.
+- **O autor não registrou motivos** em nenhum dos 50 estudos.
+
+### Volume e esforço com tr-v2
+
+Extrapolação da amostra 2 para os 2.300 candidatos, com intervalos de Wilson a 95%:
+
+| Etapa | Proporção | Estudos estimados |
+|---|---:|---:|
+| Seguem ao texto completo | 38/50 | cerca de 1.748 (1.440–1.971) |
+| As duas IAs incluem | 16/50 | cerca de 736 |
+| Exclusões consensuais | 12/50 | cerca de 552 |
+
+Tr-v2 aumenta o volume em relação à estimativa com tr-v1 (cerca de 1.541).
+
+- **Autor:** 1,77 h medidas nas duas rodadas, mais 0,94–1,30 h na amostra de 100 exclusões.
+  O tempo de texto completo, extração e conferência do texto não foi medido.
+- **IAs, título e resumo:** cada subagente usou cerca de 90 mil tokens em 50 estudos
+  (86.683 e 91.402). Nos 2.150 restantes, isso daria cerca de 7,7 milhões de tokens.
+- **IAs, texto completo:** não medido. Duas leituras de cerca de 1.748 textos são a maior
+  incerteza de viabilidade.
+
+### Critérios da seção 8 após a amostra 2
+
+| Critério | Situação |
+|---|---|
+| 1. Até 2.500 estudos únicos | Atendido: 2.304 |
+| 2. Sem perda após no máximo uma revisão | Atendido na amostra 2, com tr-v2 |
+| 3. Horas do autor | Teto retirado pelo autor (D47); projeção pendente da medição |
+
 ## Decisão do autor e próximos passos (D47)
 
 O autor manteve a RSL completa, com entrega em 08/11: o teto de 12 h deixa de decidir o
 recuo, e a viabilidade precisa ser medida. A estimativa do recuo acima fica só como
 registro. A busca ampla e as verificações da seção 7 não mudam.
 
-1. **Amostra 2:** tr-v2, 50 novos estudos (`piloto/amostra-2.csv`, semente 20261102), com
-   IA-A e IA-B em subagentes novos (D48) e o autor cego.
-2. **Medição do texto completo (depois da amostra 2):** 12 estudos sorteados entre os
-   que seguem pela união na amostra 1, com acesso aberto `sim`. IA-A e IA-B leem o texto
-   com tc-v1; o autor confere e o tempo é marcado por estudo, com início e fim. Evita a
-   amostra 2 para não contaminar a triagem cega.
+1. **Amostra 2:** concluída, sem perdas.
+2. **Medição do texto completo:** 12 estudos sorteados entre os que seguem pela união nas
+   duas amostras, com acesso aberto `sim`. A amostra 2 entra porque a triagem cega já
+   terminou e ela representa melhor o fluxo de tr-v2. IA-A e IA-B leem o texto com tc-v1;
+   o autor confere, com início e fim marcados por estudo, e o uso de tokens é registrado.
 3. **Projeção e cronograma:** refeitos com os tempos medidos (seção 12).
-
-Se tr-v2 tiver perda, aplica-se a seção 7, e a consequência para o critério 2 da seção 8
-volta à decisão do autor, que não tratou desse caso em D47.
+4. **Lote principal:** congelar tr-v2 e triar os 2.150 restantes. Pela seção 1, o recuo não
+   pode ser aplicado depois de iniciada a triagem em lote, por isso a medição vem antes.
 
 ## Limitações
 

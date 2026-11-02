@@ -222,3 +222,7 @@ vigente e não há triagem em lote. Relatório: `evidencias/piloto-triagem.md`.
 Decisão do autor (D47): RSL completa mantida, sem o teto de 12 h como condição de recuo.
 Amostra 2 com tr-v2 selada (D49); pendentes a triagem cega do autor, a medição de tempo
 no texto completo e a atualização da projeção e do cronograma.
+
+Amostra 2 concluída (D50): revocação 23/23, sem perdas, κ binário 0,700; critério 2 atendido.
+Pendentes: medição do texto completo, projeção e cronograma, congelamento de tr-v2 e lote
+principal. As decisões do piloto ainda não entraram em `dados/triagem.csv`.
