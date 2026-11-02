@@ -108,3 +108,12 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Verificação: `make check`; reextração em Python do HTML bruto comparada à extração
   do navegador; deduplicação reexecutada duas vezes sem alteração.
 - Revisão humana: pendente (revisão do autor; a triagem não foi liberada).
+
+## T05 — lote piloto — 01/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5) como IA-A, no sorteio e no formulário do
+  autor; Claude Sonnet 5.5 como IA-B, em subagente separado.
+- Entradas: `dados/estudos.csv`, `dados/resumos.csv`, prompt tr-v1.
+- Saídas: `scripts/amostrar_piloto.py`, `evidencias/piloto/amostra-1.csv`, decisões de
+  IA-A e IA-B seladas (SHA-256 em D43), artefato privado para a triagem cega do autor.
+- Revisão humana: em andamento (triagem independente do autor).

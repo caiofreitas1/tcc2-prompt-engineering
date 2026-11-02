@@ -198,6 +198,14 @@ iguais aos de 29/10. Corrigidos 3 títulos truncados na extração do navegador
 (`dados/correcoes_registros.csv`); com isso o registro ACM do PaLM agrupou-se ao S19.
 Relatório em `evidencias/verificacoes/T04-acm-2026-11-01.md`.
 
-Pendências antes da T05: o autor revisar a verificação da ACM (D40) e a proposta de
-encaminhamento de I4 e dos estudos sem resumo (D41), e autorizar a triagem. Para o método (T10): relatar os itens de busca e as ameaças
+Em 01/11 o autor aprovou a verificação e D41, e liberou a triagem (D42); o PR #20 foi
+integrado à main.
+
+## T05 — lote piloto em andamento (01/11/2026)
+
+Amostra de 100 candidatos sorteada (semente 20261101, `evidencias/piloto/amostra-1.csv`).
+IA-A e IA-B triaram com tr-v1; decisões seladas por SHA-256 em D43 e fora do Git até o
+autor terminar a sua triagem cega no artefato indicado em D43. Pendente: triagem do
+autor, κ (autor × consenso das IAs e IA-A × IA-B), revocação, regra de parada e a
+decisão da seção 8 (que deveria ter ocorrido em 31/10). Para o método (T10): relatar os itens de busca e as ameaças
 apontados na auditoria. Triagem não iniciada.
