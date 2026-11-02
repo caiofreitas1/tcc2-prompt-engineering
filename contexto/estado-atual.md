@@ -211,3 +211,10 @@ decisão da seção 8 (que deveria ter ocorrido em 31/10). Guia de triagem para 
 Claude Docs, auditado pelo Codex e corrigido em 02/11 (D44); a codificação do κ foi
 confirmada pelo autor antes da abertura dos selos (D45). Para o método (T10): relatar os itens de busca e as ameaças
 apontados na auditoria. Triagem não iniciada.
+
+## T05 — resultado do lote piloto (02/11/2026)
+
+O autor concluiu a triagem cega e os selos conferem (D46). Revocação 50/56, 6 perdas,
+κ binário autor × união 0,645: a regra de parada da seção 7 foi acionada. O critério 3
+da seção 8 não é sustentado pela projeção. Aguarda o autor: recuo e tr-v2. tr-v1 segue
+vigente e não há triagem em lote. Relatório: `evidencias/piloto-triagem.md`.

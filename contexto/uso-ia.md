@@ -127,3 +127,12 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   `evidencias/auditorias/T05-guia-triagem-2026-11-02.md`, D44.
 - Revisão humana: codificação do κ confirmada pelo autor em 02/11/2026 (D45); triagem
   independente do autor pendente.
+
+## T05 — análise do lote piloto — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, cálculo de revocação e κ (`scripts/analisar_piloto.py`),
+  leitura das perdas, projeção de horas e propostas de recuo e tr-v2.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D46.
+- Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise e
+  propostas ainda não revisadas por ele.
