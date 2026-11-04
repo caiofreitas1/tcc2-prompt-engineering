@@ -54,10 +54,19 @@ exige todos os critérios I; uma exclusão cita pelo menos um critério X.
 | X1 | Duplicata ou versão sobreposta de estudo já registrado (agrupar, não descartar o registro). |
 | X2 | Sem detalhe técnico suficiente para identificar técnica, tarefa e avaliação. |
 | X3 | Tarefa fora do escopo (ex.: apenas sumarização, revisão de código ou perguntas sobre código). |
-| X4 | Centrado apenas em treinamento, ajuste fino ou arquitetura do modelo. |
+| X4 | Centrado apenas em treinamento, ajuste fino ou arquitetura do modelo. No texto completo, também outra intervenção avaliada que não seja prompting (D59). |
 | X5 | Estudo secundário, posicionamento ou tutorial (pode apoiar a fundamentação). |
 | X6 | Texto completo sem versão em acesso aberto. |
 | X7 | Fora do período ou do idioma. |
+
+**Alteração de 03/11/2026 (D59):** depois da medição de 12 textos, o autor decidiu como
+aplicar I2 e X4 no texto completo. I2 exige resultado de código obtido por prompting, com
+a estratégia de prompt descrita, sem exigir comparador de prompting; código como etapa
+intermediária é elegível se for avaliado; estudo observacional que só descreve o uso,
+sem resultado sobre os prompts, vai ao autor como `duvida`. Essa regra está em tc-v2. No
+título e resumo, tr-v2 mantém a redação anterior de X4, com a qual foi calibrada. Decisões
+e pareceres anteriores não são reescritos. Esta alteração posterior aos dados é relatada
+como desvio do protocolo.
 
 Preprints e publicações revisadas por pares são identificados separadamente; a
 versão publicada é preferida quando aberta, preservando a versão lida.
@@ -128,6 +137,11 @@ como busca): 1.509 registros na expressão ampla e 516 na variante de título.
 (B3, versão TOSEM); S2 e S6 no arXiv; S4 no arXiv e na ACM. S3 e S5 não foram
 recuperados, como na calibração. A expressão não precisou de ajuste. Pendente a
 verificação do autor (seção 7).
+
+**Encaminhamento (D59, 03/11/2026):** S1, S2, S4 e S6 passam pelo lote e pelo texto
+completo como os demais, sem entrada automática no corpus. S3 e S5, se não aparecerem no
+*snowballing* e o autor decidir considerá-los, entram como outra fonte, com contagem própria
+e sem atribuir sua descoberta ao *snowballing*.
 
 ### 4.4 Snowballing
 

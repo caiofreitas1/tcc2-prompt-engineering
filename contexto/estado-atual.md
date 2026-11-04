@@ -242,3 +242,7 @@ resposta pendente.
 
 Esboço de T10 corrigido após auditoria por IA (D56, D57). Aguardam o autor: encaminhamento dos estudos de
 referência e interpretação de I2 (proposta em D58), além da resposta do orientador. Lote não iniciado.
+
+Autor aprovou as propostas de D58 (D59): tc-v2 criada, sem congelar; reexame de quatro casos feito (D60). Continuam abertos o
+tipo do estudo, o congelamento dos prompts, o formato de leitura, a unidade dos 20% da extração, os cenários e o acesso da banca.
+Lote não iniciado.

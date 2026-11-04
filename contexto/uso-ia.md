@@ -190,3 +190,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   quatro referências (S3–S6), com metadados na API do arXiv e na DataCite.
 - Evidências: `evidencias/auditorias/T10-esboco-PDF-2026-11-03.md`, D56–D58.
 - Revisão humana: pendente.
+
+## T05/T10 — tc-v2 e reexame de casos — 03/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5), tc-v2 e alterações no texto; IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em
+  subagentes novos, no reexame de quatro casos; Codex (IA), reavaliação do esboço.
+- Evidências: D59, D60, `evidencias/piloto/ia-a-tc-v2-reexame.jsonl`, `evidencias/piloto/ia-b-tc-v2-reexame.jsonl`.
+- Revisão humana: o autor aprovou as propostas de D58; não revisou tc-v2 nem o reexame.
