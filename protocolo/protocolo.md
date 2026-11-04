@@ -215,6 +215,11 @@ imprecisas; relatar contagens brutas junto com κ.
 
 Também é calculado κ entre IA-A e IA-B em todos os registros triados.
 
+**Complemento de 03/11/2026 (D66):** estudo com exclusão consensual que o autor marcar como
+`incluir` ou `duvida` na conferência, ou que já tenha essa decisão nas amostras do piloto,
+segue ao texto completo. O relato separa quantos os modelos teriam perdido e quantos foram
+resgatados. O resgate não coloca o estudo no corpus.
+
 ## 8. Decisão de 31/10/2026: RSL completa ou recuo
 
 Critérios propostos para aprovação do autor no PR:
