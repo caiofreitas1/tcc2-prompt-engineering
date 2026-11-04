@@ -385,7 +385,8 @@ partir deles, até o texto completo, só para ler pelo texto, com duas IAs:
 | RSL completa (cerca de 1.748) | cerca de 106 milhões | cerca de 437% | cerca de 29 |
 
 Havia 74% do limite semanal livres em 02/11, com renovação em 04/11, ou seja, cerca de 174% até 08/11 e
-cerca de 374% até 18/11, se as renovações forem semanais. Esse total ainda precisa cobrir triagem,
+cerca de 374% até 18/11, se as renovações forem semanais. **Correção de 03/11/2026 (D63):** até 18/11 são cerca de 274%, e não
+374%, pois as renovações ocorrem em 04/11, 11/11 e 18/11, esta última sem tempo útil antes da entrega. Esse total ainda precisa cobrir triagem,
 extração e redação. No plano atual, a RSL completa não cabe nem até 18/11; o recuo cabe no limite, com
 pouca sobra. Isso é uma estimativa a partir de uma única medição.
 
@@ -412,3 +413,21 @@ registro. A busca ampla e as verificações da seção 7 não mudam.
 - IA-A foi executada, na amostra 1, pelo mesmo agente que redigiu o guia e esta análise.
 - A leitura das perdas é de IA e não constitui revisão humana.
 - A alteração do critério 3 ocorreu depois de conhecidos os dados e é um desvio a relatar.
+
+## Cenários após a resposta do orientador (D62, D63)
+
+Estimativa local em 03/11/2026 (`piloto/cenarios-orientador/`). T = tarefa no título; P = indício de revisão por pares
+(registro no IEEE ou na ACM, DOI ou `journal_ref` no arXiv, ou local de publicação no Semantic Scholar). O indício não comprova
+revisão por pares e inclui pôsteres e resumos da ACM. A consulta ao Semantic Scholar parou por limite da API e cobriu só os 800
+identificadores arXiv mais antigos, de modo que P é um limite inferior. As horas usam 3 min por estudo (estimativa declarada); as
+proporções vêm das duas amostras, com prompts diferentes. O limite do plano é um teto aproximado, sem extração nem redação.
+
+| Conjunto | Candidatos | Texto completo (Wilson 95%) | Incluir do autor mantidos | Horas do autor | Limite semanal (título e resumo + texto) |
+|---|---:|---:|---:|---:|---:|
+| T e P | 419 | 367 (301–398) | 27/79 (34%) | 17 h | cerca de 98% |
+| T | 711 | 598 (502–655) | 33/79 (42%) | 27 h | cerca de 160% |
+| P, com acesso aberto indicado | 940 | 729 (614–812) | 34/79 (43%) | 33 h | cerca de 197% |
+| T ou (P com acesso aberto indicado) | 1.357 | 1.079 (940–1.180) | 48/79 (61%) | 48 h | cerca de 291% |
+| Todos | 2.300 | 1.610 (com as duas amostras) | 79/79 (100%) | 71 h | cerca de 435% |
+
+O total difere das 77 h de D53 porque aqui a proporção junta as duas amostras (105/150), enquanto D53 usa tr-v2 (38/50).
