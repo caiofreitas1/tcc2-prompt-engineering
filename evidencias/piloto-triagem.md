@@ -418,8 +418,8 @@ registro. A busca ampla e as verificações da seção 7 não mudam.
 
 Estimativa local em 03/11/2026 (`piloto/cenarios-orientador/`). T = tarefa no título; P = indício de revisão por pares
 (registro no IEEE ou na ACM, DOI ou `journal_ref` no arXiv, ou local de publicação no Semantic Scholar). O indício não comprova
-revisão por pares e inclui pôsteres e resumos da ACM. A consulta ao Semantic Scholar parou por limite da API e cobriu só os 800
-identificadores arXiv mais antigos, de modo que P é um limite inferior. As horas usam 3 min por estudo (estimativa declarada); as
+revisão por pares e inclui pôsteres e resumos da ACM. A consulta ao Semantic Scholar sofreu limite da API e cobriu só 800 dos 1593
+identificadores arXiv (de 2407.18423 a 2602.03783), de modo que P é um limite inferior. As horas usam 3 min por estudo (estimativa declarada); as
 proporções vêm das duas amostras, com prompts diferentes. O limite do plano é um teto aproximado, sem extração nem redação.
 
 | Conjunto | Candidatos | Texto completo (Wilson 95%) | Incluir do autor mantidos | Horas do autor | Limite semanal (título e resumo + texto) |
