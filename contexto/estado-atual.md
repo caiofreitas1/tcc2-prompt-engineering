@@ -239,3 +239,6 @@ Autor estimou 3 min por artigo (D53). Pela estimativa central, a RSL completa n�
 Defesa marcada para 19/11/2026, às 17h, on-line; a professora Gabriela Nunes Lopes (DEE) fará
 parte da banca (D54, atualiza P4). Orientador consultado por e-mail sobre o caminho da revisão;
 resposta pendente.
+
+Esboço de T10 corrigido após auditoria por IA (D56, D57). Aguardam o autor: encaminhamento dos estudos de
+referência e interpretação de I2 (proposta em D58), além da resposta do orientador. Lote não iniciado.

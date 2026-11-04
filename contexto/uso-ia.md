@@ -182,3 +182,11 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   arXiv e no Crossref. Fontes da fundamentação lidas pelo resumo (exceto Brown et al., seção 1.1, e S1).
 - Afirmações empíricas de estudos: nenhuma nova; os números da metodologia vêm dos registros do projeto.
 - Revisão humana: pendente.
+
+## T10 — análise da auditoria e correções do esboço — 03/11/2026
+
+- Executores: Codex (IA), auditoria; Claude Code (Claude Opus 5.5), reconferência e correções.
+- Atividade: correções em `monografia/capitulos/01`, `02`, `03` e `05`, novo apêndice `07-apendice-busca.tex` e
+  quatro referências (S3–S6), com metadados na API do arXiv e na DataCite.
+- Evidências: `evidencias/auditorias/T10-esboco-PDF-2026-11-03.md`, D56–D58.
+- Revisão humana: pendente.
