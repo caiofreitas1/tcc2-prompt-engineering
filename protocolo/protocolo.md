@@ -24,6 +24,15 @@ aplicando a restrição de título da seção 4.2 antes da triagem em lote. O re
 de iniciada a triagem em lote. Em 02/11/2026 o autor decidiu não aplicar o recuo
 por causa do teto de horas e manter a RSL completa (D47).
 
+**Decisão de 03/11/2026 (D64):** depois da resposta do orientador (D62) e da projeção de
+esforço (D53, D63), o autor adotou a revisão rápida declarada, antes de iniciar a triagem
+em lote. Substitui D47. Concessões a relatar: bloco de tarefas só no título, simulado nos
+títulos sem nova busca nas bases; sem *snowballing* amplo (seção 4.4); leitura pelo texto
+extraído (seção 6). A execução ocorre em duas etapas: primeiro os candidatos com indício de
+revisão por pares, depois os demais. Se em 10/11 a segunda etapa não couber, o trabalho
+para na primeira e declara o corte de preprints, sugerido pelo orientador; a etapa não é
+feita pela metade. As verificações da seção 7 não mudam.
+
 ## 2. Questões de pesquisa
 
 - **QP1:** quais técnicas de prompting são avaliadas e que evidências de eficácia
@@ -150,6 +159,10 @@ incluídos no texto completo, via OpenAlex. Cada direção é uma linha em
 `dados/buscas.csv` (base `snowballing_backward` ou `snowballing_forward`), com
 exportação preservada. Os registros novos passam pela mesma triagem.
 
+**Alteração de 03/11/2026 (D64):** na revisão rápida, não há *snowballing* amplo: uma rodada
+sobre centenas de incluídos não cabe no prazo. É concessão a relatar. S3 e S5 ficam fora,
+salvo decisão do autor de considerá-los como outra fonte (D59).
+
 ## 5. Registros e deduplicação
 
 - `dados/brutos/`: exportações originais, nunca editadas.
@@ -180,6 +193,8 @@ para maximizar a revocação). Exclusão exige as duas IAs.
 **Texto completo:** IA-A e IA-B leem o texto aberto. Divergências vão ao autor.
 Toda inclusão é confirmada pelo autor; somente a decisão humana `incluir` no
 texto completo coloca o estudo no corpus definitivo (verificada em `make check`).
+Desde D64, IA-A e IA-B leem o texto extraído do PDF e voltam ao PDF em caso de dúvida
+ou de tabela desordenada.
 
 ## 7. Verificação humana (pontos de controle)
 
@@ -269,21 +284,18 @@ justificativa nas fontes e orientação concreta; isso não mede eficácia.
 
 O texto de 08/11 é o texto completo (D33), não mais um texto com resultados
 parciais (D30). Todas as etapas da revisão precisam terminar antes dessa data.
-A tabela abaixo é a de D34; as datas de T05 em diante serão atualizadas com o esforço
-medido (D47).
+A tabela original é a de D34, preservada no histórico. A tabela abaixo é a de D64, que
+substitui D33: em 08/11 entra o texto com resultados preliminares da primeira etapa, a
+confirmar pelo autor na disciplina; a versão da banca é a de 18/11 (D62).
 
 | Período | Etapa |
 |---|---|
-| 27–28/10 | Protocolo v2 (este documento) |
-| 29–30/10 | T04: buscas, deduplicação e localização de versões abertas; T10 em paralelo |
-| 30–31/10 | T05: lote piloto; decisão da seção 8 |
-| 01–02/11 | T05: triagem de título e resumo |
-| 02–04/11 | T06: texto completo e *snowballing* |
-| 03–05/11 | T07: extração e qualidade |
-| 05–06/11 | T08 e T09: síntese e cenários |
-| 06–07/11 | T11: resultados, discussão e conclusão; T12: auditoria |
-| **08/11** | **Texto completo** |
-| 09–18/11 | Preparação da defesa |
+| 03–04/11 | T05: congelamento dos prompts; triagem de título e resumo; conferência de 100 exclusões |
+| 04–07/11 | T06: texto completo da primeira etapa; T07: teste de extração e extração |
+| **08/11** | **Texto com resultados preliminares da primeira etapa** |
+| 09–13/11 | T06 e T07: segunda etapa; reavaliação do limite do plano em 10/11 |
+| 14–17/11 | T08 e T09: síntese e cenários; T11 e T12 |
+| **18/11** | **Versão da banca** |
 | **19/11** | **Defesa** |
 | 20–29/11 | Ajustes da banca e verificação final |
 | **29/11** | **Texto final** |

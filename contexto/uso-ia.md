@@ -197,3 +197,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   subagentes novos, no reexame de quatro casos; Codex (IA), reavaliação do esboço.
 - Evidências: D59, D60, `evidencias/piloto/ia-a-tc-v2-reexame.jsonl`, `evidencias/piloto/ia-b-tc-v2-reexame.jsonl`.
 - Revisão humana: o autor aprovou as propostas de D58; não revisou tc-v2 nem o reexame.
+
+## T05 — triagem de título e resumo do lote — 03/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes novos, com tr-v2; Claude Code (Claude Opus 5.5) na montagem,
+  validação e resumo.
+- Evidências: `evidencias/lote/lista.csv`, `evidencias/piloto-triagem.md`, D65.
+- Revisão humana: conferência das exclusões pendente.

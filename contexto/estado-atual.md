@@ -246,3 +246,6 @@ referência e interpretação de I2 (proposta em D58), além da resposta do orie
 Autor aprovou as propostas de D58 (D59): tc-v2 criada, sem congelar; reexame de quatro casos feito (D60). Continuam abertos o
 tipo do estudo, o congelamento dos prompts, o formato de leitura, a unidade dos 20% da extração, os cenários e o acesso da banca.
 Lote não iniciado.
+
+Revisão rápida adotada (D64). Lote de título e resumo executado (D65): 623 de 715 seguem. Aguarda a conferência do autor em 85 fichas;
+depois, importar as decisões em `dados/triagem.csv` e iniciar T06 pela etapa 1.

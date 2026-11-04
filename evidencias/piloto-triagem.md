@@ -431,3 +431,25 @@ proporções vêm das duas amostras, com prompts diferentes. O limite do plano �
 | Todos | 2.300 | 1.610 (com as duas amostras) | 79/79 (100%) | 71 h | cerca de 435% |
 
 O total difere das 77 h de D53 porque aqui a proporção junta as duas amostras (105/150), enquanto D53 usa tr-v2 (38/50).
+
+## Lote de título e resumo (D65)
+
+Em 03/11/2026, IA-A e IA-B triaram com tr-v2 702 estudos, em oito lotes e subagentes novos: os candidatos com a tarefa no título,
+exceto os 13 da amostra 2, que mantêm as decisões já tomadas com tr-v2, e S1, S2, S4 e S6. Com a amostra 2, são 715 estudos
+(`lote/lista.csv`). As decisões ficam seladas até o autor concluir a conferência.
+
+| Medida | Etapa 1 | Etapa 2 | Total |
+|---|---:|---:|---:|
+| Estudos | 464 | 251 | 715 |
+| Seguem pela regra de união | 403 | 220 | 623 |
+| Exclusão consensual | 61 | 31 | 92 |
+
+Entre os 623: 371 com inclusão consensual e 252 com divergência ou dúvida. S1, S2, S4 e S6 foram incluídos pelas duas IAs.
+
+Comparação com as decisões anteriores do autor nos 44 candidatos das amostras com a tarefa no título: 32 de 33 Incluir seguem, e
+37 de 41 Incluir ou Dúvida seguem. A perda é S1040, que também era perda com tr-v1; as Dúvidas que saem são S23, S539 e S2112. Das 92
+exclusões consensuais, 7 já têm decisão anterior do autor, e as outras 85 estão no formulário de conferência. O protocolo prevê 100
+exclusões; como há só 92, a conferência cobre todas.
+
+Consumo observado: o limite semanal foi de 27% para 35%, incluindo o trabalho da sessão principal.
+
