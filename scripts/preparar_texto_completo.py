@@ -43,8 +43,11 @@ def url_aberta(sid, registros, versoes):
 
 def extrair(pdf, destino):
     """Texto do PDF sem figuras, com espaços compactados."""
-    saida = subprocess.run(['gs', '-q', '-dSAFER', '-dBATCH', '-dNOPAUSE', '-sDEVICE=txtwrite',
-                            '-sOutputFile=-', str(pdf)], capture_output=True, timeout=300)
+    try:
+        saida = subprocess.run(['gs', '-q', '-dSAFER', '-dBATCH', '-dNOPAUSE', '-sDEVICE=txtwrite',
+                                '-sOutputFile=-', str(pdf)], capture_output=True, timeout=300)
+    except subprocess.TimeoutExpired:
+        return 0
     texto = saida.stdout.decode('utf-8', errors='replace')
     texto = '\n'.join(re.sub(r'[ \t]{2,}', ' ', linha).strip() for linha in texto.splitlines())
     texto = re.sub(r'\n{3,}', '\n\n', texto)
@@ -78,6 +81,8 @@ def main():
             url = url_aberta(sid, registros, versoes)
             situacao, tamanho, sha = baixar(url, PDFS / f'{sid}.pdf') if url else ('fonte_indisponivel: sem URL', 0, '')
             caracteres = extrair(PDFS / f'{sid}.pdf', TEXTOS / f'{sid}.txt') if situacao == 'obtido' else 0
+            if situacao == 'obtido' and not caracteres:
+                situacao = 'obtido_sem_texto: extração excedeu 300 s'
             w.writerow({'estudo_id': sid, 'etapa': a.etapa, 'semente': a.semente, 'url': url, 'situacao': situacao,
                         'bytes': tamanho, 'sha256': sha, 'caracteres': caracteres, 'data': a.data})
             print(sid, situacao, tamanho, caracteres, flush=True)
