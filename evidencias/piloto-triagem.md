@@ -472,3 +472,21 @@ Tempo registrado: 62,8 min, média de 44 s por ficha.
 
 Texto completo (`lote/texto-completo.csv`): 654 estudos, 421 na etapa 1 e 233 na etapa 2. Desses, 114 ainda não têm acesso aberto
 conferido, 113 na etapa 1.
+
+### Teste do texto completo (D68)
+
+Em 05/11/2026, 20 estudos da etapa 1 com acesso aberto indicado foram sorteados (semente 20261105; `lote/textos.csv`). Foram obtidos
+16 PDFs: dois da ACM recusaram o download direto (403) e dois não retornaram PDF (página do editor). IA-A e IA-B leram os 16 pelo texto
+extraído, com tc-v2, em subagentes novos com quatro estudos cada. As decisões ficam seladas até a conferência do autor.
+
+| Medida | Valor |
+|---|---:|
+| IA-A: incluir / dúvida / excluir | 14 / 1 / 1 |
+| IA-B: incluir / dúvida / excluir | 13 / 1 / 2 |
+| Decisões iguais | 14 de 16 |
+| Conferência obrigatória do autor (inclusão, dúvida ou divergência) | 15 de 16 |
+| Limite semanal | de 2% para 5% |
+| Janela de 5 horas | de 10% para 37% |
+
+O consumo inclui a sessão principal. Por estudo, cerca de 0,19% do limite semanal e 1,7% da janela de 5 horas, com as duas IAs. A
+janela de 5 horas passa a ser o limite que mais pesa: cerca de 58 estudos por janela.
