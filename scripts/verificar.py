@@ -70,10 +70,10 @@ def verify(root=ROOT, release=False):
             errors.append(f'{sid}: corpus inválido')
         if s.get('metadados_conferidos') not in {'sim','nao'}:
             errors.append(f'{sid}: situação dos metadados inválida')
-        if s.get('acesso_aberto') not in {'sim','nao','nao_conferido'}:
+        if s.get('acesso_aberto') not in {'sim','institucional','nao','nao_conferido'}:
             errors.append(f'{sid}: situação do acesso aberto inválida')
-        if s.get('corpus')=='definitivo' and s.get('acesso_aberto')!='sim':
-            errors.append(f'{sid}: corpus definitivo sem texto aberto (I6)')
+        if s.get('corpus')=='definitivo' and s.get('acesso_aberto') not in {'sim','institucional'}:
+            errors.append(f'{sid}: corpus definitivo sem texto acessível (I6, D69)')
 
     included=set()
     for row in tables['triagem']:

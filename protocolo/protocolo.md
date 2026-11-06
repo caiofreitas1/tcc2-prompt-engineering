@@ -64,6 +64,13 @@ exige todos os critérios I; uma exclusão cita pelo menos um critério X.
 | X2 | Sem detalhe técnico suficiente para identificar técnica, tarefa e avaliação. |
 | X3 | Tarefa fora do escopo (ex.: apenas sumarização, revisão de código ou perguntas sobre código). |
 | X4 | Centrado apenas em treinamento, ajuste fino ou arquitetura do modelo. No texto completo, também outra intervenção avaliada que não seja prompting (D59). |
+
+**Alteração de 05/11/2026 (D69):** I6 passa a aceitar texto obtido pelo autor por acesso
+institucional (Portal de Periódicos da CAPES, UFMG), além do acesso aberto; X6 vale só
+para texto que não se obtém por nenhum dos dois caminhos. Substitui D26 e D14 nesse ponto.
+Os PDFs institucionais são baixados manualmente pelo autor, não são redistribuídos e
+formam uma etapa 3, lida depois das etapas 1 e 2. É alteração posterior aos dados, para
+reduzir o viés de disponibilidade.
 | X5 | Estudo secundário, posicionamento ou tutorial (pode apoiar a fundamentação). |
 | X6 | Texto completo sem versão em acesso aberto. |
 | X7 | Fora do período ou do idioma. |
