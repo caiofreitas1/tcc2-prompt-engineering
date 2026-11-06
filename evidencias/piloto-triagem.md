@@ -453,3 +453,22 @@ exclusões; como há só 92, a conferência cobre todas.
 
 Consumo observado: o limite semanal foi de 27% para 35%, incluindo o trabalho da sessão principal.
 
+
+### Conferência das exclusões consensuais (D67)
+
+O autor conferiu as 85 exclusões consensuais que ainda não tinha visto, em 05/11/2026, só por título e resumo, sem os motivos das IAs
+(`lote/autor-conferencia.jsonl`). Os selos de D65 conferem.
+
+| Decisão do autor | Fichas |
+|---|---:|
+| Excluir | 58 (X4 27, X3 21, X5 9, X2 1) |
+| Dúvida | 21 |
+| Incluir | 6 |
+
+Com as 7 exclusões que já tinham decisão anterior (S1040 Incluir; S23, S539 e S2112 Dúvida; três Excluir), o autor manteve 31 das 92
+exclusões consensuais: 7 como Incluir e 24 como Dúvida. Pela regra de D66, os 31 seguem ao texto completo. As IAs teriam perdido 7 estudos
+que o autor incluiu, cerca de 1% dos 715, e o padrão mais comum nos motivos do autor é a fronteira entre treinamento e prompting (X4).
+Tempo registrado: 62,8 min, média de 44 s por ficha.
+
+Texto completo (`lote/texto-completo.csv`): 654 estudos, 421 na etapa 1 e 233 na etapa 2. Desses, 114 ainda não têm acesso aberto
+conferido, 113 na etapa 1.

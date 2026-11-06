@@ -204,3 +204,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   validação e resumo.
 - Evidências: `evidencias/lote/lista.csv`, `evidencias/piloto-triagem.md`, D65.
 - Revisão humana: conferência das exclusões pendente.
+
+## T05 — conferência das exclusões e importação — 05/11/2026
+
+- Executores: autor (conferência de 85 fichas, sem IA); Claude Code (Claude Opus 5.5) na abertura dos selos, importação e contagens.
+- Evidências: `evidencias/lote/autor-conferencia.jsonl`, `dados/triagem.csv`, `evidencias/lote/texto-completo.csv`, D67.
+- Revisão humana: a conferência é do autor; a importação não foi revisada por ele.

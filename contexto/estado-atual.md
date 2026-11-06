@@ -249,3 +249,6 @@ Lote não iniciado.
 
 Revisão rápida adotada (D64). Lote de título e resumo executado (D65): 623 de 715 seguem. Aguarda a conferência do autor em 85 fichas;
 depois, importar as decisões em `dados/triagem.csv` e iniciar T06 pela etapa 1.
+
+Conferência das exclusões concluída (D67): 654 estudos seguem ao texto completo, 421 na etapa 1. Próximo: conferir acesso aberto de 114
+estudos, obter os textos da etapa 1, testar a extração e iniciar a leitura pelas IAs (T06).
