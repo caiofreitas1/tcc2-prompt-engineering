@@ -73,7 +73,7 @@ def verify(root=ROOT, release=False):
         if s.get('acesso_aberto') not in {'sim','institucional','nao','nao_conferido'}:
             errors.append(f'{sid}: situação do acesso aberto inválida')
         if s.get('corpus')=='definitivo' and s.get('acesso_aberto') not in {'sim','institucional'}:
-            errors.append(f'{sid}: corpus definitivo sem texto acessível (I6, D69)')
+            errors.append(f'{sid}: corpus definitivo sem texto aberto ou institucional (I6, D69)')
 
     included=set()
     for row in tables['triagem']:

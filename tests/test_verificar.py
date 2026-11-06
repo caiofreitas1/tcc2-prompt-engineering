@@ -102,6 +102,10 @@ class ScientificDataChecks(unittest.TestCase):
         self.set_study(corpus='definitivo')
         self.screening(responsavel='autor',natureza='humano',prompt_versao='')
         self.assertTrue(any('sem texto aberto' in x for x in module.verify(self.root)[0]))
+    def test_definitive_corpus_accepts_institutional_access(self):
+        self.set_study(corpus='definitivo',acesso_aberto='institucional')
+        self.screening(responsavel='autor',natureza='humano',prompt_versao='')
+        self.assertEqual([],module.verify(self.root)[0])
     def test_screening_uses_protocol_criteria(self):
         self.screening(fase='titulo_resumo',decisao='excluir',criterio='I2')
         errors=module.verify(self.root)[0]
