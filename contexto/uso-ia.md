@@ -217,3 +217,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
   importação, contagens e correção do sorteio de `scripts/montar_conferencia_tc.py`.
 - Evidências: `evidencias/lote/autor-texto-completo.jsonl`, `dados/triagem.csv`, `dados/estudos.csv`, D78.
 - Revisão humana: a conferência é do autor; a importação e as contagens não foram revisadas por ele.
+
+## T10 — metodologia executada e resultados preliminares — 08/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5), redação, contagens e compilação.
+- Evidências: `monografia/capitulos/03-metodologia.tex`, `monografia/capitulos/04-resultados.tex`, `dados/fluxos.csv`, D82.
+- Revisão humana: pendente; o autor ainda não leu o texto.
