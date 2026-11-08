@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Registra PDFs baixados para os estudos pendentes das etapas 1 e 3 (D85).
 
-Procura PDFs numa pasta (padrão: ~/Downloads), só os modificados a partir de --desde, e os associa a estudos pendentes de
+Procura PDFs (pelo cabeçalho %PDF-, com ou sem extensão) numa pasta (padrão: ~/Downloads), só os modificados a partir
+de --desde, e os associa a estudos pendentes de
 evidencias/lote/pdfs-pendentes.csv (etapa 1) ou evidencias/lote/capes-lista.csv (etapa 3), por:
 1. nome do arquivo igual a `salvar_como` (ex.: S123.pdf);
 2. sufixo do DOI no nome do arquivo (ex.: 3643795.3648391.pdf, como a ACM salva);
+2b. número do documento do IEEE (fim do DOI, 8 dígitos) no nome do arquivo;
 3. título do estudo nas duas primeiras páginas do PDF, quando só um estudo combina.
 Confere o cabeçalho %PDF-, move o arquivo para fontes/artigos/lote/<id>.pdf, extrai o texto com
 o mesmo Ghostscript de preparar_texto_completo.py e atualiza evidencias/lote/textos.csv. Arquivos
@@ -71,16 +73,20 @@ def main():
 
     achados = {}
     desde = dt.datetime.fromisoformat(a.desde).timestamp()
-    for pdf in sorted(pathlib.Path(a.dir).glob('*.pdf')):
-        if pdf.stat().st_mtime < desde:
+    for pdf in sorted(pathlib.Path(a.dir).iterdir()):
+        # o visualizador do IEEE pode salvar sem a extensão .pdf; vale o cabeçalho %PDF-
+        if not pdf.is_file() or pdf.stat().st_mtime < desde:
             continue
-        if pdf.read_bytes()[:5] != b'%PDF-':
-            print(f'{pdf.name}: não é PDF')
-            continue
+        with open(pdf, 'rb') as f:
+            if f.read(5) != b'%PDF-':
+                continue
         nome = pdf.name.lower()
         cand = [i for i, x in pend.items() if nome == x['salvar_como'].lower()]
         if not cand:
             cand = [i for i, x in pend.items() if doi_de(x) and doi_de(x).split('/', 1)[1] in nome]
+        if not cand:  # IEEE: número do documento (arnumber) no fim do DOI
+            cand = [i for i, x in pend.items()
+                    if (m := re.search(r'\.(\d{8})$', doi_de(x))) and re.search(rf'(^|\D){m.group(1)}(\D|$)', nome)]
         if not cand:
             texto = inicio_do_pdf(pdf)
             cand = [i for i, t in titulos.items() if len(t) >= 20 and t in texto]
