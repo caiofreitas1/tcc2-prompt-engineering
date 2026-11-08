@@ -35,9 +35,10 @@ substituir os requisitos ou a identificação de versão da distribuição usada
   duas colunas e dimensões controladas pela classe. A4 preserva o tamanho que já
   estava configurado no projeto; não foi atribuído a uma exigência do curso.
 - O título e a autoria usam os comandos da classe. Nome, curso, universidade e
-  cidade vieram dos materiais do projeto. O orientador confirmado está identificado
-  em nota de orientação por `\thanks`, habilitada por `\IEEEoverridecommandlockouts`.
-  A autoria permanece do aluno; e-mail, ORCID ou coautores não foram adicionados.
+  cidade vieram dos materiais do projeto. Até 08/11/2026, o orientador ficava em
+  nota de orientação por `\thanks`; por decisão do autor nessa data (D88), passou a
+  figurar como coautor, em um segundo bloco `\IEEEauthorblockN`. E-mail e ORCID não
+  foram adicionados.
 - O texto continua em português brasileiro. Resumo e palavras-chave usam os
   ambientes da classe, com rótulos em português; o resumo permanece pendente.
 - Os seis arquivos de `capitulos/` continuam separados e entram por `\input`;
