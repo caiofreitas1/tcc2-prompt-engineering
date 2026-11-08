@@ -39,7 +39,9 @@ def contar():
         return collections.Counter(x['situacao'].split(':')[0].split(' (')[0] for x in textos if x['etapa'] == etapa)
     sit, sit3 = situacoes('1'), situacoes('3')
     lidos = ia['texto_completo']
-    aut_tc = {i: list(d.values())[-1] for i, d in autor['texto_completo'].items()}
+    aut_todos = {i: list(d.values())[-1] for i, d in autor['texto_completo'].items()}
+    aut_tc = {i: d for i, d in aut_todos.items() if i in lidos}
+    fora = collections.Counter(d for i, d in aut_todos.items() if i not in lidos)
     dec_tc = collections.Counter(aut_tc.values())
     cons_tc = {i for i, d in lidos.items() if set(d.values()) == {'excluir'}}
     definitivo = sum(x['corpus'] == 'definitivo' for x in ler('dados/estudos.csv'))
@@ -85,6 +87,8 @@ def contar():
          'autor decidiu excluir', T),
         ('exclusoes_consensuais_incluidas_autor', sum(aut_tc.get(i) == 'incluir' for i in cons_tc),
          'exclusoes_consensuais_texto_completo', 'os dois modelos excluíram e o autor incluiu', T),
+        ('excluidos_autor_sem_leitura_ia', fora['excluir'], 'texto_completo_etapa1',
+         'autor excluiu estudo que as IAs não leram (sem PDF; D87)', T),
         ('corpus_definitivo', definitivo, 'conferidos_autor_texto_completo',
          'corpus=definitivo (decisão humana incluir no texto completo)', S),
     ]

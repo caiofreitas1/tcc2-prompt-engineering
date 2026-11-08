@@ -80,7 +80,8 @@ def main():
     revisoes = ROOT / 'evidencias/lote/autor-texto-completo-revisoes.jsonl'
     if revisoes.exists():
         for x in map(json.loads, open(revisoes, encoding='utf-8')):
-            assert x['estudo_id'] in {h['estudo_id'] for h in humanas}, x['estudo_id']
+            # fora_da_leitura_ia: decisão do autor sobre estudo que as IAs não leram (ex.: S2148, sem PDF)
+            assert x.get('fora_da_leitura_ia') or x['estudo_id'] in {h['estudo_id'] for h in humanas}, x['estudo_id']
             humanas.append({'estudo_id': x['estudo_id'], 'fase': 'texto_completo', 'decisao': x['decisao'],
                             'criterio': x['criterio'], 'motivo': x['motivo'], 'responsavel': AUTOR,
                             'natureza': 'humano', 'prompt_versao': '', 'data': x['data']})
