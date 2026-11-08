@@ -5,7 +5,9 @@ Entradas: os documentos da coleção `texto_completo_autor` do formulário, salv
 (um arquivo por estudo), e os JSONL selados de IA-A e IA-B com tc-v2. Saídas:
 - evidencias/lote/autor-texto-completo.jsonl: decisões do autor, na ordem do formulário;
 - dados/triagem.csv: linhas da fase texto_completo (refeitas a cada execução);
-- dados/estudos.csv: corpus=definitivo para os estudos que o autor incluiu.
+- dados/estudos.csv: corpus=definitivo para os estudos cuja última decisão do autor é incluir.
+Revisões do autor feitas fora do formulário ficam em evidencias/lote/autor-texto-completo-revisoes.jsonl
+e entram depois das decisões do formulário, como a decisão mais recente (D84).
 A data de cada decisão de IA vem da leva em que o estudo foi lido (D68 a D77), pela
 posição no JSONL cumulativo; a do autor, do horário de gravação em UTC-3.
 """
@@ -75,6 +77,13 @@ def main():
                 'criterio': x['criterio'], 'motivo': ' '.join(x['motivo'].split()),
                 'responsavel': AUTOR, 'natureza': 'humano', 'prompt_versao': '',
                 'data': data_local(x['salvo_em'])} for x in autor]
+    revisoes = ROOT / 'evidencias/lote/autor-texto-completo-revisoes.jsonl'
+    if revisoes.exists():
+        for x in map(json.loads, open(revisoes, encoding='utf-8')):
+            assert x['estudo_id'] in {h['estudo_id'] for h in humanas}, x['estudo_id']
+            humanas.append({'estudo_id': x['estudo_id'], 'fase': 'texto_completo', 'decisao': x['decisao'],
+                            'criterio': x['criterio'], 'motivo': x['motivo'], 'responsavel': AUTOR,
+                            'natureza': 'humano', 'prompt_versao': '', 'data': x['data']})
     caminho = ROOT / 'dados/triagem.csv'
     antigas = [x for x in csv.DictReader(open(caminho, encoding='utf-8', newline=''))
                if x['fase'] != 'texto_completo']
@@ -83,7 +92,8 @@ def main():
         w.writeheader()
         w.writerows(antigas + ia_a + ia_b + humanas)
 
-    incluidos = {x['estudo_id'] for x in autor if x['decisao'] == 'incluir'}
+    ultima = {h['estudo_id']: h['decisao'] for h in humanas}
+    incluidos = {i for i, d in ultima.items() if d == 'incluir'}
     caminho = ROOT / 'dados/estudos.csv'
     with open(caminho, encoding='utf-8', newline='') as f:
         leitor = csv.DictReader(f)
@@ -91,6 +101,8 @@ def main():
     for s in estudos:
         if s['id'] in incluidos:
             s['corpus'] = 'definitivo'
+        elif s['id'] in ultima and s['corpus'] == 'definitivo':
+            s['corpus'] = 'candidato'
     with open(caminho, 'w', encoding='utf-8', newline='') as f:
         w = csv.DictWriter(f, fieldnames=campos, lineterminator='\n')
         w.writeheader()

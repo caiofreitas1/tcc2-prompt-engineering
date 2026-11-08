@@ -71,6 +71,12 @@ para texto que não se obtém por nenhum dos dois caminhos. Substitui D26 e D14 
 Os PDFs institucionais são baixados manualmente pelo autor, não são redistribuídos e
 formam uma etapa 3, lida depois das etapas 1 e 2. É alteração posterior aos dados, para
 reduzir o viés de disponibilidade.
+
+**Alteração de 08/11/2026 (D84):** para a versão da banca (18/11/2026), a etapa 2 (estudos só no
+arXiv, sem indício de revisão por pares) fica de fora, e a etapa 3 é lida depois da etapa 1. O
+corpus da banca passa a ser o de estudos com indício de revisão por pares, abertos ou por acesso
+institucional. A inclusão da etapa 2 na versão final depende de conversa com o orientador. É
+alteração posterior aos dados, antecipando a decisão prevista para 10/11/2026.
 | X5 | Estudo secundário, posicionamento ou tutorial (pode apoiar a fundamentação). |
 | X6 | Texto completo sem versão em acesso aberto. |
 | X7 | Fora do período ou do idioma. |
