@@ -254,3 +254,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: começar os próximos passos depois do envio do texto inicial (D92).
 - Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) na montagem dos grupos, no selo, na escolha dos estudos para o autor e no formulário.
 - Revisão humana: pendente; o autor confere os 63 estudos no formulário cego.
+
+## T06 — décima leva do texto completo, etapa 3 (08/11/2026)
+
+- Pedido do autor: «Pode ler os 64 agora» (D95).
+- Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) no registro dos PDFs, nos grupos, no selo e no formulário.
+- Revisão humana: pendente; o autor confere os 64 estudos no formulário cego.
