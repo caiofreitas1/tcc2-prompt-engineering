@@ -236,3 +236,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: analisar seis pontos de revisão e aplicar cinco («Sim, aplicar»), D89.
 - Executor: Claude Code (Claude Opus 5.5), conferência dos pontos em `contexto/decisoes.md` (D55, D64, D66, D67, D80, D81, D83), em `dados/triagem.csv` e nas amostras de calibração; redação em `monografia/main.tex` e nos capítulos 03, 04 e 06.
 - Revisão humana: pendente; o autor ainda não leu as novas passagens.
+
+## T10 — formulação do limite de X4 (08/11/2026)
+
+- Pedido do autor: adotar a formulação proposta para o limite de X4 («Usar sua proposta»), D90.
+- Executor: Claude Code (Claude Opus 5.5), formulação a partir dos motivos do autor em D80 e D81 e redação em `monografia/capitulos/03-metodologia.tex` e `05-discussao.tex`.
+- Revisão humana: o autor aprovou a formulação; a releitura de S314 e S373 continua pendente.
