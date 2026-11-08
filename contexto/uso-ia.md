@@ -210,3 +210,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executores: autor (conferência de 85 fichas, sem IA); Claude Code (Claude Opus 5.5) na abertura dos selos, importação e contagens.
 - Evidências: `evidencias/lote/autor-conferencia.jsonl`, `dados/triagem.csv`, `evidencias/lote/texto-completo.csv`, D67.
 - Revisão humana: a conferência é do autor; a importação não foi revisada por ele.
+
+## T06 — conferência cega do texto completo e importação — 08/11/2026
+
+- Executores: autor (conferência cega de 230 estudos, sem consultar IA sobre eles); Claude Code (Claude Opus 5.5) na abertura dos selos,
+  importação, contagens e correção do sorteio de `scripts/montar_conferencia_tc.py`.
+- Evidências: `evidencias/lote/autor-texto-completo.jsonl`, `dados/triagem.csv`, `dados/estudos.csv`, D78.
+- Revisão humana: a conferência é do autor; a importação e as contagens não foram revisadas por ele.

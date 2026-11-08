@@ -19,15 +19,24 @@ def sorteado(estudo_id, semente, proporcao=0.2):
     return random.Random(f'{semente}-{estudo_id}').random() < proporcao
 
 
-def escolher(a, b, semente):
-    lista = []
+def escolher(a, b, semente, minimo=15):
+    """Protocolo, seção 7: 20% das exclusões consensuais, com mínimo de 15 (corrigido em D78).
+
+    Se o sorteio de 20% der menos que o mínimo, completa com as exclusões de menor valor
+    sorteado, na mesma semente; com menos exclusões que o mínimo, entram todas.
+    """
+    lista, consensuais = [], []
     for i in a:
         da, db = a[i]['decisao'], b[i]['decisao']
         if da == db == 'excluir':
-            if sorteado(i, semente):
-                lista.append((i, 'exclusao_sorteada'))
+            consensuais.append(i)
         else:
             lista.append((i, 'obrigatoria'))
+    ordem = sorted(consensuais, key=lambda i: random.Random(f'{semente}-{i}').random())
+    # As sorteadas (valor < 0,2) são as primeiras de `ordem`; o mínimo estende o corte.
+    n = sum(sorteado(i, semente) for i in consensuais)
+    escolhidas = set(ordem[:max(n, minimo)])
+    lista += [(i, 'exclusao_sorteada') for i in consensuais if i in escolhidas]
     return lista
 
 
