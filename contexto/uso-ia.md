@@ -223,3 +223,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executor: Claude Code (Claude Opus 5.5), redação, contagens e compilação.
 - Evidências: `monografia/capitulos/03-metodologia.tex`, `monografia/capitulos/04-resultados.tex`, `dados/fluxos.csv`, D82.
 - Revisão humana: pendente; o autor ainda não leu o texto.
+
+## T10 — resumo, ameaças à validade e conclusão parcial (08/11/2026)
+
+- Pedido do autor: redigir o resumo, as ameaças à validade e a conclusão parcial para o texto de 08/11 («Faz sentido»).
+- Executor: Claude Code (Claude Opus 5.5), redação a partir dos números já registrados na metodologia, nos resultados e em `dados/fluxos.csv`; compilação e inspeção das páginas 1, 7 e 8.
+- Evidências: `monografia/main.tex` (resumo), `monografia/capitulos/05-discussao.tex`, `monografia/capitulos/06-conclusao.tex`. Nenhuma afirmação sobre resultados dos estudos primários; apenas contagens do processo.
+- Revisão humana: pendente; o autor ainda não leu o texto.
