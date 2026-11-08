@@ -248,3 +248,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: avaliar cinco pontos de revisão e aplicar quatro («Sim, aplicar»), D91.
 - Executor: Claude Code (Claude Opus 5.5), recálculo do κ com as decisões anteriores às revisões de S314 e S373 e redação em `monografia/main.tex` e nos capítulos 03, 04 e 05.
 - Revisão humana: pendente; o autor ainda não leu as novas passagens.
+
+## T06 — nona leva do texto completo (08/11/2026)
+
+- Pedido do autor: começar os próximos passos depois do envio do texto inicial (D92).
+- Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) na montagem dos grupos, no selo, na escolha dos estudos para o autor e no formulário.
+- Revisão humana: pendente; o autor confere os 63 estudos no formulário cego.
