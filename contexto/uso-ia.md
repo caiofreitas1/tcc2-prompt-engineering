@@ -242,3 +242,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: adotar a formulação proposta para o limite de X4 («Usar sua proposta»), D90.
 - Executor: Claude Code (Claude Opus 5.5), formulação a partir dos motivos do autor em D80 e D81 e redação em `monografia/capitulos/03-metodologia.tex` e `05-discussao.tex`.
 - Revisão humana: o autor aprovou a formulação; a releitura de S314 e S373 continua pendente.
+
+## T10 — segunda rodada de ajustes de revisão (08/11/2026)
+
+- Pedido do autor: avaliar cinco pontos de revisão e aplicar quatro («Sim, aplicar»), D91.
+- Executor: Claude Code (Claude Opus 5.5), recálculo do κ com as decisões anteriores às revisões de S314 e S373 e redação em `monografia/main.tex` e nos capítulos 03, 04 e 05.
+- Revisão humana: pendente; o autor ainda não leu as novas passagens.
