@@ -230,3 +230,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executor: Claude Code (Claude Opus 5.5), redação a partir dos números já registrados na metodologia, nos resultados e em `dados/fluxos.csv`; compilação e inspeção das páginas 1, 7 e 8.
 - Evidências: `monografia/main.tex` (resumo), `monografia/capitulos/05-discussao.tex`, `monografia/capitulos/06-conclusao.tex`. Nenhuma afirmação sobre resultados dos estudos primários; apenas contagens do processo.
 - Revisão humana: pendente; o autor ainda não leu o texto.
+
+## T10 — ajustes de revisão do texto inicial (08/11/2026)
+
+- Pedido do autor: analisar seis pontos de revisão e aplicar cinco («Sim, aplicar»), D89.
+- Executor: Claude Code (Claude Opus 5.5), conferência dos pontos em `contexto/decisoes.md` (D55, D64, D66, D67, D80, D81, D83), em `dados/triagem.csv` e nas amostras de calibração; redação em `monografia/main.tex` e nos capítulos 03, 04 e 06.
+- Revisão humana: pendente; o autor ainda não leu as novas passagens.
