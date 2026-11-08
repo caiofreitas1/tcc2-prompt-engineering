@@ -21,7 +21,17 @@ de controle definidos na seção 7.
 o trabalho passa a revisão rápida declarada (Cartaxo, Pinto e Soares, 2020),
 aplicando a restrição de título da seção 4.2 antes da triagem em lote. O recuo
 é registrado em decisoes.md com motivo e números do piloto; não é aplicado depois
-de iniciada a triagem em lote.
+de iniciada a triagem em lote. Em 02/11/2026 o autor decidiu não aplicar o recuo
+por causa do teto de horas e manter a RSL completa (D47).
+
+**Decisão de 03/11/2026 (D64):** depois da resposta do orientador (D62) e da projeção de
+esforço (D53, D63), o autor adotou a revisão rápida declarada, antes de iniciar a triagem
+em lote. Substitui D47. Concessões a relatar: bloco de tarefas só no título, simulado nos
+títulos sem nova busca nas bases; sem *snowballing* amplo (seção 4.4); leitura pelo texto
+extraído (seção 6). A execução ocorre em duas etapas: primeiro os candidatos com indício de
+revisão por pares, depois os demais. Se em 10/11 a segunda etapa não couber, o trabalho
+para na primeira e declara o corte de preprints, sugerido pelo orientador; a etapa não é
+feita pela metade. As verificações da seção 7 não mudam.
 
 ## 2. Questões de pesquisa
 
@@ -53,10 +63,32 @@ exige todos os critérios I; uma exclusão cita pelo menos um critério X.
 | X1 | Duplicata ou versão sobreposta de estudo já registrado (agrupar, não descartar o registro). |
 | X2 | Sem detalhe técnico suficiente para identificar técnica, tarefa e avaliação. |
 | X3 | Tarefa fora do escopo (ex.: apenas sumarização, revisão de código ou perguntas sobre código). |
-| X4 | Centrado apenas em treinamento, ajuste fino ou arquitetura do modelo. |
+| X4 | Centrado apenas em treinamento, ajuste fino ou arquitetura do modelo. No texto completo, também outra intervenção avaliada que não seja prompting (D59). |
+
+**Alteração de 05/11/2026 (D69):** I6 passa a aceitar texto obtido pelo autor por acesso
+institucional (Portal de Periódicos da CAPES, UFMG), além do acesso aberto; X6 vale só
+para texto que não se obtém por nenhum dos dois caminhos. Substitui D26 e D14 nesse ponto.
+Os PDFs institucionais são baixados manualmente pelo autor, não são redistribuídos e
+formam uma etapa 3, lida depois das etapas 1 e 2. É alteração posterior aos dados, para
+reduzir o viés de disponibilidade.
+
+**Alteração de 08/11/2026 (D84):** para a versão da banca (18/11/2026), a etapa 2 (estudos só no
+arXiv, sem indício de revisão por pares) fica de fora, e a etapa 3 é lida depois da etapa 1. O
+corpus da banca passa a ser o de estudos com indício de revisão por pares, abertos ou por acesso
+institucional. A inclusão da etapa 2 na versão final depende de conversa com o orientador. É
+alteração posterior aos dados, antecipando a decisão prevista para 10/11/2026.
 | X5 | Estudo secundário, posicionamento ou tutorial (pode apoiar a fundamentação). |
 | X6 | Texto completo sem versão em acesso aberto. |
 | X7 | Fora do período ou do idioma. |
+
+**Alteração de 03/11/2026 (D59):** depois da medição de 12 textos, o autor decidiu como
+aplicar I2 e X4 no texto completo. I2 exige resultado de código obtido por prompting, com
+a estratégia de prompt descrita, sem exigir comparador de prompting; código como etapa
+intermediária é elegível se for avaliado; estudo observacional que só descreve o uso,
+sem resultado sobre os prompts, vai ao autor como `duvida`. Essa regra está em tc-v2. No
+título e resumo, tr-v2 mantém a redação anterior de X4, com a qual foi calibrada. Decisões
+e pareceres anteriores não são reescritos. Esta alteração posterior aos dados é relatada
+como desvio do protocolo.
 
 Preprints e publicações revisadas por pares são identificados separadamente; a
 versão publicada é preferida quando aberta, preservando a versão lida.
@@ -128,12 +160,21 @@ como busca): 1.509 registros na expressão ampla e 516 na variante de título.
 recuperados, como na calibração. A expressão não precisou de ajuste. Pendente a
 verificação do autor (seção 7).
 
+**Encaminhamento (D59, 03/11/2026):** S1, S2, S4 e S6 passam pelo lote e pelo texto
+completo como os demais, sem entrada automática no corpus. S3 e S5, se não aparecerem no
+*snowballing* e o autor decidir considerá-los, entram como outra fonte, com contagem própria
+e sem atribuir sua descoberta ao *snowballing*.
+
 ### 4.4 Snowballing
 
 Uma rodada, para trás (referências) e para a frente (citações), sobre os estudos
 incluídos no texto completo, via OpenAlex. Cada direção é uma linha em
 `dados/buscas.csv` (base `snowballing_backward` ou `snowballing_forward`), com
 exportação preservada. Os registros novos passam pela mesma triagem.
+
+**Alteração de 03/11/2026 (D64):** na revisão rápida, não há *snowballing* amplo: uma rodada
+sobre centenas de incluídos não cabe no prazo. É concessão a relatar. S3 e S5 ficam fora,
+salvo decisão do autor de considerá-los como outra fonte (D59).
 
 ## 5. Registros e deduplicação
 
@@ -151,6 +192,8 @@ exportação preservada. Os registros novos passam pela mesma triagem.
 IA-B = Claude Sonnet 5.5 em subagente separado, com o mesmo prompt e sem acesso
 às decisões de IA-A. Modelos do mesmo fornecedor podem ter erros correlacionados;
 a verificação humana por amostragem compensa parcialmente e a limitação é relatada.
+Desde a amostra 2 do piloto, IA-A também roda em subagente separado, sem o contexto
+da sessão principal (D48).
 
 **Prompts:** versionados em [prompts/](prompts/). Cada decisão de IA registra
 `prompt_versao`. Os prompts são calibrados no lote piloto e congelados antes do
@@ -163,6 +206,8 @@ para maximizar a revocação). Exclusão exige as duas IAs.
 **Texto completo:** IA-A e IA-B leem o texto aberto. Divergências vão ao autor.
 Toda inclusão é confirmada pelo autor; somente a decisão humana `incluir` no
 texto completo coloca o estudo no corpus definitivo (verificada em `make check`).
+Desde D64, IA-A e IA-B leem o texto extraído do PDF e voltam ao PDF em caso de dúvida
+ou de tabela desordenada.
 
 ## 7. Verificação humana (pontos de controle)
 
@@ -183,6 +228,11 @@ imprecisas; relatar contagens brutas junto com κ.
 
 Também é calculado κ entre IA-A e IA-B em todos os registros triados.
 
+**Complemento de 03/11/2026 (D66):** estudo com exclusão consensual que o autor marcar como
+`incluir` ou `duvida` na conferência, ou que já tenha essa decisão nas amostras do piloto,
+segue ao texto completo. O relato separa quantos os modelos teriam perdido e quantos foram
+resgatados. O resgate não coloca o estudo no corpus.
+
 ## 8. Decisão de 31/10/2026: RSL completa ou recuo
 
 Critérios propostos para aprovação do autor no PR:
@@ -195,6 +245,14 @@ Critérios propostos para aprovação do autor no PR:
 
 Atendidos os três, segue a RSL completa. Caso contrário, aplicar o recuo da
 seção 1. A decisão, os números e a data são registrados em decisoes.md.
+
+**Alteração de 02/11/2026 (D47):** depois de conhecer os resultados do piloto, o autor
+decidiu que o teto de 12 h do critério 3 deixa de decidir o recuo, porque pode dedicar
+mais horas. Sua disponibilidade não demonstra a viabilidade: o esforço restante, com o
+tempo medido das conferências de texto completo, será projetado e o cronograma da
+seção 12, atualizado. A busca ampla e as verificações da seção 7 não mudam. O critério
+2 e a regra de parada também não mudam. Esta alteração posterior aos dados é relatada
+como desvio do protocolo.
 
 ## 9. Extração
 
@@ -244,19 +302,18 @@ justificativa nas fontes e orientação concreta; isso não mede eficácia.
 
 O texto de 08/11 é o texto completo (D33), não mais um texto com resultados
 parciais (D30). Todas as etapas da revisão precisam terminar antes dessa data.
+A tabela original é a de D34, preservada no histórico. A tabela abaixo é a de D64, que
+substitui D33: em 08/11 entra o texto com resultados preliminares da primeira etapa, a
+confirmar pelo autor na disciplina; a versão da banca é a de 18/11 (D62).
 
 | Período | Etapa |
 |---|---|
-| 27–28/10 | Protocolo v2 (este documento) |
-| 29–30/10 | T04: buscas, deduplicação e localização de versões abertas; T10 em paralelo |
-| 30–31/10 | T05: lote piloto; decisão da seção 8 |
-| 01–02/11 | T05: triagem de título e resumo |
-| 02–04/11 | T06: texto completo e *snowballing* |
-| 03–05/11 | T07: extração e qualidade |
-| 05–06/11 | T08 e T09: síntese e cenários |
-| 06–07/11 | T11: resultados, discussão e conclusão; T12: auditoria |
-| **08/11** | **Texto completo** |
-| 09–18/11 | Preparação da defesa |
+| 03–04/11 | T05: congelamento dos prompts; triagem de título e resumo; conferência de 100 exclusões |
+| 04–07/11 | T06: texto completo da primeira etapa; T07: teste de extração e extração |
+| **08/11** | **Texto com resultados preliminares da primeira etapa** |
+| 09–13/11 | T06 e T07: segunda etapa; reavaliação do limite do plano em 10/11 |
+| 14–17/11 | T08 e T09: síntese e cenários; T11 e T12 |
+| **18/11** | **Versão da banca** |
 | **19/11** | **Defesa** |
 | 20–29/11 | Ajustes da banca e verificação final |
 | **29/11** | **Texto final** |

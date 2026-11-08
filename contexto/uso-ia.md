@@ -108,3 +108,143 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Verificação: `make check`; reextração em Python do HTML bruto comparada à extração
   do navegador; deduplicação reexecutada duas vezes sem alteração.
 - Revisão humana: pendente (revisão do autor; a triagem não foi liberada).
+
+## T05 — lote piloto — 01/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5) como IA-A, no sorteio e no formulário do
+  autor; Claude Sonnet 5.5 como IA-B, em subagente separado.
+- Entradas: `dados/estudos.csv`, `dados/resumos.csv`, prompt tr-v1.
+- Saídas: `scripts/amostrar_piloto.py`, `evidencias/piloto/amostra-1.csv`, decisões de
+  IA-A e IA-B seladas (SHA-256 em D43), artefato privado para a triagem cega do autor.
+- Revisão humana: em andamento (triagem independente do autor).
+
+## T05 — guia de triagem e auditoria — 01–02/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5) no guia e nas correções; Codex (IA) na
+  auditoria do guia, a pedido do autor.
+- Entradas: protocolo (seções 3, 6–8), prompt tr-v1, D41–D43.
+- Saídas: guia em Claude Docs (https://claude.ai/artifact/4TVMdTnmvSDoW7dbL83D6b),
+  `evidencias/auditorias/T05-guia-triagem-2026-11-02.md`, D44.
+- Revisão humana: codificação do κ confirmada pelo autor em 02/11/2026 (D45); triagem
+  independente do autor pendente.
+
+## T05 — análise do lote piloto — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, cálculo de revocação e κ (`scripts/analisar_piloto.py`),
+  leitura das perdas, projeção de horas e propostas de recuo e tr-v2.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D46.
+- Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise e
+  propostas ainda não revisadas por ele.
+
+## T05 — amostra 2 do piloto — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes; Claude
+  Code (Claude Opus 5.5) na preparação de tr-v2, do sorteio e do formulário.
+- Evidências: `protocolo/prompts/triagem-titulo-resumo-v2.md`,
+  `evidencias/piloto/amostra-2.csv`, D47–D49.
+- Revisão humana: tr-v2 segue a decisão do autor (D47); triagem cega dele pendente.
+
+## T05 — análise da amostra 2 — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, cálculo de revocação e κ, extrapolação de volume.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/`, D50.
+- Revisão humana: decisões da amostra feitas pelo autor (02/11/2026); análise ainda não
+  revisada por ele.
+
+## T05 — preparação da medição de texto completo — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes, com tc-v1;
+  Claude Code (Claude Opus 5.5) no sorteio, na obtenção dos PDFs e no formulário.
+- Evidências: `evidencias/piloto/medicao-texto.csv`, D51.
+- Revisão humana: conferência cega do autor pendente.
+
+## T05 — análise da medição de texto completo — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: abertura dos selos, comparação das decisões, verificação do tempo e projeção.
+- Evidências: `evidencias/piloto-triagem.md`, `evidencias/piloto/autor-medicao.jsonl`, D52.
+- Revisão humana: conferência feita pelo autor em 02/11/2026, com tempo a confirmar; análise
+  ainda não revisada por ele.
+
+## T05 — teste de custo da leitura por texto — 02/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes, com tc-v1; Claude Code
+  (Claude Opus 5.5) na extração com Ghostscript e na comparação.
+- Evidências: `evidencias/piloto/ia-a-tc-v1-texto.jsonl`, `evidencias/piloto/ia-b-tc-v1-texto.jsonl`, D55.
+- Revisão humana: não houve; aguarda o autor.
+
+## T10 — rascunho de introdução, fundamentação e metodologia — 02/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5).
+- Atividade: redação de rascunho em `monografia/capitulos/01` a `03`, com metadados conferidos na API do
+  arXiv e no Crossref. Fontes da fundamentação lidas pelo resumo (exceto Brown et al., seção 1.1, e S1).
+- Afirmações empíricas de estudos: nenhuma nova; os números da metodologia vêm dos registros do projeto.
+- Revisão humana: pendente.
+
+## T10 — análise da auditoria e correções do esboço — 03/11/2026
+
+- Executores: Codex (IA), auditoria; Claude Code (Claude Opus 5.5), reconferência e correções.
+- Atividade: correções em `monografia/capitulos/01`, `02`, `03` e `05`, novo apêndice `07-apendice-busca.tex` e
+  quatro referências (S3–S6), com metadados na API do arXiv e na DataCite.
+- Evidências: `evidencias/auditorias/T10-esboco-PDF-2026-11-03.md`, D56–D58.
+- Revisão humana: pendente.
+
+## T05/T10 — tc-v2 e reexame de casos — 03/11/2026
+
+- Executores: Claude Code (Claude Opus 5.5), tc-v2 e alterações no texto; IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em
+  subagentes novos, no reexame de quatro casos; Codex (IA), reavaliação do esboço.
+- Evidências: D59, D60, `evidencias/piloto/ia-a-tc-v2-reexame.jsonl`, `evidencias/piloto/ia-b-tc-v2-reexame.jsonl`.
+- Revisão humana: o autor aprovou as propostas de D58; não revisou tc-v2 nem o reexame.
+
+## T05 — triagem de título e resumo do lote — 03/11/2026
+
+- Executores: IA-A (claude-opus-5-5) e IA-B (claude-sonnet-5-5), em subagentes novos, com tr-v2; Claude Code (Claude Opus 5.5) na montagem,
+  validação e resumo.
+- Evidências: `evidencias/lote/lista.csv`, `evidencias/piloto-triagem.md`, D65.
+- Revisão humana: conferência das exclusões pendente.
+
+## T05 — conferência das exclusões e importação — 05/11/2026
+
+- Executores: autor (conferência de 85 fichas, sem IA); Claude Code (Claude Opus 5.5) na abertura dos selos, importação e contagens.
+- Evidências: `evidencias/lote/autor-conferencia.jsonl`, `dados/triagem.csv`, `evidencias/lote/texto-completo.csv`, D67.
+- Revisão humana: a conferência é do autor; a importação não foi revisada por ele.
+
+## T06 — conferência cega do texto completo e importação — 08/11/2026
+
+- Executores: autor (conferência cega de 230 estudos, sem consultar IA sobre eles); Claude Code (Claude Opus 5.5) na abertura dos selos,
+  importação, contagens e correção do sorteio de `scripts/montar_conferencia_tc.py`.
+- Evidências: `evidencias/lote/autor-texto-completo.jsonl`, `dados/triagem.csv`, `dados/estudos.csv`, D78.
+- Revisão humana: a conferência é do autor; a importação e as contagens não foram revisadas por ele.
+
+## T10 — metodologia executada e resultados preliminares — 08/11/2026
+
+- Executor: Claude Code (Claude Opus 5.5), redação, contagens e compilação.
+- Evidências: `monografia/capitulos/03-metodologia.tex`, `monografia/capitulos/04-resultados.tex`, `dados/fluxos.csv`, D82.
+- Revisão humana: pendente; o autor ainda não leu o texto.
+
+## T10 — resumo, ameaças à validade e conclusão parcial (08/11/2026)
+
+- Pedido do autor: redigir o resumo, as ameaças à validade e a conclusão parcial para o texto de 08/11 («Faz sentido»).
+- Executor: Claude Code (Claude Opus 5.5), redação a partir dos números já registrados na metodologia, nos resultados e em `dados/fluxos.csv`; compilação e inspeção das páginas 1, 7 e 8.
+- Evidências: `monografia/main.tex` (resumo), `monografia/capitulos/05-discussao.tex`, `monografia/capitulos/06-conclusao.tex`. Nenhuma afirmação sobre resultados dos estudos primários; apenas contagens do processo.
+- Revisão humana: pendente; o autor ainda não leu o texto.
+
+## T10 — ajustes de revisão do texto inicial (08/11/2026)
+
+- Pedido do autor: analisar seis pontos de revisão e aplicar cinco («Sim, aplicar»), D89.
+- Executor: Claude Code (Claude Opus 5.5), conferência dos pontos em `contexto/decisoes.md` (D55, D64, D66, D67, D80, D81, D83), em `dados/triagem.csv` e nas amostras de calibração; redação em `monografia/main.tex` e nos capítulos 03, 04 e 06.
+- Revisão humana: pendente; o autor ainda não leu as novas passagens.
+
+## T10 — formulação do limite de X4 (08/11/2026)
+
+- Pedido do autor: adotar a formulação proposta para o limite de X4 («Usar sua proposta»), D90.
+- Executor: Claude Code (Claude Opus 5.5), formulação a partir dos motivos do autor em D80 e D81 e redação em `monografia/capitulos/03-metodologia.tex` e `05-discussao.tex`.
+- Revisão humana: o autor aprovou a formulação; a releitura de S314 e S373 continua pendente.
+
+## T10 — segunda rodada de ajustes de revisão (08/11/2026)
+
+- Pedido do autor: avaliar cinco pontos de revisão e aplicar quatro («Sim, aplicar»), D91.
+- Executor: Claude Code (Claude Opus 5.5), recálculo do κ com as decisões anteriores às revisões de S314 e S373 e redação em `monografia/main.tex` e nos capítulos 03, 04 e 05.
+- Revisão humana: pendente; o autor ainda não leu as novas passagens.

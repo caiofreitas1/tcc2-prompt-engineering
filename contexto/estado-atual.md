@@ -198,6 +198,57 @@ iguais aos de 29/10. Corrigidos 3 títulos truncados na extração do navegador
 (`dados/correcoes_registros.csv`); com isso o registro ACM do PaLM agrupou-se ao S19.
 Relatório em `evidencias/verificacoes/T04-acm-2026-11-01.md`.
 
-Pendências antes da T05: o autor revisar a verificação da ACM (D40) e a proposta de
-encaminhamento de I4 e dos estudos sem resumo (D41), e autorizar a triagem. Para o método (T10): relatar os itens de busca e as ameaças
+Em 01/11 o autor aprovou a verificação e D41, e liberou a triagem (D42); o PR #20 foi
+integrado à main.
+
+## T05 — lote piloto em andamento (01/11/2026)
+
+Amostra de 100 candidatos sorteada (semente 20261101, `evidencias/piloto/amostra-1.csv`).
+IA-A e IA-B triaram com tr-v1; decisões seladas por SHA-256 em D43 e fora do Git até o
+autor terminar a sua triagem cega no artefato indicado em D43. Pendente: triagem do
+autor, κ (autor × consenso das IAs e IA-A × IA-B), revocação, regra de parada e a
+decisão da seção 8 (que deveria ter ocorrido em 31/10). Guia de triagem para o autor em
+Claude Docs, auditado pelo Codex e corrigido em 02/11 (D44); a codificação do κ foi
+confirmada pelo autor antes da abertura dos selos (D45). Para o método (T10): relatar os itens de busca e as ameaças
 apontados na auditoria. Triagem não iniciada.
+
+## T05 — resultado do lote piloto (02/11/2026)
+
+O autor concluiu a triagem cega e os selos conferem (D46). Revocação 50/56, 6 perdas,
+κ binário autor × união 0,645: a regra de parada da seção 7 foi acionada. O critério 3
+da seção 8 não é sustentado pela projeção. Aguarda o autor: recuo e tr-v2. tr-v1 segue
+vigente e não há triagem em lote. Relatório: `evidencias/piloto-triagem.md`.
+
+Decisão do autor (D47): RSL completa mantida, sem o teto de 12 h como condição de recuo.
+Amostra 2 com tr-v2 selada (D49); pendentes a triagem cega do autor, a medição de tempo
+no texto completo e a atualização da projeção e do cronograma.
+
+Amostra 2 concluída (D50): revocação 23/23, sem perdas, κ binário 0,700; critério 2 atendido.
+Pendentes: medição do texto completo, projeção e cronograma, congelamento de tr-v2 e lote
+principal. As decisões do piloto ainda não entraram em `dados/triagem.csv`.
+
+Medição de texto completo preparada (D51): 12 estudos, decisões de IA-A e IA-B seladas;
+pendente a conferência cega do autor.
+
+Medição concluída (D52): tempo registrado sem validar. Pendentes: confirmação do autor sobre o
+tempo, horas disponíveis até 08/11, cronograma, congelamento de tr-v2 e lote principal.
+
+Autor estimou 3 min por artigo (D53). Pela estimativa central, a RSL completa não cabe até
+08/11; aguarda decisão do autor sobre o caminho. tr-v2 não congelada; lote não iniciado.
+
+Defesa marcada para 19/11/2026, às 17h, on-line; a professora Gabriela Nunes Lopes (DEE) fará
+parte da banca (D54, atualiza P4). Orientador consultado por e-mail sobre o caminho da revisão;
+resposta pendente.
+
+Esboço de T10 corrigido após auditoria por IA (D56, D57). Aguardam o autor: encaminhamento dos estudos de
+referência e interpretação de I2 (proposta em D58), além da resposta do orientador. Lote não iniciado.
+
+Autor aprovou as propostas de D58 (D59): tc-v2 criada, sem congelar; reexame de quatro casos feito (D60). Continuam abertos o
+tipo do estudo, o congelamento dos prompts, o formato de leitura, a unidade dos 20% da extração, os cenários e o acesso da banca.
+Lote não iniciado.
+
+Revisão rápida adotada (D64). Lote de título e resumo executado (D65): 623 de 715 seguem. Aguarda a conferência do autor em 85 fichas;
+depois, importar as decisões em `dados/triagem.csv` e iniciar T06 pela etapa 1.
+
+Conferência das exclusões concluída (D67): 654 estudos seguem ao texto completo, 421 na etapa 1. Próximo: conferir acesso aberto de 114
+estudos, obter os textos da etapa 1, testar a extração e iniciar a leitura pelas IAs (T06).

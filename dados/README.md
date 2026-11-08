@@ -13,7 +13,9 @@ busca, ainda não incluído), piloto ou definitivo; só usar definitivo após de
 documentada de inclusão no texto completo. Candidatos são criados por
 `scripts/deduplicar.py`, com origem busca_T04.
 nao_conferido não significa que a informação não existe no artigo.
-`acesso_aberto`: sim, nao ou nao_conferido. O corpus definitivo exige sim (critério I6).
+`acesso_aberto`: sim, institucional, nao ou nao_conferido. O corpus definitivo exige sim ou
+institucional (critério I6). `institucional` indica texto obtido pelo autor no Portal de Periódicos
+da CAPES, com acesso da UFMG (D69); o PDF não é redistribuído.
 `sim` indica versão aberta localizada (registro arXiv, DOI ACM 10.1145, pela abertura da
 ACM em 2026, ou URL em versoes_abertas.csv); o acesso ao texto é confirmado na leitura
 (T06). `nao` só depois de procurar versões abertas na T06; não localizar local aberto no
