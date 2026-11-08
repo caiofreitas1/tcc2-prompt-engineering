@@ -35,7 +35,9 @@ def contar():
     etapas = collections.Counter(x['etapa'] for x in tc)
     origem = collections.Counter(x['origem'] for x in tc)
     textos = ler('evidencias/lote/textos.csv')
-    sit = collections.Counter(x['situacao'].split(':')[0].split(' (')[0] for x in textos)
+    def situacoes(etapa):
+        return collections.Counter(x['situacao'].split(':')[0].split(' (')[0] for x in textos if x['etapa'] == etapa)
+    sit, sit3 = situacoes('1'), situacoes('3')
     lidos = ia['texto_completo']
     aut_tc = {i: list(d.values())[-1] for i, d in autor['texto_completo'].items()}
     dec_tc = collections.Counter(aut_tc.values())
@@ -66,7 +68,9 @@ def contar():
         ('etapa1_sem_texto_extraido', sit['obtido_sem_texto'], 'texto_completo_etapa1',
          'PDF obtido, extração excedeu 300 s', X),
         ('etapa1_pdf_pendente', sit['fonte_indisponivel'], 'texto_completo_etapa1',
-         'PDF ainda não obtido (download pelo autor)', X),
+         'PDF ainda não obtido ou sem PDF disponível', X),
+        ('etapa3_texto_extraido', sit3['obtido'], 'texto_completo_etapa3',
+         'PDF baixado pelo autor pelo acesso institucional e texto extraído (D86)', X),
         ('lidos_ia_texto_completo', len(lidos), 'etapa1_texto_extraido',
          'estudos com decisão de IA-A e IA-B com tc-v2', T),
         ('exclusoes_consensuais_texto_completo', len(cons_tc), 'lidos_ia_texto_completo',

@@ -6,7 +6,7 @@ de --desde, e os associa a estudos pendentes de
 evidencias/lote/pdfs-pendentes.csv (etapa 1) ou evidencias/lote/capes-lista.csv (etapa 3), por:
 1. nome do arquivo igual a `salvar_como` (ex.: S123.pdf);
 2. sufixo do DOI no nome do arquivo (ex.: 3643795.3648391.pdf, como a ACM salva);
-2b. número do documento do IEEE (fim do DOI, 8 dígitos) no nome do arquivo;
+2b. número do documento do IEEE (fim do DOI, 8 dígitos) ou título do estudo no nome do arquivo;
 3. título do estudo nas duas primeiras páginas do PDF, quando só um estudo combina.
 Confere o cabeçalho %PDF-, move o arquivo para fontes/artigos/lote/<id>.pdf, extrai o texto com
 o mesmo Ghostscript de preparar_texto_completo.py e atualiza evidencias/lote/textos.csv. Arquivos
@@ -87,6 +87,8 @@ def main():
         if not cand:  # IEEE: número do documento (arnumber) no fim do DOI
             cand = [i for i, x in pend.items()
                     if (m := re.search(r'\.(\d{8})$', doi_de(x))) and re.search(rf'(^|\D){m.group(1)}(\D|$)', nome)]
+        if not cand:  # IEEE: título do estudo no nome do arquivo
+            cand = [i for i, t in titulos.items() if len(t) >= 20 and t in norm(pdf.stem)]
         if not cand:
             texto = inicio_do_pdf(pdf)
             cand = [i for i, t in titulos.items() if len(t) >= 20 and t in texto]
