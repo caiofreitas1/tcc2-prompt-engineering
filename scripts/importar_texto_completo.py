@@ -23,6 +23,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 AUTOR = 'Caio César de Freitas'
 # Fim (exclusivo) de cada leva no JSONL cumulativo e a data da leitura.
 LEVAS = [(36, '2026-11-05'), (196, '2026-11-06'), (256, '2026-11-07')]
+# Levas em arquivos selados próprios (D92, D95): todas as leituras do arquivo têm a mesma data.
+LEVAS_ARQUIVO = {'-r2.jsonl': '2026-11-08', '-r3.jsonl': '2026-11-08'}
 CAMPOS_TRIAGEM = ['estudo_id', 'fase', 'decisao', 'criterio', 'motivo', 'responsavel',
                   'natureza', 'prompt_versao', 'data']
 
@@ -44,22 +46,31 @@ def codigos(criterio):
     return ';'.join(dict.fromkeys(re.findall(r'\b[IX][1-7]\b', criterio)))
 
 
-def ler_ia(caminho, responsavel):
+def ler_ia(caminhos, responsavel):
+    linhas = []
+    for caminho in caminhos:
+        linhas += ler_ia_arquivo(caminho, responsavel)
+    return linhas
+
+
+def ler_ia_arquivo(caminho, responsavel):
+    data = next((d for sufixo, d in LEVAS_ARQUIVO.items() if str(caminho).endswith(sufixo)), None)
     linhas = []
     for pos, texto in enumerate(open(caminho, encoding='utf-8')):
         x = json.loads(texto)
         linhas.append({'estudo_id': x['estudo_id'], 'fase': 'texto_completo',
                        'decisao': x['decisao'], 'criterio': codigos(x['criterio']),
                        'motivo': ' '.join(x['motivo'].split()), 'responsavel': responsavel,
-                       'natureza': 'ia', 'prompt_versao': 'tc-v2', 'data': data_leva(pos)})
+                       'natureza': 'ia', 'prompt_versao': 'tc-v2', 'data': data or data_leva(pos)})
     return linhas
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--autor', required=True, help='diretório com um JSON por estudo')
-    ap.add_argument('--ia-a', default=ROOT / 'evidencias/lote/selado/ia-a-tc-v2.jsonl')
-    ap.add_argument('--ia-b', default=ROOT / 'evidencias/lote/selado/ia-b-tc-v2.jsonl')
+    selado = ROOT / 'evidencias/lote/selado'
+    ap.add_argument('--ia-a', nargs='+', default=sorted(selado.glob('ia-a-tc-v2.jsonl')) + sorted(selado.glob('ia-a-tc-v2-r*.jsonl')))
+    ap.add_argument('--ia-b', nargs='+', default=sorted(selado.glob('ia-b-tc-v2.jsonl')) + sorted(selado.glob('ia-b-tc-v2-r*.jsonl')))
     a = ap.parse_args()
 
     autor = sorted((json.load(open(p, encoding='utf-8')) for p in glob.glob(f'{a.autor}/*.json')),
