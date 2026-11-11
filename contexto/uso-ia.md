@@ -266,3 +266,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: registrar a proposta de extração revista («Sim, registrar»), D97.
 - Executores: Claude Code (Claude Opus 5.5), proposta, prompt ex-v2, atualização do protocolo e sorteio do piloto; Codex (IA), dois pareceres de auditoria sobre a proposta.
 - Revisão humana: o autor aprovou a proposta; as fichas do piloto ainda não existem.
+
+## T07 — piloto da extração (11/11/2026)
+
+- Agendado em D97; executado por Claude Code (Claude Opus 5.5): metadados e I4 por API, extração ex-v2 em 10 subagentes Opus, verificação das citações e formulário de conferência (D98).
+- Revisão humana: pendente; o autor confere as 10 fichas inteiras no formulário.

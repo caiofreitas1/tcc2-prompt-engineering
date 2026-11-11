@@ -1,0 +1,277 @@
+{
+  "estudo_id": "S50",
+  "leitura": "completa",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "ADELT (Adversarial DEep Learning Transpiler): transpilação do esqueleto de código por few-shot prompting de LLM + mapeamento de palavras-chave de API por dicionário aprendido",
+        "mecanismos": ["decomposicao", "exemplos", "instrucao", "outro"],
+        "outro_descricao": "dicionário de palavras-chave de API gerado a partir de embeddings contextuais (PyBERT) alinhados por treinamento adversarial de domínio; etapa sem prompting",
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Resumo; Seção 2; Seção 3.5, Tabela 1"
+      },
+      {
+        "nome_original": "Skeletal code transpilation via few-shot prompting (Codex)",
+        "mecanismos": ["exemplos", "instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "localizador": "Seção 2.2; Seção 3.1; Seção 3.4; Apêndice A.4, Tabela 6"
+      },
+      {
+        "nome_original": "Domain-adversarial training / Hierarchical API dictionary generation",
+        "mecanismos": ["outro"],
+        "outro_descricao": "componente de aprendizado de representações (não é prompting); isolado por ablação (w/o PyBERT, w/o Adv Loss, medida de similaridade)",
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seções 2.3-2.4; Seção 3.7, Tabela 3; Apêndice A.6-A.7, Tabelas 9-10"
+      },
+      {
+        "nome_original": "End-to-end language models (few-shot LLM baselines: GPT-3, Codex, GPT-4)",
+        "mecanismos": ["instrucao", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção 3.5; Apêndice A.5, Tabelas 7-8"
+      },
+      {
+        "nome_original": "Edit Distance (Cased/Uncased)",
+        "mecanismos": ["outro"],
+        "outro_descricao": "linha de base baseada em regras (distância de edição entre palavras-chave), sem prompting",
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção 3.5, Tabela 1"
+      }
+    ],
+    "modelos": [
+      "Codex code-davinci-002 (linha de base fim a fim; o texto não indica explicitamente a versão usada na transpilação do esqueleto no ADELT)",
+      "GPT-4 gpt-4-0314 (endpoint chat)",
+      "GPT-3 (versão Instruct text-davinci-002 citada entre as medidas de mitigação)",
+      "PyBERT SMALL (6 camadas, 512-d) e PyBERT BASE (12 camadas, 768-d), codificadores pré-treinados pelos autores (não usados por prompting)",
+      "Word2Vec (variante de ablação)"
+    ],
+    "benchmarks": [
+      "Benchmark próprio de transpilação PyTorch-Keras e PyTorch-MXNet: corpus paralelo de 100 exemplos (50 pares identificados heuristicamente e refinados manualmente, com versão MXNet transpilada por especialistas; 50 exemplos PyTorch-Keras transpilados por especialistas), com testes unitários (Apêndice A.3)",
+      "Dicionário de referência com as 50 palavras-chave de API PyTorch mais frequentes traduzidas manualmente para Keras (avaliação de tradução de palavras-chave, Seção 3.7)"
+    ],
+    "metricas": [
+      "F1 (sobre chamadas de função)",
+      "Exact Match (EM)",
+      "Pass@1 (testes unitários)",
+      "precision@1 e precision@5 (tradução de palavras-chave)",
+      "Mean Reciprocal Rank (MRR)",
+      "BLEU (Tabela 9)"
+    ],
+    "linguagens": [
+      "Python (frameworks PyTorch, Keras, MXNet)",
+      "Python 2 para Python 3 (experimento do Apêndice A.10)"
+    ],
+    "riscos": [
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Os autores relatam que as tentativas de fazer o Codex seguir as instruções têm efeito limitado e que o resultado é altamente não determinístico.",
+        "localizador": "Seção 3.6"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O Codex gera código extra não solicitado (por exemplo, embeddings posicionais) e argumentos ou instruções desnecessários após concluir a transpilação.",
+        "localizador": "Seção 3.6, Tabela 2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "GPT-3 e Codex às vezes não seguem as instruções para transpilar entre frameworks de aprendizado profundo.",
+        "localizador": "Apêndice A.5"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Risco de vazamento de respostas para o modelo pelas demonstrações do prompt, tratado restringindo as demonstrações (não discute contaminação no pré-treinamento).",
+        "localizador": "Apêndice A.5"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mapeamentos um-para-muitos (uma chamada de API que deve virar duas) não são resolvidos por ADELT nem pelo Codex; o ADELT também erra nomes de parâmetros de nn.Embedding.",
+        "localizador": "Seção 3.6, Tabela 2; Apêndice A.8, Tabela 11"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Os autores afirmam que o ADELT é muito mais rápido que o GPT-4, sem apresentar medição de tempo ou custo.",
+        "localizador": "Seção 3.5"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso das versões Instruct de GPT-3/Codex, prefixo no prompt baseado em regras simples e mascaramento (bias de -100) de logits de '#' e de quebra de linha nas linhas de base GPT-3/Codex; os autores afirmam melhora significativa, mas não reportam números com e sem essas medidas.",
+        "avaliada": "nao",
+        "localizador": "Apêndice A.5"
+      },
+      {
+        "descricao": "Desacoplamento entre treinamento neural e transpilação: substituição determinística de palavras-chave por dicionário, que segundo os autores produz código sempre sintaticamente correto e cujos erros podem ser corrigidos editando o dicionário.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.6"
+      },
+      {
+        "descricao": "Proibição de que demonstrações compartilhem funções de API com o exemplo avaliado, para evitar vazamento de respostas ao modelo.",
+        "avaliada": "nao",
+        "localizador": "Apêndice A.5"
+      },
+      {
+        "descricao": "Três pares entrada-saída de placeholders no prompt do esqueleto para manter placeholders inalterados; os autores afirmam que são necessários para 100% de correção, sem apresentar comparação numérica entre variações.",
+        "avaliada": "nao",
+        "localizador": "Apêndice A.4"
+      },
+      {
+        "descricao": "Treinamento em conjunto sintético (ADELT+) para modelar mapeamentos um-para-muitos; avaliado apenas por exemplos de caso.",
+        "avaliada": "sim",
+        "localizador": "Seção 3.6, Tabela 2; Apêndice A.8, Tabela 11"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A vantagem do ADELT sobre o GPT-4 em pass@1 é bem menor na direção Keras-PyTorch (5,6 pts) do que em PyTorch-Keras (16,2 pts).",
+        "localizador": "Seção 3.5, Tabela 1"
+      },
+      {
+        "descricao": "No caso nn.Embedding, o Codex traduz corretamente os nomes de parâmetros e o ADELT erra.",
+        "localizador": "Seção 3.6, Tabela 2"
+      },
+      {
+        "descricao": "ADELT e Codex falham no mapeamento um-para-muitos (layers.Dense com activation='relu'); só o ADELT+ treinado em dados sintéticos resolve.",
+        "localizador": "Seção 3.6, Tabela 2"
+      },
+      {
+        "descricao": "CSLS não altera significativamente o F1 PyTorch-Keras, mas piora o F1 Keras-PyTorch; produto interno (Base) supera o cosseno em algumas métricas de palavra-chave na direção Keras-PyTorch.",
+        "localizador": "Apêndice A.6, Tabela 9; Tabela 3"
+      },
+      {
+        "descricao": "Valores inconsistentes entre tabelas: F1 Keras-PyTorch do ADELT (Base) é 79,3 nas Tabelas 1 e 3 e 82,0 na Tabela 10; F1 do ADELT (Base) é 85,72/82,01 na Tabela 9; P@1 do produto interno (Small) é 81,3 na Tabela 3 e 82,9 na Tabela 10. A legenda da Tabela 9 menciona 'PyTorch to PyTorch'.",
+        "localizador": "Tabelas 1, 3, 9 e 10"
+      },
+      {
+        "descricao": "Experimentos principais restritos a Python, pela escassez de programas de aprendizado profundo em outras linguagens.",
+        "localizador": "Apêndice A.10"
+      },
+      {
+        "descricao": "As linhas de base GPT-3/Codex usaram mascaramento de logits e prefixos, enquanto o GPT-4 foi usado sem alterações adicionais, de modo que as condições de prompting das linhas de base diferem.",
+        "localizador": "Apêndice A.5"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "ton using a pretrained LLM by few-shot prompting.", "localizador": "Seção 1 (Introdução)"},
+      {"trecho": "ton is then translated by Codex using few-shot prompting.", "localizador": "Seção 2.2"},
+      {"trecho": "Our prompt design aligns with Codex’s code translation", "localizador": "Seção 3.1"},
+      {"trecho": "instructions to keep placeholders unchanged.", "localizador": "Seção 3.1"},
+      {"trecho": "score of skeletal code transpilation using Codex is 100%.", "localizador": "Seção 3.4"},
+      {"trecho": "In both cases, we give the LLM a natural language instruction", "localizador": "Seção 3.5"},
+      {"trecho": "and 5 examples as demonstrations.", "localizador": "Seção 3.5"},
+      {"trecho": "You are an expert in deep learning.", "localizador": "Apêndice A.5, Tabela 8"},
+      {"trecho": "is highly indeterministic. In the end, Codex still occasionally", "localizador": "Seção 3.6"},
+      {"trecho": "generates extra arguments or unneeded statements.", "localizador": "Seção 3.6"},
+      {"trecho": "generate code about “positional embeddings” after finishing", "localizador": "Seção 3.6"},
+      {"trecho": "fail to follow our instructions to transpile between deep learn-", "localizador": "Apêndice A.5"},
+      {"trecho": "answers from being leaked to the language model, we do not", "localizador": "Apêndice A.5"},
+      {"trecho": "allow any demonstration to share common API functions with", "localizador": "Apêndice A.5"},
+      {"trecho": "Add a prefix to the input prompt based on simple rules.", "localizador": "Apêndice A.5"},
+      {"trecho": "Mask the logits of tokens that usually leads to irrelevant", "localizador": "Apêndice A.5"},
+      {"trecho": "Wefindthat these measures significantly improve the per-", "localizador": "Apêndice A.5"},
+      {"trecho": "Conversely, GPT-4 did not exhibit similar issues, and given", "localizador": "Apêndice A.5"},
+      {"trecho": "output pairs are required for 100% skeletal code tran-", "localizador": "Apêndice A.4"},
+      {"trecho": "transpiled code is always syntactically correct. If a mistake is", "localizador": "Seção 3.6"},
+      {"trecho": "Additionally, ADELT runs much faster than GPT-4,", "localizador": "Seção 3.5"},
+      {"trecho": "Codexfail to solve this example because this usage is rarely", "localizador": "Seção 3.6"},
+      {"trecho": "to input_dim and output_dim correctly, while Codex", "localizador": "Seção 3.6"},
+      {"trecho": "In the main paper, all experiments are conducted on Python", "localizador": "Apêndice A.10"},
+      {"trecho": "ADELT(Base) 87.1 ± 1.2 90.0 ± 2.5 83.4 ± 0.8 82.0 ± 2.2", "localizador": "Apêndice A.7, Tabela 10"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "ADELT (Base)",
+      "mecanismos": ["decomposicao", "exemplos", "instrucao", "outro"],
+      "comparador": "GPT-4 fim a fim com few-shot prompting (instrução em linguagem natural + 5 demonstrações)",
+      "modelo": "ADELT (Base): Codex para o esqueleto + PyBERT BASE para o dicionário; comparador: GPT-4 gpt-4-0314",
+      "benchmark": "Benchmark próprio PyTorch-Keras (Apêndice A.3), direção PyTorch para Keras",
+      "metrica": "Pass@1",
+      "unidade": "percentual",
+      "resultado": {"baseline": 56.8, "intervencao": 73.0},
+      "condicoes": "Média de 5 execuções com sementes [10, 20, 30, 40, 50]. GPT-4 via endpoint chat, prompt em Markdown com 5 demonstrações do conjunto de avaliação, sem compartilhar funções de API com o exemplo avaliado, sem mascaramento de logits. Esqueleto do ADELT transpilado pelo Codex com um prompt de quatro pares entrada-saída (três de placeholders + um exemplo real). Modelos diferentes entre intervenção (Codex + PyBERT) e comparador (GPT-4). O corpus total tem 100 exemplos; o número exato de exemplos PyTorch-Keras usados no denominador não é explicitado de forma inequívoca. Temperatura e outros parâmetros de decodificação: nao_informado. Valores lidos na Tabela 1 (primeiro número da célula = PyTorch para Keras) e confirmados pela diferença de 16,2 pts declarada no texto.",
+      "selecao": "principal_declarado",
+      "localizador": "Resumo; Seção 1; Seção 3.5, Tabela 1",
+      "citacoes": [
+        {"trecho": "pass@1 rate by 16.2 pts and 15.0 pts for PyTorch-", "localizador": "Resumo"},
+        {"trecho": "ing pass@1 rate of 73.0 and 70.0 for PyTorch-Keras and", "localizador": "Seção 1"},
+        {"trecho": "ing a 16.2 pts lead in pass@1 of PyTorch-Keras translations", "localizador": "Seção 3.5"},
+        {"trecho": "GPT-4 67.7 74.9 55.6 64.6 56.8 66.0 60.3 71.8 54.0 60.2 55.0 60.8", "localizador": "Tabela 1"},
+        {"trecho": "ADELT(Base) 83.4 79.3 73.0 71.6 73.0 71.6 80.0 72.1 70.0 63.8 70.0 63.8", "localizador": "Tabela 1"},
+        {"trecho": "is the average of 5 runs with different random seeds.", "localizador": "Tabela 1 (legenda)"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "ADELT (Base)",
+      "mecanismos": ["decomposicao", "exemplos", "instrucao", "outro"],
+      "comparador": "GPT-4 fim a fim com few-shot prompting (instrução em linguagem natural + 5 demonstrações)",
+      "modelo": "ADELT (Base): Codex para o esqueleto + PyBERT BASE para o dicionário; comparador: GPT-4 gpt-4-0314",
+      "benchmark": "Benchmark próprio PyTorch-MXNet (Apêndice A.3; 50 exemplos com versão MXNet transpilada por especialistas), direção PyTorch para MXNet",
+      "metrica": "Pass@1",
+      "unidade": "percentual",
+      "resultado": {"baseline": 55.0, "intervencao": 70.0},
+      "condicoes": "Média de 5 execuções com sementes [10, 20, 30, 40, 50]. Mesmas condições de prompting da comparação PyTorch-Keras. O Apêndice A.3 descreve 50 exemplos PyTorch-MXNet. Temperatura: nao_informado. Valores lidos na Tabela 1 (primeiro número da célula = PyTorch para MXNet) e confirmados pela diferença de 15,0 pts declarada no resumo.",
+      "selecao": "principal_declarado",
+      "localizador": "Resumo; Seção 1; Seção 3.5, Tabela 1",
+      "citacoes": [
+        {"trecho": "pass@1 rate by 16.2 pts and 15.0 pts for PyTorch-", "localizador": "Resumo"},
+        {"trecho": "surpass those of the state-of-the-art LLM, GPT-4, by 16.2", "localizador": "Seção 1"},
+        {"trecho": "GPT-4 67.7 74.9 55.6 64.6 56.8 66.0 60.3 71.8 54.0 60.2 55.0 60.8", "localizador": "Tabela 1"},
+        {"trecho": "ADELT(Base) 83.4 79.3 73.0 71.6 73.0 71.6 80.0 72.1 70.0 63.8 70.0 63.8", "localizador": "Tabela 1"},
+        {"trecho": "Ourevaluation uses a parallel corpus of 100 examples derived", "localizador": "Apêndice A.3"}
+      ]
+    }
+  ],
+  "qualidade": {
+    "objetivo": {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara claramente o objetivo de propor e avaliar um transpilador entre frameworks de aprendizado profundo que desacopla esqueleto e palavras-chave de API.",
+      "localizador": "Resumo; Seção 1"
+    },
+    "procedimento": {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, prompts (Tabelas 6-8) e hiperparâmetros de treinamento são descritos, mas a versão do Codex usada no esqueleto e os parâmetros de decodificação (temperatura) não são informados.",
+      "localizador": "Seções 2-3; Apêndices A.1-A.5"
+    },
+    "comparador": {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Compara com LLMs fim a fim em few-shot (GPT-3, Codex, GPT-4) e com uma linha de base por distância de edição, além de ablações; ressalva: as linhas de base GPT-3/Codex receberam mascaramento de logits e o GPT-4 não, e os modelos diferem dos usados no ADELT.",
+      "localizador": "Seção 3.5, Tabela 1; Seção 3.7, Tabela 3; Apêndice A.5"
+    },
+    "metricas": {
+      "criterio": "metricas",
+      "julgamento": "atende",
+      "justificativa": "F1, EM e Pass@1 (por testes unitários escritos por especialistas) são definidos; resultados são médias de 5 sementes com intervalos de confiança de 95% na Tabela 10.",
+      "localizador": "Seção 3.3; Seção 3.5; Apêndice A.7, Tabela 10"
+    },
+    "ameacas": {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças à validade; limitações aparecem só pontualmente (mapeamentos um-para-muitos raros, restrição a Python, não determinismo do Codex).",
+      "localizador": "Seção 3.6; Apêndice A.10"
+    },
+    "reprodutibilidade": {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O código é disponibilizado e há hiperparâmetros e prompts de exemplo, mas a disponibilização do benchmark não é informada explicitamente e os resultados dependem de modelos proprietários versionados (code-davinci-002, gpt-4-0314).",
+      "localizador": "Resumo; Apêndices A.1-A.5"
+    },
+    "contaminacao": {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Evita vazamento pelas demonstrações (sem funções de API em comum com o exemplo avaliado), mas não discute a possível presença no pré-treinamento dos LLMs do código de repositórios do GitHub usado no benchmark.",
+      "localizador": "Apêndice A.3; Apêndice A.5"
+    }
+  }
+}

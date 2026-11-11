@@ -1,0 +1,343 @@
+{
+  "estudo_id": "S964",
+  "leitura": "completa (texto extraído lido do início às referências; os valores numéricos das Figs. 2, 4, 5, 6, 7 e 8 aparecem desordenados no texto extraído e não podem ser lidos com segurança; o texto não traz paginação)",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot prompting",
+        "mecanismos": ["instrucao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção V-A; Seção V-B; Fig. 3; Fig. 4"
+      },
+      {
+        "nome_original": "few-shot prompting (1-shot, 2-shot, 3-shot)",
+        "mecanismos": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção V-B; Fig. 3; Fig. 4"
+      },
+      {
+        "nome_original": "agentic pipeline / iterative feedback through compiler-based repair (Questioner, Compilation e Execution Agents)",
+        "mecanismos": ["feedback", "multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção V-D; Fig. 1; Fig. 6; Fig. 7; Fig. 8"
+      },
+      {
+        "nome_original": "hyperparameter optimization for decoding (temperature, top-p, max tokens)",
+        "mecanismos": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção IV-B (LLM Hyperparameters); Seção V-A; Fig. 2",
+        "observacao": "outro: ajuste de parâmetros de decodificação, sem alteração do prompt; não é técnica de prompting elegível"
+      },
+      {
+        "nome_original": "supervised fine-tuning",
+        "mecanismos": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "Seção V-C; Fig. 5; Fig. 7",
+        "observacao": "outro: ajuste fino de pesos do LLaMA-3.3-70B-Instruct no conjunto de treino do PARATRANS; não elegível como técnica de prompting"
+      }
+    ],
+    "modelos": [
+      "GPT-4o-mini (via Azure OpenAI API)",
+      "LLaMA-3.3-70B-Instruct (inferência com quantização de 8 bits)",
+      "LLaMA-3.3-70B-Instruct ajustado (fine-tuned) no PARATRANS (contexto de 16.384 tokens)"
+    ],
+    "benchmarks": [
+      "PARATRANS (construído a partir do HECBENCH; partição de teste com 76 pares: Serial→OpenMP 20, Serial→CUDA 19, CUDA→OpenMP 18, OpenMP→CUDA 19)"
+    ],
+    "metricas": [
+      "compilation rate (percentual de programas gerados que compilam)",
+      "validation rate (percentual de programas gerados cuja saída corresponde à esperada no kernel do HECBENCH)"
+    ],
+    "linguagens": [
+      "Serial (versões seriais derivadas das implementações OpenMP, sem pragmas)",
+      "OpenMP (implementações OpenMP-4.5 do HECBENCH)",
+      "CUDA"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos sem ajuste apresentam baixa correção funcional nas traduções sob configurações padrão.",
+        "localizador": "Resumo"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mesmo com exemplo semelhante ou idêntico no prompt de 1-shot, o LLaMA introduz erros sintáticos sutis e críticos.",
+        "localizador": "Seção V-B"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Temperatura mais alta reduz e torna menos consistente a taxa de compilação, sobretudo com saídas longas.",
+        "localizador": "Seção V-A; Fig. 2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Desempenho em tempo de execução e escalabilidade do código traduzido não foram verificados, embora sejam fatores importantes em HPC.",
+        "localizador": "Seção VI"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Pipeline multiagente com reparo guiado por diagnósticos do compilador e por erros de execução (até três rodadas por agente).",
+        "avaliada": "sim",
+        "localizador": "Seção V-D; Fig. 6; Fig. 7; Fig. 8"
+      },
+      {
+        "descricao": "Uso de temperatura baixa (0,2) para aumentar validade sintática e consistência.",
+        "avaliada": "sim",
+        "localizador": "Seção V-A; Fig. 2"
+      },
+      {
+        "descricao": "Ajuste fino supervisionado no PARATRANS para aumentar a proporção de saídas funcionalmente corretas.",
+        "avaliada": "sim",
+        "localizador": "Seção V-C; Fig. 5"
+      },
+      {
+        "descricao": "Poda por número de tokens (corte de 7.500 tokens) para padronizar o tamanho das entradas.",
+        "avaliada": "nao",
+        "localizador": "Seção III (Token Count Pruning)"
+      },
+      {
+        "descricao": "Mais rodadas de reparo poderiam beneficiar códigos mais longos ou complexos (sugestão).",
+        "avaliada": "nao",
+        "localizador": "Seção V-D (Ablation Study: Effectiveness of Compilation Agent)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "few-shot prompting (1-shot, 2-shot, 3-shot)",
+        "motivo": "Os valores de taxa de compilação da Fig. 4 estão desordenados no texto extraído e não podem ser atribuídos com segurança a modelo, direção e número de exemplos; o texto só descreve o resultado qualitativamente."
+      },
+      {
+        "tecnica": "agentic pipeline / iterative feedback through compiler-based repair",
+        "motivo": "Os valores das Figs. 6, 7 e 8 estão desordenados no texto extraído; o resumo informa números de pacote combinado (fine-tuning, hiperparâmetros e reparo), sem isolar o efeito do pipeline."
+      },
+      {
+        "tecnica": "hyperparameter optimization for decoding",
+        "motivo": "Ajuste de decodificação, fora do escopo de prompting; valores da Fig. 2 desordenados."
+      },
+      {
+        "tecnica": "supervised fine-tuning",
+        "motivo": "Ajuste fino de pesos, fora do escopo de prompting; não extraído como comparação."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Few-shot não melhorou a taxa de compilação de forma consistente; houve degradação no 3-shot (e, segundo a legenda, sobretudo além de 1-shot).",
+        "localizador": "Seção V-B; legenda da Fig. 4"
+      },
+      {
+        "descricao": "Efeitos do few-shot variam por direção de tradução e por domínio de aplicação do HECBENCH.",
+        "localizador": "Legenda da Fig. 4; Seção V-B"
+      },
+      {
+        "descricao": "Os ganhos do pipeline agêntico não se distribuem de modo uniforme entre direções de tradução; ganhos ligeiramente maiores onde o modelo base tinha pior desempenho (OMP→CUDA no LLaMA, Serial→CUDA no GPT).",
+        "localizador": "Seção V-D (Ablation Study: Effectiveness of Compilation Agent)"
+      },
+      {
+        "descricao": "A segunda tentativa de reparo trouxe ganhos limitados; a primeira concentra a maior melhoria da taxa de compilação.",
+        "localizador": "Seção V-D; Fig. 8"
+      },
+      {
+        "descricao": "A melhoria na taxa de compilação com o pipeline é menos pronunciada que a melhoria na taxa de validação; o modelo ajustado tem ganhos menores com o pipeline.",
+        "localizador": "Seção V-D (Ablation Study: Effectiveness of different Questioner Models); legenda da Fig. 7"
+      },
+      {
+        "descricao": "O alto desempenho em Serial→OMP decorre da semelhança entre as versões, inclusive pelo método de geração das versões seriais a partir do OpenMP.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "descricao": "Discrepância de condição: o experimento zero-shot de hiperparâmetros fixou top-p em 0,8, enquanto os demais experimentos usaram top-p 0,9.",
+        "localizador": "Seção IV-B; Seção V-A"
+      },
+      {
+        "descricao": "Os agentes de compilação e execução usam sempre o GPT-4o-mini, mesmo quando o Questioner é o LLaMA; outras configurações do pipeline foram adiadas para trabalho futuro.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "descricao": "A própria avaliação usou até 3 tentativas de reparo com GPT-4o-mini quando o código compilava antes, mas não depois, da substituição da função main pela do ground truth.",
+        "localizador": "Seção IV-A"
+      },
+      {
+        "descricao": "Estudo declarado preliminar; não cobre desempenho em execução, ablação aprofundada nem outras linguagens (SYCL, OpenACC).",
+        "localizador": "Seção VI"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "we target translations between serial code, CUDA, and OpenMP.",
+        "localizador": "Resumo"
+      },
+      {
+        "trecho": "We evaluated four major usage modes: hyperparameter optimization for decoding, zero- and few-shot prompting, supervised fine-tuning, and iterative feedback through compiler-based repair.",
+        "localizador": "Resumo"
+      },
+      {
+        "trecho": "we compared the compilation rates of generated code with 0-shot, 1-shot, 2-shot, and 3-shot configurations.",
+        "localizador": "Seção V-B"
+      },
+      {
+        "trecho": "System: You are an HPC expert specializing in translating between parallel programming APIs.",
+        "localizador": "Fig. 3"
+      },
+      {
+        "trecho": "Compilation Agent: Attempts to compile the generated code. If the compilation fails, it extracts the error message and formulates a compilation repair prompt for its model.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "trecho": "Execution Agent: Executes the code that passes compilation. If output verification fails, it produces an output-repair prompt containing the observed behavior and invokes its model for a correction.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "trecho": "Our findings reveal that while off-the-shelf models struggle under the default settings (e.g., GPT-4o-mini achieves only 46% compilation and 15% functional correctness)",
+        "localizador": "Resumo"
+      },
+      {
+        "trecho": "specific examples reveal that even on samples similar or identical to the one-shot prompt, LLaMA-3.3-70B-Instruct still introduces subtle but critical syntactic errors.",
+        "localizador": "Seção V-B"
+      },
+      {
+        "trecho": "As shown in Figure 2, lower temperature settings yielded both higher and more consistent results across models",
+        "localizador": "Seção V-A"
+      },
+      {
+        "trecho": "Although we checked the syntax and the functional correctness of the translated code, we did not check its runtime performance or scalability",
+        "localizador": "Seção VI"
+      },
+      {
+        "trecho": "In general, incorporating compiler and output verifier feedback significantly improves overall performance in terms of compilation and validation rate.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "trecho": "While our current experiments show limited gains from the second iteration, this pattern suggests that longer or more complex code samples may benefit more substantially from additional repair rounds.",
+        "localizador": "Seção V-D (Ablation Study: Effectiveness of Compilation Agent)"
+      },
+      {
+        "trecho": "Increasing the number of prompt examples did not consistently improve the compilation rate and can lead to degradation, especially beyond 1-shot. Effects vary by translation direction and application domain.",
+        "localizador": "Legenda da Fig. 4"
+      },
+      {
+        "trecho": "Furthermore, the gains are not distributed entirely uniformly across translation tasks.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "trecho": "The high performance in Serial→OMP stems from the close similarity between the two, both inherently and due to the generation method described in section III.",
+        "localizador": "Seção V-D"
+      },
+      {
+        "trecho": "while keeping the top-p value fixed at 0.8 in a zero-shot prompting setup.",
+        "localizador": "Seção V-A"
+      },
+      {
+        "trecho": "In places where the code compiled successfully before the replacement but failed after the replacement, we used 3 attempts with GPT-4o-mini to repair the compilation error.",
+        "localizador": "Seção IV-A"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "few-shot prompting (1-shot, 2-shot, 3-shot)",
+      "mecanismos": ["exemplos"],
+      "comparador": "0-shot prompting",
+      "modelo": "LLaMA-3.3-70B-Instruct",
+      "benchmark": "PARATRANS (partição de teste, 76 pares)",
+      "metrica": "compilation rate",
+      "unidade": "proporcao",
+      "resultado": null,
+      "condicoes": "n-shot = n exemplos do mesmo par de linguagens origem–destino retirados do conjunto de treino do PARATRANS; temperatura 0,2, top-p 0,9, máx. 15.000 tokens de saída; quatro direções (Serial→OpenMP, Serial→CUDA, OpenMP→CUDA, CUDA→OpenMP) e média. Os valores da Fig. 4 (eixo em proporção de 0 a 1) estão desordenados no texto extraído e não podem ser atribuídos com segurança a cada condição; por isso resultado = null. O texto informa apenas qualitativamente: sensibilidade mínima ao número de exemplos e degradação no 3-shot. Denominador por direção: 18 a 20 pares de teste (Tabela I).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O principal declarado (resumo: 46%/15% do GPT-4o-mini padrão contra 69%/33% da metodologia UniPar) combina fine-tuning, ajuste de hiperparâmetros e reparo, sem isolar técnica de prompting; é condição incompatível. Primeira figura de resultados elegíveis de prompting é a Fig. 4 (a Fig. 2 trata de hiperparâmetros de decodificação; a Tabela I é descritiva); primeira métrica = taxa de compilação; primeiro modelo listado = LLaMA-3.3-70B-Instruct.",
+      "localizador": "Seção V-B; Fig. 4",
+      "citacoes": [
+        {
+          "trecho": "The results reveal that both models exhibit minimal sensitivity to the addition of few-shot examples. Compilation success rates remain largely unchanged, except for 3-shot prompting, where performance degrades noticeably.",
+          "localizador": "Seção V-B"
+        },
+        {
+          "trecho": "Each n-shot involved appending n additional examples for the same source–target language pair from the PARATRANS train set.",
+          "localizador": "Seção V-B"
+        }
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "agentic pipeline / iterative feedback through compiler-based repair (Compilation e Execution Agents)",
+      "mecanismos": ["feedback", "multiagente"],
+      "comparador": "Without agent (tradução inicial do Questioner sem o pipeline agêntico)",
+      "modelo": "LLaMA-3.3-70B-Instruct (base) como Questioner; GPT-4o-mini nos agentes de compilação e execução",
+      "benchmark": "PARATRANS (partição de teste, 76 pares)",
+      "metrica": "compilation rate",
+      "unidade": "proporcao",
+      "resultado": null,
+      "condicoes": "Agente de compilação com três tentativas usando diagnósticos do compilador (Clang++, NVCC); agente de execução com três tentativas usando erros de execução; todos os LLMs com temperatura 0,2, top-p 0,9, máx. 15.000 tokens. Os valores da Fig. 6a (eixo em proporção) estão desordenados no texto extraído e não podem ser atribuídos com segurança a modelo e direção; por isso resultado = null. O texto relata melhora geral nas taxas de compilação e validação. Denominador por direção: 18 a 20 pares de teste (Tabela I).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da segunda técnica focal de prompting (feedback/multiagente), pela regra de ordem: primeira figura com o pipeline (Fig. 6), primeira métrica (taxa de compilação, Fig. 6a), primeiro modelo listado (LLaMA-3.3-70B-Instruct).",
+      "localizador": "Seção V-D; Fig. 6a",
+      "citacoes": [
+        {
+          "trecho": "In general, incorporating compiler and output verifier feedback significantly improves overall performance in terms of compilation and validation rate.",
+          "localizador": "Seção V-D"
+        },
+        {
+          "trecho": "Agent-based repair has a slight equalizing effect on results across translation directions as the variation in compilation rate shrinks.",
+          "localizador": "Legenda da Fig. 6a"
+        },
+        {
+          "trecho": "Both the Compilation and Execution agents used 3 rounds with GPT-4o-mini as their underlying LLM.",
+          "localizador": "Seção V-D"
+        }
+      ]
+    }
+  ],
+  "qualidade": {
+    "objetivo": {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (inferência base zero/few-shot, fine-tuning e pipeline agêntico) e escopo de tradução entre Serial, OpenMP e CUDA.",
+      "localizador": "Seção I (Research Questions)"
+    },
+    "procedimento": {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção do PARATRANS, template de prompt (Fig. 3), hiperparâmetros e arquitetura dos agentes são descritos; os prompts de reparo dos agentes não são mostrados e o número de execuções por condição não é informado.",
+      "localizador": "Seções III, IV-B, V-B, V-D; Fig. 1; Fig. 3"
+    },
+    "comparador": {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linhas de base (0-shot; sem agente; modelo base), mas o pipeline usa GPT-4o-mini nos agentes mesmo com Questioner LLaMA, misturando modelos, e o resultado principal do resumo combina várias estratégias.",
+      "localizador": "Resumo; Seção V-D"
+    },
+    "metricas": {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Taxas de compilação e validação definidas e verificadas por execução no HECBENCH; porém a avaliação inclui reparo com GPT-4o-mini após troca da função main, não há testes estatísticos nem medidas de variabilidade.",
+      "localizador": "Seção IV-A"
+    },
+    "ameacas": {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças à validade; limitações aparecem apenas em Trabalhos Futuros (desempenho em execução, ablação, outras linguagens).",
+      "localizador": "Seção VI"
+    },
+    "reprodutibilidade": {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código e conjunto de dados declarados disponíveis no GitHub (sem URL no texto extraído); hiperparâmetros, hardware e partições informados; GPT-4o-mini via API sem versão/data de acesso.",
+      "localizador": "Resumo; Seção IV-B; Tabela I"
+    },
+    "contaminacao": {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O PARATRANS deriva do HECBENCH, suíte pública; o texto não discute possível presença desses códigos nos dados de treino dos modelos.",
+      "localizador": "Seção III"
+    }
+  }
+}
