@@ -260,3 +260,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: «Pode ler os 64 agora» (D95).
 - Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) no registro dos PDFs, nos grupos, no selo e no formulário.
 - Revisão humana: pendente; o autor confere os 64 estudos no formulário cego.
+
+## T07 — ficha de extração e piloto (10/11/2026)
+
+- Pedido do autor: registrar a proposta de extração revista («Sim, registrar»), D97.
+- Executores: Claude Code (Claude Opus 5.5), proposta, prompt ex-v2, atualização do protocolo e sorteio do piloto; Codex (IA), dois pareceres de auditoria sobre a proposta.
+- Revisão humana: o autor aprovou a proposta; as fichas do piloto ainda não existem.

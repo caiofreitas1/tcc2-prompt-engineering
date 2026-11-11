@@ -217,7 +217,7 @@ ou de tabela desordenada.
 | Lote piloto (T05) | Triagem independente de 100 registros aleatórios, sem ver as decisões das IAs | κ de Cohen autor × consenso das IAs; revocação |
 | Exclusões de título e resumo (T05) | Amostra aleatória de 100 exclusões consensuais das IAs | Estimar estudos relevantes perdidos |
 | Texto completo (T06) | Todas as divergências e inclusões; 20% (mínimo 15) das exclusões consensuais | Constituir o corpus |
-| Extração (T07) | 20% das extrações (mínimo 10), priorizando as que sustentam afirmações | Confirmar `revisao_humana` |
+| Extração (T07) | Estudo como unidade (ficha, extrações e qualidade): `max(10, teto(0,20 × N))` estudos, com N = incluídos finais, priorizando os que sustentam afirmações e distribuídos por tarefa e técnica; os 10 do piloto contam se conferidos na versão final da ficha (D97) | Confirmar `revisao_humana` dos estudos conferidos |
 | Texto (T12) | Cada afirmação de `dados/afirmacoes.csv` contra o original | Marcar `sustentada` |
 
 **Regra de parada no piloto:** se o autor incluir um registro que as duas IAs
@@ -271,6 +271,23 @@ riscos e mitigações), que alimenta QP2 e QP3. A extração numérica detalhada
 QP1 é feita para cada comparação reportada; não se comparam números entre
 condições incompatíveis.
 
+**Complemento de 10/11/2026 (D97):** a extração usa o prompt `ex-v2`
+(`protocolo/prompts/extracao-v2.md`), versão de piloto até a calibração em 10 estudos.
+Cada estudo incluído recebe uma ficha classificatória completa (tarefas, técnicas com nome
+original, mecanismo atribuído pelo TCC e papel focal, comparador ou componente, modelos,
+benchmarks, métricas, riscos, mitigações e os sete critérios de qualidade). A extração
+numérica não é exaustiva: até três comparações por estudo como alvo, escolhidas sem
+considerar ganho, perda, significância ou tamanho do efeito, nesta ordem: resultado
+principal declarado pelo estudo; na falta ou empate, a primeira tabela com resultados
+elegíveis de prompting para tarefas do escopo, a primeira métrica pertinente e o primeiro
+modelo; depois, cobertura de técnicas focais e tarefas ainda não representadas. Técnica
+focal sem número extraído fica marcada como só classificada. Resultados nulos, inversões e
+condições discrepantes são registrados à parte, como busca dirigida de heterogeneidade, sem
+serem tratados como amostra neutra. A taxonomia é multirrótulo, com dicionário de
+mecanismos; frequências contam estudos distintos e informam a sobreposição. O trabalho
+segue por lotes: metadados e I4 do lote, extração, conferência. A seleção de comparações
+é simplificação da revisão rápida e limita as conclusões da QP1.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios
@@ -297,6 +314,11 @@ não ranquear técnicas entre estudos incompatíveis; separar resultado medido,
 inferência do TCC e sugestão dos autores. A taxonomia e a tabela de apoio à
 escolha são examinadas em oito cenários, dois por tarefa, quanto a clareza,
 justificativa nas fontes e orientação concreta; isso não mede eficácia.
+Complemento de 10/11/2026 (D97): os cenários têm origem sintética declarada, são
+aprovados pelo autor e congelados antes do exame, junto com a versão da tabela aplicada;
+incluem situações de evidência insuficiente, em que a ausência de recomendação pode ser a
+resposta adequada. Registram-se, por cenário e critério, julgamento, justificativa e
+ambiguidades.
 
 ## 12. Cronograma (D33–D34)
 

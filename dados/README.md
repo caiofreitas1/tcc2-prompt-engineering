@@ -87,6 +87,20 @@ Contrato 2 (extrações a partir do protocolo v2, marcadas com `"contrato": 2`) 
 - `prompt_versao`: versão do prompt de extração.
 E1–E2 seguem o contrato 1 da T02.
 
+Extrações com `prompt_versao` ex-v2 (D97) acrescentam `selecao` (`principal_declarado`,
+`desempate_ordem` ou `cobertura`), `mecanismos` e `condicoes`, e, quando houver,
+`selecao_motivo` para exceções ao alvo de três por estudo.
+
+## fichas.jsonl
+Uma ficha por estudo incluído, extraída com ex-v2 (D97): estudo_id, tarefas, tecnicas
+(`{nome_original, mecanismos, papel, avaliada_isoladamente, localizador}`, com papel
+focal, comparador ou componente), modelos, benchmarks, metricas, linguagens, riscos,
+mitigacoes, sem_comparador, so_classificadas, heterogeneidade (busca dirigida a
+discrepâncias, não amostra neutra), citacoes, texto_fonte, leitura (completa ou parcial),
+prompt_versao, executor, modelo_executor, data e revisao_humana (pendente ou confirmada,
+com revisor e data_revisao). A conferência humana usa o estudo como unidade: ficha,
+extrações e qualidade do estudo juntas.
+
 ## afirmacoes.csv
 Uma afirmação empírica por linha. `extracao_ids`: IDs separados por ponto e vírgula.
 `status`: rascunho ou sustentada. `bibkey` corresponde à chave conferida no .bib;
