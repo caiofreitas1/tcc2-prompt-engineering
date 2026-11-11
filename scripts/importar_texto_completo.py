@@ -24,7 +24,7 @@ AUTOR = 'Caio César de Freitas'
 # Fim (exclusivo) de cada leva no JSONL cumulativo e a data da leitura.
 LEVAS = [(36, '2026-11-05'), (196, '2026-11-06'), (256, '2026-11-07')]
 # Levas em arquivos selados próprios (D92, D95): todas as leituras do arquivo têm a mesma data.
-LEVAS_ARQUIVO = {'-r2.jsonl': '2026-11-08', '-r3.jsonl': '2026-11-08'}
+LEVAS_ARQUIVO = {'-r2.jsonl': '2026-11-08', '-r3.jsonl': '2026-11-08', '-r4.jsonl': '2026-11-11'}
 CAMPOS_TRIAGEM = ['estudo_id', 'fase', 'decisao', 'criterio', 'motivo', 'responsavel',
                   'natureza', 'prompt_versao', 'data']
 

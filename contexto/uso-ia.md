@@ -271,3 +271,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 - Agendado em D97; executado por Claude Code (Claude Opus 5.5): metadados e I4 por API, extração ex-v2 em 10 subagentes Opus, verificação das citações e formulário de conferência (D98).
 - Revisão humana: pendente; o autor confere as 10 fichas inteiras no formulário.
+
+## T06 — última leva do texto completo, etapa 3 (11/11/2026)
+
+- Agendada em D95/D96 e executada por Claude Code (Claude Opus 5.5): grupos g97–g105, selo e formulário (D100).
+- Executores da leitura: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2.
+- Revisão humana: pendente; o autor confere os 36 estudos (nº 384–419) no formulário cego.
