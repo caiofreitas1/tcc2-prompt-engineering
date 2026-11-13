@@ -283,3 +283,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: «Terminei a conferência do piloto» e respostas sobre agregado, leitura do PDF e qualidade (D101).
 - Executores: Claude Code (Claude Opus 5.5), análise das correções, prompt ex-v2.1, imagens das páginas e comparação; subagentes Claude Opus 5.5 na reaplicação (23 extrações em três rodadas).
 - Revisão humana: conferência do autor das 10 fichas ex-v2 (13/11/2026); as fichas ex-v2.1 ainda não foram conferidas pelo autor.
+- Formulário de conferência das fichas ex-v2.1 publicado em 13/11/2026 (`evidencias/piloto/formulario-ex-v2.1.html`, coleção `extracao_v21_autor`), com as correções anteriores do autor por estudo; verificação aproximada das citações por `scripts/verificar_citacoes_piloto.py` (60 de 242 não achadas no texto extraído, a conferir no PDF).
