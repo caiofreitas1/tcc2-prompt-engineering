@@ -288,6 +288,24 @@ mecanismos; frequências contam estudos distintos e informam a sobreposição. O
 segue por lotes: metadados e I4 do lote, extração, conferência. A seleção de comparações
 é simplificação da revisão rápida e limita as conclusões da QP1.
 
+**Calibração de 13/11/2026 (D101):** depois da conferência dos 10 estudos do piloto pelo
+autor, a extração passa ao prompt `ex-v2.1` (`protocolo/prompts/extracao-v2.1.md`). Mudanças:
+intervenções que não são prompting (ajuste fino, embeddings aprendidos, parâmetros de
+decodificação, alocação de orçamento, escolha de modelo sem alterar o prompt) ficam em
+`componentes_fora_escopo`, fora das técnicas, das contagens de mecanismos e das comparações;
+os mecanismos de uma técnica incluem todas as categorias presentes; técnica avaliada
+isoladamente exige condição contrafactual; mitigação avaliada exige comparação com condição
+sem ela; o resultado principal declarado precisa ser único, e o desempate vale para tabela
+ou figura, com o agregado impresso (média ou total) preferido à primeira condição quando
+existir; novo benchmark, modelo ou condição da mesma técnica e tarefa não é cobertura;
+números de outros artigos não são comparador executado; os valores selecionados são
+conferidos visualmente no PDF, com null quando a leitura for insegura; a heterogeneidade
+inclui totais que não batem e contradições entre narrativa, tabelas e figuras; as citações
+são orações completas. Na qualidade, `nao_informado` indica que, após busca no texto
+completo, faltam informações para julgar; `nao_atende`, evidência de descumprimento ou
+inadequação; `parcial`, atendimento incompleto; `atende`, evidência suficiente; a ausência
+de seção própria não determina o julgamento.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios

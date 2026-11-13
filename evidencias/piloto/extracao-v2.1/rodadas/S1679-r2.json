@@ -1,0 +1,347 @@
+{
+  "estudo_id": "S1679",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt base (No Hints)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "localizador": "p. PDF 3 (impressa 468), Seção III.B.2, formato do prompt",
+        "observacao": "Enunciado do problema seguido de instruções em linguagem natural (sem comentários ou explicações, E/S por arquivo input.in/output.out, usar Python). É a linha de base das condições com dicas; não há condição sem essas instruções."
+      },
+      {
+        "nome_original": "USACO Hint Prompting (Hint-Driven Prompting)",
+        "mecanismos": ["contexto", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "p. PDF 7-8 (impressas 472-473), Seção V.A, Fig. 2 e Tabela III",
+        "observacao": "Acrescenta ao prompt as dicas oficiais de solução da USACO em inglês (descrições de alto nível, com o código removido pelo crawler). Contrafactual: condição No Hints na Tabela III. O estudo apresenta USACO Hint Prompting e GPT-4o Refined Hint Prompting como as duas abordagens do Hint-Driven Prompting."
+      },
+      {
+        "nome_original": "GPT-4o Refined Hint Prompting (GPT-4o Refined Prompting / GPT-4o Refined Hints)",
+        "mecanismos": ["contexto", "decomposicao", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "p. PDF 8 (impressa 473), Seção V.B, Fig. 3; p. PDF 9 (impressa 474), Tabela III e Fig. 4",
+        "observacao": "Encadeamento: o GPT-4o recebe o enunciado e a dica oficial e é solicitado a reescrevê-la como instruções passo a passo de implementação; essas instruções refinadas são fornecidas ao LLM gerador. Contrafactual: condição No Hints (e USACO Hints) na Tabela III."
+      },
+      {
+        "nome_original": "Syntax Mitigation Prompt",
+        "mecanismos": ["instrucao", "restricoes", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "p. PDF 9 (impressa 474), Seção VI.A; p. PDF 9-10, Figs. 5-7",
+        "observacao": "Lista de seis regras em linguagem natural para evitar SyntaxError, IndentationError, ValueError e NameError, texto extra no código e função não chamada, com exemplos de código errado (mecanismo 'outro': exemplos negativos de erros, não exemplos resolvidos). Aplicado junto com as GPT-4o refined hints; o contrafactual é a condição GPT-4o Refined Hints sem o prompt (Figs. 5-7)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Parsing e limpeza da saída (extração do bloco markdown, remoção do parâmetro de linguagem)",
+        "natureza": "outro",
+        "localizador": "p. PDF 3 (impressa 468), Seção III.B.2; pós-processamento da resposta, não prompting"
+      },
+      {
+        "nome_original": "Limite de tempo de 5 segundos na execução dos casos de teste",
+        "natureza": "outro",
+        "localizador": "p. PDF 4 (impressa 469), Seção III.B.3; critério de avaliação (TIMEOUT), não prompting"
+      }
+    ],
+    "modelos": [
+      "GPT-4o",
+      "Codestral 22B",
+      "Deepseek-Coder 33B",
+      "CodeGemma 7B",
+      "Llama 3 8B",
+      "DBRX 132B",
+      "Codellama 70B",
+      "Codellama 7B",
+      "Phi3 3B",
+      "Phi3 14B",
+      "Mistral 7B (rotulado 'Mistral' na Tabela I, 'Mistral 7B' nas Tabelas II-III e 'Mistral 8B' em um exemplo de código da Seção IV.B; versão não informada de forma consistente)",
+      "GPT-4o também usado como refinador das dicas (Seção V.B)"
+    ],
+    "benchmarks": [
+      "USACO Benchmark (derivado da USA Computing Olympiad, divisões Bronze, Silver, Gold e Platinum): 471 problemas e 6,464 casos de teste; os experimentos de dicas contam casos de teste aprovados sobre os 6,464 casos (p. PDF 8, impressa 473)"
+    ],
+    "metricas": [
+      "USACO Score: pontos por caso de teste aprovado (100 pontos por problema divididos entre os casos), com multiplicador por divisão (1x, 1.5x, 2x, 3x) e percentual do total possível (Tabela I)",
+      "Número de casos de teste aprovados (Tabela III)",
+      "Taxa de aprovação (%) por caso de teste (Fig. 4)",
+      "Contagem e distribuição percentual de resultados por tipo de erro (FAIL, TIMEOUT, exceções Python) (Tabela II, Fig. 1)",
+      "Número de casos de teste com SyntaxError, IndentationError e NameError (Figs. 5-7)"
+    ],
+    "linguagens": ["Python (código gerado)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros de lógica (FAIL) são a principal causa de falha: 36,8% na distribuição geral dos 11 modelos; a taxa geral de aprovação é 3,0%.",
+        "localizador": "p. PDF 6 (impressa 471), Seção IV.C; p. PDF 7, Fig. 1(f)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros de sintaxe e exceções (IndentationError 18,4%, ValueError 9,8%, SyntaxError 8,1%) contribuem para falhas do código gerado. Há ambiguidade de denominador: o texto descreve os 36,8% como 'logical failures' da distribuição geral e também como '36.8% of the test cases that fail', embora a distribuição da Fig. 1(f) inclua PASS.",
+        "localizador": "p. PDF 6 (impressa 471), Seções IV.C e V; p. PDF 7, Fig. 1(f)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Eficiência: soluções que funcionam mas são lentas, evidenciadas pela alta ocorrência de TIMEOUT (por exemplo, 22,3% para GPT-4o).",
+        "localizador": "p. PDF 1 (impressa 466), Introdução; p. PDF 6 (impressa 471), Seção IV.C"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Benchmarks existentes sofrem contaminação de dados que distorce o desempenho relatado; o estudo afirma que a USACO é menos provável de estar nos dados de treino.",
+        "localizador": "p. PDF 1 (impressa 466), Introdução; p. PDF 3 (impressa 468), Seção III.A"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Hint-Driven Prompting (USACO hints e GPT-4o refined hints) para reduzir erros de lógica, comparado à condição sem dicas.",
+        "avaliada": "sim",
+        "localizador": "p. PDF 8-9 (impressas 473-474), Seção V, Tabela III e Fig. 4"
+      },
+      {
+        "descricao": "Syntax Mitigation Prompt para reduzir erros de sintaxe, comparado à condição GPT-4o Refined Hints sem o prompt.",
+        "avaliada": "sim",
+        "localizador": "p. PDF 9-10 (impressas 474-475), Seção VI, Figs. 5-7"
+      },
+      {
+        "descricao": "Uso de problemas da USACO, supostamente ausentes de benchmarks prévios, para reduzir contaminação.",
+        "avaliada": "nao",
+        "localizador": "p. PDF 2 (impressa 467), contribuições; p. PDF 3 (impressa 468), Seção III.A"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inconsistência entre o resumo e a Tabela III (cálculo próprio): pelas contagens da Tabela III (No Hints → GPT-4o Refined Hints), as razões são DBRX 278/42 ≈ 6,6; Deepseek-coder 801/269 ≈ 3,0; Codegemma 429/169 ≈ 2,5; Codellama 212/45 ≈ 4,7; Llama 3 130/62 ≈ 2,1; GPT-4o 1.359/1.087 ≈ 1,25. O resumo e as contribuições atribuem 4.7x a Deepseek-Coder 33B, 3x a Codegemma 7B e 2.5x a Codellama 7B, o que não corresponde ao pareamento da tabela.",
+        "localizador": "p. PDF 1 (impressa 466), resumo; p. PDF 2 (impressa 467), contribuições; p. PDF 9 (impressa 474), Tabela III"
+      },
+      {
+        "descricao": "Inversões com as dicas: com USACO hints, Codegemma 7B cai de 169 para 128, Llama 3 de 62 para 54 e Codellama de 45 para 41; com GPT-4o refined hints, Codellama 70B cai de 45 (No Hints) e 78 (USACO Hints) para 8, Codestral 22B de 423 para 73 (atribuído a aumento de IndentationError), Phi3 de 20 para 0; Mistral 7B permanece em 0 em todas as condições.",
+        "localizador": "p. PDF 8-9 (impressas 473-474), Seção V e Tabela III"
+      },
+      {
+        "descricao": "O mesmo valor difere entre tabelas: casos aprovados sem dicas na Tabela II (PASS) vs. Tabela III (No Hints): GPT-4o 1,088 vs. 1,087; DBRX 41 vs. 42; Llama 3 61 vs. 62; Codellama 7B 44 vs. 45; Phi3 3B 19 vs. 20.",
+        "localizador": "p. PDF 7 (impressa 472), Tabela II; p. PDF 9 (impressa 474), Tabela III"
+      },
+      {
+        "descricao": "Valor de base de SyntaxError do Codegemma 7B com GPT-4o Refined Hints impresso de duas formas: '1,285' em um parágrafo e '1,286' em outro parágrafo e no rótulo da Fig. 5. Cálculo próprio: nenhum dos dois produz exatamente 71,32% de redução até 369 (≈71,28% e ≈71,31%).",
+        "localizador": "p. PDF 9-10 (impressas 474-475), Fig. 5 e Seção VI.B"
+      },
+      {
+        "descricao": "Narrativa vs. figuras: o texto afirma que a queda em todos os modelos indica que o Syntax Mitigation Prompt é melhor para reduzir erros de sintaxe, mas os rótulos da Fig. 7 mostram aumento de NameError para Deepseek-Coder 33B (77 → 197) e para GPT-4o (20 → 43), e a Fig. 6 mostra aumento de IndentationError para Deepseek-Coder 33B (0 → 47); o texto trata as mudanças de IndentationError como 'net change under 47' e a de GPT-4o em NameError como não significativa.",
+        "localizador": "p. PDF 10 (impressa 475), Figs. 6-7 e Seção VI.B"
+      },
+      {
+        "descricao": "Relato seletivo: apenas cinco dos 11 modelos foram selecionados para as Figs. 5-7, escolhidos 'to show an overall decrease in syntax bugs'; o efeito do Syntax Mitigation Prompt sobre a aprovação não é quantificado (apenas 'generally maintaining that same number of test cases').",
+        "localizador": "p. PDF 9-10 (impressas 474-475), Seção VI.B"
+      },
+      {
+        "descricao": "Totais da Tabela II (cálculo próprio): as colunas não somam 6,464 casos de teste por modelo (por exemplo, Deepseek 33B soma 6.443, Llama 3 8B soma 6.451 e GPT-4o soma 6.471); o estudo não declara que as colunas devam somar o total, mas não explica a diferença.",
+        "localizador": "p. PDF 7 (impressa 472), Tabela II"
+      },
+      {
+        "descricao": "Classificação conceitual: o estudo trata ValueError e outras exceções Python como 'syntax bugs' ('Python exception (i.e. fail to pass due to syntax bugs)'), embora ocorram em tempo de execução.",
+        "localizador": "p. PDF 4 (impressa 469), Seção III.B.3; p. PDF 6 (impressa 471), Seção IV.C"
+      },
+      {
+        "descricao": "As dicas são descrições oficiais da solução (com o código removido), de modo que a condição com dicas fornece ao modelo a estratégia de solução; o estudo declara que a metodologia simula um humano dando instruções claras passo a passo.",
+        "localizador": "p. PDF 3 (impressa 468), Seção III.B.1; p. PDF 8 (impressa 473), Seção V.B"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Geração via framework Ollama (Python), com flags de configuração (modelo, tamanho, uso de dicas); 'we generate three versions of code' por problema, sem explicar se são as três condições ou repetições; parâmetros de decodificação e número de execuções não informados.",
+        "localizador": "p. PDF 3 (impressa 468), Seção III.B.2"
+      },
+      {
+        "descricao": "Ranking dos 11 modelos pelo USACO Score sem dicas (Tabela I): GPT-4o 13,109 pontos (15.19%); Phi3-14b e Mistral 0.",
+        "localizador": "p. PDF 4 (impressa 469), Tabela I"
+      },
+      {
+        "descricao": "Tabela III usa cores de fundo (verde, amarelo, vermelho) para agrupar modelos, sem legenda explicativa.",
+        "localizador": "p. PDF 9 (impressa 474), Tabela III"
+      },
+      {
+        "descricao": "Repositório do benchmark citado no GitHub (referência [26]); não acessado nem validado nesta extração.",
+        "localizador": "p. PDF 11 (impressa 476), referência [26]"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Through a detailed analysis, we identify common code generation errors across the models and propose Hint-Driven Prompts to address logic errors, alongside the Syntax Mitigation Prompt to reduce syntax bugs.",
+        "localizador": "p. PDF 1 (impressa 466), resumo"
+      },
+      {
+        "trecho": "To assist LLMs in identifying and correcting logic errors, we propose a Hint-Driven Prompting methodology, which encompasses two approaches: USACO Hint Prompting and GPT-4o Refined Hint Prompting.",
+        "localizador": "p. PDF 6 (impressa 471), Seção V"
+      },
+      {
+        "trecho": "Specifically, the USACO solution hints written in English is first provided to GPT-4o along with the original problem statement for context.",
+        "localizador": "p. PDF 8 (impressa 473), Seção V.B"
+      },
+      {
+        "trecho": "The refined solution hints generated by GPT-4o are subsequently fed into the LLMs, and their generated code are evaluated in the same manner as before.",
+        "localizador": "p. PDF 8 (impressa 473), Seção V.B"
+      },
+      {
+        "trecho": "Note: This Syntax Mitigation Prompt is given alongside the GPT-4o refined hints for LLMs to generate code.",
+        "localizador": "p. PDF 9 (impressa 474), Seção VI.A"
+      },
+      {
+        "trecho": "Specifically, 36.8% of the test cases that fail are due to logic errors in the code generated by LLMs.",
+        "localizador": "p. PDF 6 (impressa 471), Seção V"
+      },
+      {
+        "trecho": "This is evident from the high occurrence of “timeout” errors when evaluating code on our proposed USACO benchmark, which features complex test cases.",
+        "localizador": "p. PDF 1 (impressa 466), Introdução"
+      },
+      {
+        "trecho": "First, USACO is less likely to be included in training data compared to other coding platforms like CodeForces, minimizing concerns of benchmark leakage and overfitting [21].",
+        "localizador": "p. PDF 3 (impressa 468), Seção III.A"
+      },
+      {
+        "trecho": "Five models out of 11 models tested were selected to show an overall decrease in syntax bugs, including Deepseek-Coder 33B, Codellama 70B, Codegemma 7B, Llama 3 8B, and GPT-4o.",
+        "localizador": "p. PDF 9-10 (impressas 474-475), Seção VI.B"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "GPT-4o Refined Hint Prompting (Hint-Driven Prompt)",
+      "mecanismos": ["contexto", "decomposicao", "instrucao"],
+      "comparador": "No Hints (prompt base)",
+      "modelo": "DBRX 132B",
+      "benchmark": "USACO Benchmark",
+      "metrica": "Número de casos de teste aprovados",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 42, "intervencao": 278},
+      "denominador": "6,464 casos de teste",
+      "condicoes": "Geração via Ollama; execução com limite de 5 s por caso; parâmetros de decodificação e número de execuções não informados. O resumo expressa o resultado como aumento de 6.6x na taxa de aprovação; a contagem sem dicas do DBRX é 41 na Tabela II e 42 na Tabela III. Conferido visualmente na Tabela III (p. PDF 9).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara como resultado principal o aumento da taxa de aprovação pelo Hint-Driven Prompt em vários modelos, sem agregado impresso; usou-se o primeiro modelo na ordem de apresentação do resumo (DBRX 132B). Os fatores do resumo correspondem à condição GPT-4o Refined Hints vs. No Hints.",
+      "localizador": "p. PDF 9 (impressa 474), Tabela III; p. PDF 1 (impressa 466), resumo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Our results demonstrate that the Hint-Driven Prompt boosts pass rates for DBRX 132B, Deepseek-Coder 33B, Codegemma 7B, Codellama 7B, Llama 3, and GPT-4o by 6.6x, 4.7x, 3x, 2.5x, 2.1x, and 25%, respectively.",
+          "localizador": "p. PDF 1 (impressa 466), resumo"
+        },
+        {
+          "trecho": "DBRX 132B experiences a significant enhancement as well, with test cases passed increasing from 49 to 278, an improvement of 229 test cases.",
+          "localizador": "p. PDF 8 (impressa 473), Seção V.B"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Syntax Mitigation Prompt",
+      "mecanismos": ["instrucao", "restricoes", "outro"],
+      "comparador": "GPT-4o Refined Hints sem o Syntax Mitigation Prompt",
+      "modelo": "Codegemma 7B",
+      "benchmark": "USACO Benchmark",
+      "metrica": "Número de casos de teste com SyntaxError",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 1286, "intervencao": 369},
+      "denominador": "nao_informado (casos de teste com SyntaxError entre os 6,464 casos; denominador não declarado nas figuras)",
+      "condicoes": "Syntax Mitigation Prompt aplicado junto com as GPT-4o refined hints. Valor de base como impresso no rótulo da Fig. 5 e no segundo parágrafo da p. PDF 10 (1,286); outro parágrafo da mesma página imprime 1,285, sem que se possa escolher um como verdadeiro. Rótulos da Fig. 5 conferidos com o texto extraído do PDF; a resolução da imagem é baixa para os rótulos, mas as barras e o texto são coerentes. Efeito sobre a aprovação não quantificado pelo estudo.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara como resultado principal a redução de erros de sintaxe pelo Syntax Mitigation Prompt em vários modelos, sem agregado impresso; usou-se o primeiro modelo na ordem de apresentação do resumo (Codegemma 7B, 71.32%). Técnica focal distinta da primeira extração.",
+      "localizador": "p. PDF 9 (impressa 474), Fig. 5; p. PDF 10 (impressa 475), Seção VI.B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Additionally, the Syntax Mitigation Prompt significantly reduces syntax errors, with reductions of 71.32% for Codegemma 7B, 25.56% for Deepseek-Coder 33B, 23.39% for Llama 3, and 11.19% for Codellama 70B.",
+          "localizador": "p. PDF 1 (impressa 466), resumo"
+        },
+        {
+          "trecho": "Deepseek-Coder 33B decreases from 450 to 335 test cases (25.56%), Codellama 70B decreases from 1,242 to 1,103 test cases (11.19%), Codegemma 7B decreases from 1,285 to 369 test cases (71.32%), and Llama 3 decreases from 425 to 326 test cases(23.39%).",
+          "localizador": "p. PDF 10 (impressa 475), Seção VI.B"
+        },
+        {
+          "trecho": "Models like Codegemma 7B which decreases from 1,286 to 369 SyntaxError test cases, are brought to a more competitive level among other models with a chance of testing its code logically instead of syntactically.",
+          "localizador": "p. PDF 10 (impressa 475), Seção VI.B"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "USACO Hint Prompting",
+      "mecanismos": ["contexto", "instrucao"],
+      "comparador": "No Hints (prompt base)",
+      "modelo": "Deepseek-coder:33b",
+      "benchmark": "USACO Benchmark",
+      "metrica": "Número de casos de teste aprovados",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 269, "intervencao": 299},
+      "denominador": "6,464 casos de teste",
+      "condicoes": "Dicas oficiais da USACO em inglês com o código removido; geração via Ollama; limite de 5 s por caso; parâmetros de decodificação e número de execuções não informados. Conferido visualmente na Tabela III (p. PDF 9).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante do Hint-Driven Prompting que o estudo trata como abordagem distinta e ainda não representada; primeira tabela com o resultado (Tabela III), primeira métrica e primeiro modelo listado.",
+      "localizador": "p. PDF 9 (impressa 474), Tabela III; p. PDF 8 (impressa 473), Seção V.A",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Deepseek-Coder 33B exhibits a modest improvement, increasing from 269 to 299 passed test cases with a notable 11.2% gain.",
+          "localizador": "p. PDF 8 (impressa 473), Seção V.A"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (benchmark, tipos de erro, abordagens sem retreinamento) e contribuições enumeradas.",
+      "localizador": "p. PDF 1-2 (impressas 466-467), Introdução (RQ1-RQ3 e contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline (crawling, formato do prompt, geração via Ollama, verificação com limite de 5 s, pontuação) e os prompts das técnicas são descritos, mas não são informados parâmetros de decodificação, número de execuções, versões/quantização dos modelos no Ollama nem o template completo de inserção das dicas; 'three versions of code' não é explicado; cinco modelos foram selecionados para as figuras de sintaxe.",
+      "localizador": "p. PDF 3-4 (impressas 468-469), Seção III.B; p. PDF 8-10, Seções V-VI"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há condições contrafactuais executadas (No Hints vs. USACO Hints vs. GPT-4o Refined Hints; Refined Hints com e sem Syntax Mitigation Prompt), mas a comparação de sintaxe é relatada para cinco dos 11 modelos selecionados para mostrar redução e sem a aprovação correspondente.",
+      "localizador": "p. PDF 9-10 (impressas 474-475), Tabela III, Figs. 5-7, Seção VI.B"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas (casos aprovados, pontuação ponderada por divisão, contagem de erros por tipo), mas sem repetições, variância ou testes estatísticos, com valores divergentes entre Tabelas II e III e entre o resumo e a Tabela III.",
+      "localizador": "p. PDF 4 (impressa 469), Seção III.C; p. PDF 7 e 9, Tabelas II e III; p. PDF 1, resumo"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de ameaças discute apenas o tamanho do conjunto de dados; não aborda não determinismo, seleção de modelos, uso das soluções oficiais como dicas nem contaminação não verificada.",
+      "localizador": "p. PDF 10 (impressa 475), Seção VII"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompt base, prompt de refinamento e Syntax Mitigation Prompt são impressos e um repositório do benchmark é citado (não acessado nesta extração), mas faltam parâmetros de decodificação, versões exatas dos modelos e número de execuções.",
+      "localizador": "p. PDF 3 (impressa 468); p. PDF 8-9 (impressas 473-474); p. PDF 11 (impressa 476), referência [26]"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo discute contaminação e escolhe a USACO por ser menos provável nos dados de treino e ausente de benchmarks prévios, mas não apresenta verificação (por exemplo, análise temporal ou teste de memorização).",
+      "localizador": "p. PDF 1-3 (impressas 466-468), Introdução, Seções II.C e III.A"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-01", "p-07", "p-08", "p-09", "p-10"],
+    "observacao": "Texto extraído lido integralmente (11 páginas, incluindo referências). Os rótulos numéricos das Figs. 5-7 têm baixa resolução na imagem e foram conferidos contra o texto extraído do PDF e as barras."
+  }
+}

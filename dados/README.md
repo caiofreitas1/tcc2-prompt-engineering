@@ -101,6 +101,13 @@ prompt_versao, executor, modelo_executor, data e revisao_humana (pendente ou con
 com revisor e data_revisao). A conferência humana usa o estudo como unidade: ficha,
 extrações e qualidade do estudo juntas.
 
+Com ex-v2.1 (D101), a ficha acrescenta `componentes_fora_escopo`
+(`{nome_original, natureza, localizador}`, natureza `ajuste_fino`, `embeddings_aprendidos`,
+`decodificacao`, `orcamento`, `selecao_modelo` ou `outro`) e `observacoes`;
+`avaliada_isoladamente` aceita só `sim` ou `nao`; `qualidade` é uma lista de sete objetos.
+As extrações acrescentam `sentido` (`maior_melhor` ou `menor_melhor`), `denominador` e
+`conferido_pdf` (`sim` ou `nao`).
+
 ## afirmacoes.csv
 Uma afirmação empírica por linha. `extracao_ids`: IDs separados por ponto e vírgula.
 `status`: rascunho ou sustentada. `bibkey` corresponde à chave conferida no .bib;

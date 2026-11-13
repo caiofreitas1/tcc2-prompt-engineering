@@ -277,3 +277,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Agendada em D95/D96 e executada por Claude Code (Claude Opus 5.5): grupos g97–g105, selo e formulário (D100).
 - Executores da leitura: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2.
 - Revisão humana: pendente; o autor confere os 36 estudos (nº 384–419) no formulário cego.
+
+## T07 — calibração da ficha de extração (13/11/2026)
+
+- Pedido do autor: «Terminei a conferência do piloto» e respostas sobre agregado, leitura do PDF e qualidade (D101).
+- Executores: Claude Code (Claude Opus 5.5), análise das correções, prompt ex-v2.1, imagens das páginas e comparação; subagentes Claude Opus 5.5 na reaplicação (23 extrações em três rodadas).
+- Revisão humana: conferência do autor das 10 fichas ex-v2 (13/11/2026); as fichas ex-v2.1 ainda não foram conferidas pelo autor.
