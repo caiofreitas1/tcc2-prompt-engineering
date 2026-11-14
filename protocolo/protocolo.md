@@ -306,6 +306,23 @@ completo, faltam informações para julgar; `nao_atende`, evidência de descumpr
 inadequação; `parcial`, atendimento incompleto; `atende`, evidência suficiente; a ausência
 de seção própria não determina o julgamento.
 
+**Segunda calibração, 14/11/2026 (D102):** depois da conferência das fichas ex-v2.1 pelo
+autor, a extração passa ao prompt `ex-v2.2` (`protocolo/prompts/extracao-v2.2.md`).
+O resultado principal declarado exige uma técnica, uma métrica e um comparador sem
+desempate. Sem comparador executado, a extração é descritiva, com linha de base nula.
+Quando não há tabela nem figura com o contraste, vale o contraste relatado em prosa, sem
+calcular a condição não impressa. Cada técnica registra a unidade do isolamento (pacote,
+ingrediente, contraste pareado, cumulativo ou nenhum). Contrastes pareados derivados de
+uma matriz de ingredientes só completam o alvo de três, por ordem predeterminada.
+Os mecanismos cobrem o pacote completo, e os acrescentados ficam em campo próprio. Só
+valem agregados impressos compatíveis. Os rótulos de enumeração passam por validação
+(`scripts/validar_ficha_extracao.py`), e linhas de tabela valem como citação. A ausência
+de relato não vira valor. Linhas de base da tabela de resultados do estudo contam como
+comparador, mesmo com valores vindos dos autores originais, com a origem registrada.
+As saídas brutas de cada rodada ficam preservadas, com a versão do prompt, e as correções
+manuais ficam à parte. A concordância nos estudos de calibração não estima a acurácia da
+extração em estudos novos; essa estimativa depende da conferência da amostra de 20%.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios

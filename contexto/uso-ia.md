@@ -284,3 +284,10 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executores: Claude Code (Claude Opus 5.5), análise das correções, prompt ex-v2.1, imagens das páginas e comparação; subagentes Claude Opus 5.5 na reaplicação (23 extrações em três rodadas).
 - Revisão humana: conferência do autor das 10 fichas ex-v2 (13/11/2026); as fichas ex-v2.1 ainda não foram conferidas pelo autor.
 - Formulário de conferência das fichas ex-v2.1 publicado em 13/11/2026 (`evidencias/piloto/formulario-ex-v2.1.html`, coleção `extracao_v21_autor`), com as correções anteriores do autor por estudo; verificação aproximada das citações por `scripts/verificar_citacoes_piloto.py` (60 de 242 não achadas no texto extraído, a conferir no PDF).
+
+## T07 — segunda calibração da ficha de extração (14/11/2026)
+- Pedido do autor: «Feito», com as propostas P1–P10 e a indicação de não considerar o novo documento do Codex (13/11/2026); reaplicação agendada pelo agente para depois da renovação da janela de 5 horas (D102).
+- Executores: Claude Code (Claude Opus 5.5), importação da conferência, prompt ex-v2.2, validador de rótulos, comparação com as notas do autor e correções manuais registradas; subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações em duas rodadas (14/11/2026).
+- Revisão humana: conferência do autor das 10 fichas ex-v2.1 (13/11/2026). As fichas ex-v2.2 não foram conferidas pelo autor; a correção S570 `outro` → `instrucao` e os esclarecimentos da rodada 2 aguardam confirmação.
+- Verificação: `scripts/validar_ficha_extracao.py` sem erros nas 10 fichas finais; verificação aproximada das citações (62 de 253 não achadas no texto extraído, a conferir no PDF).
+

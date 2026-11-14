@@ -105,9 +105,11 @@ rótulos listados, sem texto acrescentado; explicações vão nos campos descrit
     pré-treinamento. Se o estudo controla o risco (por exemplo, conjuntos disjuntos entre
     exemplos e teste), registre o risco e o controle em `mitigacoes`; o controle não apaga
     o risco. Não afirme contaminação efetiva nem controle que o estudo não descreve.
-  - `custo`: só quando o estudo apresenta custo, tempo ou esforço como desvantagem. Esforço
-    manual descrito sem essa qualificação vai para `observacoes`, sem apresentá-lo como
-    custo medido; se o estudo não quantifica o custo, diga «não quantificado».
+  - `custo`: só quando o próprio estudo trata o aspecto como custo (dinheiro, tokens,
+    tempo de execução ou recursos computacionais). Esforço manual ou sobrecarga do usuário
+    descritos como desvantagem, sem que o estudo os chame de custo, vão para `observacoes`
+    (ou para `outro`, se o estudo os apresentar como limitação), sem apresentá-los como
+    custo; se o estudo não quantifica o custo, diga «não quantificado».
 - `mitigacoes`: `{descricao, avaliada, localizador}`; `avaliada` = `sim` só se o estudo
   mede o efeito da mitigação contra uma condição sem ela; procedimentos de controle (por
   exemplo, média de execuções, conjuntos disjuntos) sem essa comparação são `nao`.
@@ -115,6 +117,13 @@ rótulos listados, sem texto acrescentado; explicações vão nos campos descrit
   executar outra condição. Números de outros artigos citados para contraste não são
   comparador executado: nesse caso `sem_comparador` = `sim`, `baseline` = null e o
   contraste vai para `heterogeneidade`. Não invente linha de base.
+  Distinção (D102): linhas de base que o estudo apresenta na **sua tabela de resultados**,
+  no mesmo benchmark e na mesma métrica da condição avaliada, contam como comparador,
+  mesmo quando os valores vêm de patches ou resultados fornecidos pelos autores originais
+  ou relatados em artigos anteriores; registre essa origem e as diferenças de condição
+  (backbone, orçamento, número de amostras) em `condicoes` e `heterogeneidade`. Não contam
+  como comparador os números de outro artigo citados no texto para contraste, com outra
+  amostra, outro prompt ou outra versão do benchmark.
 - `so_classificadas`: técnicas focais que ficaram sem extração numérica, com o motivo.
 - `heterogeneidade`: resultados nulos, inversões, limitações ou condições discrepantes,
   cada um com `{descricao, localizador}`. Procure também: totais e subtotais das tabelas
@@ -148,7 +157,9 @@ efeito**:
    condição comparadora. Se for preciso escolher o comparador pela ordem de uma tabela,
    se o estudo destacar várias técnicas ou variantes sem que uma prevaleça, ou várias
    métricas como principais (no resumo ou na seção de método) sem que uma prevaleça, use o
-   item 2. Com técnica, métrica e comparador identificados, se o resultado abranger vários
+   item 2. Em estudo sem comparador executado (`sem_comparador` = `sim`), o principal
+   declarado exige uma técnica e uma métrica destacadas pelo estudo, e a extração é
+   descritiva (ver abaixo). Com técnica, métrica e comparador identificados, se o resultado abranger vários
    benchmarks, conjuntos, modelos ou condições, use o agregado impresso compatível (ver
    abaixo); sem ele, o primeiro na ordem das tabelas de resultados (não na ordem do
    resumo).
@@ -167,7 +178,10 @@ efeito**:
 3. `cobertura`: uma comparação para cada técnica focal de prompting ou tarefa do escopo
    ainda não representada, pela mesma regra de ordem. Novo benchmark, modelo ou condição
    da mesma técnica e tarefa **não** é cobertura. Variantes que o estudo trata como
-   técnicas distintas contam como técnicas, na ordem em que aparecem. Componentes
+   técnicas distintas contam como técnicas, na ordem em que aparecem; variantes que o
+   estudo apresenta como formulações próprias e avalia em linhas separadas (por exemplo,
+   versão de camada única e de camadas múltiplas) entram como técnicas distintas em
+   `tecnicas` e recebem cobertura (D102). Componentes
    isolados entram por cobertura só para completar o alvo de três, nunca justificam
    exceção ao alvo, nesta ordem: primeiro os da tabela de ablação, na ordem da tabela;
    depois, se ainda faltar, os contrastes pareados (D102), assim:
@@ -188,7 +202,9 @@ agregado compatível, aplique a ordem acima.
 **Resultado sem comparador (D102):** quando o estudo só executa a condição avaliada, a
 extração é descritiva: `comparador` = null, `resultado.baseline` = null e, na ficha,
 `sem_comparador` = `sim`. A condição avaliada nunca é seu próprio comparador. Não descreva o
-resultado como efeito da técnica.
+resultado como efeito da técnica. Em estudo que tem comparador executado para outras
+técnicas, uma técnica focal avaliada só sem comparador não recebe extração descritiva: vai
+para `so_classificadas`, com o motivo.
 
 Cada extração tem: `tarefa`, `tecnica` (nome original), `mecanismos` (todos os da condição
 de intervenção, D102), `mecanismos_acrescentados` (D102), `comparador`, `modelo`,

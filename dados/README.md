@@ -108,6 +108,18 @@ Com ex-v2.1 (D101), a ficha acrescenta `componentes_fora_escopo`
 As extrações acrescentam `sentido` (`maior_melhor` ou `menor_melhor`), `denominador` e
 `conferido_pdf` (`sim` ou `nao`).
 
+Com ex-v2.2 (D102):
+- **Técnicas:** acrescentam `mecanismos_acrescentados`, contido em `mecanismos`, que
+  passa a cobrir o pacote completo, e `tipo_contrafactual`: `pacote`, `ingrediente` ou
+  `contraste_pareado` com `avaliada_isoladamente` = `sim`, e `cumulativo` ou `nenhum` com
+  `nao`.
+- **`componentes_fora_escopo`:** acrescenta `descricao`; `natureza` aceita só o rótulo.
+- **Extrações:** acrescentam `mecanismos_acrescentados` e `derivacao` (`direta` ou
+  `contraste_pareado`). Resultado descritivo tem `comparador` e `baseline` nulos e
+  `sem_comparador` = `sim`.
+- **Validação:** `scripts/validar_ficha_extracao.py` confere os rótulos antes de uma
+  ficha ser aceita.
+
 ## afirmacoes.csv
 Uma afirmação empírica por linha. `extracao_ids`: IDs separados por ponto e vírgula.
 `status`: rascunho ou sustentada. `bibkey` corresponde à chave conferida no .bib;
