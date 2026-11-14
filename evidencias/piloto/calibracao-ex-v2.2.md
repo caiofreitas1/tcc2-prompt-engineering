@@ -104,7 +104,7 @@ uma prevaleça); S303 E0, idem (sem comparador único no resumo).
      «aparente inconsistência», com arredondamento ou escala não informados.
   3. S570: a rodada 2 rotulou como `outro` a reformulação da especificação em linguagem
      natural; a rodada 1 usara `instrucao`, que o dicionário cobre. A ficha final usa
-     `instrucao`. **Pendente de confirmação do autor.**
+     `instrucao`, confirmada pelo autor em 14/11/2026.
 - As correções de ex-v2.1 que eram manuais (métricas `parcial` em S303 e S1304) foram
   reproduzidas pela rodada 2.
 - Validador: as 10 fichas finais passam.
@@ -131,4 +131,4 @@ uma prevaleça); S303 E0, idem (sem comparador único no resumo).
   variantes juntadas; mecanismo `instrucao` ou `outro`). Em escala, essa variação só aparece
   na conferência.
 - Os esclarecimentos da rodada 2 foram derivados das aprovações anteriores do autor
-  (S303, S1304, S1695, S1775) e precisam da confirmação dele.
+  (S303, S1304, S1695, S1775) e confirmados por ele em 14/11/2026 («Confirmo os dois»).
