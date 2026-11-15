@@ -1,0 +1,454 @@
+{
+  "estudo": "S4",
+  "texto_fonte": "fontes/textos/lote/S4.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot Prompt (baseline)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Fig. 2, p. 8 do PDF (p. impressa 8); Seção 3.4.2, p. 17",
+        "observacao": "Prompt base de RQ1 e linha de base de RQ4. Contém persona/papel e objetivo em linguagem natural («You are a powerful model specialized in refactoring Java code», definição de refatoração, «You must output a refactored version of the code») → instrucao; o código anterior à refatoração do desenvolvedor, dividido em um bloco por arquivo do commit, é fornecido como insumo → contexto. Usa o símbolo «#» como delimitador. É a condição comparadora; não há condição sem ela, por isso nao/nenhum."
+      },
+      {
+        "nome_original": "Chain-of-thought",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3.4.2, p. 17; Fig. 7, p. 18; Tabela 7, p. 18; Tabela 8, p. 19",
+        "observacao": "Herda do prompt base a instrução (persona e objetivo) e o código a refatorar. Acrescenta (i) o pedido «Explain the steps you took to refactor the code and why you selected the refactoring type/types you did» → raciocinio (o pedido de explicação não está posicionado explicitamente antes do código) e (ii) a seção «# Suggested refactoring types: {refactorings developers performed on this commit with definitions}», isto é, tipos de refatoração com definições, sem exemplos → contexto; essa seção também funciona como diretriz (instrucao, categoria já presente no prompt base). O contrafactual é o pacote completo contra o zero-shot, com o mesmo modelo e os mesmos commits; o ganho não pode ser atribuído só ao raciocínio nem só às sugestões, que não são isoladas. As sugestões derivam das refatorações que o desenvolvedor fez no mesmo commit (ver heterogeneidade). Não é pacote híbrido."
+      },
+      {
+        "nome_original": "One-Shot Prompt",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3.4.2, p. 17; Fig. 8, p. 18; Tabela 7, p. 18; Tabela 8, p. 19",
+        "observacao": "Herda do prompt base a instrução (idêntica à da Fig. 2) e o código a refatorar. Acrescenta um exemplo de código antes e depois da refatoração feita pelo desenvolvedor («{code_segment_before_refactoring}» seguido de «{developer_code_after_refactoring}») → exemplos e, por ser código fornecido como demonstração, contexto (D102). Segundo o texto, o exemplo usa o mesmo tipo de refatoração do commit que o LLM vai refatorar; na Fig. 8 os marcadores do exemplo e do alvo têm o mesmo nome, e o texto não esclarece se o exemplo vem do mesmo trecho (ver heterogeneidade). O contrafactual é o pacote (zero-shot + exemplo) contra o zero-shot, com o mesmo modelo e os mesmos commits."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {
+        "nome": "StarCoder2-15B-Instruct",
+        "versao": "v0.1 («StarCoder2-15B-Instruct-v0.1», p. 20); na p. 2 grafado «StarCoder2-15B-instruct»",
+        "observacao": "Único modelo avaliado. Parâmetros de decodificação (temperatura, top-p, tamanho máximo) nao_informado. Inferência em 4 GPUs Nvidia A100 de 80 GB, Ubuntu 22.04.4 LTS (p. 7). O desempenho de 46,3% de pass@1 no HumanEval é citado como informação de fundo (p. 2), não é resultado executado pelo estudo."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto próprio de commits de refatoração de projetos Java Apache (dataset 20-MAD, refatorações detectadas por RMiner a partir do dataset de estudo anterior [30])",
+        "quantidade": "30 projetos Java; 5.194 commits de refatoração; 39.309 arquivos (p. 2, p. 7)",
+        "observacao": "Seleção: 765 projetos Apache do 20-MAD → 195 projetos Java após filtros (≥80% Java, ≥1.021 commits, ≥1 ano de histórico) → exclusão de 135 projetos incluídos no treinamento do StarCoder2 (texto cita «the commits of the 60 projects») → exclusão dos projetos com menos que a mediana (129) de commits de refatoração → 30 projetos (p. 4). Só commits com 100% da variação de código composta por refatorações (p. 4-5). Amostra de commits por projeto com nível de confiança de 95% e margem de erro de 5% (p. 7). Testes unitários gerados por EvoSuite; o texto fala em 39.309 testes unitários gerados, mesmo número dos arquivos (p. 7). O denominador de cada taxa (por commit, arquivo ou trecho, e se a média é entre projetos) não é ligado explicitamente ao corpus na Tabela 7; a Tabela 2 indica médias e medianas «Across the 30 Projects»."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Unit Test Pass Rate (Pass@1, Pass@3, Pass@5)",
+        "definicao": "pass@1: uma solução por trecho, aprovada se passar nos testes unitários; pass@3/pass@5: três ou até cinco soluções, aprovado se ao menos uma passar em todos os testes (p. 8). Na Tabela 7 aparece só «Unit Test Pass Rate (%)», sem indicar o k para Chain-of-thought e One-shot.",
+        "localizador": "p. 8; Tabela 2, p. 9; Tabela 7, p. 18"
+      },
+      {
+        "nome": "Code smell reduction rate (SRR)",
+        "definicao": "Taxa de melhoria IR = (A_before − A_after)/A_before × 100, aplicada à contagem de code smells detectados pelo DesigniteJava 2.5.2; para o LLM, calculada só sobre código cujas refatorações passam nos testes (p. 8-10).",
+        "localizador": "Eq. (2), p. 9; p. 10; Tabela 7, p. 18"
+      },
+      {
+        "nome": "Improvement in code metrics (%)",
+        "definicao": "IR aplicado a 11 métricas do Understand (acoplamento, modularidade, coesão e complexidade ciclomática, Tabela 1).",
+        "localizador": "Tabela 1, p. 6; Tabela 3, p. 11; Tabela 8, p. 19"
+      },
+      {
+        "nome": "Testes estatísticos",
+        "definicao": "Mann-Whitney U (p < 0,05) e Cliff's delta em RQ1-RQ3; Scott-Knott sobre as distribuições por projeto em RQ4 (rank reportado só para SRR na Tabela 7 e para cada métrica na Tabela 8).",
+        "localizador": "p. 9; p. 12; p. 15; p. 18"
+      }
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Refatorações geradas pelo StarCoder2 podem alterar a funcionalidade do código; com o prompt zero-shot, a taxa média de aprovação nos testes é 28,4% em Pass@1 e 57,2% em Pass@5 (Tabela 2), contra 100% para os desenvolvedores.",
+        "localizador": "Seção 3.1.3, p. 9; Tabela 2, p. 9"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo identifica alucinação do modelo, isto é, código que parece correto mas não é lógica ou sintaticamente válido, como ameaça à validade interna, e sugere que o LLM pode alucinar em algumas gerações que tentam tratar code smells complexos.",
+        "localizador": "Seção 4, p. 20; Seção 3.1.3, p. 11"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Risco de vazamento de dados: se o LLM foi treinado no mesmo código, o desempenho pode ser inflado artificialmente; mesmo com projetos fora do conjunto de treinamento, padrões semelhantes podem estar presentes no treinamento. O controle (modelo com dados de treinamento públicos e exclusão dos projetos incluídos na The Stack v2) está em mitigacoes.",
+        "localizador": "Seção 1, p. 2; Seção 2.1, p. 4; Seção 4, p. 20"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Na motivação, o estudo afirma, com base em literatura citada, que código gerado por LLM pode ter projeto ruim ou introduzir dívida técnica e aumentar custos de manutenção; não é risco medido no estudo.",
+        "localizador": "Seção 1, p. 2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Escolha do StarCoder2-15B-Instruct, treinado no conjunto público The Stack v2, e exclusão dos 135 projetos Java incluídos no treinamento, para evitar vazamento de dados.",
+        "avaliada": "nao",
+        "localizador": "Seção 1, p. 2; Seção 2.1, p. 4"
+      },
+      {
+        "descricao": "Verificação da funcionalidade por testes unitários gerados com EvoSuite; validação manual de 381 testes amostrados (348, 91,3%, válidos) e filtragem de padrões de testes que falham por dependências ausentes ou asserções estritas demais.",
+        "avaliada": "nao",
+        "localizador": "Seção 2.2.4, p. 5-7"
+      },
+      {
+        "descricao": "Contra alucinação, verificação da saída por testes unitários e inspeção de código inválido; o estudo reconhece que o risco permanece.",
+        "avaliada": "nao",
+        "localizador": "Seção 4, p. 20"
+      },
+      {
+        "descricao": "Recomendação de testes abrangentes ao usar LLMs como o StarCoder2, para garantir a correção do código refatorado.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.1.3, p. 9"
+      },
+      {
+        "descricao": "Regeneração de várias refatorações por entrada (Pass@5) é sugerida porque o LLM pode alucinar em algumas gerações; o estudo compara SRR de Pass@1 e Pass@5, mas não mede alucinação com e sem a regeneração.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.1.3, p. 11"
+      },
+      {
+        "descricao": "Execução de todos os experimentos no mesmo servidor, com hardware e software idênticos.",
+        "avaliada": "nao",
+        "localizador": "Seção 4, p. 19-20"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Condição de geração incerta em RQ4: os valores do zero-shot na Tabela 7 (28,36% de aprovação; 39,45% de SRR) coincidem, com arredondamento, com as médias de Pass@1 da Tabela 2 (28,4%; 39,5%), mas o texto afirma que a melhor geração de Pass@5 é usada para responder às questões seguintes. O estudo não informa se Chain-of-thought e One-shot foram avaliados com uma ou até cinco gerações por entrada.",
+        "localizador": "Tabela 2, p. 9; Seção 3.1.3, p. 12; Tabela 7, p. 18"
+      },
+      {
+        "descricao": "As melhorias relatadas como «6.15%» e «3.52%» (One-shot) e «3.86%» e «2.89%» (Chain-of-thought) correspondem, por cálculo próprio, às diferenças em pontos percentuais entre as linhas da Tabela 7 (34,51 − 28,36; 42,97 − 39,45; 32,22 − 28,36; 42,34 − 39,45), e não a variações relativas.",
+        "localizador": "Resumo, p. 1; Seção 1, p. 3; Tabela 7, p. 18"
+      },
+      {
+        "descricao": "O resumo afirma que gerar cinco refatorações por entrada aumenta a taxa de aprovação em 28,8% e que a combinação de one-shot com múltiplas gerações dá o melhor desempenho. Por cálculo próprio, 28,8 corresponde à diferença em p.p. entre as médias de Pass@5 (57,2%) e Pass@1 (28,4%) da Tabela 2, obtidas com o prompt zero-shot; nenhuma tabela reporta One-shot com múltiplas gerações.",
+        "localizador": "Resumo, p. 1; Tabela 2, p. 9; Tabela 7, p. 18"
+      },
+      {
+        "descricao": "A narrativa afirma que one-shot e chain-of-thought melhoram «significativamente» a correção funcional, mas a Tabela 7 traz rank de Scott-Knott só para SRR; não há teste estatístico reportado para a taxa de aprovação nos testes unitários, e o Scott-Knott é descrito sobre melhorias de qualidade (SRR e métricas de código) por projeto.",
+        "localizador": "Seção 3.4.2, p. 18; Tabela 7, p. 18; Resumo dos resultados, p. 19"
+      },
+      {
+        "descricao": "A narrativa diz que one-shot «consistently yields the best performance across various metrics», mas na Tabela 8 Chain-of-thought supera One-shot em CountClassCoupled (23,4 contra 22,7), CountDeclClassVariable (14,0 contra 13,8), CountDeclInstanceVariable (20,2 contra 19,8) e PercentLackOfCohesion (23,5 contra 23,1; ranks 1 e 2).",
+        "localizador": "Tabela 8, p. 19; Seção 3.4.3, p. 19"
+      },
+      {
+        "descricao": "As condições de intervenção recebem informação derivada da refatoração do desenvolvedor no mesmo commit, ausente do zero-shot: o prompt Chain-of-thought inclui as refatorações que os desenvolvedores realizaram nesse commit, com definições, e o One-shot usa exemplo do desenvolvedor com o mesmo tipo de refatoração do commit (na Fig. 8, os marcadores do exemplo e do alvo têm o mesmo nome). O estudo não discute esse aspecto; os ganhos de RQ4 não são separáveis dessa informação.",
+        "localizador": "Seção 3.4.2, p. 17; Figs. 7 e 8, p. 18"
+      },
+      {
+        "descricao": "A conclusão informa redução de 43,36% de code smells «de implementação», enquanto RQ1 e o resumo de resultados informam 44,36% para todos os code smells do código que passa nos testes (12.213 → 6.795).",
+        "localizador": "Seção 3.1.3, p. 10; Resumo dos resultados, p. 12; Seção 6, p. 22"
+      },
+      {
+        "descricao": "A redução de code smells do LLM (44,36%) é calculada só sobre o código cujas refatorações passam nos testes (12.213 smells iniciais), enquanto a dos desenvolvedores (24,27%) usa o conjunto inicial de 17.429 smells: denominadores diferentes. O «20.1% higher rate» corresponde, por cálculo próprio, a 44,36 − 24,27 = 20,09 p.p.; o mesmo valor 20,1 aparece como ganho médio de aprovação de Pass@1 para Pass@3.",
+        "localizador": "Seção 3.1.3, p. 9-11"
+      },
+      {
+        "descricao": "O texto afirma melhora de Pass@5 (57,15%) sobre «Pass@3 (8.7%)», mas a média de Pass@3 na Tabela 2 é 48,5%; 8,7% é o ganho relatado de Pass@3 para Pass@5.",
+        "localizador": "Seção 3.1.3, p. 9; Tabela 2, p. 9"
+      },
+      {
+        "descricao": "As referências às figuras estão trocadas: o texto diz que a Fig. 4 mostra as taxas de aprovação e a Fig. 3 a distribuição de code smells, mas as legendas e os gráficos mostram o contrário; a legenda da Fig. 4 menciona só refatorações do LLM, embora o gráfico traga também antes da refatoração e refatoração do desenvolvedor.",
+        "localizador": "Seção 3.1.3, p. 9-10; Figs. 3 e 4, p. 10"
+      },
+      {
+        "descricao": "A narrativa diz que o LLM supera os desenvolvedores em 10 dos 16 tipos de code smell, mas a Tabela 4 tem 11 linhas com «LLM» (7 de implementação e 4 de projeto, como o próprio texto detalha); contagem própria das linhas da tabela.",
+        "localizador": "Tabela 4, p. 13; Seção 3.2.3, p. 13"
+      },
+      {
+        "descricao": "A narrativa atribui «large effect sizes» à vantagem dos desenvolvedores em Missing Default, Insufficient Modularization e Multifaceted Abstraction, mas a Tabela 4 classifica Missing Default (0,4488) e Multifaceted Abstraction (0,4636) como «Medium».",
+        "localizador": "Tabela 4, p. 13; Seção 3.2.3, p. 13"
+      },
+      {
+        "descricao": "Em RQ3 o texto diz que o StarCoder2 aplica Rename Method e Extract Method com mais frequência que os desenvolvedores, mas em RQ4 afirma que Chain-of-thought acrescenta sete tipos não observados com zero-shot, incluindo Extract Method e Rename Method; na leitura visual dos rótulos da Fig. 6, esses dois tipos não aparecem.",
+        "localizador": "Seção 3.3.3 e Fig. 6, p. 15; Seção 3.4.3, p. 19"
+      },
+      {
+        "descricao": "O mesmo número, 39.309, é usado para os testes unitários gerados e para os arquivos dos 5.194 commits; aparente inconsistência ou coincidência não explicada.",
+        "localizador": "Seção 2.2.4 e Seção 3.1.2, p. 7"
+      },
+      {
+        "descricao": "Limitações declaradas: um único modelo e versão (StarCoder2-15B-Instruct-v0.1), projetos Java do ecossistema Apache, seleção aleatória de commits, refatorações limitadas a um commit, métricas que não captam legibilidade nem desempenho e dependência das ferramentas usadas.",
+        "localizador": "Seção 4, p. 20"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Geração de múltiplas refatorações por entrada (Pass@3, Pass@5) com seleção da melhor solução, primeiro pela aprovação nos testes e depois pela maior redução de code smells e melhoria de métricas, é usada como critério de avaliação em RQ1 com o prompt zero-shot. Não foi registrada em `tecnicas` porque o estudo a apresenta como métrica/critério de avaliação, não como técnica de prompting investigada, e a seleção usa o oráculo de testes.",
+        "localizador": "Seção 3.1.2, p. 8; Tabela 2, p. 9"
+      },
+      {
+        "descricao": "RQ1-RQ3 comparam refatorações do LLM (zero-shot) com as dos desenvolvedores; o desenvolvedor não é condição de prompting e esses contrastes não entram em `extracoes`.",
+        "localizador": "Seções 3.1-3.3, p. 7-17"
+      },
+      {
+        "descricao": "Ferramentas: RMiner (RefactoringMiner) 3.0, DesigniteJava 2.5.2, Understand, EvoSuite, Apache Maven e Mockito. Geração das refatorações em cerca de 6 dias para 5.194 commits (cerca de 1,6 minuto por commit); o estudo descreve a geração em todos os commits como computacionalmente cara e demorada, motivo da amostragem.",
+        "localizador": "Seções 2.2-2.3, p. 5-7; Seção 3.1.2, p. 7; Seção 3.3.2, p. 14"
+      },
+      {
+        "descricao": "Pacote de replicação indicado por link no GitHub; não acessado nem validado nesta extração.",
+        "localizador": "Seção 1, p. 3"
+      },
+      {
+        "descricao": "Número de execuções independentes por condição e sementes nao_informado; o k de Pass@k é parâmetro da métrica, não número de execuções.",
+        "localizador": "Seções 3.1.2 e 3.4.2, p. 8 e 17-18"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Specifically, we (1) evaluate whether the code refactored by the LLM or by developers is more effective at improving code quality, (2) understand the differences between the types of refactoring applied by the LLM and developers and compare their effectiveness, and (3) evaluate whether the quality of the refactored code generated by the LLM can be improved through one-shot prompting and chain-of-thought prompting.",
+        "localizador": "Resumo, p. 1"
+      },
+      {
+        "trecho": "You are a powerful model specialized in refactoring Java code.",
+        "localizador": "Fig. 2, p. 8"
+      },
+      {
+        "trecho": "The LLM is specifically prompted to refactor Java code and we break the code snippets into chunks (i.e., one chunk for each file in a commit).",
+        "localizador": "Seção 3.1.2, p. 8"
+      },
+      {
+        "trecho": "Zero-shot Prompt (baseline): This prompt is the baseline used in RQ1.",
+        "localizador": "Seção 3.4.2, p. 17"
+      },
+      {
+        "trecho": "Chain-of-thought: Shown in Figure 7, this prompt provides suggestions for refactorings, along with the explanation of that refactoring type, by including common refactoring patterns developers perform that the LLM does not.",
+        "localizador": "Seção 3.4.2, p. 17"
+      },
+      {
+        "trecho": "Explain the steps you took to refactor the code and why you selected the refactoring type/types you did.",
+        "localizador": "Fig. 7, p. 18"
+      },
+      {
+        "trecho": "{refactorings developers performed on this commit with definitions}",
+        "localizador": "Fig. 7, p. 18 (linha do prompt sob «# Suggested refactoring types:»)"
+      },
+      {
+        "trecho": "We provide the LLM with an example by the developer that uses the same refactoring type on the commit the LLM will refactor.",
+        "localizador": "Seção 3.4.2, p. 17"
+      },
+      {
+        "trecho": "Refactorings generated by StarCoder2 can sometimes propose changes that may affect the functionality of the code.",
+        "localizador": "Seção 3.1.3, p. 9"
+      },
+      {
+        "trecho": "A potential threat to internal validity is the occurrence of model hallucination, where StarCoder2 may generate code that appears correct but is not logically or syntactically valid.",
+        "localizador": "Seção 4, p. 20"
+      },
+      {
+        "trecho": "Overfitting could occur if the LLM has been trained on the same code, potentially leading to artificial inflation of its performance and resulting in over-optimistic results [5].",
+        "localizador": "Seção 1, p. 2"
+      },
+      {
+        "trecho": "Although we select projects not included in the StarCoder2 training dataset, there is still a possibility that similar code patterns or practices could be present in the training set of the model, which might give the LLM an advantage.",
+        "localizador": "Seção 4, p. 20"
+      },
+      {
+        "trecho": "LLMs are trained using an enormous amount of open-source code; therefore, if the training code has flaws, the generated code could suffer from poor design [52] or introduce technical debts [7].",
+        "localizador": "Seção 1, p. 2"
+      },
+      {
+        "trecho": "To mitigate the risk of data leakage, we choose StarCoder2-15B-instruct [24], trained on the publicly available dataset, The Stack v2 [24].",
+        "localizador": "Seção 1, p. 2"
+      },
+      {
+        "trecho": "To avoid data leakage, we filter out the 135 Java projects from our initial dataset that are included in the StarCoder2.",
+        "localizador": "Seção 2.1, p. 4"
+      },
+      {
+        "trecho": "Of the 381 unit tests, 348 tests (91.3%) were valid and functional, meaning they executed as expected without encountering the above issues.",
+        "localizador": "Seção 2.2.4, p. 7"
+      },
+      {
+        "trecho": "We account for this by verifying the output through unit test evaluations and inspecting for invalid code, but hallucinations remain an inherent risk in LLM-generated code.",
+        "localizador": "Seção 4, p. 20"
+      },
+      {
+        "trecho": "Therefore, it is recommended to have comprehensive testing when utilizing LLMs like StarCoder2 to ensure the correctness and integrity of the refactored code.",
+        "localizador": "Seção 3.1.3, p. 9"
+      },
+      {
+        "trecho": "This suggests that regenerating refactorings multiple times can enhance the effectiveness of code smell reduction, as the LLM may hallucinate for some refactoring generations that attempt to address complex code smells.",
+        "localizador": "Seção 3.1.3, p. 11"
+      },
+      {
+        "trecho": "We use the best refactoring generation from pass@5 to answer the remaining research questions.",
+        "localizador": "Seção 3.1.3, p. 12"
+      },
+      {
+        "trecho": "Our findings show that One-shot prompting improves unit test pass rate over the zero-shot prompt by 6.15% and reduces code smells at a 3.52% higher rate.",
+        "localizador": "Resumo, p. 1"
+      },
+      {
+        "trecho": "When generating five refactorings per input, StarCoder2 achieves a unit test pass rate of 28.8% higher than when generating one refactoring per input, which indicates that the combination of one-shot prompting with multiple refactoring generations per input leads to the best performance.",
+        "localizador": "Resumo, p. 1"
+      },
+      {
+        "trecho": "To assess whether the prompting techniques lead to statistically significant improvements, we perform the Scott-Knott test [11] across the three distributions: zero-shot, one-shot, and chain-of-thought.",
+        "localizador": "Seção 3.4.2, p. 18"
+      },
+      {
+        "trecho": "One-shot prompting consistently yields the best performance across various metrics, including code complexity and modularity, by providing a concrete example of refactoring.",
+        "localizador": "Seção 3.4.3, p. 19"
+      },
+      {
+        "trecho": "Incorporating examples (i.e., one-shot prompt) or providing more explicit instructions (i.e., chain-of-thought prompt) significantly improves both the functional correctness and overall quality of the refactorings generated by StarCoder2.",
+        "localizador": "Resumo dos resultados de RQ4, p. 19"
+      },
+      {
+        "trecho": "Our findings indicate that StarCoder2 outperforms developers in reducing implementation code smells, achieving a reduction rate of 43.36%, compared to developers’ code smell reduction rate of 24.27%.",
+        "localizador": "Seção 6, p. 22"
+      },
+      {
+        "trecho": "StarCoder2 reduces the initial number of code smells from 12,213 to 6,795 showing a code smell reduction rate of 44.36% for 30 projects.",
+        "localizador": "Seção 3.1.3, p. 10"
+      },
+      {
+        "trecho": "The refactored code generated by StarCoder2 achieves a 57.15% unit test pass rate at Pass@5, indicating substantial improvement over Pass@1 (28.36%) and Pass@3 (8.7%).",
+        "localizador": "Seção 3.1.3, p. 9"
+      },
+      {
+        "trecho": "The LLM outperforms developers in reducing 10 of the 16 types of code smells.",
+        "localizador": "Seção 3.2.3, p. 13"
+      },
+      {
+        "trecho": "Furthermore, chain-of-thought prompting increases the variety of refactoring types performed by the LLM, adding seven new refactoring types not observed with zero-shot prompting: Extract Method, Rename Method, Extract Variable, Inline Method, Add Parameter, Extract Class, and Parameterize Variable.",
+        "localizador": "Seção 3.4.3, p. 19"
+      },
+      {
+        "trecho": "We randomly select 381 unit tests from 39,309 generated unit tests to assess each one to determine if it is valid and functional.",
+        "localizador": "Seção 2.2.4, p. 7"
+      },
+      {
+        "trecho": "Therefore, we have 5,194 commits containing a total of 39,309 files for testing the model.",
+        "localizador": "Seção 3.1.2, p. 7"
+      },
+      {
+        "trecho": "Our study is based on the latest open-source version of StarCoder2-15B-Instruct-v0.1, as of the date of our study.",
+        "localizador": "Seção 4, p. 20"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Chain-of-thought",
+      "mecanismos": ["instrucao", "contexto", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio", "contexto"],
+      "comparador": "Zero-shot",
+      "modelo": "StarCoder2-15B-Instruct-v0.1",
+      "benchmark": "Conjunto próprio: commits de refatoração de 30 projetos Java Apache (20-MAD) não incluídos na The Stack v2",
+      "metrica": "Unit Test Pass Rate (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 28.36, "intervencao": 32.22},
+      "denominador": "nao_informado (a Tabela 7 não informa a unidade nem o número de casos; o corpus tem 5.194 commits e 39.309 arquivos de 30 projetos, mas o estudo não liga a taxa a esse total; o valor do zero-shot coincide com a média entre os 30 projetos de Pass@1 da Tabela 2)",
+      "condicoes": "Mesmo modelo e mesmos commits nas três condições. Não se informa se Chain-of-thought foi avaliado com uma geração por entrada (Pass@1) ou com a melhor de até cinco (Pass@5): o valor do zero-shot corresponde ao Pass@1 médio da Tabela 2, embora o texto diga que as questões seguintes usam a melhor geração de Pass@5. O prompt Chain-of-thought inclui as refatorações que os desenvolvedores realizaram no mesmo commit, com definições, informação ausente do zero-shot. Parâmetros de decodificação, número de execuções e sementes nao_informado. A Tabela 7 não traz teste estatístico para esta métrica (o rank de Scott-Knott refere-se só a SRR). Pacote completo contra zero-shot; o ganho não é atribuível só ao raciocínio. conferido_pdf: valores lidos na imagem da p. 18 (resolução baixa, mas legíveis) e coincidentes com a prosa das p. 3, 18 e 19.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam duas técnicas (one-shot e chain-of-thought) e duas métricas (taxa de aprovação nos testes e redução de code smells) sem que uma prevaleça. A Tabela 7 é a primeira tabela com o contraste de prompting (a Tabela 2 só traz o zero-shot e o desenvolvedor); primeira métrica: Unit Test Pass Rate; único modelo; linha de base: Zero-shot; primeira técnica listada após a linha de base: Chain-of-thought.",
+      "derivacao": "direta",
+      "localizador": "Tabela 7, p. 18 do PDF (p. impressa 18)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Zero-shot 28.36% 39.45% 2", "localizador": "Tabela 7, p. 18, linha Zero-shot; colunas Prompting Method, Unit Test Pass Rate (%), SRR (%), Scott-Knott Rank (SRR)"},
+        {"trecho": "Chain-of-thought 32.22% 42.34% 1", "localizador": "Tabela 7, p. 18, linha Chain-of-thought; colunas Prompting Method, Unit Test Pass Rate (%), SRR (%), Scott-Knott Rank (SRR)"}
+      ]
+    },
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "One-Shot Prompt",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "Zero-shot",
+      "modelo": "StarCoder2-15B-Instruct-v0.1",
+      "benchmark": "Conjunto próprio: commits de refatoração de 30 projetos Java Apache (20-MAD) não incluídos na The Stack v2",
+      "metrica": "Unit Test Pass Rate (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 28.36, "intervencao": 34.51},
+      "denominador": "nao_informado (a Tabela 7 não informa a unidade nem o número de casos; o corpus tem 5.194 commits e 39.309 arquivos de 30 projetos, mas o estudo não liga a taxa a esse total; o valor do zero-shot coincide com a média entre os 30 projetos de Pass@1 da Tabela 2)",
+      "condicoes": "Mesmo modelo e mesmos commits nas três condições. Um exemplo (one-shot) de código antes e depois da refatoração feita pelo desenvolvedor, com o mesmo tipo de refatoração do commit a refatorar; o texto não esclarece se o exemplo vem do mesmo trecho (os marcadores da Fig. 8 têm o mesmo nome). Não se informa se One-shot foi avaliado com uma geração por entrada ou com a melhor de até cinco. Parâmetros de decodificação, número de execuções e sementes nao_informado. A Tabela 7 não traz teste estatístico para esta métrica (o rank de Scott-Knott refere-se só a SRR). conferido_pdf: valores lidos na imagem da p. 18 (resolução baixa, mas legíveis) e coincidentes com a prosa das p. 1, 3 e 18.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal de prompting ainda não representada; pela mesma regra de ordem, Tabela 7, primeira métrica (Unit Test Pass Rate), único modelo e linha de base Zero-shot. Não há tabela de ablação nem contraste pareado que difira em um único ingrediente, por isso o alvo fica em duas comparações.",
+      "derivacao": "direta",
+      "localizador": "Tabela 7, p. 18 do PDF (p. impressa 18)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Zero-shot 28.36% 39.45% 2", "localizador": "Tabela 7, p. 18, linha Zero-shot; colunas Prompting Method, Unit Test Pass Rate (%), SRR (%), Scott-Knott Rank (SRR)"},
+        {"trecho": "One-shot 34.51% 42.97% 1", "localizador": "Tabela 7, p. 18, linha One-shot; colunas Prompting Method, Unit Test Pass Rate (%), SRR (%), Scott-Knott Rank (SRR)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas; RQ4 trata do efeito de chain-of-thought e one-shot sobre a qualidade das refatorações geradas pelo LLM.",
+      "localizador": "Seção 1, p. 2-3; Seção 3.4.1, p. 17"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Seleção de projetos e commits, templates dos prompts (Figs. 2, 7 e 8), ferramentas e testes estatísticos estão descritos. Faltam informar se as condições de RQ4 usam uma ou até cinco gerações por entrada, como o exemplo do one-shot é escolhido (a Fig. 8 sugere o mesmo trecho), os parâmetros de decodificação e o número de execuções.",
+      "localizador": "Seções 2-3, p. 4-8; Seção 3.1.3, p. 12; Seção 3.4.2, p. 17-18"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "O prompt zero-shot é executado como linha de base no mesmo modelo e nos mesmos commits. Porém as intervenções recebem informação derivada da refatoração do desenvolvedor no mesmo commit (tipos de refatoração realizados ou exemplo do desenvolvedor), ausente do comparador, e a correspondência de condições de geração (Pass@1 ou Pass@5) entre as linhas da Tabela 7 não é informada.",
+      "localizador": "Seção 3.4.2, p. 17; Figs. 7 e 8 e Tabela 7, p. 18; Tabela 2, p. 9"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k e a taxa de melhoria (Eq. 2) estão definidos, e os valores do zero-shot coincidem entre as Tabelas 2, 3, 7 e 8 (com arredondamento na Tabela 2). Mas o denominador da taxa de aprovação na Tabela 7 não é informado; a SRR do LLM e a dos desenvolvedores usam bases diferentes; diferenças em p.p. são relatadas como «%»; e há valores divergentes no texto (43,36% contra 44,36%; «Pass@3 (8.7%)» contra 48,5%).",
+      "localizador": "p. 8-12; Tabela 7, p. 18; Seção 6, p. 22"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute ameaças internas (hardware, alucinação, seleção aleatória de commits, refatorações em vários commits, padrões semelhantes no treinamento), externas (projetos Java Apache, um único modelo e versão) e de construto (métricas e ferramentas), com as medidas tomadas.",
+      "localizador": "Seção 4, p. 19-20"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Há link para pacote de replicação (não acessado), templates dos prompts, versão do modelo, ferramentas com versões e hardware. Faltam parâmetros de decodificação, sementes, número de execuções e a regra de escolha do exemplo do one-shot.",
+      "localizador": "Seção 1, p. 3; Seção 2.3, p. 7; Figs. 2, 7 e 8, p. 8 e 18; Seção 4, p. 20"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "atende",
+      "justificativa": "O estudo escolhe modelo com dados de treinamento públicos, exclui os projetos incluídos na The Stack v2 e reconhece o risco residual de padrões semelhantes no treinamento. O método de verificação da inclusão dos projetos não é detalhado, e o uso de informação do desenvolvedor nos prompts (item de heterogeneidade) não é tratado como contaminação pelo estudo.",
+      "localizador": "Seção 1, p. 2; Seção 2.1, p. 4; Seção 4, p. 20"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-1080, incluindo referências).",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 15, 17, 18, 19, 20, 22]
+  }
+}

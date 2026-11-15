@@ -291,3 +291,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Revisão humana: conferência do autor das 10 fichas ex-v2.1 (13/11/2026). As fichas ex-v2.2 não foram conferidas pelo autor. O autor confirmou a correção S570 `outro` → `instrucao` e os esclarecimentos da rodada 2 (14/11/2026).
 - Verificação: `scripts/validar_ficha_extracao.py` sem erros nas 10 fichas finais; verificação aproximada das citações (62 de 253 não achadas no texto extraído, a conferir no PDF).
 
+
+## T07 — extração em escala, lote 1 (15/11/2026)
+- Pedido do autor: «Seguir com Opus» (14/11/2026); confirmação da regra de `contexto` (D103).
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S1–S129); Claude Code (Claude Opus 5.5), validação, 6 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-01.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

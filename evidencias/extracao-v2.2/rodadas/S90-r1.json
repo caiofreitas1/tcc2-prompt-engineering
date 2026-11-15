@@ -1,0 +1,263 @@
+{
+  "estudo": "S90",
+  "texto_fonte": "fontes/textos/lote/S90.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Liu, Y.; Chen, X.; Gao, Y.; Su, Z.; Zhang, F.; Zan, D.; Lou, J.-G.; Chen, P.-Y.; Ho, T.-Y. Uncovering and Quantifying Social Biases in Code Generation. arXiv:2305.15377v1 [cs.CL], 24 maio 2023 (preprint, under review).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "code prompt template / new paradigm to construct code prompts (two complete functions and a function signature)",
+        "mecanismos": ["exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 2 (Figura 1 e texto), p. 4 (Figura 2 e seção 3.1), p. 10 (Apêndice A, Tabela 8); páginas impressas iguais às do PDF",
+        "observacao": "Prompt de completamento de código com duas funções completas irrelevantes para humanos (carros e maçãs), usadas como demonstrações de código (exemplos e contexto, D102), seguidas de uma assinatura de função incompleta relevante para humanos com modificador de julgamento (ADJ) e dimensão demográfica (HumanAttribute). 'outro': a assinatura com modificador de julgamento e dimensão demográfica funciona como gatilho de elicitação de viés (sondagem), ingrediente que não cabe nas demais categorias. O contrafactual (Tabela 8, 'Num. functions' 0 vs 2) retira as funções completas e mantém a assinatura; não há condição sem a assinatura com modificador. O objetivo da técnica é elicitar e medir viés social, não melhorar o código gerado."
+      },
+      {
+        "nome_original": "prompt sem funções completas (Num. functions = 0)",
+        "mecanismos": ["outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 10, Tabela 8, linha 'Num. functions' valor 0",
+        "observacao": "Condição do estudo preliminar com zero funções no prompt; pela descrição do estudo, presume-se que reste apenas a assinatura incompleta, mas a Tabela 8 e o Apêndice A não descrevem o conteúdo exato dessa condição (nao_informado). Linha de base do contraste da técnica focal."
+      },
+      {
+        "nome_original": "Human Relevancy (funções completas relevantes para humanos: 0Y2N, 1Y1N, 2Y0N)",
+        "mecanismos": ["exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 10, Apêndice A e Tabela 8, bloco 'Human Relevancy'",
+        "observacao": "Varia a relevância para humanos das duas funções completas (0, 1 ou 2 funções relevantes), mantido o número de funções; altera o conteúdo das demonstrações sem acrescentar categoria de mecanismo. A condição adotada no estudo principal é 0Y2N."
+      },
+      {
+        "nome_original": "Function Order (POS vs NEG)",
+        "mecanismos": ["exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 10, Apêndice A e Tabela 8, bloco 'Function Order'",
+        "observacao": "POS: função relevante para humanos posicionada perto da assinatura incompleta; NEG: posicionada longe. Altera só a ordem das duas funções; não acrescenta categoria."
+      },
+      {
+        "nome_original": "judgmental modifiers (RoBERTa-Neg, Random-Neg, Random-Pos, Comparative-Neg, Comparative-Pos)",
+        "mecanismos": ["exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (Tabela 2 e lista de tipos), p. 6 (Tabela 4), p. 11 (Apêndice B)",
+        "observacao": "Cinco tipos de modificadores inseridos no lugar de ADJ na assinatura. As Tabelas 4 e 7 comparam os tipos entre si (por exemplo, RoBERTa-Neg vs Random-Neg, motivação descrita no Apêndice B), mas não há condição sem modificador; por isso 'nao'."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "code bias classifier (BERT-Base; também LSTM Random e LSTM Pretrain)",
+        "natureza": "outro",
+        "descricao": "Classificador treinado com código anotado por humanos e usado como avaliador automático do CBS; é instrumento de medição, não intervenção de prompting.",
+        "localizador": "PDF p. 4-5, seção 3.3 e Figura 3; p. 12-13, Apêndice D"
+      },
+      {
+        "nome_original": "temperature t e top-p",
+        "natureza": "decodificacao",
+        "descricao": "Variação de temperatura e top-p de 0,1 a 0,9 no CodeGen-6B para observar o efeito no CBS.",
+        "localizador": "PDF p. 9, seção 5.2 e Figura 7"
+      },
+      {
+        "nome_original": "sampling number set as 10",
+        "natureza": "decodificacao",
+        "descricao": "Dez amostras por prompt, sem seleção entre respostas; serve para compor o conjunto de código avaliado.",
+        "localizador": "PDF p. 4, seção 3.2"
+      },
+      {
+        "nome_original": "model size / choice of code generation model (Codex, InCoder 1.3B/6.7B, CodeGen 350M/2.7B/6.1B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Os resultados principais comparam modelos e tamanhos com o mesmo paradigma de prompt; a conclusão sobre escolha de modelos com menor viés não é efeito de prompting.",
+        "localizador": "PDF p. 6, Tabela 4 e seção 4.1; p. 9, seção 7"
+      }
+    ],
+    "modelos": [
+      {"nome": "Codex", "versao": "code-davinci-002 (OpenAI Davinci Codex API)", "tamanho": "100B+ (inferido pelos autores; tamanho não divulgado publicamente)", "localizador": "PDF p. 6, nota de rodapé 5 e Tabela 4"},
+      {"nome": "InCoder", "versao": "nao_informado", "tamanho": "1.3B", "localizador": "PDF p. 6, Tabela 4"},
+      {"nome": "InCoder", "versao": "nao_informado", "tamanho": "6.7B (chamado 'InCoder-6B' nas Figuras 1 e 5 e nas Tabelas 5 e 6)", "localizador": "PDF p. 6, Tabela 4; p. 2, Figura 1"},
+      {"nome": "CodeGen Mono", "versao": "nao_informado", "tamanho": "350M", "localizador": "PDF p. 6, Tabela 4"},
+      {"nome": "CodeGen Mono", "versao": "nao_informado", "tamanho": "2.7B (a Tabela 9 menciona 'CodeGen-2B', sem mapeamento explícito)", "localizador": "PDF p. 6, Tabela 4; p. 10, Tabela 9"},
+      {"nome": "CodeGen Mono", "versao": "nao_informado", "tamanho": "6.1B (a seção 5.2 menciona 'CodeGen-6B', sem mapeamento explícito)", "localizador": "PDF p. 6, Tabela 4; p. 9, seção 5.2"},
+      {"nome": "InCoder e CodeGen no estudo preliminar (Tabela 8)", "versao": "nao_informado", "tamanho": "nao_informado", "localizador": "PDF p. 10, Tabela 8"},
+      {"nome": "BERT-Base (uncased, 12 camadas) como classificador de viés", "versao": "nao_informado", "tamanho": "BERT-Base", "localizador": "PDF p. 13, Apêndice D"}
+    ],
+    "benchmarks": [
+      {"nome": "code prompt dataset (conjunto próprio de prompts)", "quantidade": "392 samples (prompts)", "observacao": "Construído com 5 tipos de modificadores (49 modificadores listados na Tabela 2: 25 + 10 + 10 + 2 + 2, contagem própria) e 8 dimensões demográficas; 49 × 8 = 392 (cálculo próprio, compatível com o impresso). Com 10 amostras por prompt, 3920 trechos de código por modelo.", "localizador": "PDF p. 3, Tabela 2; p. 4, seção 3.2"},
+      {"nome": "code bias dataset (código anotado para treinar o classificador)", "quantidade": "Incoder: Train 2744, Dev 784, Test 392; CodeGen: Train 2744, Dev 784, Test 392; Total: Train 5488, Dev 1568, Test 784", "observacao": "Partição 7:2:1. A Tabela 3 não informa a quais tamanhos de InCoder e CodeGen pertencem os 3920 trechos de cada bloco (nao_informado). Somas de Pos + Neg e totais por bloco conferem (cálculo próprio).", "localizador": "PDF p. 4, seção 3.2; p. 5, Tabela 3"},
+      {"nome": "subconjunto de avaliação humana", "quantidade": "8900 samples; 29400 annotations", "observacao": "5 de 10 amostras por dimensão demográfica e categoria de modificador; ver inconsistência aparente em heterogeneidade.", "localizador": "PDF p. 7, seção 4.2"},
+      {"nome": "HumanEval", "quantidade": "nao_informado", "observacao": "Usado apenas para pass@k; os valores foram retirados dos artigos correspondentes, não executados pelo estudo.", "localizador": "PDF p. 6, legenda da Tabela 4"},
+      {"nome": "conjunto do estudo preliminar de construção de prompt (Tabela 8)", "quantidade": "nao_informado", "observacao": "O Apêndice A não informa número de prompts, modificadores, dimensões ou amostras usados no estudo preliminar.", "localizador": "PDF p. 10, Apêndice A e Tabela 8"}
+    ],
+    "metricas": [
+      {"nome": "Code Bias Score (CBS)", "definicao": "proporção de código classificado como enviesado (confiança do classificador ≥ 0,5) entre todo o código gerado, × 100; faixa [0, 100]; maior = mais viés", "denominador": "N = número de código gerado; o valor de N por tabela não é informado explicitamente", "localizador": "PDF p. 5, seção 3.4, Equação (1)"},
+      {"nome": "CBS por avaliação humana (frequência de código enviesado)", "definicao": "mesma ideia do CBS com rótulos humanos", "denominador": "subconjunto anotado; tamanho por célula nao_informado", "localizador": "PDF p. 7, seção 4.2 e Tabela 7"},
+      {"nome": "UnFairness Score (UFS)", "definicao": "(f_d1 − f_d2) / max(f_d1, f_d2), com f_di = N_di / N_bias; faixa [−1,00; 1,00]", "denominador": "N_bias = número de código enviesado", "localizador": "PDF p. 5, Equação (2); p. 6, Tabela 5"},
+      {"nome": "Standard Deviation (SD) da frequência das demografias válidas", "definicao": "desvio-padrão populacional (1/M) de f_dk; faixa declarada [0, 100]", "denominador": "M = número de demografias válidas", "localizador": "PDF p. 5-6, Equação (3); p. 7, Tabela 6"},
+      {"nome": "Pass@k (k ∈ {1, 10, 100})", "definicao": "taxa de aprovação em casos de teste", "denominador": "nao_informado (valores retirados de outros artigos)", "localizador": "PDF p. 6, seção 3.4 e Tabela 4"},
+      {"nome": "acurácia de classificação do classificador de viés", "definicao": "acurácia em validação e teste", "denominador": "Dev 1568 e Test 784 (Tabela 3), ligação explícita com a Figura 3 nao_informado", "localizador": "PDF p. 5, Figura 3"}
+    ],
+    "linguagens": [
+      {"nome": "nao_informado", "observacao": "O texto não nomeia a linguagem; os prompts e saídas mostrados nas figuras têm sintaxe de Python (def, for, append), mas o estudo não o declara.", "localizador": "PDF p. 2, Figura 1; p. 4, Figura 2"}
+    ],
+    "riscos": [
+      {"categoria": "outro", "descricao": "Viés social em código gerado (discriminação contra grupos demográficos), com possíveis consequências em aplicações centradas em pessoas; não é risco de cibersegurança nem de correção funcional.", "localizador": "PDF p. 1, seção 1; p. 8, seção 4.3"},
+      {"categoria": "outro", "descricao": "Modelos maiores e com melhor pass@k apresentaram mais viés social; Codex, em uso prático, gerou o código de melhor qualidade e o viés mais severo.", "localizador": "PDF p. 6, seção 4.1; p. 9, seção 7"},
+      {"categoria": "outro", "descricao": "Limitação de medição: o classificador automático de viés é descrito como imperfeito em relação à avaliação humana.", "localizador": "PDF p. 2, seção 1"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Validação do classificador automático por avaliação humana (Tabela 7 e Figura 4), sem coeficiente de correlação reportado.", "avaliada": "nao", "localizador": "PDF p. 7, seção 4.2"},
+      {"descricao": "Rótulo final por maioria entre três anotadores.", "avaliada": "nao", "localizador": "PDF p. 7, seção 4.2; p. 12, Apêndice C.2"},
+      {"descricao": "Sugestão de escolha de hiperparâmetros (temperatura, top-p) e de modelos com menor viés; o estudo compara valores de hiperparâmetros, mas não avalia uma mitigação contra condição sem ela.", "avaliada": "nao", "localizador": "PDF p. 9, seção 5.2 e seção 7"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt com 0 funções completas (Tabela 8, estudo preliminar); os experimentos principais (Tabelas 4 a 7) comparam modelos e tipos de modificadores com o mesmo paradigma de prompt, sem condição de prompting de referência.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "A Tabela 8 não informa tamanho dos modelos, modificadores, dimensões demográficas, número de amostras nem parâmetros de decodificação do estudo preliminar. Os valores da linha 'Num. functions' 2 (InCoder 31.55; CodeGen 39.30) coincidem numericamente com a coluna RoB. Neg da Tabela 4 para InCoder 6.7B (31.55) e CodeGen 2.7B (39.30), mas o estudo não liga as duas tabelas; a coincidência não foi usada para atribuir condições.", "localizador": "PDF p. 10, Tabela 8; p. 6, Tabela 4"},
+      {"descricao": "Na Tabela 8, os valores da linha NEG (48.38; 56.91) coincidem com os da linha 1Y1N; a tabela não declara que se trata da mesma condição.", "localizador": "PDF p. 10, Tabela 8"},
+      {"descricao": "O Apêndice A afirma que o CBS 'increases significantly' quando as funções são relevantes para humanos, sem teste estatístico ou medida de variabilidade reportados.", "localizador": "PDF p. 10, Apêndice A"},
+      {"descricao": "Narrativa contradiz a definição do sinal do UFS: o texto diz que números negativos indicam julgamento mais intenso para a segunda demografia, mas interpreta −0.24 (Ethnicity, RoB. Neg; par White, Black) como julgamento mais negativo para pessoas brancas, a primeira demografia.", "localizador": "PDF p. 6, seção 4.1 e Tabela 5; p. 5, Equação (2)"},
+      {"descricao": "A legenda da Tabela 6 diz que o código do InCoder-6B não contém demografias válidas para Disability e Politics, mas a coluna Politics traz valores (0.00, 0.50, 0.00, 0.50) e só a linha Comp. Pos tem '-'; a Tabela 5 também traz UFS de Politics (1.00, 0.50, 1.00, -, 1.00) para o mesmo modelo.", "localizador": "PDF p. 7, Tabela 6; p. 6, Tabela 5"},
+      {"descricao": "Aparente inconsistência na avaliação humana: 8900 amostras rotuladas por três anotadores resultariam em 26700 anotações (cálculo próprio), mas o texto informa 29400 anotações; o estudo não explica a diferença.", "localizador": "PDF p. 7, seção 4.2"},
+      {"descricao": "O texto diz que a avaliação humana cobriu código gerado por InCoder e CodeGen, mas a Tabela 7 inclui uma linha para Codex (84.03 em Tot.).", "localizador": "PDF p. 7, seção 4.2 e Tabela 7"},
+      {"descricao": "Rótulo de anotação inconsistente: 'discriminatory' na seção 4.2 e 'biased' no Apêndice C.2 para a mesma tarefa.", "localizador": "PDF p. 7, seção 4.2; p. 12, Apêndice C.2"},
+      {"descricao": "Nomes de modelos divergentes sem mapeamento explícito: InCoder-6B vs InCoder 6.7B; CodeGen-6B vs CodeGen 6.1B; CodeGen-2B vs CodeGen 2.7B.", "localizador": "PDF p. 2, Figura 1; p. 6, Tabela 4 e seção 4; p. 9, seção 5.2; p. 10, Tabela 9"},
+      {"descricao": "Aparente inconsistência na coluna Tot. da Tabela 4: a tabela não informa como Tot. é calculado. Uma média ponderada pelo número de modificadores (25, 10, 10 e 4, supondo que 'Comp.' reúna Comparative-Neg e Comparative-Pos; cálculo próprio) reproduz Tot. dentro do arredondamento para as cinco linhas de InCoder e CodeGen, mas dá 81,31 para Codex, contra 82.64 impresso. Falta a regra de agregação para confirmar.", "localizador": "PDF p. 6, Tabela 4"},
+      {"descricao": "CBS automático (Tabela 4) e humano (Tabela 7) diferem em várias células (por exemplo, CodeGen 350M Tot. 9.36 vs 5.69; InCoder 1.3B Comp. 22.19 vs 35.90; CodeGen 2.7B Comp. 60.94 vs 72.44), com denominadores diferentes (todo o código vs subconjunto). Os autores declaram consistência 'basically consistent' com base na Figura 4, sem coeficiente de correlação.", "localizador": "PDF p. 6, Tabela 4; p. 7, Tabela 7 e Figura 4"},
+      {"descricao": "Pass@k não foi executado: os valores foram retirados de outros artigos, e não se informa a qual versão do Codex correspondem os valores de pass@k nem sua relação com code-davinci-002; InCoder 1.3B sem pass@10 e pass@100.", "localizador": "PDF p. 6, legenda da Tabela 4 e nota 5"},
+      {"descricao": "O modelo de prompt da Figura 2(a) contém 'delicious_apples.append(apple)' com variável de laço 'apl', enquanto o exemplo da Figura 2(b) usa 'append(apl)'; o estudo não diz qual versão foi usada nos experimentos.", "localizador": "PDF p. 4, Figura 2"},
+      {"descricao": "A seção 5.2 descreve a Figura 7 como partes 'upper' e 'bottom', mas a legenda e a figura mostram partes esquerda (temperatura) e direita (top-p).", "localizador": "PDF p. 9, seção 5.2 e Figura 7"},
+      {"descricao": "Os parâmetros de decodificação dos experimentos principais (temperatura, top-p, tamanho máximo) não são informados; a Figura 7 mostra que o CBS varia com eles no CodeGen-6B.", "localizador": "PDF p. 4, seção 3.2; p. 9, Figura 7"}
+    ],
+    "observacoes": [
+      {"descricao": "Estudo de viés social em geração de código: a técnica de prompting é um instrumento de elicitação, e os resultados principais comparam modelos, não técnicas de prompting. O estudo preliminar de construção do prompt (Tabela 8) está no apêndice.", "localizador": "PDF p. 1-2, resumo e seção 1; p. 10, Apêndice A"},
+      {"descricao": "Os autores escolheram deliberadamente o prompt mais fraco (duas funções irrelevantes para humanos), embora três funções ou funções relevantes para humanos tenham dado CBS maior na Tabela 8.", "localizador": "PDF p. 4, seção 3.1; p. 10, Apêndice A"},
+      {"descricao": "Acurácia dos classificadores (Figura 3): LSTM Random 57.27 (Val) e 58.04 (Test); LSTM Pretrain 83.04 (Val) e 79.85 (Test); BERT-Base 95.47 (Val) e 96.05 (Test). BERT-Base foi escolhido como avaliador.", "localizador": "PDF p. 5, Figura 3"},
+      {"descricao": "Esforço manual: três pós-graduandos anotaram o código; pagamento de US$ 0,05 por amostra e tempo esperado de 20 segundos por anotação.", "localizador": "PDF p. 11, Apêndice C.1"},
+      {"descricao": "Disponibilidade de recursos apenas prometida ('will make ... publicly available'); nenhum link impresso foi encontrado. Não foi acessado pacote de replicação.", "localizador": "PDF p. 2, nota de rodapé 2"}
+    ],
+    "citacoes": [
+      {"trecho": "We propose a new paradigm to construct code prompts and successfully uncover social biases in code generation models.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "As shown in Figure 1, we construct the prompt with two complete functions and a function signature.", "localizador": "PDF p. 2, seção 1"},
+      {"trecho": "We only use two human-irrelevant complete functions, which select cars and apples with restricted characteristics respectively.", "localizador": "PDF p. 4, seção 3.1"},
+      {"trecho": "Following these two complete functions, we curate a human-relevant function signature, combined with judgemental modifiers and demographic dimensions, respectively corresponding to “ADJ” and “HumanAttribute” in the figure, to elicit social bias in code generation models.", "localizador": "PDF p. 4, seção 3.1"},
+      {"trecho": "We mainly study the following aspects: the number of functions contained in the prompt, the relevancy of functions to humans, and the order of functions in the code prompt.", "localizador": "PDF p. 10, Apêndice A"},
+      {"trecho": "With the sampling number set as 10, we get 3920 generated code snippets from each code generation model.", "localizador": "PDF p. 4, seção 3.2"},
+      {"trecho": "For example, code generation models may be asked to help the development of human-centric applications, such as education, job hiring, law sentencing, and autonomous systems, where biased code can cause life-altering consequences.", "localizador": "PDF p. 1, seção 1"},
+      {"trecho": "These code snippets can do harm to marginalized groups and have unpredictable negative effects if adopted by programmers in real-world applications or systems.", "localizador": "PDF p. 8, seção 4.3"},
+      {"trecho": "For the Codex model that has been put into practical use, it generates code with the best quality but with the most severe social biases.", "localizador": "PDF p. 6, seção 4.1"},
+      {"trecho": "Compared with human evaluation, experimental results show that, though imperfect, the code classifier can be used as a code bias scorer.", "localizador": "PDF p. 2, seção 1"},
+      {"trecho": "If the labels for code differ among annotators, we choose the label that most people agree with as our final label.", "localizador": "PDF p. 7, seção 4.2"},
+      {"trecho": "These findings can provide insights into the choice of hyper-parameters of code generation models that demonstrate fewer social biases.", "localizador": "PDF p. 9, seção 5.2"},
+      {"trecho": "Pass@k is computed on the HumanEval benchmark [7], and the results are taken from corresponding papers.", "localizador": "PDF p. 6, legenda da Tabela 4"},
+      {"trecho": "We queried the OpenAI Davinci Codex API (code-davinci-002) to obtain results.", "localizador": "PDF p. 6, nota de rodapé 5"},
+      {"trecho": "For example, −0.24 in the first row and first column means that generated code demonstrates more negative judgment for white people compared with black people.", "localizador": "PDF p. 6, seção 4.1"},
+      {"trecho": "We hire three well-educated postgraduates majoring in computer science to label social bias for each code, and get 29400 annotations in total.", "localizador": "PDF p. 7, seção 4.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "code prompt template (two complete functions and a function signature; Table 8 'Num. functions' = 2)",
+      "mecanismos": ["exemplos", "contexto", "outro"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "prompt sem funções completas (Table 8 'Num. functions' = 0)",
+      "modelo": "InCoder (tamanho nao_informado na Tabela 8)",
+      "benchmark": "conjunto do estudo preliminar de construção de prompt (composição nao_informado)",
+      "metrica": "Code Bias Score (CBS)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0.00, "intervencao": 31.55},
+      "denominador": "nao_informado",
+      "condicoes": "Estudo preliminar do Apêndice A. Sentido 'menor_melhor' segue a definição da métrica (maior CBS = mais viés; seta ↓ na Tabela 4); no estudo preliminar, porém, os autores tratam CBS maior como maior eficácia do prompt em elicitar viés. Funções completas irrelevantes para humanos (a linha 0Y2N tem o mesmo valor, 31.55). Tamanho do modelo, modificadores, dimensões demográficas, número de prompts e de amostras, temperatura e top-p: nao_informado na Tabela 8 e no Apêndice A. Número de execuções: nao_informado. CBS medido pelo classificador automático (BERT-Base). Conferido visualmente no PDF, p. 10, Tabela 8.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca três métricas (CBS, UFS, SD) sem que uma prevaleça e não identifica condição comparadora. As Tabelas 1 a 7 não contêm contraste de prompting com linha de base (Tabelas 4 a 7 comparam modelos ou tipos de modificadores sob o mesmo paradigma, sem condição sem a técnica). A primeira tabela com contraste elegível é a Tabela 8; primeira métrica (CBS), primeiro modelo (InCoder), primeira linha de base de prompting (0 funções) contra a condição adotada pela técnica focal (2 funções).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10 (página impressa 10), Apêndice A, Tabela 8, bloco 'Num. functions', colunas 'Values' e 'InCoder'",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Num. functions | 0 | 0.00 | 0.00", "localizador": "PDF p. 10, Tabela 8, colunas Prompt Features | Values | InCoder | CodeGen"},
+        {"trecho": "2 | 31.55 | 39.30", "localizador": "PDF p. 10, Tabela 8 (bloco Num. functions), colunas Values | InCoder | CodeGen"},
+        {"trecho": "As we can see in the table, CBS increases with the number of functions both for InCoder and CodeGen.", "localizador": "PDF p. 10, Apêndice A"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Human Relevancy (1Y1N: one human-relevant function and one human-irrelevant function)",
+      "mecanismos": ["exemplos", "contexto", "outro"],
+      "mecanismos_acrescentados": [],
+      "comparador": "0Y2N (two human-irrelevant functions)",
+      "modelo": "InCoder (tamanho nao_informado na Tabela 8)",
+      "benchmark": "conjunto do estudo preliminar de construção de prompt (composição nao_informado)",
+      "metrica": "Code Bias Score (CBS)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 31.55, "intervencao": 48.38},
+      "denominador": "nao_informado",
+      "condicoes": "Estudo preliminar do Apêndice A; ambas as condições com duas funções completas. Sentido segue a definição da métrica (maior CBS = mais viés); os autores leem CBS maior como maior eficácia de elicitação. Tamanho do modelo, modificadores, dimensões, amostras e decodificação: nao_informado. Número de execuções: nao_informado. Conferido visualmente no PDF, p. 10, Tabela 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa; componente isolado incluído para completar o alvo de três, na ordem da tabela de ablação (Tabela 8): o bloco 'Num. functions' já foi usado, segue 'Human Relevancy'; primeiro modelo (InCoder) e primeiro par que difere só nesse componente (0Y2N sem, 1Y1N com).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10 (página impressa 10), Apêndice A, Tabela 8, bloco 'Human Relevancy', coluna 'InCoder'",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Human Relevancy | 0Y2N | 31.55 | 39.30", "localizador": "PDF p. 10, Tabela 8, colunas Prompt Features | Values | InCoder | CodeGen"},
+        {"trecho": "1Y1N | 48.38 | 56.91", "localizador": "PDF p. 10, Tabela 8 (bloco Human Relevancy), colunas Values | InCoder | CodeGen"},
+        {"trecho": "Besides, CBS increases significantly when the prompt functions are relevant to humans.", "localizador": "PDF p. 10, Apêndice A"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Function Order POS (human-relevant function placed near the incomplete function signature)",
+      "mecanismos": ["exemplos", "contexto", "outro"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Function Order NEG (human-relevant function placed far from the incomplete function signature)",
+      "modelo": "InCoder (tamanho nao_informado na Tabela 8)",
+      "benchmark": "conjunto do estudo preliminar de construção de prompt (composição nao_informado)",
+      "metrica": "Code Bias Score (CBS)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 48.38, "intervencao": 49.05},
+      "denominador": "nao_informado",
+      "condicoes": "Estudo preliminar do Apêndice A; duas funções, uma relevante para humanos, variando só a posição. Sentido segue a definição da métrica (maior CBS = mais viés); os autores leem CBS maior como maior eficácia de elicitação. Tamanho do modelo, modificadores, dimensões, amostras e decodificação: nao_informado. Número de execuções: nao_informado; sem teste estatístico. Conferido visualmente no PDF, p. 10, Tabela 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três, na ordem da tabela de ablação (Tabela 8): bloco seguinte, 'Function Order'; primeiro modelo (InCoder); condição com o componente (POS) contra a condição sem ele (NEG).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10 (página impressa 10), Apêndice A, Tabela 8, bloco 'Function Order', coluna 'InCoder'",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Function Order | NEG | 48.38 | 56.91", "localizador": "PDF p. 10, Tabela 8, colunas Prompt Features | Values | InCoder | CodeGen"},
+        {"trecho": "POS | 49.05 | 58.26", "localizador": "PDF p. 10, Tabela 8 (bloco Function Order), colunas Values | InCoder | CodeGen"},
+        {"trecho": "The more close the function signature is to the human-relevant function, the higher the CBS is.", "localizador": "PDF p. 10, Apêndice A"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "O estudo formula duas questões explícitas: se o viés social existe em modelos de geração de código e de que forma se manifesta no código gerado.", "localizador": "PDF p. 1-2, seção 1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "O modelo de prompt, a construção do conjunto (392 prompts, 10 amostras), a anotação e o classificador são descritos; faltam parâmetros de decodificação dos experimentos principais e a composição do estudo preliminar da Tabela 8 (modelos, modificadores, amostras); o modelo de prompt da Figura 2(a) diverge do exemplo da Figura 2(b).", "localizador": "PDF p. 4, seções 3.1-3.2 e Figura 2; p. 10, Apêndice A"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparador de prompting só no estudo preliminar do apêndice (0 funções, variações de relevância e ordem); os experimentos principais comparam modelos sob o mesmo prompt; pass@k foi retirado de outros artigos.", "localizador": "PDF p. 6, Tabela 4; p. 10, Tabela 8"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "CBS, UFS e SD são definidos por fórmulas; porém o N de cada célula não é informado, a interpretação do sinal do UFS no texto contradiz a definição, a legenda da Tabela 6 contradiz seus valores, a regra de Tot. não é informada e o CBS automático e o humano divergem em várias células sem coeficiente de concordância.", "localizador": "PDF p. 5, seção 3.4; p. 6, Tabelas 4-5; p. 7, Tabelas 6-7 e Figura 4"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças; o estudo reconhece o classificador como imperfeito, a inferência do tamanho do Codex e o uso deliberado do prompt mais fraco, mas não discute variância das amostras, generalização para outras linguagens ou dependência dos hiperparâmetros nos resultados principais.", "localizador": "PDF p. 2, seção 1; p. 6, nota 5; p. 10, Apêndice A"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Detalhes do classificador (LSTM, BERT-Base, taxa de aprendizado, épocas) e a versão do Codex (code-davinci-002) são informados; os recursos são apenas prometidos, sem link, e faltam parâmetros de decodificação e versões de InCoder e CodeGen.", "localizador": "PDF p. 2, nota 2; p. 6, nota 5; p. 12-13, Apêndice D"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura do texto completo, o estudo não discute vazamento de dados de avaliação no pré-treinamento ou nos prompts; menciona apenas que o viés pode vir de estereótipos do corpus de pré-treinamento, o que não é contaminação.", "localizador": "PDF p. 7, seção 4.1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (910 linhas, incluindo apêndices e referências). Páginas do PDF abertas visualmente: p-04 (Figura 2), p-05 (Tabela 3, Figura 3, métricas), p-06 (Tabelas 4 e 5), p-07 (Tabelas 6 e 7, Figura 4), p-09 (Figura 7), p-10 (Tabela 8). Páginas impressas coincidem com as do PDF."
+  }
+}

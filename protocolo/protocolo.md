@@ -354,6 +354,14 @@ aprovados pelo autor e congelados antes do exame, junto com a versão da tabela 
 incluem situações de evidência insuficiente, em que a ausência de recomendação pode ser a
 resposta adequada. Registram-se, por cenário e critério, julgamento, justificativa e
 ambiguidades.
+Complemento de 14/11/2026 (D103): código-fonte ou do repositório fornecido como insumo
+no prompt conta como `contexto`, mesmo sem recuperação externa. A frequência em
+`mecanismos` descreve o conteúdo das condições avaliadas, não a contribuição das técnicas.
+Na síntese, o contexto já presente no prompt base é separado do acrescentado pela
+técnica, com `mecanismos_acrescentados` e as descrições das condições; a contribuição de
+uma técnica é discutida pelo que ela acrescenta e pelos contrastes efetivamente avaliados.
+A presença de `contexto` não demonstra uso de RAG, enriquecimento do prompt nem efeito
+avaliado isoladamente.
 
 ## 12. Cronograma (D33–D34)
 

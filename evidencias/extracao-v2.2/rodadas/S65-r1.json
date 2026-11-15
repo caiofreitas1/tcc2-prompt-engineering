@@ -1,0 +1,575 @@
+{
+  "estudo": "S65",
+  "texto_fonte": "fontes/textos/lote/S65.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt Template (Basic) (PT-B)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3, p. 2 do PDF (template PT-B); Tabela 2, p. 4 do PDF (colunas ChatGPT PT-B)",
+        "observacao": "Prompt base adaptado de trabalho anterior [40]: pergunta se o programa tem defeito e pede o reparo, com o código-fonte do programa defeituoso inserido em [CODE] (contexto, D102). Linha de base de prompting das RQ1 e RQ2; não há condição sem o prompt base, por isso não é avaliada isoladamente. Também é a rodada 1 do diálogo da RQ3 (Figura 2, p. 7)."
+      },
+      {
+        "nome_original": "Prompt Template (Enhanced) (PT-E)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["instrucao", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4.2, p. 6 do PDF (template e variantes); Seção 4.3, p. 6; Tabela 2, p. 4 do PDF (colunas ChatGPT PT-E)",
+        "observacao": "Template proposto pelo estudo a partir da categorização de perguntas reais do StackOverflow (Seção 4.1). Acrescenta ao prompt base a tarefa de aprendizado [X] e o conjunto de dados [Y] (contexto sobre a intenção do código) e o objetivo do reparo [Z] (instrução com objetivo explícito); mantém o código em [CODE] e remove a pergunta «Is the following program buggy?». O contraste com PT-B (mesmo benchmark, cinco requisições por consulta) é de pacote: PT-E difere de PT-B em mais de um ingrediente, e não há ablação de X, Y ou Z; o ganho não pode ser atribuído a um único ingrediente. Pacote só de prompting (não híbrido). Quando X, Y ou Z não estavam disponíveis, foram usadas variantes do template sem o elemento ausente (p. 6); o número de casos com cada variante e quem preencheu X/Y/Z não são informados."
+      },
+      {
+        "nome_original": "Prompt Template (Locations) (PT-Loc)",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 5, pp. 6-7 do PDF (template, rodada 3); Figura 2, p. 7 do PDF",
+        "observacao": "Rodada 3 de diálogo, aplicada só aos 18 casos não reparados completamente na Seção 4: informa que o reparo está errado e fornece as localizações das falhas, preenchidas automaticamente a partir do gabarito do benchmark [7] (informação de oráculo). Herda a conversa com PT-B e PT-E (instrução e contexto do código, tarefa, dados e objetivo). Resultado relatado apenas como contribuição cumulativa por rodada (Figura 2), sem condição comparável sem a dica de localização; não avaliada isoladamente."
+      },
+      {
+        "nome_original": "Prompt Template (IncR) (PT-IncR)",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 5, p. 7 do PDF (template, rodada 4); Figura 2, p. 7 do PDF",
+        "observacao": "Rodada 4 de diálogo: informa as localizações restantes reparadas incorretamente na rodada anterior, preenchidas «after analysis» (análise manual não detalhada). Herda a conversa anterior (PT-B, PT-E, PT-Loc). Só contribuição cumulativa por rodada (Figura 2); não avaliada isoladamente."
+      },
+      {
+        "nome_original": "Failing-Test-Guided Prompt",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 7.2, p. 10 do PDF",
+        "observacao": "Exploração em um único caso (post 31556268, problema XOR), após as dicas de localização: os autores executam o programa reparado, observam um teste que falha e informam a entrada e a saída esperada no diálogo. Resultado qualitativo (a falha não foi reparada); sem condição comparável sem o teste. Ver so_classificadas."
+      },
+      {
+        "nome_original": "few-shot prompt template (preenchimento automático do template)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 7.1, pp. 9-10 do PDF",
+        "observacao": "Proposta de discussão: um prompt com a descrição da pergunta [TEXT], o template PT-E e um exemplo preenchido pede ao ChatGPT que preencha X, Y e Z (geração automática do próprio prompt de reparo → otimizacao_prompt; um exemplo resolvido → exemplos). Lista de acrescentados vazia porque não há prompt base identificável para esse meta-prompt. Ilustrado com um único exemplo comparado qualitativamente a uma referência escrita por humano; não aplicado ao reparo nem medido. Ver so_classificadas."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "AutoTrainer (AT)",
+        "natureza": "outro",
+        "descricao": "Ferramenta de linha de base sem LLM que detecta problemas de treinamento e os repara com estratégias predefinidas, iterando até o problema desaparecer ou atingir o máximo de reparos. Comparador não baseado em prompting nas colunas de detecção, localização e reparo da Tabela 2.",
+        "localizador": "Seção 2.2, p. 2 do PDF; Tabela 2, p. 4 do PDF"
+      },
+      {
+        "nome_original": "DeepFD (DFD)",
+        "natureza": "outro",
+        "descricao": "Ferramenta de linha de base sem LLM que monitora características de execução do treinamento e classifica falhas; comparada só em detecção e localização, por não reparar programas.",
+        "localizador": "Seção 2.2, p. 2 do PDF; Tabela 2, p. 4 do PDF"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "ChatGPT (API)",
+        "versao": "gpt-3.5-turbo; snapshot e parâmetros de decodificação nao_informado",
+        "localizador": "Seção 2.3, p. 2 do PDF"
+      },
+      {
+        "nome": "ChatGPT (interface web)",
+        "versao": "Mar 14, 2023 Version",
+        "localizador": "Seção 9, p. 10 do PDF",
+        "observacao": "Usada só para repetir a RQ1 como verificação de ameaça à validade; resultados descritos como «slight difference», sem números no texto."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Benchmark do DeepFD [7] (subconjunto StackOverflow)",
+        "quantidade": "Benchmark com 58 programas de DL defeituosos (StackOverflow e GitHub); usados só os do StackOverflow porque os do GitHub excedem o máximo de tokens de entrada. A Tabela 2 lista 34 programas (posts) com 72 falhas no total (coluna #F); o texto não declara separadamente o número de programas do StackOverflow, que aparece como denominador 34 (por exemplo, «27/34»).",
+        "observacao": "Tabela 1 (p. 3) informa para o benchmark DeepFD média de 45.91 linhas e 6.70 dependências por programa, sem distinguir o subconjunto usado. Cada programa contém até cinco tipos de falhas. A análise de perguntas reais (Figura 1, p. 6) usa os textos dos mesmos 34 casos.",
+        "localizador": "Seção 2.1, p. 2 do PDF; Tabela 1, p. 3; Tabela 2, p. 4"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Detection (Y/N por programa)",
+        "definicao": "Alarme correto se feito em programa defeituoso, independentemente da causa; para o ChatGPT, cinco requisições por programa e Y se a maioria (≥ 3) reporta corretamente a existência de falha. Denominador: 34 programas.",
+        "localizador": "Seção 2.4, p. 2 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "nome": "Localization (número de falhas localizadas corretamente)",
+        "definicao": "Localização correta se a falha reportada coincide com a marcada no benchmark; para o ChatGPT, número por rodada e melhor resultado entre as cinco rodadas (coluna Best). Denominador: 72 falhas.",
+        "localizador": "Seção 2.4, p. 2 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "nome": "Repair (número de falhas reparadas corretamente)",
+        "definicao": "Reparo correto se a falha é reparada da mesma forma que no benchmark; para épocas de treinamento, basta a direção correta do ajuste. Para o ChatGPT, melhor entre cinco rodadas (coluna Best). Denominador: 72 falhas.",
+        "localizador": "Seção 2.4, p. 2 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "nome": "# of Corret-Repaired (Y) / # of Incorrect-Repaired (N)",
+        "definicao": "Número de falhas reparadas correta e incorretamente após cada rodada de diálogo (PT-B, PT-E, PT-Loc, PT-IncR); Y + N = 72 em cada linha (cálculo próprio). Rótulo impresso com o erro tipográfico «Corret».",
+        "localizador": "Figura 2, p. 7 do PDF"
+      },
+      {
+        "nome": "Casos reparados completamente",
+        "definicao": "Número de programas com todas as falhas reparadas (16/34 com PT-E, 6/34 com PT-B).",
+        "localizador": "Seção 3.3, p. 5; Seção 4.3, p. 6 do PDF"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "observacao": "Programas de DL com bibliotecas como TensorFlow, Keras e PyTorch; versões das bibliotecas nao_informado.",
+        "localizador": "Seção 2.1, p. 2 do PDF; Tabela 1, p. 3"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Refatorações e renomeação de variáveis nas respostas podem levar o programa a falhar (crash), inclusive quando trechos de código devolvidos substituem linhas do programa.",
+        "localizador": "Seção 3.3 e Finding 5, p. 5 do PDF; Seção 1, p. 2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sem objetivo explícito de reparo, o ChatGPT tende a localizar APIs desatualizadas e code smells em vez das falhas graves, e falsos alarmes decorrem de má compreensão da intenção do código.",
+        "localizador": "Seção 3.2 e Finding 3, pp. 3-4 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O conhecimento do modelo sobre APIs vai até setembro de 2021, de modo que o reparo pode tornar-se inválido com novas versões das bibliotecas; o modelo também deixa de detectar APIs depreciadas em alguns casos.",
+        "localizador": "Seção 6.2.1 e Finding 10, p. 9 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No diálogo, algumas falhas reparadas corretamente voltam a ficar incorretas na rodada seguinte, e 14 falhas permanecem sem reparo mesmo com as localizações fornecidas, por esquecimento catastrófico ou má compreensão da intenção do código.",
+        "localizador": "Seção 5 e Finding 8, p. 7 do PDF; Figura 2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O ChatGPT não executa o programa; mesmo com patch fornecido, uma etapa de validação continua necessária.",
+        "localizador": "Finding 12, p. 10 do PDF"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Natureza não determinística do ChatGPT, tratada com cinco requisições independentes por consulta.",
+        "localizador": "Seções 2.3 e 2.4, p. 2 do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento de dados: os casos do benchmark podem estar no conjunto de treinamento do ChatGPT e a saída ser fruto de memorização. O estudo não afirma contaminação efetiva.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A avaliação das respostas do ChatGPT foi feita manualmente e pode ser subjetiva ou conter equívocos (ameaça à validade).",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Diferença entre a interface web do ChatGPT e a API usada nos experimentos (ameaça à validade); a repetição da RQ1 na interface mostrou «slight difference», não quantificada no texto.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Cinco requisições independentes por consulta, cada uma em nova conversa; detecção decidida por maioria (≥ 3) e localização/reparo pelo melhor resultado entre as cinco rodadas.",
+        "avaliada": "nao",
+        "localizador": "Seções 2.3 e 2.4, p. 2 do PDF"
+      },
+      {
+        "descricao": "Repetição do experimento da RQ1 na interface web (Mar 14, 2023 Version) para verificar a diferença em relação à API; só descrita como «slight difference».",
+        "avaliada": "nao",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "descricao": "Contra a subjetividade da avaliação manual: casos identificados pelos IDs dos posts do StackOverflow e prompts e respostas rastreáveis no repositório divulgado (link não impresso no texto; não acessado).",
+        "avaliada": "nao",
+        "localizador": "Seção 9, p. 10 do PDF; Seção 2.3, p. 2"
+      },
+      {
+        "descricao": "Contra o vazamento de dados: a observação de que o ChatGPT não tem bom desempenho com vários templates é apresentada como indício de que não memorizou os casos, aliviando parcialmente a preocupação; não é controle experimental.",
+        "avaliada": "nao",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "descricao": "Sugestão de pedir explicitamente o código reparado completo para evitar respostas só com estratégias de reparo; não testada.",
+        "avaliada": "nao",
+        "localizador": "Finding 5, p. 5 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt Template (Basic) (PT-B), executado no mesmo benchmark e com as mesmas métricas; também AutoTrainer e DeepFD (ferramentas sem LLM, fora do escopo de prompting).",
+    "so_classificadas": [
+      {
+        "tecnica": "Failing-Test-Guided Prompt",
+        "motivo": "Exploração qualitativa em um único caso (31556268), sem condição comparável sem o teste e sem contagem; a técnica focal ficou sem extração numérica (Seção 7.2, p. 10)."
+      },
+      {
+        "tecnica": "few-shot prompt template (preenchimento automático do template)",
+        "motivo": "Ilustrada com um único exemplo comparado qualitativamente a uma referência humana; não aplicada ao reparo nem medida, e a saída é um prompt, não código (Seção 7.1, pp. 9-10)."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente inconsistência na decomposição das falhas escapadas na localização com PT-B: o texto fala em 49 (72 - 23) falhas escapadas, das quais 16 não detectadas e 32 detectadas mas não localizadas; 16 + 32 = 48 (cálculo próprio), não 49. A soma das falhas (#F) dos sete programas não detectados na Tabela 2 é 16 (cálculo próprio), o que deixaria 33 no outro grupo; a fonte não esclarece.",
+        "localizador": "Seção 3.2, p. 3 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "descricao": "Narrativa incompleta em relação à tabela: o texto diz que há sete programas não detectados com PT-B e descreve dois (0/5: 48385830 e 39810655) e quatro (50079585, 50481178, 58237726, 51181393); o sétimo, 48594888 (2/5, N na Tabela 2), não é mencionado.",
+        "localizador": "Seção 3.1, p. 3 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "descricao": "Inversões por caso na Tabela 2 (PT-E pior que PT-B, apesar do ganho no total): localização do post 31556268, Best 4 com PT-B e 3 com PT-E; reparo do post 45337371, Best 1 com PT-B e 0 com PT-E; reparo do post 46995209, Best 2 com PT-B e 1 com PT-E. Na detecção, o post 58609115 tem 5/5 com PT-B e 4/5 com PT-E (ambos Y).",
+        "localizador": "Tabela 2, p. 4 do PDF, linhas 31556268, 45337371, 46995209 e 58609115"
+      },
+      {
+        "descricao": "Regressões entre rodadas do diálogo na Figura 2: 2 falhas corretas com PT-B passam a incorretas com PT-E; 3 corretas com PT-E passam a incorretas com PT-Loc; 1 correta com PT-Loc passa a incorreta com PT-IncR (atribuição dos rótulos do diagrama de fluxo conferida pela consistência com os totais Y/N impressos, cálculo próprio). O texto reconhece faltas «changed back to faulty».",
+        "localizador": "Figura 2 e Seção 5, p. 7 do PDF"
+      },
+      {
+        "descricao": "Ambiguidade sobre o desenho de PT-E: a Seção 4.3 descreve nova execução do experimento com PT-E (Tabela 2, cinco rodadas), mas a Seção 5 e a Figura 2 apresentam PT-E como rodada 2 de um diálogo após PT-B. O Finding 8 atribui ao diálogo 42 (58 - 16) falhas a mais, valor que inclui o ganho de PT-B para PT-E (43 - 16 = 27, cálculo próprio).",
+        "localizador": "Seção 4.3, p. 6; Seção 5, Figura 2 e Finding 8, p. 7 do PDF"
+      },
+      {
+        "descricao": "As rodadas PT-Loc e PT-IncR foram aplicadas só aos 18 casos não reparados completamente, mas a Figura 2 conta as 72 falhas; as localizações de PT-Loc vêm do gabarito do benchmark e as de PT-IncR de análise posterior, informação indisponível em uso real. Não há condição de controle com rodadas adicionais sem a dica.",
+        "localizador": "Seção 5, pp. 6-7 do PDF"
+      },
+      {
+        "descricao": "Condições assimétricas na comparação com as ferramentas: para o ChatGPT, localização e reparo usam o melhor resultado entre cinco rodadas e a detecção usa maioria de cinco, enquanto AutoTrainer e DeepFD têm um único resultado por programa. O critério de reparo aceita a direção correta do ajuste para épocas (por exemplo, 1 → 20 em vez de 1 → 50).",
+        "localizador": "Seção 2.4, p. 2 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "descricao": "Aparente divergência entre resumo e corpo: o resumo afirma que, com o melhor trabalho anterior, a localização de falhas fica em «only about 30%», sem fonte explícita; na Tabela 2, o melhor baseline (DeepFD) localiza 29/72 falhas (≈ 40%, cálculo próprio). O estudo não liga os dois valores.",
+        "localizador": "Resumo, p. 1 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "descricao": "Número de casos em que foram usadas as variantes de PT-E sem X, Y ou Z não informado; a condição PT-E é, portanto, heterogênea entre programas.",
+        "localizador": "Seções 4.2 e 4.3, p. 6 do PDF"
+      },
+      {
+        "descricao": "A conclusão de que testes que falham podem não ajudar no reparo de programas de DL baseia-se em um único caso.",
+        "localizador": "Seção 7.2 e Finding 12, p. 10 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Os valores de PT-B e PT-E no reparo coincidem entre a Tabela 2 (16 e 43) e a Figura 2 (16 e 43). Conferi pela soma das linhas da Tabela 2 os totais 72 (#F), 8 (AT detecção), 27 (PT-B detecção), 29 (DFD localização), 23 e 50 (localização Best), 16 e 43 (reparo Best), e os 16 casos reparados completamente com PT-E (cálculos próprios, todos coincidentes).",
+        "localizador": "Tabela 2, p. 4; Figura 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "A repetição de cinco requisições com maioria ou melhor resultado é procedimento de medição aplicado igualmente a PT-B e PT-E, não ingrediente de técnica; por isso não foi classificada como amostragem.",
+        "localizador": "Seção 2.4, p. 2 do PDF"
+      },
+      {
+        "descricao": "A concepção de PT-E se apoia em categorização manual dos textos de 34 perguntas do StackOverflow em sete tipos de informação (Symptom 33, Task 26, Data 24, Attempted fixes 15, Architecture 6, Hyperparameter 3, Version 3 na Figura 1).",
+        "localizador": "Seção 4.1 e Figura 1, pp. 5-6 do PDF"
+      },
+      {
+        "descricao": "Esforço manual descrito pelo estudo: respostas que só explicam estratégias de reparo exigem reparo manual e tentativas; os autores avaliaram as respostas manualmente e preencheram as localizações de PT-IncR após análise.",
+        "localizador": "Seção 3.3 e Finding 5, p. 5; Seção 5, p. 7; Seção 9, p. 10 do PDF"
+      },
+      {
+        "descricao": "O estudo também descreve qualitativamente sugestões de refatoração, comentários, código morto e uso de APIs feitas pelo ChatGPT durante o reparo (Seção 6); são observações de estudo de caso, não tarefa de refatoração avaliada.",
+        "localizador": "Seção 6, pp. 7-9 do PDF"
+      },
+      {
+        "descricao": "Os autores declaram uso do Grammarly e do ChatGPT para revisar a escrita e reformular o título, além do uso nos experimentos.",
+        "localizador": "Seção 11, p. 11 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In particular, we split the debugging task into three steps, i.e., fault detection, fault localization, and program repair.",
+        "localizador": "Seção 1, p. 1 do PDF"
+      },
+      {
+        "trecho": "Prompt Template (Basic): Is the following program buggy? If so, please repair it. [CODE]",
+        "localizador": "Seção 3, p. 2 do PDF"
+      },
+      {
+        "trecho": "On top of the observation from real-world questions, we propose an enhanced prompt template (abbrev. PT-E) as follows:",
+        "localizador": "Seção 4.2, p. 6 do PDF"
+      },
+      {
+        "trecho": "Prompt Template (Enhanced): The following code is designed for a [X] problem trained on [Y].Please repair it in order to [Z]. [CODE]",
+        "localizador": "Seção 4.2, p. 6 do PDF"
+      },
+      {
+        "trecho": "where X describes the task (e.g., classification, regression), Y specifies the dataset (e.g., MNIST, ImageNet, numbers that follow the sine waves), and Z describes the objective (e.g., improve the accuracy) against the symptom.",
+        "localizador": "Seção 4.2, p. 6 do PDF"
+      },
+      {
+        "trecho": "Note that for the cases where the learning task/dataset/objective is unavailable, we use the variant templates as listed in Section 4.2.",
+        "localizador": "Seção 4.3, p. 6 do PDF"
+      },
+      {
+        "trecho": "In particular, for the cases that failed to be completely repaired in Section 4 (i.e., 18 cases), we first provide the fault locations using the following prompt template (Prompt Template (Locations), abbrev, PT-Loc).",
+        "localizador": "Seção 5, p. 6 do PDF"
+      },
+      {
+        "trecho": "(Round 3) Prompt Template (Locations) : The repair is wrong. Faults may happen in the following locations: [Loc]. Please repair it.",
+        "localizador": "Seção 5, p. 7 do PDF"
+      },
+      {
+        "trecho": "(Round 4) Prompt Template (IncR): The [Remaining_loc] is/are repaired incorrectly. Please repair it accordingly.",
+        "localizador": "Seção 5, p. 7 do PDF"
+      },
+      {
+        "trecho": "where the fault location information in PT-Loc is automatically filled in using the information provided by the benchmark [7], while the remaining locations in PT-IncR are filled after analysis.",
+        "localizador": "Seção 5, p. 7 do PDF"
+      },
+      {
+        "trecho": "We then integrate such failing information to ChatGPT by saying “The repair is wrong. For the input [1, 1], the output should be [0] instead of [1]. Please repair it again.”",
+        "localizador": "Seção 7.2, p. 10 do PDF"
+      },
+      {
+        "trecho": "It indicates that for DL program repair, providing the failing test cases may not be helpful.",
+        "localizador": "Seção 7.2, p. 10 do PDF"
+      },
+      {
+        "trecho": "We propose a few-shot prompt template as follows:",
+        "localizador": "Seção 7.1, p. 9 do PDF"
+      },
+      {
+        "trecho": "Compared with the human-written prompt (Reference), the meaning of two sentences are almost identical, which indicates the possibility to automate the prompt as discussed in RQ2.",
+        "localizador": "Seção 7.1, p. 9 do PDF"
+      },
+      {
+        "trecho": "We build a pipeline for our experiments using the latest ChatGPT API based on the gpt-3.5-turbo model released by OpenAI.",
+        "localizador": "Seção 2.3, p. 2 do PDF"
+      },
+      {
+        "trecho": "Due to the non-deterministic nature of ChatGPT, for each query, we run five independent requests by starting a new conversation every time on the API.",
+        "localizador": "Seção 2.3, p. 2 do PDF"
+      },
+      {
+        "trecho": "If the majority (≥ 3) of replies correctly report fault existence, we denote the result as a Yes; otherwise, No.",
+        "localizador": "Seção 2.4, p. 2 do PDF"
+      },
+      {
+        "trecho": "For ChatGPT, we put down the number of faults reported each round, and we use the best result among the five rounds for comparison.",
+        "localizador": "Seção 2.4, p. 2 do PDF"
+      },
+      {
+        "trecho": "To evaluate the automatic DL program repair ability of ChatGPT, we use a benchmark released by a recent study [7], which contains 58 buggy DL programs collected from StackOverflow and Github.",
+        "localizador": "Seção 2.1, p. 2 do PDF"
+      },
+      {
+        "trecho": "In the evaluation, we use the buggy programs collected from StackOverflow, because the programs in GitHub exceed the maximum input tokens.",
+        "localizador": "Seção 2.1, p. 2 do PDF"
+      },
+      {
+        "trecho": "While one should be careful with code refactoring and variable renaming, in case they cause a crash.",
+        "localizador": "Finding 5, p. 5 do PDF"
+      },
+      {
+        "trecho": "When asked to repair the program without an explicit repair goal, ChatGPT tends to focus on identifying outdated APIs and bad code smells.",
+        "localizador": "Finding 3, p. 4 do PDF"
+      },
+      {
+        "trecho": "It means that the repair could be invalid once newer version is released.",
+        "localizador": "Seção 6.2.1, p. 9 do PDF"
+      },
+      {
+        "trecho": "In addition, there are a few faults that are repaired correctly in the previous round but changed back to faulty in the next round.",
+        "localizador": "Seção 5, p. 7 do PDF"
+      },
+      {
+        "trecho": "Besides, ChatGPT is not able to execute the program at the current stage, even though a patch is provided by ChatGPT, a validation step is still needed.",
+        "localizador": "Finding 12, p. 10 do PDF"
+      },
+      {
+        "trecho": "Besides, ChatGPT’s replies are carried out manually, which may be subjective and misunderstandings.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "trecho": "To alleviate this threat, the cases used in the paper come along with StackOverflow post IDs.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "trecho": "Finally, since ChatGPT is trained on a large corpus of text data from the Internet (e.g., books, articles, open-source code repositories), it is possible that there is a data leakage problem, i.e., the cases in the benchmark were included in its training set, so the output is generated due to memorization.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "trecho": "This observation may partially alleviate the concern regarding such threat.",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "trecho": "To avoid the difference between the ChatGPT website interface and the latest API, we repeat the experiment of RQ1 using the interface (Mar 14, 2023 Version).",
+        "localizador": "Seção 9, p. 10 do PDF"
+      },
+      {
+        "trecho": "One can avoid it by explicitly asking ChatGPT to return the complete repaired code.",
+        "localizador": "Finding 5, p. 5 do PDF"
+      },
+      {
+        "trecho": "Via further analysis, we found that among the 49 (72 - 23) escaped faults that belong to 18 cases, 16 of them (belonging to 7 cases) cannot be even detected, 32 of them (belonging to 11 cases) can be detected but cannot be correctly-localized.",
+        "localizador": "Seção 3.2, p. 3 do PDF"
+      },
+      {
+        "trecho": "With the best prior work, the performance of fault localization is still far less than satisfactory (only about 30%).",
+        "localizador": "Resumo, p. 1 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Prompt Template (Enhanced) (PT-E)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["instrucao", "contexto"],
+      "comparador": "Prompt Template (Basic) (PT-B)",
+      "modelo": "ChatGPT (gpt-3.5-turbo via API; snapshot nao_informado)",
+      "benchmark": "Benchmark do DeepFD [7], programas do StackOverflow (34 programas, 72 falhas)",
+      "metrica": "Detection (programa com falha detectada: Y se a maioria, ≥ 3, de cinco respostas reporta corretamente a existência de falha)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 27, "intervencao": 34},
+      "denominador": "34 programas defeituosos",
+      "condicoes": "Cinco requisições independentes por programa, cada uma em nova conversa; Y por maioria (≥ 3 de 5). Mesmo benchmark e mesmo modelo nas duas condições. PT-E difere de PT-B em vários ingredientes (acrescenta tarefa, conjunto de dados e objetivo; retira a pergunta «Is the following program buggy?»): contraste de pacote, sem atribuição a um ingrediente. Nos casos sem tarefa, dados ou objetivo disponíveis foram usadas variantes do template (número de casos nao_informado); quem preencheu X/Y/Z nao_informado. Temperatura e demais parâmetros de decodificação nao_informado. Observação do extrator: PT-E não pergunta se o programa tem defeito, e o estudo não descreve como a detecção foi julgada nessa condição. O baseline DeepFD (ferramenta sem LLM, fora do escopo) também detecta 34/34. Conferido na Tabela 2 (p. 4 do PDF), linha de totais e linhas por programa (soma das linhas Y de PT-B = 27, cálculo próprio), e no texto da p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo fala em «various prompt templates» e o estudo define três métricas (detecção, localização e reparo) sem que uma prevaleça. A Tabela 1 é descritiva; a primeira tabela com o contraste de prompting é a Tabela 2, cuja primeira métrica é Detection, com o único modelo (ChatGPT) e a primeira linha de base de prompting listada (PT-B).",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF (colunas Detection: ChatGPT PT-B e ChatGPT PT-E, linha de totais); Seção 4.3, p. 6 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "72 8 34 27 34 7 29 23 50 7 16 43",
+          "localizador": "Tabela 2, p. 4 do PDF, linha de totais; colunas: #F; Detection AT, DFD, ChatGPT PT-B, ChatGPT PT-E; Localization AT Num, DFD Num, ChatGPT PT-B Best, ChatGPT PT-E Best; Repair AT Num, ChatGPT PT-B Best, ChatGPT PT-E Best"
+        },
+        {
+          "trecho": "For fault detection, all the buggy programs can be detected, achieving a comparable result to the best existing approach (34/34), compared with 27/34 achieved when using the basic prompt template.",
+          "localizador": "Seção 4.3, p. 6 do PDF"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Prompt Template (Locations) (PT-Loc)",
+      "mecanismos": ["instrucao", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Prompt Template (Enhanced) (PT-E), rodada anterior do diálogo",
+      "modelo": "ChatGPT (gpt-3.5-turbo via API; snapshot nao_informado)",
+      "benchmark": "Benchmark do DeepFD [7], programas do StackOverflow (72 falhas)",
+      "metrica": "# of Corret-Repaired (Y) (número de falhas reparadas corretamente; rótulo impresso com «Corret»)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 43, "intervencao": 55},
+      "denominador": "72 falhas (Y + N = 72 em cada linha da Figura 2, cálculo próprio)",
+      "condicoes": "Resultado cumulativo por rodada, sem condição comparável sem a dica: PT-Loc é a rodada 3, aplicada só aos 18 casos não reparados completamente após PT-E, com as localizações das falhas tiradas do gabarito do benchmark (oráculo). A contagem cobre as 72 falhas. Número de execuções nas rodadas de diálogo e se o valor é melhor entre cinco rodadas: nao_informado. Não isolado; o aumento não é efeito isolado da dica de localização. Conferido na Figura 2 (p. 7 do PDF), tabela embutida, e no texto da p. 7.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal PT-Loc (RQ3), não representada. Primeira figura com o contraste: Figura 2; primeira métrica: # of Corret-Repaired (Y). Comparador: a rodada imediatamente anterior (PT-E), que é o estado ao qual PT-Loc se acrescenta e o contraste que o próprio texto descreve («the number increases to 55»); PT-B, listado antes na figura, incluiria também o ganho de PT-E.",
+      "derivacao": "direta",
+      "localizador": "Figura 2, p. 7 do PDF (linhas PT-E e PT-Loc, coluna # of Corret-Repaired (Y)); Seção 5, p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PT-E 43 29",
+          "localizador": "Figura 2, p. 7 do PDF, tabela embutida; colunas: Prompt Template, # of Corret-Repaired (Y), # of Incorrect-Repaired (N)"
+        },
+        {
+          "trecho": "PT-Loc 55 17",
+          "localizador": "Figura 2, p. 7 do PDF, tabela embutida; colunas: Prompt Template, # of Corret-Repaired (Y), # of Incorrect-Repaired (N)"
+        },
+        {
+          "trecho": "Then, with the hints of fault locations, the number increases to 55.",
+          "localizador": "Seção 5, p. 7 do PDF"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Prompt Template (IncR) (PT-IncR)",
+      "mecanismos": ["instrucao", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Prompt Template (Locations) (PT-Loc), rodada anterior do diálogo",
+      "modelo": "ChatGPT (gpt-3.5-turbo via API; snapshot nao_informado)",
+      "benchmark": "Benchmark do DeepFD [7], programas do StackOverflow (72 falhas)",
+      "metrica": "# of Corret-Repaired (Y) (número de falhas reparadas corretamente; rótulo impresso com «Corret»)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 55, "intervencao": 58},
+      "denominador": "72 falhas (Y + N = 72 em cada linha da Figura 2, cálculo próprio)",
+      "condicoes": "Resultado cumulativo por rodada, sem condição comparável sem a dica: PT-IncR é a rodada 4, com as localizações das falhas ainda reparadas incorretamente preenchidas após análise dos autores. Aplicada aos casos com falhas restantes; a contagem cobre as 72 falhas; 14 permanecem sem reparo. Número de execuções nas rodadas de diálogo nao_informado. Não isolado. Conferido na Figura 2 (p. 7 do PDF), tabela embutida, e no texto da p. 7.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal PT-IncR (RQ3), não representada. Figura 2, primeira métrica # of Corret-Repaired (Y); comparador: rodada imediatamente anterior (PT-Loc), como no texto («3 more faults can be repaired»).",
+      "derivacao": "direta",
+      "localizador": "Figura 2, p. 7 do PDF (linhas PT-Loc e PT-IncR, coluna # of Corret-Repaired (Y)); Seção 5, p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PT-IncR 58 14",
+          "localizador": "Figura 2, p. 7 do PDF, tabela embutida; colunas: Prompt Template, # of Corret-Repaired (Y), # of Incorrect-Repaired (N)"
+        },
+        {
+          "trecho": "Finally, with the hints of the unrepaired fault locations, 3 more faults can be repaired.",
+          "localizador": "Seção 5, p. 7 do PDF"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas sobre depuração de programas de DL pelo ChatGPT, impacto do prompt e efeito do diálogo.",
+      "localizador": "Resumo e Seção 1, pp. 1-2 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, benchmark, templates, cinco requisições por consulta e critérios de avaliação descritos; mas a avaliação das respostas foi manual sem indicação de avaliadores ou concordância, o preenchimento de X/Y/Z e o uso das variantes não são detalhados por caso, as localizações de PT-IncR são preenchidas após análise não descrita e há ambiguidade entre PT-E como nova execução ou rodada 2 de diálogo.",
+      "localizador": "Seções 2.3-2.4, p. 2; Seções 4.2-4.3, p. 6; Seção 5, pp. 6-7; Seção 9, p. 10 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "PT-B é executado nas mesmas condições que PT-E, e há duas ferramentas de linha de base; porém PT-E difere de PT-B em vários ingredientes sem ablação, as rodadas de diálogo não têm controle, e a comparação com AutoTrainer/DeepFD usa o melhor de cinco rodadas para o ChatGPT.",
+      "localizador": "Seção 2.2 e 2.4, p. 2; Tabela 2, p. 4; Figura 2, p. 7 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas e denominadores visíveis (34 programas, 72 falhas); valores de reparo coincidem entre Tabela 2 e Figura 2 (16 e 43). Porém o melhor de cinco rodadas é otimista, o critério de reparo de épocas é permissivo, a avaliação é manual e há aparente inconsistência na decomposição 49 = 16 + 32 no texto.",
+      "localizador": "Seção 2.4, p. 2; Seção 3.2, p. 3; Tabela 2, p. 4; Figura 2, p. 7 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças discute diferença entre interface e API, subjetividade da avaliação manual e vazamento de dados, mas sem quantificar a repetição na interface e sem discutir tamanho do benchmark, generalização ou uso de informação de oráculo nas rodadas de diálogo.",
+      "localizador": "Seção 9, p. 10 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelo (gpt-3.5-turbo), templates e IDs dos posts são informados e os autores dizem disponibilizar prompts e respostas, mas o link do repositório não aparece no texto, e snapshot, parâmetros de decodificação e os valores de X/Y/Z por caso não são informados. Pacote não acessado.",
+      "localizador": "Seção 2.3, p. 2; Seção 4.2, p. 6; Seção 9, p. 10 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece o risco de vazamento dos casos do benchmark no treinamento, mas o mitiga só com o argumento de que o desempenho fraco indica ausência de memorização, sem controle experimental.",
+      "localizador": "Seção 9, p. 10 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [2, 3, 4, 5, 6, 7, 10],
+    "observacao": "Texto extraído lido integralmente (686 linhas, 12 páginas). Abertas visualmente as páginas da configuração e métricas (2), Tabela 1 e resultados da RQ1 (3), Tabela 2 (4), reparo e Finding 5 (5), PT-E e Figura 1 (6), Figura 2 (7) e Seção 7.2 e ameaças (10). O PDF não tem paginação impressa; os localizadores usam a posição no arquivo."
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "estudo": "S25",
+  "texto_fonte": "fontes/textos/lote/S25.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RING (multilingual repair engine; prompt com mensagem do compilador, seleção inteligente de few-shots e ranqueamento de candidatos)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 do PDF (contribuições); p. 3-4 do PDF (Approach, Figura 1); Tabela 1, p. 6 do PDF",
+        "observacao": "Pacote comparado com o baseline Codex zero-shot (Tabela 1). O prompt do RING tem cabeçalho de instrução (Figura 1: «Fix ES Lint Errors in Javascript»), o código defeituoso (contexto), a mensagem de erro pré-processada do compilador/analisador (contexto), exemplos buggy-fixed recuperados do example bank por similaridade de diagnóstico (contexto e exemplos) e ranqueamento de vários candidatos pela média das log-probabilidades dos tokens (amostragem). Mecanismos acrescentados em relação ao baseline zero-shot: mensagem do compilador e exemplos recuperados; o ranqueamento não é contado como acrescentado porque a linha None/None das Tabelas 3-9 (configuração do RING sem localização nem transformação) tem valores idênticos aos do baseline Codex da Tabela 1, mas o estudo não declara explicitamente se o baseline usa o mesmo ranqueamento. A configuração do RING na Tabela 1 varia por linguagem (mensagem abstraída ou não; error vector ou message embedding) e é a de melhor desempenho escolhida pelos autores. Pacote híbrido: inclui temperatura 0,7 (decodificação, fora do escopo) informada só para os experimentos do RING. A decomposição em localização, transformação e ranqueamento é conceitual: o estudo não descreve etapas de LLM encadeadas, por isso não se registra `decomposicao`. O ganho do pacote não se atribui a um único ingrediente."
+      },
+      {
+        "nome_original": "Compiler message (Localization: Compiler)",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 3 do PDF (Fault Localization through Language Tooling, Figura 3); Tabelas 3-9, p. 12-13 do PDF",
+        "observacao": "Mensagem de erro pré-processada do compilador ou analisador, com linha e coluna, incluída no prompt. O estudo não analisa o contraste com e sem a mensagem; a matriz de configurações (Tabelas 3-9, colunas Localization e Transformation) tem as condições Localization=None/Transformation=None e Localization=Compiler/Transformation=None, que diferem apenas nesse ingrediente (por exemplo, Tabela 3, Excel, P@1 0.60 e 0.70). A RQ2 avalia localização por outra medida (fração de localização correta, Figura 5), não por contrafactual de prompt. `amostragem` registrada porque as configurações das Tabelas 3-9 são do RING, que inclui ranqueamento."
+      },
+      {
+        "nome_original": "Abstracted compiler message (Localization: Abstracted Compiler)",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 do PDF; p. 8 do PDF (Creating abstracted error message); Tabelas 3-9, p. 12-13 do PDF; texto p. 12 do PDF (Different Configurations of RING)",
+        "observacao": "Variante da mensagem do compilador que remove a localização relatada e preserva o texto do erro. O estudo compara mensagem abstraída e não abstraída nas Tabelas 3-9 e comenta o contraste para Excel e PowerFx (p. 12). Em relação à mensagem completa, o ingrediente é a abstração (remoção de informação), registrada como variação de `contexto`."
+      },
+      {
+        "nome_original": "Smart selection of few-shots (Smart Shots / Transformation: Smart Selection), com as variantes error vector selection e message embedding selection",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3-4 do PDF (Code Transformation through Few-shot Learning, Figura 4); Tabela 2, p. 7 do PDF (RQ3); Tabelas 3-9, p. 12-13 do PDF",
+        "observacao": "Recuperação de pares buggy-fixed do example bank por similaridade de diagnóstico: error vector selection (distância L2 entre vetores de contagem de categorias de erro; usada em Excel e JavaScript) ou message embedding selection (similaridade de cosseno entre embeddings das mensagens obtidos com CodeBert pré-treinado; usada nas demais linguagens). As duas variantes não são comparadas entre si: cada linguagem usa uma. Comparada com exemplos fixos pré-definidos na Tabela 2 (RQ3) e nas Tabelas 3-9; o ingrediente acrescentado em relação aos exemplos fixos é a recuperação (contexto). Leave-one-out sobre o benchmark; para C e Python, example bank formado a partir de 400 programas adicionais reparados pelo próprio RING sem seleção inteligente."
+      },
+      {
+        "nome_original": "Pre-defined fixed examples (Fixed Shots / Transformation: Fixed Example)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "amostragem"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "Tabela 2, p. 7 do PDF; Tabelas 3-9, p. 12-13 do PDF; p. 6-7 do PDF (RQ3)",
+        "observacao": "Comparador da seleção inteligente. Na matriz das Tabelas 3-9, Compiler/None e Compiler/Fixed Example diferem apenas nos exemplos fixos; o estudo não analisa esse contraste. Número e conteúdo dos exemplos fixos: nao_informado."
+      },
+      {
+        "nome_original": "Candidate ranking by average token log probabilities (Log Prob Ranking)",
+        "mecanismos": ["amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (Candidate Ranking); p. 7-8 do PDF (RQ4, Figuras 7 e 8)",
+        "observacao": "Vários candidatos gerados com temperatura mais alta e ordenados pela média das log-probabilidades dos tokens. Não há condição sem ranqueamento (por exemplo, candidato aleatório ou temperatura zero) nos resultados; a afirmação de que temperaturas mais altas com ranqueamento são melhores refere-se ao desenvolvimento, sem números. A RQ4 analisa a calibração por densidades de log-probabilidade, não um contrafactual. Número de candidatos gerados: nao_informado."
+      },
+      {
+        "nome_original": "Zero-shot Codex (Common Baseline)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Common Baseline); Tabela 1, p. 6 do PDF",
+        "observacao": "Prompt literal: «Fix bugs in the below code: / ### Buggy <language>: / <buggy program> / ### Fixed <language>:». Instrução e código defeituoso (contexto). Uso de ranqueamento ou amostragem com seleção no baseline: nao_informado (os valores coincidem com a linha None/None das Tabelas 3-9). Temperatura do baseline: nao_informado (a legenda da Tabela 1 informa 0,7 só para os experimentos do RING)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "0.7 temperature",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de amostragem usada em todos os experimentos do RING; não é prompting.",
+        "localizador": "Legenda da Tabela 1, p. 6 do PDF; p. 4 do PDF (Candidate Ranking)"
+      },
+      {
+        "nome_original": "Program Normalization / filtragem de candidatos",
+        "natureza": "outro",
+        "descricao": "Pós-processamento: candidatos idênticos ao código defeituoso são descartados e há normalização para deduplicação e comparação com o ground truth (exceto PowerShell e PowerFx), aplicada a todos os sistemas.",
+        "localizador": "Apêndice, Program Normalization, p. 11 do PDF"
+      },
+      {
+        "nome_original": "Extended code snippets",
+        "natureza": "outro",
+        "descricao": "Preparação do conjunto JavaScript: em vez das janelas arbitrárias do TFix, extrai-se a função (ou arquivo) inteira que contém o trecho defeituoso e o reparado. É preparação de dados de avaliação, não ingrediente de prompt comparado para o RING.",
+        "localizador": "p. 4-5 do PDF (JavaScript)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Codex (OpenAI), API pública, impresso como “davinci-code-002”", "versao": "davinci-code-002 (como impresso); consultas em 9 de agosto de 2022", "papel": "LLM do RING e do baseline zero-shot"},
+      {"nome": "CodeBert (Feng et al. 2020), pré-treinado", "versao": "nao_informado", "papel": "embeddings das mensagens de erro para message embedding selection"},
+      {"nome": "LaMirage (Bavishi et al. 2022)", "versao": "nao_informado", "papel": "baseline específico de linguagem, neurossimbólico (Excel, Power Fx); não é prompting"},
+      {"nome": "TFix (Berabi et al. 2021), T5 ajustado", "versao": "nao_informado", "papel": "baseline específico de linguagem (JavaScript); executado nos trechos originais e nos estendidos; não é prompting"},
+      {"nome": "BIFI (Yasunaga and Liang 2021)", "versao": "nao_informado", "papel": "baseline específico de linguagem (Python); não é prompting"},
+      {"nome": "Dr. Repair / DrRepair (Yasunaga and Liang 2020)", "versao": "nao_informado", "papel": "baseline específico de linguagem (C); não é prompting"}
+    ],
+    "benchmarks": [
+      {"nome": "Excel (200 tarefas de LaMirage + 73 tarefas com erro de tipo coletadas pelos autores)", "quantidade": "273 tarefas", "observacao": "Ground truth disponível. Denominador das métricas não ligado explicitamente ao corpus. Não se informa se os valores do LaMirage na Tabela 1 foram obtidos nas 273 ou nas 200 tarefas originais."},
+      {"nome": "Power Fx (tarefas que acompanham o LaMirage)", "quantidade": "200 tarefas", "observacao": "Ground truth disponível."},
+      {"nome": "Python (amostra aleatória do conjunto do BIFI)", "quantidade": "200 trechos", "observacao": "Sem ground truth; example bank formado com 400 programas adicionais (número final de pares: nao_informado)."},
+      {"nome": "JavaScript (amostra aleatória do conjunto do TFix; extended code snippets)", "quantidade": "200 trechos", "observacao": "Ground truth disponível."},
+      {"nome": "C (amostra aleatória do conjunto do DeepFix)", "quantidade": "200 trechos", "observacao": "Sem ground truth; example bank formado com 400 programas adicionais (número final de pares: nao_informado)."},
+      {"nome": "PowerShell (StackOverflow; novo benchmark dos autores)", "quantidade": "nao_informado", "observacao": "Inconsistência: 200 comandos nas contribuições (p. 2) e «final set of 208 task pairs» na descrição do conjunto (p. 5). Pacote de dados com link impresso, não acessado."}
+    ],
+    "metricas": [
+      {"nome": "Pass@1, Pass@3, Pass@50", "definicao": "Estimador e número de candidatos gerados: nao_informado; a Figura 1 indica que o candidato de Pass@1 é o primeiro após o ranqueamento."},
+      {"nome": "Exact Match", "definicao": "Excel, Power Fx, JavaScript e PowerShell: reparo idêntico ao ground truth (após normalização, exceto PowerShell e PowerFx)."},
+      {"nome": "Passes Parser + Edit Distance < 5", "definicao": "Python: analisado pelo parser do Python 3 e distância de edição de tokens (Pygments) menor que 5; C: compila sem mensagens de erro com gcc -w -std=c99 -pedantic e menos de 5 edições de token. Rotulada «Passes Parser» nas tabelas e «Passes Critic@1» nas Figuras 6(b) e 11."},
+      {"nome": "Fractional Change", "definicao": "Coluna da Tabela 2; definição não declarada (os valores de cinco linhas são compatíveis com variação relativa, cálculo próprio)."},
+      {"nome": "Correct Localization frac. (±k tokens)", "definicao": "Fração de programas não reparados em pass@1 cujas edições do candidato principal ficam a até k tokens das edições do ground truth (Figura 5)."},
+      {"nome": "Average token log probability", "definicao": "Média das log-probabilidades dos tokens do candidato, analisada por densidades de kernel (Figuras 7, 8 e 12)."}
+    ],
+    "linguagens": ["Excel (fórmulas)", "Power Fx", "Python 3", "JavaScript", "C (C99)", "PowerShell"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Janelas arbitrárias de código fornecidas ao Codex produziram edições falsas, porque continham erros de sintaxe criados pelo recorte.", "localizador": "p. 4-5 do PDF (JavaScript)"},
+      {"categoria": "correcao_funcional", "descricao": "Em PowerShell, o RING faz menos edições que as necessárias para igualar o ground truth (inspeção manual de falhas; Figura 9).", "localizador": "p. 5 do PDF (RQ1); Apêndice, Fewer edits in PowerShell, Figura 9, p. 11 do PDF"},
+      {"categoria": "correcao_funcional", "descricao": "Em JavaScript o RING gera o reparo correto, mas o ranqueamento não o coloca em primeiro lugar.", "localizador": "Legenda da Tabela 1, p. 6 do PDF"},
+      {"categoria": "outro", "descricao": "Mensagens imprecisas do compilador Power Fx podem introduzir ruído no prompt na seleção de exemplos (limitação da seleção inteligente).", "localizador": "p. 7 do PDF (RQ3)"},
+      {"categoria": "outro", "descricao": "Desempenho baixo em PowerShell atribuído pelos autores, como hipótese, à escassez presumida de comandos PowerShell nos dados de treinamento do Codex.", "localizador": "p. 5 do PDF (RQ1); legenda da Tabela 1, p. 6 do PDF"},
+      {"categoria": "outro", "descricao": "O example bank construído por leave-one-out é restritivo e pode limitar o número de reparos bem-sucedidos; dados de telemetria podem exigir anonimização que afete a recuperação.", "localizador": "p. 8 do PDF (Designing the Example Bank)"},
+      {"categoria": "custo", "descricao": "Tempo de recuperação pode se tornar mais significativo com example banks maiores em produção; não quantificado.", "localizador": "p. 8 do PDF (Designing the Example Bank)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Uso de extended code snippets (função ou arquivo inteiro) em vez de janelas arbitrárias, para evitar edições falsas; não há comparação do RING com e sem essa preparação.", "avaliada": "nao", "localizador": "p. 5 do PDF (JavaScript)"},
+      {"descricao": "Mensagem de erro abstraída (sem a localização relatada) para linguagens com mensagens imprecisas; comparada com a mensagem completa nas Tabelas 3-9.", "avaliada": "sim", "localizador": "p. 3 e p. 8 do PDF; Tabelas 3-9, p. 12-13 do PDF"},
+      {"descricao": "Seleção de exemplos por leave-one-out (a tarefa avaliada não entra no example bank).", "avaliada": "nao", "localizador": "p. 5 do PDF (RQ1)"},
+      {"descricao": "Normalização aplicada igualmente ao RING e aos baselines.", "avaliada": "nao", "localizador": "Apêndice, Program Normalization, p. 11 do PDF"},
+      {"descricao": "Propostas não implementadas: sistemas de indexação/recuperação rápidos (FAISS, ANNOY) para o tempo de recuperação; modelo de ranqueamento dedicado; consultas iterativas ao Codex com restrições leves específicas de linguagem.", "avaliada": "nao", "localizador": "p. 5 do PDF (RQ1); p. 8 do PDF"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa contradiz a tabela: o texto diz que o TFix nos trechos originais (pass@1 0.59) fica «approximately 7 points higher» que o RING, mas a Tabela 1 traz 0.46 para o RING em JavaScript (diferença de 0,13, cálculo próprio).", "localizador": "p. 5 do PDF (RQ1); Tabela 1, p. 6 do PDF"},
+      {"descricao": "Tamanho do benchmark PowerShell: 200 comandos nas contribuições e 208 pares no corpo.", "localizador": "p. 2 e p. 5 do PDF"},
+      {"descricao": "Valores da Tabela 2 não coincidem com as tabelas de configuração: JavaScript Fixed Shots 0.43 coincide com Abstracted Compiler/Fixed Example e Smart Shots 0.46 com Compiler/Smart Selection (linhas de localização diferentes, Tabela 5); C Fixed Shots 0.5 e Smart Shots 0.58 não coincidem com nenhuma linha da Tabela 9 (Compiler: 0.53 e 0.64; Abstracted Compiler: 0.56 e 0.63).", "localizador": "Tabela 2, p. 7 do PDF; Tabelas 5 e 9, p. 12-13 do PDF"},
+      {"descricao": "Mesmo valor diferente entre tabelas: RING em C rotulado «Compiler Message, Message Embedding» tem Pass@1 0.63 na Tabela 1 e 0.64 na linha Compiler/Smart Selection da Tabela 9 (Pass@3 0.69 e Pass@50 0.70 coincidem); 0.63 coincide com Abstracted Compiler/Smart Selection.", "localizador": "Tabela 1, p. 6 do PDF; Tabela 9, p. 13 do PDF"},
+      {"descricao": "A Tabela 1 apresenta «the best performing configuration» por linguagem, mas a Tabela 5 traz para JavaScript Abstracted Compiler/Smart Selection com P@1 0.47 e P@50 0.65, acima da configuração da Tabela 1 (0.46 e 0.64), e a Tabela 8 traz para PowerShell Abstracted Compiler/Fixed Example com P@1 0.11, acima de 0.10; o critério de escolha não é declarado e a escolha é feita sobre o próprio conjunto de avaliação.", "localizador": "p. 5 do PDF; Tabela 1, p. 6 do PDF; Tabelas 5 e 8, p. 12-13 do PDF"},
+      {"descricao": "Narrativa «smart selection improves performance in all languages» vale para as linhas escolhidas na Tabela 2, mas há inversões nas tabelas de configuração em P@1: Power Fx Abstracted Compiler Fixed Example 0.71 contra Smart Selection 0.68 (Tabela 4); Python 0.90 contra 0.89 (Tabela 6); PowerShell 0.11 contra 0.09 (Tabela 8). Em Excel com Compiler, Smart Selection tem P@3 0.88 e P@50 0.92, abaixo de Fixed Example (0.89 e 0.93).", "localizador": "p. 7 do PDF; Tabelas 3, 4, 6 e 8, p. 12-13 do PDF"},
+      {"descricao": "Inversões: em PowerShell, Compiler/None tem P@1 0.04, abaixo de None/None 0.06 (Tabela 8); em Python, o RING tem Pass@50 0.97, abaixo do Codex zero-shot 0.98 (Tabela 1); em C, Compiler/None tem P@50 0.71, acima de Compiler/Smart Selection 0.70 (Tabela 9).", "localizador": "Tabela 1, p. 6 do PDF; Tabelas 8 e 9, p. 13 do PDF"},
+      {"descricao": "Aparente inconsistência na coluna Fractional Change da Tabela 2: para PowerShell (0.09 e 0.1) o valor impresso é 0.01, enquanto a variação relativa calculada sobre os valores arredondados seria cerca de 0,11 (cálculo próprio); as demais linhas são compatíveis com variação relativa. A tabela não define a coluna nem informa valores não arredondados, que poderiam explicar a diferença apenas se fossem muito próximos.", "localizador": "Tabela 2, p. 7 do PDF"},
+      {"descricao": "O texto cita a diferença entre pass@1 e pass@5, mas nenhuma tabela ou figura reporta pass@5 (as tabelas trazem Pass@1, Pass@3 e Pass@50).", "localizador": "p. 7-8 do PDF (RQ4); Tabelas 1 e 3-9"},
+      {"descricao": "Resultado nulo/desfavorável frente a sistemas específicos (não prompting): em Power Fx, LaMirage tem Pass@1 0.85 contra 0.71 do RING; em JavaScript, TFix nos trechos originais tem 0.59 contra 0.46. As comparações com esses sistemas usam condições diferentes (TFix em trechos originais e estendidos; LaMirage e Dr. Repair sem Pass@3/Pass@50), e o texto não informa se LaMirage, BIFI e Dr. Repair foram reexecutados ou se os números vêm de outra fonte.", "localizador": "Tabela 1, p. 6 do PDF; p. 5 do PDF; Agradecimentos, p. 8 do PDF"},
+      {"descricao": "Para C e Python, o example bank vem de 400 programas adicionais reparados pela melhor configuração do RING (sem seleção inteligente) e escolhidos por não gerarem diagnóstico de erro, isto é, sem ground truth; o número de pares resultantes não é informado.", "localizador": "p. 5 do PDF (RQ1)"},
+      {"descricao": "A análise de localização (Figura 5) compara subconjuntos diferentes (programas não reparados pelo RING e programas não reparados pelos baselines), com denominadores não informados.", "localizador": "Figura 5 e texto da RQ2, p. 6 do PDF"},
+      {"descricao": "Métrica de C: o critério descrito é compilar sem erros com gcc e menos de 5 edições, mas as tabelas a rotulam «Passes Parser» e as Figuras 6(b) e 11 «Passes Critic@1»; para Python e C o sucesso não é verificado contra ground truth. Sem o limite de edição (Tabela 7), os valores de C mudam (RING 0.82; Dr. Repair 0.63).", "localizador": "p. 4-5 do PDF; Tabela 1, p. 6 do PDF; Tabela 7, p. 13 do PDF"},
+      {"descricao": "Tamanho médio de JavaScript: o texto informa 208 e 74 tokens T5 (trechos estendidos e originais) e a Tabela 1 informa Avg. Tokens 163±106, sem indicar o tokenizador da tabela; não é possível afirmar se há divergência.", "localizador": "p. 5 do PDF; Tabela 1, p. 6 do PDF"},
+      {"descricao": "A introdução afirma que o RING repara «significantly more programs», mas nenhum teste estatístico é relatado.", "localizador": "p. 2 do PDF"}
+    ],
+    "observacoes": [
+      {"descricao": "Os baselines específicos de linguagem (LaMirage, TFix, BIFI, Dr. Repair) são sistemas treinados ou neurossimbólicos, não técnicas de prompting; não entram em `tecnicas` nem em `extracoes`.", "localizador": "p. 4-5 do PDF; Tabela 1, p. 6 do PDF"},
+      {"descricao": "Apêndice: combinação (ensembling) com motores específicos não executada; o estudo informa quantos programas os motores de Power Fx (34; 17%) e JavaScript (52; 26%) reparam e o RING não, e números menores para Excel (15), Python (6) e C (4).", "localizador": "Apêndice, Combining RING with language-specific repair engines, p. 11 do PDF"},
+      {"descricao": "Número de execuções repetidas, número de candidatos gerados por tarefa, número de exemplos por prompt e sementes da amostragem aleatória dos benchmarks: nao_informado.", "localizador": "p. 4-6 do PDF"},
+      {"descricao": "RQ4 analisa a calibração das log-probabilidades por densidades (Figuras 7, 8, 12); valores lidos de curvas não foram extraídos.", "localizador": "p. 7-8 do PDF; p. 12 do PDF"},
+      {"descricao": "Anotação manual: os pares PowerShell foram anotados manualmente pelos autores a partir dos posts do StackOverflow; os 73 casos Excel com erro de tipo foram anotados com reparo ground truth.", "localizador": "p. 4-5 do PDF"}
+    ],
+    "citacoes": [
+      {"trecho": "We implement our approach in the RING system, which employs compiler (or diagnostic) messages, smart few-shot selection, and ranking of repair candidates to perform repair across varying languages.", "localizador": "p. 2 do PDF, contribuições"},
+      {"trecho": "Following this intuition, we include a preprocessed error message produced by the compiler or other static analyzers.", "localizador": "p. 3 do PDF, Fault Localization through Language Tooling"},
+      {"trecho": "For languages where the error messaging may not be precise, particularly with regards to the error location reported, we found that a simple abstraction that removes the reported error location but preserves the error text worked well – we discuss how to create such an abstracted message in our discussion section.", "localizador": "p. 3 do PDF, Fault Localization through Language Tooling"},
+      {"trecho": "Following the intuition that programs with similar mistakes have similar fixes, we select examples from a collection of buggy-fixed pairs based on error message similarity.", "localizador": "p. 3 do PDF, Code Transformation through Few-shot Learning"},
+      {"trecho": "We then select programs from the example bank by minimizing the L2 distance between error vectors.", "localizador": "p. 4 do PDF"},
+      {"trecho": "We use this description by embedding the compiler messages with a pretrained CodeBert (Feng et al. 2020) model and comparing embeddings based on cosine similarity.", "localizador": "p. 4 do PDF"},
+      {"trecho": "We use a relatively simple (but effective) ranking strategy to order the candidate programs: averaging the log-probabilities of tokens selected during the decoding process and sort the candidates in descending order of their averages.", "localizador": "p. 4 do PDF, Candidate Ranking"},
+      {"trecho": "We also use zero-shot Codex as a baseline for all languages.", "localizador": "p. 5 do PDF, Common Baseline"},
+      {"trecho": "Smart selection is done via leave-one-out.", "localizador": "p. 5 do PDF, RQ1"},
+      {"trecho": "We run the best RING configuration (without smart selection) on these 400 programs and pick those that do not raise any diagnostics error.", "localizador": "p. 5 do PDF, RQ1"},
+      {"trecho": "We found that providing these arbitrary windows to Codex resulted in false edits, as the windows had syntax errors that were just an artifact of the windowing.", "localizador": "p. 4-5 do PDF, JavaScript"},
+      {"trecho": "To mitigate this, we extracted the whole function (or whole file, if not in a function) that encompassed the originally buggy and the repaired code snippets.", "localizador": "p. 5 do PDF, JavaScript"},
+      {"trecho": "Manual inspection of failures also revealed that RING performs fewer edits than required to match the ground truth.", "localizador": "p. 5 do PDF, RQ1"},
+      {"trecho": "We hypothesize that this may be a reflection of the (presumed) relative scarcity of PS commands in Codex’s training data.", "localizador": "p. 5 do PDF, RQ1"},
+      {"trecho": "In Javascript, RING is capable of generating the right repair but ranking needs to improve.", "localizador": "Legenda da Tabela 1, p. 6 do PDF"},
+      {"trecho": "Manual inspection revealed that Power Fx compiler messages tend to be imprecise, and using them to select examples can introduce some noise into the prompt.", "localizador": "p. 7 do PDF, RQ3"},
+      {"trecho": "In practice, this will be a very restrictive example bank that can potentially limit the number of successful repairs.", "localizador": "p. 8 do PDF, Designing the Example Bank"},
+      {"trecho": "While the example bank sizes used during our evaluation do not present a performance concern, as example banks in production grow, retrieval time may become more significant.", "localizador": "p. 8 do PDF, Designing the Example Bank"},
+      {"trecho": "To address such challenges, RING could take advantage of off-the-shelf fast indexing/retrieval systems, such as FAISS (Johnson, Douze, and Jégou 2019) or ANNOY (ANNOY library).", "localizador": "p. 8 do PDF, Designing the Example Bank"},
+      {"trecho": "We carry out these normalization steps for all systems, both RING and baselines.", "localizador": "Apêndice, Program Normalization, p. 11 do PDF"},
+      {"trecho": "In Javascript, we find that TFix applied to the original code snippets obtains a pass@1 rate of 0.59 (approximately 7 points higher than that of RING).", "localizador": "p. 5 do PDF, RQ1"},
+      {"trecho": "We kept a final set of 208 task pairs.", "localizador": "p. 5 do PDF, PowerShell"},
+      {"trecho": "We introduce PowerShell commands as a new application for last-mile repair and collect a benchmark set of 200 PowerShell commands from StackOverflow, which we also release for future research.", "localizador": "p. 2 do PDF, contribuições"},
+      {"trecho": "For Excel and PowerFx, we see that Abstracted compiler message gives better performance, likely due to shorter (usually, 1 line) programs.", "localizador": "p. 12 do PDF, Different Configurations of RING"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "RING (Abstracted Message, Error Vector)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "Codex (Chen et al. 2021) — baseline Codex zero-shot",
+      "modelo": "Codex, “davinci-code-002” (como impresso)",
+      "benchmark": "Excel (273 tarefas)",
+      "metrica": "Pass@1 (Metric: Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.60, "intervencao": 0.82},
+      "denominador": "nao_informado (corpus Excel de 273 tarefas; o estudo não liga explicitamente o denominador da métrica ao corpus)",
+      "condicoes": "RING com mensagem do compilador abstraída e seleção de exemplos por error vector, com leave-one-out (as demais tarefas formam o example bank) e ranqueamento por média de log-probabilidades; temperatura 0,7 para os experimentos do RING; temperatura e uso de ranqueamento no baseline: nao_informado. Configuração do RING escolhida pelos autores como a de melhor desempenho para a linguagem. Exact Match após normalização (espaços, identificadores e referências de célula em maiúsculas). Consultas ao Codex em 9 de agosto de 2022. Número de candidatos gerados, número de exemplos no prompt e número de execuções: nao_informado. Pacote: o resultado não se atribui a um ingrediente isolado. Valores conferidos na imagem da p. 6 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam a comparação com motores específicos de linguagem (não prompting), várias métricas (Pass@1/3/50) e configurações do RING que variam por linguagem. Primeira tabela com contraste elegível de prompting: Tabela 1 (RING contra Codex zero-shot); primeira métrica pertinente Pass@1; único modelo Codex; primeira linguagem/benchmark Excel; primeira linha de base de prompting listada é o Codex zero-shot (LaMirage não é prompting).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 6 do PDF (sem paginação impressa), linhas Excel",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "RING (Abstracted Message, Error Vector) 0.82 0.89 0.92", "localizador": "Tabela 1, p. 6 do PDF, Language = Excel; colunas Approach, Pass@1, Pass@3, Pass@50 (Metric = Exact Match)"},
+        {"trecho": "Codex (Chen et al. 2021) 0.60 0.77 0.88", "localizador": "Tabela 1, p. 6 do PDF, Language = Excel; colunas Approach, Pass@1, Pass@3, Pass@50 (Metric = Exact Match)"},
+        {"trecho": "All RING experiments are at 0.7 temperature.", "localizador": "Legenda da Tabela 1, p. 6 do PDF"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Smart Shots (smart selection of few-shots; error vector selection em Excel)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Fixed Shots (pre-defined fixed examples)",
+      "modelo": "Codex, “davinci-code-002” (como impresso)",
+      "benchmark": "Excel (273 tarefas)",
+      "metrica": "Pass@1 (Excel: Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.76, "intervencao": 0.82},
+      "denominador": "nao_informado",
+      "condicoes": "Tabela 2 (RQ3) compara exemplos selecionados por similaridade de diagnóstico (error vector selection para Excel, p. 7) com exemplos fixos pré-definidos. A Tabela 2 não indica a configuração de localização; os valores 0.76 e 0.82 coincidem com as linhas Abstracted Compiler/Fixed Example e Abstracted Compiler/Smart Selection da Tabela 3 (correspondência inferida pela extração; Compiler/Fixed Example também tem 0.76). Coluna Fractional Change impressa: 0.08. Temperatura 0,7; número de exemplos fixos e recuperados, número de candidatos e de execuções: nao_informado. Valores conferidos nas imagens das p. 7 e 12 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa; para completar o alvo de três, componente isolado da tabela de ablação do estudo (Tabela 2, RQ3, primeira tabela que isola um componente), primeira linha (Excel).",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF; Tabela 3, p. 12 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Excel 0.76 0.82 0.08", "localizador": "Tabela 2, p. 7 do PDF; colunas Language, Fixed Shots, Smart Shots, Fractional Change"},
+        {"trecho": "Pass@1 for few-shots selected using our smart selection strategy, compared to pre-defined fixed examples.", "localizador": "Legenda da Tabela 2, p. 7 do PDF"},
+        {"trecho": "We use error vector selection for Excel and JavaScript, which have better and more granular error categorization, and message embedding selection for other languages.", "localizador": "p. 7 do PDF, RQ3"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Compiler (Localization: Compiler message; Transformation: None)",
+      "mecanismos": ["instrucao", "contexto", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Localization: None; Transformation: None",
+      "modelo": "Codex, “davinci-code-002” (como impresso)",
+      "benchmark": "Excel (273 tarefas)",
+      "metrica": "P@1 (Metrics: Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.60, "intervencao": 0.70},
+      "denominador": "nao_informado",
+      "condicoes": "Contraste pareado na matriz de configurações do RING (Tabela 3): as duas condições diferem apenas na inclusão da mensagem do compilador; sem exemplos (Transformation = None). O estudo não analisa esse contraste. Temperatura 0,7 (experimentos do RING); ranqueamento por log-probabilidade presumido por serem configurações do RING, sem declaração específica para a linha None/None, cujos valores coincidem com o baseline Codex da Tabela 1. Número de candidatos e de execuções: nao_informado. Valores conferidos na imagem da p. 12 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Para completar o alvo de três após a tabela de ablação: contraste pareado do primeiro componente de prompting pela ordem das colunas da matriz (Localization, depois Transformation), primeiro modelo (Codex), primeira tabela de configuração (Tabela 3, Excel), primeiro par pela ordem da matriz que difere só nesse componente (None/None e Compiler/None).",
+      "derivacao": "contraste_pareado",
+      "localizador": "Tabela 3, p. 12 do PDF (matriz e resultados na mesma tabela)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "None None 0.60 0.77 0.88", "localizador": "Tabela 3 (Excel), p. 12 do PDF; colunas Localization, Transformation, P@1, P@3, P@50 (Metrics: Exact Match)"},
+        {"trecho": "Compiler None 0.70 0.83 0.90", "localizador": "Tabela 3 (Excel), p. 12 do PDF; colunas Localization, Transformation, P@1, P@3, P@50 (Metrics: Exact Match)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (viabilidade multilíngue, localização, transformação com seleção inteligente e ranqueamento) e contribuições declaradas.", "localizador": "p. 2 e p. 5 do PDF"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Conjuntos, critérios de sucesso, prompt do baseline e estratégias de seleção e ranqueamento são descritos, mas os prompts do RING aparecem simplificados nas figuras, e não se informam número de candidatos gerados, número de exemplos por prompt, número de execuções, estimador de pass@k nem o critério de escolha da melhor configuração por linguagem, escolhida sobre o próprio conjunto de avaliação.", "localizador": "p. 3-6 do PDF; Figuras 1, 3 e 4"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Baseline Codex zero-shot executado em todas as linguagens, motores específicos de linguagem e matriz de configurações (localização x transformação) com exemplos fixos como comparador da seleção inteligente; a temperatura e o ranqueamento do baseline não são declarados explicitamente.", "localizador": "p. 5 do PDF; Tabelas 1-9"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Critérios de sucesso definidos por linguagem, mas Python e C usam aproximação (análise sintática ou compilação e distância de edição) sem ground truth; estimador de pass@k e denominadores não são ligados explicitamente aos corpora; valores da mesma condição divergem entre a Tabela 1, a Tabela 2 e as Tabelas 5 e 9; a coluna Fractional Change não é definida; rótulos da métrica de C variam (Passes Parser, Passes Critic@1).", "localizador": "p. 4-5 do PDF; Tabelas 1, 2, 5, 9; Figuras 6 e 11"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças, mas o estudo discute limitações (example bank restritivo por leave-one-out, escassez presumida de PowerShell no treinamento, mensagens imprecisas do Power Fx, edições falsas com janelas, tempo de recuperação). Não discute não determinismo, ausência de testes estatísticos (embora use «significantly») nem a escolha da configuração sobre o conjunto de teste.", "localizador": "p. 2, p. 5, p. 7-8 do PDF"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelo e data das consultas, temperatura do RING, fontes dos conjuntos e libera o benchmark PowerShell (link impresso, não acessado); não informa liberação do código ou dos prompts completos do RING, sementes das amostras aleatórias de 200 programas, conteúdo dos exemplos fixos nem os example banks de C e Python.", "localizador": "p. 2, p. 4-6 do PDF; legenda da Tabela 1"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O leave-one-out impede que a tarefa avaliada entre no example bank do prompt, mas o estudo não discute contaminação no pré-treinamento, embora os conjuntos venham de GitHub, fóruns e StackOverflow públicos.", "localizador": "p. 4-5 do PDF"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (corpo, referências e apêndice). Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04, p-05, p-06 (Tabela 1, Figura 5), p-07 (Tabela 2, Figuras 6 e 7), p-08, p-11, p-12 (Tabelas 3-6), p-13 (Tabelas 7-9). Páginas 9-10 (referências) não abertas visualmente."
+  }
+}
