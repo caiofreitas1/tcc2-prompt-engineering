@@ -296,3 +296,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: «Seguir com Opus» (14/11/2026); confirmação da regra de `contexto` (D103).
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S1–S129); Claude Code (Claude Opus 5.5), validação, 6 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-01.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 2 (15/11/2026)
+- Pedido do autor: «Pode começar, assim que o limite semanal acabar, eu reseto ele» (15/11/2026).
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S137–S261); Claude Code (Claude Opus 5.5), validação, 2 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-02.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

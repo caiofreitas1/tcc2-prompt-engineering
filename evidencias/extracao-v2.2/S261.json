@@ -1,0 +1,315 @@
+{
+  "estudo": "S261",
+  "texto_fonte": "fontes/textos/lote/S261.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "versao_fonte": "arXiv:2402.09126v2 [cs.DC], 23 Apr 2024; Workshop on AI For Systems (AI4Sys '24), DOI 10.1145/3660605.3660944 impresso na p. 1 do PDF. O PDF não tem paginação impressa; os localizadores usam a posição no arquivo.",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "GPT3.5 zero-shot (prompt “Generate the optimal MPI functions for the provided code, and supply in the response the entire complete code with those MPI functions: [CODE]”)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF, legenda da Figura 4; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»",
+        "observacao": "Única condição de prompting descrita com o texto do prompt. É a linha de base contra a qual o estudo compara o MPIrigen, que é um modelo ajustado (fora do escopo). Instrução direta com o código semisserial fornecido como insumo ([CODE]) → instrucao e contexto; o pedido de devolver o código completo foi tratado como parte da instrução. Não há variante de prompting com e sem algum ingrediente, nem outro prompt executado para o GPT-3.5. O prompt usado para o GPT-3.5 na tarefa de completação de código do RQ1 (Figura 2) não é informado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "MPIrigen (fine-tuning MonoCoder on HPCorpusMPI)",
+        "natureza": "ajuste_fino",
+        "descricao": "Proposta central do estudo: ajuste fino do MonoCoder (0.7B, segundo a legenda da Figura 3) no HPCorpusMPI para prever as chamadas MPI removidas e suas linhas; treino com batch 2, 2048 tokens e 3 épocas em duas GPUs NVidia Tesla-V100 de 32GB.",
+        "localizador": "p. 1 do PDF, resumo; p. 3 do PDF, seção 5; p. 4 do PDF, legenda da Figura 3; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "nome_original": "pre-process for completion (numeração de linhas, remoção das funções MPI e concatenação na última linha)",
+        "natureza": "outro",
+        "descricao": "Formato dos dados de treino e de entrada do modelo ajustado: cada linha é numerada, as funções MPI são removidas e escritas com suas linhas na última linha, que o modelo aprende a prever. Faz parte do procedimento de ajuste fino, não de um prompt para modelo pré-treinado; o estudo não o avalia contra uma condição sem ele.",
+        "localizador": "p. 3 do PDF, passos (1)–(4) e seção 5; p. 3 do PDF, Figura 1c; p. 4 do PDF, coluna esquerda"
+      },
+      {
+        "nome_original": "TokomPiler",
+        "natureza": "outro",
+        "descricao": "Pré-processamento do código que substitui a informação semântica (identificadores, literais) por tokens anônimos, mantendo a estrutura da AST. É usado no RQ1 como teste de dependência dos modelos em relação à semântica local, não como técnica de prompting proposta para melhorar a geração.",
+        "localizador": "p. 3 do PDF, Figura 1b e Figura 2; p. 4 do PDF, parágrafo «RQ1: MPI code generation»"
+      },
+      {
+        "nome_original": "MonoCoder (domain-specific model) versus PolyCoder e GPT-3.5",
+        "natureza": "selecao_modelo",
+        "descricao": "O RQ1 compara modelos pré-treinados (MonoCoder, pré-treinado em C e C++, contra PolyCoder e GPT-3.5) na mesma tarefa de completação; a diferença entre condições é o modelo, não o prompt.",
+        "localizador": "p. 3 do PDF, Figura 2; p. 4 do PDF, parágrafo «RQ1: MPI code generation»"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5 (GPT3.5)",
+        "versao": "nao_informado",
+        "observacao": "Usado em zero-shot nos RQ2–RQ4 e na completação de código do RQ1; snapshot, temperatura e demais parâmetros de decodificação não informados."
+      },
+      {
+        "nome": "PolyCoder",
+        "versao": "nao_informado",
+        "observacao": "Usado só no RQ1 (Figura 2); tamanho não informado neste artigo."
+      },
+      {
+        "nome": "MonoCoder",
+        "versao": "nao_informado para o RQ1; MonoCoder-0.7B como base do MPIrigen (legenda da Figura 3)",
+        "observacao": "Modelo de domínio pré-treinado em C e C++; o artigo não diz se a versão do RQ1 é a mesma de 0.7B."
+      },
+      {
+        "nome": "MPIrigen",
+        "versao": "MonoCoder-0.7B ajustado no HPCorpusMPI",
+        "observacao": "Modelo ajustado (fora do escopo de prompting)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "HPCorpusMPI",
+        "quantidade": "16,384 programs (corpus após filtro e remoção de duplicatas); final dataset with 13,322 programs; legenda da Figura 3: 16K MPI codes",
+        "observacao": "Corpus próprio derivado de MPICodeCorpus e HPCorpus. A divisão entre treino e teste e o número de programas avaliados nos RQ2–RQ4 não são informados. A completação de código do RQ1 usa «over a thousand examples», sem número exato.",
+        "localizador": "p. 2–3 do PDF, seção 4; p. 3 do PDF, coluna direita; p. 4 do PDF, legenda da Figura 3 e parágrafo do RQ1"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "CodeBLEU",
+        "definicao": "Usada no RQ1 para a completação de código a partir de contexto inicial de 100, 300 e 600 tokens.",
+        "denominador": "nao_informado («over a thousand examples»)",
+        "localizador": "p. 3 do PDF, Figura 2; p. 4 do PDF, parágrafo do RQ1"
+      },
+      {
+        "nome": "Accuracy – Locations",
+        "definicao": "Proporção de funções em locais corretos, com tolerância (variance) de 0 a 2 linhas; variance 0 é localização exata.",
+        "denominador": "nao_informado (número de programas e de chamadas avaliados não informado); resultados cumulativos por programas com n ou menos chamadas MPI (1–20)",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»; p. 4 do PDF, Figuras 3a e 4a"
+      },
+      {
+        "nome": "Accuracy – Functions",
+        "definicao": "Verifica se a função MPI correta foi chamada, medida só nos locais corretos.",
+        "denominador": "funções em locais corretos (contagem não informada)",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»; p. 4 do PDF, Figuras 3b e 4b"
+      },
+      {
+        "nome": "Accuracy – Arguments",
+        "definicao": "Razão entre argumentos corretos e o total de argumentos, medida só nas funções corretas.",
+        "denominador": "argumentos das funções corretas (contagem não informada)",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»; p. 4 do PDF, Figuras 3c e 4c"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "C e C++ com MPI",
+        "observacao": "O MonoCoder é pré-treinado em C e C++; o exemplo da Figura 1 é em C. A linguagem de cada programa do HPCorpusMPI não é detalhada."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O estudo não avalia a correção do código MPI gerado (nem compilação nem saída); as métricas medem só local, função e argumentos das chamadas.",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A acurácia cai à medida que aumenta o número de chamadas MPI no programa (complexidade), exceto nos programas com uma ou duas chamadas.",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»; p. 4 do PDF, Figuras 3 e 4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Desbalanceamento das funções MPI nos dados: a acurácia de localização varia entre funções MPI e, segundo os autores, correlaciona-se com a proporção dessas chamadas nos dados de treino e possivelmente no GitHub. Refere-se ao MPIrigen (modelo ajustado).",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»; Figura 5"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Abordagem baseada em compilação e verificação de saída para avaliar a correção do código gerado, apresentada como trabalho futuro e não executada.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      },
+      {
+        "descricao": "Desenvolver um conjunto de dados MPI balanceado e treinar o MPIrigen nele, apresentado como estudo futuro e não executado (fora do escopo de prompting).",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O tamanho do corpus aparece com valores distintos: 16,384 programs após o filtro e a remoção de duplicatas (seção 4), final dataset with 13,322 programs depois dos passos de pré-processamento, e «16K MPI codes» na legenda da Figura 3 para o ajuste do MPIrigen. O artigo não informa a divisão entre treino e teste nem quantos programas foram avaliados nos RQ2–RQ4; o denominador das acurácias não é informado.",
+        "localizador": "p. 2–3 do PDF, seção 4; p. 3 do PDF, coluna direita; p. 4 do PDF, legenda da Figura 3"
+      },
+      {
+        "descricao": "Os valores dos RQ2–RQ4 só aparecem em prosa, arredondados (MPIrigen: locais e funções com variance 2 «reach 80% and converge to 70%», argumentos «reaches 95% and converge to 94%»; GPT3.5: «converged to 50% for locations and approximately 55% and 80% for functions and arguments»). As Figuras 3 e 4 não têm rótulos numéricos, e a prosa atribui o mesmo par de valores a locais e funções do MPIrigen, que são subfiguras distintas; a conferência exata não é possível sem estimar pela posição das linhas (aparente imprecisão, não verificável).",
+        "localizador": "p. 5 do PDF, «Results for RQ2, RQ3, RQ4»; p. 4 do PDF, Figuras 3 e 4"
+      },
+      {
+        "descricao": "A comparação MPIrigen × GPT3.5 zero-shot opõe um modelo ajustado no próprio corpus a um modelo de uso geral sem exemplos, com formatos de saída distintos (última linha com pares linha/função versus código completo devolvido pelo GPT-3.5). O artigo não descreve como locais e funções foram extraídos da resposta do GPT-3.5, nem a versão do modelo, os parâmetros de decodificação ou o número de execuções. O ganho é do pacote ajuste fino + pré-processamento, não de prompting.",
+        "localizador": "p. 4 do PDF, legenda da Figura 4; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "descricao": "No RQ1 (Figura 2, CodeBLEU), com context-100 o MonoCoder+Tokompiler (0.5) fica abaixo do GPT3.5+Tokompiler (0.52) e igual ao GPT3.5 (0.5). A narrativa qualifica a superioridade do MonoCoder «as context grows» e a chama de «significantly outperforming» sem teste estatístico relatado; o resumo generaliza que modelos de domínio «outperform larger models».",
+        "localizador": "p. 3 do PDF, Figura 2 (rótulos das barras, context-100); p. 4 do PDF, parágrafo do RQ1; p. 1 do PDF, resumo"
+      },
+      {
+        "descricao": "Efeito do TokomPiler não uniforme no RQ1: para o PolyCoder, CodeBLEU de 0.38 sem e 0.47 com TokomPiler em context-100, mas 0.54 sem e 0.47 com em context-300 e 0.71 sem e 0.48 com em context-600; para o GPT3.5, 0.5/0.52, 0.59/0.59 e 0.6/0.6. A narrativa sobre independência da semântica local refere-se ao MonoCoder.",
+        "localizador": "p. 3 do PDF, Figura 2 (rótulos das barras); p. 4 do PDF, parágrafo do RQ1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Nenhuma extração foi registrada: o estudo não compara técnicas de prompting entre si. A proposta focal é o ajuste fino (MPIrigen), comparado com o GPT3.5 zero-shot; o RQ1 compara modelos (MonoCoder, PolyCoder, GPT-3.5) e o pré-processamento TokomPiler. Essas condições estão em componentes_fora_escopo. Não há técnica focal de prompting, portanto so_classificadas fica vazia.",
+        "localizador": "p. 2 do PDF, seção 3 (RQs e contribuições); p. 3–5 do PDF, seção 5"
+      },
+      {
+        "descricao": "sem_comparador = nao porque o estudo executa outras condições (MPIrigen e outros modelos) contra o código obtido por prompting do GPT-3.5; porém nenhuma dessas condições é outra técnica de prompting.",
+        "localizador": "p. 4 do PDF, Figuras 3 e 4; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "descricao": "Tarefa classificada como geração: o estudo a apresenta como geração de código MPI (inserção de chamadas MPI em código semisserial para decomposição de domínio), embora o enquadramento introdutório seja de paralelização fonte-a-fonte.",
+        "localizador": "p. 1 do PDF, título e resumo; p. 2 do PDF, seção 3"
+      },
+      {
+        "descricao": "No RQ1, a completação parte de um contexto inicial de 100, 300 ou 600 tokens; é condição de avaliação dos modelos, não técnica de prompting. O artigo não informa como o GPT-3.5 foi instruído nessa tarefa.",
+        "localizador": "p. 3 do PDF, Figura 2; p. 4 do PDF, parágrafo do RQ1"
+      },
+      {
+        "descricao": "O artigo indica um repositório GitHub com as fontes; ele não foi acessado nem validado nesta extração.",
+        "localizador": "p. 1 do PDF, resumo"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This study presents MPIrigen, a tool developed to assist MPI programmers in automatically generating correct MPI functions in an MPI-based domain decomposition parallel code.",
+        "localizador": "p. 3 do PDF, seção 5"
+      },
+      {
+        "trecho": "Subsequently, we introduce a dedicated downstream task of MPI-based program generation by fine-tuning MonoCoder on HPCorpusMPI.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Comparative analysis against GPT-3.5 zero-shot performance, using a novel HPC-oriented evaluation method, demonstrates that MPIrigen excels in generating accurate MPI functions calls.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Figure 4: Performance breakdown of GPT3.5 using prompt “Generate the optimal MPI functions for the provided code, and supply in the response the entire complete code with those MPI functions: [CODE]”.",
+        "localizador": "p. 4 do PDF, legenda da Figura 4"
+      },
+      {
+        "trecho": "Any semantic information has been replaced using TokomPiler (Figure 1b) and thus, a measure of reliance of these pre-trained models on semantic information has been tested.",
+        "localizador": "p. 4 do PDF, parágrafo «RQ1: MPI code generation»"
+      },
+      {
+        "trecho": "This code completion task has been done over a thousand examples with up to 2048 tokens in HPCorpusMPI and under an initial context of 100, 300, and 600 tokens (Figure 2).",
+        "localizador": "p. 4 do PDF, parágrafo «RQ1: MPI code generation»"
+      },
+      {
+        "trecho": "Results show that as context grows, MonoCoder is significantly outperforming PolyCoder and GPT-3.5 results, while also proving to not fix on local semantics for those results, suggesting high generality capabilities.",
+        "localizador": "p. 4 do PDF, parágrafo «RQ1: MPI code generation»"
+      },
+      {
+        "trecho": "HPCorpusMPI is a corpus consisting of both of the corpora above but under the filter of MPI domain decomposition codes only and with duplication removal resulting in a total of 16,384 programs.",
+        "localizador": "p. 2–3 do PDF, seção 4"
+      },
+      {
+        "trecho": "For convenience, the final dataset (with 13,322 programs) contains three fields – “Program”, “Code”, “MPI label” – and corresponds to the program’s GitHub username, the code with removed MPI functions, and the label of the locations and their MPI functions.",
+        "localizador": "p. 3 do PDF, coluna direita"
+      },
+      {
+        "trecho": "Figure 3: Performance breakdown of MPIrigen (fine-tuned MonoCoder-0.7B over 16K MPI codes from HPCorpusMPI) over programs containing (n) or less of MPI function calls (X axis).",
+        "localizador": "p. 4 do PDF, legenda da Figura 3"
+      },
+      {
+        "trecho": "Functions accuracy is measured for matched locations only and arguments accuracy for matched functions only.",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»"
+      },
+      {
+        "trecho": "The results are given as a function of the number of original MPI calls (1-20), showcasing that accuracy drops as complexity grows (besides the ultra simplicity of one or two MPI function calls).",
+        "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4»"
+      },
+      {
+        "trecho": "The training was carried out with a batch size of 2, 2048 tokens and 3 epochs.",
+        "localizador": "p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "trecho": "As shown in Figure 3, for MPIrigen, the location as well as functions accuracy under variance of 2 reach 80% and converge to 70%, while for arguments it reaches 95% and converge to 94%.",
+        "localizador": "p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "trecho": "For GPT3.5 on the contrary, the accuracy converged to 50% for locations and approximately 55% and 80% for functions and arguments resp (Figure 4).",
+        "localizador": "p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+      },
+      {
+        "trecho": "As the figure shows the accuracy of predicting the correct location varies for different MPI functions, and we believe it correlates with the proportion of different MPI calls in the training dataset and possibly in open-source repositories on GitHub.",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      },
+      {
+        "trecho": "It would be thus an interesting study to develop a balanced MPI dataset and train MPIrigen on it.",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      },
+      {
+        "trecho": "Currently, we do not evaluate the correctness of generated MPI codes, nonetheless we are envisioning an approach based on compilation and output verification as a part of immediate future work.",
+        "localizador": "p. 5 do PDF, «Result analysis and future work»"
+      }
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas (RQ1–RQ4) e contribuições listadas.",
+      "localizador": "p. 2 do PDF, seção 3"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pré-processamento, o ajuste fino (batch, tokens, épocas, GPUs) e o prompt do GPT-3.5 nos RQ2–RQ4 são descritos, mas faltam a divisão treino/teste, o número de programas avaliados, o modo de extrair locais e funções da resposta do GPT-3.5 e o prompt usado no RQ1.",
+      "localizador": "p. 3 do PDF, passos (1)–(4); p. 4 do PDF, legenda da Figura 4 e parágrafo do RQ1; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores executados (GPT3.5 zero-shot nos RQ2–RQ4; PolyCoder e GPT-3.5 no RQ1), mas o comparador zero-shot usa um único prompt, formato de saída distinto e versão não informada, o que limita a comparabilidade com o modelo ajustado.",
+      "localizador": "p. 3 do PDF, Figura 2; p. 4 do PDF, Figuras 3 e 4; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas de localização, função e argumentos são definidas, inclusive seus denominadores condicionais (funções só nos locais corretos, argumentos só nas funções corretas), mas o número de programas e chamadas avaliados não é informado, os resultados dos RQ2–RQ4 não têm valores impressos nas figuras e a prosa dá só valores arredondados; o tamanho do corpus varia entre 16,384, 13,322 e 16K.",
+      "localizador": "p. 5 do PDF, «Evaluation metric for RQ2, RQ3, RQ4» e «Results for RQ2, RQ3, RQ4»; p. 3–4 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Sem seção de ameaças; o texto reconhece que a correção do código gerado não é avaliada e que o desbalanceamento das funções MPI pode afetar a acurácia, mas não discute contaminação, não determinismo nem validade da comparação com o GPT-3.5.",
+      "localizador": "p. 5 do PDF, «Result analysis and future work»"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O artigo indica um repositório GitHub com as fontes (não acessado nesta extração), o texto do prompt e hiperparâmetros de treino, mas não informa versão do GPT-3.5, parâmetros de decodificação, número de execuções nem a partição de teste.",
+      "localizador": "p. 1 do PDF, resumo; p. 4 do PDF, legenda da Figura 4; p. 5 do PDF, «Results for RQ2, RQ3, RQ4»"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O corpus é coletado do GitHub e os modelos pré-treinados (GPT-3.5, PolyCoder, MonoCoder) podem ter visto código semelhante, mas o artigo não menciona vazamento de dados nem controle de sobreposição entre treino, teste e pré-treinamento.",
+      "localizador": "p. 2–3 do PDF, seção 4; texto completo"
+    }
+  ],
+  "leitura": {
+    "situacao": "completa",
+    "observacao": "Texto extraído lido integralmente (p. 1–6 do PDF, incluindo referências). Páginas do PDF abertas visualmente: p. 1, 2, 3 (Figuras 1 e 2, Tabela 1), 4 (Figuras 3 e 4) e 5 (Figura 5, métricas, resultados e conclusão). A p. 6 (só referências) não foi aberta como imagem."
+  }
+}
