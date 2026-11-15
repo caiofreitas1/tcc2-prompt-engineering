@@ -1,0 +1,624 @@
+{
+  "estudo": "S273",
+  "texto_fonte": "fontes/textos/lote/S273.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "CAPIR (Compositional API Recommendation)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "restricoes",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "restricoes",
+          "outro"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3 (Figura 2 e Prompts 1-4), p. 3-5 do PDF; Seção 5.2 e Tabela 3, p. 7-8 do PDF; o artigo não tem página impressa numerada",
+        "observacao": "Condição avaliada na geração de código: GPT-3.5 + CAPIR (ours), cujo prompt contém a tarefa (assinatura e docstring) e 5 APIs com descrições recomendadas pelo CAPIR (Figura 1c; Seção 5.2). O pacote inclui: Summarizer (gpt-3.5-turbo; gera pares <task, subtasks> a partir de exemplos de uso da documentação, com saída em formato JSON especificado no Prompt 1 → restricoes); Selector por embeddings que recupera k_e = 4 exemplos (→ exemplos e contexto, pois os exemplos vêm da documentação); Decomposer few-shot (→ decomposicao, exemplos); Retriever por embeddings (ada-embedding-002) sobre a documentação de APIs (→ contexto); Reranker_ws e Reranker_as por LLM que reordenam e filtram os APIs recuperados dentro e entre subtarefas (→ outro: reranqueamento/filtragem por LLM do contexto recuperado, sem categoria específica no dicionário); prompts com instruções em linguagem natural (→ instrucao). Base de comparação: GPT-3.5 em geração direta (instrucao). O contrafactual da Tabela 3 é do pacote inteiro contra a geração sem recomendação de API e contra GPT-3.5 + ADA-retrieve; o ganho não pode ser atribuído a um ingrediente isolado. O pacote não é híbrido no sentido de ajuste fino (o estudo declara uso sem treinamento), mas depende de modelo de embeddings pronto para seleção e recuperação."
+      },
+      {
+        "nome_original": "GPT-3.5 + ADA-retrieve",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4.4, p. 6-7 do PDF; Seção 5.2 e Tabela 3, p. 7-8 do PDF; Seção 6.2, p. 11 do PDF",
+        "observacao": "Recupera os top-k APIs da documentação pela similaridade de embeddings (ada-embedding-002) entre a descrição da tarefa e as descrições funcionais, sem decomposição, e os insere no prompt de geração. O estudo afirma que esse baseline usa o mesmo pipeline de DocPrompting e CodeGenAPI, com embedding pronto. A Tabela 3 traz a mesma geração com e sem esses APIs (GPT-3.5 vs. GPT-3.5 + ADA-retrieve), e o texto analisa o contraste; é contrafactual do pacote de prompt aumentado por recuperação. O número de APIs inseridos para este baseline não é declarado separadamente: o texto diz apenas «we add 5 APIs for each task in the prompt» (nao_informado se vale igualmente para ADA-retrieve). Na recomendação de API (Tabela 2) é baseline sem LLM."
+      },
+      {
+        "nome_original": "GPT-3.5 (geração direta, sem recomendação de API)",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Figura 1a, p. 2 do PDF; Tabela 3, p. 8 do PDF",
+        "observacao": "Linha de base de geração zero-shot com gpt-3.5-turbo. O texto do prompt usado não é impresso além do exemplo da Figura 1a (assinatura e docstring); conteúdo exato do prompt nao_informado."
+      },
+      {
+        "nome_original": "Examples (exemplos no prompt do Decomposer)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "restricoes",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.1 (RQ3), p. 5 do PDF; Seção 5.3 e Figura 3, p. 8-9 do PDF",
+        "observacao": "Ablação CAPIR w/o Examples (remove os exemplos do prompt do Decomposer). O contrafactual existe apenas na recomendação de API (Recall@k e Precision@k em Torchdata-AR), não na geração de código; por isso não gera extração. Os valores da Figura 3 não são impressos; o texto dá só as melhorias, sem dizer se são relativas ou em p.p. O formato JSON do Summarizer, que produz os exemplos, não é isolado separadamente."
+      },
+      {
+        "nome_original": "Decomposer",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "restricoes",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao",
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.1 (RQ3), p. 5 do PDF; Seção 5.3 e Figura 3, p. 8-9 do PDF",
+        "observacao": "Ablação CAPIR w/o Decomposer: remove o módulo e recupera APIs com a tarefa original, mantendo o Reranker. Como os exemplos few-shot estão no prompt do Decomposer, a remoção retira decomposição e exemplos juntos. Contrafactual medido só na recomendação de API (Torchdata-AR), não na geração de código."
+      },
+      {
+        "nome_original": "Reranker",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "restricoes",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "outro"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.3 e Prompts 3-4, p. 4-5 do PDF; Seção 4.1 (RQ3), p. 5 do PDF; Seção 5.3 e Figura 3, p. 8-9 do PDF",
+        "observacao": "Reranqueamento por LLM (gpt-3.5-turbo) dos APIs candidatos dentro de cada subtarefa (k_p = 20) e entre subtarefas para formar o top-k; classificado como outro (reranqueamento/filtragem do contexto recuperado por LLM), porque não é amostragem de várias respostas nem recuperação em si. Ablação CAPIR w/o Reranker devolve os top-k resultados do Retriever; medida só na recomendação de API (Torchdata-AR)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "CLEAR",
+        "natureza": "outro",
+        "descricao": "Baseline de recomendação de API baseado em BERT com aprendizado contrastivo e reranqueamento por BERT; não usa prompt de LLM. Foi adaptado: em vez de selecionar APIs de posts do StackOverflow, recupera os k APIs mais próximos da documentação. Usado apenas na recomendação de API (Tabelas 2, 4 e 5), não na geração de código. O estudo declara testar todas as bibliotecas sem treinamento; se o CLEAR foi re-treinado nas bibliotecas não é informado.",
+        "localizador": "Seção 4.4, p. 7 do PDF; Seção 5.1, p. 7 do PDF; Seção 7, p. 11 do PDF"
+      },
+      {
+        "nome_original": "Parâmetros de decodificação",
+        "natureza": "decodificacao",
+        "descricao": "temperature=0.0 e top_p=1.0 para Summarizer, Decomposer e Reranker; temperature = 0.8 e top_p=0.95 na geração de código para calcular pass@k com múltiplas amostras.",
+        "localizador": "Seção 4.2, p. 5 do PDF; Seção 5.2, p. 7 do PDF"
+      },
+      {
+        "nome_original": "CAPIR w/ llama-2-70b (RQ4)",
+        "natureza": "selecao_modelo",
+        "descricao": "Substituição do gpt-3.5-turbo por llama-2-70b nos módulos do CAPIR, avaliada só na recomendação de API em Torchdata-AR (Tabela 4).",
+        "localizador": "Seção 5.4 e Tabela 4, p. 8-9 do PDF"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "gpt-3.5-turbo",
+        "versao": "nao_informado",
+        "uso": "Summarizer, Decomposer e Reranker do CAPIR; modelo base de geração de código (RQ2)"
+      },
+      {
+        "nome": "ada-embedding-002 (grafia do estudo)",
+        "versao": "nao_informado",
+        "uso": "Selector e Retriever do CAPIR; baseline ADA-retrieve"
+      },
+      {
+        "nome": "llama-2-70b",
+        "versao": "nao_informado",
+        "uso": "substituto do gpt-3.5-turbo no CAPIR na RQ4 (recomendação de API); descrito como modelo base sem ajuste por instrução"
+      },
+      {
+        "nome": "CLEAR (BERT)",
+        "versao": "nao_informado",
+        "uso": "baseline de recomendação de API"
+      },
+      {
+        "nome": "GPT-4",
+        "versao": "nao_informado",
+        "uso": "geração de comentários (descrições de tarefa) na construção do Torchdata-AR; não é condição avaliada"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "RAPID — Torchdata-AR",
+        "quantidade": "278 amostras; média 4.35 APIs; máx. 8; 96 APIs candidatos (Tabela 1)",
+        "observacao": "Construído a partir de 1342 arquivos coletados no GitHub, com comentários gerados por GPT-4 e revisados por três pós-graduandos (Seção 4.3.3). Tarefa: recomendação de API (fora das tarefas do escopo)."
+      },
+      {
+        "nome": "RAPID — Math-AR",
+        "quantidade": "200 amostras; 88 APIs candidatos (Tabela 1)",
+        "observacao": "Derivado do DGAS, só amostras de teste com múltiplas APIs."
+      },
+      {
+        "nome": "RAPID — RealMatrix-AR",
+        "quantidade": "48 amostras; 26 APIs candidatos (Tabela 1)",
+        "observacao": "Derivado do DGAS."
+      },
+      {
+        "nome": "RAPID — XMLStreamWriter-AR",
+        "quantidade": "187 amostras; 26 APIs candidatos (Tabela 1)",
+        "observacao": "Derivado do DGAS."
+      },
+      {
+        "nome": "RAPID — Multi-Conala",
+        "quantidade": "232 amostras de teste e 625 de treino; 30775 APIs candidatos na Tabela 1 e 30,755 APIs no texto",
+        "observacao": "Sete bibliotecas; documentação do DevDocs. Divergência entre texto e tabela registrada em heterogeneidade."
+      },
+      {
+        "nome": "LOCG — Torchdata-Code",
+        "quantidade": "50 amostras; média 4.22 APIs; 96 APIs candidatos (Tabela 1)",
+        "observacao": "Selecionadas do Torchdata-AR (sobreposição de origem declarada), transformadas manualmente em funções executáveis com casos de teste escritos pelos autores. Número de casos de teste por tarefa nao_informado."
+      },
+      {
+        "nome": "LOCG — Multi-ODEX",
+        "quantidade": "67 amostras; média 2.17 APIs; 30775 APIs candidatos (Tabela 1)",
+        "observacao": "Derivado do ODEX, excluindo exemplos com uma só API; usa a mesma documentação do Multi-Conala."
+      },
+      {
+        "nome": "Human-written",
+        "quantidade": "53 tarefas (60 escritas, 7 removidas)",
+        "observacao": "Tarefas escritas por três pós-graduandos; APIs-alvo escritos pelos autores; só recomendação de API (Tabela 5)."
+      },
+      {
+        "nome": "Post",
+        "quantidade": "7 posts (PyTorch community e StackOverflow)",
+        "observacao": "Só recomendação de API (Tabela 5)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Recall@k",
+        "detalhe": "k = {3, 5, 10, 15}; recomendação de API"
+      },
+      {
+        "nome": "Precision@k",
+        "detalhe": "k = {3, 5, 10, 15}; recomendação de API"
+      },
+      {
+        "nome": "pass@k",
+        "detalhe": "k = {1, 10, 100}; geração de código baseada em execução; número de amostras geradas por tarefa e denominador não declarados explicitamente"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "detalhe": "geração de código (Torchdata-Code, Multi-ODEX) e recomendação de API"
+      },
+      {
+        "nome": "Java",
+        "detalhe": "recomendação de API; o estudo não indica quais conjuntos são Java (nao_informado)"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sem informação de API, ou com APIs recuperados diretamente do requisito, o LLM gera código que parece razoável mas não executa corretamente.",
+        "localizador": "Legenda da Figura 1, p. 2 do PDF; Seção 2, p. 3 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Recomendações de API de baixa qualidade introduzem ruído no prompt e pioram a geração (GPT-3.5 + ADA-retrieve abaixo da geração direta em Torchdata-Code); APIs demais no prompt também podem introduzir ruído.",
+        "localizador": "Seção 5.2, p. 7-8 do PDF; Tabela 3, p. 8 do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Presença das bibliotecas nos dados de treino do LLM: o estudo escolhe Torchdata por ter sido lançada depois do período de coleta do gpt-3.5-turbo e reconhece que as demais bibliotecas são amplamente usadas e vêm de conjuntos existentes. Não há verificação de contaminação dos itens dos benchmarks nem descrição de disjunção entre os exemplos da documentação e as amostras de teste.",
+        "localizador": "Seção 4.3.1, p. 6 do PDF; Seção 7, p. 11 do PDF"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Incerteza das saídas do LLM, tratada implicitamente pela fixação de temperature=0.0 e top_p=1.0 nos módulos do CAPIR «to ensure the certainty of the outputs»; o estudo não relata número de execuções nem variação entre execuções.",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade do benchmark RAPID: requisitos criados a partir de sumarizações geradas podem diferir de requisitos reais de desenvolvimento.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada: só Torchdata é biblioteca de poucos recursos e a geração de código foi avaliada apenas em Python.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Dependência da capacidade do modelo de seguir instruções: com llama-2-70b (modelo base sem ajuste por instrução) o CAPIR tem desempenho inferior ao obtido com gpt-3.5-turbo.",
+        "localizador": "Seção 5.4 e Tabela 4, p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de tamanho de entrada do LLM impede fornecer a documentação inteira da biblioteca, o que motiva a seleção de exemplos e a recuperação de APIs.",
+        "localizador": "Seção 2, p. 3 do PDF; Seção 3.1.2, p. 4 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Revisão por três pós-graduandos dos comentários gerados por GPT-4 para o Torchdata-AR, com inclusão, reescrita por consenso ou exclusão das amostras.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.3.3, p. 6 do PDF"
+      },
+      {
+        "descricao": "Fixação de temperature=0.0 e top_p=1.0 nos módulos do CAPIR para dar certeza às saídas.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "descricao": "Uso de Torchdata, lançada após a coleta dos dados de treino do gpt-3.5-turbo, para avaliar biblioteca ausente do treinamento.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.3.1, p. 6 do PDF"
+      },
+      {
+        "descricao": "Limitar o prompt de geração a 5 APIs, escolhido pelo equilíbrio entre recall e precisão da Tabela 2, para evitar cobertura insuficiente ou ruído excessivo; o efeito do número de APIs na geração não é medido.",
+        "avaliada": "nao",
+        "localizador": "Seção 5.2, p. 7 do PDF"
+      },
+      {
+        "descricao": "Teste de todas as bibliotecas sem treinamento, declarado para garantir equidade e validade do experimento.",
+        "avaliada": "nao",
+        "localizador": "Seção 7, p. 11 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Na geração de código (Tabela 3): GPT-3.5 em geração direta e GPT-3.5 + ADA-retrieve, executados pelos autores com o mesmo modelo. Na recomendação de API (Tabelas 2, 4 e 5): ADA-retrieve e CLEAR adaptado.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão: em Torchdata-Code, GPT-3.5 + ADA-retrieve fica abaixo da geração direta em Pass@1, Pass@10 e Pass@100 (1.3, 7.0, 12.0 contra 1.7, 9.1, 16.0); o estudo atribui ao ruído de recomendações de baixa qualidade. Em Multi-ODEX, ADA-retrieve fica acima da geração direta (27.6, 38.8, 44.8 contra 27.5, 35.8, 41.8).",
+        "localizador": "Tabela 3, p. 8 do PDF; Seção 5.2, p. 8 do PDF"
+      },
+      {
+        "descricao": "Narrativa contra a tabela: o texto afirma que o CAPIR supera os dois baselines nos quatro conjuntos de biblioteca única, mas na Tabela 2, em RealMatrix-AR com k = 3, o CLEAR tem Recall 27.3% contra 26.4% do CAPIR (valor do CLEAR em negrito). O próprio texto diz depois «Under most experimental settings». Contraste de recomendação de API, fora das tarefas do escopo.",
+        "localizador": "Seção 5.1, p. 7 do PDF; Tabela 2, p. 8 do PDF"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre texto e tabela: o texto informa 30,755 APIs na documentação do DevDocs (Multi-Conala), e a Tabela 1 informa 30775 APIs candidatos para Multi-Conala e Multi-ODEX.",
+        "localizador": "Seção 4.3.1, p. 6 do PDF; Tabela 1, p. 5 do PDF"
+      },
+      {
+        "descricao": "Mistura não rotulada de variação relativa e diferença absoluta: na maior parte do texto, as melhorias percentuais correspondem a variação relativa (cálculo próprio: 28.0/16.0 = 1.75, coerente com os 75.0% citados), mas na comparação com CLEAR no conjunto Post os valores «28.6%» e «10.0%» coincidem com a diferença absoluta entre os valores da Tabela 5 (cálculo próprio: 57.1 − 28.5 = 28.6; 22.9 − 12.9 = 10.0). O estudo não indica a base dos percentuais.",
+        "localizador": "Seção 5.2, p. 7-8 do PDF; Seção 5.6, p. 10 do PDF; Tabela 5, p. 11 do PDF"
+      },
+      {
+        "descricao": "Aparente divergência na definição de pass@k: o texto diz que se amostram k códigos e se calcula a proporção que passa em todos os testes, o que difere da definição usual (ao menos uma das k amostras correta); os valores crescem com k (1.7, 9.1, 16.0), padrão compatível com a definição usual. O número de amostras geradas por tarefa e o estimador não são informados, de modo que não é possível decidir qual definição foi aplicada.",
+        "localizador": "Seção 4.5, p. 7 do PDF; Tabela 3, p. 8 do PDF"
+      },
+      {
+        "descricao": "Ablação sem valores impressos: a Figura 3 mostra curvas de Recall@k e Precision@k sem rótulos numéricos, e o texto relata as melhorias de cada componente sem indicar se são relativas ou em p.p.; não foi possível conferir as magnitudes na figura. A ablação mede só recomendação de API, não geração de código.",
+        "localizador": "Seção 5.3, p. 8 do PDF; Figura 3, p. 9 do PDF"
+      },
+      {
+        "descricao": "Condição discrepante do baseline CLEAR: foi executado de forma diferente do método original (recuperação na documentação de APIs em vez de posts similares do StackOverflow), por falta de posts sobre bibliotecas de poucos recursos.",
+        "localizador": "Seção 5.1, p. 7 do PDF"
+      },
+      {
+        "descricao": "Efeito dependente do conjunto: a diferença entre GPT-3.5 + CAPIR e GPT-3.5 é maior em Torchdata-Code (16.0 para 28.0 em Pass@100) do que em Multi-ODEX (41.8 para 55.2), o que o estudo interpreta como maior utilidade da informação de API para bibliotecas não vistas; conclusão baseada em 50 e 67 amostras, sem teste estatístico.",
+        "localizador": "Tabela 3, p. 8 do PDF; Seção 5.2, p. 8 do PDF"
+      },
+      {
+        "descricao": "O número de APIs no prompt (5) foi escolhido pelos resultados de recomendação da Tabela 2, não por experimento de geração; o estudo não relata a geração com outros valores.",
+        "localizador": "Seção 5.2, p. 7 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Componentes do CAPIR: Summarizer (construção offline do banco de exemplos a partir de exemplos de uso da documentação com mais de duas APIs), Selector por embeddings, Decomposer few-shot, Retriever por embeddings, Reranker dentro e entre subtarefas. Parâmetros: k_e = 4 exemplos; k_p = 20 APIs candidatos.",
+        "localizador": "Seção 3 e Seção 4.2, p. 3-5 do PDF"
+      },
+      {
+        "descricao": "A RQ1, a RQ3 (ablação), a RQ4 (troca de modelo) e a aplicação prática (Human-written e Post) avaliam só recomendação de API, fora das tarefas do escopo; apenas a RQ2 (LOCG) avalia geração de código.",
+        "localizador": "Seção 4.1, p. 5 do PDF; Seções 5.1-5.6, p. 7-11 do PDF"
+      },
+      {
+        "descricao": "Esforço manual descrito pelo estudo: revisão dos comentários por três pós-graduandos; transformação manual dos trechos em funções executáveis e escrita de casos de teste para Torchdata-Code; escrita de tarefas e APIs-alvo no conjunto Human-written.",
+        "localizador": "Seção 4.3.2 e 4.3.3, p. 6 do PDF; Seção 5.6, p. 9-10 do PDF"
+      },
+      {
+        "descricao": "Análise qualitativa de dois casos (Figura 4) e visualização UMAP/HDBSCAN dos embeddings de APIs (Figura 5); no caso 2 a decomposição não tem granularidade ideal, mas o estudo relata que as APIs corretas sobem no ranking.",
+        "localizador": "Seção 5.5, Figuras 4 e 5, p. 9-10 do PDF"
+      },
+      {
+        "descricao": "Não há testes estatísticos, intervalos de confiança nem número de execuções relatados; não foi encontrado link de pacote de replicação no texto.",
+        "localizador": "Seções 4-5, p. 5-11 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Specifically, CAPIR employs an LLM-based Decomposer to break down a coarse-grained task description into several detailed subtasks.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Then, CAPIR applies an embedding-based Retriever to identify relevant APIs corresponding to each subtask.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Moreover, CAPIR leverages an LLM-based Reranker to filter out redundant APIs and provides the final recommendation.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "As previous work has shown the in-context learning [4, 5, 7, 15] ability of LLMs, we use few-shot examples to demonstrate the decomposition granularity.",
+        "localizador": "Seção 3.1, p. 3 do PDF"
+      },
+      {
+        "trecho": "Due to the lack of resources for low-resource libraries on the internet, CAPIR leverages the usage examples in API documentation to construct example bank.",
+        "localizador": "Seção 3.1.1, p. 3 do PDF"
+      },
+      {
+        "trecho": "I will give you a task that needs to use several APIs to implement it. You need to break down the task into several subtasks.",
+        "localizador": "Prompt 2 (Prompt For Decomposer), p. 4 do PDF"
+      },
+      {
+        "trecho": "CAPIR utilizes the same off-the-shelf embedding model as Selector.",
+        "localizador": "Seção 3.2, p. 4 do PDF"
+      },
+      {
+        "trecho": "Please rerank the APIs based on their probability of being able to solve the subtask.",
+        "localizador": "Prompt 3, p. 5 do PDF"
+      },
+      {
+        "trecho": "Please give me the top-k APIs that sorted based on their probability of being able to solve the task.",
+        "localizador": "Prompt 4, p. 5 do PDF"
+      },
+      {
+        "trecho": "To ensure the certainty of the outputs, we set the parameters of gpt-3.5-turbo as follows: temperature=0.0, top_p=1.0.",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "trecho": "We remove the examples in the Decomposer prompt, to assess whether they have positive impact on CAPIR.",
+        "localizador": "Seção 4.1, p. 5 do PDF"
+      },
+      {
+        "trecho": "We remove the Decomposer module and directly use the original task to retrieve APIs from Docs, while keeping the Reranker module, to assess whether the Decomposer module improves CAPIR’s performance.",
+        "localizador": "Seção 4.1, p. 5 do PDF"
+      },
+      {
+        "trecho": "We remove the Reranker module and directly return the top-k retrieve results, to assess whether the Reranker can improve the retrival performance.",
+        "localizador": "Seção 4.1, p. 5 do PDF"
+      },
+      {
+        "trecho": "ADA-retrieve directly used OpenAI’s off-the-shelf embedding model, ada-embedding-002, to retrieve the top-k APIs from the API documentation based on the task description’s similarity to the functional descriptions.",
+        "localizador": "Seção 4.4, p. 6-7 do PDF"
+      },
+      {
+        "trecho": "Instead, we employed CLEAR to retrieve the closest k APIs from the API documentation as the results.",
+        "localizador": "Seção 5.1, p. 7 do PDF"
+      },
+      {
+        "trecho": "The prompt for code generation is shown in 1c, including the development task and the APIs recommended by CAPIR.",
+        "localizador": "Seção 5.2, p. 7 do PDF"
+      },
+      {
+        "trecho": "If there are too few APIs in the prompt, it may not cover the required APIs for the given task, while having too many APIs could introduce excessive noise to the prompt.",
+        "localizador": "Seção 5.2, p. 7 do PDF"
+      },
+      {
+        "trecho": "This suggests that when the quality of API recommendations is insufficient, it will introduce noise, thereby having a negative impact on library-oriented code generation.",
+        "localizador": "Seção 5.2, p. 8 do PDF"
+      },
+      {
+        "trecho": "(a) Due to the lack of API information, LLM generates code that looks reasonable but cannot be executed correctly.",
+        "localizador": "Legenda da Figura 1, p. 2 do PDF"
+      },
+      {
+        "trecho": "Since Torchdata was released on Mar 11, 2022, it was not included in the training data of gpt-3.5-turbo.",
+        "localizador": "Seção 4.3.1, p. 6 do PDF"
+      },
+      {
+        "trecho": "In our experiment, only Torchdata has low resources within the open-source community, while other libraries are widely used and extracted from existing datasets.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "trecho": "While these generated summarizations may exhibit some discrepancies compared to practical developmental requirements, we took proactive steps to enhance the dataset’s quality.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "trecho": "But we only evaluated CAPIR on libary-oriented code generation for python.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "trecho": "To ensure the fairness and validity of the experiment, we tested all libraries without any training.",
+        "localizador": "Seção 7, p. 11 do PDF"
+      },
+      {
+        "trecho": "Since llama-2-70b is a base model without instruction tuning, its weaker ability to follow instructions has consequently impacted the performance of CAPIR.",
+        "localizador": "Seção 5.4, p. 9 do PDF"
+      },
+      {
+        "trecho": "To enhance the credibility and quality of the data generated by GPT-4, we engaged three graduate students with more than five years of programming experience to scrutinize the comments generated by GPT-4.",
+        "localizador": "Seção 4.3.3, p. 6 do PDF"
+      },
+      {
+        "trecho": "Therefore, we add 5 APIs for each task in the prompt.",
+        "localizador": "Seção 5.2, p. 7 do PDF"
+      },
+      {
+        "trecho": "(1) CAPIR outperforms the two baselines on all four single library API sequence recommendation datasets.",
+        "localizador": "Seção 5.1, p. 7 do PDF"
+      },
+      {
+        "trecho": "RealMatrix-AR | CLEAR | 27.3% | 20.7% | 30.0% | 11.0% | 33.9% | 9.6% | 57.7% | 6.8%",
+        "localizador": "Tabela 2, p. 8 do PDF; colunas Dataset | Method | k = 3 Recall | Precision | k = 5 Recall | Precision | k = 10 Recall | Precision | k = 15 Recall | Precision"
+      },
+      {
+        "trecho": "RealMatrix-AR | CAPIR (ours) | 26.4% | 22.2% | 35.0% | 18.3% | 49.3% | 15.9% | 63.6% | 11.1%",
+        "localizador": "Tabela 2, p. 8 do PDF; mesmas colunas"
+      },
+      {
+        "trecho": "Multi-Conala | 232 | 2.48 | 7 | 30775",
+        "localizador": "Tabela 1, p. 5 do PDF; colunas Dataset | # samples | Avg. APIs | Max. APIs | # Candidate APIs"
+      },
+      {
+        "trecho": "Following the methodology outlined in a previous study [51], we obtained API documentation from DevDocs, encompassing a total of 30,755 APIs extracted from different libraries.",
+        "localizador": "Seção 4.3.1, p. 6 do PDF (marcador de nota de rodapé omitido)"
+      },
+      {
+        "trecho": "Compared with CLEAR, CAPIR improves 28.6% for Recall@10 performance and 10.0% for Precision@10.",
+        "localizador": "Seção 5.6, p. 10 do PDF"
+      },
+      {
+        "trecho": "For a given task, we randomly sample k codes and calculate the proportion that can pass all test cases.",
+        "localizador": "Seção 4.5, p. 7 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CAPIR (Compositional API Recommendation)",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "decomposicao",
+        "restricoes",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "contexto",
+        "decomposicao",
+        "restricoes",
+        "outro"
+      ],
+      "comparador": "GPT-3.5 (geração direta, sem recomendação de API)",
+      "modelo": "gpt-3.5-turbo (snapshot nao_informado)",
+      "benchmark": "LOCG — Torchdata-Code",
+      "metrica": "Pass@100 (Tabela 3; «pass@100» no resumo). Aparente divergência: a definição textual (amostrar k códigos e calcular a proporção que passa em todos os testes) difere da definição usual de pass@k; estimador e número de amostras por tarefa nao_informado.",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 16.0,
+        "intervencao": 28.0
+      },
+      "denominador": "nao_informado (o corpus Torchdata-Code tem 50 amostras segundo a Tabela 1 e a Seção 4.3.2, mas o estudo não declara que pass@k é calculado sobre as 50 tarefas)",
+      "condicoes": "Geração com gpt-3.5-turbo, temperature = 0.8 e top_p=0.95; prompt com a tarefa e 5 APIs recomendados pelo CAPIR (Figura 1c). Módulos do CAPIR com gpt-3.5-turbo (temperature=0.0, top_p=1.0), k_e = 4 exemplos few-shot, k_p = 20 candidatos, embeddings ada-embedding-002. Comparador: mesmo modelo gerando diretamente, prompt exato nao_informado (Figura 1a mostra só assinatura e docstring). Número de amostras geradas por tarefa e número de execuções nao_informado; sem intervalo de confiança ou teste estatístico. O ganho é do pacote CAPIR (decomposição, exemplos, recuperação, reranqueamento e contexto de APIs), não de um ingrediente; a ablação existe só na recomendação de API. A Tabela 3 imprime os valores sem símbolo de porcentagem; o resumo os apresenta como 16.0% e 28.0%. Valores conferidos na imagem da p. 8 (Tabela 3) e da p. 1 (resumo).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo identifica, para a tarefa de geração de código, uma técnica (CAPIR), uma métrica (pass@100), um comparador (code generation without API recommendation) e um conjunto (Torchdata-Code). As métricas de Recall@5 e Precision@5 destacadas no resumo referem-se à recomendação de API, fora das tarefas do escopo. Não há outra técnica focal nem outra tarefa do escopo para cobertura; o contraste com ADA-retrieve é outro comparador da mesma técnica e tarefa, e a ablação dos componentes mede só recomendação de API, por isso não há outras extrações.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 8 do PDF (linhas Torchdata-Code: GPT-3.5 e GPT-3.5 + CAPIR (ours), coluna Pass@100); resumo, p. 1 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "On LOCG’s Torchdata-Code dataset, compared to code generation without API recommendation, CAPIR improves pass@100 from 16.0% to 28.0%.",
+          "localizador": "Resumo, p. 1 do PDF"
+        },
+        {
+          "trecho": "Torchdata-Code | GPT-3.5 | 1.7 | 9.1 | 16.0",
+          "localizador": "Tabela 3, p. 8 do PDF; colunas Dataset | Method | Pass@1 | Pass@10 | Pass@100"
+        },
+        {
+          "trecho": "GPT-3.5 + CAPIR (ours) | 3.0 | 12.4 | 28.0",
+          "localizador": "Tabela 3, p. 8 do PDF; linha Torchdata-Code; colunas Method | Pass@1 | Pass@10 | Pass@100"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas (RQ1-RQ4), incluindo a eficácia das APIs recomendadas na geração de código orientada a bibliotecas (RQ2).",
+      "localizador": "Seção 4.1, p. 5 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline, os templates de prompt (Prompts 1-4), os modelos e os parâmetros são descritos, mas o prompt exato da geração direta, o número de amostras geradas por tarefa para pass@k, o número de APIs inseridos para ADA-retrieve e o número de execuções não são informados; o baseline CLEAR foi adaptado.",
+      "localizador": "Seções 3, 4.2, 4.4 e 5.2, p. 3-7 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Na geração de código há duas linhas de base executadas com o mesmo modelo (geração direta e ADA-retrieve, representando o pipeline de DocPrompting e CodeGenAPI). Na recomendação de API, o CLEAR foi executado de forma diferente do método original, o que limita a comparação.",
+      "localizador": "Seção 4.4 e 5.1, p. 6-7 do PDF; Seção 6.2, p. 11 do PDF; Tabela 3, p. 8 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Recall@k, Precision@k e pass@k são definidas, mas a definição textual de pass@k difere da usual e não informa estimador nem número de amostras; o denominador de pass@k não é ligado explicitamente ao corpus. Os valores de ADA-retrieve, CLEAR e CAPIR coincidem entre Tabela 2 e Tabela 4; há divergência entre texto (30,755) e Tabela 1 (30775) no número de APIs, e as melhorias percentuais misturam variação relativa e diferença absoluta sem rótulo.",
+      "localizador": "Seção 4.5, p. 7 do PDF; Tabelas 1, 2, 4 e 5, p. 5, 8, 9 e 11 do PDF; Seção 5.6, p. 10 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de ameaças discute requisitos gerados por sumarização, a única biblioteca de poucos recursos e a avaliação de geração só em Python, mas não trata não determinismo, ausência de repetições ou de testes estatísticos, tamanho reduzido dos conjuntos de geração (50 e 67 amostras) nem a adaptação do CLEAR como ameaça.",
+      "localizador": "Seção 7, p. 11 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Templates de prompt, modelos e parâmetros de decodificação são informados, mas não há snapshot dos modelos, número de execuções nem link para código ou dados no texto; parte do benchmark depende de anotação manual e de comentários gerados por GPT-4.",
+      "localizador": "Seções 3, 4.2 e 4.3, p. 4-6 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo escolhe Torchdata por ser posterior ao período de coleta do gpt-3.5-turbo e reconhece que as outras bibliotecas são amplamente usadas e vêm de conjuntos existentes, mas não verifica contaminação dos itens dos benchmarks derivados de Conala, ODEX e DGAS nem descreve disjunção entre os exemplos extraídos da documentação e as amostras de teste.",
+      "localizador": "Seção 4.3.1, p. 6 do PDF; Seção 7, p. 11 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [
+      "p-01",
+      "p-02",
+      "p-03",
+      "p-04",
+      "p-05",
+      "p-06",
+      "p-07",
+      "p-08",
+      "p-09",
+      "p-10",
+      "p-11"
+    ],
+    "observacao": "Texto extraído lido integralmente (796 linhas, incluindo referências). Páginas 1 a 11 do PDF abertas visualmente; a p. 12 contém só referências e não foi aberta. O artigo não traz numeração impressa de página; os localizadores usam a posição no PDF."
+  }
+}

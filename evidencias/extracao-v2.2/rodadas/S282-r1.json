@@ -1,0 +1,457 @@
+{
+  "estudo": "S282",
+  "texto_fonte": "fontes/textos/lote/S282.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "library of prompts (stand-alone LLM; linha «LLM only» da Table 1)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 6-7 (PDF p. 6-7); Table 1, p. 18 (PDF p. 18)",
+        "observacao": "Biblioteca de prompts aplicada em laço iterativo até solução correta ou esgotamento da biblioteca. instrucao: persona («You are a good synthesizer»), requisitos em linguagem natural, estímulo emocional e pedido motivacional de nova tentativa; restricoes: especificação SyGuS/SMT-LIB no prompt e regras de formato (uma única função, sem funções embutidas, sem iterações); decomposicao: solução pedida em Lisp e depois convertida para SMT-LIB por outro prompt; raciocinio: só nos benchmarks de invariantes (explicação das restrições antes da solução); feedback: novo prompt após falha do verificador, com a resposta anterior mantida na conversa. Sem base de prompt identificável na Table 1, por isso mecanismos_acrescentados vazio. Os comparadores executados (enumerator, A*, cvc5) são sintetizadores sem LLM: não constituem condição sem a técnica em condições comparáveis e não isolam mecanismos de prompting."
+      },
+      {
+        "nome_original": "emotional prompt (emotional stimuli)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.1, p. 6 (PDF p. 6); Prompt 1, p. 6",
+        "observacao": "Frase «Write it correctly, or I will lose my job and 100 grandmothers will die. Don’t disappoint me.» no Prompt 1. O estudo relata em prosa comparação com «standard, non-emotional prompts» (aumento de 8%), sem informar amostra, modelo, número de execuções nem se o valor é variação relativa ou p.p.; os detalhes são remetidos à versão estendida, não consultada. Mecanismos do pacote listados conforme o Prompt 1; a presença de raciocinio depende da categoria (não informada para este experimento)."
+      },
+      {
+        "nome_original": "solicitar a solução em Lisp e converter para SMT-LIB (Lisp to SMT-LIB Converter)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.1, p. 6-7 (PDF p. 6-7); Prompt 3, p. 7",
+        "observacao": "Etapa intermediária: o LLM escreve a função em Lisp e um segundo prompt («You are a good programming language converter») a converte para SMT-LIB. Em subconjunto de 50 benchmarks, o estudo relata em prosa melhoria de 6% de Lisp sobre Python e que ambos foram melhores que pedir SMT-LIB diretamente (sem número para este último contraste). O contraste Lisp × Python varia a linguagem intermediária, não a presença da etapa; o contraste com/sem etapa (SMT-LIB direto) é só qualitativo. Condições detalhadas apenas na versão estendida, não consultada."
+      },
+      {
+        "nome_original": "chain-of-thought-inspired prompting for invariants (explicar as restrições antes)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, «Prompts for invariant synthesis», p. 7 (PDF p. 7)",
+        "observacao": "Aplicado só à categoria INV. Não há condição sem essa etapa relatada. O texto atribui o desempenho inferior do iLLM-synth em INV à ausência desse prompt personalizado (hipótese do estudo, p. 16), mas iLLM-synth difere em vários outros ingredientes, portanto não é contraste pareado."
+      },
+      {
+        "nome_original": "iterative re-prompting after a failed solution (Prompt 2)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Prompt 2, p. 7 (PDF p. 7); Seção 7, p. 16 (PDF p. 16)",
+        "observacao": "Após falha na verificação, o LLM recebe «You are close to the right answer. Take another guess...» (sem contraexemplo), até 6 tentativas completas. O estudo relata só contribuição por rodada (média de 4 tentativas nos benchmarks resolvidos; na 6ª iteração, novas soluções < 2%, 0 em LIA), sem condição de tentativa única com o mesmo protocolo."
+      },
+      {
+        "nome_original": "pCFG-synth (e-pCFG-synth e A*-pCFG-synth)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+        "mecanismos_acrescentados": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seções 3 e 5, p. 4-13 (PDF p. 4-13); Seção 7, p. 16; Table 1, p. 18",
+        "observacao": "Pacote híbrido: usa as mesmas técnicas de prompting do LLM stand-alone (Seção 4) e converte as soluções incorretas do LLM em uma wCFG/pCFG que guia um enumerador (top-down probabilístico ou A*) dentro de CEGIS; enumerador, inferência de pesos e CEGIS estão fora do escopo. Comparado com o mesmo algoritmo com peso 1 para todas as regras («enumerator» e «A*»), o que isola o pacote, não um mecanismo de prompting. Variantes e-/A* diferem só no enumerador (componente fora do escopo), por isso não são técnicas de prompting distintas. mecanismos_acrescentados em relação ao enumerador sem LLM, do qual deriva."
+      },
+      {
+        "nome_original": "iLLM-synth (e-iLLM-synth e A*-iLLM-synth)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "restricoes", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 6, p. 13-15 (PDF p. 13-15); Prompt 4, p. 13-14; Seção 7, p. 16; Table 1, p. 18",
+        "observacao": "Pacote híbrido: o enumerador chama o LLM a cada n-ésima iteração com prompt de papel («You are teaching a student to write SMT-LIB») → instrucao; restrições do problema e «You must print only the code and nothing else» → restricoes; programa parcial enumerado fornecido como insumo → contexto; candidato falho mais recente e contraexemplo acrescentados depois de falha → feedback. As funções auxiliares retornadas viram regras e pesos da gramática (fora do escopo). Não usa os prompts da Seção 4 (prompts mais curtos). Comparado com o enumerador com pesos uniformes; isola o pacote, não um mecanismo."
+      },
+      {
+        "nome_original": "inclusão do candidato falho e do contraexemplo no prompt integrado",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 6.1, p. 13 (PDF p. 13)",
+        "observacao": "Componente do iLLM-synth sem ablação relatada."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "probabilistic top-down enumerator / weighted A* search",
+        "natureza": "outro",
+        "descricao": "Algoritmos de busca enumerativa (Algoritmos 2, 4, 6 e 7) que exploram a gramática; não são prompting.",
+        "localizador": "Seções 5.2, 5.3 e 6.3, p. 9-15 (PDF p. 9-15)"
+      },
+      {
+        "nome_original": "Inferring a Weighted CFG / pCFG (WeightCounter) e atualização da gramática",
+        "natureza": "outro",
+        "descricao": "Contagem de regras nas derivações das respostas do LLM para pesos e probabilidades, inclusão de funções auxiliares como novas regras com peso médio; processamento das saídas, não do prompt.",
+        "localizador": "Seções 5.1 e 6.2, p. 8-9 e 14 (PDF p. 8-9 e 14)"
+      },
+      {
+        "nome_original": "Smoothing the probability distributions (γ = 0.4)",
+        "natureza": "outro",
+        "descricao": "Suavização dos pesos da gramática para o A*.",
+        "localizador": "Seção 5.3, p. 13 (PDF p. 13)"
+      },
+      {
+        "nome_original": "CEGIS com verificação por Z3",
+        "natureza": "outro",
+        "descricao": "Laço de síntese indutiva guiada por contraexemplos; o verificador SMT (Z3 4.8.12 64-bit) checa candidatos e devolve contraexemplos ao enumerador.",
+        "localizador": "Seção 5, Algoritmo 1, p. 8; Seção 7, p. 15 (PDF p. 8 e 15)"
+      },
+      {
+        "nome_original": "temperature (1.0 para o LLM stand-alone/pCFG e e-iLLM-synth; 0 para A*-iLLM-synth)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetro de amostragem do modelo, diferente entre as variantes.",
+        "localizador": "Seção 7, p. 15-16 (PDF p. 15-16)"
+      },
+      {
+        "nome_original": "GPT-3.5-turbo-16k para prompts longos e GPT-3.5-turbo para iLLM-synth",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do modelo conforme o tamanho do prompt, sem alterar o prompt.",
+        "localizador": "Seção 7, p. 15 (PDF p. 15)"
+      },
+      {
+        "nome_original": "chamada ao LLM a cada n-ésima iteração",
+        "natureza": "orcamento",
+        "descricao": "Heurística de frequência de chamadas ao LLM durante a enumeração; valor de n não informado.",
+        "localizador": "Seção 6.3, p. 15 (PDF p. 15)"
+      },
+      {
+        "nome_original": "limite de 6 tentativas do LLM e timeout de 600 s",
+        "natureza": "orcamento",
+        "descricao": "Limites de tentativas para o LLM stand-alone e de tempo para todos os métodos.",
+        "localizador": "Seção 7, p. 16; legenda da Table 1, p. 18 (PDF p. 16 e 18)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5-turbo-16k (OpenAI)", "versao": "nao_informado", "uso": "LLM stand-alone e geração das wCFGs do pCFG-synth (Seção 7); a Seção 4 diz GPT-3.5-turbo para o LLM stand-alone"},
+      {"nome": "GPT-3.5-turbo (OpenAI)", "versao": "nao_informado", "uso": "iLLM-synth"}
+    ],
+    "baseline": [
+      "enumerator: enumerador probabilístico top-down com peso 1 para todas as regras (sem LLM)",
+      "A*: busca A* com pesos uniformes (sem LLM)",
+      "cvc5 versão 1.1.0 (solver SyGuS estado da arte)"
+    ],
+    "benchmarks": [
+      {"nome": "SyGuS competition — Bit-Vector (BV)", "versao": "nao_informado", "quantidade": "384", "observacao": "Gramática correspondente à linguagem completa da teoria; referência [3] acessada em 2024-01-16."},
+      {"nome": "SyGuS competition — Linear Integer Arithmetic (LIA)", "versao": "nao_informado", "quantidade": "87", "observacao": ""},
+      {"nome": "SyGuS competition — Invariants (INV)", "versao": "nao_informado", "quantidade": "138", "observacao": ""},
+      {"nome": "SyGuS competition — Total", "versao": "nao_informado", "quantidade": "609", "observacao": "Soma das três categorias (384 + 87 + 138 = 609, conferida). Trilhas de programming-by-example omitidas."},
+      {"nome": "subconjunto dos benchmarks SyGuS para experimentos iniciais de prompting", "versao": "nao_informado", "quantidade": "50", "observacao": "Categorias e critério de seleção não informados; detalhes remetidos à versão estendida."}
+    ],
+    "metricas": [
+      "# (número de benchmarks resolvidos) por categoria e total; denominador = tamanho de cada categoria (384, 87, 138, 609)",
+      "% de benchmarks resolvidos no total (sobre 609)",
+      "time(s): tempo médio; para pCFG-synth exclui a chamada ao LLM; tempos em itálico dependem da carga dos servidores OpenAI",
+      "número médio de tentativas do LLM até a solução correta (texto, p. 16)",
+      "aumento percentual na resolução/probabilidade de solução correta nos experimentos iniciais de prompting (texto, p. 6; base não informada)"
+    ],
+    "linguagens": [
+      "SMT-LIB / formato SyGuS (teorias LIA e BV; linguagem-alvo)",
+      "Lisp (linguagem intermediária de resposta)",
+      "Python (linguagem intermediária alternativa nos experimentos iniciais)"
+    ],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os problemas SyGuS são públicos e podem estar nos dados de treinamento do LLM; os autores acreditam que as soluções não estavam públicas, sem verificação descrita.",
+        "localizador": "Seção 8, «LLM Training Data», p. 18 (PDF p. 18)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "GPT-3.5 se comporta de forma não determinística sem possibilidade de semente; respostas podem não ser reprodutíveis; pequenas variações no número de benchmarks resolvidos e maior variação no tempo médio.",
+        "localizador": "Seção 8, «Reproducibility», p. 18 (PDF p. 18)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Reprodutibilidade: a OpenAI pode descontinuar ou atualizar o modelo e a API, alterando o comportamento.",
+        "localizador": "Seção 8, «Reproducibility», p. 18 (PDF p. 18)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modos de falha do LLM stand-alone: mal-entendidos por restrições complexas, erros sintáticos simples (operandos em ordem errada, concatenação de bit-vectors na ordem errada) e erros semânticos simples; o estudo também levanta a hipótese de que a orientação do LLM atrapalha o enumerador em benchmarks com restrições complexas e soluções curtas com operadores menos comuns.",
+        "localizador": "Seção 7, «Failure Modes», p. 17 (PDF p. 17)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Entre os erros sintáticos identificados está alucinar operações.",
+        "localizador": "Seção 7, «Failure Modes», p. 17 (PDF p. 17)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Com especificações por exemplos (PBE), o LLM tende a sobreajustar aos exemplos com um grande case split, inútil para guiar o enumerador; por isso essas trilhas foram omitidas.",
+        "localizador": "Seção 7, «Programming-by-example», p. 17 (PDF p. 17)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Viés de benchmark: o conjunto SyGuS pode não ser diverso nem representativo de problemas reais.",
+        "localizador": "Seção 8, «Benchmark Bias», p. 18 (PDF p. 18)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Hiperparâmetros não ajustados (temperatura, pesos, profundidade de enumeração, heurísticas); resultados melhores ou piores poderiam ser obtidos.",
+        "localizador": "Seção 8, «Hyperparameters», p. 18 (PDF p. 18)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Renomear funções e variáveis dos benchmarks para nomes genéricos, para evitar soluções baseadas só nos nomes das funções.",
+        "avaliada": "nao",
+        "localizador": "Seção 4, p. 5-6 (PDF p. 5-6)"
+      },
+      {
+        "descricao": "Registro das respostas e parâmetros do LLM em todos os experimentos.",
+        "avaliada": "nao",
+        "localizador": "Seção 8, «Reproducibility», p. 18 (PDF p. 18)"
+      },
+      {
+        "descricao": "Resultados não determinísticos (marcados ⋄) executados 3 vezes, com média relatada.",
+        "avaliada": "nao",
+        "localizador": "Legenda da Table 1, p. 18 (PDF p. 18)"
+      },
+      {
+        "descricao": "Verificação dos candidatos por solver SMT (Z3) no CEGIS e verificação de formato do programa Lisp extraído; soluções incompletas e funções auxiliares malformadas são descartadas.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.1, p. 7; Seção 5, p. 8; Seção 6.2, p. 14; Seção 7, p. 16 (PDF p. 7, 8, 14, 16)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa × tabela: a introdução afirma que «the final technique outperforms cvc5» e o resumo fala em ganhos sobre «the winning SyGuS competition tool» para a integração do LLM ao enumerador, mas na Table 1 as variantes de iLLM-synth (a técnica final, Seção 6) resolvem 370.0 e 408.0 de 609, abaixo de cvc5 (415.0); o próprio texto da avaliação diz que iLLM-synth «gets close to the performance of cvc5». O valor que supera cvc5 é o da união LLM ∪ A*-pCFG-synth (488.0). Ambiguidade sobre qual técnica é a «final».",
+        "localizador": "Resumo, p. 1; Introdução, p. 2; Seção 7, p. 16; Table 1, p. 18 (PDF p. 1, 2, 16, 18)"
+      },
+      {
+        "descricao": "Inversões por categoria apesar de «All techniques easily outperform the baseline enumerator»: em BV, LLM only resolve 137 contra 142.7 do enumerator; em LIA, e-pCFG-synth resolve 24.0 contra 25.0 do enumerator. No total, todas as técnicas superam o enumerator (188.7).",
+        "localizador": "Introdução, p. 2; Table 1, p. 18 (PDF p. 2 e 18)"
+      },
+      {
+        "descricao": "Resultado quase nulo: A*-pCFG-synth resolve 322 contra 309 do A* (BV 262 × 253; LIA 35 × 34; INV 25 × 22); o texto diz que pCFG-synth «barely increases the number A* can solve», embora os conjuntos resolvidos difiram.",
+        "localizador": "Seção 7, p. 16; Table 1, p. 18 (PDF p. 16 e 18)"
+      },
+      {
+        "descricao": "iLLM-synth resolve menos em INV (e-iLLM-synth 65.3; A*-iLLM-synth 67.3) que LLM only (112), atribuído pelos autores, como hipótese, à ausência do prompt personalizado para invariantes.",
+        "localizador": "Seção 7, p. 16; Table 1, p. 18 (PDF p. 16 e 18)"
+      },
+      {
+        "descricao": "Soma que não bate (aparente inconsistência, cálculo próprio): na linha e-iLLM-synth, 241.0 + 63.4 + 65.3 = 369.7, mas o total impresso é 370.0. A diferença de 0.3 excede o que o arredondamento a uma casa de três médias explicaria (até cerca de 0.2), mas a fonte não informa como o total foi calculado. Na linha A*-iLLM-synth, 272.3 + 68.3 + 67.3 = 407.9 contra 408.0, compatível com arredondamento. As demais linhas somam exatamente.",
+        "localizador": "Table 1, p. 18 (PDF p. 18)"
+      },
+      {
+        "descricao": "Versão do modelo divergente: a Seção 4 diz que o LLM stand-alone usa GPT-3.5-turbo; a Seção 7 diz GPT-3.5-turbo-16k para o LLM stand-alone e o pCFG-synth e GPT-3.5-turbo para o iLLM-synth. Snapshots não informados.",
+        "localizador": "Seção 4, p. 5; Seção 7, p. 15 (PDF p. 5 e 15)"
+      },
+      {
+        "descricao": "Condições discrepantes entre técnicas: modelos diferentes (GPT-3.5-turbo-16k × GPT-3.5-turbo), temperaturas diferentes (1.0 para e-iLLM-synth, 0 para A*-iLLM-synth) e tempos de pCFG-synth sem o tempo de chamada ao LLM (incluído só nas linhas LLM ∪ pCFG-synth); tempos em itálico dependem da carga dos servidores OpenAI.",
+        "localizador": "Seção 7, p. 15-16; legenda da Table 1, p. 18 (PDF p. 15, 16, 18)"
+      },
+      {
+        "descricao": "Número de execuções não uniforme e lacunas de dispersão: só linhas marcadas ⋄ são médias de 3 execuções; LLM only (temperatura 1.0) não é marcada ⋄ e seu número de execuções não é informado; o desvio-padrão do enumerator para número de benchmarks resolvidos, declarado ≥ 1%, não é reportado.",
+        "localizador": "Legenda da Table 1, p. 18; Seção 7, p. 15 (PDF p. 15 e 18)"
+      },
+      {
+        "descricao": "Arredondamento entre resumo e corpo: a introdução diz «roughly 50%» e o texto diz que o LLM resolve 49% dos benchmarks; a Table 1 imprime 303 e 49.8%.",
+        "localizador": "Introdução, p. 2; Seção 7, p. 16; Table 1, p. 18 (PDF p. 2, 16, 18)"
+      },
+      {
+        "descricao": "Experimentos iniciais de prompting só em prosa: Lisp × Python (6%, subconjunto de 50 benchmarks) e prompt emocional × não emocional (8%), sem informar se são variações relativas ou p.p., nem modelo, amostra (no caso emocional) e número de execuções; detalhes remetidos à versão estendida, não consultada.",
+        "localizador": "Seção 4.1, p. 6 (PDF p. 6)"
+      },
+      {
+        "descricao": "O resumo qualifica os ganhos como «significant performance gains», sem teste estatístico relatado no artigo.",
+        "localizador": "Resumo, p. 1; Seção 7 e Table 1, p. 16-18 (PDF p. 1, 16-18)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Linhas «LLM ∪ e-pCFG-synth» e «LLM ∪ A*-pCFG-synth» combinam os resultados: o enumerador só é usado quando o LLM não resolve o benchmark; os autores consideram essa a representação mais realista do uso.",
+        "localizador": "Seção 7, p. 16; Table 1, p. 18 (PDF p. 16 e 18)"
+      },
+      {
+        "descricao": "As variantes e-/A* diferem no algoritmo de busca (fora do escopo); o contraste e-pCFG-synth × enumerator e A*-pCFG-synth × A* são ablações do pacote LLM+gramática, não de mecanismos de prompting.",
+        "localizador": "Seção 7, p. 16 (PDF p. 16)"
+      },
+      {
+        "descricao": "Análise manual de uma amostra (tamanho não informado) dos erros do LLM stand-alone; exemplos remetidos à versão estendida. Soluções de benchmarks resolvidos só pelo LLM são, em média, 4.7x mais longas (em caracteres) que as resolvidas só por cvc5; A* sem LLM só encontra soluções com menos de 3 operadores, A*-iLLM-synth encontra soluções com mais de 20.",
+        "localizador": "Seção 7, «Failure Modes», p. 17 (PDF p. 17)"
+      },
+      {
+        "descricao": "0.85% dos programas gerados foram descartados por incompletos; tempo médio de geração de um programa pelo LLM de aproximadamente 5 s pela API, dependente da OpenAI.",
+        "localizador": "Seção 7, p. 16 (PDF p. 16)"
+      },
+      {
+        "descricao": "Os autores afirmam que os prompts integrados do iLLM-synth são mais curtos e por isso «cheaper and faster to run», sem quantificar custo.",
+        "localizador": "Seção 6.1, p. 13 (PDF p. 13)"
+      },
+      {
+        "descricao": "Valores de maxDepth e de n (frequência de chamadas ao LLM) não informados; a biblioteca completa de prompts não é listada, só exemplos (Prompts 1-4).",
+        "localizador": "Seções 4.1, 5.2 e 6.3, p. 6-15 (PDF p. 6-15)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we set out to investigate whether off-the-shelf large language models can solve formal program synthesis problems.", "localizador": "Introdução, p. 2 (PDF p. 2)"},
+      {"trecho": "We design a library of prompts for program synthesis problems with logical specifications and a single target function to synthesize.", "localizador": "Seção 4.1, p. 6 (PDF p. 6)"},
+      {"trecho": "These prompts are deployed in an iterative loop, until a correct solution is obtained, or the library of prompts is exhausted.", "localizador": "Seção 4.1, p. 6 (PDF p. 6)"},
+      {"trecho": "On a subset of 50 benchmarks, we observed that soliciting responses in Lisp resulted in a 6% enhancement in the resolution of benchmarks compared to utilizing Python (and both were better than asking for SMT-lib directly).", "localizador": "Seção 4.1, p. 6 (PDF p. 6)"},
+      {"trecho": "Incorporating the emotional prompt leads to an 8% increase in the likelihood of generating accurate solutions compared to standard, non-emotional prompts in our study.", "localizador": "Seção 4.1, p. 6 (PDF p. 6)"},
+      {"trecho": "Write it correctly, or I will lose my job and 100 grandmothers will die. Don’t disappoint me.", "localizador": "Prompt 1, p. 6 (PDF p. 6)"},
+      {"trecho": "You are close to the right answer. Take another guess. You have to try something different, think harder.", "localizador": "Prompt 2, p. 7 (PDF p. 7)"},
+      {"trecho": "Inspired by “chain-of-thought” [42] prompting, where the LLM is asked to provide a step-by-step explanation, we augment our prompting strategy for invariants by asking the LLM first to explain the constraints.", "localizador": "Seção 4.1, p. 7 (PDF p. 7)"},
+      {"trecho": "The final prompts in our prompt library are to ask the LLM to convert any functions given in Lisp to correct SMT-LIB functions:", "localizador": "Seção 4.1, p. 7 (PDF p. 7)"},
+      {"trecho": "The first method, shown in Figure 1, prompts an LLM for solutions to the benchmark, and generates a pCFG from these solutions before deploying an enumerative synthesizer, increasing the chance of the LLM solving the synthesis problem outright.", "localizador": "Seção 3, p. 4 (PDF p. 4)"},
+      {"trecho": "In this section, we describe how we prompt the LLM as a stand-alone synthesizer. These prompting techniques are then also deployed by pCFG-synth.", "localizador": "Seção 4, p. 5 (PDF p. 5)"},
+      {"trecho": "We give the LLM the constraints from the target synthesis problem and the partially complete program at the point the enumerator calls the LLM.", "localizador": "Seção 6.1, p. 13 (PDF p. 13)"},
+      {"trecho": "If the LLM fails to solve the problem with this prompt, we later add the most recently failed candidate solution and the counterexample it failed on.", "localizador": "Seção 6.1, p. 13 (PDF p. 13)"},
+      {"trecho": "As a baseline, we run the same algorithms assigning a weight of 1 to every rule in the grammar (referred to as “enumerator” and A∗ respectively in the results).", "localizador": "Seção 7, p. 16 (PDF p. 16)"},
+      {"trecho": "The SyGuS problems are publicly available and might be part of the training data for the LLM we use, although we believe the solutions were not publicly available at the time of training.", "localizador": "Seção 8, p. 18 (PDF p. 18)"},
+      {"trecho": "We have recorded the responses and parameters generated by the LLM in all experiments, but these may not be reproducible [33] since GPT-3.5 behaves non-deterministically in a way that cannot be seeded.", "localizador": "Seção 8, p. 18 (PDF p. 18)"},
+      {"trecho": "Broadly, we identify the following common failures: Misunderstandings due to complex constraints (the LLM suggests solutions that are not syntactically close to the correct solution); simple syntactic errors, e.g., applying non-commutative operators to operands in the wrong order, concatenating bit-vectors in the wrong order or hallucinating operations; simple semantic errors, e.g., operators in the wrong order.", "localizador": "Seção 7, p. 17 (PDF p. 17)"},
+      {"trecho": "We hypothesize that the LLM guidance becomes an impediment to the enumerator in these scenarios.", "localizador": "Seção 7, p. 17 (PDF p. 17)"},
+      {"trecho": "This is not useful for guiding the enumerator because the LLM overfits to the examples in the specification and fails to provide any bias towards operators other than “if-then-else”.", "localizador": "Seção 7, p. 17 (PDF p. 17)"},
+      {"trecho": "Furthermore, we rename any functions and variables in the SyGuS benchmarks to generic names to avoid the LLM producing solutions solely based on the function names.", "localizador": "Seção 4, p. 5-6 (PDF p. 5-6)"},
+      {"trecho": "We run nondeterministic results, marked ⋄, 3 times and report the average (standard deviation is less than 1% for all methods except the baseline enumerator for number of benchmarks solved).", "localizador": "Legenda da Table 1, p. 18 (PDF p. 18)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "library of prompts (stand-alone LLM; «LLM only»)",
+      "mecanismos": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+      "mecanismos_acrescentados": [],
+      "comparador": "enumerator (enumerador probabilístico top-down com peso 1 para todas as regras, sem LLM; ⋄ média de 3 execuções)",
+      "modelo": "GPT-3.5-turbo-16k (Seção 7; a Seção 4 diz GPT-3.5-turbo); snapshot nao_informado",
+      "benchmark": "SyGuS competition, Total (609) = BV (384) + LIA (87) + INV (138)",
+      "metrica": "# (number of benchmarks solved)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 188.7, "intervencao": 303},
+      "denominador": "609 benchmarks",
+      "condicoes": "Agregado impresso (coluna Total) da mesma técnica, métrica e comparador sobre as três categorias SyGuS; por categoria: BV 137 × 142.7, LIA 54 × 25.0, INV 112 × 21.0 (inversão em BV). LLM only: até 6 tentativas completas por benchmark, temperatura 1.0, conversação; raciocinio só em INV; timeout 600 s. Enumerator: média de 3 execuções (⋄); LLM only não marcado ⋄ e número de execuções nao_informado. O comparador é um sintetizador sem LLM, não uma condição de prompting: a diferença não é efeito isolado de prompting nem de algum mecanismo. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da página 18.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam três técnicas (biblioteca de prompts, pCFG-synth, iLLM-synth, cada uma com duas variantes) e vários comparadores (LLM sozinho, enumerador, cvc5). Primeira (e única) tabela com o contraste: Table 1; primeira métrica (#), primeira linha de técnica (LLM only) e primeira linha de base listada (enumerator), que o estudo usa como linha de base de todas as técnicas («All techniques easily outperform the baseline enumerator»). Usado o agregado impresso Total.",
+      "derivacao": "direta",
+      "localizador": "Table 1, p. 18 (PDF p. 18), colunas Total (609) #; texto Seção 7, p. 16",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "LLM only 137 13.5 54 7.10 112 29.2 303 49.8%", "localizador": "Table 1, p. 18 (PDF p. 18); colunas Methods | BV (384) # | time(s) | LIA (87) # | time(s) | INV (138) # | time(s) | Total (609) # | %"},
+        {"trecho": "enumerator⋄ 142.7 7.2 25.0 1.53 21.0 3.2 188.7 31.0%", "localizador": "Table 1, p. 18 (PDF p. 18); mesmas colunas"},
+        {"trecho": "In total, the LLM solves 49% of benchmarks, performing better in the invariant and LIA categories than the bit-vector category.", "localizador": "Seção 7, p. 16 (PDF p. 16)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "pCFG-synth (variante e-pCFG-synth)",
+      "mecanismos": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+      "mecanismos_acrescentados": ["instrucao", "restricoes", "decomposicao", "raciocinio", "feedback"],
+      "comparador": "enumerator (mesmo enumerador probabilístico top-down com peso 1 para todas as regras, sem LLM; ⋄ média de 3 execuções)",
+      "modelo": "GPT-3.5-turbo-16k (geração das wCFGs); snapshot nao_informado",
+      "benchmark": "SyGuS competition, Total (609) = BV (384) + LIA (87) + INV (138)",
+      "metrica": "# (number of benchmarks solved)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 188.7, "intervencao": 245.4},
+      "denominador": "609 benchmarks",
+      "condicoes": "Agregado impresso (coluna Total); por categoria: BV 196.0 × 142.7, LIA 24.0 × 25.0 (inversão), INV 25.4 × 21.0. Ambas as linhas são médias de 3 execuções (⋄). Pacote híbrido: prompts da Seção 4 (temperatura 1.0) + inferência de wCFG/pCFG + enumerador em CEGIS; o contraste isola o pacote (com × sem orientação do LLM no mesmo enumerador), não um mecanismo de prompting. Timeout 600 s; tempos de pCFG-synth não incluem a chamada ao LLM. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da página 18.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal pCFG-synth ainda não representada; primeira linha da técnica na Table 1 (e-pCFG-synth) e sua linha de base declarada no estudo, que é também a primeira listada (enumerator). A variante A*-pCFG-synth difere só no enumerador e não é cobertura.",
+      "derivacao": "direta",
+      "localizador": "Table 1, p. 18 (PDF p. 18), colunas Total (609) #; texto Seção 7, p. 16",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "e-pCFG-synth ⋄ 196.0 48.3 24.0 40.0 25.4 100.5 245.4 40.3%", "localizador": "Table 1, p. 18 (PDF p. 18); colunas Methods | BV (384) # | time(s) | LIA (87) # | time(s) | INV (138) # | time(s) | Total (609) # | %"},
+        {"trecho": "enumerator⋄ 142.7 7.2 25.0 1.53 21.0 3.2 188.7 31.0%", "localizador": "Table 1, p. 18 (PDF p. 18); mesmas colunas"},
+        {"trecho": "pCFG-synth increases the number of benchmarks the probabilistic enumerator can solve by 30%, but barely increases the number A∗ can solve, although the exact sets of benchmarks which A∗ and A∗-pCFG-synth solve do differ significantly.", "localizador": "Seção 7, p. 16 (PDF p. 16)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "iLLM-synth (variante e-iLLM-synth)",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["instrucao", "contexto", "restricoes", "feedback"],
+      "comparador": "enumerator (enumerador probabilístico top-down com peso 1 para todas as regras, sem LLM; ⋄ média de 3 execuções)",
+      "modelo": "GPT-3.5-turbo; snapshot nao_informado",
+      "benchmark": "SyGuS competition, Total (609) = BV (384) + LIA (87) + INV (138)",
+      "metrica": "# (number of benchmarks solved)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 188.7, "intervencao": 370.0},
+      "denominador": "609 benchmarks",
+      "condicoes": "Agregado impresso (coluna Total); por categoria: BV 241.0 × 142.7, LIA 63.4 × 25.0, INV 65.3 × 21.0. A soma das categorias da linha e-iLLM-synth dá 369.7 (cálculo próprio), contra 370.0 impresso; aparente inconsistência registrada em heterogeneidade. Ambas as linhas são médias de 3 execuções (⋄). e-iLLM-synth com temperatura 1; LLM chamado a cada n-ésima iteração (n nao_informado); timeout 600 s. Pacote híbrido (prompt integrado + atualização da gramática + enumerador); o contraste isola o pacote, não um mecanismo de prompting. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da página 18.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal iLLM-synth ainda não representada; primeira linha da técnica na Table 1 (e-iLLM-synth) e primeira linha de base listada (enumerator), que é o mesmo enumerador sem orientação do LLM. A variante A*-iLLM-synth difere no enumerador e na temperatura e não é cobertura.",
+      "derivacao": "direta",
+      "localizador": "Table 1, p. 18 (PDF p. 18), colunas Total (609) #; texto Seção 7, p. 16",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "e-iLLM-synth ⋄ 241.0 88.2 63.4 9.3 65.3 25.4 370.0 60.8%", "localizador": "Table 1, p. 18 (PDF p. 18); colunas Methods | BV (384) # | time(s) | LIA (87) # | time(s) | INV (138) # | time(s) | Total (609) # | %"},
+        {"trecho": "enumerator⋄ 142.7 7.2 25.0 1.53 21.0 3.2 188.7 31.0%", "localizador": "Table 1, p. 18 (PDF p. 18); mesmas colunas"},
+        {"trecho": "We find that iLLM-synth outperforms the enumerator of pCFG-synth, and gets close to the performance of cvc5, suggesting that the ability to prompt the LLM with additional information obtained during enumeration allows the LLM to provide better guidance to the enumerator, as well as to more frequently propose useful helper functions.", "localizador": "Seção 7, p. 16 (PDF p. 16)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito (investigar se LLMs prontos resolvem síntese formal) e contribuições enumeradas com as seções correspondentes.",
+      "localizador": "Introdução, p. 2 (PDF p. 2)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Algoritmos, exemplos de prompts, modelos, temperatura, timeout e limite de tentativas descritos; porém a biblioteca completa de prompts não é listada, os experimentos iniciais de prompting e os exemplos de erros ficam na versão estendida, e n e maxDepth não são informados.",
+      "localizador": "Seções 4-7, p. 5-16 (PDF p. 5-16)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Linhas de base executadas no mesmo benchmark e métrica: o mesmo enumerador e o A* com pesos uniformes (contrafactual do pacote) e cvc5 1.1.0. Não há linha de base de prompting na tabela; contrastes entre prompts só em prosa.",
+      "localizador": "Introdução, p. 2; Seção 7, p. 15-16; Table 1, p. 18 (PDF p. 2, 15-16, 18)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Número de benchmarks resolvidos com denominador por categoria (384, 87, 138, 609) e percentuais compatíveis; mas desvios-padrão não reportados (só limite de 1%, exceto o enumerator), número de execuções do LLM only não informado, soma das categorias de e-iLLM-synth (369.7) diverge do total impresso (370.0), tempos sujeitos à carga da OpenAI e percentuais de 6% e 8% sem base nem indicação de relativo × p.p.",
+      "localizador": "Seção 4.1, p. 6; Seção 7, p. 16; Table 1, p. 18 (PDF p. 6, 16, 18)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute dados de treinamento, reprodutibilidade, viés de benchmark e hiperparâmetros; modos de falha discutidos na avaliação.",
+      "localizador": "Seção 8, p. 18; Seção 7, p. 17 (PDF p. 17-18)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Versões de Z3 (4.8.12) e cvc5 (1.1.0), temperatura e modelos nomeados; respostas registradas, mas sem indicação de pacote de replicação ou repositório no artigo, snapshots dos modelos não informados e comportamento não determinístico sem semente reconhecido pelos autores.",
+      "localizador": "Seção 7, p. 15; Seção 8, p. 18 (PDF p. 15 e 18)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Risco reconhecido (problemas públicos possivelmente no treinamento) e nomes de funções e variáveis renomeados; a afirmação de que as soluções não estavam públicas é crença dos autores, sem verificação descrita.",
+      "localizador": "Seção 4, p. 5-6; Seção 8, p. 18 (PDF p. 5-6 e 18)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (resumo a referências). Páginas do PDF abertas visualmente: p-02, p-06, p-13, p-15, p-16, p-17, p-18 (Table 1 na p-18, conferida linha a linha)."
+  }
+}

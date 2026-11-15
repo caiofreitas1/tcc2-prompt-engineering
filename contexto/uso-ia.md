@@ -301,3 +301,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: «Pode começar, assim que o limite semanal acabar, eu reseto ele» (15/11/2026).
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S137–S261); Claude Code (Claude Opus 5.5), validação, 2 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-02.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 3 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S271–S323); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-03.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

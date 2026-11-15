@@ -1,0 +1,516 @@
+{
+  "estudo": "S321",
+  "texto_fonte": "fontes/textos/lote/S321.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "D4C (Direct Debug Drives Decent Code)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5, Sec. III e Fig. 4; p. 6, Sec. III-C, III-D e Fig. 5; p. 7, Sec. IV-A1; p. 9, Tabela IV (Report-Func vs Mask-Hunk)",
+        "observacao": "Pacote de prompting de um passo: instrução de papel no sistema («As an debugger, you should refine the buggy program for bug report») → instrucao; exemplo fixo único (bug report e função refinada) → exemplos, que também restringe o formato de saída a uma função refinada completa → restricoes; bug report com código da função defeituosa, documentação/comentários, entradas e saídas esperadas dos testes falhos e mensagens de erro → contexto; 10 amostras por bug validadas por testes e depois manualmente → amostragem. Não há iteração guiada por erros sobre a saída gerada (as mensagens de erro são do programa original, insumo de contexto), por isso não recebe feedback. mecanismos_acrescentados em relação à condição Mask-Hunk (formato de entrada e saída do APR por preenchimento no mesmo arcabouço, Tabela IV): artefatos no lugar do trecho mascarado (contexto) e saída de função completa no lugar do trecho (restricoes); as duas categorias já estavam presentes na base com outro conteúdo. Contrafactual de pacote: Report-Func vs Mask-Hunk no DebugBench (mesmo modelo, 10 amostras), o que não autoriza atribuir o ganho a um único ingrediente. Na comparação com os sistemas da Tabela II (RQ1) os valores dos comparadores foram reaproveitados dos artigos originais, com outro orçamento de amostras e localização perfeita de trechos."
+      },
+      {
+        "nome_original": "Report (bug report com artefatos como entrada; Insight 2)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10, Tabela V (Samp=10 (default) vs - Pure); p. 9, Tabela IV (Report-Func vs Mask-Func; Report-Hunk vs Mask-Hunk)",
+        "observacao": "Componente do D4C. Na Tabela V, a configuração padrão e a linha «- Pure» (sem máscara nem artefatos) diferem apenas nos artefatos do bug report. Na Tabela IV, Report vs Mask difere em dois ingredientes (inclusão dos artefatos e retirada da máscara). A base («- Pure») já contém contexto (o código da função), e os artefatos acrescentam conteúdo da mesma categoria."
+      },
+      {
+        "nome_original": "Func (saída como função refinada completa; alinhamento de objetivo, Insight 1)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9, Fig. 6 e Tabela IV (Mask-Func vs Mask-Hunk; Report-Func vs Report-Hunk)",
+        "observacao": "Componente do D4C: troca do formato de saída de trechos corrigidos (Hunk) para a função refinada inteira (Func), mantida a entrada. O estudo informa que também adaptou as instruções do sistema a cada formato de saída e que, em Report-Hunk, o Mixtral-MoE foi usado para aplicar os trechos gerados ao programa antes da validação; os pares não são, portanto, idênticos em tudo exceto o formato. A base Hunk já contém restricoes (formato de trecho)."
+      },
+      {
+        "nome_original": "Document (documentos do programa ou comentários da função no prompt)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10, Sec. IV-D e Tabela V (w/o Document vs Samp=10 (default))",
+        "observacao": "Ablação que retira só os documentos/comentários do bug report, com GPT-4, temperatura 1.0 e 10 amostras."
+      },
+      {
+        "nome_original": "Failed Test (entradas e saídas esperadas dos casos de teste falhos)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10, Sec. IV-D e Tabela V (w/o Test vs Samp=10 (default))",
+        "observacao": "Ablação que retira só as entradas e saídas esperadas dos testes falhos."
+      },
+      {
+        "nome_original": "Test Info / error message (mensagem de erro dos testes falhos)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10, Sec. IV-D e Tabela V (w/o Message vs Samp=10 (default))",
+        "observacao": "Ablação que retira só a mensagem de erro dos testes falhos. A mensagem refere-se à execução do programa defeituoso original, inserida uma vez no prompt (contexto), não a retorno sobre a saída gerada."
+      },
+      {
+        "nome_original": "One-shot fixed example (exemplo fixo de bug report e função refinada)",
+        "mecanismos": ["exemplos", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Sec. III-D e Fig. 5; p. 7, Sec. IV-A1",
+        "observacao": "Exemplo elaborado manualmente e usado em todos os experimentos, com formato de entrada e saída adaptado a cada experimento; serve também para restringir o formato da resposta. Não há condição sem o exemplo. O conteúdo do exemplo não é reproduzido no artigo (código omitido na Fig. 5)."
+      },
+      {
+        "nome_original": "Role-play system instruction (instrução de papel de depurador)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Fig. 4; p. 6, Sec. III-D e Fig. 5",
+        "observacao": "Instrução de sistema concisa; sem condição sem ela."
+      },
+      {
+        "nome_original": "Sampling number (Samp=10, várias amostras validadas por testes)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7, Sec. IV-A1; p. 10, Tabela V (Samp=1, Samp=3, Samp=10 (default))",
+        "observacao": "Várias respostas por bug, selecionadas pela execução da suíte de testes (e depois por validação manual no Defects4J) → amostragem. Samp=1 vs Samp=10 constitui condição com e sem amostragem múltipla, demais parâmetros mantidos. O número de amostras é também o orçamento de patches por bug; a temperatura, analisada na mesma tabela, é decodificação e está em componentes_fora_escopo."
+      },
+      {
+        "nome_original": "Mask-Hunk (entrada com trecho mascarado e saída de trecho; formato do APR por preenchimento)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9, Fig. 6 e Tabela IV",
+        "observacao": "Condição comparadora executada no arcabouço do D4C (instrução adaptada, exemplo único adaptado, programa com <INFILL> no trecho defeituoso, saída restrita ao trecho, 10 amostras). Seus ingredientes não são isolados; o efeito da máscara só aparece no par «- Mask» vs «- Pure» da Tabela V, com saída Func."
+      },
+      {
+        "nome_original": "- Pure (D4C sem máscara nem artefatos; «an aligned LLM»)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10, Sec. IV-D e Tabela V",
+        "observacao": "Linha de base da ablação com o código da função defeituosa, instrução e exemplo, sem guia de localização."
+      },
+      {
+        "nome_original": "- Mask (Mask-Func; máscara sem artefatos)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10, Sec. IV-D e Tabela V; p. 9, Tabela IV (Mask-Func)",
+        "observacao": "Linha de base da ablação: função com trechos mascarados e saída de função completa, sem artefatos."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Sec. IV-A4, IV-B e Tabela II",
+        "observacao": "Sistema comparador (GPT-4) descrito no estudo apenas como APR por preenchimento com trechos defeituosos fornecidos e diálogo de várias rodadas, com informação dos testes falhos (p. 4, ref. [30]); 100-200 patches amostrados por bug. Mecanismos atribuídos só a partir dessa descrição; demais ingredientes nao_informado neste estudo. Resultados reaproveitados do artigo original, não reexecutados; mecanismos não isolados."
+      },
+      {
+        "nome_original": "AlphaRepair",
+        "mecanismos": ["contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Sec. IV-A4 e Tabelas II e III",
+        "observacao": "Sistema comparador (CodeBERT) descrito apenas como APR por preenchimento (programa com trecho mascarado), 5000 patches amostrados por bug. Demais ingredientes nao_informado neste estudo; resultados reaproveitados do artigo original; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Repilot",
+        "mecanismos": ["contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Sec. IV-A4 e Tabela II",
+        "observacao": "Sistema comparador (InCoder) descrito apenas como APR por preenchimento, 5000 patches amostrados por bug. Demais ingredientes nao_informado neste estudo; resultados reaproveitados; mecanismos não isolados."
+      },
+      {
+        "nome_original": "RAP-Gen",
+        "mecanismos": ["contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Sec. IV-A4 e Tabelas II e III",
+        "observacao": "Sistema comparador (CodeT5) descrito apenas como APR por preenchimento, 100 patches amostrados por bug. Demais ingredientes nao_informado neste estudo; resultados reaproveitados; mecanismos não isolados."
+      },
+      {
+        "nome_original": "FitRepair",
+        "mecanismos": ["contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Sec. IV-A4 e Tabela II",
+        "observacao": "Sistema comparador (CodeT5) descrito apenas como APR por preenchimento, 5000 patches amostrados por bug. Demais ingredientes nao_informado neste estudo; resultados reaproveitados; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Temperature (Temp=1.0 default vs Temp=0.0)",
+        "natureza": "decodificacao",
+        "descricao": "Hiperparâmetro de aleatoriedade da geração; analisado na sensibilidade da Tabela V (temperatura 0 vs 1.0).",
+        "localizador": "p. 7, Sec. IV-A1; p. 10, Tabela V"
+      },
+      {
+        "nome_original": "Backbone GPT-4 vs Mixtral-MoE",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do modelo de base; a Tabela IV apresenta as mesmas configurações com Mixtral-MoE e GPT-4.",
+        "localizador": "p. 5-6, Sec. III-B; p. 9, Tabela IV"
+      },
+      {
+        "nome_original": "FLUCCS (method-level FL)",
+        "natureza": "outro",
+        "descricao": "Ferramenta de localização de falhas em nível de método que fornece a função mais suspeita (Top@1) ao D4C no cenário de localização estatística; não é prompting.",
+        "localizador": "p. 8, Sec. IV-B e Tabela III"
+      },
+      {
+        "nome_original": "Aplicação automática dos trechos de Report-Hunk pelo Mixtral-MoE",
+        "natureza": "outro",
+        "descricao": "Etapa auxiliar de pós-processamento usada só na condição Report-Hunk para aplicar os trechos gerados ao programa antes da validação.",
+        "localizador": "p. 9, Sec. IV-C2"
+      },
+      {
+        "nome_original": "Timeout de 1 minuto por patch",
+        "natureza": "orcamento",
+        "descricao": "Limite de tempo da validação de cada patch.",
+        "localizador": "p. 7, Sec. IV-A1; p. 11, Sec. V-D"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "gpt-4-0613", "uso": "backbone do D4C em todas as RQs", "localizador": "p. 7, Sec. IV-A1"},
+      {"nome": "Mixtral-MoE", "versao": "mixtral-8x7b-instruct-v0.1", "uso": "backbone alternativo (perplexidade e patches verificados na RQ2; aplicação dos trechos de Report-Hunk)", "localizador": "p. 7, Sec. IV-A1; p. 9, Sec. IV-C"},
+      {"nome": "GPT-4 (ChatRepair)", "versao": "nao_informado", "uso": "modelo do comparador ChatRepair; resultado reaproveitado do artigo original", "localizador": "p. 8, Tabela II"},
+      {"nome": "CodeBERT (AlphaRepair)", "versao": "nao_informado", "uso": "modelo do comparador", "localizador": "p. 8, Tabelas II e III"},
+      {"nome": "InCoder (Repilot)", "versao": "nao_informado", "uso": "modelo do comparador", "localizador": "p. 8, Tabela II"},
+      {"nome": "CodeT5 (RAP-Gen, FitRepair)", "versao": "nao_informado", "uso": "modelo dos comparadores", "localizador": "p. 8, Tabelas II e III"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Defects4J",
+        "versao": "v1.2 e v2.0 (bugs de função única)",
+        "quantidade": "437 bugs de função única (203 em v1.2 e 234 em v2.0), de um total de 835 bugs reais de 17 repositórios",
+        "observacao": "Marcado com ameaça de vazamento de dados (Tabela I). Usado na RQ1 (patches corretos, validação manual) e na RQ3 (patches plausíveis). O cenário de localização estatística (Tabela III) usa só v1.2. O estudo não informa se os comparadores reaproveitados usaram o mesmo conjunto de 437 bugs.",
+        "localizador": "p. 7, Sec. IV-A2 e Tabela I"
+      },
+      {
+        "nome": "DebugBench",
+        "versao": "subconjunto de bugs lógicos de função única",
+        "quantidade": "590 bugs (C++ 200, Java 194, Python3 196, Tabela I «200/194/196»), de um total de 4,253 bugs do LeetCode",
+        "observacao": "Descrito como sem ameaça de vazamento (bugs implantados com GPT-4). Usado nas RQ2 e RQ3 com patches verificados pelos testes ocultos do LeetCode. Não usado na comparação com os sistemas de referência.",
+        "localizador": "p. 7, Sec. IV-A2 e Tabela I"
+      }
+    ],
+    "metricas": [
+      {"nome": "number of correct patches", "definicao": "patch plausível (passa em todos os testes) confirmado manualmente como correção real; na prática contado por bug (o resumo fala em «repair 180 bugs»)", "localizador": "p. 8, Sec. IV-A3; p. 8, Tabela II"},
+      {"nome": "#Plausible (plausible patches)", "definicao": "patch que passa em todos os testes unitários; usado no Defects4J na RQ3 por causa do custo da validação manual", "localizador": "p. 8, Sec. IV-A3; p. 10, Sec. IV-D e Tabela V"},
+      {"nome": "#Verified (verified patches)", "definicao": "patch que passa na validação do LeetCode (testes ocultos), no DebugBench", "localizador": "p. 8, Sec. IV-A3; p. 9, Tabela IV; p. 10, Tabela V"},
+      {"nome": "Perplexity (O e IO)", "definicao": "perda de inferência do objetivo CLM, calculada no Mixtral-MoE sobre a saída (O) e sobre entrada e saída (IO)", "localizador": "p. 9, Sec. IV-C1 e Tabela IV"},
+      {"nome": "Drop", "definicao": "queda percentual de patches corretos da localização perfeita (Perf.) para a estatística (Stat.)", "localizador": "p. 8, Tabela III"},
+      {"nome": "Sampled", "definicao": "patches amostrados por bug", "localizador": "p. 8, Tabelas II e III"},
+      {"nome": "custo em tokens e dólares; posição do patch correto; patches plausíveis por bug", "definicao": "medidas descritivas de custo e esforço de validação do D4C no Defects4J", "localizador": "p. 11, Sec. V-C e V-D"}
+    ],
+    "linguagens": ["Java (Defects4J e DebugBench)", "C++ (DebugBench)", "Python3 (DebugBench)"],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento do Defects4J no pré-treinamento dos LLMs; o estudo o considera menos grave em APR, mas reconhece que pode comprometer a validade, usa o Defects4J como referência na RQ1 e atribui parte do desempenho de «- Pure» no Defects4J a possível vazamento.",
+        "localizador": "p. 7, Sec. IV-A2 e Tabela I; p. 8, Sec. IV-B; p. 10, Sec. IV-D e V-A"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Patches plausíveis que passam nos testes sem corrigir o defeito (cobertura de testes incompleta, sobreajuste aos testes falhos fornecidos no prompt): 30 dos 210 patches plausíveis do D4C no Defects4J foram incorretos em relação aos patches humanos (Fig. 7).",
+        "localizador": "p. 7, Sec. III-F; p. 8, Sec. IV-A3; p. 10, Sec. V-A e V-B; p. 11, Fig. 7"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Sobrecarga de inferência e tempo dos LLMs maior que a das ferramentas tradicionais; o estudo quantifica para o D4C no Defects4J um custo médio de $0.023 por patch, $0.23 para 10 patches («for the entire dataset», ver heterogeneidade) e tempo de testes de até 10 minutos por bug.",
+        "localizador": "p. 4, Sec. II-B; p. 7, Sec. IV-A1; p. 11, Sec. V-C e V-D"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Esforço manual de validar patches plausíveis, que o estudo chama de «labor cost» além do custo de tokens (média de 5.80 patches plausíveis por bug); não quantificado em dinheiro ou tempo.",
+        "localizador": "p. 11, Sec. V-D"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: os resultados podem não se generalizar para outras configurações e linguagens além das cobertas pelo Defects4J e pelo DebugBench.",
+        "localizador": "p. 10, Sec. V-A"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Uso do DebugBench, descrito como livre de vazamento, para validar os insights (RQ2) e a ablação (RQ3).", "avaliada": "nao", "localizador": "p. 7, Sec. IV-A2; p. 10, Sec. V-A"},
+      {"descricao": "Validação manual dos patches plausíveis por dois autores independentes, com o terceiro autor revisando as discordâncias.", "avaliada": "nao", "localizador": "p. 10, Sec. V-A; p. 11, Sec. V-B"},
+      {"descricao": "Liberação dos resultados experimentais para verificação pública.", "avaliada": "nao", "localizador": "p. 10, Sec. V-A; p. 11, nota de disponibilidade de dados"},
+      {"descricao": "Reuso de configurações de trabalhos anteriores e de benchmarks amplamente usados contra a ameaça externa.", "avaliada": "nao", "localizador": "p. 10, Sec. V-A"},
+      {"descricao": "Interromper a geração ao encontrar um patch correto reduziria o custo médio por bug para $0.18 (estimativa do estudo, sem condição executada para comparação).", "avaliada": "nao", "localizador": "p. 11, Sec. V-C"},
+      {"descricao": "Número reduzido de amostras (10) por causa do orçamento de inferência; a Tabela V mede o efeito do número de amostras sobre patches plausíveis e verificados, não sobre custo.", "avaliada": "nao", "localizador": "p. 7, Sec. IV-A1; p. 10, Tabela V"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "ChatRepair e demais sistemas da Tabela II (valores reaproveitados dos artigos originais); Mask-Hunk e demais configurações executadas nas Tabelas IV e V",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão por versão: no Defects4J v1.2 o D4C tem 84 patches corretos, menos que ChatRepair (114) e FitRepair (89); a vantagem no total (180 vs 162) vem do v2.0 (96 vs 48).",
+        "localizador": "p. 8, Tabela II"
+      },
+      {
+        "descricao": "Condições discrepantes na RQ1: valores dos comparadores reaproveitados dos artigos originais, sem reexecução; comparadores recebem os trechos defeituosos perfeitos, o D4C só a função defeituosa; orçamentos de amostras diferentes (5000, 100, 100-200 vs 10). O estudo não informa se o denominador dos comparadores coincide com os 437 bugs; o título da referência [30] (ChatRepair) menciona «162 out of 337 bugs».",
+        "localizador": "p. 8, Sec. IV-B e Tabela II; p. 12, referência [30]"
+      },
+      {
+        "descricao": "Redação da vantagem: o resumo diz que o D4C supera o estado da arte «by 10%» e o corpo diz «almost 10% more correct patches than ChatRepair»; cálculo próprio a partir da Tabela II (180/162) dá cerca de 11% de variação relativa, o que torna «almost 10%» aparente inconsistência.",
+        "localizador": "p. 1, resumo; p. 8, Sec. IV-B e Tabela II"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: a configuração do D4C com GPT-4 no DebugBench aparece como Report-Func 177/163/161 (C++/Java/Python) na Tabela IV e como Samp=10 (default) / Temp=1.0 (default) 181/171/169 na Tabela V; o estudo não explica a diferença (a Tabela IV menciona instruções adaptadas a cada formato). Em contraste, Mask-Func na Tabela IV (160/153/147) coincide com «- Mask» na Tabela V.",
+        "localizador": "p. 9, Tabela IV; p. 10, Tabela V"
+      },
+      {
+        "descricao": "Métrica diferente entre RQs no Defects4J: a ablação (RQ3) usa patches plausíveis sem validação manual (210 no padrão), enquanto a RQ1 usa patches corretos (180); 30 plausíveis foram incorretos. Os resultados da ablação no Defects4J não são, portanto, de correção confirmada.",
+        "localizador": "p. 10, Sec. IV-D, Tabela V e Sec. V-B; p. 8, Tabela II"
+      },
+      {
+        "descricao": "Tempo de validação divergente: a Sec. III-E diz que os 10 patches são verificados «within 5 minutes», e a Sec. V-D diz que os testes rodam «up to 10 minutes per bug» com timeout de 1 minuto por patch.",
+        "localizador": "p. 7, Sec. III-E; p. 11, Sec. V-D"
+      },
+      {
+        "descricao": "Aparente inconsistência na descrição da decodificação: a Sec. III-E fala em gerar até 10 patches «during decoding (i.e., beam search)», enquanto a configuração usa amostragem com temperatura 1.0 e compara com decodificação gulosa (temp=0).",
+        "localizador": "p. 7, Sec. III-E e IV-A1; p. 10, Sec. IV-D"
+      },
+      {
+        "descricao": "Aparente inconsistência nas médias de tokens de entrada: a média geral (1,386.84) é maior que as médias de bugs resolvidos (1,325.68) e não resolvidos (1,369.72), o que não ocorre se a média geral for ponderada desses dois grupos; o estudo não explica o cálculo.",
+        "localizador": "p. 11, Sec. V-C"
+      },
+      {
+        "descricao": "Aparente inconsistência de escala do custo: com $0.023 por patch, o estudo diz que gerar 10 patches por bug resulta em «a total cost of $0.23 for the entire dataset»; cálculo próprio (10 × $0.023) corresponde a $0.23 por bug, não ao conjunto inteiro.",
+        "localizador": "p. 11, Sec. V-C"
+      },
+      {
+        "descricao": "Limitação da sensibilidade: o estudo chama 10 amostras de configuração ótima, mas só testa 1, 3 e 10 amostras; o ganho de 3 para 10 é menor que o de 1 para 3.",
+        "localizador": "p. 10, Tabela V e Sec. IV-D"
+      },
+      {
+        "descricao": "Condição com componente adicional: em Report-Hunk, o Mixtral-MoE aplica os trechos gerados ao programa antes da validação, etapa ausente nas demais condições da Tabela IV.",
+        "localizador": "p. 9, Sec. IV-C2"
+      },
+      {
+        "descricao": "Localização estatística com granularidades diferentes: o D4C usa FL em nível de método (FLUCCS, Top@1) e os comparadores usam FL em nível de instrução; a comparação cobre só o Defects4J v1.2 e só AlphaRepair e RAP-Gen. D4C cai de 84 para 80 (4.8%), AlphaRepair de 52 para 36 (30.8%) e RAP-Gen de 72 para 48 (33.3%).",
+        "localizador": "p. 8, Sec. IV-B e Tabela III"
+      },
+      {
+        "descricao": "Comparação entre tabelas feita pelo estudo: «- Pure» com GPT-4 soma 414 verificados no DebugBench (Tabela V) contra 408 de Mask-Hunk (Tabela IV), isto é, o modelo sem guia de localização supera o formato por preenchimento com máscara.",
+        "localizador": "p. 10, Sec. IV-D; p. 9, Tabela IV; p. 10, Tabela V"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "O estudo declara não ter o objetivo de propor o D4C como nova técnica de APR, e sim um novo modo de usar LLMs em APR; o D4C é ainda assim o objeto de investigação.", "localizador": "p. 2, Introdução"},
+      {"descricao": "Pressuposto de localização perfeita em nível de função: a função defeituosa é fornecida e o D4C escolhe as linhas a modificar; no cenário real, uma ferramenta de FL em nível de método a forneceria.", "localizador": "p. 5, nota 1; p. 7, Sec. III-E"},
+      {"descricao": "Validação: a função refinada substitui a original, a suíte de testes é executada e os patches plausíveis do Defects4J são conferidos manualmente; no DebugBench o bug report só inclui os exemplos de teste fornecidos, e a correção é verificada pelos testes ocultos do LeetCode.", "localizador": "p. 7, Sec. III-F; p. 8, Sec. IV-A3"},
+      {"descricao": "Artefatos indisponíveis são substituídos por uma frase padrão no bug report (por exemplo, ausência de testes conhecidos); documentos README podem substituir comentários ausentes.", "localizador": "p. 6, Sec. III-C"},
+      {"descricao": "O prompt é implementado como texto único em modelos locais e como mensagens de sistema, usuário e assistente nos modelos da OpenAI; no Mixtral usam-se os tokens [INST] e [/INST]. O texto diz que os dois modelos foram usados «via OpenAI APIs» e com servidor 8xA100, sem detalhar qual infraestrutura serve cada modelo.", "localizador": "p. 6, Sec. III-D; p. 7, Sec. IV-A1"},
+      {"descricao": "Contraste da máscara disponível na Tabela V: «- Mask» (Mask-Func) 126 plausíveis no Defects4J e 460 verificados no DebugBench, contra «- Pure» 109 e 414; a máscara pertence às condições comparadoras, não ao D4C.", "localizador": "p. 10, Tabela V"},
+      {"descricao": "Medidas descritivas do D4C no Defects4J: o patch correto é em média o 4.29º de 10 (std.=1.74); 5.80 patches plausíveis por bug (std.=3.28), com cada 2.06º plausível correto (std.=1.49).", "localizador": "p. 11, Sec. V-C e V-D"},
+      {"descricao": "Número de execuções independentes dos experimentos: nao_informado (10 amostras por bug são parâmetro de geração, não repetição do experimento); não há variância entre execuções nem teste estatístico.", "localizador": "p. 7, Sec. IV-A1; Tabelas II a V"},
+      {"descricao": "Repositório de código e resultados impresso na nota de disponibilidade de dados; não acessado nem validado nesta extração.", "localizador": "p. 11, nota de rodapé 1"},
+      {"descricao": "Análise qualitativa: Fig. 8 mostra patch correto aplicado em local diferente do patch do desenvolvedor (JxPath-8), usado pelo estudo para ilustrar a flexibilidade de não restringir a localização.", "localizador": "p. 11, Sec. V-B e Fig. 8"}
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we investigate a new approach to adapt LLMs to program repair.", "localizador": "p. 1, resumo"},
+      {"trecho": "Based on this insight, we designed D4C, a straightforward prompting framework for APR.", "localizador": "p. 1, resumo"},
+      {"trecho": "To align LLM’s inference objective with its pre-trained completion objective, we adopt a one-shot prompting strategy.", "localizador": "p. 5, Sec. III"},
+      {"trecho": "As shown in Fig. 4, once the buggy function is identified, D4C will automated extract (1) documents or comments that describe the general purpose of the function and its input-output data types, (2) the inputs and expected outputs of the failed test cases, and (3) error messages from executing those failed test cases.", "localizador": "p. 6, Sec. III-C"},
+      {"trecho": "Following this, D4C integrates the bug report into a complete prompt, which is carefully designed to include a concise role-play system instruction (e.g., You are an AI debugger ...) and a fixed example consisting of a handcrafted bug report and its refined program.", "localizador": "p. 6, Sec. III-D"},
+      {"trecho": "This one-shot ICL also allows us to restrict the output format of the LLM to a refined function rather than other common output formats related to APR (e.g., unit diff patch [67]).", "localizador": "p. 6, Sec. III-D"},
+      {"trecho": "Furthermore, we adopt a much smaller sampling number of 10, as the inference budgets (fee, time, etc.) for LLMs are much larger than traditional methods.", "localizador": "p. 7, Sec. IV-A1"},
+      {"trecho": "To control a moderated randomness of text generation, we follow the previous work and set the randomness hyper-parameter, temperature, as 1.0.", "localizador": "p. 7, Sec. IV-A1"},
+      {"trecho": "In our implementation, we also carefully modified the system instructions to adapt to each output setting.", "localizador": "p. 9, Sec. IV-C1"},
+      {"trecho": "For the generated patches by Report-Hunk, as we do not provide a specific location to modify and cannot precisely determine where the generated patch should be applied, we instruct Mixtral-MoE to help us to automatically apply the generated patches to the original buggy program before patch validation.", "localizador": "p. 9, Sec. IV-C2"},
+      {"trecho": "w/o Document: D4C without including the program documents or function comments in the prompt.", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "w/o Test: D4C without including inputs and expected outputs of the failed test cases in the prompt.", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "w/o Message: D4C without including error message from the failed tests in the prompt.", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "- Pure: D4C without including any guidance like mask or artifacts to identify bugs in the prompt, i.e., an aligned LLM.", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "Since some of the baselines are not open-sourced, we cannot re-run them to reproduce the result.", "localizador": "p. 8, Sec. IV-B"},
+      {"trecho": "Specifically, for baselines, the perfect buggy hunks within the buggy function is provided, while for D4C, only the buggy function is provided.", "localizador": "p. 8, Sec. IV-B"},
+      {"trecho": "Since it contains data from previous versions of open-source projects where most code models have been trained on, it faces the threat of data leakage.", "localizador": "p. 7, Sec. IV-A2"},
+      {"trecho": "Since DebugBench is not exposed to the threat of data leakage, we use it for our insight validation (RQ2).", "localizador": "p. 7, Sec. IV-A2"},
+      {"trecho": "Table V shows that D4C generates a total of 210 plausible patches but 30 are incorrect with respect to the human patches.", "localizador": "p. 10, Sec. V-B"},
+      {"trecho": "To mitigate the potential bias in the manual analysis, two authors independently confirm the patch correctness.", "localizador": "p. 10, Sec. V-A"},
+      {"trecho": "Moreover, as LLM’s inference overhead and time cost is much higher than traditional APR tools, using LLM to generate patches for all given hunks may result in huge resource waste.", "localizador": "p. 4, Sec. II-B"},
+      {"trecho": "Given OpenAI’s pricing of $0.01 per 1,000 input tokens and $0.03 per 1,000 output tokens [76], the average cost per patch is $0.023 ($0.021 for resolved bugs and $0.024 for unresolved bugs).", "localizador": "p. 11, Sec. V-C"},
+      {"trecho": "Generating 10 patches per bug results in a total cost of $0.23 for the entire dataset.", "localizador": "p. 11, Sec. V-C"},
+      {"trecho": "Thus, there is a labor cost of manually validating the correctness of plausible patches beyond the token cost of patch generation.", "localizador": "p. 11, Sec. V-D"},
+      {"trecho": "As the effectiveness of the model may vary in different settings, our results may not generalize beyond the studied settings and other programming languages beyond the supported ones in Defects4J and DebugBench.", "localizador": "p. 10, Sec. V-A"},
+      {"trecho": "We mitigate this threat by reusing configurations in prior work, and widely used benchmarks.", "localizador": "p. 10, Sec. V-A"},
+      {"trecho": "Therefore, we decide to release our experimental results for public verification.", "localizador": "p. 10, Sec. V-A"},
+      {"trecho": "Thus, D4C can subsequently verify all 10 patches without involving significant waste of effort on incorrect patches (within 5 minutes), rather than suffering from a time-consuming process of verifying hundreds of patches (up to 5 hours [18], [25], [26], [30], [70]).", "localizador": "p. 7, Sec. III-E"},
+      {"trecho": "However, D4C requires running tests only up to 10 minutes per bug, with a timeout of 1min per patch.", "localizador": "p. 11, Sec. V-D"},
+      {"trecho": "This is because D4C only needs to generate at most 10 patches during decoding (i.e., beam search), which is significantly less than the sampling number of existing methods (i.e., over hundreds of sampling).", "localizador": "p. 7, Sec. III-E"},
+      {"trecho": "For Defects4J, the average input prompt length is 1,386.84 tokens overall, with 1,325.68 for resolved bugs and 1,369.72 for unresolved bugs.", "localizador": "p. 11, Sec. V-C"},
+      {"trecho": "In terms of sample size, we notice that a sample size of 10 is the optimal setting to allow D4C to find the correct patches.", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "Despite this, GPT-4 with the completion objective still fixes more bugs (414 vs 408) on DebugBench than GPT-4 with the infilling objective and masked hunk (“Mask-Hunk” in Table IV).", "localizador": "p. 10, Sec. IV-D"},
+      {"trecho": "This paper is not aimed at proposing D4C as a new APR technique, but rather to introduce a new mindset or paradigm for better harnessing LLMs in APR in the future.", "localizador": "p. 2, Introdução"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "D4C",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "ChatRepair (GPT-4; APR por preenchimento com trechos defeituosos perfeitos e diálogo de várias rodadas; valores reaproveitados do artigo original)",
+      "modelo": "GPT-4 (gpt-4-0613) no D4C; GPT-4 com versão nao_informado no ChatRepair",
+      "benchmark": "Defects4J v1.2 + v2.0, bugs de função única (coluna Sum)",
+      "metrica": "number of correct patches (Tabela II); a narrativa conta o mesmo valor como bugs reparados («D4C can repair 180 bugs correctly»)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 162, "intervencao": 180},
+      "denominador": "D4C: 437 bugs de função única (203 em v1.2 e 234 em v2.0), ligado ao resultado na Introdução («180 out of the 437 single-function bugs»); ChatRepair: nao_informado neste estudo",
+      "condicoes": "Cenário de localização perfeita: os comparadores recebem os trechos defeituosos perfeitos, o D4C só a função defeituosa. D4C com 10 patches amostrados por bug, temperatura 1.0 e timeout de 1 minuto por patch; ChatRepair com 100-200 patches por bug. Valores do ChatRepair reaproveitados do artigo original, sem reexecução. Patch correto = plausível confirmado manualmente (dois autores e terceiro em discordâncias). Sum é agregado impresso de v1.2 e v2.0 da mesma técnica, métrica e comparador; por versão, v1.2: 114 (ChatRepair) vs 84 (D4C); v2.0: 48 vs 96. Número de execuções independentes nao_informado. Ganho atribuível ao pacote D4C, não a um ingrediente; mecanismos_acrescentados registrados em relação à condição Mask-Hunk, pois os ingredientes do ChatRepair não são descritos o bastante neste estudo para a comparação de categorias. Conferido no PDF, p. 8, Tabela II.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo, Introdução e Conclusão destacam uma técnica (D4C), uma métrica (patches corretos/bugs reparados no Defects4J) e um comparador: a Introdução identifica o estado da arte com localização perfeita pela referência [30] (ChatRepair) e o corpo afirma a comparação com ChatRepair. O valor declarado (180) é o total impresso de v1.2 e v2.0, por isso usou-se o agregado Sum.",
+      "derivacao": "direta",
+      "localizador": "p. 8, Tabela II (colunas Method, Model, v1.2, v2.0, Sum, Sampled), linhas ChatRepair e D4C; p. 1, resumo; p. 2, Introdução; p. 8, Sec. IV-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "ChatRepair GPT-4 114 48 162 100-200", "localizador": "p. 8, Tabela II, colunas Method, Model, v1.2, v2.0, Sum, Sampled"},
+        {"trecho": "D4C GPT-4 84 96 180 10", "localizador": "p. 8, Tabela II, colunas Method, Model, v1.2, v2.0, Sum, Sampled"},
+        {"trecho": "D4C repaired 180 out of the 437 single-function bugs in Defects4J, outperforming the state-of-the-art (SOTA) APR methods with perfect statement-level FL [30] by 10%.", "localizador": "p. 2, Introdução"},
+        {"trecho": "D4C (GPT-4) can generate almost 10% more correct patches than ChatRepair, the latest APR methods which uses GPT-4 for multi-run dialogue with provided buggy hunks.", "localizador": "p. 8, Sec. IV-B"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Document (documentos do programa ou comentários da função no prompt do D4C)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "w/o Document (D4C sem documentos ou comentários da função)",
+      "modelo": "GPT-4 (gpt-4-0613)",
+      "benchmark": "Defects4J v1.2 + v2.0, bugs de função única (coluna Sum)",
+      "metrica": "#Plausible (patches plausíveis, que passam em todos os testes)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 192, "intervencao": 210},
+      "denominador": "nao_informado para a métrica; corpus de 437 bugs de função única do Defects4J (203 v1.2, 234 v2.0)",
+      "condicoes": "GPT-4, temperatura 1.0, 10 amostras por bug (configuração padrão; linha Samp=10 (default) como intervenção). Patches plausíveis sem validação manual (o estudo indica 30 incorretos entre os 210 plausíveis do padrão). Sum é agregado impresso de v1.2 e v2.0; por versão: w/o Document 93 e 99, padrão 96 e 114. Número de execuções independentes nao_informado. Conferido no PDF, p. 10, Tabela V.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal (D4C) e única tarefa já representadas; componentes isolados completam o alvo de três, pela ordem da tabela de ablação (Tabela V): primeiro w/o Document. Primeira métrica da tabela (Defects4J #Plausible), com o agregado Sum impresso; único modelo da ablação (GPT-4).",
+      "derivacao": "direta",
+      "localizador": "p. 10, Tabela V (colunas Defects4J (#Plausible) v1.2, v2.0, Sum; DebugBench (#Verified) C++, Java, Python, Sum), linhas w/o Document e Samp=10 (default); p. 10, Sec. IV-D",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w/o Document 93 99 192 175 162 158 495", "localizador": "p. 10, Tabela V, colunas Benchmark, Defects4J (#Plausible) v1.2, v2.0, Sum, DebugBench (#Verified) C++, Java, Python, Sum"},
+        {"trecho": "Samp=10 (default) 96 114 210 181 171 169 521", "localizador": "p. 10, Tabela V, colunas Benchmark, Defects4J (#Plausible) v1.2, v2.0, Sum, DebugBench (#Verified) C++, Java, Python, Sum"},
+        {"trecho": "w/o Document: D4C without including the program documents or function comments in the prompt.", "localizador": "p. 10, Sec. IV-D"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Failed Test (entradas e saídas esperadas dos testes falhos no prompt do D4C)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "w/o Test (D4C sem entradas e saídas esperadas dos testes falhos)",
+      "modelo": "GPT-4 (gpt-4-0613)",
+      "benchmark": "Defects4J v1.2 + v2.0, bugs de função única (coluna Sum)",
+      "metrica": "#Plausible (patches plausíveis, que passam em todos os testes)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 169, "intervencao": 210},
+      "denominador": "nao_informado para a métrica; corpus de 437 bugs de função única do Defects4J (203 v1.2, 234 v2.0)",
+      "condicoes": "GPT-4, temperatura 1.0, 10 amostras por bug (linha Samp=10 (default) como intervenção). Patches plausíveis sem validação manual. Sum é agregado impresso de v1.2 e v2.0; por versão: w/o Test 80 e 89, padrão 96 e 114. Número de execuções independentes nao_informado. Conferido no PDF, p. 10, Tabela V.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado seguinte na ordem da tabela de ablação (Tabela V), para completar o alvo de três; mesma métrica (Defects4J #Plausible, agregado Sum) e modelo.",
+      "derivacao": "direta",
+      "localizador": "p. 10, Tabela V (colunas Defects4J (#Plausible) v1.2, v2.0, Sum; DebugBench (#Verified) C++, Java, Python, Sum), linhas w/o Test e Samp=10 (default); p. 10, Sec. IV-D",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w/o Test 80 89 169 173 159 159 491", "localizador": "p. 10, Tabela V, colunas Benchmark, Defects4J (#Plausible) v1.2, v2.0, Sum, DebugBench (#Verified) C++, Java, Python, Sum"},
+        {"trecho": "Samp=10 (default) 96 114 210 181 171 169 521", "localizador": "p. 10, Tabela V, colunas Benchmark, Defects4J (#Plausible) v1.2, v2.0, Sum, DebugBench (#Verified) C++, Java, Python, Sum"},
+        {"trecho": "w/o Test: D4C without including inputs and expected outputs of the failed test cases in the prompt.", "localizador": "p. 10, Sec. IV-D"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (comparação com APR baseado em LLM, efeito dos dois insights, ablação e sensibilidade), com duas subquestões (IQ1, IQ2) para os insights.",
+      "localizador": "p. 7, Sec. IV; p. 9, Sec. IV-C"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Estrutura do prompt, artefatos, número de amostras, temperatura, timeout e validação descritos; porém o exemplo fixo não é reproduzido (código omitido na Fig. 5), as instruções adaptadas a cada formato de saída não são mostradas, Report-Hunk depende do Mixtral para aplicar os trechos e o número de execuções não é informado.",
+      "localizador": "p. 5-7, Sec. III e IV-A1; p. 6, Fig. 5; p. 9, Sec. IV-C"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Na RQ1, os comparadores não foram reexecutados (valores dos artigos originais), com orçamentos de amostras e condições de localização diferentes; nas RQ2 e RQ3, as configurações comparadas foram executadas no mesmo modelo e benchmark.",
+      "localizador": "p. 8, Sec. IV-B e Tabelas II e III; p. 9, Tabela IV; p. 10, Tabela V"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas (correto, plausível, verificado, perplexidade) e tamanhos dos conjuntos informados, mas a métrica é chamada de número de patches e contada como bugs, o denominador dos comparadores não é informado, a RQ3 usa patches plausíveis no Defects4J e a mesma configuração do D4C tem valores diferentes nas Tabelas IV e V.",
+      "localizador": "p. 7, Tabela I; p. 8, Sec. IV-A3; p. 9, Tabela IV; p. 10, Tabela V"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças externas (vazamento, generalização) e internas (cobertura de testes incompleta, viés da validação manual), com mitigações descritas.",
+      "localizador": "p. 10, Sec. V-A"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Versões dos modelos (gpt-4-0613, mixtral-8x7b-instruct-v0.1), temperatura, número de amostras e timeout informados e link de código e resultados impresso (não acessado); faltam o exemplo fixo, as instruções completas por condição e o número de execuções.",
+      "localizador": "p. 6, Sec. III-B; p. 7, Sec. IV-A1; p. 11, nota de disponibilidade de dados"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo identifica o risco de vazamento do Defects4J e usa o DebugBench, descrito como livre de vazamento, nas RQ2 e RQ3; a comparação principal com os sistemas de referência (RQ1) permanece no Defects4J exposto ao risco, e a ausência de vazamento no DebugBench é afirmada a partir do desenho do benchmark, sem verificação própria.",
+      "localizador": "p. 7, Sec. IV-A2 e Tabela I; p. 8, Sec. IV-B; p. 10, Sec. V-A"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (816 linhas, incluindo referências).",
+    "paginas_abertas": [1, 5, 6, 7, 8, 9, 10, 11, 12]
+  }
+}

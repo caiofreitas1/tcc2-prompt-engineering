@@ -1,0 +1,495 @@
+{
+  "estudo": "S309",
+  "texto_fonte": "fontes/textos/lote/S309.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Sarker, L.; Downing, M.; Desai, A.; Bultan, T. Assessing, Exploiting, and Mitigating Syntactic Robustness Failures in LLM-Based Code Generation. FORGE '26, Rio de Janeiro, 2026. DOI 10.1145/3793655.3793727. Versão lida: arXiv:2404.01535v2 (7 May 2026), 12 páginas no PDF, sem paginação impressa.",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt pre-processing with formula reduction (reduced prompts)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 6, p. 5-6 do PDF (Tabelas 2 e 3); RQ4, Figuras 9-12, p. 8-9 do PDF",
+        "observacao": "Proposta do estudo: reescrita automática, determinística e por regras (9 reduções para equações, 7 para expressões), da fórmula do prompt para forma reduzida, mantendo o texto em inglês. Classificada como otimizacao_prompt (refinamento automático do próprio prompt), embora não haja busca nem seleção; leitura alternativa possível é outro. Herdados do prompt base: instrução em linguagem natural (instrucao) e especificação formal, pré/pós-condições e formato de saída fixo (restricoes). Contrafactual: prompts reduzidos contra prompts mutados (mesmo texto, fórmula mutada sem redução) e contra prompts originais (Figura 9); também contra cada ataque (Figura 10) e Top-K na distância 5 (Figura 11) e no Clover (Figura 12)."
+      },
+      {
+        "nome_original": "Mutated prompts (syntactic mutations of formulas; attack strategies NaiveUniform, Uniform, Weighted, Top-K)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seções 4 e 5, p. 4-5 do PDF; Figuras 5, 7, 8, 9, 10, p. 7-9 do PDF",
+        "observacao": "Condição comparadora da redução: prompt com a mesma parte textual e fórmula sintaticamente mutada, semanticamente equivalente (distâncias 1-5). As mutações e os ataques são perturbações adversariais propostas pelo estudo para avaliar e explorar falhas de robustez, não técnicas de prompting para melhorar a geração; por isso ficam como comparador, sem categoria acrescentada. O contraste original contra mutado mede a perda de robustez, não o efeito de uma técnica."
+      },
+      {
+        "nome_original": "Original prompt (Distance 0)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 2, p. 2-3 do PDF (Prompts A-D); Seção 7, p. 6 do PDF; Figuras 5, 6, 9, p. 7-8 do PDF",
+        "observacao": "Prompt base: texto em inglês com instrução para implementar programa em C, fórmula matemática ou especificação formal (requires/ensures no Clover) e formato de saída fixo (6 ou 2 dígitos de precisão). Linha de base sem mecanismos acrescentados."
+      },
+      {
+        "nome_original": "Chain-of-thought (CoT)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF; Figuras 5, 6, 9, p. 7-8 do PDF",
+        "observacao": "Avaliada como 'framework model' na investigação de robustez (RQ1-RQ2, RQ4); não é a proposta do estudo, mas é objeto de investigação, por isso focal. CoT zero-shot por gatilho ('Let's solve this step-by-step') acrescentado ao mesmo prompt; contrafactual Gpt-4o contra Gpt-4o+CoT e Gpt-3.5 contra Gpt-3.5+CoT. Aplicada só a modelos GPT."
+      },
+      {
+        "nome_original": "Deeply Understanding Problems (DUP)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF; Seção 9, p. 10 do PDF; Figuras 5, 6, 9, p. 7-8 do PDF",
+        "observacao": "Avaliada como 'framework model'. O estudo descreve DUP como estratégia de prompting zero-shot orientada a raciocínio, adaptada para geração de código matemático, sem detalhar o texto do prompt; outros mecanismos possíveis do DUP original não foram atribuídos por falta de descrição no artigo. Contrafactual Gpt-4o contra Gpt-4o+DUP e Gpt-3.5 contra Gpt-3.5+DUP (Figura 5). Aplicada só a modelos GPT."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature, top_p, and seed configurations",
+        "natureza": "decodificacao",
+        "descricao": "Escolha das configurações de decodificação 'mais determinísticas' para reduzir a variabilidade; valores detalhados apenas no artefato.",
+        "localizador": "Seção 7, Non-determinism of LLMs, p. 6 do PDF"
+      },
+      {
+        "nome_original": "Post-processing of the LLM responses",
+        "natureza": "outro",
+        "descricao": "Remoção do texto que não é código e conversão da resposta em arquivo C, compilado com GCC; etapa do pipeline de avaliação, não do prompt.",
+        "localizador": "Seção 7, p. 6-7 do PDF"
+      },
+      {
+        "nome_original": "Profiling / Threshold (seleção das mutações Top-K)",
+        "natureza": "outro",
+        "descricao": "Algoritmo que pondera o impacto de cada tipo de mutação na robustez (calculado com Gpt-3.5) e seleciona as 50% mais impactantes para o ataque Top-K; componente dos ataques, não de prompting para melhorar a geração.",
+        "localizador": "Seção 5, Algoritmo 1, p. 5 do PDF; Seção 7, p. 7 do PDF"
+      }
+    ],
+    "modelos": [
+      "Gpt-3.5 (referência [3] aponta GPT-3.5 Turbo; snapshot nao_informado)",
+      "Gpt-4o (versão/snapshot nao_informado)",
+      "Llama-3.1-70B (variante instrução/base nao_informado)",
+      "CodeLlama (tamanho e versão nao_informado)",
+      "o4-mini (snapshot nao_informado; usado apenas na RQ4)",
+      "Frameworks: Gpt-4o+CoT, Gpt-4o+DUP, Gpt-3.5+CoT, Gpt-3.5+DUP"
+    ],
+    "benchmarks": [
+      "Conjunto próprio de 52 prompts com fórmulas matemáticas (Table 4): Solve 7, Evaluate 7, Differential 6, MaTT [25] 6, MATH [43] 7, Clover [91] 19; 15 expressões e 37 equações; 36 de raciocínio e 16 de tradução.",
+      "RQ1-RQ2: 33 prompts (linhas 1-5 da Table 4).",
+      "RQ3: prompts de raciocínio com Gpt-3.5 (número de prompts não informado explicitamente).",
+      "RQ4: conjunto estendido ao Clover e inclusão do o4-mini; o subconjunto de prompts por figura (Figuras 9-11) não é informado de modo inequívoco; Figura 12 restrita ao Clover (Gpt-4o e o4-mini).",
+      "Mutações: até 20 por distância sintática (1-5), menos na distância 1; aproximadamente 4.000 prompts mutados ao todo (valor aproximado, como impresso)."
+    ],
+    "metricas": [
+      "Syntactic robustness degree (|F_eq|/|F|, em percentual): fração das variantes sintáticas da fórmula cujo código gerado é equivalente ao código de referência.",
+      "Equivalência por differential testing com 100 entradas aleatórias e limiar epsilon para ponto flutuante (epsilon necessário em 31 prompts); código que não compila conta como não equivalente.",
+      "Required number of mutations para atingir um nível de robustez (Figura 8, ataques).",
+      "Denominador de cada figura (número de prompts × variantes × execuções) nao_informado; cinco execuções por prompt, forma de agregação nao_informado."
+    ],
+    "linguagens": [
+      "C (linguagem alvo dos programas gerados)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Prompts semanticamente equivalentes, com fórmula sintaticamente diferente, levam a código não equivalente ao de referência; a robustez cai com a distância sintática em todos os modelos, mais em prompts de raciocínio.",
+        "localizador": "Seção 2, p. 3 do PDF; RQ1-RQ2, p. 7-8 do PDF, Figuras 5-6"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos com CoT/DUP e modelos Llama frequentemente não seguem as instruções: código só com a instrução em comentário (22 casos Gpt-3.5+DUP, 3 casos Gpt-3.5+CoT), código sem processar entradas (18 casos Gpt-3.5+DUP; aproximadamente 150 Llama-3.1-70B e 600 CodeLlama) e saída em C++ ou Python apesar da instrução de usar C; denominadores não informados.",
+        "localizador": "Seção 8, Discussion, p. 9 do PDF"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Adversário black-box pode aplicar mutações que preservam a semântica para induzir código incorreto ou que não compila; o estudo mostra que os ataques reduzem a robustez (ameaça adversarial ao gerador, não vulnerabilidade no código gerado).",
+        "localizador": "Seção 2, p. 2 do PDF; Seção 5, p. 4-5 do PDF; RQ3, p. 8 do PDF, Figuras 7-8"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Os LLMs são não determinísticos; o estudo ajusta a decodificação e executa cinco vezes por prompt.",
+        "localizador": "Seção 7, Non-determinism of LLMs, p. 6 do PDF"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Tempo de execução: o4-mini levou aproximadamente 4× mais tempo que Gpt-4o e cerca de 10× mais que Gpt-3.5 em tarefas comparáveis; custo monetário não quantificado.",
+        "localizador": "Seção 8, Discussion, p. 9 do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possibilidade de a API GPT (Gpt-3.5, Gpt-4o, o4-mini) aprender com requisições anteriores do próprio experimento; o estudo não descreve contaminação de pré-treinamento pelos conjuntos públicos (MATH, MaTT, Clover).",
+        "localizador": "Seção 8, Threats to Validity (Internal), p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade da medição: differential testing não garante equivalência e o limiar epsilon (31 prompts) pode marcar como corretos resultados incorretos.",
+        "localizador": "Seção 7, p. 7 do PDF; Threats to Validity, p. 9 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Pré-processamento do prompt com redução de fórmulas para mitigar falhas de robustez sintática e ataques.",
+        "avaliada": "sim",
+        "localizador": "Seção 6, p. 5-6 do PDF; RQ4, Figuras 9-12, p. 8-9 do PDF"
+      },
+      {
+        "descricao": "Seleção das configurações de decodificação mais determinísticas e cinco execuções por prompt para reduzir variabilidade.",
+        "avaliada": "nao",
+        "localizador": "Seção 7, p. 6 do PDF"
+      },
+      {
+        "descricao": "Limiar epsilon nas comparações de ponto flutuante e revisão manual de 100 programas gerados (nenhum falso equivalente encontrado).",
+        "avaliada": "nao",
+        "localizador": "Seção 7, p. 7 do PDF; Threats to Validity, p. 9-10 do PDF"
+      },
+      {
+        "descricao": "Troca de APIs várias vezes durante os experimentos, sem diferença observável entre código de API já usada e de API nova, para afastar aprendizado com requisições anteriores.",
+        "avaliada": "nao",
+        "localizador": "Seção 8, Threats to Validity (Internal), p. 9 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Deeply Understanding Problems (DUP)",
+        "motivo": "O contraste com e sem DUP (Gpt-4o contra Gpt-4o+DUP; Gpt-3.5 contra Gpt-3.5+DUP) aparece apenas nas Figuras 5, 6 e 9, sem valores impressos, e o texto não imprime valores de robustez para os modelos com DUP; não se estimam valores pela altura das barras."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Os valores do resumo (de 54,05% para 74,42%) não aparecem no corpo nem na Figura 9 (sem rótulos numéricos). O corpo informa melhoria média de 20,37% (entre 10,63% e 37,55%) de prompts reduzidos sobre mutados; a diferença 74,42 − 54,05 = 20,37 (cálculo próprio) é compatível, mas o resumo não especifica modelos, prompts nem distâncias cobertos.",
+        "localizador": "Resumo, p. 1 do PDF; RQ4, p. 9 do PDF; Figura 9, p. 8 do PDF"
+      },
+      {
+        "descricao": "Diferenças são relatadas com '%' sem distinguir p.p. de variação relativa (10,63%-37,55%, 20,37%, 2,73%, 0,6%, 5,1%, -3,45%, -9,52%, aproximadamente 30% e 8%, 1,95%). Para 20,37% a diferença calculada entre os valores do resumo sugere p.p. (cálculo próprio); para os demais a natureza não é informada.",
+        "localizador": "RQ1-RQ2, p. 8 do PDF; RQ4, p. 9 do PDF"
+      },
+      {
+        "descricao": "Inversão: os prompts reduzidos superam os originais só para Gpt-4o (2,73%), Gpt-4o+CoT (0,6%) e CodeLlama (5,1%); os demais modelos mostram leve degradação com prompts reduzidos em relação aos originais.",
+        "localizador": "RQ4, p. 9 do PDF; Figura 9, p. 8 do PDF"
+      },
+      {
+        "descricao": "A RQ4 é descrita como estendida ao Clover e ao o4-mini, mas a Figura 9 mostra os oito modelos/frameworks da avaliação sem o o4-mini, e o texto não diz se os prompts da Figura 9 são os 33 da RQ1 ou o conjunto estendido; o denominador da média por modelo não é informado.",
+        "localizador": "Seção 8, p. 7 do PDF; Figura 9, p. 8 do PDF; RQ4, p. 9 do PDF"
+      },
+      {
+        "descricao": "As médias de 87,4% (Gpt-4o+CoT) e 83,87% (Gpt-4o) são apresentadas como 'average syntactic robustness' da Figura 5, que é organizada por distância 0-5; o texto não explicita se a média cobre todas as distâncias, e a figura não imprime valores.",
+        "localizador": "RQ1, p. 7-8 do PDF; Figura 5, p. 7 do PDF"
+      },
+      {
+        "descricao": "CoT e DUP foram aplicados só a modelos GPT; o estudo relata que os frameworks com texto adicional frequentemente não seguem instruções (casos contados sem denominador), o que afeta o desempenho medido desses frameworks e dos modelos Llama.",
+        "localizador": "Seção 7, p. 7 do PDF; Discussion, p. 9 do PDF"
+      },
+      {
+        "descricao": "A seleção das mutações Top-K foi calculada com Gpt-3.5 e os ataques da RQ3 foram avaliados também com Gpt-3.5; o estudo não discute a sobreposição entre perfilamento e avaliação. Resultados dos ataques em prompts de tradução constam apenas no artefato.",
+        "localizador": "Seção 7, p. 7 do PDF; RQ3, p. 8 do PDF"
+      },
+      {
+        "descricao": "Efeito de teto no o4-mini: muito robusto ao ataque Top-K na distância 5, com queda de 1,95% mitigada pela redução (Figura 11).",
+        "localizador": "RQ4, p. 9 do PDF; Figura 11, p. 9 do PDF"
+      },
+      {
+        "descricao": "Gpt-3.5 tem a maior queda média por distância (-9,52%) e Gpt-4o+CoT a menor (-3,45%); a métrica de 'declínio por distância' não é definida formalmente.",
+        "localizador": "RQ1, p. 8 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ataques propostos (NaiveUniform, Uniform, Weighted, Top-K) com Gpt-3.5 em prompts de raciocínio: robustez média, em todas as distâncias, de 36,13%, 30,17%, 17,54% e 14,64%, respectivamente; Top-K exige menos mutações para atingir 10% de robustez (3 contra 5 do Weighted). São resultados de perturbação adversarial, não de técnica de prompting para melhorar a geração.",
+        "localizador": "RQ3, p. 8 do PDF; Figuras 7-8, p. 8 do PDF"
+      },
+      {
+        "descricao": "Prompts de tradução são mais robustos que os de raciocínio (médias de 83,80% e 42,86%), comparação de tipos de prompt, não de técnica.",
+        "localizador": "RQ2, p. 8 do PDF; Figura 6, p. 8 do PDF"
+      },
+      {
+        "descricao": "Regras completas de mutação (18 para equações, 12 para expressões) e de redução, configurações de decodificação e valores de epsilon estão apenas no artefato GitHub [7], não acessado nem validado nesta extração.",
+        "localizador": "Seções 4, 6 e 7, p. 4-7 do PDF"
+      },
+      {
+        "descricao": "Códigos de referência implementados pelos autores para cada prompt; entradas numéricas amostradas de faixas específicas por prompt.",
+        "localizador": "Seção 7, Differential Testing, p. 7 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Finally, to mitigate syntactic robustness failures in LLMs, we propose a pre-processing step that uses reductions to transform formulas in prompts to a simplified form.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Our experimental results demonstrate that the syntactic robustness of LLM-based code generation improves significantly using our approach, improving syntactic robustness of LLMs from 54.05% to 74.42%.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Then, we feed the reduced prompt with the same English text and the reduced mathematical formula to the LLM-based code generator to generate the target code.",
+        "localizador": "Seção 6, p. 5 do PDF"
+      },
+      {
+        "trecho": "We experiment with Chain-of-thought (CoT) [100] and Deeply Understanding Problems (DUP) [116] approaches as they are zero-shot prompting techniques that are generalizable, and cost-efficient.",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF"
+      },
+      {
+        "trecho": "For CoT, we use trigger-based prompts (e.g., “Let’s solve this step-by-step”) to preserve automation [60].",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF"
+      },
+      {
+        "trecho": "DUP, which addresses semantic misunderstandings for mathematical reasoning, has achieved state-of-the-art results on arithmetic tasks [6] and is adapted here for mathematical code generation.",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF"
+      },
+      {
+        "trecho": "In code generation accuracy, Gpt-3.5 and Gpt-4 frameworks outperform others, achieving ≥ 85% on HumanEval [21], a trend reflected in our results; thus, framework-based techniques are applied only to Gpt models, excluding Llama models due to lower performance.",
+        "localizador": "Seção 7, Benchmark Models, p. 7 do PDF"
+      },
+      {
+        "trecho": "However, the generated codes from Gpt-4o are not semantically equivalent.",
+        "localizador": "Seção 2, p. 3 do PDF"
+      },
+      {
+        "trecho": "Thus, we conclude that LLMs do not achieve syntactic robustness and increasing number of mutations (equivalently, increasing syntactic distance) leads to a decrease in syntactic robustness.",
+        "localizador": "RQ1, p. 8 do PDF"
+      },
+      {
+        "trecho": "Our evaluation demonstrates that LLMs are vulnerable to adversarial prompt-based attacks, motivating the need for assessing and improving the syntactic robustness of LLM-based code generators.",
+        "localizador": "Seção 2, p. 2 do PDF"
+      },
+      {
+        "trecho": "The goal is to induce incorrect or non-compiling code without changing the intended semantics.",
+        "localizador": "Seção 5, p. 5 do PDF"
+      },
+      {
+        "trecho": "LLMs are inherently non-deterministic.",
+        "localizador": "Seção 7, Non-determinism of LLMs, p. 6 do PDF"
+      },
+      {
+        "trecho": "To address this, we experimented with various temperature, top_p, and seed configurations (where applicable) and selected the most deterministic settings, detailed in our artifact [7].",
+        "localizador": "Seção 7, Non-determinism of LLMs, p. 6 do PDF"
+      },
+      {
+        "trecho": "Additionally, we executed the LLM-based code generator five times per prompt to mitigate variability.",
+        "localizador": "Seção 7, Non-determinism of LLMs, p. 6 do PDF"
+      },
+      {
+        "trecho": "For instance, Gpt-3.5+DUP produced only the instruction to generate code in the comment section of the C program in 22 cases, while Gpt-3.5+CoT did the same in 3 cases.",
+        "localizador": "Seção 8, Discussion, p. 9 do PDF"
+      },
+      {
+        "trecho": "This issue is even more pronounced in Llama-based models, where code is generated without user input processing in approximately 150 cases for Llama-3.1-70B and 600 cases for CodeLlama.",
+        "localizador": "Seção 8, Discussion, p. 9 do PDF"
+      },
+      {
+        "trecho": "Although we selected o4-mini for its efficiency over larger reasoning models like o3 and o1-pro, our experiments reveal that it still takes approximately 4× more time than Gpt-4o and about 10× more time than Gpt-3.5 for comparable tasks.",
+        "localizador": "Seção 8, Discussion, p. 9 do PDF"
+      },
+      {
+        "trecho": "First, there is the possibility that the Gpt API (for Gpt-3.5, Gpt-4o, and o4-mini) may be learning from prior requests we send.",
+        "localizador": "Seção 8, Threats to Validity, p. 9 do PDF"
+      },
+      {
+        "trecho": "However, we believe this is not the case, as we have switched APIs during these experiments multiple times and found no observable difference between code returned from a previously-used API and code returned from a fresh one.",
+        "localizador": "Seção 8, Threats to Validity, p. 9 do PDF"
+      },
+      {
+        "trecho": "Second, we note that differential testing cannot prove equivalence, and due to needing an epsilon value in 31 prompts to avoid incorrectly marking nonequivalence due to floating point error, it is possible some incorrect results could be marked correct.",
+        "localizador": "Seção 8, Threats to Validity, p. 9 do PDF"
+      },
+      {
+        "trecho": "In a manual review of 100 generated programs, we found no cases where non-equivalent programs were incorrectly classified as equivalent.",
+        "localizador": "Seção 7, Differential Testing and Code Equivalence, p. 7 do PDF"
+      },
+      {
+        "trecho": "It is evident that our pre-processing step helps in mitigating the impact of attacks, especially for reasoning prompts.",
+        "localizador": "RQ4, p. 9 do PDF"
+      },
+      {
+        "trecho": "In contrast, other models show a slight degradation in performance with the reduced prompts compared to the original prompts.",
+        "localizador": "RQ4, p. 9 do PDF"
+      },
+      {
+        "trecho": "To evaluate our reduction technique (RQ4), we have extended our dataset to Clover dataset and also included o4-mini model.",
+        "localizador": "Seção 8, p. 7 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Prompt pre-processing with formula reduction (reduced prompts)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "otimizacao_prompt"
+      ],
+      "comparador": "Mutated prompts (mesmo texto com fórmula sintaticamente mutada, sem redução)",
+      "modelo": "Agregado impresso sobre os modelos fundacionais e frameworks avaliados (na Figura 9: Gpt-4o, Gpt-4o+CoT, Gpt-4o+DUP, Gpt-3.5, Gpt-3.5+CoT, Gpt-3.5+DUP, Llama-3.1-70B, CodeLlama); o resumo não especifica os modelos cobertos",
+      "benchmark": "Conjunto próprio de prompts com fórmulas matemáticas (Table 4); subconjunto de prompts usado no agregado nao_informado (33 prompts da RQ1 ou conjunto estendido ao Clover)",
+      "metrica": "syntactic robustness degree",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 54.05,
+        "intervencao": 74.42
+      },
+      "denominador": "nao_informado",
+      "condicoes": "Valores impressos apenas no resumo; o corpo relata melhoria média de 20,37% (entre 10,63% e 37,55% por modelo) de reduzidos sobre mutados, 'across all foundational and framework models', e a Figura 9 não imprime valores. O agregado cobre modelos e frameworks heterogêneos (inclui condições com CoT e DUP), sem indicação de ponderação; a condição mutada é a média das variantes mutadas (distâncias 1-5, até 20 variantes por distância). Equivalência por differential testing com 100 entradas aleatórias e epsilon; cinco execuções por prompt, agregação nao_informado; configurações de decodificação 'mais determinísticas' (valores só no artefato). conferido_pdf = sim: valores conferidos no resumo (p. 1 do PDF) e narrativa conferida na p. 9; a Figura 9 (p. 8) foi aberta, mas não traz rótulos numéricos para conferir os valores.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo e conclusão destacam uma técnica (pré-processamento por redução de fórmulas), uma métrica (syntactic robustness) e um resultado; o corpo identifica o comparador (prompts mutados) ao relatar a melhoria média de 20,37%. Usado o agregado impresso no resumo, da mesma técnica, métrica e comparador.",
+      "derivacao": "direta",
+      "localizador": "Resumo, p. 1 do PDF; RQ4, p. 8-9 do PDF; Figura 9, p. 8 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Our experimental results demonstrate that the syntactic robustness of LLM-based code generation improves significantly using our approach, improving syntactic robustness of LLMs from 54.05% to 74.42%.",
+          "localizador": "Resumo, p. 1 do PDF"
+        },
+        {
+          "trecho": "The improvement in syntactic robustness when comparing reduced prompts to mutated prompts is substantial, with increases between 10.63% and 37.55%, resulting in an overall average improvement of 20.37%.",
+          "localizador": "RQ4, p. 9 do PDF"
+        },
+        {
+          "trecho": "Figure 9 presents the syntactic robustness of the models for the original formulas, the average robustness for mutated formulas, and the robustness of the reduced prompts.",
+          "localizador": "RQ4, p. 8-9 do PDF"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-thought (CoT)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio"
+      ],
+      "comparador": "Gpt-4o sem CoT (mesmos prompts originais e mutados)",
+      "modelo": "Gpt-4o (versão nao_informado)",
+      "benchmark": "33 prompts das linhas 1-5 da Table 4 (Solve, Evaluate, Differential, MaTT, MATH), originais e mutados (distâncias 0-5)",
+      "metrica": "syntactic robustness degree (average syntactic robustness)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 83.87,
+        "intervencao": 87.4
+      },
+      "denominador": "nao_informado",
+      "condicoes": "Médias impressas no texto que descreve a Figura 5 ('average robustness scores across the 33 prompts'); o texto não explicita se a média cobre todas as distâncias 0-5. CoT zero-shot por gatilho ('Let's solve this step-by-step'). Cinco execuções por prompt, agregação nao_informado. conferido_pdf = sim: valores conferidos no texto da p. 8 do PDF; a Figura 5 (p. 7) foi aberta, mas não imprime valores.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal CoT. Não há tabela com o contraste; a primeira figura com o contraste é a Figura 5, cujo primeiro modelo é Gpt-4o, com a condição sem CoT como comparador. A figura não imprime valores; usados os valores impressos no texto que a descreve.",
+      "derivacao": "direta",
+      "localizador": "Figura 5, p. 7 do PDF; RQ1, p. 8 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Gpt-4o+CoT performs best, with an average syntactic robustness of 87.4%, followed by Gpt-4o with 83.87%.",
+          "localizador": "RQ1, p. 8 do PDF"
+        },
+        {
+          "trecho": "Figure 5 illustrates the syntactic robustness percentages for all foundational and framework models across different syntactic distances, based on the average robustness scores across the 33 prompts used.",
+          "localizador": "RQ1, p. 7 do PDF"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Contribuições e quatro questões de pesquisa explícitas (avaliação, tipos de prompt, exploração por ataques, mitigação).",
+      "localizador": "Seção 1, p. 2 do PDF; Seção 8, p. 7 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Definições formais, gramática, mutações, ataques, reduções e pipeline de differential testing descritos; porém regras completas, configurações de decodificação e epsilons ficam no artefato, a agregação das cinco execuções não é descrita e o conjunto de prompts da RQ4 por figura não é especificado.",
+      "localizador": "Seções 3-7, p. 3-7 do PDF; RQ4, p. 9 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Condições comparáveis executadas: prompts originais, mutados e reduzidos nos mesmos modelos; modelos com e sem CoT/DUP sobre os mesmos prompts; sem ataque e com cada ataque. CoT/DUP restritos a modelos GPT.",
+      "localizador": "Figuras 5, 9, 10, p. 7-9 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métrica definida formalmente e com critério de equivalência; mas os resultados aparecem em figuras sem valores, os valores do resumo não constam no corpo, diferenças em '%' não distinguem p.p. de variação relativa e o denominador por figura não é informado.",
+      "localizador": "Seção 3, p. 4 do PDF; Figuras 5-12, p. 7-9 do PDF; Resumo, p. 1 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seções de ameaças internas e externas e de limitações discutem aprendizado da API, limites do differential testing e do epsilon, generalização para outras fórmulas, linguagens e tamanho do benchmark.",
+      "localizador": "Seção 8, Threats to Validity e Limitations, p. 9-10 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Artefato com implementação, dados, resultados e regras indicado no GitHub (não acessado nesta extração); versões/snapshots dos modelos e parâmetros de decodificação não são informados no artigo.",
+      "localizador": "Seção 7, p. 6-7 do PDF; referência [7], p. 11 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo discute a possibilidade de a API aprender com requisições anteriores e descreve verificação por troca de APIs; não discute contaminação de pré-treinamento pelos conjuntos públicos MATH, MaTT e Clover.",
+      "localizador": "Seção 8, Threats to Validity, p. 9 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (776 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [
+      1,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  }
+}
