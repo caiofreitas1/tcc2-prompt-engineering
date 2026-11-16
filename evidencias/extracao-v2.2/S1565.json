@@ -1,0 +1,311 @@
+{
+  "id_estudo": "S1565",
+  "texto_fonte": "fontes/textos/lote/S1565.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "a: Basic Prompt",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (seção 3.3, Figura 7); p. 6 (seção 3.3 e Tabela 4, linha a)",
+        "observacao": "Prompt base dos modelos de template: mensagem de sistema de papel («You're an Automated Program Repair tool.»), descrição da tarefa e regra de alterar só o script indicado → instrucao; código C# com falha (prefixo até a linha com falha, função inteira ou função chamadora mais função chamada de outra classe, conforme o cenário) em versão comentada com // seguida de «FIXED CODE:»; em asset files, configurações com erro em texto simples seguidas de «FIXED:» → contexto. Na ablação (Tabela 8) corresponde à linha «Basic Instruction», declarada linha de base. Sem condição sem o prompt base."
+      },
+      {
+        "nome_original": "b: Basic Prompt + Bug Instruction",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 (seção 3.3 e Tabela 4, linha b); p. 8 (Figuras 9 e 10); p. 9-10 (seção 4.8.2 e Tabela 8, linha «Bug Instruction»)",
+        "observacao": "Acrescenta ao template a os comentários «BUG: [error name]» e «MESSAGE: [error message]» com nome e descrição da falha obtidos das ferramentas de análise estática (em asset files, nome e descrição antes das configurações) → contexto (informação externa sobre a falha, em passo único, sem retorno iterativo; por isso não é feedback). A categoria contexto já existia em a; o ingrediente novo é dessa categoria. Contrafactual: ablação de componentes de prompt (Tabela 8) e matriz de templates (Figuras 9-11), em que a e b diferem só na bug instruction."
+      },
+      {
+        "nome_original": "c: Basic Prompt + Bug Instruction + Fix Instruction",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 (seção 3.3 e Tabela 4, linha c); p. 8 (Figuras 9 e 10); p. 9-10 (Tabela 8, linha «Fix Instruction»); p. 10 (Tabela 10, linha «XRFix (GPT-4o)»; Figura 12)",
+        "observacao": "Acrescenta a b um comentário com sugestão de correção antes de «FIXED CODE:» (por exemplo, «You can try to build an object pool before calling Update() method.», Figura 12) → instrucao (diretriz em linguagem natural). É o template usado pelo XRFix (GPT-4o) na comparação com os métodos de APR (Tabela 10). O XRFix como sistema inclui detecção e localização por CodeQL e UnityLint customizados e fusão de patches por Tree-sitter (componentes fora do escopo); o contraste da Tabela 10 é de pacote contra outros métodos, não isola a fix instruction. Contrafactual do ingrediente: ablação (Tabela 8) e matriz b versus c."
+      },
+      {
+        "nome_original": "d: Basic Prompt + Bug Instruction + Fix Instruction with Alternative Comment Style",
+        "mecanismos": ["instrucao", "contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 (Tabela 4, linha d); p. 8 (Figuras 9 e 10); p. 9 (seção 4.8.1, Figura 11a); p. 10 (Tabela 8, linha «Alternative Comment Style»)",
+        "observacao": "outro = estilo de comentário alternativo (/* e */ em vez de //) na apresentação do código com falha; substitui a formatação do template c sem acrescentar conteúdo. Só para scripts C#: não há template d para asset files (Tabela 4, «N.A.»; denominadores /510 na Figura 10). Contrafactual: ablação (Tabela 8) e matriz c versus d."
+      },
+      {
+        "nome_original": "e: Basic Prompt + Bug Instruction + Code Examples of Specific Bug and Fix",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (seção 2.3, «zero-shot and one-shot learning»); p. 6 (seção 3.3 e Tabela 4, linha e); p. 8 (Figuras 9 e 10); p. 10 (Tabela 8, linha «Code Example»)",
+        "observacao": "Acrescenta a b exemplos de código de falha e correção do tipo de falha-alvo, coletados do GitHub e de fóruns Unity, após a descrição da tarefa → exemplos; exemplos de código fornecidos como demonstração → também contexto (D102). Não contém a fix instruction de c. Contrafactual: ablação (Tabela 8, «Code Example») e matriz b versus e."
+      },
+      {
+        "nome_original": "Self-Repair (GPT-4o)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 (seção 4.3); p. 10 (Tabela 10 e seção 4.10)",
+        "observacao": "Método de APR de referência adaptado pelos autores: usa mensagens de erro das ferramentas de análise estática como feedback, pede ao LLM explicações breves da falha (raciocinio) e usa essa informação para guiar a correção (feedback); GPT-4o como modelo de feedback e de reparo. O texto do prompt e o número de iterações não são informados. Comparador sem mecanismos isolados."
+      },
+      {
+        "nome_original": "AlphaRepair",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 (seção 4.3); p. 10 (Tabela 10); p. 11 (seção 5)",
+        "observacao": "Reparo zero-shot por preenchimento (infilling) de linhas com falha mascaradas com CodeBERT, recebendo o contexto com falha dos três cenários; seleção dos 5 melhores candidatos. O estudo o descreve em trabalhos relacionados como construção de templates de prompt para preenchimento; classificado como prompting de preenchimento com contexto, com incerteza sobre o enquadramento. Comparador sem mecanismos isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "CodeT5 (Fine-tuned for multi-hunk APR Tasks)",
+        "natureza": "ajuste_fino",
+        "descricao": "Linha de base de APR com CodeT5 ajustado no conjunto CPatMiner para reparo multi-hunk; comparada na Tabela 10.",
+        "localizador": "p. 7 (seção 4.3); p. 10 (Tabela 10)"
+      },
+      {
+        "nome_original": "Customized UnityLint and CodeQL (static analysis tools)",
+        "natureza": "outro",
+        "descricao": "Ferramentas de análise estática customizadas (novas regras para RWT, IDU e NAU em CodeQL; detecção de SORL e AOBL em asset files com UnityLint) para detectar e localizar as falhas, gerar as mensagens usadas nos prompts e julgar plausibilidade dos patches.",
+        "localizador": "p. 4-5 (seção 3.2); p. 7 (seção 4.2); p. 8 (Tabela 5)"
+      },
+      {
+        "nome_original": "Code Reduction and Patch Merging (Tree-sitter)",
+        "natureza": "outro",
+        "descricao": "Extração de funções e declarações das respostas com Tree-sitter e substituição no repositório original para formar o repositório «LLM-fixed».",
+        "localizador": "p. 6 (seção 4.1)"
+      },
+      {
+        "nome_original": "sampling temperature of top_p = 1; max_tokens 4,000",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação: top_p = 1 (descrito pelo estudo como «sampling temperature») e max_tokens de 4.000 para todos os LLMs; cinco consultas por cenário de falha.",
+        "localizador": "p. 6 (seção 4.1)"
+      },
+      {
+        "nome_original": "best-performing LLM (GPT-4o)",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do GPT-4o como modelo do XRFix na comparação com os métodos de APR, por ser o de melhor desempenho; comparação entre cinco LLMs sem alteração do prompt.",
+        "localizador": "p. 10 (seções 4.9 e 4.10)"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeLlama", "versao": "nao_informado", "observacao": "Tabela 2: 7B, janela de contexto 16K, Code LLM, cut-off 2022.09; pesos carregados via HuggingFace."},
+      {"nome": "Deepseek-Coder", "versao": "nao_informado", "observacao": "Tabela 2: 6.7B, 16K, Code LLM, cut-off 2023.03; HuggingFace."},
+      {"nome": "StarChat-β", "versao": "nao_informado", "observacao": "Tabela 2: 16B, 8K, Code LLM, cut-off «N.A. (Before 2023.05)»; HuggingFace."},
+      {"nome": "GPT-3.5-Turbo", "versao": "nao_informado (snapshot não informado)", "observacao": "Tabela 2: «175B», 16K, General LLM, cut-off 2021.09; API oficial."},
+      {"nome": "GPT-4o", "versao": "nao_informado (snapshot não informado)", "observacao": "Tabela 2: «1800B», 128K, General LLM, cut-off 2023.10; API oficial; também modelo de feedback e reparo do Self-Repair. A introdução cita «GPT-4» na lista de modelos (ver heterogeneidade)."},
+      {"nome": "CodeBERT (AlphaRepair)", "versao": "nao_informado", "observacao": "Modelo do comparador AlphaRepair."},
+      {"nome": "CodeT5 ajustado (CPatMiner)", "versao": "nao_informado", "observacao": "Comparador fora do escopo (ajuste fino)."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto próprio de falhas de desempenho XR (XRFix dataset)",
+        "quantidade": "104 falhas reais de 23 projetos XR open-source em Unity (10 SideQuest e 13 GitHub); 10 tipos de falha",
+        "observacao": "Por tipo (denominadores da Figura 9): RWT 13, RCC 7, RLC 4, RD 7, RHA 23, RS 1, IDU 33, NAU 14, SORL 1, AOBL 1 (SORL e AOBL em asset files; os demais em scripts C#). Por cenário: single-line 76; function-level e class-level descritos como «22% and 6%» no texto, com denominadores 110 e 30 respostas na Tabela 9 (5 respostas por falha). Respostas de referência escritas por autores. Denominadores: FR sobre falhas (104; Figura 9 por tipo); PPF sobre respostas (520 = 104 × 5; 510 no template d, sem asset files); Tabela 9 por cenário (380/110/30 respostas)."
+      }
+    ],
+    "metricas": [
+      {"nome": "Fix Rate (FR)", "definicao": "Número de falhas corrigidas; uma falha é considerada corrigida se qualquer uma das amostras passa nos testes de avaliação. Relatada em percentual e em contagens por tipo (Figura 9).", "localizador": "p. 7 (seções 4.1 e 4.2); p. 8 (Figura 9)"},
+      {"nome": "Percentage of Plausible Fix (PPF)", "definicao": "Número de respostas plausíveis: em C#, compiláveis e aprovadas pelos testes de detecção do CodeQL; em asset files, formato YAML consistente e aprovadas pelo UnityLint. Denominador 520 (510 no template d).", "localizador": "p. 7 (seção 4.2); p. 8 (Figura 10)"},
+      {"nome": "CodeBLEU", "definicao": "Similaridade com as respostas de referência, pesos α,β,γ,δ = 0.1, 0.1, 0.4, 0.4; média com IC por bootstrap de 1.000 reamostragens; teste de Wilcoxon (α=0.05).", "localizador": "p. 7 (seção 4.2)"},
+      {"nome": "Similarity Scores", "definicao": "Pontuação 0 ou 1 atribuída por pesquisadores para asset files; média das respostas.", "localizador": "p. 6 (seção 3.4); p. 7 (seção 4.2)"},
+      {"nome": "Percentage of Correct Patches", "definicao": "Patches corretos sobre o total de falhas inspecionadas manualmente (8 tipos, no máximo 10 respostas por caso).", "localizador": "p. 7 (seção 4.2); p. 8-9 (seção 4.7.3, Tabela 7)"},
+      {"nome": "Precision (detecção)", "definicao": "Proporção de avisos das ferramentas de análise estática que identificam falhas corretamente.", "localizador": "p. 7 (seção 4.2); p. 8 (Tabela 5)"}
+    ],
+    "linguagens": ["C#", "YAML (asset files do Unity)"],
+    "riscos": [
+      {"categoria": "contaminacao", "descricao": "Parte considerável das falhas está em commits anteriores a outubro de 2023 (cut-off mais recente dos LLMs), e os resultados podem sofrer leve vazamento de dados.", "localizador": "p. 11 (Threats to External Validity)"},
+      {"categoria": "correcao_funcional", "descricao": "Muitas respostas do Code Llama e do StarChat-β omitem as linhas originais com erro, e os autores consideram essas correções não confiáveis.", "localizador": "p. 9 (seção 4.7.3)"},
+      {"categoria": "correcao_funcional", "descricao": "Os LLMs tendem a não comentar nem apagar linhas originais, o que dificulta corrigir RHA (remoção de alocação redundante).", "localizador": "p. 8 (seção 4.7.1)"},
+      {"categoria": "correcao_funcional", "descricao": "Exemplos de código aumentam correções sugeridas, mas «não são sempre confiáveis»; o modelo pode se apoiar demais nos exemplos em vez de tratar a falha.", "localizador": "p. 10 (seção 4.8.2)"},
+      {"categoria": "outro", "descricao": "Validade interna: o desempenho do XRFix depende das ferramentas de análise estática customizadas (UnityLint e CodeQL).", "localizador": "p. 11 (Threats to Internal Validity)"},
+      {"categoria": "outro", "descricao": "Validade externa e de construto: cobertura de dez tipos de falha, foco em apps Unity e ausência de capacidade para falhas visuais (por exemplo, inconsistências estereoscópicas).", "localizador": "p. 11 (Threats to External Validity; Threats to Construct Validity)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Seleção das nove falhas com commits posteriores ao cut-off; segundo os autores, todas ainda foram corrigidas pelos LLMs e as tendências coincidiram com o conjunto inteiro (números não relatados).", "avaliada": "nao", "localizador": "p. 11 (Threats to External Validity)"},
+      {"descricao": "Conferência da correção das regras pré-definidas e customizadas (precisão de 90,4%, Cohen's Kappa 0,83 entre dois autores).", "avaliada": "nao", "localizador": "p. 8 (seção 4.6, Tabela 5); p. 11 (Threats to Internal Validity)"},
+      {"descricao": "Triangulação por análise estática, comparação com respostas de referência e inspeção manual (com compilação e execução no Unity Editor) para verificar se as correções funcionam.", "avaliada": "nao", "localizador": "p. 6 (seção 3.4); p. 9 (seção 4.7.3); p. 11 (Threats to Internal Validity)"},
+      {"descricao": "Redução de código (diretivas using e salto de declarações de topo) para caber na janela de contexto e max_tokens igual (4.000) para todos os LLMs.", "avaliada": "nao", "localizador": "p. 6 (seção 4.1)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "O resumo diz que o XRFix alcança 67,3% e fica «7.7% higher» que o segundo melhor método; na Tabela 10 o Self-Repair (GPT-4o) tem 59,6, e a diferença de 7,7 corresponde a pontos percentuais (cálculo próprio: 67,3 − 59,6), não a variação relativa. Já «8.33% more correct patches» (GPT-4o 81,25 contra GPT-3.5-Turbo 75 na Tabela 7) corresponde a variação relativa (cálculo próprio: 6,25 p.p.; 6,25/75 ≈ 8,33%). O estudo usa «%» para os dois tipos de diferença.", "localizador": "p. 1 (resumo); p. 9 (seção 4.7.3, Tabela 7); p. 10 (Tabela 10)"},
+      {"descricao": "Na Tabela 10, XRFix (GPT-4o) e Self-Repair (GPT-4o) não diferem significativamente em CodeBLEU (0.664‡ contra 0.667‡; o Self-Repair tem valor numericamente maior). O texto diz que o XRFix «significantly outperforms the baselines», mas não relata teste de significância para FR ou PPF; o Wilcoxon descrito refere-se a médias de pontuações.", "localizador": "p. 7 (seção 4.2); p. 10 (Tabela 10 e seção 4.10)"},
+      {"descricao": "Ablação (Tabela 8): o texto declara «Basic Instruction» como linha de base, mas não identifica a condição de referência de cada componente; «Alternative Comment Style» −24.9 pontos de FR não pode ser relativo à linha de base de 15.4 (resultaria em FR negativo), o que indica referência incremental não declarada (aparente inconsistência). Os valores são médias ± desvio-padrão de cinco LLMs heterogêneos e o componente d não existe para asset files.", "localizador": "p. 9-10 (seção 4.8.2, Tabela 8); p. 6 (Tabela 4)"},
+      {"descricao": "Inversões entre métricas: o template d tem o maior CodeBLEU para GPT-4o (0.700 contra 0.664 do c, P < 0.05), mas a ablação atribui ao estilo alternativo −24.9 de FR e −10.1 de PPF; Code Example acrescenta +4.04 de FR e +2.08 de PPF, mas −0.0174 de CodeBLEU. Para GPT-3.5-Turbo, c e d não diferem (P = 0.44).", "localizador": "p. 9 (seção 4.8.1, Figura 11a); p. 10 (Tabela 8)"},
+      {"descricao": "CodeBLEU geral do GPT-4o: 0.608 no texto e 0.607 na Tabela 6; Deepseek-Coder: 0.445 no texto e 0.446 na Tabela 6. A Tabela 6 não informa o template; o CodeBLEU do GPT-4o com prompt c é 0.664 (seção 4.8.1 e Tabela 10).", "localizador": "p. 8 (seção 4.7.2); p. 9 (Tabela 6 e seção 4.8.1); p. 10 (Tabela 10)"},
+      {"descricao": "Distribuição por cenário: o texto informa single-line «76, i.e., more than 73.07%» e function-level e class-level com «frequencies of 22% and 6%»; os denominadores da Tabela 9 (380, 110 e 30 respostas, com 5 respostas por falha) e a soma 76 + 22 + 6 = 104 (cálculo próprio) indicam contagens de 22 e 6, não percentuais (aparente inconsistência). A Figura 8b rotula o terceiro cenário como «File Level».", "localizador": "p. 7 (seção 4.5); p. 8 (Figura 8b); p. 10 (Tabela 9)"},
+      {"descricao": "Número de templates: a seção 3.3 fala em «four prompt templates» e em variantes «based on the above three templates», mas a Tabela 4 lista cinco (a–e).", "localizador": "p. 5-6 (seção 3.3, Tabela 4)"},
+      {"descricao": "Autoria das respostas de referência: a seção 3.2 diz que foram dadas por dois autores, escritas independentemente e depois discutidas; a seção 3.4 diz que um autor fornece uma ou mais respostas por cenário.", "localizador": "p. 5 (seção 3.2); p. 6 (seção 3.4)"},
+      {"descricao": "A introdução lista «GPT-4 and GPT-3.5» entre os modelos, enquanto a Tabela 2 e os resultados usam GPT-4o e GPT-3.5-Turbo.", "localizador": "p. 2 (seção 1); p. 3 (Tabela 2)"},
+      {"descricao": "O texto da seção 4.7.1 descreve o GPT-4o com prompt c como «generating 70 plausible bug fixes out of 104, with a success fix rate of 67.31%», misturando a métrica de correção (FR) com a de plausibilidade (PPF, 45% na Figura 10: 234/520). Os «testes de avaliação» que definem uma falha corrigida não são especificados.", "localizador": "p. 7 (seção 4.1); p. 8 (seção 4.7.1, Figura 10)"},
+      {"descricao": "Caso SORL: o tempo de renderização de quadro cai de 2,4 ms para 1,8 ms «by 33%»; a redução sobre o valor inicial é 25% (cálculo próprio: 0,6/2,4), e 33% corresponde a 0,6/1,8 (aparente inconsistência de base). Medida em um único cenário.", "localizador": "p. 9 (seção 4.7.3)"},
+      {"descricao": "Nulos e limitações por tipo de falha: RS, RHA, SORL e AOBL têm muitas células 0 na Figura 9 (por exemplo, RS 0/1 para GPT-4o em todos os templates); NAU tem os menores CodeBLEU (0.248–0.307, Tabela 6); a inspeção manual cobre 8 tipos com no máximo 10 respostas por caso e Code Llama e StarChat-β têm 0% em vários tipos (Tabela 7).", "localizador": "p. 8 (Figura 9); p. 9 (Tabelas 6 e 7)"}
+    ],
+    "observacoes": [
+      {"descricao": "Versão lida: arXiv:2608.21718v1 [cs.SE], 22 ago. 2026. O PDF não traz numeração impressa; os localizadores usam a página do PDF.", "localizador": "p. 1"},
+      {"descricao": "Antes dos experimentos, os autores examinaram manualmente algumas abordagens alternativas de prompt com falhas selecionadas no OpenAI Playground; resultados desse ajuste não são relatados.", "localizador": "p. 6 (seção 4.1)"},
+      {"descricao": "Esforço manual: a inspeção manual é descrita como «extremely laborious and demanding», por isso restrita a casos selecionados; um pesquisador avalia e discute com outro (Kappa 0,9). O estudo não trata isso como custo.", "localizador": "p. 8-9 (seção 4.7.3)"},
+      {"descricao": "Cada LLM é consultado cinco vezes por cenário (amostras para a métrica); o número de repetições independentes do experimento não é informado. Os métodos de APR também geram cinco respostas por cenário com o mesmo max_tokens.", "localizador": "p. 6 (seção 4.1); p. 7 (seção 4.3)"},
+      {"descricao": "Repositório do XRFix indicado no GitHub (nota 1); não acessado nem validado.", "localizador": "p. 1 (nota de rodapé 1)"},
+      {"descricao": "A Tabela 2 imprime contagens de parâmetros para GPT-3.5-Turbo (175B) e GPT-4o (1800B); registradas como impressas, sem conferência externa.", "localizador": "p. 3 (Tabela 2)"}
+    ],
+    "citacoes": [
+      {"trecho": "For the third challenge, we design different prompts to instruct large language models (LLMs) to fix XR bugs in three types of bug scenarios with different complexities, i.e., single-line level, function level, and class level.", "localizador": "p. 1 (resumo)"},
+      {"trecho": "Our goal is to investigate the prompt engineering potential of various LLMs in fixing XR bugs with zero-shot and one-shot learning.", "localizador": "p. 3 (seção 2.3)"},
+      {"trecho": "First, we use “You’re an Automated Program Repair tool.” as the default system message.", "localizador": "p. 6 (seção 3.3)"},
+      {"trecho": "For C# script files, bug instruction contains “BUG:” and “MESSAGE:” to include the bug’s name and descriptions.", "localizador": "p. 6 (seção 3.3)"},
+      {"trecho": "As for code examples, we collect the specific types of bugs and fixes from GitHub and Unity forums as examples to instruct LLMs on the expected output, suggesting each bug’s common patterns.", "localizador": "p. 6 (seção 3.3)"},
+      {"trecho": "The fix instruction is preceded by suggestions to assist in fixing.", "localizador": "p. 6 (seção 3.3)"},
+      {"trecho": "d Basic Prompt + Bug Instruction + Fix Instruction with Alternative Comment Style - Same as c, but commented in alternative comment style using /* and */ rather than //. N.A.", "localizador": "p. 6 (Tabela 4, linha d; colunas TPL_ID, Templates for Script Files, Templates for Asset Files)"},
+      {"trecho": "Self-Repair [49] uses test failure feedback to prompt LLMs for brief failure explanations, then leverages this information to guide code improvements.", "localizador": "p. 7 (seção 4.3)"},
+      {"trecho": "Here, we use error messages from our SAT tools to generate feedback.", "localizador": "p. 7 (seção 4.3)"},
+      {"trecho": "AlphaRepair [72] uses CodeBERT for APR by infilling buggy lines with masked tokens.", "localizador": "p. 7 (seção 4.3)"},
+      {"trecho": "Table 8 lists the results of different prompt components’ contribution, where Basic Instruction serves as the baseline.", "localizador": "p. 9 (seção 4.8.2)"},
+      {"trecho": "As a result, it is likely that our experimental results may slightly suffer from data leakage.", "localizador": "p. 11 (Threats to External Validity)"},
+      {"trecho": "To mitigate this issue, we select all bugs from our curated dataset that were committed after the cut-off date and end up gathering nine bugs.", "localizador": "p. 11 (Threats to External Validity)"},
+      {"trecho": "A large number of answers generated by Code Llama and StarChat-β leave out the original error code lines.", "localizador": "p. 9 (seção 4.7.3)"},
+      {"trecho": "Although code examples help LLMs suggest more possible fixes, they are not always reliable.", "localizador": "p. 10 (seção 4.8.2)"},
+      {"trecho": "LLMs struggle with them because they are less inclined to generate responses that comment out or delete the original buggy code lines.", "localizador": "p. 8 (seção 4.7.1)"},
+      {"trecho": "The performance of the proposed XRFix depends on customized static analysis tools, such as UnityLint and CodeQL.", "localizador": "p. 11 (Threats to Internal Validity)"},
+      {"trecho": "XRFix lacks bug-fixing capabilities for visual and non-visual functions in XR apps, such as stereoscopic visual inconsistency bugs as reported in [37].", "localizador": "p. 11 (Threats to Construct Validity)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "XRFix (GPT-4o), template c: Basic Prompt + Bug Instruction + Fix Instruction",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Self-Repair (GPT-4o)",
+      "modelo": "GPT-4o (snapshot não informado), nas duas condições",
+      "benchmark": "Conjunto próprio de 104 falhas de desempenho XR (23 projetos Unity)",
+      "metrica": "FR(%) (Fix Rate)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 59.6, "intervencao": 67.3},
+      "denominador": "104 falhas (o texto relata 70 de 104 para GPT-4o com prompt c; denominador do Self-Repair não impresso separadamente)",
+      "condicoes": "Cinco respostas por cenário de falha em cada método; falha corrigida se qualquer amostra passa nos testes de avaliação; max_tokens igual (4.000); XRFix com top_p = 1; decodificação do Self-Repair não informada; Self-Repair adaptado pelos autores, com mensagens de erro das ferramentas de análise estática como feedback e GPT-4o como modelo de feedback e reparo (número de iterações não informado). Inclui scripts C# e asset files. Sem teste de significância para FR (o ‡ da Tabela 10 refere-se ao CodeBLEU). O ganho é do pacote XRFix (template c, com informação de falha vinda da análise estática), não de um ingrediente. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 10; frase do resumo conferida na p. 1.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo destaca uma técnica (XRFix), uma métrica (fixing rate) e um comparador identificável sem desempate («the second-best method», o Self-Repair (GPT-4o) na Tabela 10); a seção 4.10 informa que o XRFix usa GPT-4o com prompt c.",
+      "derivacao": "direta",
+      "localizador": "p. 1 (resumo); p. 10 (Tabela 10, colunas Approach e FR(%); seção 4.10); p. 7 (seção 4.3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "For example, our XRFix achieves 67.3% fixing rate, i.e., 7.7% higher than the second-best method.", "localizador": "p. 1 (resumo)"},
+        {"trecho": "Self-Repair (GPT-4o) 59.6 41.5 0.667‡", "localizador": "p. 10 (Tabela 10; colunas Approach, FR(%), PPF(%), CodeBLEU)"},
+        {"trecho": "XRFix (GPT-4o) 67.3 45.0 0.664‡", "localizador": "p. 10 (Tabela 10; colunas Approach, FR(%), PPF(%), CodeBLEU)"},
+        {"trecho": "We use the best-performing LLM (GPT-4o) instructed by prompt c.", "localizador": "p. 10 (seção 4.10)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "b: Basic Prompt + Bug Instruction",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "a: Basic Prompt",
+      "modelo": "GPT-3.5-Turbo (snapshot não informado)",
+      "benchmark": "Conjunto próprio de falhas XR, subconjunto RWT (13 falhas)",
+      "metrica": "Fixed bugs (Figura 9, «Statistics of fixed bugs»; contagem correspondente ao Fix Rate)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 1, "intervencao": 11},
+      "denominador": "13 falhas RWT (impresso como 1/13 e 11/13)",
+      "condicoes": "Cinco consultas por falha; falha corrigida se qualquer amostra passa nos testes de avaliação; top_p = 1; max_tokens 4.000. A Tabela 8 (ablação) traz para «Bug Instruction» só a contribuição +19.6 (±7.63) de FR(%) sobre a linha de base «Basic Instruction» 15.4 (±4.21), médias ± desvio-padrão de cinco LLMs, sem o valor da condição com o componente. conferido_pdf: célula conferida na imagem da p. 8 (resolução baixa, legível; coincide com o texto extraído).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal b. A única tabela com o contraste de templates (Tabela 8) imprime só a linha de base e a diferença, sem as duas condições; passa-se à primeira figura com o contraste (Figura 9), primeiro painel (RWT), primeiro modelo (GPT-3.5-Turbo), comparador a (template de que b deriva). Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (Figura 9, painel RWT, linha GPT-3.5-Turbo, colunas a e b); p. 6 (Tabela 4); p. 10 (Tabela 8)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-3.5-Turbo 1/13 11/13 10/13 5/13 11/13", "localizador": "p. 8 (Figura 9, painel RWT; colunas Prompt Template a, b, c, d, e)"},
+        {"trecho": "Bug Instruction +19.6 (±7.63) +11.8 (±7.31) +0.0628 (±.0558)", "localizador": "p. 10 (Tabela 8; colunas Prompt Components, FR(%), PPF(%), CodeBLEU)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "d: Basic Prompt + Bug Instruction + Fix Instruction with Alternative Comment Style",
+      "mecanismos": ["instrucao", "contexto", "outro"],
+      "mecanismos_acrescentados": ["outro"],
+      "comparador": "c: Basic Prompt + Bug Instruction + Fix Instruction",
+      "modelo": "GPT-3.5-Turbo (snapshot não informado)",
+      "benchmark": "Conjunto próprio de falhas XR, subconjunto RWT (13 falhas)",
+      "metrica": "Fixed bugs (Figura 9, «Statistics of fixed bugs»; contagem correspondente ao Fix Rate)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 10, "intervencao": 5},
+      "denominador": "13 falhas RWT (impresso como 10/13 e 5/13)",
+      "condicoes": "Cinco consultas por falha; falha corrigida se qualquer amostra passa; top_p = 1; max_tokens 4.000; d só existe para scripts C#. A Tabela 8 traz para «Alternative Comment Style» −24.9 (±10.1) de FR(%), média de cinco LLMs, sem condição de referência identificada. conferido_pdf: células conferidas na imagem da p. 8 (resolução baixa, legível; coincidem com o texto extraído).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal d. A Tabela 8 imprime só a contribuição, sem as condições e sem identificar a referência; primeira figura com o contraste (Figura 9), painel RWT, primeiro modelo (GPT-3.5-Turbo), comparador c (template de que d deriva, Tabela 4). Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (Figura 9, painel RWT, linha GPT-3.5-Turbo, colunas c e d); p. 6 (Tabela 4); p. 10 (Tabela 8)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-3.5-Turbo 1/13 11/13 10/13 5/13 11/13", "localizador": "p. 8 (Figura 9, painel RWT; colunas Prompt Template a, b, c, d, e)"},
+        {"trecho": "Alternative Comment Style -24.9 (±10.1) -10.1 (±4.91) -0.0424 (±.0601)", "localizador": "p. 10 (Tabela 8; colunas Prompt Components, FR(%), PPF(%), CodeBLEU)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "e: Basic Prompt + Bug Instruction + Code Examples of Specific Bug and Fix",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "b: Basic Prompt + Bug Instruction",
+      "modelo": "GPT-3.5-Turbo (snapshot não informado)",
+      "benchmark": "Conjunto próprio de falhas XR, subconjunto RWT (13 falhas)",
+      "metrica": "Fixed bugs (Figura 9, «Statistics of fixed bugs»; contagem correspondente ao Fix Rate)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 11, "intervencao": 11},
+      "denominador": "13 falhas RWT (impresso como 11/13 nas duas colunas)",
+      "condicoes": "Cinco consultas por falha; falha corrigida se qualquer amostra passa; top_p = 1; max_tokens 4.000; exemplos de falha e correção do tipo-alvo coletados do GitHub e de fóruns Unity (número de exemplos não informado; o estudo menciona one-shot learning). A Tabela 8 traz para «Code Example» +4.04 (±6.76) de FR(%), média de cinco LLMs, sem condição de referência identificada. conferido_pdf: células conferidas na imagem da p. 8 (resolução baixa, legível; coincidem com o texto extraído).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da técnica focal e. A Tabela 8 imprime só a contribuição; primeira figura com o contraste (Figura 9), painel RWT, primeiro modelo (GPT-3.5-Turbo), comparador b (template de que e deriva, Tabela 4). Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (Figura 9, painel RWT, linha GPT-3.5-Turbo, colunas b e e); p. 6 (Tabela 4); p. 10 (Tabela 8)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-3.5-Turbo 1/13 11/13 10/13 5/13 11/13", "localizador": "p. 8 (Figura 9, painel RWT; colunas Prompt Template a, b, c, d, e)"},
+        {"trecho": "Code Example +4.04 (±6.76) +2.08 (±2.41) -0.0174 (±.0504)", "localizador": "p. 10 (Tabela 8; colunas Prompt Components, FR(%), PPF(%), CodeBLEU)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo e seis questões de pesquisa explícitos, incluindo como os prompts devem ser construídos (RQ4) e a comparação com métodos de APR (RQ6).", "localizador": "p. 1-2 (resumo e contribuições); p. 7 (seção 4.4)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Coleta de dados, detecção, templates (Tabela 4, Figuras 7 e 12), parâmetros e avaliação descritos; porém o texto diverge sobre o número de templates (quatro, três ou cinco), sobre quem escreveu as respostas de referência, não especifica os testes que definem falha corrigida nem o prompt e as iterações do Self-Repair adaptado.", "localizador": "p. 4-7 (seções 3.1-4.3)"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Template base (a) e matriz de templates executados nas mesmas falhas, com cinco modelos; três métodos de APR adaptados e executados no mesmo conjunto com cinco respostas por falha e o mesmo max_tokens.", "localizador": "p. 6 (Tabela 4); p. 7 (seção 4.3); p. 8 (Figuras 9 e 10); p. 10 (Tabelas 8 e 10)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas e denominadores visíveis nas figuras (/13, /520, /510); porém valores da mesma métrica divergem entre texto e Tabela 6 (0.608/0.607; 0.445/0.446), a Tabela 6 não informa o template, a Tabela 8 não identifica a referência de cada componente, frequências por cenário aparecem como percentuais incompatíveis e FR e PPF são confundidos no texto.", "localizador": "p. 7 (seções 4.2 e 4.5); p. 8 (seção 4.7.2, Figuras 9 e 10); p. 9 (Tabela 6); p. 10 (Tabela 8)"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças à validade interna, externa e de construto, incluindo dependência das ferramentas de análise estática, generalização a Unity e vazamento de dados.", "localizador": "p. 11 (Threats to Validity)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelos, janelas de contexto, top_p, max_tokens, número de consultas, hardware e repositório no GitHub (não acessado); não informa snapshots dos modelos de API, número de exemplos nem o texto integral de todos os prompts por tipo de falha, e o ajuste manual no OpenAI Playground não é relatado.", "localizador": "p. 1 (nota 1); p. 3 (Tabela 2); p. 6 (seção 4.1)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Reconhece o risco de vazamento pelos cut-offs e analisa nove falhas posteriores a outubro de 2023, mas relata só que todas foram corrigidas e que as tendências coincidem, sem números, modelos ou templates dessa análise.", "localizador": "p. 3 (Tabela 2); p. 11 (Threats to External Validity)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-874, incluindo referências). Páginas do PDF abertas visualmente: p-01, p-03, p-06, p-07, p-08, p-09, p-10, p-11. A Figura 9 tem resolução baixa na imagem; as células usadas estão legíveis e coincidem com o texto extraído."
+  }
+}

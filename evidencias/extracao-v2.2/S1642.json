@@ -1,0 +1,196 @@
+{
+  "id_estudo": "S1642",
+  "texto_fonte": "fontes/textos/lote/S1642.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG) (Mistral + RAG)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (resumo e introdução); p. 4 (seção IV.D, Listing 2; seção V.2); p. 5 (Tabela I, coluna «Mistral + RAG»); p. 6 (conclusão). O PDF não traz página impressa.",
+        "observacao": "Pipeline LangChain: o prompt do usuário é codificado com SentenceTransformers, recupera-se o trecho mais relevante (k = 1) de um índice FAISS construído a partir de PDFs de domínio (manuais de G-code, guias de slicing) e o trecho é combinado com o prompt no modelo «<s>[PROMPT] {prompt} [/PROMPT] [CONTEXT] {context} [/CONTEXT] [G-code]». Pedido em linguagem natural → instrucao; documentação recuperada → contexto; a introdução descreve o conteúdo recuperado como «relevant code snippets» e os resultados dizem que o modelo reproduzia código dos PDFs, por isso também exemplos (trechos de código ilustrativos no prompt). Mecanismos acrescentados em relação ao prompt simples do usuário: contexto e exemplos. Não há condição Mistral-7B sem RAG nos resultados: a Tabela I compara «Mistral + RAG» com StarCoder2-3B ajustado por fine-tuning e com Mistral-7B-Instruct ajustado por instruction tuning, que diferem em modelo e em treinamento; logo, sem contrafactual. O estudo não informa se o Mistral-7B base usado com RAG também foi ajustado nos 15 exemplos (nao_informado)."
+      },
+      {
+        "nome_original": "example-rich, structured prompts / carefully structured few-shot prompting",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (introdução); p. 2 (seção II); p. 6 (conclusão)",
+        "observacao": "Mencionado na introdução, na lacuna de pesquisa e na conclusão como parte da abordagem com instruction tuning («instruction tuning combined with carefully structured few-shot prompting»), mas a metodologia (seção IV) não descreve prompts few-shot na inferência: número de exemplos, seleção e formato são nao_informado. Aparece só como componente de um pacote com ajuste fino, sem condição com e sem os exemplos. A conclusão lista few-shot como trabalho futuro."
+      },
+      {
+        "nome_original": "\"Explain your logic, then output the G-code.\" (prompt dos pares prompt-completion)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 (seção IV.E, Listing 3); p. 5 (seção V.3, primeiro parágrafo da coluna direita)",
+        "observacao": "A instrução de explicar a lógica antes do código aparece no exemplo do conjunto prompt-completion usado para o instruction tuning (ajuste fino de pesos, fora do escopo). Os resultados dizem que as saídas incluíam o raciocínio por trás do código. O estudo não informa se a mesma instrução foi usada nos prompts de inferência (nao_informado) e não há condição sem ela."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Fine-tuning StarCoder2-3B (Hugging Face Trainer; PEFT/LoRA nas camadas q_proj e v_proj; SFTTrainer)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste de pesos do StarCoder2-3B em 15 exemplos JSONL com LoRA (learning_rate 5e-5, batch_size 4, max_seq_length 1024) e SFTTrainer (max_seq_length 2048, max_steps 25, learning_rate 2e-4, use_4bit, entre outros).",
+        "localizador": "p. 3 (seção IV.A e IV.C); p. 4 (configuração do SFTTrainer)"
+      },
+      {
+        "nome_original": "Instruction-Tuned Mistral-7B (Mistral-7B-Instruct-v0.1 ajustado no conjunto prompt-completion)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino de um modelo instrução em novo conjunto prompt-completion de 15 exemplos, com ênfase em formas 2D. É a condição «Instruction Tuned» da Tabela I.",
+        "localizador": "p. 4 (seção IV.E, Listing 3); p. 5 (seção V.3, Tabela I)"
+      },
+      {
+        "nome_original": "model.generate(max_new_tokens=150, temperature=0.7, do_sample=True)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação da geração com RAG; amostragem estocástica sem seleção entre respostas.",
+        "localizador": "p. 4 (Listing 2)"
+      },
+      {
+        "nome_original": "Troca de StarCoder2-3B por Mistral-7B e por Mistral-7B-Instruct",
+        "natureza": "selecao_modelo",
+        "descricao": "A mudança de modelo foi motivada por limites de tokens e memória; as três condições da Tabela I diferem em modelo e treinamento, não só em prompting.",
+        "localizador": "p. 4 (seções IV.C, IV.D e V.2)"
+      }
+    ],
+    "modelos": [
+      {"nome": "StarCoder2-3B", "versao": "nao_informado", "observacao": "Ajustado por fine-tuning com LoRA/SFTTrainer."},
+      {"nome": "Mistral-7B (base)", "versao": "nao_informado", "observacao": "Usado com RAG; não se informa se foi ajustado."},
+      {"nome": "Mistral-7B Instruction-Tuned", "versao": "Mistral-7B-Instruct-v0.1", "observacao": "Ajustado no conjunto prompt-completion."},
+      {"nome": "SentenceTransformers (embeddings da recuperação)", "versao": "nao_informado", "observacao": "Componente de recuperação do RAG, com índice FAISS."}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto JSONL próprio de G-code (fine-tuning)", "quantidade": "15 exemplos/objetos (resumo e seção IV.A); a seção VI fala em 14 objetos", "observacao": "Formas 2D e 3D comuns, engrenagens e padrões de gravação; G-code gerado com slicers como PrusaSlicer. Divergência 15 vs 14 registrada em heterogeneidade."},
+      {"nome": "Conjunto prompt-completion próprio (instruction tuning)", "quantidade": "15 exemplos", "observacao": "Foco em formas 2D e 3D, com ênfase posterior em 2D."},
+      {"nome": "Base de conhecimento do RAG", "quantidade": "nao_informado", "observacao": "PDFs de domínio (manuais de G-code, guias de slicing); número de documentos e de trechos não informado."},
+      {"nome": "Prompts de avaliação", "quantidade": "nao_informado", "observacao": "O estudo cita formas como quadrados, círculos e engrenagens; não informa o número de prompts, de saídas ou de linhas sobre os quais a Tabela I foi calculada."}
+    ],
+    "metricas": [
+      {"nome": "Valid G/M-code Lines (%)", "observacao": "Definição e denominador (número de linhas, saídas ou prompts) não informados; número de execuções não informado."},
+      {"nome": "Tokens/sec Throughput", "observacao": "Tabela I."},
+      {"nome": "Latency per 1k Tokens (sec)", "observacao": "Tabela I."},
+      {"nome": "GPU Memory Used (MB) e Peak GPU Memory (MB)", "observacao": "Tabela I; medidas de recursos, não de correção."},
+      {"nome": "Avaliação qualitativa: completude, coerência contextual, validade sintática e generalização; validação visual no ncviewer.com", "observacao": "Sem critérios ou contagens informados."}
+    ],
+    "linguagens": [
+      {"nome": "G-code (G/M-code)", "observacao": "Impressão 3D/CNC"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "StarCoder2-3B produziu código incompleto, truncado e linhas aleatórias ou deslocadas; os dois métodos baseados em Mistral introduziram ruído e saídas irrelevantes; o modelo com instruction tuning produziu ocasionalmente saídas inválidas («junk»); os G-codes gerados frequentemente omitiam instruções auxiliares (temperatura, ventilador, mesa aquecida).",
+        "localizador": "p. 1 (resumo); p. 4 (seções IV.C, IV.E e V.1); p. 5 (seções V.3 e VI)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Com RAG, o modelo funcionava como consulta de referência, reproduzindo código diretamente dos PDFs-fonte e produzindo correspondências próximas em vez de generalização (falta de generalização/cópia do material recuperado).",
+        "localizador": "p. 1-2 (introdução); p. 5 (seção V.2, coluna esquerda)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo trata o processamento de G-code como computacionalmente intensivo, relata erros CUDA Out-Of-Memory e tempo de geração longo com StarCoder2-3B e mede memória de GPU, throughput e latência na Tabela I; o custo monetário não é quantificado.",
+        "localizador": "p. 3 (seção IV.C); p. 4 (seção V.1); p. 5 (seção VI, Tabela I)"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "PEFT com LoRA para reduzir memória e tempo de treinamento diante dos erros de memória.", "avaliada": "nao", "localizador": "p. 3 (seção IV.C)"},
+      {"descricao": "RAG para compensar a limitação dos dados de treinamento e acrescentar conhecimento de domínio; não há condição sem RAG no mesmo modelo.", "avaliada": "nao", "localizador": "p. 4 (seção IV.D)"},
+      {"descricao": "Mudança de ênfase para formas 2D mais simples, para facilitar a geração do conjunto e a validação do código.", "avaliada": "nao", "localizador": "p. 5 (seção V.3)"},
+      {"descricao": "Validação visual de cada saída no ncviewer.com.", "avaliada": "nao", "localizador": "p. 4 (seção IV.F)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Retrieval-Augmented Generation (RAG) (Mistral + RAG)",
+        "motivo": "A única tabela de resultados (Tabela I) compara «Mistral + RAG» com StarCoder2-3B ajustado por fine-tuning e com Mistral-7B ajustado por instruction tuning; as condições diferem em modelo e em ajuste de pesos, e nenhuma é linha de base de prompting comparável (não há Mistral-7B sem RAG). O estudo executa outras condições, por isso não cabe extração descritiva; nenhuma comparação de prompting elegível foi encontrada em tabela, figura ou texto."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Tamanho do conjunto divergente: o resumo fala em G-code «for 15 objects» e a seção IV.A em «15 curated examples», enquanto a seção VI diz que o conjunto do StarCoder foi derivado de «only 14 objects».",
+        "localizador": "p. 1 (resumo); p. 3 (seção IV.A); p. 5 (seção VI)"
+      },
+      {
+        "descricao": "Narrativa e Tabela I não coincidem sobre memória: o texto diz que StarCoder2-3B tem maior throughput «at the cost of greater memory consumption» e que o modelo Instruction Tuned tem «lower token throughput and memory usage»; na Tabela I, StarCoder2-3B tem a menor «GPU Memory Used» (31.80 MB contra 228.72 e 143.01) e a maior «Peak GPU Memory» (6153.27 MB contra 4568.70 e 4345.18). O texto não diz a qual das duas medidas se refere.",
+        "localizador": "p. 5 (seção VI e Tabela I)"
+      },
+      {
+        "descricao": "O resumo afirma que os dois métodos baseados em Mistral introduziram «a significant amount of noise and irrelevant outputs», enquanto a Tabela I mostra 99.2% (Mistral + RAG) e 99.7% (Instruction Tuned) de linhas G/M válidas; a métrica mede validade de linhas, não correção geométrica nem relevância, e não tem denominador informado.",
+        "localizador": "p. 1 (resumo); p. 5 (Tabela I)"
+      },
+      {
+        "descricao": "Resultado nulo para RAG: os resultados dizem que a abordagem funcionou como consulta de referência, reproduzindo código dos PDFs, e que o modelo não aprendia a gerar G-code; a conclusão afirma que os experimentos com RAG ressaltaram seu papel na melhora do grounding factual, mas com impacto limitado na qualidade, sem medida de grounding factual.",
+        "localizador": "p. 5 (seção V.2); p. 6 (conclusão)"
+      },
+      {
+        "descricao": "A conclusão atribui ao instruction tuning combinado com few-shot prompting uma melhora substancial de qualidade, organização e consistência geométrica, mas não há condição com e sem few-shot nem métrica de consistência geométrica; a metodologia não descreve os prompts few-shot.",
+        "localizador": "p. 6 (conclusão); p. 3-4 (seção IV)"
+      },
+      {
+        "descricao": "A seção VI declara uma «comparative analysis ... based on quantitative analysis», mas o estudo não informa número de prompts, de saídas, de execuções nem a forma de cálculo de «Valid G/M-code Lines (%)»; as três condições diferem em modelo e treinamento.",
+        "localizador": "p. 5 (seção VI, Tabela I)"
+      },
+      {
+        "descricao": "Resumo/conclusão e corpo divergem: a conclusão descreve integração com «algorithmic path planning and real-world hardware implementation», que não são descritos na metodologia nem nos resultados (a validação descrita é visual, no ncviewer.com).",
+        "localizador": "p. 6 (conclusão); p. 4 (seção IV.F)"
+      },
+      {
+        "descricao": "A metodologia lista como critérios de comparação «syntactic correctness, coherence, generation length, inference time, and CUDA memory efficiency», mas a Tabela I não traz comprimento de geração nem coerência; esses aspectos aparecem só em descrição qualitativa.",
+        "localizador": "p. 3 (seção IV.B); p. 5 (Tabela I)"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "A seção de resultados sobre o modelo Instruction Tuned (V.3) continua na p. 5 após a Figura 3; o parágrafo que menciona raciocínio nas saídas e 15 exemplos refere-se a esse modelo.", "localizador": "p. 5 (seção V.3)"},
+      {"descricao": "Inferência implantada em interface Gradio no Google Colab; o estudo apresenta a interface como experiência de chatbot.", "localizador": "p. 4 (seção IV.F); p. 5 (seção V.3)"},
+      {"descricao": "Figuras 1-3 mostram saídas visualizadas (cubo do StarCoder2-3B, engrenagem do Mistral-7B, quadrado do Mistral-7B-Instruct) sem métricas associadas.", "localizador": "p. 5 (Figuras 1-3)"},
+      {"descricao": "O estudo afirma que, uma vez treinados, os modelos geram códigos subsequentes mais rapidamente para usuários que reutilizam G-codes semelhantes; é afirmação de vantagem, não medida.", "localizador": "p. 5 (seção VI)"},
+      {"descricao": "Não há link de código, dados ou pacote de replicação impresso.", "localizador": "texto completo (p. 1-6)"}
+    ],
+    "citacoes": [
+      {"trecho": "Due to token limitations encountered during fine-tuning, the process was shifted to Mistral-7B, where a Retrieval-Augmented Generation (RAG) approach was implemented using a knowledge base constructed from G-code manuals and reference guides.", "localizador": "p. 1, resumo"},
+      {"trecho": "Among the three approaches, the instruction-tuned Mistral-7B produced the most promising results, though both Mistral-based methods introduced a significant amount of noise and irrelevant outputs.", "localizador": "p. 1, resumo"},
+      {"trecho": "Significant improvements were observed with Mistral-7B, particularly after the transition from fine-tuning to instruction tuning and the use of example-rich, structured prompts.", "localizador": "p. 1, introdução"},
+      {"trecho": "Retrieval-Augmented Generation (RAG) was also explored as a means of enhancing performance by providing relevant code snippets at runtime; however, this approach often produced near matches rather than genuine generalization.", "localizador": "p. 1-2, introdução"},
+      {"trecho": "The dataset consisted of 15 curated examples of common 2D and 3D shapes, G-code for gears, and engraving patterns.", "localizador": "p. 3, seção IV.A"},
+      {"trecho": "Combined the retrieved context with the user prompt.", "localizador": "p. 4, seção IV.D, passo 3"},
+      {"trecho": "full_prompt = f\"<s>[PROMPT] {prompt} [/PROMPT] [CONTEXT] {context} [/CONTEXT] [G-code]\"", "localizador": "p. 4, Listing 2"},
+      {"trecho": "\"prompt\": \"Generate G-code for a triangle with 20mm dimensions and 20% infill.\\nExplain your logic, then output the G-code.\",", "localizador": "p. 4, Listing 3"},
+      {"trecho": "However, due to the small dataset size, occasional junk outputs were observed.", "localizador": "p. 4, seção IV.E"},
+      {"trecho": "Each model output was evaluated using [ncviewer.com](https://ncviewer.com) to visually validate the correctness of the G-code.", "localizador": "p. 4, seção IV.F"},
+      {"trecho": "Despite syntactic correctness in the short examples, the model failed to retain context in longer sequences and frequently produced incomplete or truncated code.", "localizador": "p. 4, seção V.1"},
+      {"trecho": "however, the approach functioned primarily as a reference lookup rather than true learning, often reproducing code directly from the source PDFs.", "localizador": "p. 5, seção V.2 (continuação)"},
+      {"trecho": "The results included reasoning behind producing code the way it looks, thereby offering better insights into geometry of figures.", "localizador": "p. 5, seção V.3"},
+      {"trecho": "First, processing G-code data is computationally intensive due to its large size.", "localizador": "p. 5, seção VI"},
+      {"trecho": "In addition, although the generated G-codes were syntactically valid, they often consisted primarily of coordinate movement commands and lacked auxiliary instructions such as temperature settings, fan speed and heatbed temperature.", "localizador": "p. 5, seção VI"},
+      {"trecho": "Valid G/M-code Lines (%) 98.3 99.2 99.7", "localizador": "p. 5, Tabela I, linha «Valid G/M-code Lines (%)»; colunas StarCoder2-3B, Mistral + RAG, Instruction Tuned"},
+      {"trecho": "An evaluation of transformer-based models, namely StarCoder2-3B, Mistral-7B, and an instruction-tuned variant of Mistral-7B, indicated that instruction tuning combined with carefully structured few-shot prompting substantially enhanced the quality, organization, and geometric consistency of the generated G-code.", "localizador": "p. 6, conclusão"},
+      {"trecho": "Additionally, the experiments with Retrieval-Augmented Generation (RAG) underscored its role in improving factual grounding, though its impact on generation quality is limited unless tightly integrated with the model’s core reasoning process.", "localizador": "p. 6, conclusão"}
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: verificar se LLMs ajustados por fine-tuning ou instruction tuning geram G-code utilizável a partir de descrições em linguagem natural.", "localizador": "p. 1 (resumo e introdução)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Descreve conjunto de dados, hiperparâmetros de LoRA/SFTTrainer e o pipeline de RAG com código; não descreve os prompts de avaliação, sua quantidade, os prompts few-shot mencionados nem como as métricas da Tabela I foram calculadas.", "localizador": "p. 3-4 (seção IV); p. 5 (Tabela I)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Compara três abordagens na Tabela I, mas as condições diferem simultaneamente em modelo e em ajuste de pesos; não há condição que isole o RAG ou o few-shot prompting (por exemplo, Mistral-7B sem RAG).", "localizador": "p. 5 (Tabela I); p. 4 (seção IV.D)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas da Tabela I nomeadas, mas «Valid G/M-code Lines (%)» não tem definição nem denominador informados, o número de execuções não é informado, critérios qualitativos (coerência, completude, validação visual) não têm procedimento, e a narrativa sobre memória não coincide claramente com as duas medidas de memória da tabela.", "localizador": "p. 3 (seção IV.B); p. 4 (seção IV.F); p. 5 (seção VI, Tabela I)"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Reconhece limitações (conjunto de 15 exemplos, restrições computacionais, saídas ruidosas, limites de métricas de throughput para G-code), sem discussão sistemática de validade.", "localizador": "p. 4 (seção IV.E); p. 5 (seção VI); p. 6 (conclusão)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa hiperparâmetros, a versão Mistral-7B-Instruct-v0.1 e o código do RAG, mas não disponibiliza dados, prompts de avaliação nem código; versões de StarCoder2-3B, Mistral-7B base e do modelo de embeddings não informadas; base de conhecimento não especificada.", "localizador": "p. 3-4 (seção IV); p. 5 (seção V.3)"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute sobreposição entre exemplos de treinamento, base de conhecimento e prompts de avaliação nem contaminação no pré-treinamento; menciona apenas que o RAG reproduzia código dos PDFs.", "localizador": "texto completo (p. 1-6); p. 5 (seção V.2)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (360 linhas, incluindo referências). Páginas do PDF abertas visualmente: p-01 (resumo, 15 objetos, introdução), p-03 (seção IV.A, 15 exemplos; IV.B), p-04 (seções IV.C-IV.F, Listings 2 e 3, resultados V.1-V.2), p-05 (V.2-V.3, seção VI, 14 objetos, Tabela I), p-06 (discussão final e conclusão). O PDF não traz numeração impressa; os localizadores usam a posição no PDF."
+  }
+}

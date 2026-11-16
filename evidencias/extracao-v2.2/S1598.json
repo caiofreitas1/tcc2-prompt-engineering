@@ -1,0 +1,216 @@
+{
+  "id_estudo": "S1598",
+  "texto_fonte": "fontes/textos/lote/S1598.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-Shot",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 (PDF; impressa 392), seção III-B; p. 3 (impressa 393), Tabela II, linha Zero-Shot",
+        "observacao": "O estudo compara três estratégias sem propor nenhuma e descreve o Zero-Shot como linha de base usual («widely adopted as a baseline»); é a condição sem exemplos e sem raciocínio passo a passo contra a qual Few-Shot e Chain-of-Thought diferem. Papel/persona «You are an expert Python developer» e diretriz de corrigir erros → instrucao; «Return only the corrected code inside a Python code block» → restricoes; código defeituoso (e, segundo o texto, breve descrição da função) fornecido como insumo → contexto. O resumo e a conclusão destacam o Zero-Shot como o de melhor desempenho, mas isso não o torna técnica proposta. Comparador sem mecanismos isolados."
+      },
+      {
+        "nome_original": "Few-Shot",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 (impressa 392), seção III-B; p. 3 (impressa 393), Tabela II, linha Few-Shot; p. 3-4 (resultados e Fig. 1)",
+        "observacao": "Mesma persona e diretriz (instrucao), código defeituoso como insumo (contexto) e exemplo resolvido (exemplos). O texto descreve pares de código defeituoso e corrigido, mas o modelo impresso na Tabela II traz um único exemplo em linguagem natural (Task/Bug/Fix), sem código; o número de exemplos não é informado. O modelo impresso não contém a instrução de formato de saída presente no Zero-Shot e no Chain-of-Thought, por isso restricoes não foi atribuído. Contrafactual de pacote: comparado com o Zero-Shot no mesmo modelo e conjunto, mas os dois modelos diferem em mais de um ingrediente (exemplo acrescentado, ausência da restrição de formato e redação da diretriz); o resultado não pode ser atribuído só aos exemplos."
+      },
+      {
+        "nome_original": "Chain-of-Thought",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 (impressa 393), Tabela II, linha Chain-of-Thought, e texto da seção III-B; p. 3-4 (resultados e Fig. 1)",
+        "observacao": "Persona e diretriz (instrucao), etapas Step 1–4 de explicar o propósito, listar erros e explicar a correção antes do código (raciocinio, numa única resposta; o estudo chama de «explicit decomposition», mas não há subtarefas executadas em chamadas separadas, por isso não se atribuiu decomposicao), «provide only the corrected code inside a Python code block» (restricoes) e código defeituoso como insumo (contexto). Contrafactual de pacote contra o Zero-Shot no mesmo modelo e conjunto; a redação também difere além das etapas de raciocínio."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "DeepSeek Coder 1.3B", "versao": "nao_informado (variante base ou instruct e snapshot não informados)", "observacao": "Único modelo avaliado; parâmetros de decodificação (temperatura, top-p, tamanho máximo) não informados."}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto próprio de problemas de depuração em Python (organização inspirada no MBPP)", "quantidade": "nao_informado (resumo: «20 carefully curated» problemas; seção III-A: «over 20» problemas)", "observacao": "Três categorias: erros de sintaxe, erros de lógica e exemplos sem bug (controles); a distribuição por categoria e o número de casos de teste por problema não são informados. Cada instância tem id, description, buggy_code, correct_code, test_cases, bug_type e difficulty. A Tabela I mostra 5 problemas de amostra. O conjunto não é disponibilizado (nenhum link impresso). A Fig. 2 só apresenta as categorias logic_error e syntax_error."}
+    ],
+    "metricas": [
+      {"nome": "overall_score = 0.3 syn + 0.3 ex + 0.4 tpr (Mean Overall Score na Fig. 1)", "observacao": "Métrica composta definida pelos autores; relatada como média (± desvio-padrão) por estratégia. Denominador não informado explicitamente."},
+      {"nome": "syn (syntax validity, binária, parser AST do Python)", "observacao": "Média por estratégia relatada no texto (p. 4)."},
+      {"nome": "ex (execution validity, binária, execução em sandbox)", "observacao": "Média por estratégia relatada no texto (p. 4)."},
+      {"nome": "tpr (test pass rate, fração de casos de teste aprovados, 0.0–1.0)", "observacao": "Média por estratégia relatada no texto (p. 4)."},
+      {"nome": "Mean Score by Bug Type and Method (Fig. 2)", "observacao": "Média do overall_score por categoria de bug (logic_error, syntax_error) e estratégia."},
+      {"nome": "Testes t pareados", "observacao": "Mencionados no método; estatísticas e valores-p não relatados nos resultados."}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "Linguagem dos problemas e das correções."}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com Chain-of-Thought, o modelo gera às vezes código sintaticamente inválido ou que não executa: validade sintática 0.850 e validade de execução 0.650, contra 1.000 em ambas para Zero-Shot e Few-Shot; o estudo atribui isso à verbosidade dos prompts de CoT.",
+        "localizador": "p. 4 (impressa 394), análise dos componentes"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com Few-Shot, o código é válido e executável, mas a correção funcional fica comprometida: taxa de aprovação nos testes 0.108, contra 0.458 (Zero-Shot) e 0.408 (Chain-of-Thought).",
+        "localizador": "p. 4 (impressa 394), análise dos componentes"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Risco de o modelo modificar desnecessariamente código já correto, que motivou a inclusão de exemplos sem bug como controles; o estudo não relata os resultados desses controles.",
+        "localizador": "p. 2 (impressa 392), seção III-A"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Inconsistência de desempenho entre problemas com Chain-of-Thought (± 0.369; 1.000 no problema 1 e 0.000 no problema 3), descrita como menor confiabilidade para depuração de uso geral. Trata-se de variabilidade entre problemas, não de não determinismo entre execuções, que o estudo não discute.",
+        "localizador": "p. 3-4 (impressas 393-394), Fig. 1 e texto"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Inclusão de exemplos sem bug como itens de controle para verificar modificações desnecessárias em código correto; resultados não relatados.", "avaliada": "nao", "localizador": "p. 2 (impressa 392), seção III-A"},
+      {"descricao": "Avaliação automática com validação sintática por AST, execução em sandbox controlada e casos de teste predefinidos, com peso maior (0.4) para a taxa de aprovação nos testes, para não recompensar correções apenas superficiais.", "avaliada": "nao", "localizador": "p. 3 (impressa 393), seção III-C"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão em relação à hipótese inicial e à literatura citada pelos autores: Few-Shot (0.643 ± 0.102) e Chain-of-Thought (0.613 ± 0.369) ficam abaixo do Zero-Shot (0.783 ± 0.140) no overall_score com DeepSeek Coder 1.3B.",
+        "localizador": "p. 1 (impressa 391), resumo; p. 3 (impressa 393), seção IV; p. 4 (impressa 394), Fig. 1"
+      },
+      {
+        "descricao": "Tamanho do conjunto diverge entre resumo («20 carefully curated» problemas) e método («over 20» problemas); o denominador das médias não é informado.",
+        "localizador": "p. 1 (impressa 391), resumo; p. 2 (impressa 392), seção III-A"
+      },
+      {
+        "descricao": "O resumo afirma que o Zero-Shot supera «significantly» Few-Shot e Chain-of-Thought, e o texto diz que Few-Shot tem tpr «significantly underperforming», mas, embora o método mencione testes t pareados, nenhuma estatística ou valor-p é relatado.",
+        "localizador": "p. 1 (impressa 391), resumo; p. 3 (impressa 393), seção III-C; p. 4 (impressa 394)"
+      },
+      {
+        "descricao": "Narrativa contradiz os números: a conclusão atribui ao Zero-Shot «greater reliability through lower performance variability», mas o desvio-padrão do Zero-Shot (± 0.140) é maior que o do Few-Shot (± 0.102); só é menor que o do Chain-of-Thought (± 0.369).",
+        "localizador": "p. 3 (impressa 393), seção IV; p. 5 (impressa 395), conclusão"
+      },
+      {
+        "descricao": "A ordenação depende dos pesos da métrica composta (cálculo próprio): os overall_score impressos são compatíveis com a fórmula aplicada às médias dos componentes (0,3×1,000 + 0,3×1,000 + 0,4×0,458 = 0,7832; 0,6 + 0,4×0,108 = 0,6432; 0,3×0,850 + 0,3×0,650 + 0,4×0,408 = 0,6132). Em tpr, componente que os autores tratam como o mais importante, Chain-of-Thought (0.408) supera Few-Shot (0.108) e fica próximo do Zero-Shot (0.458), mas no composto Few-Shot (0.643) supera Chain-of-Thought (0.613) por causa de syn e ex.",
+        "localizador": "p. 3 (impressa 393), equação (1) e seção IV; p. 4 (impressa 394), análise dos componentes"
+      },
+      {
+        "descricao": "O modelo Few-Shot da Tabela II difere do Zero-Shot em mais de um ingrediente: acrescenta o exemplo, mas não contém a instrução de formato de saída («Return only the corrected code inside a Python code block»), e o exemplo é uma descrição textual (Task/Bug/Fix) sem código, embora o texto descreva pares de código defeituoso e corrigido.",
+        "localizador": "p. 2 (impressa 392), seção III-B; p. 3 (impressa 393), Tabela II"
+      },
+      {
+        "descricao": "O exemplo do prompt Few-Shot («Check if a number is even», com retorno True para ímpares) coincide com o problema 5 da amostra da Tabela I («Check if a number is even», código «if n % 2 == 1:»). O estudo não informa se esse problema foi avaliado com o mesmo exemplo no prompt; não se afirma vazamento efetivo.",
+        "localizador": "p. 2 (impressa 392), Tabela I, linha 5; p. 3 (impressa 393), Tabela II, linha Few-Shot"
+      },
+      {
+        "descricao": "O conjunto inclui controles sem bug, mas a Fig. 2 e o texto só relatam erros de lógica e de sintaxe; o resumo afirma superioridade do Zero-Shot «across all bug types examined» sem resultados para os controles. Os resultados por problema citados (Chain-of-Thought 1.000 no problema 1 e 0.000 no problema 3) não aparecem em tabela ou figura.",
+        "localizador": "p. 1 (impressa 391), resumo; p. 2 (impressa 392), seção III-A; p. 4 (impressa 394), Fig. 2 e texto"
+      },
+      {
+        "descricao": "Número de execuções, parâmetros de decodificação e variante do modelo não são informados; um único modelo pequeno e um conjunto de cerca de 20 problemas simples limitam a generalização, aspecto que o estudo só menciona como trabalho futuro.",
+        "localizador": "p. 3 (impressa 393), seção III-C; p. 5 (impressa 395), conclusão"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "O estudo afirma que o Zero-Shot reduz a contagem de tokens e potencialmente o tempo de resposta e o custo computacional, e que prompts com exemplos ou raciocínio impõem sobrecarga ao modelo pequeno; são afirmações de vantagem não quantificadas (custo não medido), por isso não foram registradas como risco.", "localizador": "p. 4 (impressa 394), discussão"},
+      {"descricao": "Os autores atribuem o bom desempenho do Zero-Shot ao pré-treinamento do modelo em repositórios com muitos bugs comuns e suas correções; é hipótese explicativa, não análise de contaminação dos dados de avaliação.", "localizador": "p. 4 (impressa 394)"},
+      {"descricao": "Inconsistências de citação e de remissão: Chain-of-Thought é atribuído a [4], que na lista é LLM.int8() de Dettmers et al.; BugsInPy é citado como [10], mas é [9]; Austin et al. é citado como [14], mas a lista termina em [13]; Zheng et al. é citado como [13], mas é [12]; HumanEval é atribuído a «Chen et al. [2]» e Codex a «Chen et al. [1]», sendo [1] Brown et al.; o workflow remete à «Section II-B», mas os métodos de prompting estão na seção III-B.", "localizador": "p. 2-3 (impressas 392-393); p. 5 (impressa 395), referências"},
+      {"descricao": "O estudo afirma que a estrutura experimental garante resultados «robust and reproducible», mas não disponibiliza conjunto de dados, código nem saídas.", "localizador": "p. 1 (impressa 391), resumo"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper presents a comprehensive comparative analysis of three distinct prompt engineering strategies—Zero-Shot, Few-Shot, and Chain-of-Thought—for Python code debugging applications using DeepSeek Coder 1.3B, a lightweight large language model.", "localizador": "p. 1 (impressa 391), resumo"},
+      {"trecho": "Through systematic evaluation on a custom dataset comprising 20 carefully curated Python debugging problems covering syntax errors, logic errors, and control cases, we employed a weighted evaluation metric that prioritizes functional correctness while accounting for syntax validity and execution capability.", "localizador": "p. 1 (impressa 391), resumo"},
+      {"trecho": "To evaluate the performance of DeepSeek Coder 1.3B under different prompting strategies, this study constructed a custom dataset comprising over 20 Python debugging problems.", "localizador": "p. 2 (impressa 392), seção III-A"},
+      {"trecho": "(c) no-bug examples, which serve as control items to assess whether the model unnecessarily modifies already correct code.", "localizador": "p. 2 (impressa 392), seção III-A"},
+      {"trecho": "Zero-Shot prompting provides the model only with the buggy code and a brief description of the intended function, without any accompanying example fixes.", "localizador": "p. 2 (impressa 392), seção III-B"},
+      {"trecho": "Zero-shot prompting is widely adopted as a baseline when evaluating LLMs on a variety of tasks, allowing direct assessment of their out-of-the-box capabilities [1][6].", "localizador": "p. 2 (impressa 392), seção III-B"},
+      {"trecho": "Few-Shot prompting augments the basic task description and buggy code with a limited number of example pairs, where each pair consists of buggy code and its corresponding corrected version.", "localizador": "p. 2 (impressa 392), seção III-B"},
+      {"trecho": "Zero-Shot You are an expert Python developer. Your job is to fix any errors in the code below. Return only the corrected code inside a Python code block.", "localizador": "p. 3 (impressa 393), Tabela II, linha Zero-Shot; colunas Method, Prompt"},
+      {"trecho": "Few-Shot You are an expert Python developer. You will be given some buggy code to fix. See these examples: Task: Check if a number is even. Bug: The function returns True for odd numbers instead of even numbers. Fix: Correct the conditional logic to check for evenness (n % 2 == 0).", "localizador": "p. 3 (impressa 393), Tabela II, linha Few-Shot; colunas Method, Prompt"},
+      {"trecho": "Chain-of-Thought You are an expert Python developer. Debug the code below step by step. At the end, provide only the corrected code inside a Python code block. Step 1: Briefly explain what the code is supposed to do. Step 2: List any syntax or logic errors. Step 3: For each error, explain how to fix it. Step 4: Output only the corrected code.", "localizador": "p. 3 (impressa 393), Tabela II, linha Chain-of-Thought; colunas Method, Prompt"},
+      {"trecho": "This explicit decomposition encourages the model to produce intermediate reasoning steps before generating the final code, a technique that has been shown to improve performance in both complex reasoning and code-related tasks [5][8].", "localizador": "p. 3 (impressa 393), seção III-B"},
+      {"trecho": "5 Check if a number is even if n % 2 == 1: Logic Error (2, True)", "localizador": "p. 2 (impressa 392), Tabela I, linha 5; colunas No, Description, Buggy Code, Bug Type, Test Case"},
+      {"trecho": "All experiments were conducted using DeepSeek Coder 1.3B, a compact language model pre-trained specifically for code-related tasks [3].", "localizador": "p. 3 (impressa 393), seção III-C"},
+      {"trecho": "All results were aggregated for statistical analysis, with mean scores, standard deviations, and paired t-tests to assess the significance of differences between prompting strategies.", "localizador": "p. 3 (impressa 393), seção III-C"},
+      {"trecho": "A deeper analysis of the component scores reveals that both Zero-Shot and Few-Shot achieved perfect scores for syntax validity (1.000) and execution validity (1.000), whereas Chain-of-Thought showed lower scores in these categories (0.850 and 0.650 respectively).", "localizador": "p. 4 (impressa 394)"},
+      {"trecho": "This suggests that the more verbose Chain-of-Thought prompts may occasionally lead DeepSeek Coder 1.3B to generate syntactically invalid code or solutions that fail to execute properly.", "localizador": "p. 4 (impressa 394)"},
+      {"trecho": "This indicates that while Few-Shot prompting helps the model generate valid code, the functional correctness of these solutions is often compromised.", "localizador": "p. 4 (impressa 394)"},
+      {"trecho": "This variability (± 0.369) makes Chain-of-Thought less reliable for general-purpose debugging applications with DeepSeek Coder 1.3B, despite its theoretical advantages with larger models.", "localizador": "p. 4 (impressa 394)"},
+      {"trecho": "For smaller models with limited computational capacity, simpler prompts appear to enable more effective resource allocation to the core debugging task, while also providing greater reliability through lower performance variability.", "localizador": "p. 5 (impressa 395), conclusão"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Few-Shot",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "Zero-Shot",
+      "modelo": "DeepSeek Coder 1.3B (versão nao_informado)",
+      "benchmark": "Conjunto próprio de problemas de depuração em Python (20 segundo o resumo; «over 20» segundo o método)",
+      "metrica": "overall_score (Mean Overall Score; 0.3 syn + 0.3 ex + 0.4 tpr)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.783, "intervencao": 0.643},
+      "denominador": "nao_informado (o estudo não liga explicitamente o número de problemas avaliados às médias; resumo e método divergem sobre o tamanho do conjunto)",
+      "condicoes": "Médias com desvio-padrão impresso: Zero-Shot ± 0.140, Few-Shot ± 0.102. Número de execuções, parâmetros de decodificação e número de exemplos no prompt Few-Shot não informados (a Tabela II mostra um exemplo textual). O modelo Few-Shot impresso não traz a instrução de formato de saída do Zero-Shot, de modo que o contraste é de pacote. Testes t pareados mencionados no método, sem estatística ou valor-p relatados; o «significantly» do resumo não tem suporte impresso. Conferido no PDF: a Fig. 1 (p. 4) contém o contraste, mas não imprime valores numéricos; os valores vêm do texto da seção IV (p. 3), conferido na imagem da p. 3; as alturas das barras e as barras de erro da Fig. 1 são compatíveis, mas não foram usadas para estimar valores.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca o Zero-Shot contra duas condições (Few-Shot e Chain-of-Thought), sem uma única condição comparadora. Não há tabela de resultados (Tabelas I e II são descritivas); a primeira figura com o contraste é a Fig. 1. Primeira métrica (Mean Overall Score), único modelo, linha de base de prompting Zero-Shot (listada primeiro) e primeira técnica listada depois dela (Few-Shot).",
+      "derivacao": "direta",
+      "localizador": "p. 4 (PDF; impressa 394), Fig. 1 «Overall performance by prompting method»; valores no texto da seção IV, p. 3 (impressa 393)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Contrary to the initial hypothesis, Zero-Shot prompting demonstrated superior overall performance with a mean score of 0.783 (± 0.140), outperforming both Few-Shot 0.643 (± 0.102) and Chain-of-Thought 0.613 (± 0.369) approaches.", "localizador": "p. 3 (impressa 393), seção IV"},
+        {"trecho": "overall_score = 0.3 syn + 0.3 ex + 0.4 tpr (1)", "localizador": "p. 3 (impressa 393), seção III-C, equação (1)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Chain-of-Thought",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "Zero-Shot",
+      "modelo": "DeepSeek Coder 1.3B (versão nao_informado)",
+      "benchmark": "Conjunto próprio de problemas de depuração em Python (20 segundo o resumo; «over 20» segundo o método)",
+      "metrica": "overall_score (Mean Overall Score; 0.3 syn + 0.3 ex + 0.4 tpr)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.783, "intervencao": 0.613},
+      "denominador": "nao_informado (o estudo não liga explicitamente o número de problemas avaliados às médias; resumo e método divergem sobre o tamanho do conjunto)",
+      "condicoes": "Médias com desvio-padrão impresso: Zero-Shot ± 0.140, Chain-of-Thought ± 0.369. Número de execuções e parâmetros de decodificação não informados. Raciocínio em etapas numa única resposta, com instrução de devolver só o código corrigido. Testes t pareados mencionados no método, sem estatística ou valor-p relatados. Conferido no PDF: a Fig. 1 (p. 4) contém o contraste, sem valores impressos; os valores vêm do texto da seção IV (p. 3), conferido na imagem; as barras não foram usadas para estimar valores.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (Chain-of-Thought), pela mesma regra de ordem: Fig. 1, Mean Overall Score, único modelo, linha de base Zero-Shot.",
+      "derivacao": "direta",
+      "localizador": "p. 4 (PDF; impressa 394), Fig. 1 «Overall performance by prompting method»; valores no texto da seção IV, p. 3 (impressa 393)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Contrary to the initial hypothesis, Zero-Shot prompting demonstrated superior overall performance with a mean score of 0.783 (± 0.140), outperforming both Few-Shot 0.643 (± 0.102) and Chain-of-Thought 0.613 (± 0.369) approaches.", "localizador": "p. 3 (impressa 393), seção IV"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: comparar Zero-Shot, Few-Shot e Chain-of-Thought para depuração de código Python simples com DeepSeek Coder 1.3B.", "localizador": "p. 1 (impressa 391), resumo e introdução"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Descreve a estrutura do conjunto, os modelos de prompt (Tabela II), o fluxo de avaliação automática e a métrica composta, mas não informa o número exato de problemas e sua distribuição por categoria, o número de casos de teste, o número de execuções, os parâmetros de decodificação, a variante do modelo, o número de exemplos do Few-Shot nem como a descrição e o código defeituoso são inseridos nos modelos.", "localizador": "p. 2-3 (impressas 392-393), seções III-A a III-C"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "O Zero-Shot é executado no mesmo modelo e conjunto que as demais estratégias, mas os modelos de prompt diferem em mais de um ingrediente (o Few-Shot não tem a instrução de formato do Zero-Shot), o que limita o isolamento das técnicas.", "localizador": "p. 2-3 (impressas 392-393), seção III-B e Tabela II"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métrica composta e componentes definidos por fórmula, e os valores do texto coincidem com a Fig. 2 (arredondados) e com a fórmula aplicada às médias dos componentes; porém o denominador não é informado (resumo diz 20, método diz mais de 20), os testes t pareados não têm resultados relatados apesar de afirmações de significância, e os controles sem bug não têm resultados.", "localizador": "p. 1 (impressa 391); p. 3-4 (impressas 393-394), equação (1), seção IV, Fig. 1 e Fig. 2"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "O estudo não discute ameaças à validade (modelo único, conjunto pequeno e próprio, execuções, sensibilidade aos pesos da métrica); apenas propõe, como trabalho futuro, estender a outros tamanhos de modelo e a contextos reais.", "localizador": "p. 5 (impressa 395), conclusão"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Os modelos de prompt e a fórmula da métrica são impressos, mas o conjunto de dados, o código e as saídas não são disponibilizados, e faltam variante do modelo, parâmetros de decodificação e número de execuções, apesar da afirmação de resultados reprodutíveis.", "localizador": "p. 1 (impressa 391), resumo; p. 3 (impressa 393), Tabela II e seção III-C"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute vazamento dos dados de avaliação no pré-treinamento nem no prompt; atribui o desempenho do Zero-Shot à exposição a bugs comuns no pré-treinamento, como hipótese, e não comenta a coincidência entre o exemplo do Few-Shot e o problema 5 da Tabela I.", "localizador": "p. 2-4 (impressas 392-394), Tabelas I e II e discussão"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (311 linhas, incluindo referências). Páginas do PDF abertas visualmente: p-01 (resumo), p-02 (seção III-A, III-B e Tabela I), p-03 (Tabela II, equação (1) e seção IV), p-04 (Fig. 1, Fig. 2 e análise dos componentes), p-05 (conclusão e referências). As páginas 1-5 do PDF correspondem às páginas impressas 391-395."
+  }
+}

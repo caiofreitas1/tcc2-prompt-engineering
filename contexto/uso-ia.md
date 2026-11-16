@@ -348,3 +348,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — extração em escala, lote 11 (16/11/2026)
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S1141–S1503), 19 fichas finais; Claude Code (Claude Opus 5.5), validação, 3 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-11.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 12 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S1556–S1653); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-12.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
