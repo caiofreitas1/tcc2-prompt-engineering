@@ -1,0 +1,326 @@
+{
+  "estudo": "S569",
+  "texto_fonte": "fontes/textos/lote/S569.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "HAVEN",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (sem página impressa), Seção III-A e Fig. 1; p. 6 do PDF, Fig. 3 (configurações base e vanilla+CoT+KL)",
+        "observacao": "Pacote híbrido: o framework combina SI-CoT (prompting) com ajuste fino do CodeGen-LLM nos conjuntos K-dataset e L-dataset (KL-dataset), que estão fora do escopo. O contrafactual do pacote é a configuração 'base' (modelo pré-treinado sem modificações) contra 'vanilla+CoT+KL' na Fig. 3; o ganho é do pacote e não pode ser atribuído ao prompting. Os mecanismos listados são apenas os da parte de prompting (SI-CoT) mais a instrução do prompt original do benchmark."
+      },
+      {
+        "nome_original": "symbolic interpretation based CoT (SI-CoT)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 do PDF, Seção III-B e Tabela III; p. 6 do PDF, Fig. 3 (vanilla vs. vanilla+CoT; vanilla+KL vs. vanilla+CoT+KL) e Tabela VI (w SI-CoT vs. w/o SI-CoT)",
+        "observacao": "Componente do HAVEN. Um 'CoT prompting model' (o mesmo modelo pré-treinado do CodeGen-LLM) reescreve o prompt do usuário em etapas: (1) identificar componentes simbólicos; (2) tabelas-verdade e formas de onda são convertidas por um parser externo em formato uniforme de instrução, e diagramas de estado são interpretados por CoT com um template estruturado; (3) acrescentar o cabeçalho do módulo Verilog se faltar. 'instrucao' vem do prompt original do benchmark e do template; 'raciocinio' da interpretação por CoT; 'decomposicao' das etapas encadeadas; 'restricoes' do formato uniforme de instrução e do cabeçalho de módulo (especificação de interface). O texto do template não é impresso. As etapas internas não são isoladas."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "knowledge enhanced dataset (K-dataset)",
+        "natureza": "ajuste_fino",
+        "descricao": "Cerca de 14k pares instrução-código alinhados a práticas de engenheiros de HDL, gerados com GPT-3.5 a partir de exemplares curados e verificados por compilador, usados para ajuste fino do CodeGen-LLM.",
+        "localizador": "p. 3-4 do PDF, Seção III-C e Fig. 2"
+      },
+      {
+        "nome_original": "logical enhanced dataset (L-dataset)",
+        "natureza": "ajuste_fino",
+        "descricao": "Cerca de 5k pares instrução-código para raciocínio lógico, gerados por scripts e templates e diversificados por instruction evolution com GPT-3.5, usados para ajuste fino.",
+        "localizador": "p. 4-5 do PDF, Seção III-D e Fig. 2"
+      },
+      {
+        "nome_original": "vanilla dataset",
+        "natureza": "ajuste_fino",
+        "descricao": "Cerca de 43k pares instrução-código básicos (instruções geradas por GPT-3.5 para código Verilog do GitHub), usados para ajuste fino nas configurações vanilla e vanilla+CoT da ablação.",
+        "localizador": "p. 4 do PDF, Seção III-C, item 5; p. 6 do PDF, Seção IV-D"
+      },
+      {
+        "nome_original": "temperatura 0,2, 0,5 e 0,8 com relato do melhor desempenho",
+        "natureza": "decodificacao",
+        "descricao": "Para cada modelo, a temperatura é fixada em 0,2, 0,5 e 0,8 e reporta-se o melhor desempenho, seguindo o RTLCoder.",
+        "localizador": "p. 5 do PDF, Seção IV-A"
+      },
+      {
+        "nome_original": "Parser for Topic Matching (slang)",
+        "natureza": "outro",
+        "descricao": "Parser usado na construção de dados para casar tópicos e atributos dos pares vanilla com os exemplares curados; parte do pipeline de dados de ajuste fino, não do prompt de geração.",
+        "localizador": "p. 4 do PDF, Seção III-C, item 6"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeLlama-7b-Instruct", "versao": "7b-Instruct", "uso": "modelo base para SI-CoT, ajuste fino e geração"},
+      {"nome": "Deepseek-Coder-6.7b-Instruct", "versao": "6.7b-Instruct", "uso": "modelo base para SI-CoT, ajuste fino e geração"},
+      {"nome": "CodeQwen1.5-7B-Chat", "versao": "1.5-7B-Chat", "uso": "modelo base para SI-CoT, ajuste fino e geração; também gera as instruções SI-CoT da Tabela VI"},
+      {"nome": "GPT-4o mini", "versao": "nao_informado", "uso": "LLM comercial na Tabela VI"},
+      {"nome": "GPT-4", "versao": "nao_informado", "uso": "LLM comercial nas Tabelas IV, V e VI"},
+      {"nome": "DeepSeek-Coder-V2", "versao": "nao_informado", "uso": "LLM comercial nas Tabelas V e VI"},
+      {"nome": "GPT-3.5", "versao": "nao_informado", "uso": "geração e reescrita de instruções para os conjuntos de ajuste fino; baseline na Tabela IV"},
+      {"nome": "Baselines da Tabela IV (Starcoder 15B, CodeLlama 7B, DeepSeek-Coder 6.7B, CodeQwen 7B, ChipNeMo 13B, Thakur et al. 16B, RTLCoder-Mistral/DeepSeek, BetterV-CodeLlama/DeepSeek/CodeQwen, AutoVCoder-CodeLlama/DeepSeek/CodeQwen, OriGen-DeepSeek-7B-v1.5)", "versao": "tamanhos como impressos; nota da tabela: OriGen usa DeepSeek-v1.5 (7B) e os demais DeepSeek-v1 (6.7B)", "uso": "comparação com trabalhos concorrentes; origem dos valores não informada"}
+    ],
+    "benchmarks": [
+      {"nome": "VerilogEval v1 - Machine", "quantidade": "143 tarefas", "observacao": "tarefas criadas com modelos baseados em GPT"},
+      {"nome": "VerilogEval v1 - Human", "quantidade": "156 problemas", "observacao": "problemas elaborados manualmente; usado na ablação (Fig. 3 e 4)"},
+      {"nome": "RTLLM v1.1", "quantidade": "29 tarefas", "observacao": ""},
+      {"nome": "VerilogEval v2 (Spec.-to-RTL)", "quantidade": "nao_informado", "observacao": "Construído sobre o VerilogEval-Human (sobreposição descrita pelo estudo); cabeçalho da Tabela IV indica 0-Shot (n=1)."},
+      {"nome": "Subconjunto de 44 tarefas do VerilogEval(v1)-Human com modalidades simbólicas", "quantidade": "44 tarefas: tabelas-verdade (10), formas de onda (13), diagramas de estado (21)", "observacao": "Subconjunto do VerilogEval v1-Human, usado nas Tabelas V e VI."}
+    ],
+    "metricas": [
+      {"nome": "pass@k (k ∈ {1,5})", "definicao": "estimador de Chen et al.; n = 10 tentativas por problema 'in experiments'", "observacao": "Aplicado à corretude sintática e funcional. O número de tentativas por problema nas Tabelas V e VI não é especificado à parte; a Tabela IV indica n=1 para o VerilogEval v2."},
+      {"nome": "P/T (PR)", "definicao": "pass cases/total cases e pass rate", "observacao": "Tabela V; coluna Overall Pass@1."}
+    ],
+    "linguagens": ["Verilog"],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo propõe uma taxonomia de alucinações na geração de Verilog (simbólica, de conhecimento e lógica), com exemplos de código incorreto induzido por prompts com diagramas de estado, formas de onda, tabelas-verdade, convenções de projeto, sintaxe e lógica.",
+        "localizador": "p. 1 do PDF, Seção I; p. 2 do PDF, Tabela II e Seção II"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "LLMs podem produzir erros de sintaxe, funcionais ou lógicos que não correspondem às expectativas dos engenheiros de HDL.",
+        "localizador": "p. 1 do PDF, Seção I"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "SI-CoT para mitigar alucinação simbólica, comparado com e sem SI-CoT na ablação (Fig. 3) e em LLMs comerciais (Tabela VI).",
+        "avaliada": "sim",
+        "localizador": "p. 3 do PDF, Seção III-B; p. 6 do PDF, Fig. 3 e Tabela VI"
+      },
+      {
+        "descricao": "Ajuste fino com K-dataset e L-dataset para mitigar alucinações de conhecimento e lógicas (fora do escopo de prompting), comparado na ablação (Fig. 3 e Fig. 4).",
+        "avaliada": "sim",
+        "localizador": "p. 6 do PDF, Fig. 3 e Fig. 4"
+      },
+      {
+        "descricao": "Verificação dos pares instrução-código gerados por compilação com compilador Verilog industrial, filtrando pares errôneos ou incompletos.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF, Seção III-C, item 8"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "HAVEN",
+        "motivo": "Pacote híbrido cujo contraste com as linhas de base (Tabela IV) e com a configuração base (Fig. 3) inclui ajuste fino fora do escopo; nenhuma dessas comparações isola prompting, por isso não há extração de técnica de prompting para o pacote. A parte de prompting (SI-CoT) recebe a extração."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz os rótulos da Tabela VI: o texto afirma que SI-CoT ajuda diretamente o CodeGen LLM, mas a linha 'Pass@1 (w SI-CoT)' traz 22.7%, 22.7% e 34.1% e a linha 'Pass@1 (w/o SI-CoT)' traz 31.8%, 34.1% e 45.5% (GPT-4o mini, GPT-4, DeepSeek-Coder-V2), isto é, valores menores com SI-CoT. O texto também diz que DeepSeek-Coder-V2 sem SI-CoT iguala o GPT-4 com SI-CoT, o que só coincide nos números impressos se os rótulos estiverem trocados (34.1% na linha w SI-CoT do DeepSeek-Coder-V2 e 34.1% na linha w/o SI-CoT do GPT-4). Observação própria: os valores da linha 'w SI-CoT' para GPT-4 (22.7%) e DeepSeek-Coder-V2 (34.1%) coincidem com o Overall Pass@1 desses modelos na Tabela V, no mesmo subconjunto de 44 tarefas. Possível troca de rótulos, não confirmada pelo estudo; os valores são preservados como impressos.",
+        "localizador": "p. 6 do PDF, Tabela VI, Tabela V e Seção IV-D ('Analysis of SI-CoT')"
+      },
+      {
+        "descricao": "Valor diferente entre tabela e texto: a Tabela V imprime Overall Pass@1 de 47.4% para HAVEN-CodeQwen, e o texto diz 'the highest overall pass@1 of 47.7%'. Cálculo próprio: 6+4+11 = 21 aprovações em 10+13+21 = 44 casos, 21/44 ≈ 47,7%.",
+        "localizador": "p. 6 do PDF, Tabela V e Seção IV-C"
+      },
+      {
+        "descricao": "Aparente inconsistência na Tabela IV: o cabeçalho da coluna VerilogEval v2 indica '0-Shot (n=1)', mas há valores de pass@5 para os modelos HAVEN (55.8, 63.4, 62.9), enquanto a definição de pass@k do estudo exige n ≥ k. O estudo não explica como o pass@5 foi obtido nessa condição.",
+        "localizador": "p. 5 do PDF, Tabela IV (cabeçalho VerilogEval v2) e Seção IV-A (Eq. 1)"
+      },
+      {
+        "descricao": "Narrativa aparentemente incompatível com a tabela: o texto diz que HAVEN-DeepSeek fica 'only 4-6% lower in terms of syntax pass@5' que o AutoVCoder, mas a Tabela IV traz 92.8 para HAVEN-DeepSeek e 100.0 para AutoVCoder-DeepSeek e AutoVCoder-CodeQwen (cálculo próprio: 7,2 p.p.); para o par CodeLlama, HAVEN (95.4) supera AutoVCoder (93.1). O estudo não indica qual comparação gera 4-6%.",
+        "localizador": "p. 5 do PDF, Tabela IV (RTLLM v1.1, Syntax pass@5) e Seção IV-B"
+      },
+      {
+        "descricao": "Diferenças relatadas com '%' que correspondem a diferenças em pontos percentuais na Tabela IV (cálculo próprio: 61.1 − 54.4 = 6.7 e 64.8 − 60.1 = 4.7 para HAVEN-CodeQwen vs. OriGen no VerilogEval-Human; 66.0 − 65.5 = 0.5 no RTLLM); o estudo não distingue p.p. de variação relativa.",
+        "localizador": "p. 2 do PDF, contribuições; p. 5 do PDF, Seção IV-B e Tabela IV"
+      },
+      {
+        "descricao": "Inversões e limites da superioridade declarada: na Tabela IV, HAVEN não é o melhor em syntax pass@5 do RTLLM v1.1 (92.8-95.4 vs. 100.0 de GPT-4 e AutoVCoder-DeepSeek/CodeQwen); HAVEN-CodeLlama (54.7) fica abaixo de GPT-4 (65.5) e OriGen (65.5) em Func. pass@5 do RTLLM; no VerilogEval-Machine pass@5, OriGen (82.4) supera HAVEN-CodeLlama (80.0) e HAVEN-CodeQwen (81.2). O estudo relata que CodeLlama ajustado fica abaixo dos outros dois modelos.",
+        "localizador": "p. 5 do PDF, Tabela IV e Seção IV-B"
+      },
+      {
+        "descricao": "Condições discrepantes entre linhas de base da Tabela IV: a origem dos valores das linhas de base não é informada; o OriGen usa DeepSeek-v1.5 (7B) e os demais DeepSeek-v1 (6.7B); ChipNeMo, BetterV e AutoVCoder não estavam publicamente acessíveis segundo a nota da tabela; há várias células n/a.",
+        "localizador": "p. 5 do PDF, Tabela IV e notas"
+      },
+      {
+        "descricao": "Relato do melhor desempenho entre três temperaturas (0,2, 0,5 e 0,8) para cada modelo, o que favorece valores otimistas; o estudo não informa se a regra vale para os LLMs comerciais das Tabelas V e VI nem o número de tentativas nessas tabelas.",
+        "localizador": "p. 5 do PDF, Seção IV-A; p. 6 do PDF, Tabelas V e VI"
+      },
+      {
+        "descricao": "Condição não declarada na Fig. 4: observação própria, a célula 0% K-dataset/0% L-dataset (41.0 em Pass@1 e 57.2 em Pass@5) coincide com a configuração vanilla+CoT do CodeQwen na Fig. 3 (41.0 e 57.2), e não com vanilla (38.5 e 49.6), sugerindo que a Fig. 4 inclui SI-CoT; o estudo não declara essa condição.",
+        "localizador": "p. 6 do PDF, Fig. 3 e Fig. 4"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "As instruções SI-CoT da Tabela VI são produzidas pelo modelo base CodeQwen e fornecidas iguais a todos os LLMs comerciais, sem ajuste fino destes.",
+        "localizador": "p. 6 do PDF, Seção IV-D ('Analysis of SI-CoT')"
+      },
+      {
+        "descricao": "Na ablação (Fig. 3), SI-CoT é comparado em dois pares que diferem só nele: vanilla vs. vanilla+CoT e vanilla+KL vs. vanilla+CoT+KL, nos três modelos base; o estudo relata ganho médio de 3.6% (Pass@1) e 6.6% (Pass@5) só com SI-CoT. A Fig. 4 é ablação do ajuste fino (proporções de K e L), fora do escopo.",
+        "localizador": "p. 6 do PDF, Fig. 3, Fig. 4 e Seção IV-D"
+      },
+      {
+        "descricao": "A Tabela V compara HAVEN-CodeQwen (pacote híbrido) com outros modelos no subconjunto simbólico; não é contraste de prompting.",
+        "localizador": "p. 6 do PDF, Tabela V e Seção IV-C"
+      },
+      {
+        "descricao": "O estudo menciona que GPT-4o mini é mais barato que GPT-4 e que DeepSeek-Coder-V2 é o mais acessível dos três, sem quantificar custo; trata-se de comentário, não de risco.",
+        "localizador": "p. 6 do PDF, Seção IV-D"
+      },
+      {
+        "descricao": "O link do repositório público é impresso; não foi acessado nem validado.",
+        "localizador": "p. 1 do PDF, resumo"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Recently, the use of large language models (LLMs) for Verilog code generation has attracted great research interest to enable hardware design automation.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Given a user prompt, i.e., instructions for Verilog code generation (CodeGen), it will be fed into a CoT prompting model to translate the vanilla user prompt into a refined CoT prompt, which can mitigate symbolic hallucinations.",
+        "localizador": "p. 3 do PDF, Seção III-A"
+      },
+      {
+        "trecho": "As countermeasures against the hallucination taxonomy, HAVEN integrates three techniques, i.e., symbolic interpretation based CoT (SI-CoT) to mitigate symbolic hallucination, while fine-tuning the CodeGen-LLM with knowledge enhanced dataset (K-dataset) and logical enhanced dataset (L-dataset) against knowledge- and logical-hallucinations respectively.",
+        "localizador": "p. 3 do PDF, Seção III-A"
+      },
+      {
+        "trecho": "By using a structured prompt template, CoT prompting model maintains the integrity of the original instruction while ensuring the symbolic logic is clearly communicated.",
+        "localizador": "p. 3 do PDF, Seção III-B, item 2"
+      },
+      {
+        "trecho": "If the module header is missing, CoT prompting model appends an appropriate module header to define the module name, inputs and outputs, standardizing the instruction.",
+        "localizador": "p. 3 do PDF, Seção III-B, item 3"
+      },
+      {
+        "trecho": "Vanilla+CoT: Base LLMs fine-tuned by vanilla dataset, then prompted by SI-CoT instructions.",
+        "localizador": "p. 6 do PDF, Seção IV-D"
+      },
+      {
+        "trecho": "Solely adopting SI-CoT improve the Pass@1 and Pass@5 by 3.6% and 6.6% on average, while fine-tuning LLMs with KL-dataset improves these metrics by 12.3 % and 8.7% on average.",
+        "localizador": "p. 6 do PDF, Seção IV-D"
+      },
+      {
+        "trecho": "They may produce syntax, functional or logical errors that do not match the expectation of HDL engineers.",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "Hallucination [11] in language models refers to the generation of incorrect or misleading information not grounded in reality.",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "This verification step ensures erroneous or incomplete pairs are filtered out.",
+        "localizador": "p. 4 do PDF, Seção III-C, item 8"
+      },
+      {
+        "trecho": "Following RTLCoder [21], we set the temperature of each model to 0.2, 0.5 and 0.8, reporting the best performance.",
+        "localizador": "p. 5 do PDF, Seção IV-A"
+      },
+      {
+        "trecho": "We set n = 10 in experiments.",
+        "localizador": "p. 5 do PDF, Seção IV-A"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SI-CoT",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "restricoes"],
+      "comparador": "Pass@1 (w/o SI-CoT): mesmo LLM comercial sem as instruções SI-CoT",
+      "modelo": "GPT-4o mini",
+      "benchmark": "Subconjunto de 44 tarefas do VerilogEval(v1)-Human com modalidades simbólicas (10 tabelas-verdade, 13 formas de onda, 21 diagramas de estado)",
+      "metrica": "Pass@1 (o texto declara que SI-CoT ajuda, mas os valores impressos sob o rótulo 'w SI-CoT' são menores que os de 'w/o SI-CoT'; ver condicoes)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 31.8, "intervencao": 22.7},
+      "denominador": "44 tarefas; número de tentativas por problema nesta tabela nao_informado (o estudo fixa n = 10 'in experiments' sem especificar esta tabela)",
+      "condicoes": "Valores registrados como impressos, segundo os rótulos da Tabela VI: 'Pass@1 (w SI-CoT)' = 22.7% e 'Pass@1 (w/o SI-CoT)' = 31.8% para GPT-4o mini. A narrativa afirma que SI-CoT ajuda e descreve DeepSeek-Coder-V2 sem SI-CoT igualando GPT-4 com SI-CoT, o que só coincide se os rótulos estiverem trocados; a troca não é confirmada pelo estudo (ver heterogeneidade). Instruções SI-CoT produzidas pelo modelo base CodeQwen e iguais para todos os LLMs; sem ajuste fino dos LLMs comerciais. Temperatura e número de execuções nesta tabela: nao_informado (a regra geral de melhor entre temperaturas 0,2, 0,5 e 0,8 é dada para 'each model' sem menção explícita aos comerciais). Versão do GPT-4o mini: nao_informado. Conferido visualmente na p. 6 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam o framework HAVEN (pacote híbrido com ajuste fino) e duas métricas (pass@1 e pass@5) sem que uma prevaleça. Tabelas I a III são descritivas; Tabelas IV e V comparam o pacote híbrido com outros modelos, diferindo em ajuste fino, e não contêm contraste elegível de prompting. A Tabela VI é a primeira tabela com o contraste com e sem SI-CoT; métrica única (Pass@1), primeiro modelo listado (GPT-4o mini), comparador w/o SI-CoT. Não há cobertura adicional: SI-CoT é a única técnica de prompting, e os pares da Fig. 3 seriam nova condição da mesma técnica e tarefa; o focal HAVEN é pacote híbrido (so_classificadas).",
+      "derivacao": "direta",
+      "localizador": "p. 6 do PDF (sem página impressa), Tabela VI, coluna GPT-4o mini; Seção IV-D ('Analysis of SI-CoT')",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Pass@1 (w SI-CoT) 22.7% 22.7% 34.1%",
+          "localizador": "p. 6 do PDF, Tabela VI, linha 'Pass@1 (w SI-CoT)', colunas GPT-4o mini, GPT-4, DeepSeek-Coder-V2"
+        },
+        {
+          "trecho": "Pass@1 (w/o SI-CoT) 31.8% 34.1% 45.5%",
+          "localizador": "p. 6 do PDF, Tabela VI, linha 'Pass@1 (w/o SI-CoT)', colunas GPT-4o mini, GPT-4, DeepSeek-Coder-V2"
+        },
+        {
+          "trecho": "We select a set of 44 tasks from VerilogEval(v1)-Human, same as we conducted in Table V.",
+          "localizador": "p. 6 do PDF, Seção IV-D"
+        },
+        {
+          "trecho": "For fair comparison, all LLMs are prompted with the same SI-CoT instructions produced by the base model CodeQwen[29].",
+          "localizador": "p. 6 do PDF, Seção IV-D"
+        },
+        {
+          "trecho": "Theresults in Table VI shows SI-CoT directly helps with CodeGen LLM even without fine-tuning.",
+          "localizador": "p. 6 do PDF, Seção IV-D (copiado como extraído do PDF, com 'Theresults' sem espaço)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de mitigar alucinações e alinhar a geração de Verilog às práticas de engenheiros de HDL é explícito, com contribuições enumeradas.",
+      "localizador": "p. 1 do PDF, resumo; p. 2 do PDF, contribuições"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As etapas do SI-CoT e do pipeline de dados são descritas, com exemplos (Tabela III) e hiperparâmetros de ajuste fino; o template estruturado do prompt não é impresso, o parser externo não é detalhado e o desempenho reportado é o melhor entre três temperaturas.",
+      "localizador": "p. 3 do PDF, Seção III-B e Tabela III; p. 5 do PDF, Seção IV-A"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores executados com e sem SI-CoT (Fig. 3 e Tabela VI) e ampla tabela de linhas de base; porém a origem dos valores das linhas de base não é informada, alguns modelos não estavam acessíveis, o OriGen usa outra versão de backbone, e os rótulos da Tabela VI contradizem a narrativa.",
+      "localizador": "p. 5 do PDF, Tabela IV e notas; p. 6 do PDF, Fig. 3 e Tabela VI"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k é definido com n = 10 e os tamanhos dos benchmarks são informados; mas a Tabela IV traz pass@5 sob '0-Shot (n=1)', o Overall Pass@1 do HAVEN-CodeQwen difere entre tabela (47.4%) e texto (47.7%), e o número de tentativas nas Tabelas V e VI não é especificado.",
+      "localizador": "p. 5 do PDF, Seção IV-A e Tabela IV; p. 6 do PDF, Tabelas V e VI e Seção IV-C"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há discussão de ameaças à validade ou limitações do estudo.",
+      "localizador": "texto completo (p. 1-6 do PDF)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos base, hiperparâmetros de ajuste fino, temperaturas e um link de repositório público são informados (link não acessado); faltam o texto do template SI-CoT, detalhes do parser e o número de execuções e a temperatura dos experimentos com LLMs comerciais.",
+      "localizador": "p. 1 do PDF, resumo; p. 5 do PDF, Seção IV-A; p. 6 do PDF, Seção IV-D"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível vazamento dos benchmarks nos dados de ajuste fino (código do GitHub e instruções geradas por GPT-3.5) ou no pré-treinamento.",
+      "localizador": "texto completo (p. 1-6 do PDF)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [3, 4, 5, 6],
+    "observacao": "Texto extraído lido integralmente. Páginas abertas visualmente: p. 3 (Fig. 1, Tabela III), p. 4 (Fig. 2), p. 5 (Tabela IV), p. 6 (Tabelas V e VI, Fig. 3 e 4). As páginas do PDF não têm numeração impressa."
+  }
+}

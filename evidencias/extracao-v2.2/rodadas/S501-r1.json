@@ -1,0 +1,412 @@
+{
+  "estudo": "S501",
+  "texto_fonte": "fontes/textos/lote/S501.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "CodeScribe",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1 (resumo), p. 2-3 (seção 3, Figuras 2 e 3), p. 3-5 (seção 4); páginas impressas não numeradas",
+        "observacao": "Ferramenta proposta que combina modelo de chat (seed prompt em TOML com regras de conversão e um exemplo fonte→convertido: instrucao, exemplos), código-fonte Fortran e rascunho C++ anexados ao prompt, com índice YAML e anotações de funções externas (contexto), instrução para delimitar a saída em <csource>/<fsource> (restricoes) e regeneração após erros de compilação atualizando o seed prompt, feita pelo desenvolvedor (feedback mediado por humano, não automatizado). O encadeamento rascunho→tradução→compilação/teste não foi classificado como decomposicao porque o rascunho é produzido por substituição de padrões sem LLM e a compilação/teste é manual. O tempo do desenvolvedor (Figura 5) foi medido apenas com o CodeScribe, variando o modelo; não há condição sem o pacote no mesmo estudo. A afirmação de 2-3 arquivos/dia antes da ferramenta e 10-12 depois (p. 5) é comparação histórica sem descrição de condições, não condição contrafactual comparável. Pacote híbrido: inclui pré-processamento determinístico, classes FArray e escolha de modelo fora do escopo."
+      },
+      {
+        "nome_original": "chat completion template (seed prompt, seed_prompt.toml)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2-3 (seção 3, Figura 2), p. 5 (seção 4.4)",
+        "observacao": "Modelo de conversa com mensagem de usuário de regras e instruções de sintaxe, resposta do assistente, exemplo de arquivo-fonte e conteúdo convertido desejado, e por fim o código do arquivo-alvo anexado. Criado manualmente pelo desenvolvedor (passo vermelho da Figura 3). Não há condição sem o modelo."
+      },
+      {
+        "nome_original": "Index command (YAML index)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (seção 4.1, Figura 4)",
+        "observacao": "Índice YAML de módulos, sub-rotinas e funções usado como referência para os prompts e para o rascunho. A motivação (alucinação de código periférico sem orientação) é relatada como observação dos autores, sem condição experimental sem o índice."
+      },
+      {
+        "nome_original": "Draft command (preliminary C++ draft, <filename>.scribe)",
+        "mecanismos": ["contexto", "instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4-5 (seção 4.3), p. 8 (Figura 7)",
+        "observacao": "Rascunho C++ gerado por substituição de padrões (sem LLM), com comentários scribe-prompt que orientam o LLM (por exemplo, converter funções de instrução em funções lambda), anexado ao seed prompt. A afirmação de que sem rascunho os LLMs introduziam tipos errôneos é observação dos autores, sem condição sem rascunho relatada."
+      },
+      {
+        "nome_original": "RAG elements in the Draft command (with-function-context)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 6-7 (seção 6.2), p. 8 (Figuras 7 e 8)",
+        "observacao": "Anotações no arquivo scribe, obtidas do índice YAML, informando que lnrat, L0, L1 e Lsm1 são funções externas; comparadas com o arquivo scribe sem essas linhas (Figura 7 mostra os dois rascunhos, que diferem apenas nessas anotações). É parte do sistema proposto, por isso componente, embora o estudo o trate como um dos dois estudos de sensibilidade. Exemplos e restricoes provêm do seed prompt e da instrução de saída descritos para o comando Translate (seção 4.4); a seção 6.2 não reapresenta o prompt completo. Modelo usado e número de execuções não informados; resultado só qualitativo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Model Sensitivity Study (CodeLlama-7B, Mistral-7B, CodeLlama-34B, GPT-4o, GPT-3.5 Turbo)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação do tempo de revisão e de teste do desenvolvedor entre modelos com o mesmo modelo de chat; varia o modelo, não o prompt.",
+        "localizador": "PDF p. 5-6 (seção 6.1, Figura 5)"
+      },
+      {
+        "nome_original": "maximum token limit of 4096; maximum batch size of 8; default temperature and top-p",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de inferência: limite de 4096 tokens para todos os modelos; tamanho máximo de lote 8 e valores padrão de temperatura e top-p para CodeLlama e Mistral.",
+        "localizador": "PDF p. 6 (seção 6.1)"
+      },
+      {
+        "nome_original": "FArray1D, FArray2D, FArray3D container classes",
+        "natureza": "outro",
+        "descricao": "Biblioteca C++ de classes contêiner com indexação a partir de 1 para emular arrays Fortran; infraestrutura de código, não prompting (o rascunho e o modelo de chat referem-se a ela).",
+        "localizador": "PDF p. 6 (seção 6.1)"
+      },
+      {
+        "nome_original": "Interaction mechanisms (API endpoints, Transformers library, JSON copy/paste into ChatGPT)",
+        "natureza": "outro",
+        "descricao": "Formas de acesso ao LLM: API da OpenAI, modelos locais via Transformers em GPUs NVIDIA A100 (sistema Swing) ou cópia manual do prompt para o ChatGPT.",
+        "localizador": "PDF p. 4 (seção 4.2), p. 5 (seção 4.4 e seção 6.1)"
+      },
+      {
+        "nome_original": "Draft pattern substitution",
+        "natureza": "outro",
+        "descricao": "Conversão determinística de tipos de variáveis e arrays por reconhecimento de padrões que produz o rascunho; a parte que entra no prompt (rascunho e comentários) está classificada em tecnicas como contexto/instrucao.",
+        "localizador": "PDF p. 4-5 (seção 4.3)"
+      }
+    ],
+    "modelos": [
+      "CodeLlama-7B (versão/snapshot nao_informado)",
+      "Mistral-7B (rótulo do eixo da Figura 5: Mistral-7B-v0.1)",
+      "CodeLlama-34B (listado entre os cinco modelos; resultados não apresentados)",
+      "GPT-4o (versão/snapshot nao_informado)",
+      "GPT-3.5 Turbo (versão/snapshot nao_informado)",
+      "Modelo usado no estudo de sensibilidade a RAG: nao_informado"
+    ],
+    "benchmarks": [
+      "MCFM (código Fortran de Monte Carlo para colisores de hádrons): aproximadamente 450-500 arquivos-fonte, cada um com 50-70 linhas, como impresso; corpus da conversão completa, não denominador das métricas",
+      "Arquivo-alvo único do estudo de modelos: <results>/model-sensitivity/target.f (MCFM)",
+      "Arquivo-alvo do estudo de RAG: <results>/rag-sensitivity/target.f (MCFM); relação com o arquivo do estudo de modelos nao_informado",
+      "Noah-MP (biblioteca Fortran; interface C++ para o ERF) apenas como aplicação descrita, sem avaliação quantitativa"
+    ],
+    "metricas": [
+      "Review Time e Testing Time do desenvolvedor, em minutos, para converter e testar um único arquivo-fonte Fortran do MCFM (Figura 5); número de desenvolvedores, execuções e procedimento de medição nao_informado",
+      "Avaliação qualitativa da saída: geração da interface Fortran, delimitação em <csource>/<fsource>, separação da interface extern C, conversão da função de instrução zab2 em lambda (seção 6.1, Figura 6)",
+      "Avaliação qualitativa da detecção de funções externas e de sua não declaração explícita no C++ gerado (seção 6.2); a narrativa fala em 'accuracy' sem definir métrica",
+      "Arquivos convertidos por dia (2-3 antes da ferramenta; 10-12 depois), estatística relatada sem procedimento de medição (seção 5)"
+    ],
+    "linguagens": [
+      "Fortran (origem; Fortran 2003 com recursos de Fortran 2008 citados para o Noah-MP)",
+      "C++ (destino; C++11 citado para o Noah-MP)",
+      "Interface Fortran-C (Fortran com iso_c_binding / extern C)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A saída da IA generativa não tem correção garantida, o que mantém necessária a intervenção manual (revisão e teste).",
+        "localizador": "PDF p. 1 (resumo); p. 3 (seção 3)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Conversão incorreta da função de instrução zab2 por todos os modelos avaliados (como array multidimensional no GPT-3.5 Turbo, com inconsistências de uso no GPT-4o) e conversão incompleta da variável Fcc pelo Mistral-7B, exigindo intervenção manual.",
+        "localizador": "PDF p. 6 (seção 6.1); p. 7 (Figura 6)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Conversão entre indexação a partir de 1 (Fortran) e a partir de 0 (C++) apontada como um dos aspectos mais propensos a erro; sem rascunho, os LLMs introduziam tipos de dados errôneos ou redefiniam estruturas existentes.",
+        "localizador": "PDF p. 6 (seção 6.1); p. 4 (seção 4.3)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Sem orientação, os LLMs geravam código periférico para funções externas ou programas principais de exemplo; o Mistral-7B alucinou a interface Fortran copiando código do target.f; com as anotações RAG, o LLM ainda alucina ocasionalmente apesar de informado sobre as funções externas.",
+        "localizador": "PDF p. 4 (seção 4.1); p. 6 (seção 6.1); p. 7 (seção 6.2)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Tempo de revisão e teste do desenvolvedor tratado pelos autores como sobrecarga e custo do desenvolvedor ('developer costs'), quantificado em minutos para um arquivo na Figura 5; modelos GPT exigem compra de créditos de API (custo monetário não quantificado).",
+        "localizador": "PDF p. 5-6 (seção 6.1, Figura 5)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Anotações RAG no rascunho informando funções externas (with-function-context), comparadas com o rascunho sem elas; efeito relatado só qualitativamente e como inconsistente.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 6-7 (seção 6.2); p. 8 (Figuras 7 e 8)"
+      },
+      {
+        "descricao": "Comando Index (mapa YAML) para mitigar alucinações de código periférico.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (seção 4.1)"
+      },
+      {
+        "descricao": "Rascunho preliminar com comentários para alinhar tipos e estruturas e prevenir redeclaração de funções.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (seção 4.3)"
+      },
+      {
+        "descricao": "Revisão, compilação e teste manuais pelo desenvolvedor, com regeneração após atualização do seed prompt.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3 (seção 3, Figura 3)"
+      },
+      {
+        "descricao": "Classes contêiner FArray para emular a indexação Fortran em C++.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6 (seção 6.1)"
+      },
+      {
+        "descricao": "Processamento em lote da tradução, revisão e teste de vários arquivos para reduzir a sobrecarga do desenvolvedor.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6 (seção 6.1)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "CodeScribe",
+        "motivo": "O tempo de revisão e teste (Figura 5) foi medido só com o pacote CodeScribe, variando o modelo, sem condição sem o pacote; como o estudo tem comparador executado para outra técnica (anotações RAG), a técnica focal avaliada só sem comparador não recebe extração descritiva. A estatística de 2-3 para 10-12 arquivos/dia (p. 5) é comparação histórica com condições não descritas, não condição executada comparável."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Cinco modelos são listados (incluindo CodeLlama-34B), mas a Figura 5 e o texto de resultados apresentam apenas quatro (GPT-4o, GPT-3.5 Turbo, CodeLlama-7B, Mistral-7B-v0.1); resultados do CodeLlama-34B não são relatados.",
+        "localizador": "PDF p. 5 (seção 6.1 e Figura 5); p. 6"
+      },
+      {
+        "descricao": "O modelo Mistral aparece como 'Mistral-7B' no texto e como 'Mistral-7B-v0.1' no eixo da Figura 5.",
+        "localizador": "PDF p. 5 (Figura 5 e texto)"
+      },
+      {
+        "descricao": "A conclusão afirma que o CodeScribe reduz o tempo do desenvolvedor para conversão e teste, mas a Figura 5 não contém condição sem o CodeScribe; o único contraste com a situação sem ferramenta é a estatística de 2-3 para 10-12 arquivos por dia, sem procedimento de medição descrito.",
+        "localizador": "PDF p. 8 (seção 8); p. 5 (seção 5 e Figura 5)"
+      },
+      {
+        "descricao": "O resultado das anotações RAG é declarado inconsistente: o LLM ocasionalmente alucina mesmo informado das funções externas; número de execuções, frequência das alucinações e modelo usado não são informados.",
+        "localizador": "PDF p. 7 (seção 6.2)"
+      },
+      {
+        "descricao": "O estudo de modelos usa um único arquivo-alvo; número de desenvolvedores, de repetições e o procedimento de medição do tempo não são informados. O tempo de teste do GPT-4o não é impresso no texto ('remained comparable'); o valor não foi estimado pela altura da barra.",
+        "localizador": "PDF p. 5-6 (seção 6.1, Figura 5)"
+      },
+      {
+        "descricao": "A legenda da Figura 5 fala em tempo para 'converting and testing', enquanto as séries da figura e o texto usam 'Review Time' e 'Testing Time' e a seção 6.1 fala em tempo para 'verify and test the code after LLM conversion'.",
+        "localizador": "PDF p. 5 (Figura 5 e seção 6.1)"
+      },
+      {
+        "descricao": "A narrativa qualifica o tempo de revisão do GPT-4o (2.5 min) como 'slightly better' que o do GPT-3.5 Turbo (4.26 min); números preservados como impressos, sem cálculo da diferença.",
+        "localizador": "PDF p. 6 (seção 6.1)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Passos manuais do fluxo: geração do modelo de chat, revisão do código e verificação (passos vermelhos da Figura 3); a interação via ChatGPT exige cópia manual do código para os arquivos.",
+        "localizador": "PDF p. 3 (Figura 3); p. 5 (seção 4.4)"
+      },
+      {
+        "descricao": "Comando Inspect: consultas interativas de LLM sobre o código Fortran com contexto do índice YAML, usadas também para gerar conhecimento para desenhar o seed prompt; inspeção de código não é tarefa do escopo e não foi avaliada.",
+        "localizador": "PDF p. 4 (seção 4.2)"
+      },
+      {
+        "descricao": "Resultados quantitativos da Figura 5, conferidos no texto e na figura: CodeLlama-7B 13.8 min de revisão e 7 min de teste; Mistral-7B 12.8 e 7; GPT-3.5 Turbo 4.26 e 2.3; GPT-4o 2.5 min de revisão (teste não impresso). São comparações entre modelos (fora do escopo), não entre técnicas de prompting.",
+        "localizador": "PDF p. 5 (Figura 5); p. 6 (seção 6.1)"
+      },
+      {
+        "descricao": "Aplicação ao Noah-MP/ERF e planos de integração com o framework LASSI e geração automática do seed prompt pelo Inspect são trabalho em andamento, sem avaliação.",
+        "localizador": "PDF p. 7 (seção 7); p. 8 (seção 8)"
+      },
+      {
+        "descricao": "Materiais suplementares (arquivos-fonte, saídas dos modelos, seed_prompt.toml) indicados em repositório GitHub [13] e ferramenta no Zenodo [12]; não acessados nem validados nesta extração.",
+        "localizador": "PDF p. 5 (seção 6.1); p. 9 (referências 12 e 13)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "However, because the output of GenAI cannot be guaranteed to be correct, manual intervention remains necessary.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "In the process, we developed a tool, CodeScribe, which combines prompt engineering with user supervision to establish an efficient process for code conversion.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "It uses chat completion as a prompting technique to generate desired coding output from GenAI models.",
+        "localizador": "PDF p. 2, seção 3"
+      },
+      {
+        "trecho": "This template outlines code conversion rules and includes an example representing a set of files that follow a similar pattern.",
+        "localizador": "PDF p. 3, legenda da Figura 2"
+      },
+      {
+        "trecho": "Using the chat template as a seed prompt, CodeScribe appends the source and draft files and triggers the LLM to complete the code conversion.",
+        "localizador": "PDF p. 3, seção 3"
+      },
+      {
+        "trecho": "Any errors found during compilation are addressed manually by the developer or sent for regeneration by updating the seed prompt.",
+        "localizador": "PDF p. 3, seção 3"
+      },
+      {
+        "trecho": "Blue steps indicate tasks handled by CodeScribe, such as project indexing, draft generation, and LLM-driven translations, while red steps indicate manual activities, including chat template generation, code review, and verification.",
+        "localizador": "PDF p. 3, seção 3"
+      },
+      {
+        "trecho": "For instance, when prompted to translate a subroutine that references external functions, the LLM would often extrapolate code for these external functions or even provide a main program example to demonstrate functionality.",
+        "localizador": "PDF p. 4, seção 4.1"
+      },
+      {
+        "trecho": "To mitigate such hallucinations, we developed the Index command to capture a detailed structural map of the source code using YAML files.",
+        "localizador": "PDF p. 4, seção 4.1"
+      },
+      {
+        "trecho": "Without a preliminary draft, LLMs frequently introduced erroneous data types or redefined existing structures, leading to incoherence in generated C++ code.",
+        "localizador": "PDF p. 4, seção 4.3"
+      },
+      {
+        "trecho": "Additionally, comments embedded in the draft help prevent common hallucinations, such as re-declaring functions or subroutines already defined elsewhere, by clearly indicating these constructs in advance.",
+        "localizador": "PDF p. 4, seção 4.3"
+      },
+      {
+        "trecho": "The LLM is instructed to produce output for the C++ source and the corresponding Fortran-C interface, enclosing them within <csource>...</csource> and <fsource>...</fsource>.",
+        "localizador": "PDF p. 5, seção 4.4"
+      },
+      {
+        "trecho": "The conversion process initially averaged 2-3 files per day before the development of the tool. After the tool was implemented, developer productivity increased to 10-12 files per day.",
+        "localizador": "PDF p. 5, seção 5"
+      },
+      {
+        "trecho": "We utilized five models for the code conversion task: CodeLlama-7B, Mistral-7B, CodeLlama-34B, GPT-4o, and GPT-3.5 Turbo, each with distinct architectures, parameter counts, and capabilities.",
+        "localizador": "PDF p. 5, seção 6.1"
+      },
+      {
+        "trecho": "All models operated under a maximum token limit of 4096, with CodeLlama and Mistral models utilizing a maximum batch size of 8 and default values for temperature and top-p parameters.",
+        "localizador": "PDF p. 6, seção 6.1"
+      },
+      {
+        "trecho": "However, it hallucinated the Fortran interface by copying code directly from the target.f file and, like CodeLlama-7B, failed to convert the statement function zab2.",
+        "localizador": "PDF p. 6, seção 6.1"
+      },
+      {
+        "trecho": "Converting between 1-based and 0-based indexing is one of the most error-prone aspects of translating between these languages, especially when it impacts index values and array bounds.",
+        "localizador": "PDF p. 6, seção 6.1"
+      },
+      {
+        "trecho": "To mitigate this, we often batch the translation, review, and testing of multiple files simultaneously, optimizing the overall process and helping manage developer costs more effectively.",
+        "localizador": "PDF p. 6, seção 6.1"
+      },
+      {
+        "trecho": "To evaluate its effectiveness in code translation, we applied RAG elements within CodeScribe, specifically during the Draft command.",
+        "localizador": "PDF p. 6, seção 6.2"
+      },
+      {
+        "trecho": "While the RAG-enhanced draft file annotations improve accuracy, the results are inconsistent, as the LLM occasionally hallucinates despite being explicitly informed of the use of external functions.",
+        "localizador": "PDF p. 7, seção 6.2"
+      },
+      {
+        "trecho": "Our evaluations demonstrate that CodeScribe reduces the developer time required for code conversion and testing, showcasing its potential to enhance productivity in scientific computing projects.",
+        "localizador": "PDF p. 8, seção 8"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "RAG elements in the Draft command (with-function-context)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "without-function-context (arquivo scribe sem as anotações de funções externas)",
+      "modelo": "nao_informado",
+      "benchmark": "MCFM, arquivo <results>/rag-sensitivity/target.f",
+      "metrica": "Detecção do uso das funções externas (lnrat, L0, L1, Lsm1) e não declaração explícita no C++ gerado; avaliação qualitativa sem nome de métrica (a narrativa menciona 'accuracy' sem defini-la)",
+      "sentido": "maior_melhor",
+      "unidade": "qualitativo",
+      "resultado": null,
+      "denominador": "nao_informado (número de gerações ou execuções não informado)",
+      "condicoes": "Com as anotações de contexto, segundo a prosa, a IA detecta o uso das funções externas e evita declará-las; sem elas, as funções são declaradas como no target.f (Figura 8 mostra 'std::complex<double> L0, L1, Lsm1, lnrat;'). Os autores dizem que o resultado é inconsistente e que o LLM ocasionalmente alucina apesar das anotações. A saída com contexto não aparece nas figuras; Figura 7 mostra os dois rascunhos de entrada, que diferem apenas nas linhas scribe-prompt sobre funções externas. Modelo, número de execuções, frequência das alucinações e parâmetros de decodificação do estudo de RAG nao_informado. Exemplos e restricoes da condição vêm do seed prompt e da instrução de saída descritos para o Translate (seção 4.4), não reapresentados na seção 6.2. Repositório de resultados citado, não acessado. conferido_pdf = sim: páginas 6, 7 e 8 do PDF abertas; texto e Figuras 7 e 8 conferidos.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado (a conclusão destaca o tempo do desenvolvedor com o CodeScribe, sem comparador executado). O estudo não tem tabelas; a Figura 5 compara modelos (fora do escopo); as Figuras 7 e 8 mostram as entradas das duas condições e só a saída sem contexto, sem o desfecho de ambas. O contraste elegível está só em prosa (seção 6.2, p. 7), item c da ordem; é a única comparação de prompting executada.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6-7 (seção 6.2); p. 8 (Figuras 7 e 8); páginas impressas não numeradas",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "The results demonstrate that when provided with the context of external functions–lnrat, L0, L1, Lsm1–the AI is able to detect their use and avoid declaring them explicitly.",
+          "localizador": "PDF p. 7, seção 6.2"
+        },
+        {
+          "trecho": "Without this context, however, the functions are declared as they appear in the target.f file, found at:",
+          "localizador": "PDF p. 7, seção 6.2"
+        },
+        {
+          "trecho": "While the RAG-enhanced draft file annotations improve accuracy, the results are inconsistent, as the LLM occasionally hallucinates despite being explicitly informed of the use of external functions.",
+          "localizador": "PDF p. 7, seção 6.2"
+        },
+        {
+          "trecho": "Figure 8: Excerpt from C++ code generated without context regarding the use of external functions.",
+          "localizador": "PDF p. 8, legenda da Figura 8"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de explorar a IA generativa na tradução Fortran→C++ com a ferramenta CodeScribe e comparar o desempenho de LLMs é declarado no resumo e na introdução; os dois estudos de sensibilidade (modelos e RAG) são anunciados na seção 6.",
+      "localizador": "PDF p. 1 (resumo, seção 1); p. 2 (seção 2); p. 5 (seção 6)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O fluxo da ferramenta e os comandos são descritos, mas o procedimento de avaliação não: tempo medido para um único arquivo, sem informar quem mediu, quantas repetições ou como o tempo foi registrado; no estudo de RAG o modelo e o número de execuções não são informados.",
+      "localizador": "PDF p. 3-5 (seções 3 e 4); p. 5-7 (seção 6)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há contraste com e sem as anotações RAG, mas só qualitativo; o pacote CodeScribe não tem condição sem ele no estudo de tempo (a comparação de 2-3 com 10-12 arquivos/dia é histórica, sem condições descritas); a Figura 5 compara modelos, não técnicas.",
+      "localizador": "PDF p. 5 (seção 5, Figura 5); p. 6-7 (seção 6.2)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Tempo de revisão e de teste em minutos é a métrica quantitativa, sem definição operacional e com denominador de um arquivo; o estudo de RAG não tem métrica definida ('accuracy' citada sem definição). Os valores impressos no texto coincidem com a Figura 5, mas o tempo de teste do GPT-4o não é impresso e o CodeLlama-34B não tem resultado.",
+      "localizador": "PDF p. 5-6 (seção 6.1, Figura 5); p. 7 (seção 6.2)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece a necessidade de intervenção manual, a inconsistência dos resultados com RAG e a sobrecarga de revisão, mas não discute ameaças à validade da avaliação (arquivo único, avaliador, repetições, generalização).",
+      "localizador": "PDF p. 1 (resumo); p. 6 (seção 6.1); p. 7 (seção 6.2)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Indica repositório com arquivos-fonte, saídas dos modelos, referência e seed_prompt.toml, ferramenta com DOI no Zenodo, limite de tokens, tamanho de lote e temperatura/top-p padrão; faltam versões/snapshots dos modelos, modelo do estudo de RAG e número de execuções. Pacote não acessado nem validado.",
+      "localizador": "PDF p. 5-6 (seção 6.1); p. 7 (seção 6.2); p. 9 (referências 12 e 13)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há menção a possível presença do MCFM ou do código de referência nos dados de pré-treinamento dos modelos nem a controle desse risco.",
+      "localizador": "Texto completo (PDF p. 1-9)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (incluindo referências). Páginas do PDF abertas visualmente: p-01 a p-08 (Figuras 2, 3 e 4 nas p. 3-4; Figura 5 na p. 5; texto da seção 6.1 na p. 6; Figura 6 e seção 6.2 na p. 7; Figuras 7 e 8 na p. 8). A p-09 (continuação das referências) não foi aberta visualmente."
+  }
+}

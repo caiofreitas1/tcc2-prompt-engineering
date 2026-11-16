@@ -1,0 +1,443 @@
+{
+  "estudo": "S511",
+  "texto_fonte": "fontes/textos/lote/S511.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt 1 (P1)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 2.3, p. 6 (PDF p. 6), Fig. 3; Seção 3.1, p. 8",
+        "observacao": "Prompt genérico: papel de desenvolvedor, tarefa (revisar o código e refatorar se houver oportunidades) e o documento Java completo como insumo (contexto). Serve de linha de base para P2 (RQ1-1 vs. RQ1-2). Não há condição mais simples que permita isolar seus próprios ingredientes."
+      },
+      {
+        "nome_original": "Prompt 2 (P2) (specifying expected refactoring types)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 2.3, p. 6, Fig. 3; Seção 3.2, pp. 9-10, Tabelas 1 e 2",
+        "observacao": "P2 = P1 + especificação e explicação do tipo de refatoração esperado (uma versão de P2 por tipo). Comparação P2 vs. P1 com o mesmo modelo, o mesmo conjunto (180 casos) e a mesma métrica; o estudo apresenta a comparação como objeto de RQ1-2 e faz teste de Wilcoxon. Avaliada com GPT-4 e Gemini-1.0 Pro."
+      },
+      {
+        "nome_original": "P2 + Refactoring Subcategory (P2$)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.4, p. 14, Fig. 6; Tabela 3, p. 15; Fig. 5, p. 13",
+        "observacao": "Acrescenta a P2 a descrição da subcategoria (padrão) de refatoração e um exemplo antes/depois recuperado do histórico dos projetos estudados (exemplos resolvidos recuperados → exemplos e contexto). O contraste P2$ vs. P2 retira o pacote 'subcategoria' inteiro (descrição + exemplo); o ganho não pode ser atribuído só aos exemplos. Avaliada só com GPT-4. Modelos completos de prompt apenas no pacote de replicação (não acessado)."
+      },
+      {
+        "nome_original": "P2 + Refactoring Subcategory + Search Space Limitation (P2$†)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.4, pp. 14-15; Tabela 3, p. 15; Fig. 5, p. 13",
+        "observacao": "Acrescenta a P2$ a limitação do espaço de busca (por exemplo, do documento inteiro para um único método), com estratégia própria por subcategoria. Classificado como alteração do ingrediente contexto (código fornecido como insumo); o artigo não detalha se a limitação é feita reduzindo o código fornecido ou por instrução, e remete as estratégias ao pacote de replicação (não acessado): nao_informado. O contraste com P2$ isola a limitação; o contraste com P1 citado no resumo é de pacote (tipo + subcategoria + exemplo + limitação). Avaliada só com GPT-4."
+      },
+      {
+        "nome_original": "Prompt 3 (P3)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 2.3, p. 7, Fig. 3 (p. 6); Seção 4.1, pp. 16-18",
+        "observacao": "Prompt usado em RQ2 (recomendação de soluções): papel, tarefa, documento, entidade a refatorar e tipo de refatoração com explicação. É a condição sob a qual o estudo avalia a qualidade das soluções do GPT-4 e do Gemini; nenhuma outra condição de prompt é executada em RQ2, por isso sem contrafactual. Lista vazia em mecanismos_acrescentados por não haver comparador executado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "RefactoringMirror (detect-and-reapply tactic)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento que detecta, com ReExtractor, as refatorações feitas pelo LLM e as reaplica ao código original com o motor de refatoração do IntelliJ IDEA, descartando mudanças inseguras. Não altera o prompt.",
+        "localizador": "Seção 5, pp. 21-22, Fig. 8"
+      },
+      {
+        "nome_original": "GPT-4 vs. Gemini-1.0 Pro",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre dois modelos com os mesmos prompts (P1, P2, P3); não é intervenção de prompting.",
+        "localizador": "Seção 2.1, p. 3; Tabelas 1, 2 e 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4 (chamado 'GPT'; 'ChatGPT' no resumo)", "versao": "nao_informado (texto diz 'the latest GPT-4', sem snapshot)"},
+      {"nome": "Gemini", "versao": "Gemini-1.0 Pro"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "ref-Dataset (construído pelos autores)",
+        "quantidade": "180 refatorações reais de 20 projetos Java; 20 casos por tipo em 9 tipos (Tabelas 1-4)",
+        "descricao": "Refatorações mineradas com ReExtractor e RefactoringMiner em commits posteriores a abril de 2023, validadas por três especialistas; entrada construída por refatoração reversa (V_n') e saída esperada V_n. A Seção 2.2 menciona 8 tipos intradocumento, mas o conjunto tem 9 tipos (inclui Extract Class).",
+        "localizador": "Seção 2.2, pp. 4-6"
+      },
+      {
+        "nome": "Suíte de testes de unidade para RQ2",
+        "quantidade": "102 testes (59 dos projetos, 43 gerados com TestMe)",
+        "descricao": "Usada para detectar soluções com bugs, complementada por inspeção manual.",
+        "localizador": "Seção 4.1, pp. 16-17"
+      },
+      {
+        "nome": "Amostra para análise manual de RQ1-1",
+        "quantidade": "54 exemplos (2 LLMs × 9 tipos × 3), com 112 oportunidades sugeridas",
+        "descricao": "Subconjunto dos resultados de P1.",
+        "localizador": "Seção 3.1, p. 9"
+      },
+      {
+        "nome": "Avaliação do RefactoringMirror",
+        "quantidade": "22 soluções com bugs; 35 refatorações",
+        "descricao": "Subconjunto das soluções de RQ2 marcadas como buggy.",
+        "localizador": "Seção 5.2, p. 22"
+      }
+    ],
+    "metricas": [
+      {"nome": "Success Rate (Recall) = #Succeeded / total de casos envolvidos", "denominador": "180 no total; 20 por tipo", "localizador": "Seção 3.1, p. 8; Tabelas 1-3"},
+      {"nome": "Dice coefficient (tolerância >= 0,5) para decidir sucesso em extract method/class", "denominador": "nao_aplicavel", "localizador": "Seção 2.4, p. 7"},
+      {"nome": "Accuracy (refatorações sugeridas consideradas necessárias)", "denominador": "GPT: 731 sugeridas (P2); Gemini: 94 impresso, sem descrição", "localizador": "Seção 3.2, p. 11; Seção 3.1, p. 9"},
+      {"nome": "Qualidade da solução (Excellent=4, Good=3, Poor=2, Failed=1, Buggy=0; mediana de três avaliadores)", "denominador": "180 pedidos na Fig. 7 e Tabela 4; 176 (GPT) e 137 (Gemini) soluções em percentuais do texto", "localizador": "Seção 2.4, pp. 7-8; Fig. 7, p. 17; Tabela 4, p. 18"},
+      {"nome": "Correlação ponto-bisserial entre LOC e sucesso", "denominador": "nao_informado", "localizador": "Seção 3.3, p. 11"},
+      {"nome": "Teste de Wilcoxon e Cliff's delta", "denominador": "nao_informado", "localizador": "pp. 10, 14, 15"},
+      {"nome": "Taxa de reaplicação do RefactoringMirror", "denominador": "35 refatorações", "localizador": "Seção 5.2, p. 22"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Soluções de refatoração com bugs: 13 de 176 (GPT) e 9 de 137 (Gemini); 18 mudam a semântica e 4 introduzem erros de sintaxe. Percentuais com denominadores diferentes: texto 7,4% (13/176) e 6,6% (9/137); Fig. 7 e Tabela 4, 7,2% e 5% sobre 180 pedidos.",
+        "localizador": "Resumo, p. 1; Seção 4.1, p. 17; Fig. 7; Tabela 4, p. 18; Seção 4.2, pp. 19-21"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo chama de alucinações as refatorações que introduzem erros de sintaxe ou alteram o comportamento do código, e propõe o RefactoringMirror para mitigá-las.",
+        "localizador": "Seção 7.3, p. 27; Seção 6.3, p. 25"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Conjuntos existentes podem ter sido usados no treinamento dos LLMs; controle descrito: só commits posteriores a abril de 2023 e exclusão do projeto junit4 (ver mitigações). O estudo não afirma contaminação efetiva.",
+        "localizador": "Seção 2.2, p. 4"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Ameaça à validade estatística pela aleatoriedade das predições dos LLMs, que pode comprometer a reprodutibilidade.",
+        "localizador": "Seção 6.1, p. 23"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Refatorações seguras mas sem benefício (por exemplo, nomes sem sentido) podem prejudicar a compreensibilidade e são reaplicadas pelo RefactoringMirror; cerca de um terço das soluções foi avaliado como inferior às dos desenvolvedores.",
+        "localizador": "Seção 6.2, pp. 23-24; Seção 4.1, p. 17"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação prática das estratégias de prompt: desenvolvedores podem não saber de antemão o tipo ou a subcategoria de refatoração esperados.",
+        "localizador": "Seção 6.2, p. 24"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de tamanho de entrada e saída dos LLMs: só refatorações intradocumento foram avaliadas; o contexto fora do documento não é incluído no prompt.",
+        "localizador": "Seção 2.3, p. 7; Seção 6.1, p. 23"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "RefactoringMirror (detecção e reaplicação por motor de refatoração) aplicado às 22 soluções com bugs: todos os bugs evitados; 33 de 35 refatorações detectadas e 32 de 33 reaplicadas. Avaliação restrita às 22 soluções com bugs, comparando com a saída do LLM sem o pós-processamento.",
+        "avaliada": "sim",
+        "localizador": "Seção 5.2, p. 22"
+      },
+      {
+        "descricao": "Mineração apenas de commits posteriores a abril de 2023 e exclusão do junit4 para reduzir o risco de os dados estarem no treinamento.",
+        "avaliada": "nao",
+        "localizador": "Seção 2.2, p. 4"
+      },
+      {
+        "descricao": "Validação independente dos casos por três especialistas, com descarte de casos inconsistentes.",
+        "avaliada": "nao",
+        "localizador": "Seção 2.2, p. 4; Seção 6.1, p. 23"
+      },
+      {
+        "descricao": "Avaliação da qualidade por três avaliadores independentes (Fleiss' kappa 0,82), com discussão de casos buggy e mediana das notas.",
+        "avaliada": "nao",
+        "localizador": "Seção 2.4, p. 8; Seção 6.1, p. 23"
+      },
+      {
+        "descricao": "Amostragem de 20 exemplos de projetos diferentes por tipo para reduzir viés estatístico associado ao não determinismo.",
+        "avaliada": "nao",
+        "localizador": "Seção 6.1, p. 23"
+      },
+      {
+        "descricao": "Testes de unidade (102) combinados com inspeção manual para detectar soluções com bugs.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.1, pp. 16-17"
+      },
+      {
+        "descricao": "Proposta de tática interativa que apresenta ao usuário a saída do RefactoringMirror e as modificações do LLM (não avaliada).",
+        "avaliada": "nao",
+        "localizador": "Seção 6.2, p. 24"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Prompt 3 (P3)",
+        "motivo": "Usado em RQ2 sem outra condição de prompt executada; o estudo tem comparadores executados para outras técnicas (P1, P2, P2$), então P3 não recebe extração descritiva."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Resumo e Tabela 3 informam 86,7% para P2$† (GPT), mas a conclusão afirma 86,1%.",
+        "localizador": "Resumo, p. 1; Tabela 3, p. 15; Seção 8, p. 27"
+      },
+      {
+        "descricao": "O texto diz que especificar o tipo melhorou o Gemini em só quatro de nove tipos, mas as Tabelas 1 e 2 mostram aumento de #Succeeded do Gemini em todos os nove (por exemplo, Extract Class 0 → 2, Inline Method 3 → 6, Rename Variable 2 → 3).",
+        "localizador": "Seção 3.2, p. 10; Tabela 1, p. 8; Tabela 2, p. 10"
+      },
+      {
+        "descricao": "A Seção 3.4 afirma que o GPT superou o Gemini em todos os tipos e nas duas configurações, mas a Tabela 1 e a Seção 3.1 registram empate em Extract Class, Inline Method e Rename Variable com P1.",
+        "localizador": "Seção 3.4, p. 12; Seção 3.1, pp. 8-9; Tabela 1, p. 8"
+      },
+      {
+        "descricao": "RefactoringMirror: o texto e o resumo atribuem 94,3% (33/35) a refatorações reaplicadas, mas 33 é o número detectado pelo ReExtractor; o próprio texto informa 32 de 33 reaplicadas e falha em 3 de 35. Cálculo próprio: 32/35 = 91,4%.",
+        "localizador": "Resumo, p. 1; Seção 5.2, p. 22"
+      },
+      {
+        "descricao": "Decomposição das soluções com bugs não fecha: o texto informa 18 semânticas e 4 sintáticas em 22 (13 GPT + 9 Gemini), mas depois atribui 10 (GPT) e 6 (Gemini) semânticas e 3 e 1 sintáticas, isto é, 16 semânticas e 7 para o Gemini (cálculo próprio), contra 18 e 9.",
+        "localizador": "Seção 4.1, p. 17; Seção 4.2, pp. 19-20"
+      },
+      {
+        "descricao": "Percentuais de qualidade com denominadores diferentes: Fig. 7 e Tabela 4 usam 180 pedidos (por exemplo, Buggy GPT 7,2%, Poor 28,3%); o texto usa soluções sugeridas (7,4% = 13/176; 29% = 51/176; 37,2% = 51/137).",
+        "localizador": "Fig. 7 e Seção 4.1, p. 17; Tabela 4, p. 18"
+      },
+      {
+        "descricao": "O texto atribui a 'LLMs' os percentuais de 87,5% (inline), 70% (extract) e 43,8% (rename) de soluções comparáveis ou melhores; o denominador não é informado. Cálculo próprio a partir da Tabela 4: os valores se reproduzem só com as linhas do GPT sobre os pedidos (35/40, 42/60, 35/80), não com os dois modelos.",
+        "localizador": "Seção 4.1, pp. 18-19; Tabela 4, p. 18"
+      },
+      {
+        "descricao": "Aparente inconsistência na amostra de 54 exemplos: 76,8% = 86/112 benéficas, mas as subcontagens informadas somam 42 (extract) + 11 (rename) + 25 (outros tipos) = 78, mais no máximo 4 inline (cálculo próprio), abaixo de 86; o estudo não informa quantas inline foram benéficas.",
+        "localizador": "Seção 3.1, p. 9"
+      },
+      {
+        "descricao": "Accuracy do Gemini impressa como 64,9% = 61/94; 94 coincide com o #Succeeded do GPT em P2 e o estudo não informa quantas refatorações o Gemini sugeriu, o que deixa o denominador ambíguo.",
+        "localizador": "Seção 3.2, p. 11"
+      },
+      {
+        "descricao": "A Seção 2.2 fala em 8 tipos de refatoração intradocumento (lista sem Extract Class), mas o conjunto e as tabelas têm 9 tipos, incluindo Extract Class.",
+        "localizador": "Seção 2.2, pp. 4-5; Tabelas 1-4"
+      },
+      {
+        "descricao": "Só 4 das 22 soluções com bugs falharam nos testes de unidade; as demais foram identificadas por inspeção manual.",
+        "localizador": "Seção 4.1, p. 17"
+      },
+      {
+        "descricao": "As estratégias P2$ e P2$† só foram avaliadas com GPT-4; o Gemini fica restrito a P1 e P2. O resumo compara P1 (15,6%) com P2$† (86,7%), um contraste de pacote com vários ingredientes.",
+        "localizador": "Seção 3.4, pp. 12-15; Resumo, p. 1"
+      },
+      {
+        "descricao": "O estudo declara não ter quantificado em que medida LLMs reduzem o custo da refatoração nem comparado com ferramentas manuais ou semiautomáticas.",
+        "localizador": "Seção 6.2, p. 24"
+      },
+      {
+        "descricao": "Contagem de subquestões inconsistente: RQ1 'three sub-research questions' com quatro listadas; RQ2 'three' com duas listadas.",
+        "localizador": "Seção 2.1, pp. 3-4"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Esforço manual: 42 pessoas-dia para verificar oportunidades identificadas e avaliar a qualidade das soluções (apresentado como dificuldade de ampliar a amostra, não como custo da técnica).",
+        "localizador": "Seção 6.1, p. 23"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura etc.) e número de execuções por prompt: nao_informado.",
+        "localizador": "Seções 2.1-2.4, pp. 3-8 (busca no texto completo)"
+      },
+      {
+        "descricao": "Os exemplos de P2$ vêm do histórico dos projetos estudados; o estudo não informa se são disjuntos dos 180 casos avaliados (nao_informado).",
+        "localizador": "Seção 3.4, p. 14"
+      },
+      {
+        "descricao": "Correlação ponto-bisserial negativa entre LOC e sucesso: P2 -0,38 (GPT) e -0,28 (Gemini); P1 -0,29 e -0,2. Fig. 4 mostra a taxa por quartil de LOC sem valores impressos (não estimados).",
+        "localizador": "Seção 3.3, p. 11; Fig. 4, p. 12"
+      },
+      {
+        "descricao": "Após correção manual dos bugs, as 22 soluções foram reavaliadas: 14 good, 2 excellent e 6 poor.",
+        "localizador": "Seção 4.1, p. 18"
+      },
+      {
+        "descricao": "Pacote de replicação citado (github.com/bitselab/LLM4Refactoring) com os modelos completos de prompt e as estratégias de limitação do espaço de busca; não acessado nem validado.",
+        "localizador": "Referência [11], p. 28; Seção 3.4, p. 14"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "To fill this gap, in this paper, we conduct an empirical study to investigate the potential of LLMs in automated software refactoring, focusing on the identification of refactoring opportunities and the recommendation of refactoring solutions.", "localizador": "Resumo, p. 1"},
+      {"trecho": "To answer RQ1-1, we designed the first prompt template P1. It specifies the role of the large language model, the task, and the source code to be refactored.", "localizador": "Seção 2.3, p. 6"},
+      {"trecho": "Besides all the information specified in P1, P2 also specifies the requested refactoring type.", "localizador": "Seção 2.3, p. 6"},
+      {"trecho": "As a developer, imagine your team leader requests you to review a piece of code to identify potential refactoring opportunities.", "localizador": "Fig. 3 (Prompt 1), p. 6"},
+      {"trecho": "Rename method refactorings are frequently employed to modify low-quality identifiers to improve readability.", "localizador": "Fig. 3 (Prompt 2), p. 6"},
+      {"trecho": "It specifies the role of the large language model, the task, the code entities that should be refactored, and the requested refactoring type as well as its explanation.", "localizador": "Seção 2.3, p. 7"},
+      {"trecho": "To this end, we retrieve similar refactoring patterns from the history of the subject projects to serve as contextual cues, instructing the LLMs to understand the necessary background knowledge for each refactoring subcategory.", "localizador": "Seção 3.4, p. 14"},
+      {"trecho": "Notably, for each refactoring subcategory, we designed a unique strategy to narrow the search space, noted as Search Space Limitation.", "localizador": "Seção 3.4, p. 14"},
+      {"trecho": "In the example illustrated in Fig. 6, the search space was limited from the entire document to a single method because the method name is only associated with the functionality of its method body.", "localizador": "Seção 3.4, p. 14"},
+      {"trecho": "In this study, we employ the latest GPT-4 [5] (called GPT for short in the rest of this paper) and Gemini-1.0 Pro [3] (called Gemini for short) as the evaluated large language models because they represent the state of the art in this area [45, 56].", "localizador": "Seção 2.1, p. 3"},
+      {"trecho": "However, 13 out of the 176 solutions suggested by ChatGPT and 9 out of the 137 solutions suggested by Gemini were unsafe in that they either changed the functionality of the source code or introduced syntax errors, which indicate the risk of LLM-based refactoring.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Among such 22=13+9 buggy solutions, 18 results in semantic changes and 4 results in syntax errors.", "localizador": "Seção 4.1, p. 17"},
+      {"trecho": "Notably, in this paper, the hallucinations refer to instances where LLM-driven refactorings result in syntax errors or change the intended behavior of the code.", "localizador": "Seção 7.3, p. 27"},
+      {"trecho": "The existing datasets might have been utilized to train the selected LLMs.", "localizador": "Seção 2.2, p. 4"},
+      {"trecho": "Notably, we only mined refactorings from commits submitted after April 2023 because GPT’s training data extends up to this date [5], while Gemini’s training data extends to February 2023 [3].", "localizador": "Seção 2.2, p. 4"},
+      {"trecho": "A threat to statistical validity is the inherent randomness of LLMs’ predictions.", "localizador": "Seção 6.1, p. 23"},
+      {"trecho": "To minimize this threat, we sampled 20 examples from different subject projects for each type of refactoring to reduce potential statistical bias.", "localizador": "Seção 6.1, p. 23"},
+      {"trecho": "The first limitation is that the detect-and-reapply tactic may reapply some safe but profitless refactorings.", "localizador": "Seção 6.2, p. 23"},
+      {"trecho": "However, developers may not know exactly the expected refactoring subcategories in advance.", "localizador": "Seção 6.2, p. 24"},
+      {"trecho": "Finally, we only investigated within-document refactorings because of the length limitation posed by LLMs on their input and output.", "localizador": "Seção 6.1, p. 23"},
+      {"trecho": "Our evaluation results on the 22 cases suggested that RefactoringMirror was effective in that it successfully reapplied most (94.3%=33/35) of the conducted refactorings whereas all bugs introduced by the large language models have been avoided.", "localizador": "Seção 5.2, p. 22"},
+      {"trecho": "RefactoringMirror then reapplied all detected refactorings, and 32 out of the 33 refactorings had been reapplied successfully.", "localizador": "Seção 5.2, p. 22"},
+      {"trecho": "In case of inconsistent validation, we simply discarded the case and turned to the next one.", "localizador": "Seção 2.2, p. 4"},
+      {"trecho": "All participants rated independently, and they reached a high consistency by achieving a Fleiss’ kappa coefficient [36] of 0.82.", "localizador": "Seção 2.4, p. 8"},
+      {"trecho": "To mitigate this limitation, we propose an interactive tactic where both the outputs of RefactoringMirror and the modifications made by LLMs are presented to users.", "localizador": "Seção 6.2, p. 24"},
+      {"trecho": "Explicitly specifying the expected refactoring types improved the success rate of GPT on all types of refactoring opportunities whereas it only improved Gemini on four out of the nine categories of refactoring opportunities, i.e., extract method, rename attribute, rename method, and rename parameter.", "localizador": "Seção 3.2, p. 10"},
+      {"trecho": "Our findings suggest that with proper prompts, LLMs have the potential to identify 86.1% of the refactoring opportunities with high accuracy.", "localizador": "Seção 8, p. 27"},
+      {"trecho": "In total, GPT and Gemini suggested 10 and 6 refactoring solutions respectively that changed the functionality of the involved source code.", "localizador": "Seção 4.2, p. 20"},
+      {"trecho": "In total, GPT and Gemini suggested 3 and 1 such kind of unsafe solutions.", "localizador": "Seção 4.2, p. 20"},
+      {"trecho": "Gemini achieved a comparable accuracy of 64.9%=61/94.", "localizador": "Seção 3.2, p. 11"},
+      {"trecho": "In the previous research questions (RQs), we observe that GPT consistently outperformed Gemini across all types of refactorings and in both prompt settings.", "localizador": "Seção 3.4, p. 12"},
+      {"trecho": "Consequently, it remains unclear to what extent developers can benefit from LLM-based refactoring concerning the effect (i.e., quality improvement caused by conducted refactorings) and the cost (e.g., human cost and computational expense) compared against the state of the art.", "localizador": "Seção 6.2, p. 24"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "P2 + Refactoring Subcategory + Search Space Limitation (P2$†)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "contexto"],
+      "comparador": "Prompt 1 (P1), prompt genérico",
+      "modelo": "GPT-4 (versão nao_informado; 'ChatGPT' no resumo)",
+      "benchmark": "ref-Dataset (180 refatorações, 20 projetos Java)",
+      "metrica": "Success Rate (Recall) na identificação de oportunidades de refatoração (#Succeeded / casos envolvidos)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 15.6, "intervencao": 86.7},
+      "denominador": "180 oportunidades de refatoração (28/180 e 156/180)",
+      "condicoes": "Comparação declarada no resumo entre condições de duas tabelas: P1 na Tabela 1 (28 (15.6%)) e P2$† na Tabela 3 (156 (86.7%)), mesmo modelo, conjunto e métrica. Contraste de pacote: P2$† difere de P1 pela especificação do tipo, descrição da subcategoria, exemplo recuperado e limitação do espaço de busca; o ganho é do pacote, não de um ingrediente. A conclusão (p. 27) informa 86,1% em vez de 86,7%. Número de execuções e parâmetros de decodificação: nao_informado. Avaliação de sucesso feita manualmente pelos autores/avaliadores com heurísticas por tipo (Dice >= 0,5 para extract method/class). Conferido nas imagens das pp. 1, 8 e 15.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo identifica uma técnica (explicar subcategorias e limitar o espaço de busca, a condição P2$†), uma métrica (success rate) e um comparador (15,6%, prompt genérico P1) com o mesmo modelo.",
+      "derivacao": "direta",
+      "localizador": "Resumo, p. 1 (PDF p. 1); Tabela 1, p. 8, linha Total, coluna GPT #Succeeded; Tabela 3, p. 15, linha Total, coluna P2$† #Succeeded",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "However, explaining the expected refactoring subcategories and narrowing the search space in the prompts substantially increased the success rate of ChatGPT from 15.6% to 86.7%.", "localizador": "Resumo, p. 1"},
+        {"trecho": "Total 28 (15.6%) 152 7 (3.9%) 173", "localizador": "Tabela 1, p. 8, linha Total; colunas GPT #Succeeded, #Missed, Gemini #Succeeded, #Missed"},
+        {"trecho": "Total 94 (52.2%) 86 120 (66.7%) 60 156 (86.7%) 24", "localizador": "Tabela 3, p. 15, linha Total; colunas P2 #Succeeded, #Missed, P2$ #Succeeded, #Missed, P2$† #Succeeded, #Missed"}
+      ]
+    },
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Prompt 2 (P2) (specifying expected refactoring types)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Prompt 1 (P1), prompt genérico",
+      "modelo": "GPT-4 (versão nao_informado)",
+      "benchmark": "ref-Dataset (180 refatorações, 20 projetos Java)",
+      "metrica": "Success Rate (Recall) na identificação de oportunidades de refatoração (#Succeeded / casos envolvidos)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 15.6, "intervencao": 52.2},
+      "denominador": "180 oportunidades de refatoração (28/180 e 94/180)",
+      "condicoes": "P1 (Tabela 1) e P2 (Tabela 2) com o mesmo modelo, conjunto e métrica; P2 tem uma versão por tipo de refatoração. Teste de Wilcoxon com Cliff's delta para GPT: p-value 3.06E-15, |d| = 0,37 (refere-se a esta mesma comparação de success rate). Número de execuções e parâmetros de decodificação: nao_informado. Conferido nas imagens das pp. 8 e 10.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal P2 ainda não representada. Nenhuma tabela traz P1 e P2 juntas (Tabela 1 só P1, Tabela 2 só P2); a Fig. 4 traz o contraste apenas por quartil de LOC, sem valores impressos. O estudo compara explicitamente as Tabelas 1 e 2 de estrutura idêntica; usou-se essa comparação, com o primeiro modelo listado (GPT) e a linha Total.",
+      "derivacao": "direta",
+      "localizador": "Seção 3.2, pp. 9-10; Tabela 1, p. 8, linha Total, coluna GPT #Succeeded; Tabela 2, p. 10, linha Total, coluna GPT #Succeeded",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "The success rate of GPT increased substantially from 15.6% to 52.2%, with a relative improvement of 234.6%=(52.2%-15.6%)/15.6%.", "localizador": "Seção 3.2, pp. 9-10"},
+        {"trecho": "Total 28 (15.6%) 152 7 (3.9%) 173", "localizador": "Tabela 1, p. 8, linha Total; colunas GPT #Succeeded, #Missed, Gemini #Succeeded, #Missed"},
+        {"trecho": "Total 94 (52.2%) 86 38 (21.1%) 142", "localizador": "Tabela 2, p. 10, linha Total; colunas GPT #Succeeded, #Missed, Gemini #Succeeded, #Missed"},
+        {"trecho": "The test results (p-value=3.06E-15, Cliff’s |d|=0.37) confirmed that the improvement of GPT was statistically significant.", "localizador": "Seção 3.2, p. 10"}
+      ]
+    },
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "P2 + Refactoring Subcategory (P2$)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "contexto"],
+      "comparador": "Prompt 2 (P2)",
+      "modelo": "GPT-4 (versão nao_informado)",
+      "benchmark": "ref-Dataset (180 refatorações, 20 projetos Java)",
+      "metrica": "Success Rate (Recall) na identificação de oportunidades de refatoração (#Succeeded / casos envolvidos)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 52.2, "intervencao": 66.7},
+      "denominador": "180 oportunidades de refatoração (94/180 e 120/180)",
+      "condicoes": "Mesma tabela, modelo, conjunto e métrica. P2$ acrescenta descrição da subcategoria e um exemplo antes/depois recuperado do histórico dos projetos; o ganho é do pacote subcategoria (descrição + exemplo), não atribuível só aos exemplos. Teste de Wilcoxon: p-value 1.26E-4, Cliff's |d| = 0,14. Avaliado só com GPT-4. Número de execuções e parâmetros de decodificação: nao_informado. Conferido na imagem da p. 15 (Tabela 3) e p. 14 (texto).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal P2$ ainda não representada; primeira tabela com o contraste é a Tabela 3 (P2 vs. P2$), único modelo (GPT), linha Total.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 15, linha Total, colunas P2 #Succeeded e P2$ #Succeeded; Seção 3.4, p. 14",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Total 94 (52.2%) 86 120 (66.7%) 60 156 (86.7%) 24", "localizador": "Tabela 3, p. 15, linha Total; colunas P2 #Succeeded, #Missed, P2$ #Succeeded, #Missed, P2$† #Succeeded, #Missed"},
+        {"trecho": "Specifically, the success rate of GPT increased significantly from 52.2% to 66.7%, with a relative improvement of 27.8%=(66.7%-52.2%)/52.2%.", "localizador": "Seção 3.4, p. 14"},
+        {"trecho": "The test results (p-value=1.26E-4, Cliff’s |d|=0.14) confirmed that the improvement was statistically significant.", "localizador": "Seção 3.4, p. 14"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Questões de pesquisa e subquestões explícitas (RQ1-1 a RQ1-4, RQ2-1 e RQ2-2), incluindo o efeito de especificar tipos de refatoração no prompt.",
+      "localizador": "Seção 1, p. 2; Seção 2.1, pp. 3-4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção do conjunto, prompts P1-P3 (Fig. 3) e exemplo de P2$ (Fig. 6) descritos; porém os modelos completos por tipo e subcategoria e as estratégias de limitação do espaço de busca ficam só no pacote de replicação, e parâmetros de decodificação e número de execuções não são informados.",
+      "localizador": "Seções 2.2-2.4, pp. 4-8; Seção 3.4, p. 14"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores de prompt executados no mesmo conjunto e modelo (P1 vs. P2; P2 vs. P2$ vs. P2$†), com teste estatístico; mas P2$ e P2$† só com GPT-4, RQ2 não tem comparador de prompt e o estudo não compara com abordagens manuais ou semiautomáticas.",
+      "localizador": "Tabelas 1-3, pp. 8, 10, 15; Seção 6.2, p. 24"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Success rate tem denominador explícito (180; 20 por tipo) e totais das Tabelas 1-4 conferem com as linhas; mas há denominadores ambíguos ou divergentes (accuracy do Gemini 61/94; qualidade sobre 180 na figura e sobre 176/137 no texto), valor divergente entre resumo e conclusão (86,7% vs. 86,1%) e rótulo inconsistente para 94,3% no RefactoringMirror.",
+      "localizador": "Seção 3.1, p. 8; Seção 3.2, p. 11; Fig. 7, p. 17; Seção 5.2, p. 22; Seção 8, p. 27"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute validade externa (amostra, dois modelos, só Java, só intradocumento), de construto (rotulação manual, avaliação subjetiva com kappa) e estatística (não determinismo), além de limitações.",
+      "localizador": "Seções 6.1-6.2, pp. 23-24"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Pacote de replicação citado (não acessado nem validado) e projetos públicos; mas o GPT-4 é identificado só como 'the latest GPT-4', sem snapshot, e parâmetros e número de execuções não são informados.",
+      "localizador": "Seção 2.1, p. 3; Seção 2.2, p. 4; Referência [11], p. 28"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo trata o risco explicitamente e o controla com commits posteriores a abril de 2023 e exclusão do junit4; mas o corte depende de datas de treinamento declaradas para uma versão de GPT-4 não identificada, e não se informa se os exemplos recuperados para P2$ são disjuntos dos casos avaliados.",
+      "localizador": "Seção 2.2, p. 4; Seção 3.4, p. 14"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 4, 6, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 22, 27],
+    "observacao": "Texto extraído lido integralmente (1254 linhas, incluindo referências). A numeração impressa coincide com a posição no PDF."
+  }
+}

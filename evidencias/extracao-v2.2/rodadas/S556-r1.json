@@ -1,0 +1,544 @@
+{
+  "estudo": "S556",
+  "texto_fonte": "fontes/textos/lote/S556.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "versao_fonte": "arXiv:2412.18573v2 [cs.SE], 17 Mar 2025 (carimbo na p. 1 do PDF); cabeçalho de modelo 'Conference’17, July 2017, Washington, DC, USA'; páginas impressas sem numeração, localizadores pela posição no PDF",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "basic prompt (docstring + function signature)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings); PDF p. 3, seção 3.1; PDF p. 9, seção 5.3 (Analysis)",
+        "observacao": "Prompt base: docstring reescrita manualmente (descrição do requisito em linguagem natural → instrucao) combinada com a assinatura da função, que especifica entrada e saída (→ restricoes). O estudo informa que escolheu o modelo de prompt com melhor resultado após testar várias opções (PDF p. 11), sem mostrar o modelo final nem as opções testadas. É a condição de referência de todas as diferenças da Tabela 7."
+      },
+      {
+        "nome_original": "API Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup); PDF p. 10, Tabela 7, bloco API Context",
+        "observacao": "Informação das APIs de bibliotecas de terceiros exigidas pela função-alvo, extraída do ground truth (oráculo) e acrescentada ao prompt básico; a Tabela 7 compara prompt básico com e sem esse contexto. Por ser oráculo, a condição não representa uso realista."
+      },
+      {
+        "nome_original": "Dependency Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup); PDF p. 10, Tabela 7, bloco Dependency Context",
+        "observacao": "Trechos de código do repositório de que a função-alvo depende, extraídos do ground truth (oráculo) para explorar o limite superior de desempenho com contexto de dependências suficiente e preciso; representa os métodos baseados em análise estática. Comparado com o prompt básico sem o contexto."
+      },
+      {
+        "nome_original": "Similar Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup e Analysis, Finding 9); PDF p. 10, Tabela 7, bloco Similar Context",
+        "observacao": "Pipeline RAG padrão que recupera do repositório trechos de código provavelmente semelhantes ao código-alvo (representa os métodos baseados em recuperação). Classificado também como exemplos porque o estudo descreve os trechos semelhantes como exemplos práticos para o modelo. Detalhes do recuperador (modelo de recuperação, número de trechos, índice) não informados."
+      },
+      {
+        "nome_original": "API + Dependency Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis); PDF p. 10, Tabela 7, bloco API + Dependency Context",
+        "observacao": "Combinação de dois contextos oráculo comparada com o prompt básico; o 'sim' vale para o pacote e não autoriza atribuir o ganho a um dos dois contextos. A tabela imprime apenas diferenças em relação ao prompt básico, sem contraste impresso entre combinações e contextos isolados."
+      },
+      {
+        "nome_original": "API + Similar Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context",
+        "observacao": "Combinação do contexto API (oráculo) com o contexto semelhante recuperado por RAG, comparada com o prompt básico; efeito do pacote, não de um ingrediente."
+      },
+      {
+        "nome_original": "API + Similar Context + Dependency Context",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context + Dependency Context",
+        "observacao": "Combinação dos três contextos comparada com o prompt básico; efeito do pacote, não de um ingrediente. Não é discutida em prosa; aparece só na Tabela 7."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature 0.4 and top-p 0.95",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação fixos em todas as condições, seguindo trabalho anterior.",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings)"
+      },
+      {
+        "nome_original": "automated static analysis tool",
+        "natureza": "outro",
+        "descricao": "Ferramenta de análise estática desenvolvida pelos autores para extrair do ground truth as dependências (APIs da biblioteca padrão, APIs definidas no repositório com implementação e APIs de terceiros); serve à construção do benchmark e dos contextos oráculo, não é técnica de prompting em si.",
+        "localizador": "PDF p. 4, seção 3.2.2 (4) Dependency Analysis"
+      }
+    ],
+    "modelos": [
+      "GPT-4 (GPT-4-0125-preview); não consta da Tabela 7 (RQ3)",
+      "CodeLLaMa-7B (versão/snapshot nao_informado)",
+      "CodeLLaMa-13B (versão/snapshot nao_informado)",
+      "CodeLLaMa-34B (versão/snapshot nao_informado)",
+      "DeepSeekCoder-6.7B (versão/snapshot nao_informado)",
+      "DeepSeekCoder-33B (versão/snapshot nao_informado)",
+      "StarCoder (rotulado StarCoder-15.5B na Tabela 4; versão/snapshot nao_informado)",
+      "StarCoder2-3B (versão/snapshot nao_informado)",
+      "StarCoder2-7B (versão/snapshot nao_informado)",
+      "StarCoder2-15B (rotulado SC2-1.5B na Tabela 5; versão/snapshot nao_informado)"
+    ],
+    "benchmarks": [
+      "DomainCodeBench: 2.400 tarefas verificadas manualmente, 12 domínios de aplicação, 200 tarefas por domínio, 15 linguagens; nível de repositório (função-alvo com dependências). Denominador da coluna Mean da Tabela 7 nao_informado (o estudo não liga explicitamente a média ao total de 2.400 tarefas; a média é sobre os 12 domínios).",
+      "HumanEval (164 problemas): valores de pass@1 da Tabela 3 obtidos do EvoEval, não executados pelo estudo."
+    ],
+    "metricas": [
+      "CodeBLEU (métrica principal; escala 0–100 como impressa nas Tabelas 4, 5 e 7; Tabela 7 apresenta diferenças em relação ao prompt básico)",
+      "Pass@1 no HumanEval (Tabela 3, valores de outra fonte, EvoEval)",
+      "σ² (variância dos escores CodeBLEU entre domínios ou subdomínios, Tabelas 4 e 5)",
+      "FOC, frequência de ocorrência das causas de falha (Tabela 6)"
+    ],
+    "linguagens": ["Python", "JavaScript", "TypeScript", "Solidity", "Go", "C#", "C++ (CPP)", "C", "Java", "Rust", "Scala", "PHP", "Lua", "Kotlin", "Swift"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os modelos geram código incorreto por compreensão insuficiente do contexto do projeto (uso indevido de APIs, acesso a interfaces não definidas), uso incorreto de bibliotecas de terceiros do domínio e desconhecimento de algoritmos ou fluxos do domínio (taxonomia da Tabela 6, Findings 6–8).",
+        "localizador": "PDF p. 8, Tabela 6 e Finding 6; PDF p. 9, Findings 7 e 8"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Limitação de medida: CodeBLEU não capta plenamente se o código gerado executa corretamente ou passa nos testes; nenhum resultado do estudo mede correção funcional por execução.",
+        "localizador": "PDF p. 10, seção 6 (Internal Threats, terceira ameaça); PDF p. 5, seção 4.3"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O DomainCodeBench contém dados do GitHub anteriores a 2023, que podem ter sido incluídos no treinamento dos modelos avaliados. Controle descrito (docstrings reescritas manualmente) registrado em mitigacoes; o estudo não mede contaminação efetiva.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "A aleatoriedade inerente à geração pode dificultar revelar com precisão o desempenho dos modelos nos domínios.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Escolha do modelo de prompt: o estudo escolheu o melhor entre várias opções testadas e reconhece que não pode cobrir todos os modelos de prompt, o que pode afetar a representatividade dos experimentos.",
+        "localizador": "PDF p. 11, seção 6 (External Threats, terceira ameaça)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Precisão limitada do contexto semelhante recuperado por busca, que dificulta recuperar toda a informação de dependências de que o modelo precisa.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Docstrings reescritas manualmente para cada tarefa, por processo de validação cruzada com dois anotadores e arbitragem por um terceiro, para evitar que os modelos associem as tarefas a dados de treinamento.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4, seção 3.2.2 (3); PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "descricao": "Três execuções repetidas de cada experimento, com média dos resultados, para reduzir o efeito da incerteza do modelo.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings); PDF p. 11, seção 6 (External Threats)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "prompt básico (docstring + assinatura da função), executado pelo estudo nos mesmos nove modelos open-source e no mesmo benchmark; a Tabela 7 imprime apenas a diferença de CodeBLEU em relação a ele",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O resumo afirma melhora de cerca de 38,17% com prompts aumentados por conhecimento de domínio, e a introdução, cerca de 38,17% em média com contexto de domínio; o texto não identifica a condição (qual contexto ou combinação), os modelos, a base nem o cálculo desse valor relativo. A Tabela 7 só traz diferenças em pontos de CodeBLEU (por exemplo, médias do API Context entre 1.85 e 4.18), e o valor 38,17% não aparece em nenhuma tabela. Valor não rastreável no artigo.",
+        "localizador": "PDF p. 1, resumo; PDF p. 2, seção 1; PDF p. 10, Tabela 7"
+      },
+      {
+        "descricao": "Narrativa contradiz tabela: o texto diz que o DeepSeekCoder-33B fica em 4º no HumanEval, mas a Tabela 3 imprime Pass@1 50.6 e Rank 3 para esse modelo.",
+        "localizador": "PDF p. 6, seção 5.1; PDF p. 5, Tabela 3"
+      },
+      {
+        "descricao": "Narrativa contradiz tabela: o texto descreve o desempenho do GPT-4 nos domínios como '≤ 46.33 CodeBLEU', mas a Tabela 4 imprime 46.83 para o GPT-4 em Blockchain (BC).",
+        "localizador": "PDF p. 6, seção 5.1 e Tabela 4"
+      },
+      {
+        "descricao": "Aparente inconsistência na coluna Mean da Tabela 7 (cálculo próprio da média aritmética dos 12 valores de domínio impressos, cada domínio com 200 tarefas): Similar Context StarCoder2-3B 8.78 calculado vs 7.92 impresso; StarCoder2-7B 9.40 vs 8.71; StarCoder2-15B 7.68 vs 7.24; API + Similar Context CodeLLaMa-7B 13.46 vs 13.94 (valor igual às células IoT e Mob da mesma linha); API + Dependency Context CodeLLaMa-7B 8.14 vs 7.96. Em outras linhas a média bate (por exemplo, API Context CodeLLaMa-7B 3.57). O estudo não informa como a média foi calculada (por exemplo, sobre as três execuções ou com outra ponderação), o que impede decidir qual valor é o correto.",
+        "localizador": "PDF p. 10, Tabela 7 (colunas BC…Web e Mean)"
+      },
+      {
+        "descricao": "A narrativa diz que cada um dos três contextos melhora o desempenho 'to some extent in each case' e que a combinação com API context melhorou em todos os modelos, mas há células negativas na Tabela 7: API Context DeepSeekCoder-6.7B Mob −0.78 e StarCoder2-3B CS −0.11; Dependency Context Rob −0.78 (DeepSeekCoder-6.7B), −1.08 (StarCoder2-3B), −1.04 (StarCoder2-7B), −0.59 (StarCoder2-15B); API + Similar Context StarCoder2-3B Web −0.18. As afirmações valem para as médias, não para todos os domínios.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis); PDF p. 10, Tabela 7"
+      },
+      {
+        "descricao": "O estudo afirma que os modelos se saem melhor só com contexto semelhante do que com API + dependências; nas médias impressas isso vale para os nove modelos (por exemplo, StarCoder2-15B 7.24 vs 7.19, diferença mínima), mas há inversões por domínio, como StarCoder2-15B DApp (Similar 4.06 vs API + Dependency 9.49) e CodeLLaMa-7B DApp (10.82 vs 12.12).",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis); PDF p. 10, Tabela 7"
+      },
+      {
+        "descricao": "O estudo avalia dez modelos, mas a Tabela 7 (RQ3) e a Tabela 5 trazem só nove, sem o GPT-4, e o texto não explica a exclusão.",
+        "localizador": "PDF p. 5, seção 4.2; PDF p. 6, Tabela 5; PDF p. 10, Tabela 7"
+      },
+      {
+        "descricao": "Rótulos de modelos inconsistentes entre tabelas: 'StarCoder' (Tabela 3) e 'StarCoder-15.5B' (Tabela 4); 'StarCoder2-15B' (Tabelas 3, 4 e 7) e 'SC2-1.5B' (Tabela 5).",
+        "localizador": "PDF p. 5, Tabela 3; PDF p. 6, Tabelas 4 e 5"
+      },
+      {
+        "descricao": "Condições discrepantes: API Context e Dependency Context são extraídos do ground truth (oráculo, limite superior), enquanto Similar Context é recuperado por RAG; os contrastes da Tabela 7 misturam, portanto, contextos oráculo e contexto obtido de forma realista.",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup)"
+      },
+      {
+        "descricao": "A Tabela 7 imprime só diferenças; os valores absolutos de CodeBLEU do prompt básico e das condições com contexto não são impressos para a RQ3, e o texto não declara que a Tabela 4 corresponde ao prompt básico.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis); PDF p. 6, Tabela 4; PDF p. 10, Tabela 7"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O artigo é principalmente uma proposta de benchmark (RQ1 e RQ2 não comparam técnicas de prompting); apenas a RQ3 compara condições de prompt com contexto adicional contra o prompt básico.",
+        "localizador": "PDF p. 5, seção 4.1"
+      },
+      {
+        "descricao": "Seleção do modelo de prompt: o estudo testou várias opções e manteve a de melhor resultado; a seleção é manual e o processo não é descrito, por isso não foi classificada como otimizacao_prompt.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "descricao": "Justificativa da métrica: o estudo descarta métricas por execução (Pass@k) por complexidade dos ambientes, custo computacional de executar 2.400 tarefas e praticidade; o custo aparece como razão de escolha da métrica, não como risco das técnicas.",
+        "localizador": "PDF p. 5, seção 4.3"
+      },
+      {
+        "descricao": "Limitação de recursos computacionais impediu avaliar mais modelos.",
+        "localizador": "PDF p. 10, seção 6 (Internal Threats, segunda ameaça)"
+      },
+      {
+        "descricao": "Análise de erros manual: amostra aleatória de 10% das saídas de todos os modelos analisada por três anotadores, cinco anotadores com mais de cinco anos de experiência; uma amostra pode ter várias causas. Os denominadores das frequências (FOC) da Tabela 6 não são explicitados.",
+        "localizador": "PDF p. 7, seção 5.2; PDF p. 8, Tabela 6"
+      },
+      {
+        "descricao": "Esforço manual descrito pelo estudo: considera irrealista esperar que programadores expliquem o conhecimento básico do domínio a cada uso do LLM, por desperdiçar tempo e esforço (não tratado como custo quantificado).",
+        "localizador": "PDF p. 9, Case Study 3"
+      },
+      {
+        "descricao": "Pacote de replicação indicado por link no GitHub; não acessado nem validado nesta extração. Os dados completos de subdomínios estão, segundo o estudo, no apêndice online.",
+        "localizador": "PDF p. 1, resumo; PDF p. 7, seção 5.1"
+      },
+      {
+        "descricao": "Configuração de execução: servidor Ubuntu 18.04.6 LTS com 8 GPUs NVIDIA A800 80GB; os escores do HumanEval vêm do EvoEval.",
+        "localizador": "PDF p. 5, seção 4.2"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this paper, we introduce DomainCodeBench, a multi-domain code generation benchmark designed to systematically evaluate LLMs across 12 software application domains and 15 programming languages.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "The Function signature field is included as part of the prompt provided to the LLM, specifying input and output of the target function to guide code generation.",
+        "localizador": "PDF p. 3, seção 3.1"
+      },
+      {
+        "trecho": "Besides, to better showcase LLMs’ code generation performance, we combine the docstring and function signature in accordance with the characteristics of the task’s corresponding programming language.",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings)"
+      },
+      {
+        "trecho": "In this experiment, we adopt a standard retrieval-augmented generation (RAG) pipeline to retrieve code snippets from the repository that are likely highly similar to the target code (referred to as Similar Context in Table 7).",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup)"
+      },
+      {
+        "trecho": "In this experiment, we directly extract the oracle project dependency context from the ground truth and provide these code snippets that the target function depends on (referred to as Dependency Context in Table 7) to the LLM to explore the upper bound of the model’s performance when given sufficient and accurate project dependency context information.",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup)"
+      },
+      {
+        "trecho": "Since most existing repository-level code generation methods do not involve the mining of domain-specific information, we directly extract the third-party library API information required by the target function (referred to as API Context in Table 7) from the ground truth and provide it as domain-specific input for the model.",
+        "localizador": "PDF p. 9, seção 5.3 (Experimental Setup)"
+      },
+      {
+        "trecho": "The values in Table 7 are computed by subtracting the performance of the LLMs using the basic prompt from that of the LLMs using the basic prompt with additional information.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+      },
+      {
+        "trecho": "These similar code snippets provide a good example for the LLMs, helping the model more directly generate code that meets domain-specific requirements.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+      },
+      {
+        "trecho": "Following prior work [45], we set the temperature to 0.4 and top-p to 0.95.",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings)"
+      },
+      {
+        "trecho": "To mitigate randomness of model generation, the experimental results presented in this paper are obtained by conducting three repeated experiments and averaging the results.",
+        "localizador": "PDF p. 5, seção 4.2 (Model Settings)"
+      },
+      {
+        "trecho": "Finding 6: During generating domain-specific code, LLMs often struggle to generate correct code due to insufficient understanding of project-specific context, such as dependencies and defined functions, leading to errors like misusing APIs or accessing undefined interfaces.",
+        "localizador": "PDF p. 8, Finding 6"
+      },
+      {
+        "trecho": "Although this metric reflects the accuracy of LLM-generated results from various aspects, it does not fully capture whether the generated code can execute correctly or pass the corresponding test cases.",
+        "localizador": "PDF p. 10, seção 6 (Internal Threats)"
+      },
+      {
+        "trecho": "The first external threat is that DomainCodeBench contains data from GitHub before 2023, which may have already been included in the training datasets of the evaluated models.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "trecho": "To mitigate this risk, we provide each task instance in DomainCodeBench with a manually annotated docstring, avoiding the use of docstrings from online code repositories to prevent LLMs from directly associating training data with the programming tasks in DomainCodeBench.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "trecho": "The inherent randomness in LLM generation may make it difficult to accurately reveal the models’ code generation performance in specific domains.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "trecho": "To mitigate this threat, we repeat each experiment three times and take the average result to reduce the impact of model uncertainty.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "trecho": "We ultimately choose the prompt template that yields the best results after testing several options.",
+        "localizador": "PDF p. 11, seção 6 (External Threats)"
+      },
+      {
+        "trecho": "This is unexpected because the accuracy of similar context retrieved through search is generally limited, making it difficult to recall all the dependency information needed by the model.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+      },
+      {
+        "trecho": "(3) Contextual enhancement: we show that augmenting prompts with domain-specific knowledge improves performance by around 38.17%, providing actionable insights for performance optimization.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "As shown in Table 3, DeepSeekCoder-33B ranks 4th on HumanEval yet achieves top performance in most application domains.",
+        "localizador": "PDF p. 6, seção 5.1"
+      },
+      {
+        "trecho": "Among these models, only DeepSeekCoder-33B exceeds 50 CodeBLEU score (blockchain domain), with even SOTA closed-source LLMs like GPT-4 demonstrating moderate domain-specific performance (≤ 46.33 CodeBLEU).",
+        "localizador": "PDF p. 6, seção 5.1"
+      },
+      {
+        "trecho": "When we feed these three types of additional information (API context, dependency context, and similar context) to LLMs separately, the performance of domain-specific code generation improves to some extent in each case.",
+        "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "API Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; a coluna Mean é média sobre os 12 domínios e o estudo não explicita o denominador)",
+      "condicoes": "A Tabela 7 imprime apenas a diferença de CodeBLEU em relação ao prompt básico: 3.57 na coluna Mean (agregado impresso sobre os 12 domínios, mesmo modelo, técnica, métrica e comparador; a média aritmética própria dos 12 valores da linha confere com 3.57). Os valores absolutos das duas condições não são impressos; baseline e intervenção ficam null e não foram calculados. CodeBLEU na escala 0–100 como impressa (unidade 'percentual' por aproximação de escala; a fonte não usa %). Contexto API extraído do ground truth (oráculo). Temperatura 0,4, top-p 0,95; resultados médios de três execuções repetidas. GPT-4 ausente da Tabela 7. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca o aumento de prompts com conhecimento de domínio (~38,17%) sem identificar uma técnica entre as seis condições de contexto nem a condição comparada; a conclusão não destaca técnica. As Tabelas 3–6 não contêm contraste de prompting; a Tabela 7 é a primeira com o contraste. Primeira técnica (API Context), primeiro modelo (CodeLLaMa-7B), único comparador (prompt básico), métrica CodeBLEU; usada a coluna Mean como agregado impresso compatível.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco API Context, linha CodeLLaMa-7B, coluna Mean; definição dos valores na PDF p. 9, seção 5.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 5.90 2.45 1.20 3.54 5.95 1.75 2.89 7.23 3.58 0.05 4.42 3.84 3.57",
+          "localizador": "PDF p. 10, Tabela 7, bloco API Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        },
+        {
+          "trecho": "The values in Table 7 are computed by subtracting the performance of the LLMs using the basic prompt from that of the LLMs using the basic prompt with additional information.",
+          "localizador": "PDF p. 9, seção 5.3 (Analysis)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Dependency Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; média sobre os 12 domínios)",
+      "condicoes": "Diferença impressa na Tabela 7, coluna Mean: 6.08 (média própria dos 12 valores da linha confere). Valores absolutos não impressos; baseline e intervenção null, não calculados. Contexto de dependências do projeto extraído do ground truth (oráculo, limite superior). Temperatura 0,4, top-p 0,95; média de três execuções. Escala CodeBLEU 0–100. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura de técnica focal ainda não representada (segundo contexto avaliado na Tabela 7), pela mesma regra de ordem: primeiro modelo (CodeLLaMa-7B), coluna Mean.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco Dependency Context, linha CodeLLaMa-7B, coluna Mean",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 6.34 4.12 5.22 3.52 7.98 6.75 6.02 7.32 5.31 11.76 2.01 6.56 6.08",
+          "localizador": "PDF p. 10, Tabela 7, bloco Dependency Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Similar Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; média sobre os 12 domínios)",
+      "condicoes": "Diferença impressa na Tabela 7, coluna Mean: 10.52 (média própria dos 12 valores da linha: 10.53, diferença compatível com arredondamento). Valores absolutos não impressos; baseline e intervenção null, não calculados. Trechos semelhantes recuperados do repositório por pipeline RAG padrão (configuração do recuperador e número de trechos não informados). Temperatura 0,4, top-p 0,95; média de três execuções. Escala CodeBLEU 0–100. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura de técnica focal ainda não representada (terceiro contexto da Tabela 7), primeiro modelo, coluna Mean.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco Similar Context, linha CodeLLaMa-7B, coluna Mean",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 13.95 12.23 4.12 5.78 10.82 11.50 8.19 14.35 10.31 11.56 14.79 8.80 10.52",
+          "localizador": "PDF p. 10, Tabela 7, bloco Similar Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "API + Dependency Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; média sobre os 12 domínios)",
+      "condicoes": "Diferença impressa na Tabela 7, coluna Mean: 7.96. Aparente inconsistência: a média aritmética própria dos 12 valores impressos da linha é 8.14; o estudo não informa como a média foi calculada. Valores absolutos não impressos; baseline e intervenção null, não calculados. Pacote de dois contextos oráculo (API e dependências); ganho do pacote, não de um ingrediente. Temperatura 0,4, top-p 0,95; média de três execuções. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três: cobertura de técnica focal ainda não representada; o estudo avalia a combinação em linhas próprias da Tabela 7 e a discute como experimento distinto («API + Dependency»). Primeiro modelo, coluna Mean.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco API + Dependency Context, linha CodeLLaMa-7B, coluna Mean",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 9.82 4.87 5.73 5.33 12.12 7.80 8.99 9.96 6.15 13.06 6.14 7.68 7.96",
+          "localizador": "PDF p. 10, Tabela 7, bloco API + Dependency Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "API + Similar Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; média sobre os 12 domínios)",
+      "condicoes": "Diferença impressa na Tabela 7, coluna Mean: 13.94. Aparente inconsistência: a média aritmética própria dos 12 valores impressos da linha é 13.46, e 13.94 repete os valores das células IoT e Mob da mesma linha; o estudo não informa como a média foi calculada. Valores absolutos não impressos; baseline e intervenção null, não calculados. Pacote de contexto API oráculo com contexto semelhante recuperado por RAG. Temperatura 0,4, top-p 0,95; média de três execuções. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três: cobertura de técnica focal ainda não representada (combinação avaliada em linhas próprias da Tabela 7). Primeiro modelo, coluna Mean.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context, linha CodeLLaMa-7B, coluna Mean",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 15.68 14.28 6.05 7.97 15.73 12.82 12.34 19.05 13.94 13.94 17.85 11.81 13.94",
+          "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "API + Similar Context + Dependency Context",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "basic prompt (docstring + function signature)",
+      "modelo": "CodeLLaMa-7B",
+      "benchmark": "DomainCodeBench (12 domínios; coluna Mean)",
+      "metrica": "CodeBLEU (diferença: prompt básico com informação adicional menos prompt básico)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado (corpus de 2.400 tarefas, 200 por domínio; média sobre os 12 domínios)",
+      "condicoes": "Diferença impressa na Tabela 7, coluna Mean: 17.14 (média própria dos 12 valores da linha confere). Valores absolutos não impressos; baseline e intervenção null, não calculados. Pacote dos três contextos (dois oráculo e um recuperado por RAG); ganho do pacote. Temperatura 0,4, top-p 0,95; média de três execuções. Conferido na imagem da p. 10 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três: cobertura de técnica focal ainda não representada (combinação avaliada em linhas próprias da Tabela 7). Primeiro modelo, coluna Mean.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context + Dependency Context, linha CodeLLaMa-7B, coluna Mean",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLLaMa-7B 16.91 15.49 9.97 10.50 21.45 19.13 17.00 21.48 16.56 23.44 18.36 15.42 17.14",
+          "localizador": "PDF p. 10, Tabela 7, bloco API + Similar Context + Dependency Context; colunas LLMs, BC, CS, DA, DL, DApp, DSys, EApp, Game, IoT, Mob, Rob, Web, Mean"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas; a RQ3 define o objetivo de verificar se métodos existentes de geração em nível de repositório (contextos adicionais no prompt) melhoram a geração específica de domínio.",
+      "localizador": "PDF p. 5, seção 4.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve modelos, parâmetros de decodificação, três execuções e a origem de cada contexto; porém o modelo de prompt final e as opções testadas não são mostrados, a configuração do pipeline RAG (recuperador, número de trechos) não é informada e o formato de inserção dos contextos no prompt não é detalhado.",
+      "localizador": "PDF p. 5, seção 4.2; PDF p. 9, seção 5.3; PDF p. 11, seção 6"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparador executado (prompt básico) nos mesmos modelos e benchmark, mas a Tabela 7 imprime só diferenças, sem valores absolutos identificados para a condição básica, e o GPT-4 é omitido da RQ3 sem explicação; dois dos contextos são oráculo, o que limita a comparabilidade com uso realista.",
+      "localizador": "PDF p. 9, seção 5.3; PDF p. 10, Tabela 7"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CodeBLEU é definida como métrica única e justificada, mas mede similaridade e não correção funcional (reconhecido pelos autores); o denominador da coluna Mean não é explicitado; alguns valores Mean da Tabela 7 não coincidem com a média dos domínios impressos; o valor de 38,17% do resumo não é rastreável às tabelas; a narrativa diverge das Tabelas 3 e 4 em dois pontos.",
+      "localizador": "PDF p. 5, seção 4.3; PDF p. 10, Tabela 7 e seção 6; PDF p. 1, resumo; PDF p. 6, seção 5.1"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria de ameaças internas (número de domínios, número de modelos, métrica) e externas (contaminação, aleatoriedade, escolha do modelo de prompt), com mitigações descritas.",
+      "localizador": "PDF p. 10–11, seção 6"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa link de pacote de replicação (não acessado), temperatura, top-p, número de execuções, hardware e snapshot do GPT-4; não informa versões ou checkpoints dos modelos abertos, o texto dos prompts nem a configuração do RAG no artigo.",
+      "localizador": "PDF p. 1, resumo; PDF p. 5, seção 4.2"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Reconhece que os dados do GitHub anteriores a 2023 podem estar no treinamento dos modelos e reescreve as docstrings manualmente; o código de ground truth continua oriundo de repositórios públicos e não há medição ou controle do efeito da contaminação.",
+      "localizador": "PDF p. 4, seção 3.2.2 (3); PDF p. 11, seção 6 (External Threats)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (828 linhas, incluindo referências). Páginas do PDF abertas visualmente: p-01, p-02, p-05, p-06, p-09, p-10."
+  }
+}
