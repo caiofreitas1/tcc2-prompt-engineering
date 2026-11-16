@@ -1,0 +1,278 @@
+{
+  "estudo": "S1706",
+  "texto_fonte": "fontes/textos/lote/S1706.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "iSMELL (LLM-based Code Refactoring)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (impressa 1345), resumo; p. 5 (impressa 1349), seções 3.3.1 e 3.3.2 e Figura 2; p. 8-9 (impressas 1352-1353), seção 5.3",
+        "observacao": "Etapa de refatoração do iSMELL: o prompt combina instruções (com sugestões específicas por smell), resultados das ferramentas especialistas, definições do smell, um exemplo de refatoração recuperado aleatoriamente de uma base EDB (cinco exemplos por smell) e o código a analisar, com a classe-mãe no caso de Refused Bequest (instrucao, contexto, exemplos). Para smells de classe (God Class, Refused Bequest) o LLM gera uma diretriz em etapas encadeadas: desenho da estrutura abstrata, mapeamento de assinaturas e movimentação de métodos por ferramenta (decomposicao); para Feature Envy, o LLM devolve o código completo dos métodos refatorados. A Figura 2 pede mostrar só o código crítico modificado, permitindo substituir código funcional por comentários (restricoes). Pacote híbrido: depende da detecção pelo modelo MoE e das ferramentas especialistas e inclui a ferramenta de movimentação automática, componentes fora do escopo. Não há condição de refatoração sem o pacote nem com outro prompt; a avaliação compara métricas antes e depois da refatoração e notas humanas, o que não é contrafactual de prompting. Sem prompt base identificável, a lista de acrescentados é vazia. O prompt concreto por smell está só no site [19], não acessado."
+      },
+      {
+        "nome_original": "Tool results (detection results from expert toolsets in the prompt)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (impressa 1345), resumo; p. 5 (impressa 1349), seção 3.3.1",
+        "observacao": "Resultados de detecção das ferramentas selecionadas pelo MoE inseridos no prompt de refatoração. Não há condição de refatoração sem esses resultados."
+      },
+      {
+        "nome_original": "Definitions",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.1 e Figura 2",
+        "observacao": "Definição do smell detectado fornecida ao LLM como conhecimento de domínio. Sem condição sem definições na refatoração."
+      },
+      {
+        "nome_original": "Refactoring Examples (random retrieval from EDB)",
+        "mecanismos": ["exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.1 e Figura 2; p. 11 (impressa 1355), seção 8",
+        "observacao": "Um exemplo de refatoração recuperado aleatoriamente (não por similaridade) entre cinco exemplos por smell selecionados manualmente de projetos de código aberto. A recuperação por similaridade é apenas trabalho futuro. Sem condição sem exemplo."
+      },
+      {
+        "nome_original": "Class-Level Refactoring (LLM-based Structure Design e LLM-based Methods Re-Organizing)",
+        "mecanismos": ["decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.2; p. 9-10 (impressas 1353-1354), Figura 4 e seção 5.3.3",
+        "observacao": "Para God Class e Refused Bequest, em vez de código completo, o LLM produz a estrutura abstrata (classes, assinaturas, propriedades) e depois mapeia assinaturas refatoradas às originais; a movimentação final é feita por ferramenta (fora do escopo). Não há condição de refatoração de classe com geração direta de código completo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "MoE-based Code Smell Detection (gating network, multi-head self-attention, accuracy matrix)",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelo Mixture of Experts treinado (70 épocas) que escolhe, por smell, a ferramenta especialista de detecção; não altera o texto do prompt, apenas define quais resultados de detecção alimentam a refatoração.",
+        "localizador": "p. 3-5 (impressas 1347-1349), seções 3.2.1-3.2.3; p. 7 (impressa 1351), seção 4.5"
+      },
+      {
+        "nome_original": "Combined Code Embedding (CodeBERT + CK metrics)",
+        "natureza": "outro",
+        "descricao": "Vetor de entrada do MoE com 812 dimensões, concatenando embedding CodeBERT (768) e métricas CK com estatísticas (44); representação para o classificador, não prompting.",
+        "localizador": "p. 3 (impressa 1347), seção 3.1.1"
+      },
+      {
+        "nome_original": "Representation-level data augmentation",
+        "natureza": "outro",
+        "descricao": "Gaussian Scaling, Binary Interpolation, Linear Interpolation/Extrapolation para ampliar 15 vezes o treino do MoE.",
+        "localizador": "p. 3-4 (impressas 1347-1348), seção 3.1.2; p. 6 (impressa 1350), seção 4.2.3"
+      },
+      {
+        "nome_original": "Expert toolsets (PMD, JDeodorant, Organic, DesigniteJava, JSpIRIT, FeTruth, JMove)",
+        "natureza": "outro",
+        "descricao": "Ferramentas de detecção de smells cujas saídas definem o ground truth, alimentam o MoE e são inseridas no prompt de refatoração.",
+        "localizador": "p. 6 (impressa 1350), seções 4.1.2 e 4.2.2, Tabela 1"
+      },
+      {
+        "nome_original": "Tool-based Methods Moving",
+        "natureza": "outro",
+        "descricao": "Ferramenta desenvolvida pelos autores que executa automaticamente a movimentação de métodos na refatoração de classe.",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.2"
+      },
+      {
+        "nome_original": "Temperatures 0.2 e MAX TOKEN 1500",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,2 e limite de 1500 tokens de resposta declarados para todos os LLMs.",
+        "localizador": "p. 7 (impressa 1351), seção 4.5"
+      }
+    ],
+    "modelos": [
+      {"nome": "nao_informado (LLM usado na refatoração do iSMELL)", "versao": "nao_informado", "observacao": "O estudo não nomeia o LLM que executa a refatoração avaliada na seção 5.3."},
+      {"nome": "GPT-3.5 turbo", "versao": "nao_informado", "observacao": "Só como linha de base de detecção de smells (tarefa fora do escopo); contexto de 16k tokens informado."},
+      {"nome": "GPT-4.0 turbo", "versao": "nao_informado", "observacao": "Só como linha de base de detecção (fora do escopo)."},
+      {"nome": "LLAMA3-70B", "versao": "nao_informado", "observacao": "Só como linha de base de detecção (fora do escopo)."},
+      {"nome": "CodeLlama-34B", "versao": "nao_informado", "observacao": "Só como linha de base de detecção (fora do escopo)."},
+      {"nome": "CodeBERT", "versao": "nao_informado", "observacao": "Codificador de embeddings para o MoE; não gera código."}
+    ],
+    "benchmarks": [
+      {"nome": "Conjuntos de code smells de Palomba et al., Fontana et al. e Khomh et al.", "versao": "nao_informado", "quantidade": "God Class 196 (teste 39), Refused Bequest 248 (teste 50), Feature Envy 210 (teste 42); treino aumentado 2352, 2976 e 2520 (Tabela 2)", "observacao": "Usados na detecção (fora do escopo); rótulos definidos pelas próprias ferramentas especialistas."},
+      {"nome": "Amostra de refatoração (instâncias preditas pelo MoE)", "versao": "nao_aplicavel", "quantidade": "25 instâncias aleatórias por smell, 75 no total, incluindo falsos positivos (seis, segundo o texto)", "observacao": "Denominador da avaliação humana. O número de instâncias sobre o qual a Tabela 6 calcula as médias não é informado."}
+    ],
+    "metricas": [
+      {"nome": "Refactoring Correctness (escala 0-4, avaliação humana)", "definicao": "0 = diferenças significativas em relação ao código de refatoração real ou smell não resolvido (e falsos positivos); 4 = idêntico ao código de refatoração real", "localizador": "p. 7 (impressa 1351), seção 4.4.2; p. 9 (impressa 1353), Figura 3"},
+      {"nome": "acceptance rate", "definicao": "nao_informado (critério de aceitação não definido)", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"nome": "Content consistency", "definicao": "nao_informado; anunciada para refatorações aceitas, sem resultado relatado", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"nome": "WMC, DIT, NOC, CBO, RFC, LCOM (média antes e depois da refatoração)", "definicao": "métricas CK extraídas pelo CK Metric Extractor", "localizador": "p. 3 (impressa 1347), seção 3.1.1; p. 7 (impressa 1351), seção 4.4.2; p. 8 (impressa 1352), Tabela 6"},
+      {"nome": "F1, Accuracy, Precision, Recall (detecção)", "definicao": "classificação binária por smell; tarefa fora do escopo", "localizador": "p. 6-7 (impressas 1350-1351), seção 4.4.1"}
+    ],
+    "linguagens": [
+      {"nome": "Java", "observacao": "Todos os projetos são de código aberto em Java."}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O limite de tokens de saída leva a conteúdo incompleto na refatoração de God Class, sem nenhuma amostra com nota 4; a escala de avaliação prevê perda de lógica central ou de funcionalidade.",
+        "localizador": "p. 9 (impressa 1353), seção 5.3.2; p. 7 (impressa 1351), seção 4.4.2"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Smells residuais após a refatoração de classes longas: no caso analisado, a God Class continuou com 900 LOC e estrutura excessivamente grande e complexa.",
+        "localizador": "p. 9-10 (impressas 1353-1354), Figura 4 e seção 5.3.3"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Gerar o código completo de refatorações de classe exige várias consultas iterativas, com esquecimento seletivo e alto custo de interação; custo não quantificado.",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.2; p. 10 (impressa 1354), seção 6.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A inferência pode ser interrompida pela política de execução do LLM em refatorações longas.",
+        "localizador": "p. 5 (impressa 1349), seção 3.3.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falsos positivos da detecção levam a refatorar código que não precisava (seis casos, a maioria de Refused Bequest, com nota 0).",
+        "localizador": "p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça interna: cálculo incorreto de algumas métricas durante o parsing; ameaça externa: só projetos Java de código aberto.",
+        "localizador": "p. 11 (impressa 1355), seções 6.3.1 e 6.3.2"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Para smells de classe, o LLM produz diretriz e estrutura abstrata em vez de código completo, com movimentação por ferramenta, para evitar saídas longas e consultas iterativas.", "avaliada": "nao", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"descricao": "Envio do código da classe-mãe no prompt de Refused Bequest para fornecer contexto de repositório.", "avaliada": "nao", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"descricao": "Avaliação humana com pelo menos dois avaliadores independentes por instância, discussão até consenso e avaliadores não coautores.", "avaliada": "nao", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"descricao": "Refatorações iterativas múltiplas propostas como trabalho futuro para smells residuais; não executadas.", "avaliada": "nao", "localizador": "p. 10 (impressa 1354), seção 5.3.3"}
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O LLM que executa a refatoração não é identificado; temperatura 0,2 e limite de 1500 tokens são declarados 'for all LLMs', sem dizer quais. Os quatro LLMs nomeados aparecem só como linhas de base de detecção.",
+        "localizador": "p. 6 (impressa 1350), seção 4.3; p. 7 (impressa 1351), seção 4.5; p. 5 (impressa 1349), seção 3.3"
+      },
+      {
+        "descricao": "A métrica 'Content consistency' é anunciada para refatorações aceitas, mas nenhum resultado dela é relatado.",
+        "localizador": "p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "descricao": "As taxas de aceitação (68%, 64%, 72%) não têm critério definido (limiar de nota ou decisão dos avaliadores). A proporção de notas zero, citada como maior para Refused Bequest, não é impressa; a Figura 3 (violino) não traz valores numéricos e não foi lida por posição.",
+        "localizador": "p. 9 (impressa 1353), seção 5.3.2 e Figura 3"
+      },
+      {
+        "descricao": "A Tabela 6 não informa sobre quantas instâncias as médias são calculadas nem se inclui falsos positivos ou só refatorações aceitas. Cálculo próprio, não conclusivo: as médias são compatíveis com divisões por 18 (Refused Bequest), 16 (God Class) e 17 (Feature Envy), números que coincidem com 72%, 64% e 68% de 25, mas o estudo não declara esse denominador e outros múltiplos também seriam compatíveis.",
+        "localizador": "p. 8 (impressa 1352), Tabela 6; p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "descricao": "A escala 0-4 compara o código sugerido ao 'actual refactoring code', mas o estudo não descreve a origem desse código de referência. A concordância entre avaliadores não é relatada (só consenso por discussão).",
+        "localizador": "p. 7 (impressa 1351), seção 4.4.2; p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "descricao": "O ground truth é definido pelas mesmas ferramentas especialistas que o iSMELL seleciona, e as instâncias refatoradas vêm das predições do MoE; isso condiciona a amostra da refatoração.",
+        "localizador": "p. 6 (impressa 1350), seção 4.2.2; p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "descricao": "A refatoração não tem comparador executado (nem outro prompt, nem LLM sem o pacote, nem outra ferramenta); a comparação antes/depois da Tabela 6 contrasta código original e refatorado. Os ganhos de F1 relatados no resumo (35,05% em média sobre LLMs) referem-se à detecção, tarefa fora do escopo, e não se estendem à refatoração. A conclusão registra a comparação com métodos existentes como trabalho futuro.",
+        "localizador": "p. 1 (impressa 1345), resumo; p. 8 (impressa 1352), Tabela 6; p. 11 (impressa 1355), seção 8"
+      },
+      {
+        "descricao": "A narrativa afirma que o código é aceitável 'in most cases', mas God Class não teve nenhuma amostra com nota 4 e média 2,08, e Refused Bequest teve a maior proporção de zeros apesar da maior taxa de aceitação (72%).",
+        "localizador": "p. 9 (impressa 1353), seção 5.3.2"
+      },
+      {
+        "descricao": "Feature Envy não altera DIT e NOC e quase não altera LCOM (798,24 para 798,12); o estudo não explica sobre qual classe as métricas de Feature Envy, refatoração de método, são medidas.",
+        "localizador": "p. 8-9 (impressas 1352-1353), Tabela 6 e seção 5.3.1"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Detecção de code smells (RQ1, RQ2) está fora das tarefas do escopo. As linhas de base LLM de detecção usam prompt com instrução, definição e código (com classe-mãe e comentários removidos); não são extraídas.", "localizador": "p. 7-8 (impressas 1351-1352), seções 5.1.1 e 5.1.2, Tabelas 3 e 4"},
+      {"descricao": "Ablação do iSMELL (sem métricas CK, sem gating network) refere-se a componentes do MoE de detecção, não a prompting.", "localizador": "p. 8 (impressa 1352), seção 5.2 e Tabela 5"},
+      {"descricao": "Avaliação humana por três participantes (dois mestrandos e um desenvolvedor experiente), cada um com 50 instâncias; acordos assinados exigindo avaliação objetiva.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"descricao": "Comentários dos participantes na Figura 3 relatam redução do esforço manual e dificuldade em classes massivas; são relatos qualitativos.", "localizador": "p. 9 (impressa 1353), Figura 3"},
+      {"descricao": "Tempo relatado: treino do MoE em cerca de 5 minutos, inferência abaixo de 0,02 s e cerca de 30 s por refatoração de instância complexa; o estudo apresenta como eficiência, sem comparação.", "localizador": "p. 10 (impressa 1354), seção 6.2"},
+      {"descricao": "O estudo imprime link para dados e código [19]; o pacote não foi acessado nem validado.", "localizador": "p. 2 (impressa 1346), contribuições; p. 12 (impressa 1356), referência [19]"}
+    ],
+    "citacoes": [
+      {"trecho": "Finally, we equip the prompts with the detection results from the expert toolsets, thereby enhancing the refactoring capability of LLMs for code with existing smells, enabling them to provide different solutions based on the type of smell.", "localizador": "p. 1 (impressa 1345), resumo"},
+      {"trecho": "The quantitative and human evaluation results show that iSMELL could improve code quality metrics and conduct satisfactory refactoring toward the identified code smells.", "localizador": "p. 1 (impressa 1345), resumo"},
+      {"trecho": "The prompt for code smell refactoring primarily consists of five components: instructions, tool results, definitions, refactoring examples, and the code to be analyzed.", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "For each type of code smell, we also offer specific suggestions for refactoring to enhance the LLMs’ ability to address that particular code smell.", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "To make LLMs understand the code smell better, we provide definitions for the code smells detected by the toolset.", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "Then, when preparing the prompt for a given code snippet and its specific code smell, we randomly retrieve one from the database EDB.", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "For \"Refused Bequest\", we input the code of the parent class into the LLMs.", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "We provide the concrete prompt for each code smell on our website [19].", "localizador": "p. 5 (impressa 1349), seção 3.3.1"},
+      {"trecho": "This process can be fraught with issues such as selective forgetting and high interaction costs.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "Moreover, the inference process may even halt due to execution policy.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "Consequently, in the context of class-level code smells, we do not mandate that LLMs provide explicit modification code; instead, we employ an abstract yet efficient approach by outputting a guideline for refactoring.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "Then we prompt the LLMs to match the refactored class/method signatures to the origin signatures.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "We develop a tool to do the automatic move work.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "Due to the limited refactoring scope, we directly request the LLM to provide the complete code of the refactored methods.", "localizador": "p. 5 (impressa 1349), seção 3.3.2"},
+      {"trecho": "If a particular smell was identified by the expert toolsets, the corresponding instance was labeled as 1; conversely, if the respective smell was not detected, it was labeled as 0.", "localizador": "p. 6 (impressa 1350), seção 4.2.2"},
+      {"trecho": "For all LLMs, we set their parameter Temperatures to 0.2.", "localizador": "p. 7 (impressa 1351), seção 4.5"},
+      {"trecho": "Furthermore, we impose a limit of 1500 for the MAX TOKEN count in the responses from all LLMs.", "localizador": "p. 7 (impressa 1351), seção 4.5"},
+      {"trecho": "In our study, focusing on the code smell data predicted by the MoE model, we conducted in-depth refactoring attempts on 25 randomly selected instances for each category of code smells.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "Each evaluator was tasked with reviewing 50 instances, ensuring that each piece of code underwent independent assessment by at least two reviewers.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "If the refactored code from the large language model is accepted, we also evaluate the effectiveness of large language model refactoring using the metric of Content consistency.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "Across the three smells (Feature Envy, God Class, Refused Bequest), the average refactoring accuracies of our method are 2.60, 2.08, and 2.36, with acceptance rates of 68%, 64%, and 72%, respectively.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "Due to the token count limitations faced by LLMs during output generation, this frequently leads to incompleteness in content, thereby affecting the evaluation results.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "This is because six false positive cases in the total sample mostly belong to the Refused Bequest type, leading to an increase in low scores in the evaluation.", "localizador": "p. 9 (impressa 1353), seção 5.3.2"},
+      {"trecho": "The participants pointed out that although the split and mapping were somewhat accurate, the overall structure remained excessively large and complex.", "localizador": "p. 10 (impressa 1354), seção 5.3.3"},
+      {"trecho": "Specifically, during our error troubleshooting process, instances of inaccurate metric calculations were identified.", "localizador": "p. 11 (impressa 1355), seção 6.3.1"},
+      {"trecho": "However, all projects included in the analysis are of open-source nature and are uniformly written in the Java language, which inevitably limits the generalizability of our conclusions to industry projects using other programming languages or non-open-source environments.", "localizador": "p. 11 (impressa 1355), seção 6.3.2"},
+      {"trecho": "We also plan to systematically compare the effectiveness of our refactoring approach with existing mainstream methods.", "localizador": "p. 11 (impressa 1355), seção 8"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "iSMELL (LLM-based Code Refactoring)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "nao_informado (LLM de refatoração não nomeado)",
+      "benchmark": "Instâncias de Refused Bequest preditas pelo MoE e refatoradas (conjuntos de Palomba, Fontana e Khomh); número de instâncias da Tabela 6 não informado",
+      "metrica": "CBO (Coupling between Objects), média após a refatoração (coluna After, Refused Bequest, Tabela 6)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": null, "intervencao": 1.83},
+      "denominador": "nao_informado (a avaliação humana usa 25 instâncias por smell, mas a Tabela 6 não liga as médias a esse número)",
+      "condicoes": "Extração descritiva, sem comparador executado: a coluna Before (3.17) é o código original antes da refatoração, não uma condição de prompting, e a redução impressa (↓ 1.34) não é efeito isolado da técnica nem de um ingrediente. Pacote híbrido (detecção pelo MoE, ferramentas especialistas, ferramenta de movimentação de métodos). Refused Bequest é refatorado no modo de classe (diretriz e estrutura abstrata, com classe-mãe no prompt e um exemplo recuperado aleatoriamente). Temperatura 0,2 e máximo de 1500 tokens declarados para todos os LLMs; LLM de refatoração e número de execuções não informados. Valor conferido visualmente na Tabela 6 (p. 8).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Estudo sem comparador na refatoração; o resumo destaca resultados quantitativos (métricas de qualidade) e avaliação humana sem que uma métrica prevaleça, logo não há principal declarado. Pela ordem: primeira tabela com resultado da refatoração (Tabela 6), primeira métrica (CBO), primeiro smell listado (Refused Bequest). Não há outra técnica focal nem outra tarefa do escopo para cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (impressa 1352), Tabela 6, linha CBO, coluna Refused Bequest After",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "CBO 3.17 1.83 (↓ 1.34) 41.38 22.00 (↓ 19.38) 32.94 31.88 (↓ 1.06)", "localizador": "p. 8 (impressa 1352), Tabela 6, colunas Refused Bequest (Before, After), God Class (Before, After), Feature Envy (Before, After)"},
+        {"trecho": "According to Table 6, we can clearly observe the average changes in code quality attributes before and after refactoring.", "localizador": "p. 8 (impressa 1352), seção 5.3.1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Três questões de pesquisa explícitas; a RQ3 trata da qualidade percebida e quantitativa do código refatorado.", "localizador": "p. 5 (impressa 1349), seção 4"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Componentes do prompt e etapas de refatoração descritos, com a Figura 2, mas o LLM de refatoração não é nomeado, o prompt concreto fica só no site, o critério de aceitação não é definido e a amostra da Tabela 6 não é especificada.", "localizador": "p. 5 (impressa 1349), seções 3.3.1-3.3.2; p. 8-9 (impressas 1352-1353), seção 5.3"},
+    {"criterio": "comparador", "julgamento": "nao_atende", "justificativa": "Na refatoração não há condição comparadora executada (outro prompt, LLM sem o pacote ou ferramenta de refatoração); só antes/depois e notas humanas. Comparadores existem apenas para a detecção, fora do escopo; a comparação de refatoração fica como trabalho futuro.", "localizador": "p. 8-9 (impressas 1352-1353), seção 5.3; p. 11 (impressa 1355), seção 8"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Escala 0-4 e métricas CK definidas, mas o código de referência da escala não é descrito, a taxa de aceitação não tem critério, 'Content consistency' não tem resultado, o denominador da Tabela 6 não é informado e não há concordância entre avaliadores.", "localizador": "p. 7 (impressa 1351), seção 4.4.2; p. 8-9 (impressas 1352-1353), Tabela 6 e seção 5.3.2"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute validade interna (erros de cálculo de métricas) e externa (só Java de código aberto) e limitações dos LLMs, mas não aborda não determinismo, viés dos avaliadores ou contaminação.", "localizador": "p. 10-11 (impressas 1354-1355), seções 6.1 e 6.3"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa temperatura, limite de tokens, hiperparâmetros do MoE e link para dados e código (não acessado), mas não identifica o LLM de refatoração nem versões dos modelos, e o prompt concreto não está no artigo.", "localizador": "p. 7 (impressa 1351), seção 4.5; p. 5 (impressa 1349), seção 3.3.1; p. 2 (impressa 1346), contribuições"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O texto completo não discute vazamento dos projetos de código aberto ou das refatorações de referência no pré-treinamento dos LLMs, nem a relação entre os exemplos da EDB e as instâncias avaliadas.", "localizador": "texto completo; p. 5 (impressa 1349), seção 3.3.1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (12 páginas, incluindo referências). Tabelas 3, 4 e 5 (detecção, fora do escopo) lidas só no texto extraído.",
+    "paginas_pdf_abertas": [5, 6, 8, 9]
+  }
+}

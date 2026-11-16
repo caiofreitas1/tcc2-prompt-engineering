@@ -1,0 +1,193 @@
+{
+  "estudo": "S1725",
+  "texto_fonte": "fontes/textos/lote/S1725.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot prompts with language-specific system prompts (Python, R, SQL)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1, resumo; p. 2, contribuição 1; p. 3, seção II.A.2 e Tabela II; p. 7, seção VI (PDF sem número de página impresso)",
+        "observacao": "Prompt zero-shot com um system prompt distinto por linguagem (Tabela II): papel ('You are an R/SQL/Python programmer'), regras em linguagem natural (instrucao) e restrições de formato e bibliotecas (somente o código, sem chunk R, linha única no SQL, sem aspas, atribuir a resposta à variável 'result' no Python, usar dplyr ou pandas, nunca usar install.packages) (restricoes). O system prompt também informa que dplyr está carregado ou que pandas/numpy estão importados; não foi classificado como 'contexto' por não ser recuperação nem código do repositório. Os user prompts são as consultas em linguagem natural, sem modelo estruturado, passadas sem modificação; o estudo não informa se o esquema dos dados é fornecido ao modelo. Não há condição executada sem esses prompts nem com outra técnica: as comparações do estudo são entre modelos e entre linguagens (com system prompts diferentes por linguagem), não entre técnicas de prompting. Os três system prompts são formulações por linguagem-alvo, não alternativas avaliadas para a mesma linguagem, por isso foram registrados como uma técnica."
+      },
+      {
+        "nome_original": "special instructions to the system prompt for each language on how to manipulate the time variables (timestamp conversion rules)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, seção II.A.2 e Tabela II (regra 4 do R, regra 2 do SQL, regra 4 do Python); p. 6, seção IV",
+        "observacao": "Regra do system prompt que manda converter timestamps UNIX (as_datetime do lubridate no R; datetime(..., 'unixepoch') no SQL; pd.datetime(unit = 's') no Python). O estudo afirma que sem essa instrução o desempenho em consultas de data é muito pior 'as shown in Section III', mas a seção III não relata nenhuma condição sem a instrução; por isso não há contrafactual."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LLM Hyperparameters (Table III)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros padrão de cada modelo, exceto max tokens do Llama 3 aumentado para 4096: gpt-4-0613 com top_p 1, temperatura 1, penalidades 0; Llama-3-70b-Instruct com top_k 50, top_p 0.9, temperatura 0.6, presence penalty 1.15 e frequency penalty 0.2. As configurações diferem entre os modelos comparados.",
+        "localizador": "p. 3, seção II.A.5; p. 4, Tabela III"
+      },
+      {
+        "nome_original": "comparação GPT-4 × Llama 3",
+        "natureza": "selecao_modelo",
+        "descricao": "Contraste principal do estudo entre dois modelos com os mesmos prompts; não altera o prompt e não é efeito de prompting.",
+        "localizador": "p. 4, Tabelas IV e V; p. 4-6, seção IV"
+      },
+      {
+        "nome_original": "Code in Python and SQL was converted to R-code for comparison (reticulate, sqldf)",
+        "natureza": "outro",
+        "descricao": "Procedimento de avaliação: execução e conversão das saídas de Python e SQL para objetos R para comparar com as soluções manuais em R.",
+        "localizador": "p. 4, seção II.B"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4 (gpt-4-0613)", "versao": "0613", "observacao": "Acessado por API."},
+      {"nome": "Llama 3 (Llama-3-70b-instruct)", "versao": "nao_informado", "observacao": "Variante 70b-instruct informada; snapshot ou provedor da API não informados."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto próprio de consultas em linguagem natural sobre dados temporais tabulares financeiros (Aave V2 Mainnet)",
+        "versao": "nao_aplicavel",
+        "quantidade": "21 unique queries, each with five distinct wordings; 105 total queries tested (com soluções manuais em R)",
+        "observacao": "Dados de transações do Aave V2 Mainnet (Ethereum) de 1 jan. 2021 a 31 dez. 2022: 1,665,737 transações de 172,872 usuários; também uma visão secundária com resumos trimestrais por usuário [13]. A distribuição das consultas entre as duas visões não é informada. As regressões têm 315 observações por modelo; o estudo não liga explicitamente esse número a 105 consultas × 3 linguagens, nem informa o denominador das taxas por linguagem. Lista de consultas declarada no GitHub (não acessada)."
+      }
+    ],
+    "metricas": [
+      {"nome": "Rate of correct code responses (correctness)", "definicao": "verificação manual se a resposta gerada retorna a mesma informação que o código escrito manualmente", "localizador": "p. 4, seção II.B e Tabela IV"},
+      {"nome": "Rate of executable code responses (execution)", "definicao": "o código é sintaticamente correto (executa), sem implicar resultado correto", "localizador": "p. 4, seção II.B e Tabela V"},
+      {"nome": "Code complexity (Halstead complexity)", "definicao": "medidas de Halstead baseadas em contagens de operadores e operandos; média e desvio padrão por modelo e linguagem", "localizador": "p. 2-3, seção II.A.1; p. 4, Tabela VI"},
+      {"nome": "χ2 p-value e regressão logística", "definicao": "teste qui-quadrado de igualdade das taxas entre linguagens; regressão logística de correção e execução sobre os fatores experimentais", "localizador": "p. 4, seções III.A e III.B; p. 5, Tabelas VII e VIII"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "pandas e numpy; execução via reticulate"},
+      {"nome": "R", "observacao": "dplyr e lubridate; soluções de referência escritas em R"},
+      {"nome": "SQL", "observacao": "execução via sqldf; dialeto não informado"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os modelos tiveram grande dificuldade em gerar consultas corretas quando a pergunta envolvia o tempo das transações; mesmo com as instruções especiais, não foram perfeitos nessas tarefas. Também há variação de correção entre linguagens e modelos (Tabela IV).",
+        "localizador": "p. 6, seção IV; p. 4, Tabela IV"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Código complexo pode dificultar a compreensão e a modificação pelos desenvolvedores; a complexidade do código gerado varia com o modelo e a linguagem.",
+        "localizador": "p. 6, seção IV"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Instruções especiais no system prompt de cada linguagem sobre a conversão de timestamps.", "avaliada": "nao", "localizador": "p. 3, seção II.A.2 e Tabela II; p. 6, seção IV"},
+      {"descricao": "Cinco formulações diferentes para cada consulta, para testar prompts em linguagem natural variados.", "avaliada": "nao", "localizador": "p. 3, seção II.A.3"},
+      {"descricao": "Instrução para devolver só o código e, no Python, atribuir a resposta à variável 'result', para permitir execução e extração automáticas.", "avaliada": "nao", "localizador": "p. 3, seção II.A.2"}
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa sem dado correspondente: a seção II.A.2 afirma que, sem a instrução específica, o desempenho em consultas de data é muito pior 'as shown in Section III', mas a seção III não relata nenhuma condição sem a instrução; só apresenta coeficientes de regressão para o fator Time (por exemplo, 1.656** para GPT-4 e 0.805* para Llama na Tabela VII, ambos positivos), obtidos com a instrução presente.",
+        "localizador": "p. 3, seção II.A.2; p. 4, seção III; p. 5, Tabela VII"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: a discussão afirma que GPT-4 supera Llama-3 em correção e execução em todas as três linguagens, mas na Tabela V a taxa de execução em R é 0.914 para os dois modelos.",
+        "localizador": "p. 4, seção IV; p. 4, Tabela V"
+      },
+      {
+        "descricao": "Diferença entre análises: para Llama 3, o teste qui-quadrado indica diferenças não significativas entre linguagens (p-value 0.127, Tabela IV) e o resumo e a discussão apresentam R como a melhor linguagem do Llama; a regressão logística da Tabela VII traz LanguageR = 0.631** (p<0.05, relativo a Python, com ajuste pelos fatores). O estudo não comenta a diferença.",
+        "localizador": "p. 1, resumo; p. 4, Tabela IV; p. 5, Tabela VII; p. 4-6, seção IV"
+      },
+      {
+        "descricao": "A conclusão fala em código 'functionally correct and efficient' de GPT-4 em todas as linguagens, mas a eficiência não é medida diretamente (só complexidade de Halstead) e, na Tabela VI, a complexidade média de GPT é maior que a do Llama em Python (36.476 × 26.868) e em R (20.471 × 17.288).",
+        "localizador": "p. 7, seção VI; p. 4, Tabela VI"
+      },
+      {
+        "descricao": "Comparação entre modelos com hiperparâmetros de decodificação diferentes (temperatura 1 × 0.6, top_p 1 × 0.9, top_k NA × 50, penalidades 0 × 1.15/0.2); a diferença entre modelos não isola o modelo. Número de execuções por consulta não informado, e a temperatura 1 do GPT-4 não é discutida quanto a não determinismo.",
+        "localizador": "p. 4, Tabela III"
+      },
+      {
+        "descricao": "Limitações declaradas: conjunto pequeno de consultas, cobertura restrita das consultas financeiras possíveis e avaliação manual da correção (avaliador e critério de concordância não informados). Só zero-shot com os mesmos prompts nos dois modelos.",
+        "localizador": "p. 6-7, seção IV; p. 7, seção VI"
+      },
+      {
+        "descricao": "Denominador das taxas das Tabelas IV e V não informado explicitamente; o esquema dos dados fornecido aos modelos (se houver) também não é descrito.",
+        "localizador": "p. 3, seção II.A.3; p. 4, seção II.B e Tabelas IV e V"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Os totais das Tabelas IV e V coincidem, com arredondamento, com a média simples das três linguagens (cálculo próprio de conferência); não há discrepância de soma.", "localizador": "p. 4, Tabelas IV e V"},
+      {"descricao": "Fatores experimentais (Filtering, Grouping, Transformation, Statistics, Time, Manual Complexity) anotados por humanos a partir do código R; usados como variáveis independentes na regressão logística. A base dos percentuais da Tabela I não é informada.", "localizador": "p. 2, seção II.A.1; p. 3, Tabela I"},
+      {"descricao": "Trabalhos futuros: few-shot, ajuste fino, refinar system prompts por modelo, mais modelos e linguagens, variar hiperparâmetros e avaliação automática da correção; nenhum resultado dessas extensões.", "localizador": "p. 7, seção VI"},
+      {"descricao": "Parte dos dados foi fornecida pela Amberdata; disponibilidade do conjunto de dados não informada.", "localizador": "p. 7, seção VII"}
+    ],
+    "citacoes": [
+      {"trecho": "We demonstrate how to create specific zero-shot prompts to generate code to answer natural language queries about temporal financial tabular data.", "localizador": "p. 1, resumo"},
+      {"trecho": "We develop specific system prompts for each language to ensure they correctly answer time-oriented questions.", "localizador": "p. 1, resumo"},
+      {"trecho": "GPT-4 performs best on Python (95.2% correctness) but has significantly weaker performance on SQL (87.6% correctness) and R (79.0% correctness).", "localizador": "p. 1, resumo"},
+      {"trecho": "System prompts were varied across each language to ensure the code was written in the correct format and with the desired language libraries.", "localizador": "p. 3, seção II.A.2"},
+      {"trecho": "For each language, we specifically instruct the models on how to convert the UNIX timestamps in the data into a more usable format.", "localizador": "p. 3, seção II.A.2"},
+      {"trecho": "Without specific instruction, performance on date-related queries is much worse, as shown in Section III.", "localizador": "p. 3, seção II.A.2"},
+      {"trecho": "In total, we tested 21 unique queries, each with five distinct wordings.", "localizador": "p. 3, seção II.A.3"},
+      {"trecho": "Once written, these queries are passed as user prompts with no further modification.", "localizador": "p. 3, seção II.A.3"},
+      {"trecho": "To determine correctness, we manually checked if the code responses generated by the language model returned the same information as the manually written code.", "localizador": "p. 4, seção II.B"},
+      {"trecho": "Execution means that the code is syntactically correct, but does not necessarily mean that we get the correct result.", "localizador": "p. 4, seção II.B"},
+      {"trecho": "GPT-4 consistently outperforms Llama-3 in both correctness and execution rates across all three languages.", "localizador": "p. 4, seção IV"},
+      {"trecho": "Llama-3-70b-Instruct 0.905 0.914 0.857 0.892 0.360", "localizador": "p. 4, Tabela V, colunas Model, Python, R, SQL, Total, χ2 p-value"},
+      {"trecho": "GPT-4-0613 0.990 0.914 0.952 0.952 0.035", "localizador": "p. 4, Tabela V, colunas Model, Python, R, SQL, Total, χ2 p-value"},
+      {"trecho": "Through our testing, LLMs struggled severely at generating meaningful or correct queries when tasked with questions that forced them to deal with the time of the transactions in some way.", "localizador": "p. 6, seção IV"},
+      {"trecho": "Even with these special instructions, the models were not perfect when performing tasks that dealt with time.", "localizador": "p. 6, seção IV"},
+      {"trecho": "Complex code can pose challenges for developers, increasing the time and effort required to comprehend and modify code.", "localizador": "p. 6, seção IV"},
+      {"trecho": "One limitation of the present study is its size.", "localizador": "p. 6, seção IV"},
+      {"trecho": "A final limitation of the present study is that we are currently evaluating correctness manually.", "localizador": "p. 6-7, seção IV"},
+      {"trecho": "Our findings indicate a clear superiority of GPT-4 in generating functionally correct and efficient code across all tested programming languages.", "localizador": "p. 7, seção VI"},
+      {"trecho": "We note that we only employed zero-shot prompting using the same prompts for both LLM models.", "localizador": "p. 7, seção VI"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "zero-shot prompts with language-specific system prompts (system prompt Python)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "GPT-4-0613",
+      "benchmark": "Conjunto próprio de 105 consultas (21 consultas × 5 formulações) sobre dados do Aave V2 Mainnet",
+      "metrica": "Rate of correct code responses (correctness, verificação manual contra a solução escrita em R)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": 0.952},
+      "denominador": "nao_informado (105 consultas no desenho; o estudo não liga explicitamente esse número à taxa por linguagem)",
+      "condicoes": "Extração descritiva, sem comparador de prompting executado; não é efeito da técnica. Zero-shot com system prompt Python da Tabela II, inclusive a instrução de conversão de timestamps; decodificação padrão do gpt-4-0613 (temperatura 1, top_p 1, max tokens 4096). Número de execuções por consulta não informado. A coluna Total (0.873) agrega três system prompts e linguagens diferentes e não foi tratada como agregado compatível da mesma condição. Valor conferido visualmente na Tabela IV (p. 4) e coerente com o resumo (95.2%).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Estudo sem comparador de prompting executado. O resumo destaca vários aspectos (executável, correto e eficiência) e três system prompts por linguagem, sem uma única condição principal; pela ordem, a primeira tabela de resultados é a Tabela IV (Tabelas I-III são descritivas), primeira métrica (correção), primeiro modelo (GPT-4-0613) e primeira coluna (Python). Outros modelos e linguagens da mesma técnica não são cobertura; o componente de instrução temporal não tem contraste executado.",
+      "derivacao": "direta",
+      "localizador": "p. 4, Tabela IV, linha GPT-4-0613, coluna Python",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4-0613 0.952 0.790 0.876 0.873 0.002", "localizador": "p. 4, Tabela IV, colunas Model, Python, R, SQL, Total, χ2 p-value"},
+        {"trecho": "GPT-4 performs best on Python (95.2% correctness) but has significantly weaker performance on SQL (87.6% correctness) and R (79.0% correctness).", "localizador": "p. 1, resumo"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Pergunta de pesquisa e contribuições explícitas (desempenho de LLMs na geração de código Python, R e SQL para consultas sobre dados temporais tabulares financeiros).", "localizador": "p. 1, resumo e Introdução; p. 2, contribuições"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "System prompts, hiperparâmetros, desenho das consultas e conversão para R são descritos, mas não são informados o número de execuções por consulta, se o esquema dos dados é fornecido no prompt, quem fez a verificação manual e com que critério de equivalência.", "localizador": "p. 3, seções II.A.2-II.A.5 e Tabela II; p. 4, Tabela III e seção II.B"},
+    {"criterio": "comparador", "julgamento": "nao_atende", "justificativa": "Para a técnica de prompting não há condição comparadora executada, embora o estudo afirme que sem a instrução temporal o desempenho é muito pior; as comparações relatadas são entre modelos (com decodificação diferente) e entre linguagens.", "localizador": "p. 3, seção II.A.2; p. 4, Tabelas III-V"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Correção, execução e complexidade de Halstead são definidas e os valores coincidem entre resumo, Tabela IV e Tabela V; porém o denominador não é informado explicitamente, a correção depende de verificação manual sem procedimento detalhado e a 'eficiência' citada na conclusão não é medida diretamente.", "localizador": "p. 4, seção II.B e Tabelas IV-VI; p. 7, seção VI"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute tamanho reduzido, cobertura limitada das consultas e avaliação manual, mas não discute diferenças de hiperparâmetros entre modelos, não determinismo nem contaminação.", "localizador": "p. 6-7, seção IV; p. 7, seção VI"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa snapshot do GPT-4, hiperparâmetros, system prompts completos e indica repositório com as consultas (não acessado); faltam número de execuções, versão do Llama 3 e disponibilidade dos dados (parte fornecida pela Amberdata).", "localizador": "p. 2, seção II; p. 3, Tabela II e nota 1; p. 4, Tabela III; p. 7, seção VII"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O texto completo não menciona contaminação de dados nem do conjunto de avaliação.", "localizador": "texto completo, p. 1-8"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (8 páginas, incluindo referências). O PDF não tem números de página impressos; localizadores usam a posição no arquivo.",
+    "paginas_pdf_abertas": [1, 3, 4, 5]
+  }
+}

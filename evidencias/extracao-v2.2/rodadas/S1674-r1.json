@@ -1,0 +1,412 @@
+{
+  "estudo": "S1674",
+  "texto_fonte": "fontes/textos/lote/S1674.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Baseline: BuggyCode only (no additional information)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 (impressa 322), seções III.B e III.C; p. 5 (impressa 323), seção III.D; p. 6 (impressa 324), Tabela III, linha 'BuggyCode'",
+        "observacao": "Prompt base de todas as condições: system prompt com persona ('senior Python development expert'), princípios de correção (instrucao) e requisitos de saída obrigatórios (restricoes), mais o task prompt com o código defeituoso sem comentários (contexto, código-fonte fornecido como insumo). Não há condição sem o prompt base."
+      },
+      {
+        "nome_original": "BuggyCode+Description",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 322), seção III.B (Description) e III.C; p. 6 (impressa 324), Tabela III",
+        "observacao": "Acrescenta ao prompt base a descrição funcional do programa (docstring do QuixBugs com Input, Precondition e Output, Fig. 2). Classificada como contexto (documentação sem exemplos); a docstring contém pré-condição e saída esperada, mas o estudo a trata como descrição funcional, não como especificação de formato. Contrafactual: BuggyCode+Description contra BuggyCode, mesmo template e mesmos modelos."
+      },
+      {
+        "nome_original": "BuggyCode+BuggyLine (suspected BuggyLine)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 322), seção III.B (BuggyLine) e III.C; p. 6 (impressa 324), Tabela III",
+        "observacao": "Acrescenta a linha defeituosa e o código dessa linha, identificados pela comparação entre as versões defeituosa e correta do QuixBugs (localização de falha perfeita, obtida da solução de referência). Classificada como contexto. Contrafactual: BuggyCode+BuggyLine contra BuggyCode."
+      },
+      {
+        "nome_original": "BuggyCode+PDG (Program Dependence Graph)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 322), seção III.B (PDG) e III.C; p. 6 (impressa 324), Tabela III",
+        "observacao": "Acrescenta dependências de dados e de controle associadas à linha defeituosa, extraídas com um parser de AST. Classificada como contexto (informação estrutural do código). Contrafactual: BuggyCode+PDG contra BuggyCode. O parser não é nomeado; a construção do PDG usa a linha defeituosa, mas o estudo não diz se a linha é informada ao modelo nesta condição."
+      },
+      {
+        "nome_original": "BuggyCode+TestFile",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 322), seção III.B (TestFile) e III.C; p. 6 (impressa 324), Tabela III",
+        "observacao": "Acrescenta o arquivo de testes do QuixBugs correspondente ao programa. Classificada como contexto (código do repositório fornecido como insumo); os testes não são exemplos resolvidos de reparo. Contrafactual: BuggyCode+TestFile contra BuggyCode."
+      },
+      {
+        "nome_original": "BuggyCode+TestOutput",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 322), seção III.B (TestOutput) e III.C; p. 6 (impressa 324), Tabela III",
+        "observacao": "Acrescenta o log da execução dos testes sobre o código defeituoso (aprovação/falha, entradas, saídas esperadas e obtidas, linhas de erro). Classificada como contexto e não como feedback: o log é obtido uma única vez antes da geração e não há ciclo de execução do patch com retorno ao modelo. Contrafactual: BuggyCode+TestOutput contra BuggyCode."
+      },
+      {
+        "nome_original": "Test-related combination: BuggyCode + TestFile + TestOutput",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 (impressa 323), seções III.C e III.D (ordem BuggyCode → TestFile → TestOutput); p. 6 (impressa 324), Tabela III",
+        "observacao": "Combinação de dois ingredientes; o contrafactual contra BuggyCode é do pacote. Na matriz da Tabela III, a combinação também difere de BuggyCode+TestFile só em TestOutput e de BuggyCode+TestOutput só em TestFile, contrastes que o estudo comenta qualitativamente (efeito limitado pela redundância do TestFile), sem análise específica."
+      },
+      {
+        "nome_original": "Full-information combination: BuggyCode + Description + BuggyLine + PDG + TestFile + TestOutput",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 (impressa 323), seções III.C e III.D (ordem BuggyCode → Description → BuggyLine → PDG → TestFile → TestOutput); p. 6 (impressa 324), Tabela III",
+        "observacao": "Pacote com as cinco informações auxiliares; o contrafactual contra BuggyCode não autoriza atribuir o ganho ou a perda a um tipo de informação específico."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Six LLMs across three tiers (open-source lightweight, open-source advanced, commercial state-of-the-art)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre seis modelos sob a mesma informação (RQ3); as diferenças entre modelos não são efeito de prompting.",
+        "localizador": "p. 5 (impressa 323), seção IV.B.2 e Tabela I; p. 8 (impressa 326), RQ3"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-Coder:7B-Instruct", "versao": "nao_informado", "observacao": "7B parâmetros, implantação local (Tabela I). Snapshot e ferramenta de implantação não informados."},
+      {"nome": "Qwen2.5-Coder:14B-Instruct", "versao": "nao_informado", "observacao": "14B parâmetros, implantação local; descrito como 'main model' na seção II.B."},
+      {"nome": "CodeLlama:7B-Instruct", "versao": "nao_informado", "observacao": "7B parâmetros, implantação local."},
+      {"nome": "CodeLlama:13B-Instruct", "versao": "nao_informado", "observacao": "13B parâmetros, implantação local."},
+      {"nome": "Qwen3-Coder-480B-A35B-Instruct", "versao": "nao_informado", "observacao": "480B nominais, 35B ativados; chamada por API (serviço em nuvem). Data de acesso não informada. Na Tabela V aparece como 'Qwen3-Coder-480B-Instruct'."},
+      {"nome": "DeepseekV3.2", "versao": "nao_informado", "observacao": "Escala não divulgada; chamada por API. Data de acesso não informada."}
+    ],
+    "benchmarks": [
+      {"nome": "QuixBugs (Python subset)", "versao": "nao_informado", "quantidade": "40 programs (40 bugs)", "observacao": "Programas de 5-45 linhas com defeitos semânticos, cada um com versão correta e suíte de testes. Na Tabela III, Success + Fail = 40 em todas as células, o que liga o denominador da RSR aos 40 programas."}
+    ],
+    "metricas": [
+      {"nome": "Repair Success Rate (RSR)", "definicao": "Seção IV.C: '(Number of successfully repaired test cases / Total number of test cases) × 100%'; seção V.A: '(Number of successfully repaired cases / Total number of test cases) × 100%'. Reparo bem-sucedido: o patch passa em todos os testes oficiais do caso. 'Test cases' é usado no sentido de programas/casos (40).", "localizador": "p. 6 (impressa 324), seção IV.C; p. 7 (impressa 325), seção V.A"},
+      {"nome": "Success / Fail (contagem)", "definicao": "Número de programas reparados e não reparados por modelo e combinação (Tabela III); 'Successful Repair Number' na Tabela V.", "localizador": "p. 6 (impressa 324), Tabela III; p. 8 (impressa 326), Tabela V"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "Somente o subconjunto Python do QuixBugs."}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O arquivo de testes contém grande proporção de conteúdo redundante que distrai o modelo da localização do defeito, com queda de RSR em parte dos modelos.",
+        "localizador": "p. 7 (impressa 325), seção V.B.2 (Low-Value Information)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Descrições nativas ambíguas do QuixBugs podem levar modelos de alta capacidade (por exemplo, DeepseekV3.2) a modificar código não central, causando quedas de RSR.",
+        "localizador": "p. 7 (impressa 325), seção V.B.1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Em modelos de baixa capacidade, informação redundante causa sobrecarga de contexto e dispersão de atenção, reduzindo a RSR das combinações (efeito inibitório).",
+        "localizador": "p. 1 (impressa 319), resumo; p. 8 (impressa 326), seção V.B.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação de generalização apresentada pelo estudo: conjunto pequeno (40 casos) e idealizado do QuixBugs, sem projetos grandes nem erros de sintaxe, e apenas seis modelos testados.",
+        "localizador": "p. 9 (impressa 327), seção VI.C"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Template de prompt unificado aplicado a todos os modelos para eliminar viés de entrada.", "avaliada": "nao", "localizador": "p. 4 (impressa 322), seção III.A.1; p. 5 (impressa 323), seção III.D"},
+      {"descricao": "Regras padronizadas de extração de cada tipo de informação para eliminar diferenças de qualidade da informação.", "avaliada": "nao", "localizador": "p. 4 (impressa 322), seção III.A.2"},
+      {"descricao": "Ordem fixa das informações nas combinações para garantir coerência lógica do prompt e evitar confusão.", "avaliada": "nao", "localizador": "p. 5 (impressa 323), seção III.D"},
+      {"descricao": "Diretriz prática: usar o TestFile só em combinação com TestOutput, em modelos comerciais, após limpeza de redundância; a limpeza de redundância não foi executada nem avaliada.", "avaliada": "nao", "localizador": "p. 9 (impressa 327), seção VI.B"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a Tabela III: a resposta à RQ1 diz que Description e BuggyLine melhoram a RSR 'by 7.5–10pp for all models', mas na Tabela III DeepseekV3.2 cai de 85 para 80 com Description e com BuggyLine; Qwen2.5-Coder:14B sobe de 82.5 para 85 com BuggyLine e CodeLlama:13B de 10 para 12.5 com Description (diferenças por cálculo próprio de 2.5 p.p.).",
+        "localizador": "p. 8 (impressa 326), resposta à RQ1; p. 6 (impressa 324), Tabela III"
+      },
+      {
+        "descricao": "Narrativa contradiz a Tabela III para PDG e TestOutput ('only benefit high-capability models'): Qwen2.5-Coder:7B sobe de 62.5 para 70 com TestOutput e CodeLlama:13B de 10 para 17.5; Qwen2.5-Coder:14B, classificado como avançado, cai de 82.5 para 72.5 com TestOutput.",
+        "localizador": "p. 8 (impressa 326), resposta à RQ1; p. 7 (impressa 325), seção V.B.2; p. 6 (impressa 324), Tabela III"
+      },
+      {
+        "descricao": "Narrativa sobre TestFile ('reducing RSR by 2.5–5pp') não vale para todos os modelos: na Tabela III, Qwen3-Coder-480B sobe de 82.5 para 90, CodeLlama:7B de 10 para 15 e Qwen2.5-Coder:14B fica em 82.5; o resumo restringe a 'in most cases' (queda em 3 de 6 modelos, contagem própria).",
+        "localizador": "p. 8 (impressa 326), resposta à RQ1; p. 1 (impressa 319), resumo; p. 6 (impressa 324), Tabela III"
+      },
+      {
+        "descricao": "O texto afirma que CodeLlama:7B e CodeLlama:13B têm '10% vs 12.5% in baseline', mas na Tabela III ambos têm 10 na linha BuggyCode; 12.5 aparece para CodeLlama:13B em outras linhas (por exemplo, Description, PDG, combinações).",
+        "localizador": "p. 8 (impressa 326), seção V.B.3; p. 6 (impressa 324), Tabela III"
+      },
+      {
+        "descricao": "A Tabela V lista 'Qwen2.5-Coder:7B-Instruct' com 28 reparos e 70.0 sem indicar a combinação; na Tabela III, a combinação completa desse modelo tem 27 e 67.5, e 28/70 corresponde a Description, BuggyLine ou TestOutput. As linhas sem rótulo de condição da Tabela V (Qwen2.5-Coder:14B 36/90.0, Qwen3 39/97.5, DeepseekV3.2 36/90.0) coincidem com a combinação completa, de modo que a condição da linha do Qwen2.5-Coder:7B é ambígua.",
+        "localizador": "p. 8 (impressa 326), Tabela V; p. 6 (impressa 324), Tabela III"
+      },
+      {
+        "descricao": "Definição da RSR varia entre seções ('successfully repaired test cases' na seção IV.C e 'successfully repaired cases' na seção V.A, ambos sobre 'Total number of test cases'); pela Tabela III o denominador é 40 programas.",
+        "localizador": "p. 6 (impressa 324), seção IV.C; p. 7 (impressa 325), seção V.A"
+      },
+      {
+        "descricao": "A resposta à RQ4 diz '10%–17.5% higher than the top classic LLM-based method'; pela Tabela V (AlphaRepair 80.0; modelos 90.0–97.5) são diferenças em p.p. (cálculo próprio), impressas com '%'.",
+        "localizador": "p. 8 (impressa 326), resposta à RQ4 e Tabela V"
+      },
+      {
+        "descricao": "As linhas de base de APR da Tabela V (CoCoNut, DeepDebug, AlphaRepair, INCODER 6.7B, GPT-J, CodexRepair) trazem referências a artigos anteriores; o estudo afirma que foram avaliadas no mesmo subconjunto de 40 bugs, mas não diz se foram reexecutadas ou copiadas desses artigos, nem as condições (modelos, amostras, localização de falha). Não são condições de prompting e não foram usadas nas extrações.",
+        "localizador": "p. 6 (impressa 324), seção IV.D e Tabela II; p. 8 (impressa 326), Tabela V"
+      },
+      {
+        "descricao": "Número de execuções, temperatura e demais parâmetros de decodificação não informados; um patch por chamada é descrito ('obtain the generated patch'), sem repetições nem teste estatístico, embora o texto use 'significant' e 'significantly'. Diferenças de 1 programa equivalem a 2.5 p.p. no denominador de 40.",
+        "localizador": "p. 6 (impressa 324), seção IV.C; p. 1 (impressa 319), resumo; p. 7 (impressa 325), seção V.B.2"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "BuggyLine é obtida comparando a versão defeituosa com a correta do QuixBugs, isto é, localização de falha a partir da solução de referência, condição mais favorável que a de uso real.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"descricao": "O PDG é construído com um parser de AST não nomeado; o TestOutput é capturado automaticamente pela execução dos testes sobre o código defeituoso.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"descricao": "RQ4 compara os modelos com ferramentas de APR (Tabela V); é comparação entre sistemas, não entre técnicas de prompting.", "localizador": "p. 8 (impressa 326), Tabela V e resposta à RQ4"},
+      {"descricao": "O princípio 5 do system prompt menciona testes e saída de testes '(if provided)' e permanece em todas as condições, inclusive nas que não fornecem testes.", "localizador": "p. 5 (impressa 323), seção III.D.1"},
+      {"descricao": "O estudo atribui as diferenças entre modelos a um 'triple dividend' (escala, otimização de engenharia, adaptação à tarefa) sem experimento que isole esses fatores.", "localizador": "p. 7 (impressa 325), seção V.B.1 e Tabela IV"},
+      {"descricao": "Trabalhos futuros incluem ablação de prompt e visualização de atenção, Defects4J 2.0 e outras linguagens; não há resultados dessas extensões.", "localizador": "p. 9 (impressa 327), seção VI.D"}
+    ],
+    "citacoes": [
+      {"trecho": "Experimental results reveal that code description and BuggyLine are universal high-value information for all models, while PDG and TestOutput only benefit high-capability models, and TestFile acts as low-value noise with inhibitory effects in most cases.", "localizador": "p. 1 (impressa 319), resumo"},
+      {"trecho": "High-capability commercial models exhibit significant synergistic effects with full-information combinations, achieving a maximum Repair Success Rate (RSR) of 97.5%, while low-capability models suffer from context overload due to redundant information.", "localizador": "p. 1 (impressa 319), resumo"},
+      {"trecho": "BuggyCode: Directly extract the buggy code from the QuixBugs dataset with comment sections removed, as illustrated in Fig. 2.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "Description: For each Python buggy code snippet in the QuixBugs dataset, a functional description of the code is provided immediately after the code block, as shown in Fig. 2.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "BuggyLine: QuixBugs provides both buggy and correct versions of the code; the BuggyLine is identified by comparing these two versions.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "PDG (Program Dependence Graph): Encompasses data dependencies and control dependencies associated with the buggy line within the target function.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "TestFile: The test file corresponding to the buggy code in the QuixBugs dataset.", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "TestOutput: Execution results of buggy code from test file runs, autocapturing error-containing test logs with key info like test case pass/fail status, input parameters, expected/actual outputs and error code lines (e.g. for bucketsort in Quixbugs: “6 failed, 1 passed”, “input_data = [[8,5,3,1,9,6, …],10], expected = [0,1,2,3,4,5, …]”, “test_bucketsort.py:26: AssertionError”).", "localizador": "p. 4 (impressa 322), seção III.B"},
+      {"trecho": "Evaluate the independent impact of each auxiliary information type on repair performance, identifying high-value and low-value information.", "localizador": "p. 4 (impressa 322), seção III.C"},
+      {"trecho": "1 Test-related combination: BuggyCode + TestFile + TestOutput, integrate test-related information to explore the synergistic effect of test feedback (TestOutput) and test logic (TestFile) on repair.", "localizador": "p. 5 (impressa 323), seção III.C"},
+      {"trecho": "1 Full-information combination: BuggyCode + Description + BuggyLine + PDG + TestFile + TestOutput, include all 6 information types to explore the upper limit of information integration and potential inhibitory effects between information.", "localizador": "p. 5 (impressa 323), seção III.C"},
+      {"trecho": "To ensure that all LLMs follow the same repair constraints and output format, we design a unified Prompt template, which is divided into system prompts and task prompts:", "localizador": "p. 5 (impressa 323), seção III.D"},
+      {"trecho": "You are a senior Python development expert, proficient in code debugging and bug fixing, especially in resolving Python semantic errors and runtime errors caused by logical flaws (e.g., incorrect loop conditions, wrong variable assignments).", "localizador": "p. 5 (impressa 323), seção III.D.1"},
+      {"trecho": "1. Only return the fixed pure Python core code, without any additional content;", "localizador": "p. 5 (impressa 323), seção III.D.1 (Output Requirements)"},
+      {"trecho": "Single information enhancement scenario: Insert the corresponding auxiliary information into the prompt.", "localizador": "p. 5 (impressa 323), seção III.D.2"},
+      {"trecho": "Combined information scenario: Arrange the information in the order of “ BuggyCode → TestFile → TestOutput” or “BuggyCode → Description → BuggyLine → PDG → TestFile → TestOutput” to ensure the logical coherence of the prompt and avoid information confusion.", "localizador": "p. 5 (impressa 323), seção III.D.2"},
+      {"trecho": "Call each LLM with the Prompt, obtain the generated patch.", "localizador": "p. 6 (impressa 324), seção IV.C"},
+      {"trecho": "Execute the test case on the patch to verify whether it passes all tests; if passed, mark it as a successful repair.", "localizador": "p. 6 (impressa 324), seção IV.C"},
+      {"trecho": "Evaluation Metrics: Core metric: Repair Success Rate (RSR) = (Number of successfully repaired test cases / Total number of test cases) × 100%.", "localizador": "p. 6 (impressa 324), seção IV.C"},
+      {"trecho": "All base-lines are evaluated on the same QuixBugs Python subset (40 bugs) to ensure fair comparison, with the core metric being the Repair Success Rate (RSR) of our models versus the baselines under this consistent dataset.", "localizador": "p. 6 (impressa 324), seção IV.D"},
+      {"trecho": "Ambiguous native descriptions in QuixBugs may mislead high-capability models (e.g., DeepseekV3.2) to modify non-core code, causing temporary RSR drops.", "localizador": "p. 7 (impressa 325), seção V.B.1"},
+      {"trecho": "Core reason: Test files contain a large proportion of redundant content, with valid test logic making up only a small fraction, which distracts models from defect localization.", "localizador": "p. 7 (impressa 325), seção V.B.2"},
+      {"trecho": "Inhibitory mechanism: Low-capability models lack information weight assignment capabilities, leading to context overload and attention dispersion from redundant information.", "localizador": "p. 8 (impressa 326), seção V.B.3"},
+      {"trecho": "Notably, CodeLlama:7B and CodeLlama:13B achieve nearly identical RSR (10% vs 12.5% in baseline), with no significant gain from parameter scaling.", "localizador": "p. 8 (impressa 326), seção V.B.3"},
+      {"trecho": "Description and BuggyLine are universally high-value (improving RSR by 7.5–10pp for all models); PDG and TestOutput only benefit high-capability models.", "localizador": "p. 8 (impressa 326), resposta à RQ1"},
+      {"trecho": "TestFile is low-value noise (reducing RSR by 2.5–5pp).", "localizador": "p. 8 (impressa 326), resposta à RQ1"},
+      {"trecho": "Avoided information: Independent TestFile (low-value noise, only used in combination with TestOutput for commercial models after redundancy cleaning).", "localizador": "p. 9 (impressa 327), seção VI.B"},
+      {"trecho": "Dataset Limitations: The study only uses the QuixBugs Python subset (40 cases), which is small—results may not generalize to large-scale projects, syntax errors.", "localizador": "p. 9 (impressa 327), seção VI.C"},
+      {"trecho": "Model Coverage Limitations: Only 6 models are tested, lacking coverage of emerging code-specific LLMs (e.g., CodeLlama 70B, StarCoder) and multilingual models—future studies should include more diverse models to verify the generalizability of the “triple dividend” framework.", "localizador": "p. 9 (impressa 327), seção VI.C"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "BuggyCode+Description",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 70},
+      "denominador": "40 programas (Success + Fail = 40 em cada linha da Tabela III: 25/15 e 28/12)",
+      "condicoes": "Mesmo template de prompt (system prompt com persona, princípios e requisitos de saída); um patch por chamada; temperatura, número de execuções e implantação (ferramenta local) não informados. Valores conferidos visualmente na Tabela III (p. 6).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam vários tipos de informação e combinações sem que um prevaleça. Primeira tabela com o contraste (Tabela III), primeira métrica (Rate %), primeiro modelo listado (Qwen2.5-Coder:7B-Instruct), linha de base BuggyCode e primeira condição de intervenção na ordem das linhas (BuggyCode+Description).",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+Description', colunas Qwen2.5-Coder:7B-Instruct (Success, Fail, Rate (%))",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) para Qwen2.5-Coder:7B-Instruct, Qwen2.5-Coder:14B-Instruct, Codellama:7B-Instruct, Codellama:13B-Instruct, Qwen3-Coder-480B-A35B-Instruct, DeepseekV3.2"},
+        {"trecho": "BuggyCode+Description 28 12 70 36 4 90 8 32 20 5 35 12.5 36 4 90 32 8 80", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "BuggyCode+BuggyLine",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 70},
+      "denominador": "40 programas (25/15 e 28/12 na Tabela III)",
+      "condicoes": "Linha defeituosa obtida por comparação com a versão correta (localização perfeita). Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; exceção ao alvo de três para cobrir as sete condições focais que o estudo avalia em linhas separadas. Mesmo modelo, métrica e linha de base da primeira extração, pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+BuggyLine', colunas Qwen2.5-Coder:7B-Instruct",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+BuggyLine 28 12 70 34 6 85 7 33 17.5 6 34 15 37 3 92.5 32 8 80", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "BuggyCode+PDG",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 55},
+      "denominador": "40 programas (25/15 e 22/18 na Tabela III)",
+      "condicoes": "PDG extraído com parser de AST não nomeado. Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6); o texto da seção V.B.2 também cita a queda para 55% neste modelo.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (exceção ao alvo para cobrir as condições focais), pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+PDG', colunas Qwen2.5-Coder:7B-Instruct",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+PDG 22 18 55 32 8 80 5 35 12.5 5 35 12.5 36 4 90 35 5 87.5", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "BuggyCode+TestFile",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 57.5},
+      "denominador": "40 programas (25/15 e 23/17 na Tabela III)",
+      "condicoes": "Arquivo de testes do QuixBugs inserido no prompt. Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6); o texto da seção V.B.2 cita '62.5% → 57.5%' para este modelo.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (exceção ao alvo para cobrir as condições focais), pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+TestFile', colunas Qwen2.5-Coder:7B-Instruct; p. 7 (impressa 325), seção V.B.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+TestFile 23 17 57.5 33 7 82.5 6 34 15 3 37 7.5 36 4 90 32 8 80", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas"},
+        {"trecho": "TestFile: Adding TestFile causes performance degradation for most models (e.g., DeepseekV3.2 from 85% → 80%, Qwen2.5-Coder:7B-Instruct from 62.5% → 57.5%);", "localizador": "p. 7 (impressa 325), seção V.B.2"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "BuggyCode+TestOutput",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 70},
+      "denominador": "40 programas (25/15 e 28/12 na Tabela III)",
+      "condicoes": "Log de execução dos testes sobre o código defeituoso, obtido uma vez antes da geração, sem ciclo de retorno com o patch. Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (exceção ao alvo para cobrir as condições focais), pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+TestOutput', colunas Qwen2.5-Coder:7B-Instruct",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+TestOutput 28 12 70 29 11 72.5 5 35 12.5 7 33 17.5 37 3 92.5 35 5 87.5", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Test-related combination: BuggyCode + TestFile + TestOutput",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 67.5},
+      "denominador": "40 programas (25/15 e 27/13 na Tabela III)",
+      "condicoes": "Informações na ordem BuggyCode → TestFile → TestOutput. Contraste de pacote (dois ingredientes). Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6), onde o rótulo da linha está quebrado como 'BuggyCode+TestFile+TestO utput'.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (combinação) ainda não representada (exceção ao alvo para cobrir as condições focais), pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+TestFile+TestOutput', colunas Qwen2.5-Coder:7B-Instruct",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+TestFile+TestOutput 27 13 67.5 31 9 77.5 7 33 17.5 5 35 12.5 36 4 90 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas (rótulo da linha quebrado em duas linhas na tabela)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Full-information combination: BuggyCode + Description + BuggyLine + PDG + TestFile + TestOutput",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BuggyCode (baseline)",
+      "modelo": "Qwen2.5-Coder:7B-Instruct",
+      "benchmark": "QuixBugs (Python subset, 40 programs)",
+      "metrica": "Rate (%) — Repair Success Rate (RSR). Definição varia entre 'successfully repaired test cases' (seção IV.C) e 'successfully repaired cases' (seção V.A).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 62.5, "intervencao": 67.5},
+      "denominador": "40 programas (25/15 e 27/13 na Tabela III)",
+      "condicoes": "Informações na ordem BuggyCode → Description → BuggyLine → PDG → TestFile → TestOutput. Contraste de pacote; o resultado não é atribuível a um tipo de informação. Mesmo template; temperatura e número de execuções não informados. Valores conferidos visualmente na Tabela III (p. 6). A Tabela V lista este modelo com 28/70.0 sem rótulo de condição, valor diferente de 27/67.5 (ver heterogeneidade); registrado o valor da Tabela III.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (combinação completa) ainda não representada (exceção ao alvo para cobrir as condições focais), pela ordem da Tabela III.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 324), Tabela III, linhas 'BuggyCode' e 'BuggyCode+Description +BuggyLine+PDG +TestFile+TestOutput', colunas Qwen2.5-Coder:7B-Instruct",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BuggyCode 25 15 62.5 33 7 82.5 4 36 10 4 36 10 33 7 82.5 34 6 85", "localizador": "p. 6 (impressa 324), Tabela III, coluna Code information e colunas Success, Fail, Rate (%) por modelo"},
+        {"trecho": "BuggyCode+Description +BuggyLine+PDG +TestFile+TestOutput 27 13 67.5 36 4 90 4 36 10 5 35 12.5 39 1 97.5 36 4 90", "localizador": "p. 6 (impressa 324), Tabela III, mesmas colunas (rótulo da linha em três linhas na tabela)"},
+        {"trecho": "Qwen2.5-Coder:7B’s full-information combination RSR (67.5%) is lower than single high-value information scenarios (70% for Description/BuggyLine/TestOutput); CodeLlama series’ full-information combination RSR (10%/12.5%) is no higher or nearly than the baseline.", "localizador": "p. 7 (impressa 325), seção V.B.3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (efeito de cada tipo de informação, combinações, diferenças entre modelos e comparação com APR existente).", "localizador": "p. 2 (impressa 320), seção I"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Template de prompt transcrito, regras de extração e passos do protocolo descritos; faltam temperatura e demais parâmetros, número de execuções, ferramenta de implantação local, parser de AST usado no PDG e formato exato de inserção de cada informação.", "localizador": "p. 4-6 (impressas 322-324), seções III.B, III.D e IV.C"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "A condição BuggyCode é executada em todos os modelos com o mesmo template, permitindo contraste com cada informação adicionada; as linhas de base de APR da Tabela V (RQ4) têm origem e condições não descritas, mas não afetam o contraste de prompting.", "localizador": "p. 6 (impressa 324), seção IV.C e Tabela III; p. 8 (impressa 326), Tabela V"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "RSR definida e denominador de 40 verificável pela Tabela III (Success + Fail = 40), mas a definição varia entre seções, a Tabela V traz para Qwen2.5-Coder:7B um valor (28/70.0) sem condição identificada e diferente da combinação completa na Tabela III, e o texto atribui à linha de base do CodeLlama:13B um valor (12.5%) diferente da tabela.", "localizador": "p. 6 (impressa 324), seção IV.C e Tabela III; p. 7 (impressa 325), seção V.A; p. 8 (impressa 326), Tabela V e seção V.B.3"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Há seção de limitações sobre tamanho e idealização do QuixBugs e cobertura de modelos, mas não discute não determinismo, ausência de repetições ou testes estatísticos, contaminação nem o uso da versão correta para obter a BuggyLine.", "localizador": "p. 9 (impressa 327), seção VI.C"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Prompt de sistema e estrutura do task prompt transcritos e benchmark público, mas sem versões ou snapshots dos modelos, datas de acesso às APIs, parâmetros de decodificação, código ou dados disponibilizados.", "localizador": "p. 5 (impressa 323), seção III.D e Tabela I"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O texto completo não discute a possível presença do QuixBugs (público desde 2017) nos dados de pré-treinamento dos modelos.", "localizador": "p. 3 (impressa 321), seção II.C; p. 9 (impressa 327), seção VI.C"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (10 páginas, incluindo referências).",
+    "paginas_pdf_abertas": [4, 5, 6, 7, 8, 9]
+  }
+}

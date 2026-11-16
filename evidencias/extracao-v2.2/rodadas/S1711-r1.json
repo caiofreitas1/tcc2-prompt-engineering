@@ -1,0 +1,268 @@
+{
+  "estudo": "S1711",
+  "texto_fonte": "fontes/textos/lote/S1711.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "LLM-based multi-agent framework (Hardware-in-the-Loop) — S1: Application generation and optimization",
+        "mecanismos": ["instrucao", "multiagente", "contexto", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 do PDF (sem número impresso), resumo; p. 4 do PDF, seção III e III-A/III-B; p. 5 do PDF, seções III-C e IV-A; p. 7 do PDF, Tabela II",
+        "observacao": "Framework proposto pelo estudo, instanciado no cenário S1 (geração do zero de código CUDA de estresse para GPU). Três agentes com system prompts específicos de papel (Stress Code Expert, Code Fixer, Refiner) usando o mesmo LLM; prompt template ad hoc com a tupla I = (f, t) (arquitetura-alvo RTX 3060 Ti/CUDA 11.6 e duração de 300 s) e exigência de código compatível com nvcc (restricoes); o Code Fixer recebe o código incorreto e o log de erro de compilação ou execução, e o Refiner recebe o código e as métricas de profiling/telemetria e devolve diretivas textuais ao Stress Code Expert, que mantém o código anterior (contexto, feedback); fases encadeadas de geração, validação/depuração e refinamento (decomposicao). Sem prompt base identificável, por isso a lista de acrescentados é vazia. As comparações da Tabela II são com aplicações humanas do GPU-Rodinia (Back propagation, Needleman, Hotspot), que não são condição 'sem a técnica' para a mesma tarefa; não há ablação de agentes, de feedback ou de prompts. Pacote híbrido: inclui profiler, execução em hardware, módulo de parsing, Makefile padronizado, limites de iteração e temperatura de geração (fora do escopo)."
+      },
+      {
+        "nome_original": "LLM-based multi-agent framework (Hardware-in-the-Loop) — S2: Kernel refinement",
+        "mecanismos": ["instrucao", "multiagente", "contexto", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 do PDF (sem número impresso), seção IV-A; p. 6 do PDF, seção IV-B; p. 7 do PDF, Tabela III e seção V-B",
+        "observacao": "Mesmo framework, configurado com system prompts distintos e avaliado em tabela separada: o código original do GPU-Burn (C++) é injetado como candidato inicial C0, pulando a fase gerativa da primeira iteração; o Stress Code Expert gera PTX integrado ao código C++ existente e compatível com g++, o Code Fixer depura C++/PTX e o Refiner orienta a exploração de variantes de multiplicação de matrizes mais intensivas. O código do repositório fornecido como insumo entra em contexto. Contrafactual de pacote: a linha GPU-burn da Tabela III é o código sem o laço de refinamento, perfilado sob as mesmas condições de entrada I = (f, t) (seção IV-B); o estudo não declara explicitamente que essa medição é a mesma de M0. O 'sim' vale para o pacote híbrido (agentes, feedback de hardware, profiler, escolha de modelo, temperatura 0.2, limites de iteração) e não autoriza atribuir a diferença a um mecanismo de prompting. Sem prompt base identificável (o comparador é código humano, não um prompt), por isso a lista de acrescentados é vazia."
+      },
+      {
+        "nome_original": "Stress Code Expert Agent",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (sem número impresso), seção III e III-A; p. 5 do PDF, seção IV-A",
+        "observacao": "Gerador principal, guiado por prompt template ad hoc e system prompt de papel; recebe as diretivas do Refiner e mantém o código anterior. Não há condição sem este agente."
+      },
+      {
+        "nome_original": "Code Fixer Agent",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (sem número impresso), seção III-B; p. 6 do PDF, Tabela I",
+        "observacao": "Laço aninhado de correção com logs de erro de compilação (E_comp) e de execução (E_exec), até N_comp = 5 e N_exec = 5 tentativas. A Tabela I conta as correções por modelo, mas não há condição sem o agente."
+      },
+      {
+        "nome_original": "Refiner Agent",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (sem número impresso), seção III; p. 5 do PDF, seção III-C",
+        "observacao": "Recebe (C_valid,i, M_i) e produz diretivas textuais S_i para o Stress Code Expert; laço global até H_target = 59.8 °C ou R_max = 5. Não há condição sem o agente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "generation temperature fixed at 0.2",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de geração fixada em 0.2 para todos os modelos.",
+        "localizador": "p. 6 do PDF (sem número impresso), seção IV-C"
+      },
+      {
+        "nome_original": "evaluated suite of seven LLMs",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre sete LLMs (4B a 120B parâmetros e dois proprietários), cada um usado como LLM central de todos os agentes; diferenças entre modelos não são efeito de prompting.",
+        "localizador": "p. 6 do PDF (sem número impresso), seção IV-C; p. 2 do PDF, resumo"
+      },
+      {
+        "nome_original": "R_max, N_comp, N_exec limits and H_target stopping criterion",
+        "natureza": "orcamento",
+        "descricao": "Limites de 5 iterações globais e de 5 tentativas de correção de compilação e de execução, determinados por experimentos preliminares não relatados; critério de parada pela temperatura de 59.8 °C do GPU-burn.",
+        "localizador": "p. 6 do PDF (sem número impresso), seção IV-B"
+      },
+      {
+        "nome_original": "application profiler (Hardware-in-the-Loop)",
+        "natureza": "outro",
+        "descricao": "Profiler que executa o binário na GPU-alvo e coleta throughput, stalls, temperatura e energia no vetor M_i, que alimenta o Refiner; ferramenta de medição, não prompting.",
+        "localizador": "p. 5 do PDF (sem número impresso), seções III-C e IV-B"
+      },
+      {
+        "nome_original": "parsing module and standardized Makefile template",
+        "natureza": "outro",
+        "descricao": "Módulo que isola o código-fonte da resposta e o salva como arquivo compilável; Makefile padronizado (S1) ou toolchain g++ com opções originais (S2) para compilar sob condições idênticas.",
+        "localizador": "p. 4 do PDF (sem número impresso), seções III-A e III-B; p. 5 do PDF, seção IV-A"
+      }
+    ],
+    "modelos": [
+      {"nome": "gemma-3n-E4B-it", "versao": "nao_informado", "observacao": "Open-weight, 4B parâmetros segundo o texto; snapshot e forma de acesso não informados."},
+      {"nome": "Llama-3.1-8B", "versao": "nao_informado", "observacao": "Open-weight. Abortado (5*) em S1 e S2 na Tabela I, mas aparece como linha nas Tabelas II e III (ver heterogeneidade)."},
+      {"nome": "gpt-oss-20B", "versao": "nao_informado", "observacao": "Open-weight; abortado (5*) em S1 e S2."},
+      {"nome": "Llama-3.3-70B", "versao": "nao_informado", "observacao": "Open-weight; bem-sucedido em S1 e S2 segundo a Tabela I e o texto, mas ausente das Tabelas II e III."},
+      {"nome": "gpt-oss-120B", "versao": "nao_informado", "observacao": "Open-weight; bem-sucedido em S1, abortado em S2."},
+      {"nome": "gpt-5.2", "versao": "nao_informado", "observacao": "Proprietário, parâmetros não divulgados; bem-sucedido em S1 e S2."},
+      {"nome": "gemini-2.5-pro", "versao": "nao_informado", "observacao": "Proprietário, parâmetros não divulgados; abortado em S1, bem-sucedido em S2."}
+    ],
+    "benchmarks": [
+      {"nome": "Cenário S1 — geração de workload de estresse para GPU", "versao": "nao_aplicavel", "quantidade": "uma tarefa: f = RTX 3060 TI com CUDA 11.6 (8GB VRAM), t = 300 seconds, executada para cada um dos 7 modelos; número de execuções por modelo nao_informado", "observacao": "Não é benchmark público; comparação com aplicações do GPU-Rodinia (Back propagation, Needleman, Hotspot), cuja duração e entradas de execução não são informadas."},
+      {"nome": "Cenário S2 — refinamento do GPU-Burn", "versao": "nao_informado", "quantidade": "uma tarefa (GPU-Burn original, 733 LoC) para cada um dos 7 modelos; número de execuções nao_informado", "observacao": "GPU-Burn [6], [11] como candidato inicial e referência; também linha de base M×M em CUDA 'processing 4069 squared matrices' (valor como impresso)."}
+    ],
+    "metricas": [
+      {"nome": "Compilation Fixes / Execution Fixes", "definicao": "número de tentativas de correção do Code Fixer; 0 = sucesso na primeira tentativa; 5* = abortado ao atingir N_comp = 5", "localizador": "p. 6 do PDF (sem número impresso), Tabela I e nota"},
+      {"nome": "Temperature (°C)", "definicao": "temperatura (pico, segundo a seção V-B) da GPU durante a execução; métodos de medição e intervalo não detalhados", "localizador": "p. 5-6 do PDF, seção IV-B; p. 7 do PDF, Tabelas II e III"},
+      {"nome": "Energy (J)", "definicao": "energia gasta pela GPU durante a execução; intervalo de medição das aplicações de referência não informado", "localizador": "p. 6 do PDF, seção IV-B; p. 7 do PDF, Tabelas II e III"},
+      {"nome": "Throughput (%) (TH)", "definicao": "intensidade de uso das unidades de execução da GPU", "localizador": "p. 5 do PDF, seção IV-B"},
+      {"nome": "Stalls (%) (S_act)", "definicao": "percentual de eventos de stall devidos à atividade interna", "localizador": "p. 5 do PDF, seção IV-B"},
+      {"nome": "LoC", "definicao": "linhas de código, como indicador de complexidade estrutural", "localizador": "p. 6 do PDF, seção IV-B"}
+    ],
+    "linguagens": [
+      {"nome": "CUDA", "observacao": "S1, compilado com nvcc; CUDA 11.6."},
+      {"nome": "C++ com PTX", "observacao": "S2, PTX integrado ao código C++ do GPU-Burn, compilado com g++."}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Vários modelos não produzem código compilável e o framework aborta ao atingir N_comp = 5 (3 de 7 em S1 e 4 de 7 em S2, segundo a Tabela I); modificar um kernel de código existente é mais difícil por exigir preservar dependências estruturais do programa original. O estudo situa o gargalo na sintaxe e tipagem estática.",
+        "localizador": "p. 6 do PDF (sem número impresso), seção V-A e Tabela I; p. 7 do PDF, seção V-A"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Cadeias longas de modificação levam à perda de coerência contextual dos modelos, a laços improdutivos ou a modificações que degradam o desempenho de estresse (motivo dos limites de iteração).",
+        "localizador": "p. 6 do PDF (sem número impresso), seção IV-B"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Em S2, as variantes refinadas são mais verbosas que o GPU-Burn original (até 1,017 LoC); o estudo apresenta o aumento de stalls e de complexidade do código como o preço do ganho de throughput. O estudo trata LoC como complexidade estrutural, sem medir manutenibilidade.",
+        "localizador": "p. 7 do PDF (sem número impresso), seção V-B"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Limites de N_comp = 5, N_exec = 5 e R_max = 5, com aborto da execução, para evitar laços infinitos; valores definidos por experimentos preliminares não relatados.", "avaliada": "nao", "localizador": "p. 4 do PDF (sem número impresso), seção III-B; p. 6 do PDF, seção IV-B"},
+      {"descricao": "Makefile padronizado para compilar todas as aplicações sob condições idênticas.", "avaliada": "nao", "localizador": "p. 4 do PDF (sem número impresso), seção III-B"},
+      {"descricao": "Temperatura de geração 0.2 escolhida, com base em [12], para maximizar a probabilidade de código funcionalmente correto na primeira tentativa.", "avaliada": "nao", "localizador": "p. 6 do PDF (sem número impresso), seção IV-C"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Rótulo de modelo divergente: as Tabelas II (S1) e III (S2) trazem a linha 'Llama-3.1-8B', mas a Tabela I mostra Llama-3.1-8B abortado (5*) nos dois cenários e Llama-3.3-70B bem-sucedido (0 em S1; 1 em S2), e o texto lista Llama-3.3-70B entre os workloads avançados para a avaliação física. Não se decide qual rótulo é o correto.",
+        "localizador": "p. 6 do PDF (sem número impresso), Tabela I; p. 7 do PDF, Tabelas II e III e seção V-A"
+      },
+      {
+        "descricao": "Aparente inconsistência entre o resumo/conclusão e as tabelas: o estudo afirma que as aplicações de S1 atingem 89.9% da temperatura de pico e 77.2% da energia do GPU-Burn. Cálculo próprio com as Tabelas II e III: gpt-5.2 58.11/59.8 ≈ 97.2% da temperatura e 3,421.18/5,700 ≈ 60.0% da energia; gpt-oss-120B 44.92/59.8 ≈ 75.1% e 4,846.69/5,700 ≈ 85.0%. Nenhuma razão direta reproduz 89.9% ou 77.2%; o estudo não informa a base do cálculo. Os percentuais de compactação (80.35% e 37.51%) são compatíveis, por cálculo próprio, com 144 e 458 LoC contra 733 LoC (≈80.35% e ≈37.52%, diferença de arredondamento). A referência de 59.8 °C e 5,700 J do GPU-Burn está na Tabela III (S2), não na Tabela II.",
+        "localizador": "p. 2 do PDF (sem número impresso), resumo; p. 7 do PDF, Tabelas II e III, seções V-B e VI"
+      },
+      {
+        "descricao": "Narrativa versus Tabela I: o resumo afirma que quatro dos sete LLMs 'consistently produce compilable and executable code' e a introdução, que o código 'is consistently compilable and executable'; pela Tabela I, 4 modelos tiveram sucesso em S1 e 3 em S2, e só Llama-3.3-70B e gpt-5.2 tiveram sucesso nos dois cenários.",
+        "localizador": "p. 2 do PDF (sem número impresso), resumo; p. 3 do PDF, introdução; p. 6 do PDF, Tabela I"
+      },
+      {
+        "descricao": "Narrativa versus Tabela III: o texto afirma que, frente ao M×M, todas as variantes refinadas alcançam throughput significativamente maior e perfis térmicos/energéticos melhores, mas a linha Llama-3.1-8B tem throughput 23.36% contra 35.36% do M×M, e a linha gpt-5.2 tem temperatura 51.61 °C contra 52.4 °C do M×M. 'Significantly' é usado sem teste estatístico nem repetições.",
+        "localizador": "p. 7 do PDF (sem número impresso), Tabela III e seção V-B"
+      },
+      {
+        "descricao": "Em S1, o texto diz que os valores 'significantly exceed' os perfis térmicos e energéticos do GPU-Rodinia; a afirmação vale para os valores mais altos (58.11 °C; 4,846.69 J), mas as temperaturas de gpt-oss-120B (44.92 °C) e Llama-3.1-8B (43.01 °C) ficam abaixo das três aplicações Rodinia (50 a 53 °C).",
+        "localizador": "p. 7 do PDF (sem número impresso), Tabela II e seção V-B"
+      },
+      {
+        "descricao": "Nenhuma temperatura das Tabelas II e III atinge H_target = 59.8 °C, e o estudo não informa quantas iterações globais foram executadas por modelo nem se o laço terminou por R_max.",
+        "localizador": "p. 6 do PDF (sem número impresso), seção IV-B; p. 7 do PDF, Tabelas II e III"
+      },
+      {
+        "descricao": "Condições das referências não informadas: duração e entradas das aplicações Rodinia e do M×M não são descritas, embora a energia (J) dependa da duração; temperaturas das aplicações Rodinia impressas como inteiros (52, 53, 50). Número de execuções por aplicação e variabilidade não informados.",
+        "localizador": "p. 7 do PDF (sem número impresso), Tabelas II e III"
+      },
+      {
+        "descricao": "O resumo e a conclusão afirmam redução substancial do tempo de desenvolvimento em relação ao desenvolvimento manual, mas o estudo não apresenta medição de tempo nem de esforço.",
+        "localizador": "p. 2 do PDF (sem número impresso), resumo; p. 7 do PDF, seção VI"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "S2 modifica código existente (GPU-Burn) para explorar variantes de computação mais intensivas via PTX, alterando o comportamento computacional do workload; classificado como geração, e não como refatoração, porque o objetivo declarado não é preservar o comportamento. O reparo pelo Code Fixer é componente do pipeline de geração; a Tabela I conta correções por modelo sem condição comparadora, por isso depuração não foi listada como tarefa avaliada.", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A; p. 6 do PDF, seção V-A"},
+      {"descricao": "Os comparadores (GPU-burn, aplicações GPU-Rodinia e M×M) são aplicações projetadas por humanos, não condições de prompting; não há linha de base de prompting (por exemplo, agente único ou sem feedback) nem ablação dos agentes.", "localizador": "p. 7 do PDF (sem número impresso), seção V-B e Tabelas II e III"},
+      {"descricao": "Os prompts das duas campanhas são indicados no GitHub [33]; o pacote não foi acessado nem validado nesta extração.", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A; p. 8 do PDF, referência [33]"},
+      {"descricao": "Trabalhos futuros: otimização baseada em aprendizado por reforço e outras arquiteturas de hardware; sem resultados.", "localizador": "p. 7 do PDF (sem número impresso), seção VI"}
+    ],
+    "citacoes": [
+      {"trecho": "To address these limitations, we present an empirical study that, for the first time, assesses the ability of Large Language Models (LLMs) to collaborate within a multi-agent iterative framework to automatically generate GPU-stress-testing routines.", "localizador": "p. 2 do PDF (sem número impresso), resumo"},
+      {"trecho": "Experimental results show that four of the seven evaluated LLMs consistently produce compilable and executable code, enabling the automated development of stress-test applications without human intervention and significantly reducing the time needed to obtain a functional prototype compared to manual development.", "localizador": "p. 2 do PDF (sem número impresso), resumo"},
+      {"trecho": "Among the tested LLMs, two, used as the core LLMs for all agents, generated two stress-testing applications that were 80.35% and 37.51% more compact than GPU-Burn (a state-of-the-art stress-testing tool for GPUs), yet still reached 89.9% of GPU-Burn’s peak temperature and 77.2% of its energy consumption.", "localizador": "p. 2 do PDF (sem número impresso), resumo"},
+      {"trecho": "Code Fixer Agent: a dedicated debugger that repairs compilation and runtime failures by analysing error logs;", "localizador": "p. 4 do PDF (sem número impresso), seção III"},
+      {"trecho": "Refiner Agent: a performance analyzer that evaluates profiling feedback to produce code refinement directives, guiding subsequent code generation rounds.", "localizador": "p. 4 do PDF (sem número impresso), seção III"},
+      {"trecho": "This agent receives an ad hoc prompt template as input to guide the model in generating low-level code tailored to the target hardware architecture.", "localizador": "p. 4 do PDF (sem número impresso), seção III-A"},
+      {"trecho": "In the first stage, the generated script is compiled using a standardized Makefile template to ensure that all applications are built under identical conditions and can therefore be fairly compared.", "localizador": "p. 4 do PDF (sem número impresso), seção III-B"},
+      {"trecho": "For this reason, the Refiner Agent receives the tuple (C_valid,i, M_i) as input and it outputs its findings as S_i: structured textual directives on high-level algorithmic implementation.", "localizador": "p. 5 do PDF (sem número impresso), seção III-C (subscritos normalizados)"},
+      {"trecho": "Agents are configured through role-specific system prompts: i) the Stress-Code Expert generates CUDA code compatible with nvcc compiler; ii) the Code Fixer debugs CUDA code with explicit awareness of the nvcc toolchain; iii) the Refiner Agent gives feedbacks on how to refine the application based on runtime telemetry and profiling metrics.", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A"},
+      {"trecho": "The original GPU-Burn implementation [6] (based on C++ code) is injected as the initial candidate C0, bypassing the generative phase of the first global loop iteration.", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A (subscrito normalizado)"},
+      {"trecho": "Prompts for both experimental campaigns are available on GitHub [33].", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A"},
+      {"trecho": "To establish an objective baseline, we profiled the state-of-the-art stress-testing application, GPU-burn [6], under the same input conditions I = (f, t).", "localizador": "p. 6 do PDF (sem número impresso), seção IV-B"},
+      {"trecho": "This often led to unproductive loops or modifications that degraded stress performance.", "localizador": "p. 6 do PDF (sem número impresso), seção IV-B"},
+      {"trecho": "The generation temperature, a hyperparameter controlling output randomness, is fixed at 0.2 for all models as it maximises the likelihood of producing functionally correct code on the first attempt [12].", "localizador": "p. 6 do PDF (sem número impresso), seção IV-C"},
+      {"trecho": "Indeed, 4 out of the 7 tested models failed to generate compilable code, due to the need to preserve structural dependencies within the original program, further amplified by the complexity and verbosity of the GPU-burn codebase.", "localizador": "p. 6 do PDF (sem número impresso), seção V-A"},
+      {"trecho": "In S2, LLM-based refinement can surpass GPU-Burn in throughput, at the cost of increased stalls and code complexity.", "localizador": "p. 7 do PDF (sem número impresso), seção V-B"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "LLM-based multi-agent framework — S1: Application generation and optimization",
+      "mecanismos": ["instrucao", "multiagente", "contexto", "restricoes", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Back propagation (aplicação do GPU-Rodinia, projetada por humanos; não é condição de prompting)",
+      "modelo": "gpt-oss-120B (LLM central de todos os agentes)",
+      "benchmark": "Cenário S1: workload de estresse para RTX 3060 TI com CUDA 11.6, t = 300 seconds",
+      "metrica": "Temperature (°C)",
+      "sentido": "maior_melhor",
+      "unidade": null,
+      "resultado": {"baseline": 52, "intervencao": 44.92},
+      "denominador": "nao_aplicavel (medição física de uma aplicação; número de execuções nao_informado)",
+      "condicoes": "Unidade em graus Celsius, sem rótulo correspondente na enumeração de unidades; por isso unidade = null. Maior temperatura = maior estresse, segundo o estudo (temperatura é indicador de estresse e critério de parada). Temperatura de geração 0.2; N_comp = 5, N_exec = 5, R_max = 5; H_target = 59.8 °C; número de iterações globais executadas e número de execuções de medição não informados. Duração e entradas da aplicação Back propagation não informadas. O comparador é código humano de outro propósito (benchmark Rodinia), não uma condição sem a técnica; a diferença não é efeito isolado de prompting nem do pacote. Valores conferidos visualmente na Tabela II (p. 7 do PDF).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca vários modelos e várias métricas (compilabilidade, LoC, temperatura, energia) sem que uma prevaleça. A Tabela I não tem contraste entre condições (só modelos). Primeira tabela com o framework e linhas de base no mesmo conjunto de métricas: Tabela II; primeira métrica (Temperature), primeiro modelo listado (gpt-oss-120B) e primeira linha de base listada (Back propagation). Não há linha de base de prompting no estudo; a linha de base usada é aplicação humana apresentada pelo estudo na tabela de resultados.",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF (sem número impresso), Tabela II, linhas 'gpt-oss-120B' e 'Back propagation', coluna Temperature (°C)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "gpt-oss-120B 44.92 4,846.69 33.64 18.05 144", "localizador": "p. 7 do PDF, Tabela II, colunas LLM agent/Application, Temperature (°C), Energy (J), Throughput (%), Stalls (%), LoC"},
+        {"trecho": "Back propagation 52 2,365.98 78.43 28.05 160", "localizador": "p. 7 do PDF, Tabela II, colunas LLM agent/Application, Temperature (°C), Energy (J), Throughput (%), Stalls (%), LoC"},
+        {"trecho": "In S1, the framework autonomously generates and iteratively refines a workload to enable comparison with GPU-Rodinia benchmarks [10].", "localizador": "p. 5 do PDF (sem número impresso), seção IV-A"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "LLM-based multi-agent framework — S2: Kernel refinement",
+      "mecanismos": ["instrucao", "multiagente", "contexto", "restricoes", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": [],
+      "comparador": "GPU-burn (código original, candidato inicial C0 sem refinamento)",
+      "modelo": "Llama-3.1-8B (rótulo impresso na Tabela III; a Tabela I e o texto indicam Llama-3.1-8B abortado em S2 e Llama-3.3-70B bem-sucedido)",
+      "benchmark": "Cenário S2: refinamento do GPU-Burn (733 LoC) para RTX 3060 TI com CUDA 11.6, t = 300 seconds",
+      "metrica": "Temperature (°C)",
+      "sentido": "maior_melhor",
+      "unidade": null,
+      "resultado": {"baseline": 59.8, "intervencao": 53.16},
+      "denominador": "nao_aplicavel (medição física de uma aplicação; número de execuções nao_informado)",
+      "condicoes": "Unidade em graus Celsius, sem rótulo correspondente na enumeração de unidades; por isso unidade = null. GPU-burn perfilado sob as mesmas condições de entrada I = (f, t); toolchain g++ com as opções originais; agentes geram PTX integrado ao C++. Temperatura de geração 0.2; N_comp = 5, N_exec = 5, R_max = 5; H_target = 59.8 °C; número de iterações globais executadas e de execuções de medição não informados. Divergência de rótulo do modelo entre a Tabela III e a Tabela I/texto, sem decidir qual é o correto. O contraste é do pacote híbrido (agentes, feedback de hardware, modelo, temperatura) contra o código sem refinamento, não de um mecanismo de prompting. Valores conferidos visualmente na Tabela III (p. 7 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "S2 é formulação própria do framework (system prompts distintos, injeção do GPU-Burn como C0, geração de PTX) avaliada em tabela separada; recebe cobertura como técnica focal distinta. Pela ordem: Tabela III, primeira métrica (Temperature), primeiro modelo listado (Llama-3.1-8B, como impresso) e primeira linha de base listada (GPU-burn).",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF (sem número impresso), Tabela III, linhas 'Llama-3.1-8B' e 'GPU-burn', coluna Temperature (°C)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Llama-3.1-8B 53.16 3,240.76 23.36 46.67 788", "localizador": "p. 7 do PDF, Tabela III, colunas LLM agent/Application, Temperature (°C), Energy (J), Throughput (%), Stalls (%), LoC"},
+        {"trecho": "GPU-burn 59.8 5,700 86.91 7.89 733", "localizador": "p. 7 do PDF, Tabela III, colunas LLM agent/Application, Temperature (°C), Energy (J), Throughput (%), Stalls (%), LoC"},
+        {"trecho": "The refined variants achieve peak temperatures of from 51.61 °C to 53.16 °C, with corresponding energy consumptions of from 3,035.54 J to 3,482.01 J, whereas GPU-Burn reaches 59.8 °C and 5,700 J under the same conditions.", "localizador": "p. 7 do PDF (sem número impresso), seção V-B"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: avaliar a capacidade de LLMs, num framework multiagente iterativo, de gerar automaticamente rotinas de teste de estresse para GPU, em dois cenários definidos (S1 e S2).", "localizador": "p. 2 do PDF (sem número impresso), resumo; p. 3 do PDF, introdução; p. 5 do PDF, seção IV-A"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Fluxo dos agentes, limites de iteração, hardware, duração e temperatura são descritos, mas os prompts só estão no GitHub, e faltam número de iterações globais executadas, número de execuções, forma de acesso aos modelos e condições de execução das aplicações Rodinia e M×M.", "localizador": "p. 4-6 do PDF (sem número impresso), seções III e IV"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "GPU-burn é perfilado sob as mesmas condições de entrada e serve de código sem refinamento em S2; em S1 as referências são aplicações Rodinia de outro propósito, com condições não informadas, e não há linha de base de prompting (agente único, sem feedback) nem ablação.", "localizador": "p. 6 do PDF, seção IV-B; p. 7 do PDF, Tabelas II e III"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas nomeadas e justificadas, mas sem detalhe de medição (intervalo da energia, definição de pico); rótulo de modelo diverge entre a Tabela I e as Tabelas II/III; percentuais do resumo (89.9% e 77.2%) não são reproduzíveis pelas tabelas; denominadores não se aplicam e não há repetições nem variabilidade.", "localizador": "p. 5-6 do PDF, seção IV-B; p. 2 do PDF, resumo; p. 6-7 do PDF, Tabelas I-III"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "O texto não discute ameaças à validade nem limitações do estudo; menciona apenas experimentos preliminares para fixar os limites e trabalhos futuros.", "localizador": "p. 6 do PDF (sem número impresso), seção IV-B; p. 7 do PDF, seção VI"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa GPU, versão do CUDA, duração, temperatura de geração, limites e indica prompts no GitHub [33] (não acessado nesta extração); não informa snapshots ou forma de acesso dos modelos, ferramenta do profiler nem número de execuções.", "localizador": "p. 5 do PDF, seção IV-A; p. 6 do PDF, seções IV-B e IV-C"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute a possível presença do código do GPU-Burn ou de kernels semelhantes nos dados de pré-treinamento dos modelos.", "localizador": "texto completo (p. 2-8 do PDF)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (folha de rosto do repositório, 6 páginas de artigo e referências). Páginas do artigo sem número impresso; localizadores usam a posição no PDF (p. 1 = folha de rosto do repositório).",
+    "paginas_pdf_abertas": [2, 4, 5, 6, 7]
+  }
+}
