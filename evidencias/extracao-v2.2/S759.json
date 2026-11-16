@@ -1,0 +1,470 @@
+{
+  "estudo": "S759",
+  "texto_fonte": "fontes/textos/lote/S759.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2505.23060v3 [cs.CL], 23 Aug 2025 (impresso na margem da p. 1 do PDF); o PDF não traz numeração impressa de páginas, por isso os localizadores usam a posição no arquivo",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Simple-prompting (simple correction prompting method)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Seção 4.2; Tabela 1, linha «Simple-prompting»); p. 6 do PDF (Tabela 2, bloco «Pre-Trained (3-shot)»); p. 21 do PDF (Prompts G.1 e G.2)",
+        "observacao": "Prompt base: geração inicial com prompt de 3 exemplos (3-shot); em seguida, um segundo turno pede a correção sem revelar se a resposta inicial estava correta. O estudo não diz explicitamente qual prompt textual foi usado nessa condição; os Prompts G.1 e G.2 (persona «expert Python programmer», enunciado, casos de teste, delimitadores [BEGIN]/[DONE]/[CORRECT] e a instrução «Only output the final correct Python program!») são apresentados como os da avaliação principal e coincidem com a descrição. Se o turno de correção também usa 3 exemplos: nao_informado. instrucao = persona e instrução de correção; exemplos = 3-shot da geração inicial; restricoes = casos de teste como especificação e formato de saída; feedback = autocorreção sobre a própria resposta, sem retorno externo. O contrafactual é por turno: Accuracy@t1 (resposta inicial, sem o passo de correção) contra Accuracy@t2 (após o passo de correção), no mesmo modelo e nas mesmas respostas iniciais. É a linha de base de prompting da Tabela 1."
+      },
+      {
+        "nome_original": "Self-Refine",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Seção 4.2 e 4.3; Tabela 1, linha «Self-Refine»); p. 22 do PDF (Seção G.2; Prompts G.3 e G.4)",
+        "observacao": "Método de autocorreção por prompting de trabalho anterior (Madaan et al., 2023), que o estudo investiga em modelo pequeno na Seção 4 (objeto de investigação do estudo preliminar, por isso focal no escopo de prompting; a proposta principal do artigo, CoCoS, é treinamento e está em componentes_fora_escopo). O mesmo modelo gera uma sugestão de melhoria (feedback) e depois corrige o código com base nela, com 3 exemplos tanto na geração do feedback quanto na correção. A resposta inicial é a mesma do Simple-prompting (Accuracy@t1 = 43.8% nas duas linhas). instrucao = pedidos em linguagem natural («Can you give one suggestion...», «Now fix the code.»); exemplos = 3-shot; restricoes = «Don’t fix the code, just give one suggestion.» e delimitação do código com crases; feedback = autoavaliação seguida de refinamento. Base identificável: a geração inicial de 3 exemplos; o acréscimo é o ciclo de feedback e correção. O contrafactual é a resposta inicial (t1) contra a resposta após a correção (t2), nas mesmas respostas iniciais; há também o contraste com o Simple-prompting em t2, que difere na forma do passo de correção (feedback autogerado e correção, contra instrução direta de correção)."
+      },
+      {
+        "nome_original": "External-Refine",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Seção 4.2, nota de rodapé 2; Tabela 1, linha «External-Refine»)",
+        "observacao": "Variante do Self-Refine em que o feedback vem de um modelo professor externo (gpt-4.1-2025-04-14), em vez do próprio Qwen2.5-1.5B; o estudo a usa para investigar a influência do feedback externo. Derivada do Self-Refine, acrescenta a interação entre dois modelos com papéis distintos (multiagente). Pacote híbrido: o contraste com o Self-Refine (mesma resposta inicial, 43.8%) também troca o modelo que gera o feedback por um modelo mais forte, componente de seleção de modelo fora do escopo de prompting; o efeito não é atribuível só à estrutura multiagente. Também há contraste por turno (t1 contra t2). O texto não descreve se o prompt de feedback usado com o GPT-4.1 é o mesmo do Prompt G.3: nao_informado."
+      },
+      {
+        "nome_original": "SETS",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["raciocinio", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Seção 4.2 e 4.3; Tabela 1, linha «SETS»); p. 13 do PDF (Apêndice A, Tabela 7); p. 23 do PDF (Seção G.3; Prompts G.5 e G.6)",
+        "observacao": "Método de trabalho anterior (Chen et al., 2025) que combina amostragem, autoverificação e autocorreção; o estudo o investiga em modelo pequeno. O verificador recebe papel («You are an expert in solving coding problems»), etapas numeradas e a instrução de pensar passo a passo (raciocinio) e deve terminar com uma linha de veredito em forma fixa (restricoes); o corretor recebe os pares código–análise (feedback). São geradas 20 respostas iniciais com temperatura 0.7, e Accuracy@t1 é a média da acurácia dessas 20 respostas; o estudo não descreve seleção ou votação entre as amostras, por isso amostragem não foi atribuída (a geração de 20 amostras e a temperatura estão em componentes_fora_escopo). O prompt da geração inicial não é informado, por isso a parte herdada do prompt base não pode ser determinada além do que aparece nos Prompts G.5 e G.6; os acréscimos registrados são verificação com raciocínio e correção com base na análise. O contrafactual é a média das respostas iniciais (t1) contra o resultado após as etapas de correção (t2); o estudo afirma que os Δ entre respostas iniciais e finais não podem ser medidos de forma consistente para o SETS."
+      },
+      {
+        "nome_original": "External-SETS",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Seção 4.2, nota de rodapé 2; Seção 4.3; Tabela 1, linha «External-SETS»); p. 13 do PDF (Apêndice A, Tabela 7, linha «GPT-4.1»)",
+        "observacao": "Variante do SETS com modelo professor externo (gpt-4.1-2025-04-14); a Tabela 7 mostra o GPT-4.1 no papel de verificador. Se a correção também é feita pelo modelo externo: nao_informado. Derivada do SETS, acrescenta a interação entre dois modelos (multiagente). Pacote híbrido: o contraste com o SETS (mesma Accuracy@t1 de 39.3%) troca o verificador por um modelo mais forte, componente de seleção de modelo fora do escopo de prompting."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "CoCoS (Self-Correcting Code generation using Small LMs)",
+        "natureza": "ajuste_fino",
+        "descricao": "Proposta principal do artigo: aprendizado por reforço online (REINFORCE Leave-One-Out) que atualiza os pesos do modelo para autocorreção em vários turnos, com função de recompensa acumulada com fator de desconto γ = 0.5 e recompensa progressiva pela fração de testes aprovados; treinado em MBPP sobre o Boost model. Na inferência usa o prompt fixo de correção (Prompt G.2), mas o efeito medido é do treinamento, não de prompting.",
+        "localizador": "p. 1 do PDF (resumo; Seção 1); p. 5–6 do PDF (Seção 5.3; Equações 2–4); p. 14–15 do PDF (Apêndice C; Tabela 8)"
+      },
+      {
+        "nome_original": "Boost model (SFT on KodCode)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino supervisionado dos modelos pré-treinados no KodCode para produzir código analisável antes do treinamento por reforço; é a base de CoCoS e de todos os baselines treinados (avaliado em 0-shot na Tabela 2).",
+        "localizador": "p. 6 do PDF (Seção 6.2; Tabela 2); p. 15 do PDF (Tabelas 8 e 9)"
+      },
+      {
+        "nome_original": "Turn-SFT, Self-Corrector, ReVISE e Turn-RL",
+        "natureza": "ajuste_fino",
+        "descricao": "Baselines de autocorreção baseados em treinamento (SFT, modelo corretor separado, token [refine] com SFT e DPO, e RL com primeira resposta fixa), comparados com CoCoS nas Tabelas 3, 4 e 10–12.",
+        "localizador": "p. 6 do PDF (Seção 6.3); p. 7 do PDF (Tabelas 3 e 4); p. 13–14 do PDF (Apêndice B); p. 16–18 do PDF (Tabelas 10–12)"
+      },
+      {
+        "nome_original": "SCoRe e SFT-Qwen",
+        "natureza": "ajuste_fino",
+        "descricao": "Análise do treinamento em dois estágios por reforço de trabalho anterior (SCoRe) em modelos pequenos, que colapsa com a regularização KL do primeiro turno, e de um modelo SFT-Qwen ajustado propositalmente (com sobreajuste ao MBPP) para produzir segunda resposta diferente da primeira.",
+        "localizador": "p. 4–5 do PDF (Seção 5.2; Figuras 1 e 2); p. 19–20 do PDF (Apêndice E; Figuras 5 e 6)"
+      },
+      {
+        "nome_original": "gpt-4.1-2025-04-14 como modelo professor",
+        "natureza": "selecao_modelo",
+        "descricao": "Uso de um modelo proprietário mais forte para fornecer o feedback ou a verificação nas condições External-Refine e External-SETS; a troca de modelo faz parte dos pacotes dessas condições e não é prompting.",
+        "localizador": "p. 3 do PDF (Seção 4.2, nota de rodapé 2); p. 13 do PDF (Apêndice A)"
+      },
+      {
+        "nome_original": "sampling temperature of 0.7 (SETS)",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de amostragem 0.7 usada nas gerações do SETS.",
+        "localizador": "p. 23 do PDF (Seção G.3)"
+      },
+      {
+        "nome_original": "number of generation to 20 (SETS; test-time scaling)",
+        "natureza": "orcamento",
+        "descricao": "Vinte gerações por problema no SETS, usadas para estimar Accuracy@t1 pela média e para as etapas de correção.",
+        "localizador": "p. 3 do PDF (Seção 4.2); p. 23 do PDF (Seção G.3)"
+      },
+      {
+        "nome_original": "greedy decoding",
+        "natureza": "decodificacao",
+        "descricao": "Decodificação gulosa na inferência dos experimentos principais, para reprodutibilidade. Se vale também para Simple-prompting, Self-Refine e External-Refine na Seção 4: nao_informado.",
+        "localizador": "p. 6 do PDF (Seção 6.1)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-1.5B (pré-treinado)", "versao": "nao_informado além do nome e tamanho; único modelo das condições de prompting da Tabela 1"},
+      {"nome": "gpt-4.1-2025-04-14", "versao": "snapshot 2025-04-14 informado; modelo professor das condições External-Refine e External-SETS"},
+      {"nome": "Llama-3.2-1B", "versao": "nao_informado além do nome; usado só em CoCoS e baselines treinados (Tabela 2 em 3-shot pré-treinado)"},
+      {"nome": "DeepSeek-Coder-1.3B-Base (deepseek-coder-1.3B)", "versao": "nao_informado além do nome; usado só em CoCoS e baselines treinados (Tabela 2 em 3-shot pré-treinado)"},
+      {"nome": "Gemini-1.5-Flash", "versao": "nao_informado além do nome; usado na análise de distância de edição (Figura 2) e na geração de dados do SFT-Qwen"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "MBPP (Austin et al., 2021)",
+        "quantidade": "Train 374, Validation 90, Test 500, Few-shot 10 (Tabela 9)",
+        "observacao": "A Seção 4 e a Tabela 1 não nomeiam o conjunto usado no estudo preliminar de prompting nem o denominador. Os valores de Simple-prompting (43.8% e 44.6%) coincidem com os de Qwen2.5-1.5B Pre-Trained (3-shot) na Tabela 2, descrita como avaliação no MBPP (observação própria, não declarada pelo estudo). O conjunto de teste de 500 problemas não é ligado explicitamente à Tabela 1. A origem dos 3 exemplos (conjunto few-shot) não é declarada para a Seção 4."
+      },
+      {"nome": "HumanEval (Chen et al., 2021)", "quantidade": "Test 164 (Tabela 9)", "observacao": "Usado só na avaliação de CoCoS e baselines treinados (Tabelas 4, 5 e 11)."},
+      {"nome": "ODEX (Wang et al., 2023)", "quantidade": "Test 439 (Tabela 9)", "observacao": "Usado só na avaliação de CoCoS e baselines treinados (Tabelas 4, 5 e 12)."},
+      {"nome": "KodCode (Xu et al., 2025)", "quantidade": "Train 144,068, Validation 36,018 (Tabela 9); cerca de 180k de 484k amostras usadas", "observacao": "Conjunto de treino do Boost model (fora do escopo de prompting)."}
+    ],
+    "metricas": [
+      {"nome": "Accuracy@t1", "aplicacao": "acurácia no primeiro turno (código correto se passa todos os testes)", "localizador": "p. 3 do PDF (Seção 4.1; Tabela 1)"},
+      {"nome": "Accuracy@t2", "aplicacao": "acurácia no segundo turno; para o SETS, calculada após todas as etapas de correção", "localizador": "p. 3 do PDF (Seções 4.1 e 4.2; Tabela 1)"},
+      {"nome": "∆i→c(t1, t2)", "aplicacao": "fração de problemas que passam de incorreto a correto entre os turnos; não informada para SETS e External-SETS", "localizador": "p. 3 do PDF (Seção 4.1; Tabela 1)"},
+      {"nome": "∆c→i(t1, t2)", "aplicacao": "fração de problemas que passam de correto a incorreto; não informada para SETS e External-SETS", "localizador": "p. 3 do PDF (Seção 4.1; Tabela 1)"},
+      {"nome": "∆Acc(t1, t2)", "aplicacao": "variação da acurácia entre o primeiro e o segundo turno", "localizador": "p. 3 do PDF (Seção 4.1; Tabela 1)"},
+      {"nome": "acurácia de verificação (matriz de confusão do verificador)", "aplicacao": "verificador do SETS (Qwen2.5-1.5B e GPT-4.1), com os testes como rótulo de referência", "localizador": "p. 13 do PDF (Apêndice A; Tabela 7)"},
+      {"nome": "∆i→c_unit e ∆c→i_unit; razão de distância de edição", "aplicacao": "análises de CoCoS e do comportamento de revisão (fora do escopo de prompting)", "localizador": "p. 4–5 do PDF (Figura 2); p. 8 do PDF (Tabela 5)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Autocorreção por prompting em modelo pequeno altera respostas que estavam corretas e reduz a acurácia: Self-Refine (∆c→i 8.4%, ∆Acc −5.6%) e External-Refine (∆c→i 9.0%, ∆Acc −2.0%).",
+        "localizador": "p. 3 do PDF (Seção 4.3; Tabela 1)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O verificador Qwen2.5-1.5B do SETS tem acurácia de 42%, próxima do acaso, e o estudo conclui que o feedback prejudica a resposta inicial em vez de melhorá-la.",
+        "localizador": "p. 13 do PDF (Apêndice A; Tabela 7)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falta de revisão: no Simple-prompting o modelo raramente revisa a resposta inicial; Qwen2.5-1.5B faz mudanças mínimas (distância de edição ≤ 0.05) em 93% dos casos em que a segunda resposta está incorreta, contra 32% para o Gemini.",
+        "localizador": "p. 5 do PDF (Seção 5.2); p. 4 do PDF (Figura 2)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "As condições com feedback externo exigem acesso a um modelo externo poderoso chamado junto com o modelo pequeno durante a inferência; o estudo chama o verificador de custoso e o arranjo de impraticável. Não quantificado.",
+        "localizador": "p. 3 do PDF (Seção 4.3); p. 13 do PDF (Apêndice A)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O treinamento por reforço online de CoCoS tem custo a cada passo de ação, o que limitou o treino a dois turnos e a modelos de escala 1B (componente fora do escopo de prompting). Não quantificado.",
+        "localizador": "p. 9–10 do PDF (Limitations)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível sobreposição entre dados de treino do Boost model e conjuntos de avaliação, tratada pelo estudo com a curadoria do KodCode para excluir MBPP, HumanEval e ODEX. O estudo não discute contaminação no pré-treinamento dos modelos nem a origem dos exemplos de 3-shot da Seção 4.",
+        "localizador": "p. 6 do PDF (Seção 6.2)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O estudo adota decodificação gulosa para garantir reprodutibilidade, o que indica a preocupação com variação entre execuções; número de execuções e variância não informados.",
+        "localizador": "p. 6 do PDF (Seção 6.1)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Decodificação gulosa na inferência para reprodutibilidade; sem comparação com outra decodificação.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (Seção 6.1)"
+      },
+      {
+        "descricao": "KodCode curado para excluir dados de MBPP, HumanEval e ODEX (controle de sobreposição para os dados de ajuste fino).",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (Seção 6.2)"
+      },
+      {
+        "descricao": "Para o SETS, Accuracy@t1 estimada pela média de 20 respostas iniciais amostradas, já que o método não gera resposta inicial fixa.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seção 4.2); p. 23 do PDF (Seção G.3)"
+      },
+      {
+        "descricao": "CoCoS (ajuste por reforço, fora do escopo de prompting) como resposta à incapacidade de revisão e às revisões desnecessárias; comparado com o Boost model e baselines treinados nas mesmas condições (∆c→i de 1.8% no MBPP com Qwen2.5-1.5B).",
+        "avaliada": "sim",
+        "localizador": "p. 7 do PDF (Seção 7; Tabela 3)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Simple-prompting (correção por prompt simples após geração inicial de 3 exemplos), executado pelo estudo com o mesmo modelo (Qwen2.5-1.5B pré-treinado) e as mesmas métricas das técnicas focais (Tabela 1, p. 3 do PDF). Self-Refine e External-Refine compartilham com ele as respostas iniciais (Accuracy@t1 = 43.8%); SETS e External-SETS têm Accuracy@t1 estimada pela média de 20 amostras (39.3%).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa incompatível com o rótulo da métrica: o texto atribui ao External-SETS «10.5% gain in Accuracy@t1», mas na Tabela 1 SETS e External-SETS têm a mesma Accuracy@t1 (39.3%). O valor 10.5 coincide com a diferença entre Accuracy@t2 (49.8%) e Accuracy@t1 (39.3%) do External-SETS (cálculo próprio).",
+        "localizador": "p. 3 do PDF (Seção 4.3; Tabela 1, linhas SETS e External-SETS)"
+      },
+      {
+        "descricao": "O Apêndice A descreve «only a marginal 5% gain over simple prompting» para o arranjo com verificador externo; na Tabela 1, External-SETS tem Accuracy@t2 de 49.8% e Simple-prompting 44.6% (diferença de 5.2 p.p., cálculo próprio). A comparação junta condições distintas: média de 20 amostras com temperatura 0.7 no SETS e resposta única no Simple-prompting.",
+        "localizador": "p. 13 do PDF (Apêndice A); p. 3 do PDF (Tabela 1); p. 23 do PDF (Seção G.3)"
+      },
+      {
+        "descricao": "Inversões e resultados nulos: Self-Refine (43.8% → 38.2%), External-Refine (43.8% → 41.8%) e SETS (39.3% → 38.8%) têm Accuracy@t2 menor que Accuracy@t1; o Simple-prompting tem ganho marginal (∆Acc 0.8%). External-Refine, mesmo com feedback do GPT-4.1, fica abaixo da resposta inicial, enquanto External-SETS sobe para 49.8%.",
+        "localizador": "p. 3 do PDF (Seção 4.3; Tabela 1)"
+      },
+      {
+        "descricao": "Condições discrepantes no SETS: Accuracy@t1 é estimada pela média de 20 respostas amostradas (39.3%), diferente da resposta inicial de 3 exemplos das demais condições (43.8%), e os Δ não são informados porque, segundo o estudo, não podem ser medidos de forma consistente.",
+        "localizador": "p. 3 do PDF (Seção 4.2; Tabela 1)"
+      },
+      {
+        "descricao": "Aparente inconsistência na descrição do SETS: o texto diz que o método aplica correção só às amostras «deemed correct», o que parece contrário à lógica de verificar e corrigir; o estudo não esclarece se se trata de erro de redação.",
+        "localizador": "p. 3 do PDF (Seção 4.2)"
+      },
+      {
+        "descricao": "Conjunto e denominador da Tabela 1 não informados na Seção 4. A coincidência dos valores de Simple-prompting com a linha Pre-Trained (3-shot) do Qwen2.5-1.5B na Tabela 2 (MBPP) sugere o MBPP, mas isso não é declarado (observação própria).",
+        "localizador": "p. 3 do PDF (Seção 4; Tabela 1); p. 6 do PDF (Tabela 2)"
+      },
+      {
+        "descricao": "O mesmo valor difere entre tabelas: ∆i→c(t1, t2) do ReVISE com Qwen2.5-1.5B no MBPP é 11.3% na Tabela 3 e 16.1% na Tabela 10; as demais células da linha coincidem. Com ∆c→i 4.9% e ∆Acc 6.4%, o valor 11.3% é o compatível com a diferença (cálculo próprio). Componente fora do escopo de prompting.",
+        "localizador": "p. 7 do PDF (Tabela 3, linha ReVISE); p. 16 do PDF (Tabela 10, bloco Qwen2.5-1.5B, linha ReVISE)"
+      },
+      {
+        "descricao": "Narrativa que contradiz a tabela: a legenda da Tabela 2 afirma que usar os Boost models como base tem impacto mínimo, mas a acurácia cai de 43.8% (Pre-Trained, 3-shot) para 9.0% (Boost model, 0-shot) com Qwen2.5-1.5B, e as próprias células marcam quedas de 34.8%, 17.2% e 29.8% em Accuracy@t1. As condições também diferem (3-shot contra 0-shot).",
+        "localizador": "p. 6 do PDF (Tabela 2 e legenda)"
+      },
+      {
+        "descricao": "Legenda incompatível com o conteúdo: a Tabela 5 diz que os modelos foram avaliados no MBPP, mas traz linhas para MBPP, HumanEval e ODEX.",
+        "localizador": "p. 8 do PDF (Tabela 5 e legenda)"
+      },
+      {
+        "descricao": "O resumo informa ganhos de 35.8% no MBPP e 27.7% no HumanEval para CoCoS em relação aos baselines, sem indicar como os valores foram calculados nem com quais condições; não foi possível ligá-los a uma célula das tabelas. Componente fora do escopo de prompting.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "descricao": "A Seção 8.4 diz que a instrução foi reescrita em cinco versões alternativas, mas no Apêndice H a «Insturction 1» é idêntica à instrução original.",
+        "localizador": "p. 9 do PDF (Seção 8.4); p. 24 do PDF (Prompt H.1)"
+      },
+      {
+        "descricao": "Sem número de execuções, variância, intervalo de confiança ou teste estatístico nos resultados da Tabela 1 (e nas demais tabelas).",
+        "localizador": "p. 3 do PDF (Tabela 1); p. 6 do PDF (Seção 6.1)"
+      },
+      {
+        "descricao": "Limitações declaradas: experimentos só com modelos de escala 1B e treino de CoCoS limitado a dois turnos por restrição de infraestrutura.",
+        "localizador": "p. 9–10 do PDF (Limitations)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Classificação da tarefa: o estudo trata da geração de código com autocorreção em vários turnos sobre a própria resposta, sem programa defeituoso fornecido como entrada; por isso a tarefa registrada é geracao, não depuracao.",
+        "localizador": "p. 2 do PDF (Seção 3)"
+      },
+      {
+        "descricao": "O estudo de prompting (Seção 4) é preliminar e motiva a proposta de treinamento; os resultados centrais do artigo (Tabelas 3–6, 10–12) comparam CoCoS com baselines treinados e não são contrastes de prompting.",
+        "localizador": "p. 3 do PDF (Seção 5); p. 6 do PDF (Seção 6)"
+      },
+      {
+        "descricao": "Robustez à redação da instrução (Seção 8.4; Tabela 6): o modelo treinado com CoCoS foi avaliado com cinco reescritas manuais da instrução de correção (Template) e com a instrução fixa do treino (Fixed); Accuracy@t2 52.8/54.2 (Qwen2.5-1.5B), 58.6/59.4 (Llama-3.2-1B) e 60.2/60.4 (deepseek-coder-1.3B). É análise de sensibilidade de redação sobre modelo ajustado, não técnica de prompting comparada; não entrou em tecnicas nem em extracoes. O estudo não informa se Template é média das cinco versões.",
+        "localizador": "p. 9 do PDF (Seção 8.4; Tabela 6); p. 24 do PDF (Apêndice H)"
+      },
+      {
+        "descricao": "Matriz de confusão do verificador do SETS: Qwen2.5-1.5B TP 35.1%, FP 54.1%, TN 7.2%, FN 3.6%; GPT-4.1 TP 27.6%, FP 22.2%, TN 43.1%, FN 7.1%; o estudo resume como 42% e 70% de acurácia.",
+        "localizador": "p. 13 do PDF (Apêndice A; Tabela 7)"
+      },
+      {
+        "descricao": "Ablações fora de prompting: fator de desconto γ (Figura 3), recompensa progressiva contra binária (Tabela 5) e mudanças por turno (Figura 4) de CoCoS.",
+        "localizador": "p. 7–8 do PDF (Seções 8.1–8.3)"
+      },
+      {
+        "descricao": "O estudo imprime o endereço do código (https://github.com/jeonghun3572/CoCoS); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 1 do PDF (nota de rodapé 1)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Recent studies have explored prompting-based strategies that incorporate verification or feedback loops using proprietary models, as well as training-based methods that leverage their strong reasoning capabilities.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "Our findings reveal that smaller models struggle to exhibit reflective revision behavior across both self-correction paradigms.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "In this section, we examine both settings to assess whether prompting-based self-correction is effective for small language models.", "localizador": "p. 2 do PDF, Seção 4"},
+      {"trecho": "We experiment with two prompting-based self-correction methods, Self-Refine (Madaan et al., 2023) and SETS (Chen et al., 2025)—both demonstrated exclusively on proprietary LLMs in their original work.", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "To verify the effectiveness of SLMs, all experiments are conducted using the pre-trained Qwen2.5-1.5B (Yang et al., 2024).", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "Self-Refine uses 3-shot prompting, whereas SETS relies on test-time scaling.", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "Since SETS does not generate a fixed initial response, we estimate Accuracy@t1 by averaging the accuracy of 20 sampled initial outputs.", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "However, because SETS verifies each sample and only applies correction to those deemed correct, ∆ improvements between initial and final responses cannot be consistently measured.", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "For comparison, we also introduce a simple correction prompting method that first generates an initial response with a 3-shot prompt, then prompts for correction without disclosing the correctness of the initial output.", "localizador": "p. 3 do PDF, Seção 4.2"},
+      {"trecho": "We use gpt-4.1-2025-04-14 (OpenAI, 2025) for teacher model.", "localizador": "p. 3 do PDF, nota de rodapé 2"},
+      {"trecho": "In conclusion, SLMs struggle to revise their responses using prompting alone, as shown in Table 1.", "localizador": "p. 3 do PDF, Seção 4.3"},
+      {"trecho": "Both prior works, when used without an external LLM for self-verification, underperform compared to simple prompting and frequently modify responses that were initially correct.", "localizador": "p. 3 do PDF, Seção 4.3"},
+      {"trecho": "Effective self-correction becomes only possible when a strong external LLM provides feedback (External-SETS; 10.5% gain in Accuracy@t1).", "localizador": "p. 3 do PDF, Seção 4.3"},
+      {"trecho": "Simple-prompting 43.8% 44.6% 1.4% 0.6% 0.8%", "localizador": "p. 3 do PDF, Tabela 1, linha Simple-prompting; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "Self-Refine 43.8% 38.2% 2.8% 8.4% −5.6%", "localizador": "p. 3 do PDF, Tabela 1, linha Self-Refine; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "External-Refine 43.8% 41.8% 7.0% 9.0% −2.0%", "localizador": "p. 3 do PDF, Tabela 1, linha External-Refine; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "SETS 39.3% 38.8% - - -", "localizador": "p. 3 do PDF, Tabela 1, linha SETS; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "External-SETS 39.3% 49.8% - - -", "localizador": "p. 3 do PDF, Tabela 1, linha External-SETS; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "The Qwen verifier achieves an accuracy of 42%, which is close to random performance in distinguishing correct and incorrect responses.", "localizador": "p. 13 do PDF, Apêndice A"},
+      {"trecho": "This indicates that small-scale Qwen fails to provide effective feedback, thereby harming rather than improving the initial response.", "localizador": "p. 13 do PDF, Apêndice A"},
+      {"trecho": "However, despite employing a costly verifier with relatively high accuracy, the results in Table 1 show only a marginal 5% gain over simple prompting.", "localizador": "p. 13 do PDF, Apêndice A"},
+      {"trecho": "The prompts were designed and implemented based on the manuscript, with Self-Refine (Madaan et al., 2023) using a 3-shot prompting for both feedback generation and correction.", "localizador": "p. 22 do PDF, Seção G.2"},
+      {"trecho": "I have some code. Can you give one suggestion to improve the solution to the problem. Don’t fix the code, just give one suggestion.", "localizador": "p. 22 do PDF, Prompt G.3"},
+      {"trecho": "We use a sampling temperature of 0.7 and set the number of generation to 20.", "localizador": "p. 23 do PDF, Seção G.3"},
+      {"trecho": "2. Think step by step to verify if the statement satisfies each of the constraints.", "localizador": "p. 23 do PDF, Prompt G.5"},
+      {"trecho": "There might be an error in the code above because of a lack of understanding of the question. Please correct the error, if any, and rewrite the solution. Only output the final correct Python program!", "localizador": "p. 21 do PDF, Prompt G.2"},
+      {"trecho": "This is further supported by Figure 2, where Qwen2.5-1.5B shows minimal changes (edit distance ≤ 0.05) in 93% of cases when the second response is incorrect, compared to only 32% for Gemini.", "localizador": "p. 5 do PDF, Seção 5.2"},
+      {"trecho": "Specifically, we propose an online reinforcement learning objective that trains the model to confidently maintain correct outputs while progressively correcting incorrect outputs as turns proceed.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "During inference, we use greedy decoding to ensure reproducibility.", "localizador": "p. 6 do PDF, Seção 6.1"},
+      {"trecho": "KodCode is curated to exclude data from MBPP, HumanEval, and ODEX.", "localizador": "p. 6 do PDF, Seção 6.2"},
+      {"trecho": "The results suggest that using boost models as the backbone in our experiments has minimal impact.", "localizador": "p. 6 do PDF, legenda da Tabela 2"},
+      {"trecho": "ReVISE 34.6% 41.2% 11.3% 4.9% 6.4%", "localizador": "p. 7 do PDF, Tabela 3, linha ReVISE; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "ReVISE 34.6% 41.2% 16.1% 4.9% 6.4%", "localizador": "p. 16 do PDF, Tabela 10, bloco Qwen2.5-1.5B, linha ReVISE; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+      {"trecho": "Online reinforcement learning incurs a cost at every action step, as the model learns by interacting with the environment in real-time.", "localizador": "p. 9 do PDF, Limitations"},
+      {"trecho": "For the same reason, our experiments were conducted only on a 1B-scale small language model.", "localizador": "p. 10 do PDF, Limitations"},
+      {"trecho": "Instead of the fixed training prompt, we manually rephrase it into five alternative versions for the correction task.", "localizador": "p. 9 do PDF, Seção 8.4"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-Refine",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Simple-prompting",
+      "modelo": "Qwen2.5-1.5B (pré-treinado)",
+      "benchmark": "nao_informado na Seção 4 e na Tabela 1 (os valores de Simple-prompting coincidem com Pre-Trained 3-shot no MBPP da Tabela 2; observação própria, não declarada)",
+      "metrica": "Accuracy@t2",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 44.6, "intervencao": 38.2},
+      "denominador": "nao_informado",
+      "condicoes": "Mesmo modelo e mesmas respostas iniciais nas duas condições (Accuracy@t1 = 43.8% em ambas); Self-Refine com 3 exemplos na geração do feedback e na correção; Simple-prompting com geração inicial de 3 exemplos e instrução de correção sem revelar a correção da resposta. Dois turnos. Decodificação na Seção 4: nao_informado. Número de execuções: nao_informado. Conferido no PDF (p. 3, Tabela 1).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Não há principal declarado no escopo de prompting: a proposta principal do estudo (CoCoS) é treinamento, e o estudo preliminar destaca várias técnicas de prompting sem que uma prevaleça. Primeira tabela com contraste de prompting: Tabela 1; primeira técnica focal listada: Self-Refine; primeira linha de base de prompting: Simple-prompting; único modelo. A primeira coluna (Accuracy@t1) mede a resposta inicial, comum às duas condições e anterior ao passo de correção, por isso a primeira métrica pertinente à comparação é Accuracy@t2.",
+      "derivacao": "direta",
+      "localizador": "p. 3 do PDF, Tabela 1 (linhas Simple-prompting e Self-Refine; coluna Accuracy@t2); Seções 4.2 e 4.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Self-Refine 43.8% 38.2% 2.8% 8.4% −5.6%", "localizador": "p. 3 do PDF, Tabela 1, linha Self-Refine; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "Simple-prompting 43.8% 44.6% 1.4% 0.6% 0.8%", "localizador": "p. 3 do PDF, Tabela 1, linha Simple-prompting; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "External-Refine",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["multiagente"],
+      "comparador": "Simple-prompting",
+      "modelo": "Qwen2.5-1.5B (pré-treinado) com gpt-4.1-2025-04-14 como modelo professor que fornece o feedback",
+      "benchmark": "nao_informado na Seção 4 e na Tabela 1 (ver extração anterior)",
+      "metrica": "Accuracy@t2",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 44.6, "intervencao": 41.8},
+      "denominador": "nao_informado",
+      "condicoes": "Mesmas respostas iniciais (Accuracy@t1 = 43.8% nas duas condições). Pacote híbrido: inclui modelo externo mais forte (seleção de modelo, fora do escopo de prompting); o resultado não é efeito isolado da estrutura multiagente. Prompt do feedback com o GPT-4.1: nao_informado. Decodificação e número de execuções: nao_informado. Conferido no PDF (p. 3, Tabela 1).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (variante tratada pelo estudo como condição distinta, na ordem da Tabela 1); mesma regra de ordem: Tabela 1, primeira linha de base de prompting (Simple-prompting), Accuracy@t2 como primeira métrica pertinente.",
+      "derivacao": "direta",
+      "localizador": "p. 3 do PDF, Tabela 1 (linhas Simple-prompting e External-Refine; coluna Accuracy@t2); Seção 4.2 e nota de rodapé 2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "External-Refine 43.8% 41.8% 7.0% 9.0% −2.0%", "localizador": "p. 3 do PDF, Tabela 1, linha External-Refine; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "Simple-prompting 43.8% 44.6% 1.4% 0.6% 0.8%", "localizador": "p. 3 do PDF, Tabela 1, linha Simple-prompting; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SETS",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["raciocinio", "feedback"],
+      "comparador": "Simple-prompting",
+      "modelo": "Qwen2.5-1.5B (pré-treinado)",
+      "benchmark": "nao_informado na Seção 4 e na Tabela 1 (ver primeira extração)",
+      "metrica": "Accuracy@t2 (para o SETS, calculada após todas as etapas de correção)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 44.6, "intervencao": 38.8},
+      "denominador": "nao_informado",
+      "condicoes": "Condições não idênticas: SETS com 20 gerações por problema e temperatura 0.7, Accuracy@t1 estimada pela média das 20 respostas iniciais (39.3%) e Accuracy@t2 calculada de forma análoga após as etapas de correção; Simple-prompting com resposta inicial de 3 exemplos (43.8%). O estudo compara as duas condições na Seção 4.3. Δ não medidos para o SETS. Número de execuções: nao_informado. Conferido no PDF (p. 3, Tabela 1; p. 23, Seção G.3).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela 1, primeira linha de base de prompting, Accuracy@t2). Exceção ao alvo de três comparações apenas para cobrir as técnicas focais do estudo preliminar.",
+      "derivacao": "direta",
+      "localizador": "p. 3 do PDF, Tabela 1 (linhas Simple-prompting e SETS; coluna Accuracy@t2); Seções 4.2 e 4.3; p. 23 do PDF, Seção G.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SETS 39.3% 38.8% - - -", "localizador": "p. 3 do PDF, Tabela 1, linha SETS; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "Simple-prompting 43.8% 44.6% 1.4% 0.6% 0.8%", "localizador": "p. 3 do PDF, Tabela 1, linha Simple-prompting; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "Since SETS does not generate a fixed initial response, we estimate Accuracy@t1 by averaging the accuracy of 20 sampled initial outputs.", "localizador": "p. 3 do PDF, Seção 4.2"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "External-SETS",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["multiagente"],
+      "comparador": "Simple-prompting",
+      "modelo": "Qwen2.5-1.5B (pré-treinado) com gpt-4.1-2025-04-14 como modelo professor (verificador)",
+      "benchmark": "nao_informado na Seção 4 e na Tabela 1 (ver primeira extração)",
+      "metrica": "Accuracy@t2 (calculada após todas as etapas de correção)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 44.6, "intervencao": 49.8},
+      "denominador": "nao_informado",
+      "condicoes": "Condições não idênticas: como no SETS, 20 gerações com temperatura 0.7 e Accuracy@t1 estimada pela média (39.3%), contra resposta inicial de 3 exemplos no Simple-prompting (43.8%). Pacote híbrido: inclui verificador GPT-4.1, componente de seleção de modelo fora do escopo de prompting; o resultado não é efeito isolado de prompting. O Apêndice A descreve o ganho sobre o Simple-prompting como «marginal 5%». Número de execuções: nao_informado. Conferido no PDF (p. 3, Tabela 1; p. 13, Apêndice A).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (variante tratada pelo estudo como condição distinta); mesma regra de ordem. Exceção ao alvo de três comparações apenas para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "p. 3 do PDF, Tabela 1 (linhas Simple-prompting e External-SETS; coluna Accuracy@t2); Seção 4.3; p. 13 do PDF, Apêndice A",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "External-SETS 39.3% 49.8% - - -", "localizador": "p. 3 do PDF, Tabela 1, linha External-SETS; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "Simple-prompting 43.8% 44.6% 1.4% 0.6% 0.8%", "localizador": "p. 3 do PDF, Tabela 1, linha Simple-prompting; colunas Accuracy@t1, Accuracy@t2, ∆i→c(t1, t2), ∆c→i(t1, t2)↓, ∆Acc(t1, t2)"},
+        {"trecho": "However, despite employing a costly verifier with relatively high accuracy, the results in Table 1 show only a marginal 5% gain over simple prompting.", "localizador": "p. 13 do PDF, Apêndice A"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara investigar se modelos pequenos conseguem autocorreção sem sistemas proprietários, por prompting e por treinamento, e lista as contribuições, incluindo a demonstração empírica de que os métodos de prompting e de treinamento anteriores não generalizam para modelos pequenos.",
+      "localizador": "p. 1–2 do PDF (resumo; Seção 1, contribuições); p. 2 do PDF (Seção 4)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Para o estudo de prompting, informa modelo, métodos, prompts de Self-Refine e SETS, número de exemplos e parâmetros de amostragem do SETS, mas não nomeia o conjunto avaliado na Tabela 1, não identifica explicitamente o prompt do Simple-prompting nem a origem dos 3 exemplos, e não informa a decodificação das condições sem amostragem nem o prompt usado com o modelo professor.",
+      "localizador": "p. 3 do PDF (Seção 4.2); p. 21–23 do PDF (Apêndice G)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Executa uma linha de base de prompting (Simple-prompting) com o mesmo modelo e as mesmas respostas iniciais de Self-Refine e External-Refine, mas SETS e External-SETS são comparados com ela em condições diferentes (média de 20 amostras com temperatura 0.7) e as condições externas trocam também o modelo que fornece feedback.",
+      "localizador": "p. 3 do PDF (Seções 4.2 e 4.3; Tabela 1); p. 23 do PDF (Seção G.3)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas (Accuracy@t1, Accuracy@t2, ∆i→c, ∆c→i, ∆Acc), mas o denominador da Tabela 1 não é informado, os Δ do SETS não são medidos, o texto atribui a Accuracy@t1 um ganho que na tabela corresponde à diferença entre t2 e t1, e o mesmo valor de ∆i→c do ReVISE difere entre as Tabelas 3 e 10.",
+      "localizador": "p. 3 do PDF (Seção 4.1; Seção 4.3; Tabela 1); p. 7 do PDF (Tabela 3); p. 16 do PDF (Tabela 10)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações trata só do custo do treinamento por reforço, do limite de dois turnos e da escala de 1B; não discute variabilidade dos resultados, validade do estudo de prompting com um único modelo, diferenças de condição do SETS nem contaminação.",
+      "localizador": "p. 9–10 do PDF (Limitations)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Apresenta os prompts (Apêndices G e H), hiperparâmetros (Tabela 8), tamanhos dos conjuntos (Tabela 9), hardware, decodificação gulosa e o endereço do código (não acessado nesta extração); faltam o conjunto e o denominador da Tabela 1, os exemplos de 3-shot, a configuração das condições externas e o número de execuções.",
+      "localizador": "p. 1 do PDF (nota de rodapé 1); p. 6 do PDF (Seção 6.1); p. 15 do PDF (Apêndice C); p. 21–24 do PDF (Apêndices G e H)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Declara que o KodCode, usado no ajuste fino, foi curado para excluir MBPP, HumanEval e ODEX, mas não discute contaminação no pré-treinamento dos modelos nem a separação dos exemplos de 3-shot no estudo de prompting.",
+      "localizador": "p. 6 do PDF (Seção 6.2)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo, referências e apêndices A–H). Valores da Tabela 1 usados nas extrações conferidos visualmente na p. 3 do PDF; valores citados em heterogeneidade conferidos nas páginas das tabelas e figuras correspondentes.",
+    "paginas_abertas": [1, 3, 5, 6, 7, 8, 9, 12, 13, 14, 15, 16, 17, 21, 22, 23, 24]
+  }
+}

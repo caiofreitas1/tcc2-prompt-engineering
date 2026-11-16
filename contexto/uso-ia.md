@@ -332,3 +332,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 execuções (S579–S682), 18 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-07.md`).
 - S667: gravação interrompida por classificador de segurança, sem nova tentativa.
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 8 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S692–S810); Claude Code (Claude Opus 5.5), validação, 5 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-08.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

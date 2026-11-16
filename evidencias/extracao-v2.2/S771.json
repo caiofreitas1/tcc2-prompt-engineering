@@ -1,0 +1,487 @@
+{
+  "estudo": "S771",
+  "texto_fonte": "fontes/textos/lote/S771.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2506.05566v2 [cs.AR], 15 Jul 2025 (impresso na margem da p. 1 do PDF); a p. 1 também traz «979-8-3315-3762-3/25/$31.00 © 2025 IEEE». O PDF não tem paginação impressa; os localizadores usam a posição no arquivo.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "test-time scaling strategy / Iterative Test-Time Scaling for RTL Coding (ScaleRTL†)",
+        "mecanismos": ["instrucao", "raciocinio", "feedback"],
+        "mecanismos_acrescentados": ["raciocinio", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 do PDF (contribuições; Seção III); p. 3–4 do PDF (Seção III-B; Algoritmo 1); p. 4 do PDF (Seção IV-A-c, Model Inference); p. 5 do PDF (Tabela 2; Seção IV-C); p. 9 do PDF (Apêndice B; Tabela 5)",
+        "observacao": "Técnica de prompting proposta pelo estudo, aplicada sobre o modelo ajustado ScaleRTL-32B. Quando a solução não passa no testbench (Algoritmo 1, linha 6: IsCorrect(S)), a solução após o delimitador «</think>» é descartada e o delimitador é substituído por um prompt corretivo («Wait, my reasoning must be incorrect. Let’s check the reasoning rules: {Reasoning Rules}. Wait, I did not follow the rules. Let’s try again.»), e o traço é reenviado ao modelo para continuar o raciocínio; o processo é iterativo (até T iterações; no experimento, duas passagens adicionais). Mecanismos do pacote: instrucao (especificação em linguagem natural herdada da inferência padrão e regras gerais de RTL em linguagem natural no prompt corretivo), raciocinio (o prompt corretivo pede revisão e extensão do raciocínio) e feedback (nova iteração condicionada à falha no testbench; o prompt corretivo não inclui o conteúdo do resultado do teste, só é acionado pela falha). Comparador executado: ScaleRTL-32B com inferência padrão (Tabela 2, Tabela 5, Figura 3). Pacote híbrido: além do prompt corretivo, a condição ScaleRTL† tem passagens adicionais com limites de tokens maiores (32,768 e 49,152 contra 16,384 na inferência inicial), componente de orçamento fora do escopo; o ganho da Tabela 2 é do pacote e não pode ser atribuído só ao prompt corretivo nem às regras. O estudo não informa se o testbench usado em IsCorrect é o mesmo da avaliação."
+      },
+      {
+        "nome_original": "{Reasoning Rules} (general RTL coding rules no prompt corretivo)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (Seção III-B); p. 9 do PDF (Apêndice B; Figura 7)",
+        "observacao": "Regras gerais de codificação RTL geradas offline por prompt ao Claude3.7-Sonnet (Figura 7, até três regras por resposta) e inseridas no prompt corretivo; exemplo impresso: «Carefully implement output signals based on their timing requirements». Diretrizes em linguagem natural → instrucao, categoria já presente na condição base (especificação zero-shot), por isso sem mecanismo acrescentado em nível de categoria. O Apêndice B afirma que as regras servem como «effective hints», mas não há condição do prompt corretivo sem regras; a contribuição das regras não é isolada. As regras efetivamente usadas não são listadas além do exemplo."
+      },
+      {
+        "nome_original": "“Wait” token (abordagem de test-time scaling do s1 [25])",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Seção III-B)",
+        "observacao": "Acrescentar o token «Wait» ao fim do traço de raciocínio para que o modelo continue raciocinando. O estudo relata apenas, em prosa, que a abordagem não provocou raciocínio mais profundo no modelo RTL e que frequentemente reproduz a solução original; nenhum resultado numérico, condição experimental ou denominador é relatado. Mesma categoria raciocinio atribuída à extensão do raciocínio no prompt corretivo do ScaleRTL†."
+      },
+      {
+        "nome_original": "ScaleRTL / ScaleRTL-32B (inferência padrão, sem test-time scaling)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Seção III-B); p. 4 do PDF (Algoritmo 1, linha 3; Seção IV-A-c); p. 5 do PDF (Tabela 2)",
+        "observacao": "Condição base do contraste de prompting: o mesmo modelo ajustado recebe o problema do benchmark (especificação em linguagem natural, zero-shot) e gera traço de raciocínio e solução em uma única inferência, com limite inicial de 16,384 tokens. O raciocínio antes do código resulta do ajuste fino em traços de CoT (fora do escopo), não de um ingrediente do prompt; por isso não recebe a categoria raciocinio aqui. O prompt de inferência usado na avaliação não é reproduzido no artigo (nao_informado)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "ScaleRTL (supervised fine-tuning de DeepSeek-R1-Distill-Qwen-32B no conjunto de CoT de 3.5B tokens)",
+        "natureza": "ajuste_fino",
+        "descricao": "Primeira fase e principal contribuição de treino do estudo: SFT sobre 62K triplas <especificação, traço de CoT, código> com média de 56K tokens; taxa de aprendizado 0.0001, lote global 128, 5 épocas, 64 passos de aquecimento, 32 nós com 8 A100 cada. O ganho do ScaleRTL sobre os demais modelos da Tabela 2 é efeito de ajuste fino, não de prompting.",
+        "localizador": "p. 3 do PDF (Seção III-A-c); p. 4 do PDF (Seção IV-A-b)"
+      },
+      {
+        "nome_original": "Billion-Token Scale CoT Data Generation (prompts ao DeepSeek-R1, Apêndice A)",
+        "natureza": "outro",
+        "descricao": "Prompts ao DeepSeek-R1 para formular especificações a partir de cada script RTL (estratégia OSS-INSTRUCT, Figura 5) e para gerar traços de CoT e soluções (Figura 6). São prompts de construção de dados de treino, não condições de inferência avaliadas para a tarefa; entram no pacote de ajuste fino.",
+        "localizador": "p. 3 do PDF (Seção III-A-b); p. 8 do PDF (Apêndice A, Figuras 5 e 6)"
+      },
+      {
+        "nome_original": "multi-stage filtering pipeline (deduplicação, filtro de comprimento, validação sintática, similaridade de Jaccard com 5-gramas, filtro semântico por embeddings)",
+        "natureza": "outro",
+        "descricao": "Curadoria de 5 milhões de trechos RTL até 62K scripts (cerca de 200 milhões de tokens); scripts com similaridade de Jaccard acima de 0.8 com qualquer solução de referência dos benchmarks são descartados. Curadoria de dados de treino.",
+        "localizador": "p. 2 do PDF (Seção III-A-a); p. 3 do PDF (continuação da Seção III-A-a)"
+      },
+      {
+        "nome_original": "token limit por passagem (16,384 inicial; 32,768 na primeira passagem; 49,152 na segunda)",
+        "natureza": "orcamento",
+        "descricao": "Limites de tokens que crescem a cada passagem do ScaleRTL†; fazem parte do pacote ScaleRTL† e diferenciam a condição de intervenção da condição base além do prompt corretivo.",
+        "localizador": "p. 4 do PDF (Seção IV-A-c)"
+      },
+      {
+        "nome_original": "downgraded variants by truncating the reasoning trace (substituição de «Wait» por «</think>»)",
+        "natureza": "orcamento",
+        "descricao": "Duas variantes da Figura 3 em que o raciocínio é interrompido no meio, forçando a saída da solução; servem para traçar a relação entre número de tokens de raciocínio e desempenho. É controle do orçamento de raciocínio, não técnica de prompting comparada; valores numéricos não são impressos.",
+        "localizador": "p. 5 do PDF (Seção IV-C); p. 6 do PDF (Figura 3)"
+      },
+      {
+        "nome_original": "vLLM com bf16, tensor parallelism 4, temperature 0.2",
+        "natureza": "decodificacao",
+        "descricao": "Configuração de inferência comum às condições do ScaleRTL; não se informa se os baselines da Tabela 2 usaram a mesma configuração.",
+        "localizador": "p. 4 do PDF (Seção IV-A-c)"
+      },
+      {
+        "nome_original": "CraftRTL-70B (LLaMA3.3-70B ajustado no conjunto do CraftRTL)",
+        "natureza": "ajuste_fino",
+        "descricao": "Baseline treinado pelos autores para controlar o efeito do tamanho do modelo; comparação entre modelos ajustados, fora do escopo de prompting.",
+        "localizador": "p. 4 do PDF (Seção IV-A-a); p. 5 do PDF (Tabela 2)"
+      }
+    ],
+    "modelos": [
+      {"nome": "ScaleRTL-32B (DeepSeek-R1-Distill-Qwen-32B ajustado pelo estudo)", "versao": "nao_informado (apenas tamanho de 32B; snapshot do modelo base não informado)"},
+      {"nome": "ScaleRTL†-32B (ScaleRTL-32B com a estratégia de test-time scaling)", "versao": "mesmo modelo do ScaleRTL-32B"},
+      {"nome": "DeepSeek-R1 (geração das especificações e traços de CoT; também comparado no Apêndice C)", "versao": "nao_informado"},
+      {"nome": "Claude3.7-Sonnet (geração das regras de raciocínio; também comparado no Apêndice C)", "versao": "nao_informado"},
+      {"nome": "Baselines da Tabela 2: Llama3.1-405B, Llama3.3-70B, Nemotron4-340B, GPT-4o, CodeLlama-7B, CodeQwen-7B, Starcoder2-15B, DeepSeek-Coder-V2-16B, DeepSeek-Coder-V2-236B, RTLCoder-6.7B, BetterV-6.7B, CodeV-6.7B, OriGen-6.7B, MG-Verilog-7B, CraftRTL-15B, CraftRTL-70B, R1-Distill-Qwen-32B, R1-Distill-Llama-70B", "versao": "nao_informado (apenas nomes e tamanhos); snapshot do GPT-4o não informado"},
+      {"nome": "Modelos proprietários do Apêndice C (Tabela 4): Claude3.5-Sonnet, Claude3.7-Sonnet, GPT4.1, OpenAI o3, OpenAI o4-mini, DeepSeek-R1", "versao": "nao_informado"},
+      {"nome": "DeepSeek-R1-Distill-Qwen-32B (Tabela 3, avaliação de capacidade geral)", "versao": "nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "VerilogEval-Machine (VerilogEval [19])",
+        "quantidade": "143 descrições geradas automaticamente pelo GPT-3.5",
+        "observacao": "n = 10 tentativas por problema para pass@k. O estudo não liga explicitamente o denominador de pass@k ao total de 143 nem relata exclusões."
+      },
+      {
+        "nome": "VerilogEval-Human (VerilogEval [19])",
+        "quantidade": "156 descrições adaptadas manualmente da plataforma HDLBits",
+        "observacao": "O estudo não informa sobreposição entre os problemas dos dois subconjuntos do VerilogEval."
+      },
+      {
+        "nome": "RTLLM v1.1 [23]",
+        "quantidade": "nao_informado",
+        "observacao": "Número de problemas e denominador das métricas não informados."
+      },
+      {
+        "nome": "HumanEval, MBPP (Mostly Basic Python Programming) e IFEval",
+        "quantidade": "HumanEval: nao_informado; MBPP: nao_informado; IFEval: 541 prompts",
+        "observacao": "Usados só para avaliar capacidade geral do ScaleRTL-32B (Tabela 3), sem o test-time scaling; fora do contraste de prompting."
+      }
+    ],
+    "metricas": [
+      {"nome": "pass@k não enviesado (pass@1 e pass@5), com n = 10", "aplicacao": "VerilogEval-Machine, VerilogEval-Human, RTLLM v1.1 (Tabelas 2 e 4; Figura 3)", "localizador": "p. 4 do PDF (Seção IV-A-d); p. 5 do PDF (Tabela 2)"},
+      {"nome": "pass rate (problema resolvido ao menos uma vez em n = 10 tentativas)", "aplicacao": "ScaleRTL-32B e ScaleRTL†-32B nos três benchmarks RTL (Tabela 5)", "localizador": "p. 5 do PDF (Seção IV-B); p. 9 do PDF (Apêndice D, Tabela 5)"},
+      {"nome": "número médio de tokens de raciocínio (# Reasoning Tokens)", "aplicacao": "Figura 3, cinco variantes do ScaleRTL por benchmark; valores só em gráfico", "localizador": "p. 5 do PDF (Seção IV-C); p. 6 do PDF (Figura 3)"},
+      {"nome": "pass@1 (HumanEval, MBPP) e accuracy (IFEval)", "aplicacao": "Tabela 3, capacidade geral", "localizador": "p. 6 do PDF (Tabela 3)"}
+    ],
+    "linguagens": [
+      "Verilog (RTL/HDL)",
+      "Python (MBPP, pelo nome do benchmark; linguagem do HumanEval não declarada no estudo)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mesmo após o ajuste fino, o modelo pode seguir caminhos de raciocínio falhos e produzir soluções que não passam no testbench; a extensão simples com «Wait» frequentemente reproduz a solução original sem corrigir erros. O estudo também aponta que pequenos erros semânticos ou má interpretação da especificação levam a falhas funcionais em RTL; o exemplo da Figura 4 mostra uma solução inicial com atraso de um ciclo no sinal done.",
+        "localizador": "p. 1 do PDF (Seção I); p. 3 do PDF (Seção III-B); p. 5–6 do PDF (Seção IV-C; Figura 4)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Modelos com data de corte posterior à publicação dos benchmarks RTL (por exemplo, DeepSeek-R1 e Claude3.7-Sonnet) provavelmente foram expostos aos dados dos benchmarks no pré-treinamento, o que pode superestimar seu desempenho; também há risco de contaminação dos dados de treino do ScaleRTL, que o estudo procura controlar por filtragem (ver mitigacoes). O estudo não afirma contaminação efetiva medida.",
+        "localizador": "p. 2 do PDF (Seção III-A-a); p. 3 do PDF (Seção III-A-b); p. 4 do PDF (Seção IV-A-a); p. 9 do PDF (Apêndice C)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sobreajuste a problemas RTL estreitos dos benchmarks e perda de capacidades gerais (programação geral e seguimento de instruções) em modelos especializados em RTL; o estudo avalia esse aspecto na Tabela 3, sem o test-time scaling.",
+        "localizador": "p. 4 do PDF (Seção IV, primeiro parágrafo); p. 6 do PDF (Seção IV-D; Tabela 3)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Filtragem dos dados de treino contra os benchmarks: similaridade de Jaccard com 5-gramas entre cada script e as soluções de referência, descartando scripts acima de 0.8, e filtro semântico por embeddings; o estudo afirma que o conjunto de CoT não tem especificação nem código sobrepostos aos benchmarks. Não há comparação medida com e sem o filtro; o procedimento de verificação de sobreposição das especificações geradas não é descrito além do filtro sobre o código.",
+        "avaliada": "nao",
+        "localizador": "p. 2 do PDF (Seção III-A-a); p. 3 do PDF (Seção III-A-a e III-A-b); p. 9 do PDF (Apêndice C)"
+      },
+      {
+        "descricao": "Exclusão de DeepSeek-R1 e Claude3.7-Sonnet das comparações principais por data de corte posterior aos benchmarks, com os resultados desses modelos relatados à parte no Apêndice C.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF (Seção IV-A-a); p. 9 do PDF (Apêndice C)"
+      },
+      {
+        "descricao": "Avaliação em HumanEval, MBPP e IFEval para verificar se o ScaleRTL-32B mantém capacidades gerais; é verificação do risco de sobreajuste por comparação com o modelo base antes do ajuste, não mitigação de prompting.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (Seção IV-D; Tabela 3)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "ScaleRTL-32B com inferência padrão (sem test-time scaling), executado pelo estudo no mesmo modelo, benchmarks e métricas (Tabela 2, p. 5 do PDF; Tabela 5, p. 9 do PDF). Os 18 baselines da Tabela 2 são outros modelos, não condições de prompting; a origem dos seus valores (execução própria ou artigos originais) não é informada.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa que contradiz a tabela: o texto afirma que CraftRTL-70B fica abaixo do ScaleRTL de 32B «across all benchmarks», mas na Tabela 2, em VerilogEval-Machine pass@1, CraftRTL-70B tem 80.1 e ScaleRTL-32B tem 80.0. Nas demais colunas o ScaleRTL-32B é maior.",
+        "localizador": "p. 5 do PDF (Seção IV-B, primeiro parágrafo da coluna esquerda; Tabela 2, linhas CraftRTL-70B e ScaleRTL-32B, coluna VerilogEval-Machine pass@1)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente da tabela: a introdução diz que «our models» obtêm melhoras sobre todos os baselines; na Tabela 2, ScaleRTL-32B fica abaixo de CraftRTL-15B (81.9) e de CraftRTL-70B (80.1) em VerilogEval-Machine pass@1 (80.0) e abaixo de CodeV-6.7B em VerilogEval-Machine pass@5 (88.6 contra 88.3). ScaleRTL†-32B é o maior valor em todas as colunas da Tabela 2.",
+        "localizador": "p. 2 do PDF (Seção I); p. 5 do PDF (Tabela 2, colunas VerilogEval-Machine pass@1 e pass@5)"
+      },
+      {
+        "descricao": "Diferenças descritas como «%» que, por cálculo próprio a partir da Tabela 2, correspondem a diferenças absolutas em pontos percentuais entre ScaleRTL†-32B e o melhor baseline RTL de cada coluna: pass@1 VerilogEval-Human 80.4 − 69.7 (CraftRTL-70B) = 10.7; pass@1 RTLLM 60.7 − 49.0 (CraftRTL-15B) = 11.7; pass@5 VerilogEval-Human 90.8 − 72.4 (CraftRTL-15B) = 18.4; pass@5 RTLLM 78.5 − 65.8 (CraftRTL-15B) = 12.7. O texto fala em «VerilogEval» sem identificar o subconjunto, e o resumo diz superar «18 competitive baselines by up to 18.4%», enquanto o corpo compara com o «strongest prior RTL-specific baseline». Essas diferenças são entre modelos e não entre técnicas de prompting.",
+        "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (contribuições); p. 4 do PDF (Seção IV-B); p. 5 do PDF (Tabela 2)"
+      },
+      {
+        "descricao": "Condições discrepantes no contraste de prompting: ScaleRTL† difere da inferência padrão não só pelo prompt corretivo, mas também por até duas passagens adicionais e por limites de tokens maiores (32,768 e 49,152 contra 16,384), e as passagens só ocorrem quando a solução falha no testbench (IsCorrect). O estudo não informa se esse testbench é o mesmo usado na avaliação, nem como a verificação e as passagens adicionais se combinam com as n = 10 tentativas usadas para pass@k e pass rate. O ganho é de um pacote híbrido.",
+        "localizador": "p. 4 do PDF (Algoritmo 1, linha 6; Seção III-B; Seção IV-A-c e IV-A-d)"
+      },
+      {
+        "descricao": "Rótulos divergentes para as variantes da Figura 3: o texto fala em «five ScaleRTL variants», e a legenda em «five ScaleRTL† variants», embora o conjunto inclua o ScaleRTL base e duas variantes truncadas. A Figura 3 usa pass@1 em VerilogEval-Machine e pass@5 em VerilogEval-Human e RTLLM, métrica escolhida por ser mais robusta segundo os autores. Os valores da figura não são impressos e não foram estimados.",
+        "localizador": "p. 5 do PDF (Seção IV-C); p. 6 do PDF (Figura 3, legenda e eixos)"
+      },
+      {
+        "descricao": "O texto afirma que a curva ajustada sobre os cinco pontos de cada benchmark indica relação sistemática e previsível, sem estatística de ajuste; na inspeção visual da Figura 3(a) e 3(b), o ponto verde (ScaleRTL base) aparece afastado da curva ajustada. Observação qualitativa, sem estimativa de valores.",
+        "localizador": "p. 5 do PDF (Seção IV-C, coluna direita); p. 6 do PDF (Figura 3(a) e 3(b))"
+      },
+      {
+        "descricao": "Resultados sem números: a falha da abordagem com «Wait» (s1) e a eficácia das regras no prompt corretivo como «effective hints» são afirmadas sem resultados quantitativos nem condição comparável relatada.",
+        "localizador": "p. 3 do PDF (Seção III-B); p. 9 do PDF (Apêndice B)"
+      },
+      {
+        "descricao": "Origem das regras pouco especificada: o prompt de geração das regras (Figura 7) recebe «a markdown file containing a Verilog code generation benchmark», com o enunciado original e contexto adicional; o estudo não informa qual benchmark ou quais problemas foram usados, se as regras são por problema ou compartilhadas, nem lista as regras usadas (só um exemplo). As regras foram geradas pelo Claude3.7-Sonnet, modelo que o próprio estudo exclui das comparações principais por provável exposição aos benchmarks; o estudo não discute essa relação. Não se afirma vazamento.",
+        "localizador": "p. 4 do PDF (Seção III-B; Seção IV-A-a); p. 9 do PDF (Apêndice B; Figura 7)"
+      },
+      {
+        "descricao": "O DeepSeek-R1, usado para gerar as especificações e os traços de CoT do treino, é um dos modelos que o estudo considera provavelmente expostos aos benchmarks; o controle descrito é a filtragem dos scripts de origem, e o estudo não discute a possível exposição do gerador. Não se afirma contaminação efetiva.",
+        "localizador": "p. 3 do PDF (Seção III-A-b); p. 4 do PDF (Seção IV-A-a)"
+      },
+      {
+        "descricao": "Falta de variabilidade: não há variância, intervalo de confiança, teste estatístico nem número de execuções independentes (nao_informado); as «consistent improvements» do ScaleRTL† se baseiam em valores pontuais. O n = 10 é parâmetro do estimador de pass@k, não número de execuções.",
+        "localizador": "p. 4 do PDF (Seção IV-A-d); p. 5 do PDF (Seção IV-B; Tabela 2)"
+      },
+      {
+        "descricao": "Células ausentes na Tabela 2 («−») para BetterV-6.7B (RTLLM), OriGen-6.7B (pass@1 em RTLLM) e MG-Verilog-7B (VerilogEval-Human e RTLLM), sem explicação; a origem dos valores dos baselines não é informada.",
+        "localizador": "p. 5 do PDF (Tabela 2)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente na Tabela 3 (fora do contraste de prompting): o texto diz que o ScaleRTL-32B fica «on par with, and in some cases surpassing» o DeepSeek-R1-Distill-Qwen-32B em todos os benchmarks, mas em IFEval tem 73.2 contra 76.8.",
+        "localizador": "p. 6 do PDF (Seção IV-D; Tabela 3, coluna IFEval)"
+      },
+      {
+        "descricao": "No Apêndice C, ScaleRTL†-32B tem 83.2 em VerilogEval-Machine, abaixo de Claude3.5-Sonnet (83.4); o texto descreve o resultado como «closely matching or exceeding». Os valores do ScaleRTL nas Tabelas 4 e 5 conferem com a Tabela 2 nas métricas correspondentes (pass@1 em VerilogEval-M e VerilogEval-H; pass@5 em RTLLM).",
+        "localizador": "p. 9 do PDF (Apêndice C, Tabela 4); p. 5 do PDF (Tabela 2)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo combina ajuste fino (fase 1, fora do escopo) e uma estratégia de prompting em tempo de teste (fase 2). Só o contraste ScaleRTL × ScaleRTL†, no mesmo modelo ajustado, é contraste de prompting; as comparações com os 18 baselines e com modelos proprietários comparam modelos.",
+        "localizador": "p. 2 do PDF (Seção III); p. 3 do PDF (Figura 2); p. 5 do PDF (Tabela 2)"
+      },
+      {
+        "descricao": "Pass rate (Tabela 5), não selecionado para extração por ser nova métrica da mesma técnica e tarefa: ScaleRTL-32B 88.1, 90.4, 79.3; ScaleRTL†-32B 90.2, 93.6, 82.8 (VerilogEval-M, VerilogEval-H, RTLLM v1.1). Conferido na p. 9 do PDF.",
+        "localizador": "p. 9 do PDF (Apêndice D, Tabela 5)"
+      },
+      {
+        "descricao": "O estudo relata que o test-time scaling aumenta significativamente o número de tokens de raciocínio na inferência (Figura 3, apenas gráfico) e conclui que a abordagem tem «minimal deployment overhead»; não quantifica custo em dinheiro, tempo ou recursos. Aumento de tokens não foi registrado como risco porque o estudo não o apresenta como custo.",
+        "localizador": "p. 4 do PDF (Seção III-B); p. 5 do PDF (Seção IV-C); p. 6 do PDF (Figura 3)"
+      },
+      {
+        "descricao": "Figura 4: exemplo qualitativo em VerilogEval-Human (FSM do protocolo PS/2) em que a extensão do raciocínio corrige o atraso de um ciclo no sinal done.",
+        "localizador": "p. 5 do PDF (Seção IV-C); p. 6 do PDF (Figura 4)"
+      },
+      {
+        "descricao": "Abordagens agênticas (por exemplo, VerilogCoder) são declaradas ortogonais e não comparadas; o estudo sugere que engenheiros possam incorporar regras próprias ao prompt corretivo, sem avaliação.",
+        "localizador": "p. 2 do PDF (Seção II-B); p. 4 do PDF (Seção III-B); p. 9 do PDF (Apêndice B)"
+      },
+      {
+        "descricao": "Não identifiquei no texto endereço de código, dados ou modelo para replicação.",
+        "localizador": "texto completo (p. 1–9 do PDF)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We evaluate model performance on two representative RTL code generation benchmarks: VerilogEval [19] and RTLLM [23], which are designed to assess RTL code generation from natural language specifications.",
+        "localizador": "p. 4 do PDF, Seção IV-A-d"
+      },
+      {
+        "trecho": "For test-time scaling, we introduce a novel iterative approach that extends the model’s reasoning process through rethinking and self-correction, leading to more accurate final solutions.",
+        "localizador": "p. 2 do PDF, Seção I (contribuições)"
+      },
+      {
+        "trecho": "If the solution fails to pass the testbench, the end-of-reasoning token delimiter “</think>” is then replaced with a corrective prompt: “Wait, my reasoning must be incorrect. Let’s check the reasoning rules: {Reasoning Rules}. Wait, I did not follow the rules. Let’s try again.”",
+        "localizador": "p. 3–4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "The {Reasoning Rules} are generated offline and consist of general RTL coding guidelines, such as “Carefully implement output signals based on their timing requirements”.",
+        "localizador": "p. 4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "while t < T and not IsCorrect(S) do",
+        "localizador": "p. 4 do PDF, Algoritmo 1, linha 6"
+      },
+      {
+        "trecho": "For ScaleRTL†, we apply two additional inference passes per test problem using our test-time scaling strategy, as discussed in Section III-B.",
+        "localizador": "p. 4 do PDF, Seção IV-A-c"
+      },
+      {
+        "trecho": "The first pass uses a token limit of 32,768, and the second extends it to 49,152.",
+        "localizador": "p. 4 do PDF, Seção IV-A-c"
+      },
+      {
+        "trecho": "We use vLLM [17] with bf16 precision, a tensor parallelism factor of 4, a temperature of 0.2, and an initial token limit of 16,384.",
+        "localizador": "p. 4 do PDF, Seção IV-A-c"
+      },
+      {
+        "trecho": "As introduced in s1 [25], a straightforward approach to test-time scaling is to append a “Wait” token at the end of the reasoning trace to prompt the model to continue its reasoning process.",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "As a result, this simple trick often reproduces the original code solution generated by ScaleRTL and fails to correct any errors.",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "However, the model may still follow flawed reasoning paths, leading to solutions that fail to pass the testbench.",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "We develop an automated method to generate these general rules by prompting Claude3.7-Sonnet with the text shown in Figure 7.",
+        "localizador": "p. 9 do PDF, Apêndice B"
+      },
+      {
+        "trecho": "To enable ScaleRTL to rethink and self-correct earlier reasoning steps, we find that incorporating general RTL coding rules into the corrective prompt serves as effective hints, encouraging the model to generate longer chain-of-thought reasoning traces during test-time scaling.",
+        "localizador": "p. 9 do PDF, Apêndice B"
+      },
+      {
+        "trecho": "I will provide you with a markdown file containing a Verilog code generation benchmark, which includes:",
+        "localizador": "p. 9 do PDF, Apêndice B, Figura 7"
+      },
+      {
+        "trecho": "We obtain the ScaleRTL model by fine-tuning DeepSeek-R1-Distill-Qwen-32B on our curated CoT dataset containing 3.5B tokens shown in Table 1.",
+        "localizador": "p. 4 do PDF, Seção IV-A-b"
+      },
+      {
+        "trecho": "To prevent data contamination of downstream RTL benchmarks, we compute the Jaccard similarity between each collected code sample and the golden solutions in the benchmarks.",
+        "localizador": "p. 2 do PDF, Seção III-A-a"
+      },
+      {
+        "trecho": "We discard any script whose similarity score exceeds 0.8 with respect to any golden reference.",
+        "localizador": "p. 2 do PDF, Seção III-A-a"
+      },
+      {
+        "trecho": "We ensure that our CoT dataset contains no specification or code overlapping with existing RTL benchmarks, thereby avoiding any data contamination.",
+        "localizador": "p. 3 do PDF, Seção III-A-b"
+      },
+      {
+        "trecho": "For more recent foundation models such as DeepSeek-R1 and Claude3.7-Sonnet, we intentionally exclude them from our main comparisons, as their training data cutoff dates postdate the release of RTL benchmarks.",
+        "localizador": "p. 4 do PDF, Seção IV-A-a"
+      },
+      {
+        "trecho": "It is likely that these models have been exposed to benchmark data during pre-training.",
+        "localizador": "p. 4 do PDF, Seção IV-A-a"
+      },
+      {
+        "trecho": "As a result, it is highly likely that their training corpora contain benchmark-related information, which may lead to overestimated performance on these evaluation sets.",
+        "localizador": "p. 9 do PDF, Apêndice C"
+      },
+      {
+        "trecho": "A model that lacks such capabilities risks overfitting to narrow RTL coding problems in those benchmarks and may fail when applied to more open-ended or unfamiliar design challenges.",
+        "localizador": "p. 6 do PDF, Seção IV-D"
+      },
+      {
+        "trecho": "Notably, VerilogEval consists of two subsets: VerilogEval-Human, which contains 156 manually adapted problem descriptions from the HDLBits platform, and VerilogEval-Machine, which includes 143 descriptions automatically generated by GPT-3.5.",
+        "localizador": "p. 4 do PDF, Seção IV-A-d"
+      },
+      {
+        "trecho": "We choose n = 10 in this work.",
+        "localizador": "p. 4 do PDF, Seção IV-A-d"
+      },
+      {
+        "trecho": "In addition to the standard pass@k metric used for all baselines, we also report the pass rate, which measures whether a problem can be solved at least once within n = 10 trials.",
+        "localizador": "p. 5 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "Finally, the performance gap between ScaleRTL and ScaleRTL† confirms that test-time scaling plays a critical in accurate RTL code generation.",
+        "localizador": "p. 5 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "For instance, although CraftRTL-70B is significantly larger, it still underperforms compared to our 32B ScaleRTL model across all benchmarks.",
+        "localizador": "p. 5 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "Experimental results show that our models achieve substantial accuracy improvements over all baselines on two well-established RTL benchmarks: VerilogEval [19] and RTLLM [23].",
+        "localizador": "p. 2 do PDF, Seção I"
+      },
+      {
+        "trecho": "Specifically, our best model improves pass@1 over the strongest prior RTL-specific baseline by up to 10.7% on VerilogEval and 11.7% on RTLLM.",
+        "localizador": "p. 4 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "To this end, we analyze the performance of five ScaleRTL variants across three benchmarks: VerilogEval-Machine, VerilogEval-Human, and RTLLM.",
+        "localizador": "p. 5 do PDF, Seção IV-C"
+      },
+      {
+        "trecho": "Specifically, we suppress its reasoning in the middle by replacing the keyword “Wait” with the delimiter “</think>,” which signals the end of reasoning and forces the model to directly output the RTL solution.",
+        "localizador": "p. 5 do PDF, Seção IV-C"
+      },
+      {
+        "trecho": "Figure 3: Impact of reasoning trace length on RTL coding performance — For each benchmark, we evaluate five ScaleRTL† variants by varying the amount of reasoning.",
+        "localizador": "p. 6 do PDF, legenda da Figura 3"
+      },
+      {
+        "trecho": "Longer reasoning at inference leads to more accurate RTL code without extra fine-tuning, offering a promising path to improve performance with minimal deployment overhead.",
+        "localizador": "p. 5 do PDF, Seção IV-C (último parágrafo)"
+      },
+      {
+        "trecho": "ScaleRTL-32B 80.0 88.3 76.3 88.4 55.5 75.4",
+        "localizador": "p. 5 do PDF, Tabela 2, bloco RTL Reasoning Models, linha ScaleRTL-32B; colunas VerilogEval-Machine (pass@1, pass@5), VerilogEval-Human (pass@1, pass@5), RTLLM v1.1 (pass@1, pass@5)"
+      },
+      {
+        "trecho": "ScaleRTL†-32B 83.2 89.1 80.4 90.8 60.7 78.5",
+        "localizador": "p. 5 do PDF, Tabela 2, bloco RTL Reasoning Models, linha ScaleRTL†-32B; colunas VerilogEval-Machine (pass@1, pass@5), VerilogEval-Human (pass@1, pass@5), RTLLM v1.1 (pass@1, pass@5)"
+      },
+      {
+        "trecho": "CraftRTL-70B 80.1 81.9 69.7 71.5 46.0 52.7",
+        "localizador": "p. 5 do PDF, Tabela 2, bloco RTL Coding Models, linha CraftRTL-70B; colunas VerilogEval-Machine (pass@1, pass@5), VerilogEval-Human (pass@1, pass@5), RTLLM v1.1 (pass@1, pass@5)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "test-time scaling strategy / Iterative Test-Time Scaling for RTL Coding (ScaleRTL†)",
+      "mecanismos": ["instrucao", "raciocinio", "feedback"],
+      "mecanismos_acrescentados": ["raciocinio", "feedback"],
+      "comparador": "ScaleRTL-32B com inferência padrão (sem test-time scaling)",
+      "modelo": "ScaleRTL-32B (DeepSeek-R1-Distill-Qwen-32B ajustado pelo estudo)",
+      "benchmark": "VerilogEval-Machine",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 80.0, "intervencao": 83.2},
+      "denominador": "VerilogEval-Machine tem 143 descrições; n = 10 tentativas por problema no estimador não enviesado de pass@k. O estudo não liga explicitamente o denominador da métrica às 143 descrições nem relata exclusões.",
+      "condicoes": "Mesmo modelo ajustado nas duas condições; vLLM, bf16, temperatura 0.2. Base: uma inferência com limite de 16,384 tokens. Intervenção: quando a solução não passa no testbench, até duas passagens adicionais com o prompt corretivo (regras gerais de RTL geradas pelo Claude3.7-Sonnet) no lugar de «</think>», com limites de 32,768 e 49,152 tokens. Pacote híbrido (prompt corretivo + passagens e orçamento de tokens adicionais + acionamento pela falha no testbench); o ganho não pode ser atribuído só ao prompt corretivo ou às regras. Não informado: se o testbench de IsCorrect é o da avaliação, como as passagens se combinam com as 10 tentativas, número de execuções independentes, variância ou teste estatístico. Valores sem símbolo de unidade na Tabela 2; o texto trata pass@k como percentual. Conferido visualmente na Tabela 2 (p. 5 do PDF).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o estudo destaca o contraste ScaleRTL × ScaleRTL† em três benchmarks e duas métricas (pass@1 e pass@5) sem que uma prevaleça. Primeira tabela com o contraste de prompting: Tabela 2; primeira métrica (pass@1), primeiro benchmark na ordem das colunas (VerilogEval-Machine) e único modelo com as duas condições. Não há outra técnica focal de prompting nem outra tarefa a cobrir, nem tabela de ablação ou matriz de ingredientes de prompting para cobertura de componentes.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela 2, linhas ScaleRTL-32B e ScaleRTL†-32B, coluna VerilogEval-Machine pass@1; condições na p. 4 do PDF (Algoritmo 1; Seção IV-A-c e IV-A-d)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "ScaleRTL-32B 80.0 88.3 76.3 88.4 55.5 75.4",
+          "localizador": "p. 5 do PDF, Tabela 2, linha ScaleRTL-32B; colunas VerilogEval-Machine (pass@1, pass@5), VerilogEval-Human (pass@1, pass@5), RTLLM v1.1 (pass@1, pass@5)"
+        },
+        {
+          "trecho": "ScaleRTL†-32B 83.2 89.1 80.4 90.8 60.7 78.5",
+          "localizador": "p. 5 do PDF, Tabela 2, linha ScaleRTL†-32B; colunas VerilogEval-Machine (pass@1, pass@5), VerilogEval-Human (pass@1, pass@5), RTLLM v1.1 (pass@1, pass@5)"
+        },
+        {
+          "trecho": "For ScaleRTL†, we apply two additional inference passes per test problem using our test-time scaling strategy, as discussed in Section III-B.",
+          "localizador": "p. 4 do PDF, Seção IV-A-c"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de escalar dados de raciocínio e computação em tempo de teste para geração de código RTL é declarado, com contribuições explícitas para cada fase.",
+      "localizador": "p. 1 do PDF (resumo; Seção I); p. 2 do PDF (contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve curadoria, ajuste fino, hiperparâmetros, Algoritmo 1, prompt corretivo e limites de tokens, mas não informa como as passagens do ScaleRTL† se combinam com as 10 tentativas, se o testbench de IsCorrect é o da avaliação, quais regras foram usadas e de quais problemas foram geradas, nem o prompt de inferência da avaliação.",
+      "localizador": "p. 2–4 do PDF (Seção III; Algoritmo 1; Seção IV-A); p. 9 do PDF (Apêndice B)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "O contraste de prompting usa o mesmo modelo ajustado com e sem o test-time scaling, mas as condições diferem também em passagens e orçamento de tokens; a abordagem «Wait» é descartada sem números. Os 18 baselines são modelos, sem informação sobre a origem dos valores nem sobre configuração de inferência.",
+      "localizador": "p. 3–4 do PDF (Seção III-B; Seção IV-A); p. 5 do PDF (Tabela 2)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k não enviesado com n = 10 e pass rate são definidos; os valores do ScaleRTL coincidem entre as Tabelas 2, 4 e 5 nas métricas correspondentes. Faltam o tamanho do RTLLM v1.1 e o denominador explícito de cada métrica; diferenças em pontos percentuais são descritas como «%»; não há medida de variabilidade.",
+      "localizador": "p. 4 do PDF (Seção IV-A-d); p. 5 do PDF (Tabela 2); p. 9 do PDF (Tabelas 4 e 5)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Discute contaminação de modelos com corte recente e sobreajuste a benchmarks RTL, mas não há seção de ameaças nem discussão do acionamento pelo testbench, da confusão entre prompt corretivo e orçamento de tokens, da variabilidade dos resultados ou da origem das regras.",
+      "localizador": "p. 4 do PDF (Seção IV-A-a); p. 6 do PDF (Seção IV-D); p. 9 do PDF (Apêndice C)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Os prompts de curadoria, de geração de regras e o prompt corretivo são impressos, assim como hiperparâmetros de treino e de inferência; não identifiquei endereço de código, dados ou modelo, e as regras usadas e as versões dos modelos auxiliares não são informadas.",
+      "localizador": "p. 4 do PDF (Seção IV-A-b e IV-A-c); p. 8–9 do PDF (Apêndices A e B)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo filtra os dados de treino contra as soluções dos benchmarks (Jaccard com 5-gramas e filtro semântico) e separa modelos com corte posterior aos benchmarks, mas não discute a possível exposição do DeepSeek-R1 (gerador dos dados de treino), do modelo base nem do Claude3.7-Sonnet (gerador das regras, alimentado com conteúdo de benchmark), e não descreve como verificou a sobreposição das especificações geradas.",
+      "localizador": "p. 2–3 do PDF (Seção III-A); p. 4 do PDF (Seção IV-A-a); p. 9 do PDF (Apêndices B e C)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo, referências e apêndices A–D). Valores da Tabela 2 usados na extração e na heterogeneidade conferidos visualmente na p. 5 do PDF; Tabelas 3, 4 e 5 e Figuras 3 e 4 conferidas nas p. 6 e 9; Algoritmo 1 e condições de inferência na p. 4.",
+    "paginas_abertas": [2, 3, 4, 5, 6, 8, 9]
+  }
+}

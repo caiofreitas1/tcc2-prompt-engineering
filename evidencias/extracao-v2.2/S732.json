@@ -1,0 +1,439 @@
+{
+  "estudo": "S732",
+  "texto_fonte": "fontes/textos/lote/S732.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2505.10708v2 [cs.CR], 22 Apr 2026 (impresso na margem da p. 1 do PDF); versão publicada em ReCode ’26 (1st Workshop on Code Translation, Transformation, and Modernization), DOI 10.1145/3786180.3788317. O PDF não traz numeração impressa de páginas; os localizadores usam a posição no arquivo (8 páginas).",
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "C-to-Rust Prompt (initial prompt da transpilação; tradução básica, «basic C-to-Rust translation»)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 do PDF (Seção 3.1); p. 3 do PDF (Fig. 1, caixa «C-to-Rust Prompt»); p. 4 do PDF (Seção 5.1; Fig. 2)",
+        "observacao": "Prompt base: o programa C de entrada vai no prompt (contexto, D102), com instruções para produzir código seguro (instrucao/restricoes) e seguir o formato de saída exigido, com tags predefinidas para extrair o código Rust (restricoes). O texto do prompt não é reproduzido no artigo. É a linha de base executada (Fig. 2, CA sem nenhuma tentativa de reparo) contra a qual o estudo compara o pipeline completo (Fig. 3). Não há condição sem o próprio prompt base."
+      },
+      {
+        "nome_original": "SafeTrans (pipeline completo: transpilação + iterative repair com basic repair, guided repair e reparo de erros de execução)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": ["feedback", "exemplos", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (Seção 1 e Seção 3); p. 3 do PDF (Fig. 1; Seções 3.2 e 3.3); p. 4 do PDF (Fig. 2); p. 5 do PDF (Seção 5.4; Fig. 3)",
+        "observacao": "Pacote completo comparado com a tradução básica sem reparo, nos mesmos seis modelos e nos mesmos 2,653 programas (Fig. 2 contra Fig. 3). O contraste isola o pacote, não um mecanismo: o ganho de CA não pode ser atribuído só ao guided repair, só ao basic repair ou só ao reparo de execução. Herda do prompt base instrução, restrições (código seguro, formato) e o código como contexto; acrescenta retroalimentação do compilador rustc e dos testes (feedback), exemplos de código incorreto e corrigido no guided repair (exemplos) e o encadeamento transpilação–compilação–execução (decomposicao, conforme a regra D102 para pipelines que encadeiam tradução, compilação e execução). O pacote usa compilador e casos de teste como ferramentas de retroalimentação, que fazem parte do mecanismo de feedback; não há componente fora do escopo de prompting identificado no pacote (decodificação e temperatura não informadas)."
+      },
+      {
+        "nome_original": "Basic Repair (iterative compilation repair)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 2–3 do PDF (Seção 3.2, «Basic Repair»); p. 3 do PDF (Fig. 1, caixa «Basic Repair Prompt», «< K attempts»); p. 4 do PDF (Seção 5.2.2; Tabela 1)",
+        "observacao": "Mensagens de erro do rustc e o programa Rust transpilado são passados ao LLM; a cada iteração atualizam-se a tradução incorreta e as instruções de reparo, mantido o prompt base; até cinco iterações. O estudo declara adotar abordagem semelhante à de Pan et al. [29]. A Tabela 1 relata a contribuição da fase (Repair Rate entre os programas que falharam na compilação e Pass Rate entre os reparados), sem condição comparável sem a técnica medida na mesma métrica; por isso cumulativo. Há ambiguidade sobre se a Tabela 1 inclui também o guided repair (ver heterogeneidade). A categoria decomposicao é mantida por consistência com o pacote, porque a condição encadeia tradução e compilação."
+      },
+      {
+        "nome_original": "Guided Repair (few-shot guided repair)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (contribuições); p. 3 do PDF (Seção 3.2, «Guided Repair»; Fig. 1, «Guided Repair Prompt», «< 2K attempts»); p. 4–5 do PDF (Seção 5.3)",
+        "observacao": "Aplicado depois do basic repair aos programas que continuam sem compilar. Para os oito erros mais frequentes do rustc (E0277, E0308, E0425, E0599, E0384, E0282, E0502, E0499), o prompt de reparo recebe instruções específicas que explicam a propriedade do Rust violada, causas comuns e correções (instrucao/contexto), seguidas de exemplos de código incorreto e corrigido (exemplos); só entram as instruções relativas aos erros presentes na saída atual do compilador (feedback). O estudo o chama de «key novelty» e o lista entre as contribuições, mas é parte do sistema proposto SafeTrans e não tem condição sem ele em condições comparáveis: a resolution rate (RR) mede só a fração dos erros-alvo resolvidos depois da fase básica, relatada apenas em prosa. Por isso papel componente e contrafactual cumulativo; não autoriza atribuir a ele o ganho de CA do pacote. Instruções de reparo já existiam no basic repair e o código já era contexto, por isso só exemplos é acrescentado como categoria."
+      },
+      {
+        "nome_original": "Error-Specific Repair Prompt (reparo iterativo de erros de execução e validação)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Seção 3.3; Fig. 1, caixas «Error Type Identification» e «Error-Specific Repair Prompt»)",
+        "observacao": "Programas compilados que falham na execução ou nos casos de teste passam por outra rodada de reparo iterativo com prompts adaptados ao tipo de erro de execução (Runtime Error, Infinite Loop, Test Case Error), até cinco tentativas, com verificação de compilação e de testes a cada iteração. O conteúdo desses prompts não é descrito em detalhe. Não há resultado separado para esta fase; o efeito só aparece dentro do pacote (Fig. 3)."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "gpt-4o", "versao": "nao_informado (snapshot não informado)"},
+      {"nome": "DeepSeek-V3", "versao": "nao_informado (apenas tamanho de 671B)"},
+      {"nome": "Qwen2.5-Coder", "versao": "nao_informado (apenas tamanho de 7B)"},
+      {"nome": "Codestral", "versao": "nao_informado (apenas tamanho de 22B)"},
+      {"nome": "DeepSeek-Coder", "versao": "nao_informado (apenas tamanho de 16B)"},
+      {"nome": "Llama3", "versao": "nao_informado (apenas tamanho de 70B)"},
+      {"nome": "gpt-4o-mini, gpt-4, claude-2, claude-3.5 (ferramentas C2SaferRust, VERT, FLOURINE, SACTOR na Tabela 3)", "versao": "nao_informado; resultados copiados das publicações das ferramentas, não executados pelo estudo"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CodeNet [30] (subconjunto de programas em C)",
+        "quantidade": "2,653 programas C, após filtragem dos 4,053 problemas do CodeNet para os que têm soluções suficientes em C e passos de pré-processamento não detalhados; 15,918 traduções no total (2,653 programas × 6 LLMs)",
+        "observacao": "Casos de teste do próprio CodeNet, com cobertura média de linhas de aproximadamente 87%. A CA da Fig. 2 e da Fig. 3 usa como denominador os 2,653 programas («out of 2,653 C programs»). O Repair Rate usa como denominador os programas que falharam na compilação (coluna Compilation Failures da Tabela 1) e o Pass Rate, os programas reparados, conforme as definições; o denominador da RR (número de ocorrências de cada erro-alvo) não é informado. Critério exato de filtragem e pré-processamento: nao_informado."
+      },
+      {
+        "nome": "url_parser [2] (url.h) e avl_tree [1]",
+        "quantidade": "2 bibliotecas C reais",
+        "observacao": "Usadas na RQ5 (escalabilidade), com testes de ponta a ponta. Resultado só qualitativo (compila, seguro, verificação parcial) na Tabela 3, apenas com gpt-4o; as linhas das outras ferramentas vêm das publicações originais."
+      }
+    ],
+    "metricas": [
+      {"nome": "computational accuracy (CA): «ratio of successfully translated programs to the total number of translation samples»; tradução bem-sucedida = programa Rust passa em todos os casos de teste", "aplicacao": "CodeNet, seis LLMs, tradução básica (Fig. 2) e pipeline completo (Fig. 3); declarada métrica primária", "localizador": "p. 3 do PDF (Seção 3.3); p. 4 do PDF (Seção 5.1; Fig. 2); p. 5 do PDF (Fig. 3)"},
+      {"nome": "Repair Rate (%)", "aplicacao": "programas que falharam na compilação após a tradução básica (Tabela 1)", "localizador": "p. 4 do PDF (Seção 5.2.2; Tabela 1)"},
+      {"nome": "Pass Rate (%)", "aplicacao": "programas reparados que executam e passam em todos os testes (Tabela 1)", "localizador": "p. 4 do PDF (Seção 5.2.2; Tabela 1)"},
+      {"nome": "resolution rate (RR)", "aplicacao": "percentual dos erros-alvo resolvidos pelo guided repair; valores só em prosa, sem tabela", "localizador": "p. 2 do PDF (Seção 1); p. 5 do PDF (Seção 5.3)"},
+      {"nome": "distribuição de tipos de falha (Generation Error, Compilation Error, Runtime Error, Infinite Loop, Test Case Error)", "aplicacao": "CodeNet, Fig. 2 e Fig. 3", "localizador": "p. 4 do PDF (Seção 5.1; Fig. 2); p. 5 do PDF (Fig. 3)"},
+      {"nome": "compilação, segurança completa (sem unsafe) e completude da verificação", "aplicacao": "url_parser e avl_tree (Tabela 3), qualitativa", "localizador": "p. 8 do PDF (Apêndice A.1; Tabela 3)"},
+      {"nome": "percentual de traduções com blocos unsafe, proporção média de linhas unsafe, uso de checked functions, vulnerabilidades detectadas pelo ESBMC nos programas C", "aplicacao": "análise de vulnerabilidades (Seção 6), descritiva", "localizador": "p. 5–6 do PDF (Seção 6; Tabela 2)"}
+    ],
+    "linguagens": ["C (origem)", "Rust (destino)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os Pass Rates da Tabela 1 são bem menores que os Repair Rates (por exemplo, GPT-4o 93.5 e 43.4); o estudo interpreta que os modelos corrigem problemas sintáticos, mas perdem a intenção original do programa e a equivalência funcional. A verificação por testes é parcial e não basta para localizar erros semânticos (RQ5); a cobertura média de linhas dos testes é de aproximadamente 87%.",
+        "localizador": "p. 4 do PDF (Seção 5.2.2; Tabela 1); p. 5 do PDF (Seção 5.5); p. 3 do PDF (Seção 4)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Nos modelos menores, há aumento de erros que não são de compilação depois do reparo: programas reparados podem gerar novos erros de execução ou de lógica, atribuídos pelo estudo à tendência de alucinação dos LLMs.",
+        "localizador": "p. 5 do PDF (Seção 5.4)"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Cibersegurança e segurança de memória do código traduzido: apesar das instruções explícitas para gerar Rust seguro, todos os modelos produziram algumas traduções com blocos unsafe (0.89% a 4.4%), com proporção média de linhas unsafe de aproximadamente 34%; vulnerabilidades de overflow aritmético do C frequentemente se propagam ao Rust pela ausência de checked functions (só 0.15% das traduções corretas as usam); houve casos de desreferência de ponteiro nulo propagada por tratamento incorreto de blocos unsafe (exemplo da B+ tree com gpt-4o). O estudo conclui que as traduções exigem processamento adicional para mitigar vulnerabilidades do programa de origem. As vulnerabilidades do ESBMC são potenciais; a explorabilidade não foi avaliada.",
+        "localizador": "p. 6 do PDF (Seção 6.2; Seção 8); p. 5 do PDF (Seção 6.1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generation Error: o LLM pode não gerar resposta válida porque o prompt e a saída excedem a janela de contexto ou porque produz saída incoerente fora do formato exigido; a resposta é descartada.",
+        "localizador": "p. 2 do PDF (Seção 3.1); p. 4 do PDF (Seção 5.1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação declarada do guided repair: as regras contextuais cobrem só os oito erros de compilação mais frequentes; depois de resolvê-los, outros tipos de erro podem impedir a tradução bem-sucedida.",
+        "localizador": "p. 6 do PDF (Seção 7)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Instruções explícitas no prompt para produzir código Rust seguro; não há condição sem essas instruções, e o estudo registra que ainda assim surgem blocos unsafe.",
+        "avaliada": "nao",
+        "localizador": "p. 2 do PDF (Seção 3.1); p. 6 do PDF (Seção 6.2)"
+      },
+      {
+        "descricao": "No guided repair, inclusão apenas das instruções relativas aos erros presentes na saída atual do compilador, para respeitar a janela de contexto e reduzir ruído; sem comparação com a inclusão de todas as instruções.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seção 3.2, «Guided Repair»)"
+      },
+      {
+        "descricao": "Verificação das traduções com ferramentas de segurança de memória e comportamento indefinido do Rust (Rudra, RAPx, miri), que não relataram vulnerabilidades, e análise manual restrita a overflow aritmético e desreferência de ponteiro nulo. É procedimento de detecção, sem condição comparativa.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (Seção 6.2)"
+      },
+      {
+        "descricao": "Validação das traduções com os casos de teste do CodeNet (cobertura média de linhas de aproximadamente 87%) como critério de sucesso. Procedimento de controle, sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seções 3.3 e 4)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Tradução básica com o C-to-Rust Prompt, sem nenhuma tentativa de reparo, executada pelo estudo nos mesmos seis LLMs e nos mesmos 2,653 programas do CodeNet (Fig. 2, p. 4 do PDF), contra o pipeline completo SafeTrans (Fig. 3, p. 5 do PDF). A Tabela 3 (p. 8 do PDF) traz outras ferramentas com resultados copiados das publicações originais, com outros modelos e métricas qualitativas; não é contraste de técnicas de prompting e não foi usada como comparador.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Valor diferente entre texto e figura: o texto diz que os erros de compilação de gpt-4o e DeepSeek-V3 caem «below 2% (from 22–23% in Figure 2)», mas a Fig. 2 rotula 21% (gpt-4o) e 22% (deepseek-v3). Os números absolutos da Tabela 1 (558 e 579 falhas de compilação) correspondem, por cálculo próprio, a cerca de 21.0% e 21.8% de 2,653.",
+        "localizador": "p. 5 do PDF (Seção 5.4); p. 4 do PDF (Fig. 2, segmentos Compilation Errors; Tabela 1, coluna Compilation Failures)"
+      },
+      {
+        "descricao": "Narrativa que não bate com as figuras: o texto diz que a CA de gpt-4o e DeepSeek-V3 aumenta «by approximately 25%», chegando a 80% e 79%; as figuras dão 54% → 80% (gpt-4o) e 49% → 79% (deepseek-v3), isto é, por cálculo próprio, 26 p.p. e 30 p.p. A conclusão fala em melhoria de CA «up to 25%». O estudo usa «%» para diferenças em pontos percentuais (por exemplo, «+22% for Codestral»).",
+        "localizador": "p. 5 do PDF (Seção 5.4; Fig. 3, barras Correct Translations); p. 4 do PDF (Fig. 2, barras Correct Translations; Seção 5.1); p. 6 do PDF (Seção 8)"
+      },
+      {
+        "descricao": "Atribuição ambígua da Tabela 1: a introdução atribui os repair rates de 93.5% (gpt-4o) e 89.8% (DeepSeek-V3) à «combination of basic repair with few-shot guided repair», e a conclusão os chama de «compilation error repairing (up to 93.5%)»; já a Tabela 1, intitulada «Effectiveness of iterative repairing of failed Rust compilations», é apresentada na Seção 5.2.2 (reparo iterativo), antes da seção do guided repair (5.3), que diz que erros persistem depois do reparo iterativo. Não fica claro se a Tabela 1 mede só o basic repair ou basic + guided.",
+        "localizador": "p. 2 do PDF (Seção 1); p. 4 do PDF (Tabela 1; Seções 5.2.2 e 5.3); p. 6 do PDF (Seção 8)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente: o texto diz que, nos modelos de pior desempenho, a CA é melhorada «by roughly twice» (+22% Codestral, +17% Qwen2.5-Coder, +19% DeepSeek-Coder, +12% Llama3). Pelas figuras, Codestral vai de 33% a 55% e Llama3 de 10% a 22%; por cálculo próprio, a razão é cerca de 1.7 para Codestral e 2.2 para Llama3, de modo que «roughly twice» não descreve todos os casos.",
+        "localizador": "p. 5 do PDF (Seção 5.4; Fig. 3); p. 4 do PDF (Fig. 2)"
+      },
+      {
+        "descricao": "Inversão parcial: nos modelos menores, os erros que não são de compilação aumentam depois do reparo (o estudo reconhece), embora a CA total suba. Na Fig. 3, Llama3 continua com CA de 22%.",
+        "localizador": "p. 5 do PDF (Seção 5.4; Fig. 3)"
+      },
+      {
+        "descricao": "Resultados de RR só em prosa, sem tabela ou figura e sem denominador: a introdução fala em RR média de 58.7% para falhas de implementação de trait e 74.2% para violações do borrow checker; a Seção 5.3 fala em aproximadamente 59% (E0277) e 55% (E0308) e em Llama3 com RR média acima de 60%; o valor de 74.2% não aparece no corpo. Não há como conferir os valores nem o número de ocorrências de cada erro.",
+        "localizador": "p. 2 do PDF (Seção 1); p. 5 do PDF (Seção 5.3)"
+      },
+      {
+        "descricao": "Limite de iterações: o texto fixa cinco iterações para o basic repair e cinco tentativas para o reparo de execução; a Fig. 1 indica «< K attempts» para o basic repair e para o reparo de execução e «< 2K attempts» para o guided repair. O número de iterações do guided repair não é dito explicitamente no texto.",
+        "localizador": "p. 3 do PDF (Fig. 1; Seções 3.2 e 3.3)"
+      },
+      {
+        "descricao": "Aparente inconsistência de arredondamento na Tabela 1, por cálculo próprio: 1096/1884 = 58.17 (impresso 58.1) e 778/906 = 85.87 (impresso 85.8); os valores são compatíveis com truncamento, mas o estudo não informa a regra de arredondamento. As demais linhas (por exemplo, 522/558 = 93.5) coincidem.",
+        "localizador": "p. 4 do PDF (Tabela 1, colunas Compilation Failures, Repaired e Repair Rate (%))"
+      },
+      {
+        "descricao": "Narrativa e tabela da RQ5: o texto diz que C2SaferRust, VERT, FLOURINE e SACTOR falham ao compilar ou produzem código com unsafe extenso, mas na Tabela 3 VERT com claude-2 compila avl_tree (✓, segurança «–», só um subconjunto de funções traduzido). Os valores das outras ferramentas vêm das publicações originais, com outros modelos, e não de experimento independente; o SafeTrans foi avaliado só com gpt-4o nessas bibliotecas.",
+        "localizador": "p. 5 do PDF (Seção 5.5); p. 8 do PDF (Apêndice A.1; Tabela 3)"
+      },
+      {
+        "descricao": "Aparente ambiguidade na análise de unsafe: o texto diz que poucas traduções contêm blocos unsafe (0.89% a 4.4%) e, em seguida, informa proporção média de linhas unsafe de aproximadamente 34% «across all translated programs», sem esclarecer se a média se restringe às traduções que contêm unsafe.",
+        "localizador": "p. 6 do PDF (Seção 6.2)"
+      },
+      {
+        "descricao": "Lacunas de procedimento: número de execuções, temperatura e demais parâmetros de decodificação e o texto dos prompts não são informados; não há medida de variabilidade.",
+        "localizador": "p. 2–3 do PDF (Seções 3 e 4)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A análise de vulnerabilidades usa o verificador formal ESBMC nos programas C de origem (10,375 vulnerabilidades potenciais em 2,653 programas; cerca de 70% falharam na verificação) e combina ferramentas automáticas e análise manual nas traduções. É análise descritiva, não intervenção de prompting nem comparação de técnicas.",
+        "localizador": "p. 5–6 do PDF (Seção 6; Tabela 2)"
+      },
+      {
+        "descricao": "Construção do guided repair: os autores examinaram casos de reparo bem-sucedidos e fracassados de cada um dos oito erros para identificar padrões recorrentes e escrever as instruções (esforço manual de elaboração descrito pelo estudo, não quantificado).",
+        "localizador": "p. 5 do PDF (Seção 5.3)"
+      },
+      {
+        "descricao": "Distribuição de erros antes do reparo (RQ2): E0277 e E0308 respondem por mais de 18% dos erros na maioria dos modelos e até 30% em Qwen2.5-Coder e Llama3; 18.9% das traduções do DeepSeek-V3 falham por E0428; Codestral e DeepSeek-Coder têm 19–22% de E0599. Descritivo, sem comparação de técnicas.",
+        "localizador": "p. 4 do PDF (Seção 5.2.1)"
+      },
+      {
+        "descricao": "Modelos como Claude e Gemini não foram incluídos por razões de tempo e custo, segundo o estudo (limitação de amostra de modelos, não custo da técnica).",
+        "localizador": "p. 3 do PDF (Seção 4)"
+      },
+      {
+        "descricao": "Seleção de extrações: foi registrada uma única comparação (pacote SafeTrans contra tradução básica, gpt-4o, CA). Basic repair, guided repair e reparo de execução são componentes do sistema proposto sem contrafactual comparável e sem tabela de ablação; não há contraste pareado entre condições de prompting. Contrastes do mesmo pacote em outros modelos não contam como cobertura.",
+        "localizador": "p. 4 do PDF (Fig. 2; Tabela 1); p. 5 do PDF (Seção 5.3; Fig. 3)"
+      },
+      {
+        "descricao": "O estudo imprime o endereço do protótipo e do conjunto de dados (https://github.com/FarrukhCyber/SafeTrans); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 do PDF (Seção 1)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We present SafeTrans, a generic framework that leverages LLMs to i) transpile C code into Rust, and ii) iteratively repair compilation and runtime errors.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "A key novelty of our approach is a few-shot guided repair technique for translation errors, which provides contextual information and example code snippets for specific error types, guiding the LLM toward the correct solution.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Our results show that iterative repair improves the rate of successful translations from 54% to 80% for the best-performing LLM (gpt-4o).",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "The combination of basic repair with few-shot guided repair achieves compilation repair success rates of up to 93.5% for gpt-4o and 89.8% for DeepSeek-V3.",
+        "localizador": "p. 2 do PDF, Seção 1"
+      },
+      {
+        "trecho": "Guided repair effectively resolves challenging Rust compilation errors, such as trait implementation failures, with an average resolution rate of 58.7%, and borrow-checker violations with an average rate of 74.2% across all LLMs.",
+        "localizador": "p. 2 do PDF, Seção 1"
+      },
+      {
+        "trecho": "We used SafeTrans to perform a total of 15,918 translations across 2,653 C programs and six LLMs.",
+        "localizador": "p. 2 do PDF, Seção 1"
+      },
+      {
+        "trecho": "The input program is included in the prompt, along with instructions for producing safe code and adhering to the required output format.",
+        "localizador": "p. 2 do PDF, Seção 3.1"
+      },
+      {
+        "trecho": "In the second case, the LLM fails to generate a valid response, either because the prompt and the output exceed its context window, or because it produces incoherent output, without adhering to the required format.",
+        "localizador": "p. 2 do PDF, Seção 3.1"
+      },
+      {
+        "trecho": "Basic Repair: In case of a compilation error, the rustc compiler provides detailed error messages which can be passed to the LLM along with the transpiled Rust program to provide additional context about the issue.",
+        "localizador": "p. 2–3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "In each iteration, the incorrect Rust translation and the repair instructions within the prompt are updated based on the results of the previous iteration, while the base prompt remains unchanged.",
+        "localizador": "p. 3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "The phase continues until either the program is successfully compiled, or a predefined maximum number of iterations is reached (set to five in our experiments).",
+        "localizador": "p. 3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "To improve the translation success rate, we introduce a new guided repair strategy, which uses few-shot learning by incorporating error-specific contextual information in the repair prompt.",
+        "localizador": "p. 3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "To maintain conciseness within the LLM’s context length constraints and minimize noise, we only include instructions relevant to the errors present in the current compilation output.",
+        "localizador": "p. 3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "The instructions first explain the Rust property that was violated, leading to that error, followed by concrete examples of incorrect and corrected code snippets to assist the LLM in resolving the issue.",
+        "localizador": "p. 3 do PDF, Seção 3.2"
+      },
+      {
+        "trecho": "If the translated Rust program fails to run properly or does not pass the test cases, it undergoes another round of iterative repair, this time with prompts tailored to the specific type of runtime error encountered.",
+        "localizador": "p. 3 do PDF, Seção 3.3"
+      },
+      {
+        "trecho": "In this phase, SafeTrans iteratively repairs the program until it passes all test cases or exceeds the maximum number of repair attempts (set to five in our tests).",
+        "localizador": "p. 3 do PDF, Seção 3.3"
+      },
+      {
+        "trecho": "After some preprocessing steps, our final evaluation data set contains 2,653 C programs.",
+        "localizador": "p. 3 do PDF, Seção 4"
+      },
+      {
+        "trecho": "The test cases in our dataset achieve an average line coverage of approximately 87%.",
+        "localizador": "p. 3 do PDF, Seção 4"
+      },
+      {
+        "trecho": "CA is defined as the ratio of successfully translated programs to the total number of translation samples.",
+        "localizador": "p. 4 do PDF, Seção 5.1"
+      },
+      {
+        "trecho": "Among the evaluated models, gpt-4o and DeepSeek-V3 achieve the highest base computational accuracy (54% and 49%, respectively).",
+        "localizador": "p. 4 do PDF, Seção 5.1"
+      },
+      {
+        "trecho": "Figure 2: Percentage of correct Rust translations out of 2,653 C programs, and breakdown of the different types of failures for unsuccessful translations.",
+        "localizador": "p. 4 do PDF, legenda da Fig. 2"
+      },
+      {
+        "trecho": "GPT-4o 558 522 93.5 43.4",
+        "localizador": "p. 4 do PDF, Tabela 1, linha GPT-4o; colunas Compilation Failures, Repaired, Repair Rate (%), Pass Rate (%)"
+      },
+      {
+        "trecho": "The relatively lower pass rates across all LLMs compared to their repair rates suggest that while these models can interpret compiler feedback and fix syntactic issues, they often lose sight of the original program intent and functional equivalence.",
+        "localizador": "p. 4 do PDF, Seção 5.2.2"
+      },
+      {
+        "trecho": "To evaluate the effectiveness of guided repair in resolving compilation errors, we define the resolution rate (RR) metric, which measures the percentage of targeted errors successfully repaired.",
+        "localizador": "p. 5 do PDF, Seção 5.3"
+      },
+      {
+        "trecho": "The computational accuracy (CA) of both gpt-4o and DeepSeek-V3 is increased by approximately 25% compared to their base CA, reaching 80% and 79%, respectively.",
+        "localizador": "p. 5 do PDF, Seção 5.4"
+      },
+      {
+        "trecho": "For gpt-4o and DeepSeek-V3, we observe a drastic reduction across all error types, particularly in compilation errors, which drop below 2% (from 22–23% in Figure 2).",
+        "localizador": "p. 5 do PDF, Seção 5.4"
+      },
+      {
+        "trecho": "This occurs because programs that previously failed to compile, once repaired, may generate new runtime or logic errors due to the hallucination tendencies of LLMs.",
+        "localizador": "p. 5 do PDF, Seção 5.4"
+      },
+      {
+        "trecho": "However, verification remains partial, as test-based feedback alone is insufficient to pinpoint semantic errors.",
+        "localizador": "p. 5 do PDF, Seção 5.5"
+      },
+      {
+        "trecho": "Therefore, the presented results have been gathered directly from the respective publications describing each tool, rather than from independent experimentation.",
+        "localizador": "p. 8 do PDF, Apêndice A.1"
+      },
+      {
+        "trecho": "Despite explicit instructions to generate safe Rust code, all the evaluated models still produced very few translations containing some unsafe Rust code blocks (0.89% for DeepSeek-Coder, 1.25% for Llama3, 2.0% for Qwen2.5-Coder, 1.8% for gpt-4o, 3.4% for Codestral, and 4.4% for DeepSeek-V3).",
+        "localizador": "p. 6 do PDF, Seção 6.2"
+      },
+      {
+        "trecho": "However, we still found cases where a null pointer dereference vulnerability in C propagates to the Rust translation due to incorrect handling of unsafe blocks.",
+        "localizador": "p. 6 do PDF, Seção 6.2"
+      },
+      {
+        "trecho": "It is possible that after addressing the top errors, other compilation error types may prevent successful translation.",
+        "localizador": "p. 6 do PDF, Seção 7"
+      },
+      {
+        "trecho": "Our analysis of the security implications of the transpilation process highlights that LLM generated translations require further processing to mitigate source program vulnerabilities.",
+        "localizador": "p. 6 do PDF, Seção 8"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "SafeTrans (pipeline completo: transpilação + iterative repair com basic repair, guided repair e reparo de erros de execução)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "exemplos", "decomposicao"],
+      "mecanismos_acrescentados": ["feedback", "exemplos", "decomposicao"],
+      "comparador": "Tradução básica com o C-to-Rust Prompt, sem nenhuma tentativa de reparo (base translation, Fig. 2)",
+      "modelo": "gpt-4o (versão nao_informado)",
+      "benchmark": "CodeNet, subconjunto de 2,653 programas C",
+      "metrica": "computational accuracy (CA); no resumo, «rate of successful translations»",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 54, "intervencao": 80},
+      "denominador": "2,653 programas C (legenda da Fig. 2: «out of 2,653 C programs»)",
+      "condicoes": "Mesmos 2,653 programas e mesmo modelo nas duas condições. Intervenção: pacote completo (até cinco iterações de basic repair; guided repair para os oito erros mais frequentes, com «< 2K attempts» na Fig. 1; reparo de execução e validação com até cinco tentativas). Sucesso = programa Rust passa em todos os casos de teste do CodeNet (cobertura média de linhas de aproximadamente 87%). Número de execuções, temperatura e demais parâmetros de decodificação: nao_informado. O ganho é do pacote e não pode ser atribuído ao guided repair isoladamente. conferido_pdf: valores 54% e 80% lidos nos rótulos das barras Correct Translations de gpt-4o na Fig. 2 (p. 4) e na Fig. 3 (p. 5), coincidentes com o resumo e a Seção 5.4.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara um único resultado principal com uma técnica (o reparo iterativo do SafeTrans, isto é, o pipeline completo), uma métrica (taxa de traduções bem-sucedidas, a CA, declarada «primary evaluation metric» na Seção 5.1), uma condição comparadora (a tradução básica) e um modelo (gpt-4o). Nenhuma outra comparação de técnicas de prompting tem contrafactual: basic repair, guided repair e reparo de execução são componentes sem condição comparável e não há tabela de ablação nem contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "p. 1 do PDF (resumo); p. 4 do PDF (Fig. 2, barra Correct Translations de gpt-4o; Seção 5.1); p. 5 do PDF (Fig. 3, barra Correct Translations de gpt-4o; Seção 5.4)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Our results show that iterative repair improves the rate of successful translations from 54% to 80% for the best-performing LLM (gpt-4o).",
+          "localizador": "p. 1 do PDF, resumo"
+        },
+        {
+          "trecho": "Among the evaluated models, gpt-4o and DeepSeek-V3 achieve the highest base computational accuracy (54% and 49%, respectively).",
+          "localizador": "p. 4 do PDF, Seção 5.1"
+        },
+        {
+          "trecho": "The computational accuracy (CA) of both gpt-4o and DeepSeek-V3 is increased by approximately 25% compared to their base CA, reaching 80% and 79%, respectively.",
+          "localizador": "p. 5 do PDF, Seção 5.4"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara cinco questões de pesquisa explícitas (RQ1 desempenho básico; RQ2 erros de compilação e reparo iterativo; RQ3 guided repair; RQ4 melhoria total; RQ5 escalabilidade), além do objetivo de avaliar implicações de segurança.",
+      "localizador": "p. 3 do PDF, Seção 5; p. 1 do PDF, resumo"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve o pipeline (transpilação, compilação, reparo básico, guided repair, reparo de execução), os limites de iteração, os modelos e o conjunto de dados, mas não reproduz os prompts, não detalha o pré-processamento do CodeNet, não informa parâmetros de decodificação nem número de execuções, e deixa ambíguo se a Tabela 1 inclui o guided repair e quantas iterações este usa.",
+      "localizador": "p. 2–3 do PDF (Seções 3 e 4; Fig. 1); p. 4 do PDF (Tabela 1)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "A tradução básica é executada nos mesmos modelos e programas e serve de linha de base para o pacote (Fig. 2 contra Fig. 3), mas não há condição sem o guided repair nem ablação dos componentes; a comparação com outras ferramentas (Tabela 3) usa resultados copiados das publicações, com outros modelos, sem experimento independente.",
+      "localizador": "p. 4 do PDF (Fig. 2); p. 5 do PDF (Fig. 3; Seção 5.3); p. 8 do PDF (Apêndice A.1; Tabela 3)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CA, Repair Rate e Pass Rate são definidas e a CA tem denominador explícito (2,653 programas); porém a RR só aparece em prosa e sem denominador, o texto diverge da figura na taxa de erros de compilação (22–23% contra 21% e 22%) e no ganho de CA («approximately 25%» contra 54→80 e 49→79), e diferenças em pontos percentuais são escritas como «%».",
+      "localizador": "p. 4 do PDF (Seções 5.1 e 5.2.2; Fig. 2; Tabela 1); p. 5 do PDF (Seções 5.3 e 5.4; Fig. 3)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há seção de limitações curta (guided repair restrito aos oito erros mais frequentes) e ressalvas sobre vulnerabilidades potenciais do ESBMC e verificação parcial por testes, mas não há discussão de ameaças à validade como variabilidade entre execuções, escolha de modelos além de tempo e custo, cobertura dos testes como limite da CA ou contaminação.",
+      "localizador": "p. 6 do PDF (Seção 7); p. 5 do PDF (Seções 5.5 e 6.1); p. 3 do PDF (Seção 4)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O endereço do protótipo e do conjunto de dados é impresso (não acessado nesta extração) e os modelos são nomeados com tamanho, mas faltam snapshot do gpt-4o, versões dos demais modelos, parâmetros de decodificação, número de execuções, texto dos prompts no artigo e detalhes do pré-processamento.",
+      "localizador": "p. 2 do PDF (Seção 1, endereço do repositório); p. 3 do PDF (Seção 4)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo usa o CodeNet, conjunto público, e programas reais já usados em estudos anteriores, mas não discute a possibilidade de esses programas ou suas traduções estarem nos dados de pré-treinamento dos LLMs nem descreve controle.",
+      "localizador": "p. 3 do PDF, Seção 4"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo, apêndice e referências). Valores da extração (CA de gpt-4o nas Fig. 2 e 3) e números citados em heterogeneidade (Fig. 1, Fig. 2, Fig. 3, Tabela 1, Tabela 3, Seções 1, 5 e 6) conferidos visualmente nas páginas do PDF.",
+    "paginas_abertas": [1, 2, 3, 4, 5, 6, 8]
+  }
+}

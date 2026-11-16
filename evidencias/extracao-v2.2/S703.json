@@ -1,0 +1,380 @@
+{
+  "estudo": "S703",
+  "texto_fonte": "fontes/textos/lote/S703.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2504.19108v6 [cs.SE] 4 May 2026 (impresso na margem da p. 1 do PDF); cabeçalho «Noname manuscript No.»",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "LLM-based docString repair (fixed prompts / prompt repair)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+        "mecanismos_acrescentados": ["restricoes", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 do PDF (RQ3 e contribuição 6); p. 11 do PDF (Seção 3.1, parágrafo do RQ3); p. 37–38 do PDF (Seção 5.3, Approach; Fig. 9); p. 41 do PDF (Fig. 10)",
+        "observacao": "Técnica de prompting investigada no RQ3: o DocString é extraído do prompt perturbado, enviado ao Magicoder-7B com o prompt da Fig. 9 (instrução de corrigir gramática, ortografia e erros de digitação, com as restrições «Do not delete any information, and do not add any code snippets»), reintegrado ao contexto de código original e o prompt reconstruído é usado para gerar o código com o mesmo modelo. Mecanismos: o prompt de geração herda do prompt base a descrição em linguagem natural (instrucao), os exemplos de chamada e saída no DocString (exemplos, p. 6: «example test cases in the prompt») e a assinatura do método como código fornecido (contexto); a etapa de reparo acrescenta uma segunda instrução (categoria instrucao já presente na base), restrições explícitas (restricoes) e o encadeamento de duas chamadas, reparo e depois geração (decomposicao). O contrafactual é o prompt perturbado sem reparo (mesmo modelo, mesmos subconjuntos de DocString); trata-se de pacote: o estudo não separa a contribuição da instrução, das restrições ou do encadeamento. Avaliada só com o Magicoder-7B e só nas 10 perturbações de DocString."
+      },
+      {
+        "nome_original": "Perturbed prompt (baseline perturbed-prompt)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 38 do PDF (Seção 5.3, Approach e Results); p. 41 do PDF (Fig. 10, barras «Perturbed»)",
+        "observacao": "Linha de base do RQ3: prompt com o DocString perturbado por uma das 10 perturbações de DocString (Tabela 1, p. 15), usado diretamente para gerar código com o Magicoder-7B. Contém a descrição em linguagem natural (perturbada), os exemplos de chamada no DocString e a assinatura do método."
+      },
+      {
+        "nome_original": "Nominal prompt",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 27 do PDF (Seção 5.1, Approach); p. 38 do PDF (Results); p. 41 do PDF (Fig. 10, barras «Nominal»)",
+        "observacao": "Prompt original não perturbado (DocString e assinatura do método), condição de referência no RQ1 e barra de referência na Fig. 10. Não é técnica de prompting proposta; aparece como referência superior da recuperação, não como comparador do efeito do reparo, que o estudo mede contra o prompt perturbado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Semantic-preserving perturbations (DocString, function name, syntax, format)",
+        "natureza": "outro",
+        "descricao": "Variável experimental de robustez, não técnica de prompting: 29 estratégias de perturbação (7 de nome de função, 10 de DocString, 6 de sintaxe e 6 de formato), 28 aplicadas por problema, cada uma com cinco versões perturbadas. As perturbações de sintaxe e formato são aplicadas a prompts parciais (DocString, assinatura e cerca da primeira metade da solução canônica). Os contrastes nominal × perturbado (RQ1, Tabelas 8–15) medem degradação, não efeito de técnica de prompting, e por isso não entram em extracoes.",
+        "localizador": "p. 13–19 do PDF (Seção 3.3; Tabelas 1 e 2; Fig. 5); p. 19 do PDF (contagem de 29 estratégias)"
+      },
+      {
+        "nome_original": "Hyperparameters (temperature, top_p, maximum generation length)",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,2, top_p 0,95 e comprimento máximo de geração de 1536 tokens, aplicados a todos os modelos; o texto afirma que foram escolhidos por pequena busca em grade num subconjunto reservado e também que vêm do ReCode.",
+        "localizador": "p. 22–23 do PDF (Seção 4.3)"
+      },
+      {
+        "nome_original": "Choice of Magicoder-7B as repair model",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do Magicoder-7B como único modelo de reparo e de geração no RQ3, justificada por seguir instruções de reparo em linguagem natural; os demais cinco modelos não foram usados no RQ3.",
+        "localizador": "p. 11 do PDF (Seção 3.1); p. 37–38 do PDF (Seção 5.3, Approach)"
+      },
+      {
+        "nome_original": "Stopping rules and post-processing",
+        "natureza": "outro",
+        "descricao": "Regras de parada por linguagem e modelo e remoção de conteúdo extra (funções auxiliares redundantes, classes repetidas) após a geração; pós-processamento, não prompting.",
+        "localizador": "p. 23 do PDF (Seção 4.3)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Incoder-1B", "versao": "nao_informado"},
+      {"nome": "Incoder-6B", "versao": "nao_informado"},
+      {"nome": "CodeGen-2B-Multi", "versao": "nao_informado"},
+      {"nome": "CodeGen-6B-Multi", "versao": "nao_informado"},
+      {"nome": "Magicoder-S-DS-6.7B (também chamado Magicoder-7B)", "versao": "nao_informado; usado no RQ1 e como modelo de reparo e de geração no RQ3"},
+      {"nome": "Qwen2.5-Coder-7B-Instruct (também chamado QwenCode, QwenCode-2.5-6.7B, QwenCode-3.5-6.7B e QwenCode-2.5-7B)", "versao": "nao_informado; designações divergentes entre p. 11, 22, 27 e 45 do PDF"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "HumanEval-X (C++, Java, JavaScript)",
+        "quantidade": "164 prompts (problemas) por linguagem, como impresso na p. 21; média de casos de teste por problema 6.96 (CPP), 6.5 (Java), 7.95 (JS) na Tabela 3 (p. 22)",
+        "observacao": "A p. 21 também afirma «a total of 820 test cases for 820 problems, with an average of 164 test cases per programming language and approximately 7.7 unit tests per problem», contagem incompatível com 164 problemas por linguagem e com a Tabela 3 (ver heterogeneidade)."
+      },
+      {
+        "nome": "EvalPlus-X (testes do EvalPlus traduzidos pelos autores para C++, Java e JavaScript, com soluções canônicas revisadas)",
+        "quantidade": "mesmos 164 problemas por linguagem; média de casos de teste por problema 722.56 (CPP), 748.48 (Java), 709.99 (JS) (Tabela 3, p. 22); entre 30 e 50 soluções canônicas modificadas por linguagem (p. 13)",
+        "observacao": "Benchmark construído pelos autores; a tradução foi feita por três pesquisadores, um por linguagem (p. 13)."
+      },
+      {
+        "nome": "Conjuntos perturbados derivados (ReCode estendido)",
+        "quantidade": "28 estratégias por problema × 5 versões perturbadas por estratégia, um código gerado por prompt perturbado (p. 19); RQ3 usa os 10 subconjuntos de perturbação de DocString",
+        "observacao": "O denominador das porcentagens da Fig. 10 (RQ3) e o conjunto de testes usado no RQ3 (EvalPlus-X ou HumanEval-X) não são informados; não se deve tomar o tamanho do corpus como denominador."
+      }
+    ],
+    "metricas": [
+      "Robust Pass RPs@k (RP5@1; s = 5, k = 1), definida na Eq. 2 (p. 20)",
+      "Robust Drop RDs@k (RD5@1), Eq. 3 (p. 20)",
+      "Robust Relative RRs@k (RR5@1), Eq. 4 (p. 20–21)",
+      "Worst-case passes (5 de 5) e partial-case passes (3 de 5) (p. 19; Tabelas 8–11)",
+      "Pass@5 (%) para prompts nominal, perturbado e reparado no RQ3 (p. 38; Fig. 10), sem definição formal",
+      "Impact Score (Z-score × taxa de falha) no RQ2 (p. 32–33)",
+      "Similaridade de cosseno com MPNet e CodeBLEU (Syntax e DataFlow) para qualidade das perturbações (p. 23–24; Tabelas 4–6)",
+      "Notas de naturalidade e similaridade semântica por dois anotadores e kappa de Cohen (p. 25–26; Tabela 7)",
+      "Valores-p do teste exato de Fisher (Tabela 16, p. 36)"
+    ],
+    "linguagens": ["Java", "C++", "JavaScript"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Pequenas perturbações que preservam a semântica do prompt (nome de função, DocString, sintaxe, formato) levam o modelo a gerar código incorreto.",
+        "localizador": "p. 2 do PDF (Introdução; Fig. 1 na p. 3); p. 27–28 do PDF (Seção 5.1, Results)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O reparo do DocString por LLM pode introduzir novas falhas: casos que passavam com o prompt perturbado falham após o reparo (média de 4.3% em C++, 5.8% em Java e 4.6% em JavaScript, como impresso), e o modelo pode reescrever o DocString afastando-o da intenção original.",
+        "localizador": "p. 38–39 do PDF (Seção 5.3, Results e Summary of Findings)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Testes fracos do HumanEval-X podem mascarar código incorreto: soluções que passam nos testes originais falham nos testes ampliados do EvalPlus (resposta errada em caso de borda ou tempo esgotado).",
+        "localizador": "p. 2 do PDF (Introdução); p. 4 do PDF (Fig. 2); p. 13 do PDF (Seção 3.2, item 1); p. 37 do PDF (Fig. 8)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O estudo identifica como ameaça interna o viés introduzido pela geração do modelo a partir do mesmo prompt e menciona a aleatoriedade do modelo de geração.",
+        "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Uso de benchmark público sobre o qual os autores não têm controle, apresentado como ameaça interna; o estudo não o qualifica como contaminação.",
+        "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Reparo automático do DocString perturbado com o Magicoder-7B antes da geração (RQ3), comparado com o prompt perturbado sem reparo.",
+        "avaliada": "sim",
+        "localizador": "p. 37–39 do PDF (Seção 5.3); p. 41 do PDF (Fig. 10)"
+      },
+      {
+        "descricao": "Geração de cinco versões perturbadas por estratégia para mitigar a aleatoriedade e obter estimativa mais estável da robustez.",
+        "avaliada": "nao",
+        "localizador": "p. 19 do PDF (Seção 3.3.4, parágrafos finais); p. 43 do PDF (Seção 7)"
+      },
+      {
+        "descricao": "Uso dos testes ampliados do EvalPlus traduzidos (EvalPlus-X) e revisão de soluções canônicas para expor falhas mascaradas por testes fracos; os resultados são relatados para os dois conjuntos de testes, mas sem condição de controle de uma mitigação.",
+        "avaliada": "nao",
+        "localizador": "p. 12–13 do PDF (Seção 3.2); p. 34–35 do PDF (Tabelas 8 e 9)"
+      },
+      {
+        "descricao": "Lista de bloqueio de palavras-chave e identificadores (extraídos com Tree-Sitter) para não alterar o significado ao perturbar o DocString, e verificação da qualidade das perturbações por similaridade (MPNet, CodeBLEU) e anotação humana de 300 pares.",
+        "avaliada": "nao",
+        "localizador": "p. 14 do PDF (Seção 3.3.1); p. 23–26 do PDF (Seção 4.4; Tabelas 4–7)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A descrição do HumanEval-X diz que o estudo o usa «to assess code translation and bug classification», tarefas que o estudo não avalia, e afirma «a total of 820 test cases for 820 problems, with an average of 164 test cases per programming language and approximately 7.7 unit tests per problem»; a mesma página informa 164 prompts por linguagem e a Tabela 3 traz médias de 6.96 (CPP), 6.5 (Java) e 7.95 (JS) testes por problema. Aparente inconsistência de contagem; o texto não permite reconciliar os números.",
+        "localizador": "p. 21 do PDF (Seção 4.1); p. 22 do PDF (Tabela 3)"
+      },
+      {
+        "descricao": "Designação divergente dos modelos: «Qwen2.5-Coder-7B-Instruct» (p. 11), «QwenCode-2.5-6.7B» (p. 22), «QwenCode-3.5-6.7B» (p. 27) e «QwenCode-2.5-7B» (p. 45); «Magicoder-S-DS-6.7B» (p. 11) e «Magicoder-7B» (p. 22, 27, 37). Além disso, a motivação do RQ1 menciona «four different models» (p. 27) e a validade externa «three code generation models» (p. 43), enquanto o estudo avalia seis.",
+        "localizador": "p. 11, 22, 27, 43 e 45 do PDF"
+      },
+      {
+        "descricao": "O RQ3 justifica o uso do Magicoder por ser «the only instruction-tuned model among our six evaluated models», mas a Seção 3.1 lista Qwen2.5-Coder-7B-Instruct entre os modelos avaliados.",
+        "localizador": "p. 37 do PDF (Seção 5.3, Approach); p. 11 do PDF (Seção 3.1)"
+      },
+      {
+        "descricao": "A Seção 3.4 afirma «We choose a greedy approach for all of the metrics, skipping the sampling process», enquanto a Seção 4.3 fixa temperatura 0.2 e top_p 0.95 e a p. 19 diz que «using a non-zero sampling temperature during generation still produces varied model outputs across runs». A p. 19 diz que se gera um código por prompt perturbado, mas a p. 43 afirma «We run the whole process for all 28 perturbed datasets, 5 times each». Número de execuções e modo de decodificação ficam ambíguos.",
+        "localizador": "p. 19 do PDF (Seções 3.3.4 e 3.4); p. 22 do PDF (Seção 4.3); p. 43 do PDF (Seção 7)"
+      },
+      {
+        "descricao": "O RQ3 usa a métrica «Pass@5 (%)» sem defini-la, ao passo que a avaliação define RP5@1 com s = 5 prompts perturbados e k = 1; não se informa se Pass@5 é contagem de ao menos um acerto em cinco prompts perturbados, nem o conjunto de testes nem o denominador.",
+        "localizador": "p. 20 do PDF (Seção 3.4.1); p. 38 do PDF (Seção 5.3, Results); p. 41 do PDF (Fig. 10)"
+      },
+      {
+        "descricao": "Narrativa do RQ3 em tensão com os próprios números: para Java o texto diz «The same overall trend is observed, but with smaller gains» e que Java «exhibits the narrowest recovery range», mas os casos recuperados de Java (média 7.4%, máximo 12.2%) são maiores que os de C++ (média 6.4%, máximo 11.6%), como impresso. O texto também diz que o eixo y lista as perturbações, mas na Fig. 10 as perturbações aparecem no eixo horizontal.",
+        "localizador": "p. 38–39 do PDF (Seção 5.3, Results); p. 41 do PDF (Fig. 10)"
+      },
+      {
+        "descricao": "A contribuição (6) afirma que o reparo «partially recovers robustness across models and languages», mas o RQ3 usa um único modelo (Magicoder-7B). As lições aprendidas dizem que o reparo «rarely restores original performance» e o resumo do RQ3 afirma que novas falhas são raras (cerca de 4–6%), embora o texto reconheça degradação em perturbações semânticas.",
+        "localizador": "p. 5 do PDF (contribuição 6); p. 11 e 37 do PDF; p. 39 do PDF (Summary of Findings); p. 43 do PDF (Lessons Learned)"
+      },
+      {
+        "descricao": "Concordância entre anotadores: o texto descreve «fair to moderate agreement (0.1-0.29)» e conclui por processo «consistent and reliable», mas a Tabela 7 inclui kappas de 0.08 (Nominal, JavaScript) e 0.06 (Similarity, JavaScript), abaixo do intervalo citado.",
+        "localizador": "p. 25 do PDF (Seção 4.4.3); p. 26 do PDF (Tabela 7)"
+      },
+      {
+        "descricao": "RQ2: a p. 33 afirma que «JavaScript consistently shows the highest positive correlations across multiple features, aligning with its higher robustness drop reported in RQ1», mas a p. 34 diz que JavaScript «generally exhibits low or near-zero correlations across all perturbation types» e o RQ1 aponta C++ como a linguagem mais frágil.",
+        "localizador": "p. 33–34 do PDF (Seção 5.2, Result); p. 28 do PDF (Seção 5.1)"
+      },
+      {
+        "descricao": "O RQ1 descreve Java como a linguagem de maior robustez, com «minimal RD5@1 drops», enquanto as lições aprendidas afirmam que, nos modelos mais fortes (Magicoder e QwenCode), Java «also suffers the largest robustness drops compared to C++ and JavaScript».",
+        "localizador": "p. 28 do PDF (Seção 5.1); p. 40 do PDF (Lessons Learned)"
+      },
+      {
+        "descricao": "Aparente divergência entre o texto do RQ1 e as tabelas citadas: a p. 29 afirma que o RD5@1 de JavaScript do CodeGen no pior caso «increases from 0.07 to 0.08 for 2B and 6B» e cita nominal «0.16 vs. 0.11 on Java» com base nas Tabelas 8 e 10; no texto extraído das Tabelas 8 e 10 os RD5@1 de JavaScript do CodeGen não incluem o par 0.07/0.08 e o nominal Java do CodeGen-6B é 0.15 (0.16 aparece na Tabela 9). Não conferido visualmente: as Tabelas 8–10 são ilegíveis na resolução das imagens das p. 34–35.",
+        "localizador": "p. 29 do PDF (Summary of Findings 1 e 2); p. 34–35 do PDF (Tabelas 8–10; valores lidos do texto extraído)"
+      },
+      {
+        "descricao": "Nas condições de caso parcial (3 de 5) há RD5@1 negativos, isto é, desempenho perturbado acima do nominal, que o texto descreve como «a slight performance improvement in the partial-case scenario for Java under DocString and Function perturbations». Valores individuais não conferidos visualmente (Tabelas 10 e 11 ilegíveis nas imagens).",
+        "localizador": "p. 28 do PDF (Seção 5.1); p. 35 do PDF (Tabelas 10 e 11)"
+      },
+      {
+        "descricao": "Os valores-p do teste exato de Fisher (Tabela 16) cobrem só quatro dos seis modelos (sem Magicoder e QwenCode) e não são discutidos no texto; nenhum teste estatístico acompanha o RQ3.",
+        "localizador": "p. 36 do PDF (Tabela 16, cabeçalho lido do texto extraído); p. 38–39 do PDF (Seção 5.3)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo é principalmente de robustez (RQ1 e RQ2): mede a degradação de seis modelos sob perturbações do prompt em geração (DocString e assinatura) e em completamento de código (prompt parcial com parte da solução canônica). Só o RQ3 avalia uma técnica de prompting (reparo do DocString).",
+        "localizador": "p. 5 do PDF (RQs); p. 10 do PDF (Seção 3); p. 16 do PDF (Seção 3.3.3)"
+      },
+      {
+        "descricao": "Os prompts parciais (DocString, assinatura e cerca da primeira metade da solução canônica) servem de nominal para as perturbações de sintaxe e formato; o contraste nominal × parcial (por exemplo, linhas «Nominal» e «Partial» das Tabelas 8–11) não é apresentado como técnica de prompting nem analisado como tal.",
+        "localizador": "p. 16 do PDF (Seção 3.3.3); p. 27 do PDF (Seção 5.1, Approach); p. 34–35 do PDF (Tabelas 8–11)"
+      },
+      {
+        "descricao": "Esforço manual descrito: três pesquisadores traduziram os testes do EvalPlus, cada um para uma linguagem, e entre 30 e 50 soluções canônicas foram modificadas por linguagem; dois anotadores avaliaram 300 pares de prompts.",
+        "localizador": "p. 13 do PDF (Seção 3.2); p. 25 do PDF (Seção 4.4.3)"
+      },
+      {
+        "descricao": "Pacote de replicação indicado por link (https://github.com/frabbisw/robustextended); não acessado nem validado nesta extração.",
+        "localizador": "p. 5 do PDF (Artifact, nota 1)"
+      },
+      {
+        "descricao": "O RQ2 (Impact Score de 18 atributos) é análise de fatores associados às falhas, sem técnica de prompting.",
+        "localizador": "p. 29–34 do PDF (Seção 5.2; Fig. 7)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We applied semantic-preserving perturbations to two types of coding tasks: (1) code generation given a Docstring and method signature, and (2) code completion given a Docstring and an incomplete method with its first few lines.",
+        "localizador": "p. 10 do PDF (Seção 3)"
+      },
+      {
+        "trecho": "LLM code generation techniques leverage LLMs to generate a code snippet based on a given prompt, which usually contains information about the method’s signature, an NL description of the code’s functionality, and example test cases in the prompt.",
+        "localizador": "p. 6 do PDF (Seção 2.1)"
+      },
+      {
+        "trecho": "First, the model is prompted to repair the docstring within each perturbed prompt.",
+        "localizador": "p. 11 do PDF (Seção 3.1)"
+      },
+      {
+        "trecho": "The repaired docstring is then reintegrated into the prompt, and these repaired prompts are used to generate code following the same procedure as before.",
+        "localizador": "p. 11 do PDF (Seção 3.1)"
+      },
+      {
+        "trecho": "Fix the grammatical errors, spelling, and typos in the following text and reply with the fixed text. Do not delete any information, and do not add any code snippets.",
+        "localizador": "p. 38 do PDF (Fig. 9)"
+      },
+      {
+        "trecho": "Finally, the reconstructed fixed prompt is used to regenerate the code using the same Magicoder-7B model.",
+        "localizador": "p. 38 do PDF (Seção 5.3, Approach)"
+      },
+      {
+        "trecho": "The performance of this fixed-prompt generation is then compared against the baseline perturbed-prompt results to assess whether prompt correction helps mitigate the robustness drop observed in RQ1.",
+        "localizador": "p. 38 do PDF (Seção 5.3, Approach)"
+      },
+      {
+        "trecho": "For instance, Figure 1 demonstrates that even a minor function name modification can cause the model to produce incorrect code, although the non-perturbed prompt produced code that passed the test cases.",
+        "localizador": "p. 2 do PDF (Introdução)"
+      },
+      {
+        "trecho": "Meanwhile, newly failed cases average 5.8%, indicating that in some instances rewriting introduces additional errors.",
+        "localizador": "p. 38–39 do PDF (Seção 5.3, Results, item Java)"
+      },
+      {
+        "trecho": "In some cases, the model rewrites the docString in a way that diverges further from the original intent, explaining the occasional performance degradation visible in Figure 10.",
+        "localizador": "p. 39 do PDF (Seção 5.3)"
+      },
+      {
+        "trecho": "Both examples demonstrate that passing the standard HumanEval-X tests does not guarantee robustness.",
+        "localizador": "p. 13 do PDF (Seção 3.2, item 1)"
+      },
+      {
+        "trecho": "For this work, generating the same codes from the same prompt each time by the code generation model can introduce biases into the result.",
+        "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+      },
+      {
+        "trecho": "To eliminate this, we generate 5 perturbed datasets from the original dataset, and all are used to mitigate the randomness of the code generation model.",
+        "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+      },
+      {
+        "trecho": "Besides, the dataset we used is a public benchmark, and we have no control over it, which could impact the result.",
+        "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+      },
+      {
+        "trecho": "To maintain this, a blacklist of different programming languages is created which prevents the system from perturbing them.",
+        "localizador": "p. 14 do PDF (Seção 3.3.1)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "LLM-based docString repair (fixed prompts / prompt repair)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+      "mecanismos_acrescentados": ["restricoes", "decomposicao"],
+      "comparador": "Perturbed prompt (baseline perturbed-prompt), sem reparo do DocString",
+      "modelo": "Magicoder-7B (Magicoder-S-DS-6.7B na p. 11), usado para reparo e geração; versão nao_informado",
+      "benchmark": "Subconjuntos com perturbação de DocString do conjunto do estudo, painel (a) C++ da Fig. 10; conjunto de testes do RQ3 (EvalPlus-X ou HumanEval-X) nao_informado",
+      "metrica": "Pass@5 (%) (nome usado na Fig. 10 e na p. 38, sem definição formal; a Seção 3.4 define RP5@1 com k = 1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": null},
+      "denominador": "nao_informado",
+      "condicoes": "Fig. 10 aberta na p. 41 do PDF: os rótulos das perturbações e os valores impressos sobre as barras são ilegíveis na resolução da imagem disponível, inclusive o rótulo da primeira perturbação do painel (a) C++; por isso baseline e intervenção ficam null, sem estimativa pela altura das barras. As barras são empilhadas: azul = passou com o prompt perturbado e com o reparado; laranja = passou com o perturbado e falhou após o reparo; verde = passou com o reparado; vermelho = falhou com o perturbado e passou após o reparo (p. 38). O texto imprime só agregados por linguagem dos componentes, não as taxas de cada condição: para C++, média de casos recuperados 6.4% (máximo 11.6%), média de novas falhas 4.3% e proporção estável de casos que já passavam 33.1%; não se calculam a partir deles os valores das condições. Temperatura 0.2, top_p 0.95, máximo 1536 tokens (p. 22); cinco prompts perturbados por estratégia (p. 19); número de execuções ambíguo (um código por prompt perturbado na p. 19; «5 times each» na p. 43). Uma só condição de modelo (Magicoder-7B); sem teste estatístico. conferido_pdf = nao porque os valores da figura não puderam ser lidos.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Não há principal declarado: o resumo e as contribuições destacam o reparo do DocString e o comparador implícito (prompt perturbado), mas não identificam uma métrica. Nenhuma tabela traz o contraste de prompting (as Tabelas 8–16 contrastam nominal e perturbado, que não é técnica de prompting). Pela regra 2b, usou-se a primeira figura com o contraste elegível (Fig. 10), primeiro painel (a) C++, primeira métrica (Pass@5), único modelo (Magicoder-7B) e a linha de base de prompting (prompt perturbado). Não há outra técnica focal nem outra tarefa para cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 41 do PDF (Fig. 10, painel (a) C++; p. 41 impressa); p. 38 do PDF (Seção 5.3, Results)",
+      "conferido_pdf": "nao",
+      "citacoes": [
+        {
+          "trecho": "For each perturbation, three bars represent the Pass@5 (%) scores for the nominal, perturbed, and fixed prompts.",
+          "localizador": "p. 38 do PDF (Seção 5.3, Results)"
+        },
+        {
+          "trecho": "Across perturbations, the mean Pass@5 for newly fixed cases (i.e., failed before but passed after pre-processing) is 6.4%, reaching up to 11.6% improvement in the best case.",
+          "localizador": "p. 38 do PDF (Seção 5.3, Results, item C++)"
+        },
+        {
+          "trecho": "However, semantic perturbations continue to cause failures, with an average of 4.3% of cases newly failing.",
+          "localizador": "p. 38 do PDF (Seção 5.3, Results, item C++)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (robustez entre linguagens, fatores associados e mitigação por reparo do prompt), com contribuições enumeradas.",
+      "localizador": "p. 3–5 do PDF (Introdução; RQ1–RQ3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção do EvalPlus-X, perturbações e pipeline do RQ3 descritos em detalhe, com o prompt de reparo; mas há contradições sobre decodificação gulosa × temperatura 0.2 e sobre o número de execuções, e o RQ3 não informa o conjunto de testes nem o denominador.",
+      "localizador": "p. 11–19 do PDF (Seção 3); p. 22 do PDF (Seção 4.3); p. 37–38 do PDF (Seção 5.3); p. 43 do PDF (Seção 7)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "O reparo é comparado com o prompt perturbado sem reparo, com o mesmo modelo e os mesmos subconjuntos, e o prompt nominal aparece como referência; a comparação se limita a um modelo.",
+      "localizador": "p. 38 do PDF (Seção 5.3, Approach); p. 41 do PDF (Fig. 10)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "RP5@1, RD5@1 e RR5@1 têm definição formal, mas a métrica do RQ3 (Pass@5 %) não é definida e destoa de k = 1; denominadores da Fig. 10 não são informados; há citação de valores no texto que não coincidem com o texto extraído das tabelas citadas.",
+      "localizador": "p. 20–21 do PDF (Seção 3.4); p. 29 do PDF; p. 38 do PDF; p. 41 do PDF (Fig. 10)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria de ameaças internas, externas e de construto (benchmarks pequenos e algorítmicos, só modelos abertos, perturbação única por prompt, ausência de perturbações de tipo), embora com contagem de modelos inconsistente («three code generation models»).",
+      "localizador": "p. 43–44 do PDF (Seção 7)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Link para pacote de replicação (não acessado), hiperparâmetros e prompt de reparo publicados; faltam versões ou checkpoints dos modelos (designações divergentes), a definição do subconjunto da busca em grade e o conjunto de testes do RQ3.",
+      "localizador": "p. 5 do PDF (Artifact); p. 22–23 do PDF (Seção 4.3); p. 38 do PDF (Fig. 9); p. 11, 22, 27 e 45 do PDF (nomes dos modelos)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo usa HumanEval-X e EvalPlus, benchmarks públicos, e só menciona que não tem controle sobre o conjunto público; não discute vazamento no pré-treinamento dos modelos.",
+      "localizador": "p. 43 do PDF (Seção 7, Internal Validity)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (linhas 1–2183). Páginas do PDF abertas visualmente: 11, 19, 21, 22, 25, 26, 27, 28, 29, 33, 34, 35, 37, 38, 39, 40, 41 e 43. A Fig. 10 (p. 41) e as Tabelas 8–12 (p. 34–35) são ilegíveis na resolução das imagens; os valores dessas tabelas citados em heterogeneidade vêm do texto extraído e estão marcados como não conferidos visualmente. A página do PDF coincide com a página impressa."
+  }
+}

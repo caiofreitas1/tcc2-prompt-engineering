@@ -1,0 +1,417 @@
+{
+  "estudo": "S755",
+  "texto_fonte": "fontes/textos/lote/S755.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2505.21425v3 [cs.SE], 12 Aug 2025 (impresso na margem da p. 1 do PDF); nota de rodapé da p. 1 informa «DOI reference number: 10.18293/SEKE2025-018». As páginas do PDF não têm numeração impressa; os localizadores usam a posição no arquivo.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "GUARD (dual-agent defense framework: GUARD-Judge + GUARD-Repair)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "multiagente", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "multiagente", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo; contribuições); p. 3 do PDF (Fig. 2; Seção IV-A e IV-B); p. 4 do PDF (Seção IV-B; Tabela I); p. 5 do PDF (Tabelas II e III, linhas «GUARD» e «No Defense»/«SABER -»)",
+        "observacao": "Pacote híbrido. GUARD-Judge é um LLM (DeepSeek-R1) com prompt de tarefa e «structured analysis framework» (análise do CoT e do problema; análise de anomalias) e resposta final Yes/No (instrucao, raciocinio, restricoes; problema e CoT fornecidos como insumo, contexto). GUARD-Repair recupera com BM25 k = 3 problemas semelhantes e seus CoTs seguros do subconjunto limpo e monta um prompt com esses exemplos para o GPT-3.5 regenerar o CoT (contexto, exemplos, instrucao). O Judge passa ao Repair as amostras marcadas: dois agentes encadeados (multiagente, decomposicao); a interação é uma passagem unidirecional, sem iteração. GUARD atua sobre o conjunto de treino do modelo de CoT (modelo de ameaça: o defensor garante a integridade dos dados de treino; Tabela I traz os hiperparâmetros de «COTTON Training»), e o efeito sobre a geração de código passa pelo COTTON treinado (ajuste_fino, fora do escopo) e pelo CoT inserido no prompt do modelo de código. Também incorpora escolha de modelos (DeepSeek-R1, GPT-3.5) e recuperação BM25. Contrafactual: GUARD contra «No Defense» sob o mesmo ataque SABER (Tabela II) e «SABER GUARD» contra «SABER -» (Tabela III). O ganho é do pacote e não pode ser atribuído a um mecanismo isolado; não há ablação de Judge ou Repair. Os mecanismos acrescentados listam todas as categorias porque o pipeline de prompts do GUARD não existe na condição sem defesa; o prompt de geração de código com CoT (instrucao, raciocinio) é comum às duas condições."
+      },
+      {
+        "nome_original": "GUARD-Judge",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Fig. 2, quadro do GUARD-Judge; Seção IV-A); p. 4 do PDF (Tabela I: GUARD-Judge Model DeepSeek-R1)",
+        "observacao": "Avalia (1) correção do CoT (lógica/algoritmo e alinhamento aos requisitos) e (2) padrões anômalos (análise de padrões e feedback sobre a posição de possíveis gatilhos); saída binária. O «Feedback Analysis» é saída descritiva do Judge, não ciclo de refinamento. Sem condição com e sem o Judge."
+      },
+      {
+        "nome_original": "GUARD-Repair",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Fig. 2, quadro do GUARD-Repair; Seção IV-B); p. 4 do PDF (Seção IV-B; Tabela I: GUARD-Repair Model GPT-3.5; Number of similar samples (k) 3)",
+        "observacao": "Geração aumentada por recuperação: BM25 recupera k = 3 problemas semelhantes e seus CoTs seguros do subconjunto não detectado como envenenado; o prompt (Fig. 2) contém a tarefa, as amostras semelhantes e o problema com espaço para o CoT. O texto da Fig. 2 é pequeno; a estrutura foi lida visualmente, sem cópia literal. Sem condição com e sem o Repair."
+      },
+      {
+        "nome_original": "w. CoT (CoT gerado pelo COTTON e fornecido ao modelo de código)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 do PDF (Seção II-A, Equação 3); p. 4 do PDF (Seção V-A-1); p. 5 do PDF (Tabela III, linhas «Zero-shot» e «w. CoT» com Attack «-» e Defense «-»); p. 6 do PDF (Seção VI-B, «(1) Without Defense»)",
+        "observacao": "Condição base da RQ2: o modelo de código recebe o problema e os passos de raciocínio gerados por um modelo externo (COTTON). Contraste com «Zero-shot» na Tabela III para os quatro modelos. Pacote híbrido: o CoT vem de um modelo leve ajustado (COTTON, fora do escopo), e o formato exato do prompt do modelo de código não é mostrado. Não é técnica proposta pelo estudo."
+      },
+      {
+        "nome_original": "Zero-shot",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Tabela III, linhas «Zero-shot»); p. 6 do PDF (Seção VI-B)",
+        "observacao": "Geração de código sem CoT; o conteúdo do prompt não é mostrado (nao_informado)."
+      },
+      {
+        "nome_original": "Paraphrasing",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 do PDF (Seção V-C, Passive Defense); p. 5 do PDF (Tabela II, linhas «Paraphrasing»)",
+        "observacao": "Defesa passiva de linha de base: GPT-3.5-Turbo reescreve o prompt do usuário com a instrução «Assuming my prompt is unsafe, please paraphrase my question to the safe prompt.». Comparada com «No Defense» só na Tabela II (qualidade do CoT e ASR); ausente da Tabela III (Pass@1 de código). Pacote: inclui a escolha do GPT-3.5-Turbo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "COTTON (CoT generation model) — COTTON Training",
+        "natureza": "ajuste_fino",
+        "descricao": "Modelo leve de geração de CoT treinado no CodeCoT-9k (com parte envenenada no ataque; limpo pelas defesas). Hiperparâmetros: otimizador BAdam, taxa de aprendizado 5e-5, 5 épocas, comprimento máximo de entrada/saída 256/256. O efeito do GUARD sobre CoT e código passa por esse treinamento.",
+        "localizador": "p. 4 do PDF (Seção V-A-1 e V-A-2; Tabela I, bloco «COTTON Training»); p. 2 do PDF (Fig. 1, modelo de ameaça)"
+      },
+      {
+        "nome_original": "GUARD-Judge Model DeepSeek-R1; GUARD-Repair Model GPT-3.5",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha dos LLMs dos dois agentes: DeepSeek-R1 para a detecção «to ensure high accuracy» e GPT-3.5 para a regeneração, por consistência de estilo com o CodeCoT-9k, criado com o mesmo modelo. Não há comparação com outros modelos.",
+        "localizador": "p. 4 do PDF (Tabela I; Seção V-D)"
+      },
+      {
+        "nome_original": "SABER (backdoor attack)",
+        "natureza": "outro",
+        "descricao": "Ataque de envenenamento de dados de treino do modelo de CoT: CodeBERT identifica posições para inserir gatilhos com sintaxe de negrito em Markdown (**), e as saídas maliciosas são mutações sutis de operadores no raciocínio. Razões de envenenamento de 4% e 6% (Tabela II). É a condição de ameaça, não técnica de prompting.",
+        "localizador": "p. 3 do PDF (Seção III-B); p. 5 do PDF (Seção VI-A; Tabela II)"
+      },
+      {
+        "nome_original": "ONION",
+        "natureza": "outro",
+        "descricao": "Defesa passiva de linha de base: usa o GPT-2 para eliminar palavras atípicas das amostras de teste com base em perplexidade. Filtragem de entrada sem prompting.",
+        "localizador": "p. 4 do PDF (Seção V-C); p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "nome_original": "DeCE",
+        "natureza": "ajuste_fino",
+        "descricao": "Defesa ativa de linha de base: perda de entropia cruzada enganosa com distribuição enganosa e suavização de rótulos durante o treinamento.",
+        "localizador": "p. 4 do PDF (Seção V-C); p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "nome_original": "BKI",
+        "natureza": "outro",
+        "descricao": "Defesa ativa de linha de base: remove amostras envenenadas do treino pela importância de cada token e retreina o modelo (filtragem de dados seguida de retreino).",
+        "localizador": "p. 4 do PDF (Seção V-C); p. 5 do PDF (Tabela II)"
+      }
+    ],
+    "modelos": [
+      {"nome": "COTTON (modelo de CoT)", "versao": "nao_informado"},
+      {"nome": "DeepSeek-Coder-1.3B-Instruct (DS-1.3b-Ins)", "versao": "nao_informado além do tamanho e da variante instruct; nota 2 da p. 6 aponta huggingface.co/deepseek-ai/deepseek-coder-1.3b-instruct"},
+      {"nome": "DeepSeek-Coder-6.7B-Instruct (DS-6.7b-Ins)", "versao": "nao_informado além do tamanho e da variante instruct; nota 3 da p. 6"},
+      {"nome": "Qwen2.5-Coder-1.5B-Instruct (QW2.5-1.5b-Ins)", "versao": "nao_informado além do tamanho e da variante instruct; nota 4 da p. 6"},
+      {"nome": "Qwen2.5-Coder-7B-Instruct (QW2.5-7b-Ins)", "versao": "nao_informado além do tamanho e da variante instruct; nota 5 da p. 6"},
+      {"nome": "DeepSeek-R1 (GUARD-Judge)", "versao": "nao_informado"},
+      {"nome": "GPT-3.5 (GUARD-Repair)", "versao": "nao_informado (snapshot não informado)"},
+      {"nome": "GPT-3.5-Turbo (linha de base Paraphrasing)", "versao": "nao_informado (snapshot não informado)"},
+      {"nome": "GPT-2 (linha de base ONION)", "versao": "nao_informado"},
+      {"nome": "CodeBERT (usado pelo ataque SABER)", "versao": "nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CodeCoT-9k [10]",
+        "quantidade": "9,000 amostras",
+        "observacao": "Conjunto de treino do modelo de CoT; uma parte selecionada aleatoriamente é envenenada (4% ou 6%). Também é a fonte dos exemplos recuperados pelo GUARD-Repair (subconjunto não detectado como envenenado)."
+      },
+      {
+        "nome": "HumanEval-CoT",
+        "quantidade": "164 amostras",
+        "observacao": "Teste de geração de CoT (Tabela II). Denominador do ASR (N de amostras de teste com gatilho) nao_informado; os valores impressos são compatíveis com frações de 21 (cálculo próprio, ver heterogeneidade)."
+      },
+      {
+        "nome": "OpenEval-CoT",
+        "quantidade": "178 amostras",
+        "observacao": "Teste de geração de CoT (Tabela II). Denominador do ASR nao_informado; valores compatíveis com frações de 22 (cálculo próprio)."
+      },
+      {
+        "nome": "HumanEval [12]",
+        "quantidade": "164 problemas em Python, média de 7.8 casos de teste por problema",
+        "observacao": "Teste de geração de código (Tabela III). O denominador do Pass@1 não é ligado aos 164 problemas: os valores impressos não correspondem a k/164 e são compatíveis com frações de 21 (cálculo próprio)."
+      },
+      {
+        "nome": "OpenEval [10]",
+        "quantidade": "178 problemas do conjunto AVATAR, com casos de teste projetados manualmente",
+        "observacao": "Teste de geração de código (Tabela III). Denominador do Pass@1 nao_informado; valores compatíveis com frações de 22 (cálculo próprio)."
+      }
+    ],
+    "metricas": [
+      {"nome": "BLEU-4 (rotulado «BLEU» na Tabela II)", "aplicacao": "qualidade do CoT gerado (HumanEval-CoT, OpenEval-CoT)", "localizador": "p. 4 do PDF (Seção V-B-1); p. 5 do PDF (Tabela II)"},
+      {"nome": "METEOR (rotulado «Meteor»)", "aplicacao": "qualidade do CoT gerado", "localizador": "p. 4 do PDF (Seção V-B-1); p. 5 do PDF (Tabela II)"},
+      {"nome": "ROUGE-L (rotulado «Rouge-L»)", "aplicacao": "qualidade do CoT gerado", "localizador": "p. 4 do PDF (Seção V-B-1); p. 5 do PDF (Tabela II)"},
+      {"nome": "Attack Success Rate (ASR)", "aplicacao": "proporção de amostras de teste com gatilho em que o modelo de CoT envenenado produz a saída maliciosa (Tabela II); valores entre parênteses rotulados com % são diferenças em p.p. em relação a «No Defense»", "localizador": "p. 4 do PDF (Seção V-B-3, fórmula do ASR); p. 5 do PDF (Tabela II)"},
+      {"nome": "Pass@1", "aplicacao": "código gerado (HumanEval, OpenEval; Tabela III)", "localizador": "p. 4 do PDF (Seção V-B-2); p. 5 do PDF (Tabela III)"}
+    ],
+    "linguagens": [
+      "Python (HumanEval)",
+      "OpenEval: linguagem nao_informado (o estudo diz apenas que os problemas vêm do AVATAR, corpus paralelo Java-Python)"
+    ],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Modelos externos de CoT são vulneráveis a ataques de backdoor: gatilhos inseridos nos dados de treino levam a passos de raciocínio maliciosos (alteração da lógica do código ou código malicioso acrescentado) e a código com vulnerabilidades. Sem defesa, o ASR chegou a 80.95 (HumanEval-CoT) e 72.73 (OpenEval-CoT) com 6% de envenenamento (Tabela II). O estudo acrescenta que escores inalterados sob ataque ainda representam risco potencial.",
+        "localizador": "p. 1 do PDF (Seção I, Motivation); p. 2 do PDF (Seção III); p. 5 do PDF (Tabela II); p. 6 do PDF (Seção VI-B)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O backdoor no CoT pode levar a código com defeitos funcionais: o estudo interpreta a queda de Pass@1 sob SABER como backdoor efetivo que leva a código com bugs (por exemplo, DS-6.7b-Ins 76.19 com CoT limpo e 71.43 sob SABER sem defesa, HumanEval, Tabela III).",
+        "localizador": "p. 1 do PDF (Seção I); p. 5 do PDF (Tabela III); p. 6 do PDF (Seção VI-B)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "GUARD (detecção pelo GUARD-Judge e regeneração pelo GUARD-Repair dos CoTs suspeitos nos dados de treino) contra backdoors em modelos de CoT, comparado com «No Defense» no mesmo ataque (ASR, qualidade do CoT e Pass@1).",
+        "avaliada": "sim",
+        "localizador": "p. 3 do PDF (Seção IV); p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "descricao": "Defesas de linha de base ONION, Paraphrasing, DeCE e BKI, comparadas com «No Defense» na Tabela II; ONION e DeCE também na Tabela III.",
+        "avaliada": "sim",
+        "localizador": "p. 4 do PDF (Seção V-C); p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "descricao": "Exemplos do GUARD-Repair recuperados só do subconjunto de amostras não detectadas como envenenadas.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seção IV-B)"
+      },
+      {
+        "descricao": "Contra ameaça interna: várias execuções com sementes aleatórias diferentes e ajuste extenso de hiperparâmetros; número de execuções e forma de agregação nao_informado.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (Seção VII, Internal threats)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Executados pelo estudo: «No Defense», ONION, Paraphrasing, DeCE e BKI sob SABER (4% e 6%), mais a condição «Clean», na Tabela II (qualidade do CoT e ASR); «SABER -» (sem defesa), ONION e DeCE, mais «Zero-shot» e «w. CoT» sem ataque, na Tabela III (Pass@1 de código). Paraphrasing e BKI não aparecem na Tabela III, sem explicação.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente inconsistência de denominador (cálculo próprio): os valores de Pass@1 da Tabela III na coluna HumanEval (por exemplo, 47.62, 52.38, 57.14, 66.67, 71.43, 76.19, 80.95, 38.10, 42.86) coincidem com frações de 21 (10/21, 11/21, 12/21, 14/21…) e não com k/164 arredondado a duas casas (por exemplo, 78/164 = 47.56 e 79/164 = 48.17); na coluna OpenEval (31.82, 36.36, 40.91, 13.64, 27.27, 18.18, 22.73) coincidem com frações de 22, e não com k/178 (56/178 = 31.46; 57/178 = 32.02). O mesmo padrão aparece no ASR da Tabela II (52.38, 80.95; 59.09, 72.73). O estudo declara 164 e 178 problemas, mas não informa sobre quantas amostras as métricas foram calculadas; não se sabe se a avaliação usou um subconjunto. Denominador registrado como nao_informado.",
+        "localizador": "p. 4 do PDF (Seção V-A-2); p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "descricao": "Diferenças entre parênteses na coluna ASR da Tabela II são rotuladas com % mas correspondem a diferenças em p.p. em relação a «No Defense» (por exemplo, 52.38 → 19.05 impresso como -33.33%). Em uma célula a diferença não bate (cálculo próprio): 6%, OpenEval-CoT, BKI, 72.73 → 40.91 = 31.82 p.p., impresso «40.91(-32.54%)»; também não corresponde à variação relativa (cerca de 43.7%).",
+        "localizador": "p. 5 do PDF (Tabela II, bloco 6%, linha BKI, coluna OpenEval-CoT ASR)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente da tabela: o texto diz que GUARD obtém o melhor desempenho «in most cases» em BLEU, Meteor e Rouge-L, mas a condição «No Defense» tem qualidade do CoT maior que GUARD em vários casos (4%, HumanEval-CoT: BLEU 45.63 contra 44.38, Meteor 36.91 contra 36.67, Rouge-L 61.12 contra 59.16; 4% e 6%, OpenEval-CoT: BLEU 46.81 e 49.08 contra 45.66 e 45.96). Em 4% OpenEval-CoT, ONION (BLEU 45.80, Meteor 37.26, em negrito) supera GUARD (45.66, 36.66). A comparação do texto parece restrita às defesas.",
+        "localizador": "p. 5 do PDF (Seção VI-A; Tabela II)"
+      },
+      {
+        "descricao": "Condição limpa com qualidade de CoT menor que a envenenada sem defesa: em OpenEval-CoT, «Clean 0%» tem BLEU 43.34 e Rouge-L 59.15, abaixo de «No Defense» 4% (46.81; 60.69) e 6% (49.08; 60.36). O estudo não comenta.",
+        "localizador": "p. 5 do PDF (Tabela II)"
+      },
+      {
+        "descricao": "Resultados nulos ou empates na Tabela III: DS-1.3b-Ins em OpenEval tem 31.82 em todas as condições (Zero-shot, CoT, SABER com e sem defesa); QW2.5-1.5b-Ins em OpenEval tem 40.91 em todas as condições; QW2.5-1.5b-Ins em HumanEval tem GUARD = ONION = 47.62; QW2.5-7b-Ins em HumanEval tem 76.19 em Zero-shot, CoT e SABER sem defesa, e GUARD = ONION = 80.95. O texto afirma que GUARD alcançou o maior Pass@1 «across most models and datasets».",
+        "localizador": "p. 5 do PDF (Tabela III); p. 6 do PDF (Seção VI-B)"
+      },
+      {
+        "descricao": "Pass@1 sob ataque com defesa acima da condição sem ataque: «SABER GUARD» supera «w. CoT» sem ataque em DS-1.3b-Ins HumanEval (66.67 contra 52.38), DS-6.7b-Ins HumanEval (80.95 contra 76.19) e QW2.5-7b-Ins HumanEval (80.95 contra 76.19); o estudo diz que o método «also enhances code generation performance», sem explicar o mecanismo pelo qual o CoT de um modelo treinado com dados reparados superaria o do modelo treinado com dados limpos.",
+        "localizador": "p. 5 do PDF (Tabela III); p. 6 do PDF (Seção VI-B)"
+      },
+      {
+        "descricao": "Inversão: «Using CoT generally improved Pass@1», mas QW2.5-7b-Ins em HumanEval tem 76.19 com e sem CoT, e DS-1.3b-Ins e QW2.5-1.5b-Ins em OpenEval não mudam com CoT.",
+        "localizador": "p. 5 do PDF (Tabela III); p. 6 do PDF (Seção VI-B)"
+      },
+      {
+        "descricao": "Condições da Tabela III não informadas: o título diz «Impact of different poisoning ratios in HumanEval-CoT», mas a tabela não indica a razão de envenenamento (4% ou 6%) e traz colunas HumanEval e OpenEval de geração de código.",
+        "localizador": "p. 5 do PDF (Tabela III, título e cabeçalhos)"
+      },
+      {
+        "descricao": "Divergência de tamanhos de modelo: a Seção V-A-1 diz «both 1.5B and 7B parameter versions», enquanto a Tabela III e as notas de rodapé usam DeepSeek-Coder 1.3B e 6.7B (e Qwen2.5-Coder 1.5B e 7B).",
+        "localizador": "p. 4 do PDF (Seção V-A-1); p. 5 do PDF (Tabela III); p. 6 do PDF (notas 2–5)"
+      },
+      {
+        "descricao": "O estudo menciona várias execuções com sementes diferentes, mas as tabelas não informam número de execuções, média, variância nem teste estatístico; afirmações como «significantly reduces the ASR» não têm teste associado.",
+        "localizador": "p. 5 do PDF (Seção VI-A; Tabelas II e III); p. 6 do PDF (Seção VII)"
+      },
+      {
+        "descricao": "Abrangência limitada: um único ataque (SABER), um único modelo de CoT (COTTON) e duas razões de envenenamento; o estudo reconhece a escolha de modelos e conjuntos como ameaça externa e planeja estender a outros ataques, modelos e benchmarks.",
+        "localizador": "p. 3 do PDF (Seção III-B); p. 6 do PDF (Seções VII e VIII)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A Tabela II mede a qualidade do texto de CoT gerado (BLEU, METEOR, ROUGE-L contra CoTs de referência) e o ASR sobre a saída do modelo de CoT; não mede código. Foi tratada como resultado intermediário e não foi usada em extracoes; a Tabela III (Pass@1 de código) é a primeira tabela com contraste de prompting para a tarefa de geração de código. Se a geração de CoT fosse considerada parte da tarefa de geração, o primeiro contraste seria GUARD contra No Defense, BLEU, HumanEval-CoT, 4%: 45.63 (No Defense) e 44.38 (GUARD).",
+        "localizador": "p. 5 do PDF (Tabelas II e III)"
+      },
+      {
+        "descricao": "Modelo de ameaça: o defensor tem acesso ao conjunto de treino e repara as amostras envenenadas antes do treinamento (Fig. 1, «Data Defensing» antes de «Model Training and Upload»). O texto não descreve explicitamente o retreino do COTTON com os dados reparados, mas a Tabela I traz os hiperparâmetros de «COTTON Training».",
+        "localizador": "p. 2 do PDF (Fig. 1; Seção III); p. 3 do PDF (Seção III-C); p. 4 do PDF (Tabela I)"
+      },
+      {
+        "descricao": "O desempenho de detecção do GUARD-Judge (por exemplo, precisão e revocação na identificação de amostras envenenadas) não é relatado; só os efeitos a jusante (ASR, qualidade do CoT, Pass@1).",
+        "localizador": "p. 3–5 do PDF (Seções IV a VI)"
+      },
+      {
+        "descricao": "O estudo imprime o endereço do repositório (https://github.com/WolfgangJin/GUARD) e diz compartilhar corpus e scripts; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 do PDF (nota 1; contribuições)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address this challenge, we propose GUARD, a novel dual-agent defense framework specifically designed to counter CoT backdoor attacks in neural code generation.",
+        "localizador": "p. 1 do PDF, Resumo"
+      },
+      {
+        "trecho": "GUARD integrates two core components: GUARD-Judge, which identifies suspicious CoT steps and potential triggers through comprehensive analysis, and GUARD-Repair, which employs a retrieval-augmented generation approach to regenerate secure CoT steps for identified anomalies.",
+        "localizador": "p. 1 do PDF, Resumo"
+      },
+      {
+        "trecho": "Since LLMs follow CoT instructions when generating code, attackers can inject specific triggers into training data, causing CoT models to produce malicious reasoning steps (e.g., change the logic of the code or added malicious code) when encountered, ultimately resulting in code with security vulnerabilities or functional defects [4].",
+        "localizador": "p. 1 do PDF, Seção I (Motivation)"
+      },
+      {
+        "trecho": "The final judgment combines both evaluations, and the final output is a binary label indicating whether the CoT is potentially backdoored.",
+        "localizador": "p. 3 do PDF, Seção IV-A"
+      },
+      {
+        "trecho": "When GUARD-Judge identifies a suspicious CoT sample, GUARD-Repair regenerates a secure alternative using retrieval-augmented generation.",
+        "localizador": "p. 3 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "Using the retrieved examples as reference, GUARD-Repair constructs a prompt that includes these similar examples and their safe CoT solutions to guide the generation of a new, secure CoT solution c′ for the original problem x.",
+        "localizador": "p. 4 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "Based on the assumption that attackers can poison datasets, defenders can address the root cause of backdoor vulnerabilities by ensuring training data integrity, rather than attempting to mitigate already-embedded backdoors in deployed models.",
+        "localizador": "p. 3 do PDF, Seção III-C"
+      },
+      {
+        "trecho": "GUARD-Judge employs DeepSeek-R1 to ensure high accuracy in anomaly detection, while GUARD-Repair uses GPT-3.5 for generation to maintain stylistic consistency with the original CodeCoT-9k dataset, which was created using the same model.",
+        "localizador": "p. 4 do PDF, Seção V-D"
+      },
+      {
+        "trecho": "In the context of CoT backdoor attacks, we utilize the prompt ”Assuming my prompt is unsafe, please paraphrase my question to the safe prompt.” to allow GPT-3.5-Turbo to perform the paraphrasing.",
+        "localizador": "p. 4 do PDF, Seção V-C"
+      },
+      {
+        "trecho": "We experiment with both 1.5B and 7B parameter versions in their instruct variants.",
+        "localizador": "p. 4 do PDF, Seção V-A-1"
+      },
+      {
+        "trecho": "Then, we use HumanEval-CoT and OpenEval-CoT as test sets with 164 and 178 samples respectively, following Yang et al.’s [10] methodology for generating CoTs on standard benchmarks.",
+        "localizador": "p. 4 do PDF, Seção V-A-2"
+      },
+      {
+        "trecho": "We use Pass@1 to measure the model’s ability to generate correct code on the first attempt.",
+        "localizador": "p. 4 do PDF, Seção V-B-2"
+      },
+      {
+        "trecho": "SABER uses CodeBERT to analyze input-operator relationships, identifying optimal locations for trigger insertion using Markdown bold syntax (** markers).",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "From the perspective of CoT generation quality, GUARD achieves the best performance in most cases across the BLEU, Meteor, and Rouge-L metrics, particularly at higher poisoning ratios (6%).",
+        "localizador": "p. 5 do PDF, Seção VI-A"
+      },
+      {
+        "trecho": "BKI 43.66 36.12 54.45 38.10(-42.85%) 43.73 35.85 54.42 40.91(-32.54%)",
+        "localizador": "p. 5 do PDF, Tabela II, bloco SABER 6%, Active Defense, linha BKI; colunas HumanEval-CoT (BLEU, Meteor, Rouge-L, ASR) e OpenEval-CoT (BLEU, Meteor, Rouge-L, ASR)"
+      },
+      {
+        "trecho": "Specifically, a decrease indicates that the backdoor in the CoT was effective, leading to buggy code.",
+        "localizador": "p. 6 do PDF, Seção VI-B"
+      },
+      {
+        "trecho": "While unchanged scores suggest that model did not follow the backdoor in the CoT, but this still represents a potential risk.",
+        "localizador": "p. 6 do PDF, Seção VI-B"
+      },
+      {
+        "trecho": "For instance, DS-1.3b-Ins improved from 57.14 to 66.67 on HumanEval, and DS-6.7b-Ins increased from 71.43 to 80.95.",
+        "localizador": "p. 6 do PDF, Seção VI-B"
+      },
+      {
+        "trecho": "To mitigate this, we conducted multiple runs with different random seeds and performed extensive hyperparameter tuning to ensure the robustness of our results.",
+        "localizador": "p. 6 do PDF, Seção VII (Internal threats)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "GUARD",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "multiagente", "decomposicao"],
+      "mecanismos_acrescentados": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "multiagente", "decomposicao"],
+      "comparador": "SABER sem defesa (Type «w. CoT», Attack «SABER», Defense «-»)",
+      "modelo": "DS-1.3b-Ins (DeepSeek-Coder-1.3B-Instruct)",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 57.14, "intervencao": 66.67},
+      "denominador": "nao_informado (o HumanEval tem 164 problemas, mas os valores impressos não correspondem a k/164; ver heterogeneidade)",
+      "condicoes": "Ataque SABER ao modelo de CoT (COTTON); razão de envenenamento da Tabela III nao_informado (Tabela II usa 4% e 6%). GUARD com GUARD-Judge = DeepSeek-R1, GUARD-Repair = GPT-3.5, k = 3 exemplos recuperados por BM25; COTTON treinado com BAdam, taxa de aprendizado 5e-5, 5 épocas, comprimento 256/256. Pacote híbrido: o efeito passa pela limpeza dos dados de treino e pelo treinamento do COTTON (ajuste_fino), e não é atribuível a um mecanismo isolado. Número de execuções nao_informado (o texto menciona várias execuções com sementes diferentes, sem dizer se a tabela traz médias). Sem intervalo de confiança nem teste. Conferido visualmente na p. 5 do PDF (Tabela III).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as conclusões destacam várias métricas (ASR, qualidade do CoT, Pass@1) e várias defesas comparadas, sem uma métrica e um comparador prevalentes. A Tabela II mede o texto de CoT, não código, e foi considerada não elegível (ver observacoes). A Tabela III é a primeira tabela com o contraste do GUARD para geração de código: primeira métrica (Pass@1), primeira coluna (HumanEval), primeiro modelo (DS-1.3b-Ins) e a condição sem a técnica sob o mesmo ataque («SABER -») como comparador. Não há outra técnica focal nem outra tarefa a cobrir, nem ablação ou matriz de ingredientes para contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela III, bloco DS-1.3b-Ins, linhas «SABER -» e «SABER GUARD», coluna HumanEval; p. 6 do PDF, Seção VI-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SABER - 57.14 31.82", "localizador": "p. 5 do PDF, Tabela III, bloco DS-1.3b-Ins, Type w. CoT, linha Attack SABER / Defense -; colunas HumanEval e OpenEval"},
+        {"trecho": "SABER GUARD 66.67 31.82", "localizador": "p. 5 do PDF, Tabela III, bloco DS-1.3b-Ins, Type w. CoT, linha Attack SABER / Defense GUARD; colunas HumanEval e OpenEval"},
+        {"trecho": "For instance, DS-1.3b-Ins improved from 57.14 to 66.67 on HumanEval, and DS-6.7b-Ins increased from 71.43 to 80.95.", "localizador": "p. 6 do PDF, Seção VI-B"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Duas questões de pesquisa explícitas: RQ1 sobre preservação da qualidade do CoT em relação às defesas de base e RQ2 sobre o impacto na geração de código.",
+      "localizador": "p. 4 do PDF, Seção V"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve o GUARD, os prompts (Fig. 2), os modelos, os conjuntos e os hiperparâmetros, mas não explicita o retreino do COTTON com os dados reparados, não informa a razão de envenenamento da Tabela III, o número de execuções, como os CoTs de teste com gatilho foram montados nem o desempenho de detecção do Judge.",
+      "localizador": "p. 3–5 do PDF (Seções III a VI; Tabelas I a III)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Executa quatro defesas de base, a condição sem defesa e a condição limpa (Tabela II), e zero-shot, CoT sem ataque, sem defesa, ONION e DeCE na geração de código (Tabela III); Paraphrasing e BKI são omitidos da Tabela III sem explicação.",
+      "localizador": "p. 4 do PDF (Seção V-C); p. 5 do PDF (Tabelas II e III)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas e referenciadas (BLEU-4, METEOR, ROUGE-L, ASR com fórmula, Pass@1), mas o denominador não é informado e os valores são incompatíveis com 164 e 178 problemas; as diferenças de ASR rotuladas com % são p.p., com uma célula que não bate; a Tabela II usa «BLEU» para BLEU-4. Os valores citados no texto coincidem com as tabelas.",
+      "localizador": "p. 4 do PDF (Seção V-B); p. 5 do PDF (Tabelas II e III); p. 6 do PDF (Seção VI-B)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há seção de ameaças à validade (interna, externa, de construto), mas genérica: não discute ataque único, variabilidade dos LLMs, dependência do DeepSeek-R1 e do GPT-3.5 nem o denominador das métricas.",
+      "localizador": "p. 6 do PDF, Seção VII"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Hiperparâmetros (Tabela I), prompts (Fig. 2), modelos de código com endereço no Hugging Face e repositório impresso (não acessado nesta extração); faltam snapshots do GPT-3.5 e do GPT-3.5-Turbo, parâmetros de decodificação, número de execuções e configuração das linhas de base.",
+      "localizador": "p. 2 do PDF (nota 1); p. 3 do PDF (Fig. 2); p. 4 do PDF (Tabela I); p. 6 do PDF (notas 2–5)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute vazamento de HumanEval ou OpenEval no pré-treinamento dos modelos de código ou dos LLMs do GUARD, nem a separação entre os exemplos recuperados do CodeCoT-9k e os conjuntos de teste. O envenenamento de dados tratado no estudo é ataque, não contaminação de avaliação.",
+      "localizador": "p. 4 do PDF (Seção V-A-2); p. 6 do PDF (Seção VII)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo e referências). Tabelas II e III conferidas visualmente na p. 5 do PDF; Tabela I e Seções V-A a V-D na p. 4; Fig. 2 e Seção IV na p. 3; Fig. 1 na p. 2; Seção VI-B, ameaças e notas de rodapé dos modelos na p. 6. A p. 1 (só texto) não foi aberta visualmente; as citações dela foram reconstituídas do texto extraído em duas colunas.",
+    "paginas_abertas": [2, 3, 4, 5, 6]
+  }
+}
