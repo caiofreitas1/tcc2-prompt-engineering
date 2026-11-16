@@ -1,0 +1,342 @@
+{
+  "estudo": "S910",
+  "texto_fonte": "fontes/textos/lote/S910.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Gude, Santos-Ríos, Prado-Valiño, Ezquerro, Vilares. LyS at SemEval 2025 Task 8: Zero-Shot Code Generation for Tabular QA. arXiv:2508.09012v1 [cs.CL], 12 ago. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "AG+ECS+CF (final system setup; zero-shot modular pipeline: Column Selector, Answer Generator, Code Fixer)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1, Resumo e Introdução; p. 2, Seção 3; p. 3, Fig. 1 e Seção 3; p. 4, Seção 5.1 (Ablation Study); p. 5, Tabela 2",
+        "observacao": "Pipeline zero-shot em que um LLM com papel declarado ('You are a tabular QA system', 'You are a Python-powered Tabular QA system' → instrucao) seleciona colunas relevantes e seus tipos, depois gera código Python com a pergunta e as colunas selecionadas (etapas encadeadas → decomposicao; nomes de colunas, tipos e variações de valores no prompt → contexto) e, se a execução falha, reenvia o código e a mensagem de erro em novo prompt (→ feedback). Comparado na Tabela 2 com AG (só Answer Generator), mesmo backbone Qwen-2.5-Coder 32B. Acrescentados em relação a AG: decomposicao e feedback; contexto já está em AG. O ganho é do pacote, não de um mecanismo isolado. Possível pacote híbrido: o estudo descreve um pré-processamento manual (padronização de nomes de colunas, identificação de colunas tipo enum) e pós-processamento da saída sem dizer se se aplicam também à condição AG nem como se relacionam com o 'enhanced column selection'. Os prompts completos não são reproduzidos no artigo; o estudo remete ao GitHub (não acessado)."
+      },
+      {
+        "nome_original": "AG (Answer Generator only)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, Fig. 1 (prompt do Answer Generator) e Seção 3; p. 4, Seção 5.1; p. 5, Tabelas 1 e 2",
+        "observacao": "Configuração inicial do desenvolvimento: geração zero-shot de código Python com papel declarado e instrução (instrucao) e a pergunta 'based on the provided dataset' (contexto). O artigo não detalha que parte da tabela entra no prompt; a explicação de que o Subtask 2 tem 'smaller input size, which reduces the amount of information introduced in the prompt' (p. 4) sugere que dados da tabela entram no prompt. Sem condição sem a técnica (zero-shot é a base); serve de linha de base na Tabela 2 e é a condição usada para comparar LLMs na Tabela 1."
+      },
+      {
+        "nome_original": "Column Selector (AG+CS, AG with Column Selector)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 2, Seção 3 (Column Selector); p. 3, Fig. 1; p. 4, Ablation Study; p. 5, Tabela 2",
+        "observacao": "Etapa prévia em que o LLM recebe a lista de nomes de colunas e devolve só as essenciais, também identificando os tipos de dados; as colunas selecionadas entram no prompt do Answer Generator. Etapa encadeada → decomposicao; as colunas selecionadas são contexto, categoria já presente em AG. A Tabela 2 compara AG e AG+CS, que diferem só nessa etapa."
+      },
+      {
+        "nome_original": "Enhanced column selection (ECS)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 4, Ablation Study; p. 5, Tabela 2; p. 3, Seção 3 (Preprocessing)",
+        "observacao": "Descrita só como seleção de colunas aprimorada 'to feed richer information about feature variations to the prompt' (mais contexto, categoria já presente na base; por isso acrescentados vazio). Só aparece junto do Code Fixer (AG+CS → AG+ECS+CF), condições que diferem em dois ingredientes; não há condição sem ECS e com CF. Mecanismos listados são os da condição avaliada (AG+ECS+CF). A relação com o pré-processamento que identifica colunas tipo enum não é explicitada."
+      },
+      {
+        "nome_original": "Code Fixer (CF; error-fixing module, iterative error handling)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 1, Resumo; p. 2, Seções 2 e 3; p. 3, Fig. 1 e Seção 3 (Code Fixer); p. 4, Ablation Study; p. 5, Tabela 2",
+        "observacao": "Captura erros de execução (sintaxe, incompatibilidade de esquema, exceções) e regenera a função com um 'structured prompt' que inclui o código com erro e a descrição do erro (feedback do executor). Adicionado junto com ECS; o estudo atribui o ganho de 7 pontos no Subtask 1 ao feedback de erro, mas não há condição que isole o CF. Número máximo de iterações de correção não informado; a Fig. 1 representa um único ciclo, enquanto o resumo fala em processo iterativo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Selection of the best performing LLM (Qwen-2.5-Coder 7B/32B, Mistral-7B, Codestral-22B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação de quatro LLMs com a configuração AG no conjunto de validação (Tabela 1) para escolher o backbone (Qwen-2.5-Coder 32B); não altera o prompt.",
+        "localizador": "p. 3-4, Seção 4 (System Setup); p. 4, Seção 5.1; p. 5, Tabela 1"
+      },
+      {
+        "nome_original": "4-bit quantization",
+        "natureza": "outro",
+        "descricao": "Todos os modelos executados com quantização de 4 bits por limitação de VRAM; compressão do modelo, não prompting.",
+        "localizador": "p. 4, Seção 4 (System Setup)"
+      },
+      {
+        "nome_original": "greedy generation strategy with a temperature of 0.7",
+        "natureza": "decodificacao",
+        "descricao": "Estratégia de geração declarada como gulosa com temperatura 0,7 (aparente inconsistência registrada em heterogeneidade).",
+        "localizador": "p. 4, Seção 4 (System Setup)"
+      },
+      {
+        "nome_original": "Preprocessing",
+        "natureza": "outro",
+        "descricao": "Passo manual de pré-processamento: padronização de nomes de colunas (remoção de emoji e caracteres não alfanuméricos) e identificação de colunas categóricas tipo enum com esquema comum; transformação dos dados, não do prompt. Não se informa em quais configurações da Tabela 2 foi aplicado.",
+        "localizador": "p. 3, Seção 3 (Preprocessing)"
+      },
+      {
+        "nome_original": "postprocessed the output to ensure that only Python lines were passed",
+        "natureza": "outro",
+        "descricao": "Pós-processamento da resposta do LLM para manter só linhas de Python antes da execução.",
+        "localizador": "p. 3, Seção 3 (Answer Generator)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen-2.5-Coder 7B", "versao": "nao_informado", "localizador": "p. 4, Seção 4 (System Setup); p. 5, Tabela 1", "observacao": "Só nome e tamanho; checkpoint (por exemplo, variante instruct) não informado; quantização de 4 bits."},
+      {"nome": "Qwen-2.5-Coder 32B", "versao": "nao_informado", "localizador": "p. 4, Seção 4 e Seção 5.1; p. 5, Tabelas 1 e 2", "observacao": "Backbone da Tabela 2 e do sistema final; checkpoint não informado; quantização de 4 bits. O estudo cita o Qwen Technical Report (Bai et al., 2023) para o modelo."},
+      {"nome": "Mistral-7B", "versao": "nao_informado", "localizador": "p. 4, Seção 4; p. 5, Tabela 1", "observacao": "Só nome e tamanho; quantização de 4 bits."},
+      {"nome": "Codestral-22B", "versao": "nao_informado", "localizador": "p. 4, Seção 4; p. 5, Tabela 1", "observacao": "Só nome e tamanho; quantização de 4 bits."}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto da SemEval 2025 Task 8 (Question Answering over Tabular Data), partição dev/validação, Subtask 1 (todas as fontes de dados)", "quantidade": "nao_informado", "localizador": "p. 3, Seção 4 (Dataset, Evaluation); p. 5, Tabelas 1 e 2", "observacao": "O texto chama a partição de 'dev set' e as tabelas de 'validation set'. Número de perguntas e tabelas não informado. O artigo cita o DataBench (Osés Grijalba et al., 2024) no Background, mas não declara explicitamente que o conjunto da tarefa é o DataBench."},
+      {"nome": "Conjunto da SemEval 2025 Task 8, partição dev/validação, Subtask 2 (no máximo 20 linhas por tabela)", "quantidade": "nao_informado", "localizador": "p. 3, Seção 4 (Evaluation); p. 5, Tabelas 1 e 2", "observacao": "Mesmas perguntas em base reduzida, segundo a descrição da avaliação; sobreposição com o Subtask 1 não descrita além disso."},
+      {"nome": "Conjunto da SemEval 2025 Task 8, partição de teste (submissões no CodaBench), Subtasks 1 e 2", "quantidade": "nao_informado", "localizador": "p. 4, Seção 5 e Seção 5.2", "observacao": "Só o sistema final (AG+ECS+CF) foi avaliado no teste; sem ablação nem comparador executado no teste."}
+    ],
+    "metricas": [
+      {"nome": "Accuracy com respeito ao ground truth (por tipo de resposta: boolean, category, number, list[category], list[number]; coluna µ = 'average')", "denominador": "nao_informado", "localizador": "p. 3, Seção 4 (Dataset); p. 5, Tabelas 1 e 2 e legenda da Tabela 1", "observacao": "Mede a resposta final obtida pela execução do código, não a correção do código em si. Por cálculo próprio, µ coincide com a média simples das cinco colunas de tipo (por exemplo, AG S1: 74.06), não necessariamente com a acurácia ponderada pelo número de perguntas, que não é informado. Também por cálculo próprio, vários valores são compatíveis com frações de 64 (por exemplo, 3.12, 81.25), mas o número de perguntas por tipo não é impresso."},
+      {"nome": "Baseline performance (coluna β da Tabela 1)", "denominador": "nao_informado", "localizador": "p. 5, Tabela 1 e legenda", "observacao": "Valor único por subtarefa (27.00 e 26.00) do sistema de referência da tarefa (Osés Grijalba et al., 2025), cujo método não é descrito no artigo."},
+      {"nome": "Points of accuracy no teste e posição no ranking oficial", "denominador": "nao_informado", "localizador": "p. 1, Resumo; p. 4, Seção 5.2"},
+      {"nome": "Manual checks to assess the quality of the generated code", "denominador": "nao_aplicavel", "localizador": "p. 3, Seção 4 (Dataset)", "observacao": "Verificação qualitativa mencionada; resultados não relatados."}
+    ],
+    "linguagens": [
+      {"nome": "Python (Python 3.10.12, Pandas 2.2.3)", "localizador": "p. 3, Seção 3 (Answer Generator); p. 4, Seção 4 (System Setup)"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O código gerado pode falhar por sintaxe incorreta, incompatibilidade com o esquema da tabela ou exceções em tempo de execução (motivação do Code Fixer e do pré-processamento de nomes de colunas).",
+        "localizador": "p. 2, Seção 2 (Zero-Shot Code Generation); p. 3, Seção 3 (Code Fixer, Preprocessing)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O modelo tem dificuldade com colunas de tipos complexos (listas, dicionários) e com perguntas ambíguas, sobretudo respostas em lista; erros do Column Selector se propagam ao Answer Generator.",
+        "localizador": "p. 1, Introdução; p. 4, Seção 5.1; pp. 4-5, Seção 5.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Queda de desempenho de cerca de 20 pontos entre o desenvolvimento e o teste, atribuída pelos autores à maior complexidade dos tipos de dados nas tabelas de teste (limitação de generalização).",
+        "localizador": "p. 4, Seção 5.2; p. 5, Seção 6"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Code Fixer: reenvio do código e da mensagem de erro ao LLM para regenerar a função. Só foi avaliado junto com ECS (AG+CS → AG+ECS+CF), sem condição que difira apenas no CF.",
+        "avaliada": "nao",
+        "localizador": "p. 3, Seção 3 (Code Fixer); p. 4, Ablation Study; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Pré-processamento manual (padronização de nomes de colunas e identificação de colunas tipo enum) para prevenir erros por incompatibilidade entre a estrutura da tabela e o código gerado; sem comparação com condição sem ele.",
+        "avaliada": "nao",
+        "localizador": "p. 3, Seção 3 (Preprocessing)"
+      },
+      {
+        "descricao": "Pós-processamento da saída para passar ao módulo seguinte só linhas de Python; sem comparação com condição sem ele.",
+        "avaliada": "nao",
+        "localizador": "p. 3, Seção 3 (Answer Generator)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resumo e corpo divergem no ranking: o resumo diz 'rank 33 of 53' no teste; a Seção 5.2 informa 32ª (Subtask 1) e 31ª (Subtask 2) posições entre 49 participantes na categoria General, e 23ª e 21ª entre 35 na categoria Open models.",
+        "localizador": "p. 1, Resumo; p. 4, Seção 5.2"
+      },
+      {
+        "descricao": "Narrativa inverte os valores da tabela: o texto atribui ao desenvolvimento '84 and 85 points for Subtasks 1 and 2, respectively', mas a Tabela 2 imprime µ = 85.00 (S1) e 84.69 (S2) para AG+ECS+CF.",
+        "localizador": "p. 4, Seção 5.2; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Narrativa contradiz as tabelas: o texto diz que 'list-like types do not surpass 75 points' nas Tabelas 1 e 2, mas a Tabela 2 imprime para AG+ECS+CF list[category] 78.12 e list[number] 85.94 (S1) e 76.56 e 78.12 (S2), e para AG+CS list[number] 79.69. Pode referir-se ao teste, mas o texto cita as Tabelas 1 e 2 (validação).",
+        "localizador": "p. 4, Seção 5.2; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "A queda 'of 20 points (approx.)' entre desenvolvimento e teste corresponde, por cálculo próprio com os valores da Tabela 2 e do teste, a cerca de 20 pontos no Subtask 1 (85.00 → 65) e cerca de 17 pontos no Subtask 2 (84.69 → 68).",
+        "localizador": "p. 4, Seção 5.2; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Atribuição causal sem contrafactual: o ganho de AG+CS para AG+ECS+CF no Subtask 1 (77.50 → 85.00) é apresentado como prova de que o feedback de erro ajuda ('proving that integrating error feedback...'), mas ECS e CF foram introduzidos juntos.",
+        "localizador": "p. 4, Ablation Study; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Inversões por tipo de resposta na Tabela 2 (S2): list[category] cai de 75.00 (AG) para 73.44 (AG+CS); list[number] cai de 79.69 (AG+CS) para 78.12 (AG+ECS+CF). O aumento de cerca de 10 pontos em list[category] citado no texto vale para o S1 (68.75 → 78.12); no S2 o aumento é 73.44 → 76.56.",
+        "localizador": "p. 4, Ablation Study; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Aparente inconsistência na configuração de decodificação: 'greedy generation strategy with a temperature of 0.7'; a geração gulosa normalmente não usa a temperatura, e o artigo não esclarece qual foi aplicada nem o número de execuções.",
+        "localizador": "p. 4, Seção 4 (System Setup)"
+      },
+      {
+        "descricao": "Escolha do modelo, ablação e relato de desempenho feitos no mesmo conjunto dev/validação; a configuração escolhida caiu cerca de 20 pontos no teste, onde não há ablação nem comparador.",
+        "localizador": "p. 3, Seção 4 (Dataset); p. 4, Seções 5.1 e 5.2"
+      },
+      {
+        "descricao": "A conclusão afirma 'ranking among the best systems in the development phase', mas o artigo não apresenta ranking da fase de desenvolvimento nem resultados de outros participantes nessa fase.",
+        "localizador": "p. 5, Seção 6"
+      },
+      {
+        "descricao": "A linha de base oficial (β = 27.00 no S1 e 26.00 no S2) é comparada só com a configuração AG da Tabela 1, e seu método não é descrito; a conclusão diz que o sistema supera 'the baseline model', mas o sistema final não é comparado a ela em nenhuma tabela.",
+        "localizador": "p. 4, Seção 5.1; p. 5, Tabela 1 e Seção 6"
+      },
+      {
+        "descricao": "Consistência entre tabelas: as linhas Qwen-2.5-Coder 32B da Tabela 1 coincidem com as linhas AG da Tabela 2 nos dois subtasks (por exemplo, µ 74.06 e 81.87).",
+        "localizador": "p. 5, Tabelas 1 e 2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A tarefa é Tabular QA resolvida por geração de código Python; o Code Fixer corrige o próprio código gerado dentro do pipeline e não é avaliado como tarefa de reparo separada, por isso a tarefa registrada é só geração. A métrica avalia a resposta final, não o código.",
+        "localizador": "p. 1, Resumo; p. 3, Seção 3"
+      },
+      {
+        "descricao": "A Tabela 1 compara LLMs na configuração AG (seleção de modelo, fora do escopo) e inclui a linha de base oficial β, cujo método não é descrito; por isso não foi tratada como contraste de prompting.",
+        "localizador": "p. 5, Tabela 1"
+      },
+      {
+        "descricao": "Os prompts completos e a implementação são declarados disponíveis no GitHub (fev. 2025); o repositório não foi acessado nem validado nesta extração. A Fig. 1 mostra só trechos dos prompts do Column Selector e do Answer Generator.",
+        "localizador": "p. 1, nota 1; p. 2, nota 2; p. 3, Fig. 1"
+      },
+      {
+        "descricao": "Recursos computacionais limitados (Intel Core i9-10920X, 258 GiB de RAM, duas NVIDIA RTX 3090 compartilhadas) motivaram a quantização e a opção por zero-shot em vez de ajuste fino; o estudo apresenta isso como restrição, não como custo da técnica.",
+        "localizador": "p. 5, Hardware Setup; p. 4, Seção 4"
+      },
+      {
+        "descricao": "O conjunto de treino não foi usado; só o conjunto dev serviu aos experimentos, com verificação manual da qualidade do código cujos resultados não são relatados.",
+        "localizador": "p. 3, Seção 4 (Dataset)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "We developed a zero-shot pipeline that leverages an Large Language Model to generate functional code capable of extracting the relevant information from tabular data based on an input question.", "localizador": "p. 1, Resumo"},
+      {"trecho": "In the event that the generated code fails, an iterative refinement process is triggered, incorporating the error feedback into a new generation prompt to enhance robustness.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Our results show that zero-shot code generation is a valid approach for Tabular QA, achieving rank 33 of 53 in the test phase despite the lack of task-specific fine-tuning.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Although our approach demonstrated strong performance in code generation and execution, subsequent analysis revealed that the model struggles with columns containing complex data types (lists, dictionaries, etc.) and ambiguous queries, particularly for list-based responses.", "localizador": "p. 1, Introdução"},
+      {"trecho": "Moreover, we incorporate an error-fixing module that attempts to catch runtime errors and integrates them as part of a new prompt, guiding the LLM to refine its code generation.", "localizador": "p. 2, Seção 3"},
+      {"trecho": "Our template provides the list of column names and instructs the model to return only those that are essential for answering the query.", "localizador": "p. 2, Seção 3 (Column Selector)"},
+      {"trecho": "All our prompts are available in the code publicly available at GitHub.", "localizador": "p. 2, nota 2"},
+      {"trecho": "As part of our prompt, we guided the LLM to generate Python programming code and postprocessed the output to ensure that only Python lines were passed throught the next module.", "localizador": "p. 3, Seção 3 (Answer Generator)"},
+      {"trecho": "The final component of our pipeline captures execution errors that might occur due to incorrect syntax, schema mismatches, or runtime exceptions.", "localizador": "p. 3, Seção 3 (Code Fixer)"},
+      {"trecho": "To achieve this, we used a structured prompt that includes the code that causes an error with the corresponding error description.", "localizador": "p. 3, Seção 3 (Code Fixer)"},
+      {"trecho": "We standardized column names for simplified versions (removing emoji and all non-alphanumerical characters except punctuation symbols) to prevent possible errors in the Answer Generator caused by mismatches between the table structure and the generated code.", "localizador": "p. 3, Seção 3 (Preprocessing)"},
+      {"trecho": "This way, no explicit training nor finetuning was conducted.", "localizador": "p. 3, Seção 4"},
+      {"trecho": "To do that, we analyzed the accuracy obtained with respect to the ground truth of the validation set, together with manual checks to assess the quality of the generated code.", "localizador": "p. 3, Seção 4 (Dataset)"},
+      {"trecho": "Due to VRAM constraints, all models were executed with 4-bit quantization, using a greedy generation strategy with a temperature of 0.7.", "localizador": "p. 4, Seção 4 (System Setup)"},
+      {"trecho": "Lastly, when integrating the Code Fixer (CF) with an enhanced column selection (ECS) to feed richer information about feature variations to the prompt, our final system setup (AG+ECS+CF) maintains almost the same performance over Subtask 2 but improves 7 points in Subtask 1, proving that integrating error feedback to the model assists the LLM for better querying larger databases.", "localizador": "p. 4, Seção 5.1 (Ablation Study)"},
+      {"trecho": "Our results during the development phase (84 and 85 points for Subtasks 1 and 2, respectively) suffered a significant drop of 20 points (approx.) in accuracy with respect to the validation results, likely due to the greater complexity of datatypes presented in the test tables.", "localizador": "p. 4, Seção 5.2"},
+      {"trecho": "This might indicate that the LLM is not able to infer these complex schemes on the test set, producing errors that are propagated from the Column Selector module to the Answer Generator.", "localizador": "pp. 4-5, Seção 5.2"},
+      {"trecho": "So, we ranked in the 32th (Subtask 1) and 31th (Subtask 2) positions out of 49 participants in the General category, and 23th (Subtask 1) and 21th (Subtask 2) positions out of 35 participants in the Open models category.", "localizador": "p. 4, Seção 5.2"},
+      {"trecho": "Columns µ and β indicate the average and baseline performance, respectively.", "localizador": "p. 5, legenda da Tabela 1"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "AG+ECS+CF",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": ["decomposicao", "feedback"],
+      "comparador": "AG (Answer Generator only)",
+      "modelo": "Qwen-2.5-Coder 32B (checkpoint nao_informado; quantização de 4 bits)",
+      "benchmark": "SemEval 2025 Task 8, conjunto de validação (dev), Subtask 1",
+      "metrica": "Accuracy, coluna µ ('average') da Tabela 2",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 74.06, "intervencao": 85.00},
+      "denominador": "nao_informado (número de perguntas do conjunto de validação não impresso)",
+      "condicoes": "Agregado impresso µ da mesma técnica, métrica e comparador sobre os cinco tipos de resposta do S1 (boolean, category, number, list[category], list[number]); por cálculo próprio, µ é a média simples das cinco colunas, não ponderada pelo número de perguntas (não informado). Mesmo backbone nas duas condições; quantização de 4 bits; decodificação declarada como gulosa com temperatura 0,7 (aparente inconsistência); número de execuções e número máximo de iterações do Code Fixer não informados. Configurações escolhidas e avaliadas no mesmo conjunto dev. Não se informa se o pré-processamento manual se aplica também a AG. O ganho é do pacote (seleção de colunas, ECS e Code Fixer), não de um mecanismo isolado. Valores em pontos de acurácia, sem unidade impressa na tabela. Conferido no PDF, p. 5, Tabela 2 (cabeçalhos boolean, category, number, list[category], list[number], µ; bloco S1).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca só o ranking no teste; a conclusão menciona superar 'the baseline model', cujo método não é descrito e que não é comparado com o sistema final em tabela; a ablação destaca vários componentes sem que um prevaleça. A Tabela 1 compara LLMs (seleção de modelo, fora do escopo) e uma linha de base oficial não identificável como prompting, logo não contém contraste elegível. Primeira tabela com o contraste de prompting: Tabela 2; técnica focal (sistema final) contra a primeira linha de base listada (AG), primeiro bloco (S1), agregado impresso µ.",
+      "derivacao": "direta",
+      "localizador": "p. 5 (PDF; sem paginação impressa), Tabela 2, bloco S1, linhas AG e AG+ECS+CF, coluna µ",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "AG 81.25 78.12 75.00 65.62 70.31 74.06", "localizador": "p. 5, Tabela 2, bloco S1, linha AG; colunas boolean, category, number, list[category], list[number], µ"},
+        {"trecho": "AG+ECS+CF 89.06 85.94 85.94 78.12 85.94 85.00", "localizador": "p. 5, Tabela 2, bloco S1, linha AG+ECS+CF; colunas boolean, category, number, list[category], list[number], µ"},
+        {"trecho": "Table 2 shows the results when varying the components of the pipeline while maintaining Qwen-2.5-Coder32B as backbone.", "localizador": "p. 4, Seção 5.1 (Ablation Study)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Column Selector (AG+CS)",
+      "mecanismos": ["instrucao", "contexto", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "AG (Answer Generator only)",
+      "modelo": "Qwen-2.5-Coder 32B (checkpoint nao_informado; quantização de 4 bits)",
+      "benchmark": "SemEval 2025 Task 8, conjunto de validação (dev), Subtask 1",
+      "metrica": "Accuracy, coluna µ ('average') da Tabela 2",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 74.06, "intervencao": 77.50},
+      "denominador": "nao_informado",
+      "condicoes": "Condições que diferem só na etapa de seleção de colunas; mesmo backbone, quantização de 4 bits e decodificação declarada. Agregado impresso µ (média simples dos cinco tipos de resposta, por cálculo próprio). Número de execuções não informado. O texto descreve a melhoria como 'of 3 and 2 points in each subtask'. Conferido no PDF, p. 5, Tabela 2, bloco S1.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componente isolado, primeiro da tabela de ablação (Tabela 2), para completar o alvo. ECS e CF não foram extraídos porque só aparecem juntos (sem isolamento de componente).",
+      "derivacao": "direta",
+      "localizador": "p. 5 (PDF), Tabela 2, bloco S1, linhas AG e AG+CS, coluna µ",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "AG 81.25 78.12 75.00 65.62 70.31 74.06", "localizador": "p. 5, Tabela 2, bloco S1, linha AG; colunas boolean, category, number, list[category], list[number], µ"},
+        {"trecho": "AG+CS 82.81 78.12 78.12 68.75 79.69 77.50", "localizador": "p. 5, Tabela 2, bloco S1, linha AG+CS; colunas boolean, category, number, list[category], list[number], µ"},
+        {"trecho": "The AG+CS (AG with Column Selector) setup shows a clear improvement of 3 and 2 points in each subtask with respect to the AG-only model, outlining the importance of first asking the LLM to filter the relevance of the input attributes.", "localizador": "p. 4, Seção 5.1 (Ablation Study)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O resumo e a introdução definem o objetivo (pipeline zero-shot de geração de código para Tabular QA na SemEval 2025 Task 8) e seus três componentes.",
+      "localizador": "p. 1, Resumo e Introdução; p. 2, Seção 3"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Os componentes são descritos em prosa e a Fig. 1 mostra trechos dos prompts, mas os prompts completos (inclusive o do Code Fixer) não estão no artigo, o ECS é descrito em uma frase, o número de iterações de correção e o tamanho dos conjuntos não são informados e a configuração de decodificação é aparentemente inconsistente.",
+      "localizador": "pp. 2-4, Seções 3 e 4; p. 3, Fig. 1"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há ablação incremental no mesmo backbone (AG, AG+CS, AG+ECS+CF), mas ECS e CF entram juntos, a ablação e a escolha de modelo usam o mesmo conjunto dev, o teste só tem o sistema final e a linha de base oficial não é descrita.",
+      "localizador": "p. 4, Seções 5.1 e 5.2; p. 5, Tabelas 1 e 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "A acurácia em relação ao ground truth é informada por tipo de resposta e média µ, e os valores coincidem entre as Tabelas 1 e 2; porém o denominador (número de perguntas) não é informado, µ é média simples entre tipos (cálculo próprio), o texto inverte os valores de desenvolvimento (84/85 contra 85.00/84.69) e contradiz a tabela sobre os tipos lista.",
+      "localizador": "p. 3, Seção 4; p. 4, Seção 5.2; p. 5, Tabelas 1 e 2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças à validade, mas o estudo discute limitações: queda de cerca de 20 pontos no teste, dificuldade com tipos complexos e perguntas ambíguas, propagação de erros do Column Selector e restrições de hardware.",
+      "localizador": "p. 1, Introdução; pp. 4-5, Seção 5.2; p. 5, Seção 6 e Hardware Setup"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelos por nome e tamanho, quantização, temperatura, versões de Python e Pandas e declara código e prompts no GitHub (não acessados); faltam checkpoints exatos, número de execuções, número de iterações do Code Fixer e tamanho dos conjuntos.",
+      "localizador": "p. 1, nota 1; p. 2, nota 2; p. 4, Seção 4"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há discussão sobre possível presença das tabelas ou perguntas da tarefa no pré-treinamento dos modelos.",
+      "localizador": "texto completo, pp. 1-6"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-01", "p-02", "p-03", "p-04", "p-05"],
+    "observacao": "Texto extraído lido integralmente (379 linhas, incluindo referências). Tabelas 1 e 2 conferidas na imagem da p. 5; Fig. 1 e prompts na p. 3; ablação e fase de teste na p. 4; resumo e ranking na p. 1; Seção 3 e nota 2 na p. 2."
+  }
+}

@@ -1,0 +1,324 @@
+{
+  "estudo": "S878",
+  "texto_fonte": "fontes/textos/lote/S878.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Site, Erdemir, Eryiğit. ITUNLP at SemEval-2025 Task 8: Question-Answering over Tabular Data: A Zero-Shot Approach using LLM-Driven Code Generation. arXiv:2508.00762v1 [cs.CL], 1 ago. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF (11 páginas).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot Python (Pandas) code generation framework (schema-guided prompting, controlled execution and error-handling mechanism)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1, Resumo; p. 2, Introdução e Trabalhos relacionados; p. 3, Fig. 1; p. 4, Seções 4.1-4.2; p. 9, Apêndice B",
+        "observacao": "Pacote proposto: prompt zero-shot com a pergunta, instruções detalhadas e regras de saída (instrucao, restricoes), exemplos ilustrativos do formato de saída, como ['cat', 'dog'] e [1, 2, 3] (exemplos), esquema do conjunto de dados com nome, colunas, tipos, cinco valores únicos e total de valores únicos (contexto) e laço de correção com o código falho e a mensagem de erro da execução (feedback). Pacote híbrido: inclui pré-processamento de nomes de colunas e ambiente de execução controlado, que não são prompting (ver componentes_fora_escopo). Não há condição sem o pacote (por exemplo, outra abordagem de QA tabular ou outro estilo de prompt); a Tabela 2 só traz a acurácia do sistema por modelo. Sem base identificável, acrescentados vazio."
+      },
+      {
+        "nome_original": "Pandas Code Generation without Error Handling (prompt B.1)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 4.2; p. 9, Apêndice B.1; p. 5, Tabela 3 (coluna 'antes'); p. 11, Tabela 4 (Iteration 1)",
+        "observacao": "Prompt base de geração: instruções e proibições ('Do not include any explanations...'), formato de saída obrigatório com exemplos de formato, esquema ({schema}) e nome do arquivo parquet. É a primeira tentativa do sistema e funciona como condição 'antes do laço de correção' na Tabela 3; não há condição sem ele."
+      },
+      {
+        "nome_original": "Iterative error-handling mechanism (error fixing loop; prompt B.2 'Pandas Code Generation with Error Handling')",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 2, Introdução; p. 4, Seções 4.2 e 5; p. 9, Apêndice B.2; p. 5, Tabela 3; p. 10, Figs. 2-3; p. 11, Tabela 4",
+        "observacao": "O prompt B.2 substitui a parte do prompt B.1 posterior ao esquema, mantendo instruções, formato e esquema, e acrescenta os pares código/erro anteriores e a mensagem de erro (feedback). Contrafactual: contagem de erros de execução na primeira tentativa (sem correção) e depois do laço, com os mesmos modelos e conjuntos (Tabela 3; por rodada na Tabela 4). O isolamento vale só para contagens de erros de execução; o estudo não relata acurácia sem o laço. A Tabela 3 não informa a qual subtarefa as contagens se referem. Parte do sistema proposto, por isso componente."
+      },
+      {
+        "nome_original": "schema-guided prompting (dataset schema)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2, Trabalhos relacionados; p. 4, Seção 4.1; pp. 7-8, Apêndice A",
+        "observacao": "Esquema construído para cada conjunto de dados e inserido no prompt; valores de exemplo limitados a cem caracteres. Nenhuma condição sem o esquema é relatada; acrescentados vazio por falta de base executada sem ele."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Preprocessing (normalization and standardization of column names)",
+        "natureza": "outro",
+        "descricao": "Pré-processamento de dados: espaços e caracteres não alfanuméricos trocados por sublinhado, nomes em minúsculas e colunas duplicadas renomeadas com sufixo numérico.",
+        "localizador": "p. 4, Seção 4.1; p. 3, Fig. 1"
+      },
+      {
+        "nome_original": "controlled environment (execution of generated code)",
+        "natureza": "outro",
+        "descricao": "Ambiente de execução do código gerado, com extração de imports dinâmicos e captura da saída no formato original; fornece a mensagem de erro usada no laço de correção, mas não é prompting.",
+        "localizador": "p. 2, Introdução; p. 4, Seção 4.2"
+      },
+      {
+        "nome_original": "model selection (DeepSeek-R1, DeepSeek-V3, Qwen2.5-Coder-32B-Instruct, Llama-3.3-70B-Instruct)",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelos escolhidos 'based on their performance in code generation tasks'; a Tabela 2 compara modelos com o mesmo sistema, sem alterar o prompt.",
+        "localizador": "pp. 3-4, Seção 5; p. 5, Tabela 2"
+      }
+    ],
+    "modelos": [
+      {"nome": "DeepSeek-R1", "versao": "nao_informado", "localizador": "p. 1, Introdução; p. 5, Tabela 2"},
+      {"nome": "DeepSeek-V3", "versao": "nao_informado", "localizador": "p. 1, Introdução; p. 5, Tabela 2"},
+      {"nome": "Qwen2.5-Coder-32B-Instruct", "versao": "nao_informado", "localizador": "p. 2, Introdução; p. 5, Tabela 2", "observacao": "Tamanho e variante instruct constam do nome; snapshot e provedor não informados."},
+      {"nome": "Llama-3.3-70B-Instruct", "versao": "nao_informado", "localizador": "p. 2, Introdução; p. 5, Tabela 2", "observacao": "A Fig. 1 menciona 'Call LLM API', sem identificar provedor ou snapshot."}
+    ],
+    "benchmarks": [
+      {"nome": "DataBench (SemEval-2025 Task 8), Subtask I: DataBench QA", "quantidade": "Dev: 320 perguntas, 16 conjuntos de dados; Test: 522 perguntas, 15 conjuntos de dados (Tabela 1)", "localizador": "p. 3, Seção 3 e Tabela 1; p. 4, Seção 5", "observacao": "O DataBench original tem 1308 perguntas de 65 domínios (Train 988/49 e Dev 320/16); a partição Test foi acrescentada durante a competição. A partição Train não foi usada."},
+      {"nome": "DataBench (SemEval-2025 Task 8), Subtask II: DataBench Lite QA", "quantidade": "nao_informado (a Tabela 1 não separa as subtarefas)", "localizador": "p. 3, Seção 3", "observacao": "Versão simplificada em que cada conjunto de dados tem 20 entradas amostradas do original, com resposta na coluna sample_answer; as perguntas parecem ser as mesmas da Subtask I, mas o estudo não descreve explicitamente a sobreposição. Os esquemas da Lite foram criados a partir do conjunto completo (p. 4)."}
+    ],
+    "metricas": [
+      {"nome": "Accuracy (métrica oficial da SemEval 2025 Task 8)", "denominador": "nao_informado", "localizador": "p. 4, Seção 5; p. 5, Tabela 2", "observacao": "Não definida no artigo (critério de correspondência das respostas não informado); a Tabela 2 não declara se os valores são percentuais, embora o texto use '84.67%'."},
+      {"nome": "Number of code execution errors before and after the error fixing loop", "denominador": "nao_informado", "localizador": "p. 5, Tabela 3", "observacao": "Contagens por modelo e partição (Dev Set, Test Set), sem indicar a subtarefa nem o número de perguntas avaliadas. A Seção 5 fala em 'error reduction rates', mas apenas contagens são impressas."},
+      {"nome": "Distribution of error types (Runtime, Degenerate Loop, Syntax) across iterations", "denominador": "nao_informado", "localizador": "p. 11, Tabela 4; p. 10, Figs. 2-3", "observacao": "Experimento adicional com três iterações; a Fig. 2 agrega todos os modelos e partições."}
+    ],
+    "linguagens": [
+      {"nome": "Python (biblioteca Pandas)", "localizador": "p. 1, Resumo; p. 9, Apêndice B"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros de execução do código gerado (Runtime, Syntax, Degenerate Loop) persistem depois do laço de correção; quando o código continua falho no limite de tentativas, a execução da consulta é encerrada. Na Fig. 2 (agregada, três iterações) 49 casos terminam como 'Failed' e 96 como 'Success'.",
+        "localizador": "p. 4, Seção 4.2; p. 5, Seção 6; p. 10, Fig. 2; p. 11, Tabela 4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Erros de laço degenerado: o modelo repete saídas idênticas ou quase idênticas até o limite máximo de tokens; observados só em DeepSeek-R1 e DeepSeek-V3, e parte deles continua resultando em falha.",
+        "localizador": "p. 5, Seção 6; p. 10, Figs. 2-3"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo afirma que lidar com várias tabelas frequentemente leva a alucinações; trata-se de contexto geral sobre LLMs em QA tabular, não de achado nas condições avaliadas (o DataBench só tem perguntas de tabela única).",
+        "localizador": "p. 2, Trabalhos relacionados; p. 5, Conclusões"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Altos custos computacionais e limite de contexto citados como desafios de abordagens com LLM; o estudo também limita os valores de exemplo do esquema para evitar 'potential token overload'. Não quantificado.",
+        "localizador": "p. 1, Introdução; p. 4, Seção 4.1"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Vazamento de dados de avaliação mencionado no desenho da competição: a partição de teste só tem as colunas de pergunta e conjunto de dados 'to ensure proper evaluation without data leak'. O estudo não discute presença do DataBench no pré-treinamento dos modelos.",
+        "localizador": "p. 3, Seção 3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade dos dados de avaliação: os autores não acreditam que todo par pergunta-resposta represente perfeitamente o desempenho real dos modelos; a posição entre sistemas zero-shot é desconhecida.",
+        "localizador": "p. 4, Seção 6; p. 5, Conclusões"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Laço iterativo de correção de erros (prompt B.2) com o código falho e a mensagem de erro; comparado com a primeira tentativa em contagem de erros de execução (Tabela 3), sem medida do efeito na acurácia.",
+        "avaliada": "sim",
+        "localizador": "p. 4, Seção 4.2; p. 5, Tabela 3; p. 11, Tabela 4"
+      },
+      {
+        "descricao": "Partição de teste sem respostas, definida pela competição, para evitar vazamento de dados; sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 3, Seção 3"
+      },
+      {
+        "descricao": "Valores de exemplo do esquema limitados a cem caracteres para evitar verbosidade e excesso de tokens; sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 4.1"
+      },
+      {
+        "descricao": "Limite de duas iterações escolhido com base em experimentos preliminares não relatados.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 5"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Zero-shot Python (Pandas) code generation framework",
+        "motivo": "A acurácia (Tabela 2) só é relatada para o sistema completo, por modelo, sem condição comparadora de prompting; o estudo tem condição comparadora executada apenas para o laço de correção (contagem de erros, Tabela 3), extraída como componente. O ranking na competição não traz valores de outros sistemas nem da baseline."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: a Tabela 3 dá 9 → 6 erros para DeepSeek-R1 no Dev Set, mas a Tabela 4 dá total 7 para DeepSeek-R1 (Dev) na iteração 2 (4 Runtime, 2 Degenerate Loop, 1 Syntax). As outras sete células 'depois' da Tabela 3 coincidem com a iteração 2 da Tabela 4. Por cálculo próprio, a coluna 'depois' da Tabela 3 soma 65, enquanto a Fig. 2 ('After 2 Iterations': 59 Runtime, 1 Syntax, 6 Degenerate Loop) e a Tabela 4 somam 66.",
+        "localizador": "p. 5, Tabela 3; p. 11, Tabela 4; p. 10, Fig. 2"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que DeepSeek-R1 fica atrás de DeepSeek-V3 'by 0.52 percentage points' no teste da Subtask I, mas a Tabela 2 imprime 84.09 e 84.67, diferença de 0,58 p.p. por cálculo próprio.",
+        "localizador": "p. 4, Seção 6; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Ambiguidade no número de iterações: o texto descreve 'a maximum of two iterations' de envio do erro ao LLM para correção, mas na Tabela 4 a iteração 1 é a geração inicial e a Tabela 3 ('depois do laço') coincide com a iteração 2, o que corresponde a uma única rodada de correção. Não se declara explicitamente com qual configuração foram obtidas as acurácias da Tabela 2.",
+        "localizador": "p. 2, Introdução; p. 4, Seção 5; p. 5, Tabelas 2-3; p. 11, Tabela 4"
+      },
+      {
+        "descricao": "Justificativa do limite de duas iterações versus dados de três iterações: o texto diz que tentativas além de duas iterações 'rarely produced further improvements' (experimentos preliminares não relatados), mas a Tabela 4 mostra reduções da iteração 2 para a 3 (por exemplo, DeepSeek-R1 Dev 7 → 4, DeepSeek-V3 Test 9 → 5, Qwen2.5-Coder Test 8 → 5); na Fig. 2 os erros agregados passam de 66 (cálculo próprio a partir de 79 'No Error' de 145) para 49.",
+        "localizador": "p. 4, Seção 5; p. 11, Tabela 4; p. 10, Fig. 2"
+      },
+      {
+        "descricao": "Correlação afirmada sem quantificação: o texto diz que a taxa inicial de erros e a acurácia mostram 'a strong correlation', sem coeficiente. Nos conjuntos de teste a ordem não se mantém: Qwen2.5-Coder (25 erros iniciais) tem acurácia maior que Llama-3.3 (16) nas duas subtarefas, e DeepSeek-V3 (18) supera DeepSeek-R1 (15) no teste da Subtask I. Além disso, a Tabela 3 não informa a subtarefa das contagens.",
+        "localizador": "p. 5, Seção 6 e Tabelas 2-3"
+      },
+      {
+        "descricao": "Afirmações sem comparação executada no artigo: o resumo diz que a geração de código Python 'achieves superior performance ... compared to alternative approaches' e a Seção 2 cita 'extensive evaluations and prompt strategy experiments', mas o artigo não relata nenhuma abordagem alternativa nem comparação entre estratégias de prompt.",
+        "localizador": "p. 1, Resumo; p. 2, Trabalhos relacionados; texto completo"
+      },
+      {
+        "descricao": "A redução de erros 'by nearly half on average' não tem definição de média (por modelo, por partição ou agregada). Por cálculo próprio, as somas da Tabela 3 passam de 145 para 65 erros.",
+        "localizador": "p. 5, Seção 6 e Tabela 3"
+      },
+      {
+        "descricao": "Inversão entre partições relatada pelo estudo: DeepSeek-V3 tem a menor acurácia nos conjuntos Dev (82.50 e 78.75), mas a maior no teste da Subtask I (84.67).",
+        "localizador": "p. 4, Seção 6; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Condição discrepante na Subtask II: os esquemas usados no prompt foram criados a partir do conjunto completo também para os conjuntos amostrados (20 linhas) da DataBench Lite, de modo que valores de exemplo e totais de valores únicos podem não corresponder aos dados da subtarefa; o estudo não discute o efeito.",
+        "localizador": "p. 3, Seção 3; p. 4, Seção 4.1"
+      },
+      {
+        "descricao": "A Fig. 2 e a Tabela 4 vêm do experimento adicional com três iterações, configuração diferente do sistema descrito (máximo de duas iterações); o estado final '96 Success' e '49 Failed' refere-se só aos 145 casos com erro na primeira tentativa, agregados sobre modelos e partições.",
+        "localizador": "p. 4, Seção 5; p. 10, Fig. 2"
+      },
+      {
+        "descricao": "Ranking na competição sem números: oitavo e sexto lugares entre 30 sistemas que superaram a baseline na categoria open-source; esses sistemas podem ter usado ajuste fino ou few-shot, e a posição entre sistemas zero-shot é desconhecida.",
+        "localizador": "p. 1, Resumo; p. 4, Seção 6; p. 5, Conclusões"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A Tabela 2 compara modelos com o mesmo sistema; diferenças entre modelos não são efeito de prompting.",
+        "localizador": "p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Erros agrupados em Runtime (inclui KeyError, ValueError etc.), Degenerate Loop e Syntax; erros de Syntax e Degenerate Loop só em DeepSeek-R1 e DeepSeek-V3; alguns erros mudam de tipo entre iterações. A Fig. 3 detalha os erros de Runtime (FileNotFoundError, KeyError, NameError etc.).",
+        "localizador": "p. 5, Seção 6; p. 10, Figs. 2-3; p. 11, Tabela 4"
+      },
+      {
+        "descricao": "A redução de erros de execução não foi relacionada a ganho de acurácia: o estudo não relata acurácia sem o laço de correção.",
+        "localizador": "p. 5, Seção 6; texto completo"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura, limite máximo de tokens), número de execuções e provedor dos modelos não informados; o limite de tokens só é mencionado na definição de Degenerate Loop.",
+        "localizador": "texto completo; p. 5, Seção 6"
+      },
+      {
+        "descricao": "O artigo informa um repositório no GitHub com o código; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2, Introdução e nota de rodapé 2"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Specifically, we propose a Python code generation framework utilizing state-of-the-art open-source LLMs to generate executable Pandas code via optimized prompting strategies.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Additionally, results show that Python code generation achieves superior performance in tabular question answering compared to alternative approaches.", "localizador": "p. 1, Resumo"},
+      {"trecho": "However, LLM-based approaches introduce several challenges, including high computational costs and limited context length, making scalable and efficient tabular QA systems an open research problem.", "localizador": "p. 1, Introdução"},
+      {"trecho": "A key feature of our system is its iterative error-handling mechanism.", "localizador": "p. 2, Introdução"},
+      {"trecho": "If the initial code execution fails, the error message and faulty code are sent back to the LLM for correction, with a maximum of two iterations.", "localizador": "p. 2, Introdução"},
+      {"trecho": "This mechanism significantly improves robustness, reducing failure rates in complex queries.", "localizador": "p. 2, Introdução"},
+      {"trecho": "Additionally, handling multiple tables often leads to hallucinations, where models generate inaccurate or misleading responses.", "localizador": "p. 2, Trabalhos relacionados"},
+      {"trecho": "Motivated by these challenges, we introduce a novel framework that integrates schema-guided prompting, controlled execution, and an error-handling mechanism.", "localizador": "p. 2, Trabalhos relacionados"},
+      {"trecho": "Our extensive evaluations and prompt strategy experiments highlight the effectiveness of our approach in enhancing accuracy and robustness.", "localizador": "p. 2, Trabalhos relacionados"},
+      {"trecho": "In contrast to these extensively annotated train and development splits, the test split only has question and dataset columns to ensure proper evaluation without data leak for the competition.", "localizador": "p. 3, Seção 3"},
+      {"trecho": "The schemas include each dataset’s name, each column, each column’s data type, 5 unique values from each column, and the total unique values that a column contains.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "The example values are limited to a hundred characters total to avoid excessive verbosity and potential token overload.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "We use the full dataset for schema creation for both full and sample datasets.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "The code generation step is done with a prompt that includes the question, detailed instructions and the corresponding dataset schema.", "localizador": "p. 4, Seção 4.2"},
+      {"trecho": "The system captures the error message along with the faulty code and sends it to the LLM for automatic correction.", "localizador": "p. 4, Seção 4.2"},
+      {"trecho": "If the provided code is still faulty after the maximum number of attempts, execution is terminated for that query.", "localizador": "p. 4, Seção 4.2"},
+      {"trecho": "Additionally, we opted for a maximum of two iterations based on preliminary experiments, which showed that attempts beyond two iterations rarely produced further improvements.", "localizador": "p. 4, Seção 5"},
+      {"trecho": "To evaluate system performance, we used Accuracy, the official evaluation metric of SemEval 2025 Task 8.", "localizador": "p. 4, Seção 5"},
+      {"trecho": "However, we do not believe that every question-answer pair in these datasets can perfectly represent the real-world performance of the models.", "localizador": "p. 4, Seção 6"},
+      {"trecho": "We define Degenerate Loop errors as cases where an LLM repeatedly generates identical or nearly identical output sequences, continuing indefinitely until it reaches its maximum token limit.", "localizador": "p. 5, Seção 6"},
+      {"trecho": "As shown in Figures 2 and 3, although some Degenerate Loop errors are corrected, a notable portion still results in failures.", "localizador": "p. 5, Seção 6"},
+      {"trecho": "Results show that most initial failures are due to Runtime errors, while Syntax and Loop errors are less frequent but may persist across multiple correction attempts.", "localizador": "p. 5, Seção 6"},
+      {"trecho": "Your output must be one of the following:", "localizador": "p. 9, Apêndice B.1"},
+      {"trecho": "List[category/string]: [’cat’, ’dog’]", "localizador": "p. 9, Apêndice B.1"},
+      {"trecho": "The following prompt replaces the part after the schema is given of the previous prompt.", "localizador": "p. 9, Apêndice B.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iterative error-handling mechanism (error fixing loop, prompt B.2)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Antes do laço de correção (primeira tentativa com o prompt B.1, sem error handling)",
+      "modelo": "DeepSeek-R1 (versão nao_informado)",
+      "benchmark": "DataBench (SemEval-2025 Task 8), Dev Set (subtarefa não informada na Tabela 3)",
+      "metrica": "Number of code execution errors (Tabela 3 'The change in the amount of code execution errors before and after the error fixing loop', coluna Dev Set)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 9, "intervencao": 6},
+      "denominador": "nao_informado (a Tabela 1 lista 320 perguntas no Dev, mas a Tabela 3 não diz a subtarefa nem o número de perguntas consideradas)",
+      "condicoes": "Mesmo modelo, mesmas perguntas e mesmo prompt base; a condição 'antes' é a primeira geração e 'depois' é o estado após o laço de correção. O número de rodadas de correção incluídas no 'depois' não é explícito: o texto fala em máximo de duas iterações, e a Tabela 3 coincide com a iteração 2 da Tabela 4 em 7 das 8 células. Exceção nesta célula: a Tabela 4 imprime total 7 (4 Runtime, 2 Degenerate Loop, 1 Syntax) para DeepSeek-R1 (Dev) na iteração 2, não 6; valor da Tabela 3 preservado como impresso. Parâmetros de decodificação e número de execuções não informados. A redução de erros de execução não implica ganho de acurácia, que não foi medida sem o laço. Conferido no PDF, p. 5, Tabela 3 (cabeçalhos Models, Dev Set, Test Set) e p. 11, Tabela 4.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado com técnica, métrica e comparador únicos: a única técnica focal (o framework) só tem acurácia sem comparador (Tabela 2, que traz uma única condição por modelo e não contém contraste). Primeira tabela com contraste elegível de prompting: Tabela 3 (antes/depois do laço de correção); primeira métrica (contagem de erros), primeiro modelo listado (DeepSeek-R1) e primeira coluna (Dev Set). Nenhum outro componente de prompting tem contrafactual; outros modelos e partições não são cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 5 (PDF; sem paginação impressa), Tabela 3, linha DeepSeek-R1, coluna Dev Set",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "DeepSeek-R1 9 → 6 15 → 7", "localizador": "p. 5, Tabela 3, linha DeepSeek-R1; colunas Models, Dev Set, Test Set"},
+        {"trecho": "In addition, as shown in Table 3, our error handling mechanism decreases the number of execution errors by nearly half on average, demonstrating not only its effectiveness but also its necessity for ensuring reliable execution.", "localizador": "p. 5, Seção 6"},
+        {"trecho": "DeepSeek-R1 (Dev) 2 4 2 1 7", "localizador": "p. 11, Tabela 4, bloco DeepSeek-R1 (Dev), linha Iteration 2; colunas Models, Iteration, Runtime, Degenerate Loop, Syntax, Total"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O resumo e a introdução definem a tarefa (QA sobre dados tabulares nas duas subtarefas da SemEval-2025 Task 8) e a proposta (geração zero-shot de código Pandas com esquema e laço de correção).",
+      "localizador": "p. 1, Resumo e Introdução; p. 2, Introdução"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Prompts reproduzidos no Apêndice B, construção do esquema descrita e exemplos de esquemas no Apêndice A; porém o número efetivo de rodadas de correção é ambíguo, a configuração usada na Tabela 2 não é explicitada e parâmetros de decodificação, provedor e número de execuções não são informados.",
+      "localizador": "p. 4, Seções 4-5; pp. 7-9, Apêndices A-B"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Só há contraste antes/depois do laço de correção em contagem de erros; a acurácia não tem comparador de prompting nem condição sem o laço, e as 'alternative approaches' e 'prompt strategy experiments' citados não são relatados.",
+      "localizador": "p. 5, Tabelas 2-3; p. 1, Resumo; p. 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Accuracy é a métrica oficial, mas não é definida no artigo e seus denominadores não são informados; a Tabela 3 não informa a subtarefa nem o número de perguntas; a mesma contagem difere entre as Tabelas 3 e 4 (DeepSeek-R1 Dev: 6 contra 7) e o texto dá 0.52 p.p. onde a Tabela 2 implica 0,58.",
+      "localizador": "p. 4, Seção 5; p. 5, Tabelas 2-3; p. 11, Tabela 4"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Menciona limitações (representatividade dos pares pergunta-resposta, posição desconhecida entre sistemas zero-shot, só modelos open-source e só tabela única), sem discussão sistemática de ameaças à validade.",
+      "localizador": "p. 4, Seção 6; p. 5, Conclusões"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts e exemplos de esquema publicados no apêndice e repositório informado (não acessado); faltam versões ou snapshots dos modelos, provedor, parâmetros de decodificação e número de execuções.",
+      "localizador": "p. 2, nota de rodapé 2; pp. 7-9, Apêndices A-B; texto completo"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Registra que a partição de teste foi criada sem respostas para evitar vazamento na competição e que é nova, mas não discute a possível presença das partições públicas do DataBench (2024) no pré-treinamento dos modelos.",
+      "localizador": "p. 3, Seção 3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-01", "p-02", "p-03", "p-04", "p-05", "p-08", "p-09", "p-10", "p-11"],
+    "observacao": "Texto extraído lido integralmente (477 linhas, incluindo referências e apêndices). Tabelas 1-4, Figs. 1-3 e prompts do Apêndice B conferidos nas imagens; pp. 6-7 (referências e Apêndices A.1-A.2) lidas só no texto extraído."
+  }
+}

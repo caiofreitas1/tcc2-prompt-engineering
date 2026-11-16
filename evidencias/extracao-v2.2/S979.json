@@ -1,0 +1,281 @@
+{
+  "estudo": "S979",
+  "texto_fonte": "fontes/textos/lote/S979.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2509.16701v1 [cs.SE], 20 set. 2025 (preprint); páginas do PDF coincidem com as páginas impressas",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RelRepair",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4, p. 5-9 (PDF p. 5-9); Algoritmos 1-3; Tabela 1, p. 10; Tabela 3, p. 13",
+        "observacao": "Pacote em três estágios incrementais (BaseRepair → SigRepair → SnipRepair). Prompt base com persona ('You are an expert in program repair.') → instrucao; função defeituosa, testes que falham, mensagens de erro e localização perfeita da falha, mais assinaturas de funções e trechos de código do projeto recuperados → contexto (a recuperação acrescenta novo insumo de contexto ao que já existe no prompt base); reescrita de consulta pelo LLM (promptSIG gera duas causas-raiz e cinco nomes de funções candidatas) seguida de recuperação e geração, e escalonamento entre estágios → decomposicao; várias candidatas por estágio (1, até 20, até 300) com seleção pela suíte de testes → amostragem. Os trechos recuperados são funções do projeto, não pares de correção resolvidos; não foram classificados como exemplos. Contrafactual: RelRepair contra BaseChatGPT (sem código recuperado), no mesmo LLM (Tabelas 1 e 3); 'sim' vale para o pacote e não autoriza atribuir o ganho à recuperação isoladamente, pois o orçamento de amostras e a seleção por testes também diferem. Pacote híbrido: a recuperação usa embeddings pré-treinados (SentenceBERT, CodeBERT) e ajuste iterativo dos pesos α/β (ver componentes_fora_escopo)."
+      },
+      {
+        "nome_original": "BaseChatGPT / BaseRepair",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4, p. 5; Seção 4.1.1, p. 7; Seção 5.2-5.3, p. 10; Tabela 1, p. 10; Tabela 4, p. 14",
+        "observacao": "Amostragem direta do ChatGPT sem código recuperado, com a persona básica, a função defeituosa, testes que falham, mensagens de erro e localização perfeita da falha; uma única candidata no estágio BaseRepair. Nas variantes da RQ2 (BaseChatGPT-4, BaseChatGPT-3.5, BaseCodeLlama-13b, BaseDeepSeek-33b) o insumo é o mesmo. No ManySStuBs4J não há testes nem mensagens de erro no prompt. O estudo não declara explicitamente que BaseChatGPT é o estágio BaseRepair; o valor 47 coincide nas Tabelas 1 e 4."
+      },
+      {
+        "nome_original": "SigRepair",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 4.1 e Algoritmo 2, p. 7-8; Seção 4.3, p. 9; Tabela 4, p. 14; Figura 6, p. 12",
+        "observacao": "Reescrita de consulta pelo LLM (duas causas-raiz e cinco nomes de funções), recuperação das 25 assinaturas e comentários mais similares (SentenceBERT, cosseno) e geração de uma candidata por repetição, 20 repetições, com validação por testes. A Tabela 4 só informa os reparos adicionais deste estágio sobre os bugs não reparados pelo BaseRepair; não há condição sem o componente com os demais mantidos."
+      },
+      {
+        "nome_original": "SnipRepair",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 4.2 e Algoritmo 3, p. 8-9; Seção 4.3, p. 9; Tabela 4, p. 14; Figura 6, p. 12; Figura 8, p. 16",
+        "observacao": "Recupera 15 trechos intra-arquivo e 15 inter-arquivo (CodeBERT, similaridade ponderada por α e β); para cada trecho gera 10 candidatas validadas por testes, com parada antecipada (até 300). A reescrita de consulta deste estágio é pré-processamento sem LLM (separação de código e comentários). Contribuição só como incremento sobre BaseRepair e SigRepair (Tabela 4); a Figura 8 varia o top-k, sem condição sem o componente."
+      },
+      {
+        "nome_original": "Query Rewriting",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seções 4.1.1 e 4.2.1, p. 7-8; Seção 6.3.2, p. 14-15; Tabela 5, p. 15",
+        "observacao": "Ablação com ('w') e sem ('w/o') reescrita de consulta (Tabela 5). No SigRepair a reescrita é uma chamada adicional ao LLM que precede a recuperação (decomposicao); no SnipRepair é pré-processamento sem LLM, portanto o contraste mistura um ingrediente de prompting com um ingrediente de recuperação (híbrido). Mecanismos listados: os do pacote em que a reescrita atua. O estudo não descreve como os estágios se encadeiam na condição sem reescrita."
+      },
+      {
+        "nome_original": "ThinkRepair",
+        "mecanismos": ["raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 1, p. 2; Seção 5.2, p. 10; Tabela 1, p. 10; Seção 6.1.2, p. 11; Seção 8, p. 16",
+        "observacao": "Sistema comparador descrito como baseado em CoT; valores referenciados de estudos anteriores; mecanismos não isolados neste estudo. Outros ingredientes do sistema não são descritos aqui."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 1, p. 2; Seção 2.2, p. 3; Tabela 1, p. 10; Seção 8, p. 16",
+        "observacao": "Descrito como refinamento conversacional iterativo com informação de testes que falham; só o total (76) é informado na Tabela 1; valores de estudo anterior; excluído do diagrama de Venn por indisponibilidade dos patches."
+      },
+      {
+        "nome_original": "Muplor (também grafado Mulpor)",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 5.2, p. 10; Tabela 1, p. 10; Seção 8, p. 16-17",
+        "observacao": "O estudo descreve apenas 'multi-granularity patch generation'; não informa mecanismos de prompting. Valores referenciados de estudo anterior."
+      },
+      {
+        "nome_original": "RAP-Gen",
+        "mecanismos": ["contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 5.2, p. 10; Tabela 1, p. 10; Seção 8, p. 16",
+        "observacao": "Descrito como recuperação de pares históricos bug-correção com recuperador híbrido (esparso e denso). O texto não descreve o modelo gerador; o título da referência [41] menciona CodeT5. Sistema provavelmente híbrido com componente fora do escopo, não detalhado no artigo. Valores referenciados de estudo anterior."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Ajuste iterativo dos pesos α e β",
+        "natureza": "outro",
+        "descricao": "Ajuste leve, iterativo e baseado em gradiente dos pesos que combinam a similaridade de código e de comentários na recuperação do SnipRepair (inicializados em 0,5); parâmetro de recuperação, não de prompt.",
+        "localizador": "Seção 4.2.3, p. 9"
+      },
+      {
+        "nome_original": "SentenceBERT / CodeBERT (embeddings para recuperação)",
+        "natureza": "outro",
+        "descricao": "Codificadores pré-treinados usados para indexar e ranquear assinaturas e trechos; o estudo não relata treino desses modelos. São a maquinaria da recuperação, cujo produto entra no prompt como contexto.",
+        "localizador": "Seções 4.1.2-4.1.3 e 4.2.2-4.2.3, p. 7-9"
+      },
+      {
+        "nome_original": "Temperatura de amostragem 1",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de amostragem fixada em 1 para diversidade de candidatas.",
+        "localizador": "Seção 5.3, p. 10"
+      },
+      {
+        "nome_original": "Orçamento de candidatas e timeout",
+        "natureza": "orcamento",
+        "descricao": "1 candidata no BaseRepair, 20 no SigRepair, até 300 no SnipRepair; timeout de 5 horas por bug (tempo médio relatado abaixo de 20 minutos).",
+        "localizador": "Seção 5.3, p. 10"
+      },
+      {
+        "nome_original": "LLMs diferentes (RQ2)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do backbone (ChatGPT-4, ChatGPT-3.5, CodeLlama-13b, DeepSeek-33b) sem alterar o prompt.",
+        "localizador": "Seção 6.2, p. 13; Tabela 3, p. 13"
+      }
+    ],
+    "modelos": [
+      {"nome": "gpt-3.5 (família ChatGPT), modelo principal", "versao": "nao_informado", "localizador": "Seção 5.3, p. 10"},
+      {"nome": "ChatGPT-4", "versao": "nao_informado", "localizador": "Seção 6.2, p. 13; Tabela 3"},
+      {"nome": "CodeLlama-13b", "versao": "nao_informado", "localizador": "Seção 6.2, p. 13; Tabela 3"},
+      {"nome": "DeepSeek-33b (DeepSeek Coder, ref. [46])", "versao": "nao_informado", "localizador": "Seção 6.2, p. 13; Tabela 3; ref. [46], p. 19"},
+      {"nome": "SentenceBERT (recuperação, auxiliar)", "versao": "nao_informado", "localizador": "Seção 4.1.2, p. 7"},
+      {"nome": "CodeBERT (recuperação, auxiliar)", "versao": "nao_informado", "localizador": "Seção 4.2.2, p. 9"},
+      {"nome": "Modelos dos sistemas comparadores (ThinkRepair, ChatRepair, Muplor, RAP-Gen)", "versao": "nao_informado", "localizador": "Seção 5.2, p. 10"}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J V1.2", "quantidade": "391 bugs em seis projetos Java; 255 single-function (SF), 154 single-hunk (SH), 80 single-line (SL); SH é subconjunto de SF e SL de SH; experimentos conduzidos só no cenário SF (255)", "localizador": "Tabela 2, p. 10; Seções 5.1 e 6.1.1, p. 10-11"},
+      {"nome": "ManySStuBs4J", "quantidade": "mais de 150.000 bugs de uma linha em 16 categorias; amostra de 30 bugs por categoria = 480 (critério de escolha dos 30 não informado); sem suítes de testes", "localizador": "Tabela 2 e Seção 5.1, p. 10; Seção 6.1.1, p. 11"}
+    ],
+    "metricas": [
+      {"nome": "Correct fixes / correct patches (número de bugs com patch correto)", "definicao": "patches que passam em todos os testes e são semanticamente equivalentes à correção real, com validação manual de patches plausíveis (Defects4J)", "localizador": "Seção 5.2, p. 10"},
+      {"nome": "Fix rate (%)", "definicao": "ManySStuBs4J: proporção de bugs corrigidos em cada categoria (de 30) e no total (de 480); correto apenas se idêntico à solução de referência (exact match)", "localizador": "Seção 6.1.1, p. 11; Seção 6.1.2, p. 13; Figura 6, p. 12"},
+      {"nome": "Custo em dólares por número de patches por bug", "definicao": "rótulos na Figura 7; o estudo não define a unidade de agregação além do eixo 'Number of Patches per Bug'", "localizador": "Figura 7, p. 15"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Sem informação específica do projeto, o LLM gera nome de função plausível mas incorreto (rehashIfNecessary em vez de _verifyNeedForRehash), produzindo patch incorreto.", "localizador": "Seção 3.1, p. 4"},
+      {"categoria": "correcao_funcional", "descricao": "Tentativa do BaseChatGPT no Chart-10 não escapa caracteres, levando a saída incorreta e erros de compilação.", "localizador": "Seção 6.1.2, p. 12"},
+      {"categoria": "correcao_funcional", "descricao": "Abordagens RAG tradicionais podem recuperar informação irrelevante, ruidosa ou incompleta, prejudicando a acurácia das saídas.", "localizador": "Seção 2.3, p. 3"},
+      {"categoria": "custo", "descricao": "SnipRepair incorre em custos computacionais significativamente maiores (até US$ 0,27 para 300 patches, Figura 7); o custo das chamadas à API do ChatGPT levou a restringir parte das análises a 255 bugs. Não há quantificação de custo total da avaliação.", "localizador": "Seção 6.3.1, p. 14; Seção 6.3.2 e Figura 7, p. 15"},
+      {"categoria": "outro", "descricao": "Ameaça interna: validação manual da correção de patches plausíveis em relação às correções dos desenvolvedores.", "localizador": "Seção 7, p. 16"},
+      {"categoria": "outro", "descricao": "Ameaça externa: representatividade dos sujeitos da avaliação.", "localizador": "Seção 7, p. 16"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Reescrita de consulta para melhorar a precisão da recuperação; comparada com a condição sem reescrita (Tabela 5).", "avaliada": "sim", "localizador": "Seções 4.1.1 e 4.2.1, p. 7-8; Tabela 5, p. 15"},
+      {"descricao": "Conjunto de recuperação construído por bug (funções do mesmo arquivo e de tipos definidos pelo autor) para restringir o escopo e aumentar a relevância.", "avaliada": "nao", "localizador": "Seção 4.1.2, p. 7"},
+      {"descricao": "Exame cuidadoso de cada patch gerado, seguindo práticas anteriores, para a validação manual.", "avaliada": "nao", "localizador": "Seção 7, p. 16"},
+      {"descricao": "Avaliação em mais de um conjunto de dados (Defects4J V1.2 e ManySStuBs4J) para a representatividade.", "avaliada": "nao", "localizador": "Seção 7, p. 16"},
+      {"descricao": "Parada antecipada ao encontrar patch válido e estratégia de amostragem em pequena escala para reduzir sobrecarga computacional.", "avaliada": "nao", "localizador": "Seção 4.3, p. 9; Seção 5.3, p. 10"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "BaseChatGPT (executado pelos autores, mesmo LLM, sem código recuperado); ThinkRepair, Muplor, ChatRepair e RAP-Gen com valores referenciados de estudos anteriores na Tabela 1",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Tabela 1, coluna ThinkRepair: as linhas por projeto (11, 31, 19, 27, 5, 2) somam 95 (cálculo próprio), mas #Sum impresso é 98.", "localizador": "Tabela 1, p. 10"},
+      {"descricao": "Tabela 3, coluna CodeLlama-13b com RelRepair: as linhas (6, 17, 12, 19, 5, 2) somam 61 (cálculo próprio), mas # Sum impresso é 59; o texto usa 59.", "localizador": "Tabela 3 e Seção 6.2.2, p. 13"},
+      {"descricao": "Aumentos percentuais narrados não batem com os totais impressos (cálculos próprios): 101 vs. 47 relatado como ≈112,8% (≈114,9%); 120 vs. 86 como ≈37,2% (≈39,5%); 59 vs. 32 como ≈87,5% (≈84,4%); 68 vs. 34 como ≈105,9% (100%). Aparente inconsistência; o estudo não informa o cálculo.", "localizador": "Seção 6.1.2, p. 11; Seção 6.2.2, p. 13"},
+      {"descricao": "'35% more bugs' em Math e '38.9% more fixes than RAP-Gen': com os valores da Tabela 1, Math 28 vs. 18 (BaseChatGPT) daria ≈55,6% e 101 vs. 42 daria ≈140,5% (cálculos próprios). Aparente inconsistência; a base de comparação não é informada.", "localizador": "Seção 6.1.2, p. 11; Tabela 1, p. 10"},
+      {"descricao": "O resumo apresenta '17.1% improvement' no ManySStuBs4J; corresponde à diferença 48,3 − 31,2 = 17,1 p.p. (cálculo próprio), não a variação relativa (≈54,8%, cálculo próprio).", "localizador": "Resumo, p. 1; Seção 6.1.2, p. 13"},
+      {"descricao": "O texto cita uma 'Table 6' com colunas BaseRepair, SigRepair e SnipRepair; não há Tabela 6 no artigo. A Figura 6 tem colunas rotuladas 'BasicChatGPT', 'Syntactic Fix' e 'Semantic Fix'; a correspondência com os estágios não é declarada na figura.", "localizador": "Seção 6.1.2, p. 13; Figura 6, p. 12"},
+      {"descricao": "Texto: 'additional 83 bug fixes' além do BaseRepair; a Figura 6 dá 4,2% + 12,9% = 17,1% de 480 ≈ 82,1 bugs (cálculo próprio). Diferença possivelmente de arredondamento; aparente inconsistência.", "localizador": "Seção 6.1.2, p. 13; Figura 6, p. 12"},
+      {"descricao": "Texto: correções cumulativas de 15 e 9 bugs em DIFFERENT_METHOD_SAME_ARGS e OVERLOAD_METHOD_MORE_ARGS; pela Figura 6 (33,3% + 23,3% e 16,7% + 23,3% de 30) seriam ≈17 e ≈12 (cálculos próprios). Para CHANGE_MODIFIER e ADD_THROWS_EXCEPTION (0,0% + 30,0% → 9) há concordância.", "localizador": "Seção 6.1.2, p. 13; Figura 6, p. 12"},
+      {"descricao": "Narrativa de superioridade consistente ('consistently fixes more bugs than LLM-based APR techniques across all evaluated benchmarks') contra a tabela: no ManySStuBs4J só há comparação com BaseRepair; na Tabela 1 ThinkRepair corrige mais em Chart (11 vs. 10) e empata em Lang (19) e Mockito (5); o total do RelRepair (101) é próximo ao do ThinkRepair (98).", "localizador": "Seção 1, p. 2; Tabela 1, p. 10; Seção 6.1.2, p. 11"},
+      {"descricao": "Narrativa de melhoria 'in all evaluated LLMs and projects' contra a Tabela 3: em Mockito, DeepSeek-33b com RelRepair (5) empata com BaseDeepSeek-33b (5).", "localizador": "Seção 6.2.2 e Tabela 3, p. 13"},
+      {"descricao": "Seção 6.1.2 diz que a Tabela 1 cobre 'three scenarios', mas a Tabela 1 e os experimentos são só no cenário single-function.", "localizador": "Seção 6.1.1-6.1.2, p. 11; Tabela 1, p. 10"},
+      {"descricao": "Valores de ThinkRepair, Muplor, ChatRepair e RAP-Gen são referenciados de estudos anteriores ('identical experimental settings' segundo os autores), sem informar backbone, orçamento de amostras ou número de execuções; ChatRepair só tem total (76) e foi excluído do Venn; RAP-Gen não é descrito como baseado em ChatGPT.", "localizador": "Seção 5.2, p. 10; Seção 6.1.1-6.1.2, p. 11"},
+      {"descricao": "RelRepair vs. BaseChatGPT difere também em orçamento: BaseRepair gera 1 candidata, enquanto SigRepair gera até 20 e SnipRepair até 300, com seleção por testes; não há BaseChatGPT com orçamento equivalente, de modo que o ganho é do pacote (recuperação + amostragem + seleção).", "localizador": "Seção 5.3, p. 10; Seção 4.3, p. 9"},
+      {"descricao": "Tabela 5: os valores 'w' (15, 39) coincidem com os incrementos do SigRepair e SnipRepair na Tabela 4; o benchmark e o denominador da ablação de reescrita não são declarados (a restrição aos 255 bugs SF é afirmada só para os dois outros aspectos).", "localizador": "Seção 6.3.1, p. 14; Tabela 5, p. 15"},
+      {"descricao": "Figura 7 traça SnipRepair até 600 patches por bug (rótulo até US$ 0,53) e SigRepair até 200, embora o desenho fixe 20 (SigRepair) e no máximo 300 (SnipRepair); o texto cita SigRepair 'up to 17' e 16→17 de 80 para 200 patches, enquanto a Tabela 4 registra 15 no orçamento padrão.", "localizador": "Seção 4.3, p. 9; Seção 5.3, p. 10; Figura 7 e Seção 6.3.2, p. 15; Tabela 4, p. 14"},
+      {"descricao": "Figura 8 traça SnipRepair-Intra até top-30, embora o desenho use 15 trechos intra-arquivo; o texto diz que além de top-15 o número 'remains largely unchanged', mas a figura mostra pontos acima de 31 após top-15 (valores não rotulados; não estimados aqui).", "localizador": "Seção 4.2.3, p. 9; Seção 6.3.2, p. 15-16; Figura 8, p. 16"},
+      {"descricao": "Métricas diferentes entre benchmarks: Defects4J usa testes e validação manual de equivalência semântica; ManySStuBs4J usa só correspondência exata com a solução de referência, sem testes nem mensagens de erro no prompt.", "localizador": "Seção 5.2, p. 10; Seção 6.1.1, p. 11"}
+    ],
+    "observacoes": [
+      {"descricao": "Localização perfeita da falha em nível de instrução é assumida em todos os experimentos.", "localizador": "Seção 6.1.1, p. 11; Algoritmo 1, p. 6"},
+      {"descricao": "RelRepair repara 28 bugs não reparados por RAP-Gen, Muplor e ThinkRepair (diagrama de Venn, sem ChatRepair).", "localizador": "Seção 6.1.2, p. 11; Figura 4, p. 12"},
+      {"descricao": "Variação de parâmetros (top-k): SigRepair chega a 15 corretos em top-25 e 16 em top-35; SnipRepair-Intra de 15 (top-5) a 31 (top-15); SnipRepair-Inter de 2 (top-5) a 8 (top-15). Não é contraste de presença/ausência de técnica.", "localizador": "Seção 6.3.2, p. 15-16; Figura 8, p. 16"},
+      {"descricao": "Número de execuções repetidas não informado; temperatura 1 com amostragem estocástica.", "localizador": "Seção 5.3, p. 10"},
+      {"descricao": "O texto completo do promptSIG e do prompt de geração com trechos não é apresentado; só a frase-base de persona é citada.", "localizador": "Seção 4.1.1, p. 7"},
+      {"descricao": "O estudo não menciona pacote de replicação ou repositório próprio.", "localizador": "texto completo"}
+    ],
+    "citacoes": [
+      {"trecho": "The retrieved relevant information is then incorporated into the LLM’s input prompt, guiding the model to generate more accurate and informed patches.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Initially, the BaseRepair stage attempts a straightforward repair using only the buggy function, error messages, failing test cases and perfect fault localization via LLM.", "localizador": "Seção 4, p. 5"},
+      {"trecho": "Our basic prompt—\"You are an expert in program repair.\"—supplied to ChatGPT along with the buggy function, failing test, error messages and perfect fault localization, is sufficient for an initial patch attempt but inadequate for precisely retrieving relevant function signatures.", "localizador": "Seção 4.1.1, p. 7"},
+      {"trecho": "To overcome this, we leverage ChatGPT’s reasoning capabilities by prompting it (promptSIG) to generate two root causes and five candidate function names likely to repair the buggy line.", "localizador": "Seção 4.1.1, p. 7"},
+      {"trecho": "Since the effectiveness of this stage depends on the initial query rewriting stage, we repeat the Relevant Function Signature Retrieval process 20 times, each time producing a single candidate patch.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "For each snippet, we generate 10 candidate patches and immediately validate them using the test suite; if all patches fail, we proceed to the next snippet.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "We evaluate RELREPAIR against four state-of-the-art LLM-based APR techniques — ChatRepair [22], ThinkRepair [23], Mulpor [40] and RAP-Gen [41], as well as a baseline method, BaseChatGPT, which performs code repair by directly sampling from the ChatGPT model without access to any retrieved relevant code.", "localizador": "Seção 5.2, p. 10"},
+      {"trecho": "For baseline results, we reference reported outcomes from prior studies where available, ensuring a consistent and fair comparison across all approaches.", "localizador": "Seção 5.2, p. 10"},
+      {"trecho": "As a result, ChatGPT generates a plausible but incorrect function name, rehashIfNecessary(), based only on its general programming knowledge.", "localizador": "Seção 3.1, p. 4"},
+      {"trecho": "However, traditional RAG approaches face challenges, such as retrieving irrelevant, noisy, or incomplete information, which can negatively impact the accuracy and reliability of generated outputs.", "localizador": "Seção 2.3, p. 3"},
+      {"trecho": "(2) In contrast, the SnipRepair, although incurring significantly higher computational costs (up to $0.27 for 300 patches), exhibits consistent and substantial performance gains, increasing steadily from 21 correct fixes at 60 patches to 39 correct fixes at 300 patches.", "localizador": "Seção 6.3.2, p. 15"},
+      {"trecho": "Internal. The main internal threat arises from the manual validation performed to determine the correctness of plausible patches compared with reference developer fixes.", "localizador": "Seção 7, p. 16"},
+      {"trecho": "To mitigate this concern, following established practices in previous research [15, 20, 39, 47, 44, 43], we carefully examined each generated patch to ensure accurate validation.", "localizador": "Seção 7, p. 16"},
+      {"trecho": "External. The main external threat is the representativeness of the subjects used in our evaluation.", "localizador": "Seção 7, p. 16"},
+      {"trecho": "Specifically, when query rewriting is enabled (denoted as \"w\"), RELREPAIR successfully fixes a total of 54 bugs, whereas only 20 bugs are fixed without query rewriting (\"w/o\"), reflecting a considerable improvement.", "localizador": "Seção 6.3.2, p. 15"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "RelRepair",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "decomposicao", "amostragem"],
+      "comparador": "BaseChatGPT",
+      "modelo": "gpt-3.5 (família ChatGPT; snapshot nao_informado)",
+      "benchmark": "Defects4J V1.2, cenário single-function",
+      "metrica": "Correct Fixes (número de bugs com patch correto: passa em todos os testes e é semanticamente equivalente à correção real, com validação manual)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 47, "intervencao": 101},
+      "denominador": "255 bugs single-function (Tabela 2; '101 out of 255 bugs', Seção 1)",
+      "condicoes": "Agregado impresso #Sum da Tabela 1 sobre os seis projetos do mesmo benchmark (Chart, Closure, Lang, Math, Mockito, Time). Localização perfeita da falha; temperatura 1; BaseRepair/BaseChatGPT com 1 candidata, RelRepair com até 20 (SigRepair) e até 300 (SnipRepair) candidatas validadas por testes, timeout de 5 h por bug; número de execuções repetidas nao_informado. O ganho é do pacote (recuperação, orçamento maior de amostras e seleção por testes), não da recuperação isoladamente. Valores conferidos visualmente na p. 10 (linhas por projeto de ambas as colunas somam os totais).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo destaca dois benchmarks e duas métricas (101 bugs no Defects4J; taxa de 48,3% no ManySStuBs4J) e vários comparadores. Tabela 1 é a primeira tabela com o contraste; primeira métrica (Correct Fixes), modelo principal (gpt-3.5) e primeira linha de base de prompting listada (BaseChatGPT); usado o agregado impresso #Sum.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 10 (PDF p. 10); Seção 6.1.2, p. 11",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "#Sum 101 47 98 70 76 42", "localizador": "Tabela 1, p. 10; colunas Project, RelRepair, BaseChatGPT, ThinkRepair, Muplor, ChatRepair, RAP-Gen"},
+        {"trecho": "This represents a substantial improvement over BaseChatGPT, which repaired only 47 bugs, amounting to a performance increase of approximately 112.8%.", "localizador": "Seção 6.1.2, p. 11"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Query Rewriting",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "RelRepair sem reescrita de consulta (w/o)",
+      "modelo": "ChatGPT (gpt-3.5 segundo a implementação, Seção 5.3; a Tabela 5 não indica o modelo)",
+      "benchmark": "nao_informado explicitamente; os valores 'w' coincidem com os incrementos SigRepair (15) e SnipRepair (39) da Tabela 4 (Defects4J V1.2, single-function)",
+      "metrica": "número de bugs corrigidos (#Sum de SigRepair + SnipRepair)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 20, "intervencao": 54},
+      "denominador": "nao_informado",
+      "condicoes": "Agregado impresso #Sum da Tabela 5 (SigRepair + SnipRepair; 'w' 15 + 39, 'w/o' 4 + 16). Não inclui o estágio BaseRepair. No SigRepair a reescrita é chamada ao LLM; no SnipRepair é pré-processamento sem LLM, portanto o contraste é híbrido. O encadeamento dos estágios na condição sem reescrita não é descrito; número de execuções nao_informado. Valores conferidos visualmente na p. 15.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente isolado incluído para completar o alvo, a partir da tabela de ablação (Tabela 5). A Tabela 4 apresenta só contribuição cumulativa por estágio e não isola componentes; não há contrastes pareados adicionais.",
+      "derivacao": "direta",
+      "localizador": "Tabela 5, p. 15 (PDF p. 15); Seção 6.3.2, p. 14-15",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w 15 39 54", "localizador": "Tabela 5, p. 15; colunas Rewriting, SigRepair, SnipRepair, #Sum"},
+        {"trecho": "w/o 4 16 20", "localizador": "Tabela 5, p. 15; colunas Rewriting, SigRepair, SnipRepair, #Sum"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (falta de informação específica do projeto) e três questões de pesquisa explicitadas.", "localizador": "Seção 1, p. 2; Seção 5, p. 9-10"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Pipeline descrito com algoritmos, valores de K e orçamento; porém o texto do promptSIG e do prompt de geração não é apresentado, o critério de escolha dos 30 bugs por categoria do ManySStuBs4J não é informado, e o encadeamento da condição sem reescrita não é descrito.", "localizador": "Seções 4-5, p. 5-10; Seção 6.3, p. 14-15"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "BaseChatGPT executado no mesmo LLM, mas com orçamento de amostras muito menor; demais sistemas com valores referenciados de estudos anteriores sem detalhar backbone e orçamento; no ManySStuBs4J só há o BaseRepair.", "localizador": "Seções 5.2-5.3, p. 10; Tabela 1, p. 10; Figura 6, p. 12"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas e denominadores informados (255; 30 por categoria e 480), mas somas impressas divergem das linhas (ThinkRepair 98 vs. 95; CodeLlama-13b 59 vs. 61, cálculos próprios), percentuais narrados não batem com os totais, a 'Table 6' citada não existe e os rótulos da Figura 6 diferem dos estágios citados; ManySStuBs4J usa só correspondência exata.", "localizador": "Tabelas 1-3, p. 10 e 13; Figura 6, p. 12; Seções 6.1.2 e 6.2.2, p. 11-13"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de ameaças breve (validação manual e representatividade); não discute não determinismo, execuções únicas, diferença de orçamento entre condições nem contaminação.", "localizador": "Seção 7, p. 16"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelo (gpt-3.5, sem snapshot), temperatura, número de candidatas, K e timeout; não apresenta prompts completos, número de execuções nem pacote de replicação.", "localizador": "Seções 4.1.1, 4.3 e 5.3, p. 7-10"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não discute possível presença de Defects4J ou ManySStuBs4J no pré-treinamento dos LLMs.", "localizador": "texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [10, 12, 13, 14, 15, 16],
+    "observacao": "Texto extraído lido integralmente (886 linhas). Páginas abertas para conferir Tabelas 1-5 e Figuras 4, 6, 7 e 8."
+  }
+}

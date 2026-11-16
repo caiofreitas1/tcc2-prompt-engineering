@@ -1,0 +1,423 @@
+{
+  "estudo": "S845",
+  "texto_fonte": "fontes/textos/lote/S845.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Vijayaraghavan, Nitsure, Mackin, Shi, Ambrogio, Haran, Paruthi, Elzein, Coops, Beymer, Baldwin, Degan. Chain-of-Descriptions: Improving Code LLMs for VHDL Code Generation and Summarization. MLCAD'24 (ACM/IEEE International Symposium on Machine Learning for CAD), 9-11 set. 2024, DOI 10.1145/3670474.3685966; versão lida: arXiv:2507.12308v1 [cs.CL], 16 jul. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Chain-of-Descriptions (CoDes) — Multi-Step Execution",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (Resumo); p. 4-5, Seções 5.1-5.3.2; p. 5, Tabela 2; p. 4, Tabela 1; p. 6, Seção 6.1",
+        "observacao": "Para geração de código, o LLM recebe o prompt 'Generate a plan specifying the intermediate steps to <prob_st>' (instrucao + planejamento → decomposicao); o plano é refinado por pós-processamento com regex e, em prompt separado, combinado com o prompt original para produzir o código (etapas encadeadas → decomposicao). Os resultados da Tabela 2 foram obtidos com a variante Multi-Step (p. 6). O contrafactual é a avaliação zero-shot dos mesmos modelos e benchmarks na Tabela 1, comparada explicitamente pelo estudo ('compared to Table 1', p. 6). Pacote híbrido: inclui o refinamento por regex e a reamostragem do plano até três vezes quando não há passos no padrão esperado (componentes fora do escopo), e a fase de planejamento pode ter usado decodificação distinta (top-k 50, T = 0,89 'for specific LLMs', p. 9). O ganho é do pacote, não da decomposição isolada. O texto da descrição do problema usada na Tabela 2 (curta ou longa) não é informado."
+      },
+      {
+        "nome_original": "Chain-of-Descriptions (CoDes) — Single-Step Execution",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seção 5.3.1; p. 6, Figura 2 (direita) e Seção 6.4",
+        "observacao": "Variante de execução apresentada pelo estudo como formulação própria e avaliada em barras separadas (Figura 2, direita): plano e código são pedidos num único prompt (ex.: 'Generate a plan to design a 4-bit binary counter, then provide the final VHDL code'). O plano recebe a mesma categoria (decomposicao, planejamento) que na variante Multi-Step, pelo critério de consistência. Para geração de código, a única comparação é com a variante Multi-Step; não há condição zero-shot na Figura 2 nem valores impressos de Single-Step para geração, de modo que não há contrafactual com e sem o plano. A afirmação de pequena melhora sobre o zero-shot (p. 6) refere-se à sumarização (fora do escopo)."
+      },
+      {
+        "nome_original": "Long descriptive prompts (longer, detailed problem description) for plan formulation",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, Seção 6 (RQ2); p. 6, Figura 2 (esquerda) e Seção 6.2; p. 7, Apêndice A",
+        "observacao": "Ablação dentro do CoDes: descrição longa contra descrição curta do problema no prompt de formulação do plano, medida com Pass@1 no VHDL-Eval para quatro modelos de código. O ingrediente acrescentado é o detalhamento da descrição em linguagem natural (instrucao). O Apêndice A descreve campos 'short_description' e 'long_description' (este com 'example input/output'), mas o estudo não liga explicitamente esses campos à ablação; por isso exemplos e restricoes não foram atribuídos. A variante de execução (Single/Multi-Step) usada na ablação não é informada. Comparador: descrição curta ('short descriptions')."
+      },
+      {
+        "nome_original": "Zero-shot (standard prompting strategy)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (Resumo); p. 3, Seção 4; p. 4, Tabela 1; p. 9, Apêndice D",
+        "observacao": "Linha de base executada com os oito modelos nos dois conjuntos (Tabela 1), com amostragem única no cenário zero-shot (p. 9). O conteúdo exato do prompt zero-shot não é reproduzido; o Apêndice A descreve o campo 'prompt' do VHDL-Eval como enunciado comentado concatenado à declaração da entidade, mas o estudo não afirma que esse campo foi o prompt zero-shot usado. Sem condição sem a técnica."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Plan Refinement (post-processing)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento por regras (regex) que remove texto padrão e uniformiza o estilo dos passos do plano antes de combiná-lo com o prompt; não é prompting.",
+        "localizador": "p. 4, Seção 5.2; p. 9, Apêndice E.1"
+      },
+      {
+        "nome_original": "Reamostragem do plano até três vezes",
+        "natureza": "outro",
+        "descricao": "Se o plano gerado não contém passos no padrão esperado, o plano é amostrado até três vezes; sem passos, retorna-se string vazia. Filtro de formato, sem seleção por qualidade nem efeito medido.",
+        "localizador": "p. 9, Apêndice E.1; p. 9, Apêndice H"
+      },
+      {
+        "nome_original": "Evaluation settings (temperature, top-k, repetition penalty)",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura T = 0,5 e 0,7, top-k 40 e penalidade de repetição 1,2; na formulação do plano, top-k 50 e T = 0,89 'for specific LLMs' (modelos não identificados). Não se informa qual temperatura gerou cada valor das tabelas.",
+        "localizador": "p. 9, Apêndice D"
+      }
+    ],
+    "modelos": [
+      "CodeLlama-34b (Code Llama instruction-tuned, 34B; snapshot nao_informado, link huggingface.co/codellama)",
+      "Granite-Code-34b (Granite-34B-Code-Instruct)",
+      "Deepseek-33b / Deepseek-Coder-33b (DeepSeek Coder, 33B; variante base ou instruct nao_informado)",
+      "Granite-Code-20b (Granite-20B-Code-Instruct)",
+      "Mixtral-8x7b (link Mixtral-8x7B-Instruct-v0.1)",
+      "Mistral-7b (Mistral-7B-Instruct-v0.2)",
+      "Granite-Chat-13b (versão nao_informado)",
+      "Llama-2-Chat-13b (Llama-2-13b-chat)",
+      "Juiz da métrica PR: Llama-3-70b-instruct (Meta-Llama-3-70B-Instruct); usado na avaliação, não como modelo avaliado"
+    ],
+    "benchmarks": [
+      "VHDL-Eval (de [2], 'In Press'): 202 problemas, formados por problemas do Verilog-Eval traduzidos para VHDL e problemas públicos de tutoriais, com testbenches autoverificáveis e soluções canônicas (p. 2, Seção 3.1; p. 7, Apêndice A). O denominador do Pass@1 e do PR não é ligado explicitamente aos 202 problemas; o SC1 usa as soluções canônicas do VHDL-Eval com m = tamanho do conjunto (p. 3).",
+      "VHDL-Xform (conjunto interno): 6,500 pares de clones de código VHDL obtidos de repositórios públicos do GitHub com transformações Type-2, Type-3 e Type-4; Tabela 3 imprime 30.2%, 39.4% e 30.4%, com o rótulo 'Type-2' repetido nas duas primeiras linhas (p. 8, Tabela 3; p. 2-3, Seção 3.2). O denominador de R_L e PR não é ligado explicitamente aos 6,500 pares."
+    ],
+    "metricas": [
+      "Pass@1 (TB): aprovação nos testbenches autoverificáveis (VUnit e GHDL), proporção (p. 3, Seção 4.2.1)",
+      "Pass@1 (SEC): correção funcional por verificação de equivalência sequencial com a solução canônica, proporção (p. 3, Seção 4.2.1)",
+      "SC1 (%): autoconsistência código→resumo→código com cadeia n = 1, verificada por SEC (p. 3, Seção 4.2.2)",
+      "PR (%): LLM Preference Rate com juiz Llama-3-70b-instruct (sumarização; VHDL-Eval e VHDL-Xform) (p. 3, Seção 4.2.4; p. 9, Figura 4)",
+      "R_L: ROUGE-L entre resumos do código transformado e do original no VHDL-Xform (sumarização) (p. 3, Seção 4.2.3)"
+    ],
+    "linguagens": ["VHDL", "Verilog (apenas na construção dos conjuntos: tradução de problemas do Verilog-Eval e retrotradução Type-4 com ferramentas GHDL/ICARUS)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os testbenches podem não ser exaustivos, de modo que código aprovado no Pass@1 (TB) pode divergir da referência; o estudo atribui a diferença entre TB e SEC a isso.",
+        "localizador": "p. 3, Seção 4.2.1; p. 3-4, Seção 4.3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Na geração zero-shot, o LLM produziu código para registrador de 4 bits quando o prompt pedia registrador de n bits (exemplo ilustrativo).",
+        "localizador": "p. 5, Figura 1(b)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Risco de vazamento do benchmark (VHDL-Eval derivado do Verilog-Eval e de tutoriais públicos); o estudo reformula os enunciados para evitar reutilização direta. Não há discussão de vazamento para o VHDL-Xform.",
+        "localizador": "p. 7, Apêndice A"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "O desempenho do CoDes depende fortemente da qualidade dos passos descritivos intermediários gerados pelo LLM (limitação declarada).",
+        "localizador": "p. 9-10, Apêndice H"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: os conjuntos têm problemas autocontidos, sem a complexidade de projetos reais, o que pode dificultar o uso com problemas mais complexos.",
+        "localizador": "p. 10, Apêndice H"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Na sumarização (fora do escopo), a abordagem linha a linha torna-se cada vez mais demorada com o aumento do número de linhas (tempo de processamento); não quantificado.",
+        "localizador": "p. 10, Apêndice H; p. 6, Seção 6.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "O juiz Llama-3-70B usado no PR pode apresentar imprecisões; a variação com outros juízes não foi explorada (afeta métricas de sumarização).",
+        "localizador": "p. 10, Apêndice H"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Reformulação dos enunciados do VHDL-Eval para evitar reutilização direta e vazamento do benchmark.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Apêndice A"
+      },
+      {
+        "descricao": "Uso de verificação de equivalência sequencial (SEC) além dos testbenches para avaliar a correção funcional.",
+        "avaliada": "nao",
+        "localizador": "p. 3, Seção 4.2.1"
+      },
+      {
+        "descricao": "Refinamento do plano e retorno de string vazia quando não há passos, para evitar instruções conflitantes ou ruidosas no prompt final.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 5.2; p. 9, Apêndice E.1"
+      },
+      {
+        "descricao": "Penalidade de repetição 1,2 para reduzir geração de texto redundante.",
+        "avaliada": "nao",
+        "localizador": "p. 9, Apêndice D"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Zero-shot (standard prompting strategy) com os mesmos oito modelos e conjuntos, Tabela 1 (p. 4).",
+    "so_classificadas": [
+      {
+        "tecnica": "Chain-of-Descriptions (CoDes) — Single-Step Execution",
+        "motivo": "Sem extração numérica: para geração, os valores aparecem só em gráfico de barras sem rótulos (Figura 2, direita, p. 6); a extração de cobertura correspondente tem resultado null. Não há valores impressos de Single-Step para geração nem contraste com o zero-shot."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa de '∼ 40% improvement' no Pass@1 (TB) dos modelos Granite em relação à Tabela 1. Cálculo próprio de variação relativa a partir das tabelas: Granite-Code-34b 0.192→0.254 (cerca de +32%), Granite-Code-20b 0.085→0.126 (cerca de +48%), Granite-Chat-13b 0.061→0.095 (cerca de +56%). O valor aproximado do texto não corresponde a cada modelo isoladamente.",
+        "localizador": "p. 6, Seção 6.1; p. 4, Tabela 1; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "O resumo afirma que o CoDes 'significantly surpasses' o prompting padrão, mas o estudo não relata teste estatístico, intervalos nem número de execuções das condições CoDes; o zero-shot usa amostragem única. Alguns ganhos são pequenos (ex.: Mistral-7b PR VHDL-Eval 5.2→5.8; Mixtral-8x7b PR VHDL-Xform 14.8→15.7).",
+        "localizador": "p. 1 (Resumo); p. 9, Apêndice D; p. 4, Tabela 1; p. 5, Tabela 2"
+      },
+      {
+        "descricao": "Zero-shot e CoDes estão em tabelas separadas e podem diferir em decodificação: o Apêndice D lista T = 0,5 e 0,7 sem indicar qual gerou cada valor e informa top-k 50 e T = 0,89 'for specific LLMs' na formulação do plano, sem identificar os modelos.",
+        "localizador": "p. 9, Apêndice D"
+      },
+      {
+        "descricao": "As ablações de geração (Figura 2, esquerda e direita) mostram só quatro modelos de código e não imprimem valores; não é possível conferir se as barras Multi-Step coincidem com a Tabela 2, nem qual descrição (curta ou longa) e qual variante de Pass@1 (TB ou SEC) foram usadas.",
+        "localizador": "p. 6, Figura 2"
+      },
+      {
+        "descricao": "Tabela 3 repete o rótulo '% of Type-2 Clones' em duas linhas (30.2% e 39.4%), enquanto o texto descreve transformações Type-2, Type-3 e Type-4; a soma impressa das três linhas é 100.0% (cálculo próprio). Aparente erro de rótulo, não resolvido pela fonte.",
+        "localizador": "p. 8, Tabela 3; p. 2-3, Seção 3.2"
+      },
+      {
+        "descricao": "Na sumarização (fora do escopo), a comparação AST contra linha a linha não mostra estratégia consistentemente superior (resultado nulo declarado).",
+        "localizador": "p. 6, Seção 6.3 e Figura 2 (centro)"
+      },
+      {
+        "descricao": "Escalas diferentes entre colunas: Pass@1 em proporção (ex.: 0.176) e SC1/PR em percentual (ex.: 20.6%); R_L de CodeLlama-34b na Tabela 1 impresso com duas casas (36.63) e os demais com uma.",
+        "localizador": "p. 4, Tabela 1"
+      },
+      {
+        "descricao": "O estudo não descreve como o CoDes foi aplicado ao cálculo do SC1 (que combina sumarização e geração) na Tabela 2.",
+        "localizador": "p. 3, Seção 4.2.2; p. 5, Tabela 2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A sumarização de código VHDL (com métricas R_L e PR e o CoDes com explicações linha a linha ou por nós de AST, Tabela 4) está fora das tarefas do escopo e não foi incluída em tecnicas nem em extracoes; o SC1 envolve sumarização seguida de geração.",
+        "localizador": "p. 4, Seção 5.1.2; p. 6, Seção 6.3; p. 9, Apêndice F; p. 10, Tabela 4 e Figura 5"
+      },
+      {
+        "descricao": "A construção do VHDL-Xform usa um LLM para sugerir nomes de identificadores (Type-2) e ferramentas GHDL/ICARUS para retrotradução VHDL→Verilog→VHDL (Type-4); são etapas de preparação de dados, não condições avaliadas.",
+        "localizador": "p. 2-3, Seção 3.2"
+      },
+      {
+        "descricao": "O estudo declara não usar recuperação (retrieval-augmentation): todas as etapas do CoDes usam só o LLM.",
+        "localizador": "p. 4, Seção 5.3"
+      },
+      {
+        "descricao": "Nenhum link de código ou de pacote de replicação é impresso; o VHDL-Xform é interno e o VHDL-Eval é citado como trabalho anônimo 'In Press'.",
+        "localizador": "p. 2, Seção 3; p. 7, Referência [2]"
+      },
+      {
+        "descricao": "Datas: o artigo é de MLCAD'24 (setembro de 2024) e a versão lida é arXiv v1 de 16 jul. 2025.",
+        "localizador": "p. 1"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address this challenge, we propose Chain-of-Descriptions (CoDes), a novel approach to enhance the performance of LLMs for VHDL code generation and summarization tasks.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "CoDes involves generating a series of intermediate descriptive steps based on: (i) the problem statement for code generation, and (ii) the VHDL code for summarization.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "These steps are then integrated with the original input prompt (problem statement or code) and provided as input to the LLMs to generate the final output.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "Our experiments demonstrate that the CoDes approach significantly surpasses the standard prompting strategy across various metrics on both datasets.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "The LLM is then given a natural language prompt that follows a template: “Generate a plan specifying the intermediate steps to < prob_st >”.",
+        "localizador": "p. 4, Seção 5.1.1"
+      },
+      {
+        "trecho": "The refinement includes: (a) Truncating boilerplate text with regex for conciseness, and (b) Ensuring consistency with a uniform style across steps.",
+        "localizador": "p. 4, Seção 5.2"
+      },
+      {
+        "trecho": "In the Single-Step method, planning and execution occur in a single LLM prompt, instructing the model to outline steps and generate the final output in one interaction.",
+        "localizador": "p. 5, Seção 5.3.1"
+      },
+      {
+        "trecho": "In the Multi-Step method, planning, refinement, and execution are divided into separate LLM prompts.",
+        "localizador": "p. 5, Seção 5.3.2"
+      },
+      {
+        "trecho": "These results, obtained with the Multi-step plan execution strategy, demonstrate significant performance improvements.",
+        "localizador": "p. 6, Seção 6.1"
+      },
+      {
+        "trecho": "Figure 2 (Left) shows that longer descriptions improve performance across all models, supporting our CoDes framework’s approach.",
+        "localizador": "p. 6, Seção 6.2"
+      },
+      {
+        "trecho": "However, these test cases might not be completely exhaustive due to limitations in covering all possible scenarios, edge cases, and input combinations.",
+        "localizador": "p. 3, Seção 4.2.1"
+      },
+      {
+        "trecho": "To ensure the model can make inferences and to prevent benchmark leakage, problem statements are reframed to avoid direct reuse.",
+        "localizador": "p. 7, Apêndice A"
+      },
+      {
+        "trecho": "If the generated plan does not contain any of these patterns, we sample the plan up to three times to extract intermediate steps.",
+        "localizador": "p. 9, Apêndice E.1"
+      },
+      {
+        "trecho": "In the zero-shot scenario, we primarily present scores derived from single sampling from the LLMs.",
+        "localizador": "p. 9, Apêndice D"
+      },
+      {
+        "trecho": "Additionally, we explored using a top-k value set to 50 and a temperature of T = 0.89 for specific LLMs during the plan formulation phase.",
+        "localizador": "p. 9, Apêndice D"
+      },
+      {
+        "trecho": "This method heavily relies on the quality of intermediate descriptive steps provided by the LLM being utilized.",
+        "localizador": "p. 9, Apêndice H"
+      },
+      {
+        "trecho": "Furthermore, the datasets used in our study feature self-contained problem sets and solutions, lacking the complexities found in real-life design scenarios.",
+        "localizador": "p. 10, Apêndice H"
+      },
+      {
+        "trecho": "Similarly, in the context of code summarization, employing a line-by-line approach becomes increasingly time-consuming as the number of lines of code increases.",
+        "localizador": "p. 10, Apêndice H"
+      },
+      {
+        "trecho": "This ensures clarity and avoids conflicting instructions when combining the plan with the input prompt.",
+        "localizador": "p. 4, Seção 5.2"
+      },
+      {
+        "trecho": "To mitigate redundant text generation, a repetition penalty of 1.2 was applied.",
+        "localizador": "p. 9, Apêndice D"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Descriptions (CoDes) — Multi-Step Execution",
+      "mecanismos": ["instrucao", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "Zero-shot (standard prompting strategy), Tabela 1",
+      "modelo": "CodeLlama-34b",
+      "benchmark": "VHDL-Eval",
+      "metrica": "Pass@1 (TB)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.186, "intervencao": 0.210},
+      "denominador": "nao_informado (o VHDL-Eval tem 202 problemas, mas o estudo não liga o denominador do Pass@1 a esse total)",
+      "condicoes": "Comparação entre a Tabela 1 (zero-shot) e a Tabela 2 (CoDes, variante Multi-Step), mesmos modelo, conjunto e métrica. Pass@1 por testbenches autoverificáveis executados com VUnit e GHDL. Zero-shot com amostragem única; número de execuções do CoDes nao_informado. Decodificação: T = 0,5 e 0,7, top-k 40, penalidade de repetição 1,2, sem indicação de qual temperatura gerou cada valor; na formulação do plano, top-k 50 e T = 0,89 para modelos não identificados. Descrição do problema usada (curta ou longa) nao_informado. Pacote híbrido (refinamento por regex e reamostragem do plano até três vezes). Sem teste estatístico. conferido_pdf: valores conferidos nas imagens das Tabelas 1 (p. 4) e 2 (p. 5).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca várias métricas ('across various metrics on both datasets') sem que uma prevaleça. Nenhuma tabela isolada traz as duas condições (Tabela 1 só zero-shot; Tabela 2 só CoDes), mas o próprio estudo contrasta a Tabela 2 com a Tabela 1 ('compared to Table 1', p. 6), nos mesmos modelos, conjuntos e métricas; adotou-se esse par de tabelas, que precede a Figura 2, como primeiro contraste elegível. Leitura alternativa (tabela com só uma condição não contém o contraste) levaria à Figura 2 (esquerda), sem valores impressos. Primeira métrica: Pass@1 (TB); primeiro modelo: CodeLlama-34b; linha de base: zero-shot.",
+      "derivacao": "direta",
+      "localizador": "p. 4, Tabela 1 (linha CodeLlama-34b, coluna VHDL-Eval Pass@1 (TB)); p. 5, Tabela 2 (linha CodeLlama-34b, coluna VHDL-Eval Pass@1 (TB)); p. 6, Seção 6.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "CodeLlama-34b 0.186 0.176 20.6 34.7 36.63 36.6", "localizador": "p. 4, Tabela 1, linha CodeLlama-34b; colunas VHDL-Eval Pass@1 (TB), Pass@1 (SEC), SC1 (%), PR (%), VHDL-Xform R_L, PR (%)"},
+        {"trecho": "CodeLlama-34b 0.210 0.202 22.6 36.6 39.2 39.5", "localizador": "p. 5, Tabela 2, linha CodeLlama-34b; colunas VHDL-Eval Pass@1 (TB), Pass@1 (SEC), SC1 (%), PR (%), VHDL-Xform R_L, PR (%)"},
+        {"trecho": "Notably, Granite-based models show a ∼ 40% improvement in the Pass@1 metric using testbenches compared to Table 1.", "localizador": "p. 6, Seção 6.1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Descriptions (CoDes) — Multi-Step Execution",
+      "mecanismos": ["instrucao", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "Chain-of-Descriptions (CoDes) — Single-Step Execution",
+      "modelo": "CodeLlama-34b",
+      "benchmark": "VHDL-Eval",
+      "metrica": "Pass@1 (a legenda e o eixo da Figura 2 não indicam se é TB ou SEC)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": null,
+      "denominador": "nao_informado",
+      "condicoes": "Figura 2 (direita), gráfico de barras sem rótulos numéricos para quatro modelos de código; resultado null porque não se estimam valores pela altura das barras. Mecanismos acrescentados em relação ao Single-Step: encadeamento de planejamento, refinamento e execução em prompts separados (etapas encadeadas → decomposicao); o refinamento por regex, presente só no Multi-Step, é componente fora do escopo, de modo que as condições diferem em mais de um ingrediente. Descrição do problema, decodificação e número de execuções nao_informado para esta figura. O texto afirma melhora significativa sem teste estatístico. conferido_pdf: figura aberta na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da variante focal Single-Step Execution, que o estudo apresenta como formulação própria e avalia em barras separadas; é o único contraste do estudo que envolve essa variante na geração de código. Primeiro modelo da figura: CodeLlama-34b.",
+      "derivacao": "direta",
+      "localizador": "p. 6, Figura 2 (direita) e Seção 6.4; p. 5, Seções 5.3.1-5.3.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Multi-step execution significantly improves performance compared to Single-step execution, allowing the model to process and refine intermediate outputs for better final results.", "localizador": "p. 6, Seção 6.4"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Long descriptive prompts (longer, detailed problem description) for plan formulation",
+      "mecanismos": ["instrucao", "decomposicao"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Short descriptive prompts (short descriptions) for plan formulation",
+      "modelo": "CodeLlama-34b",
+      "benchmark": "VHDL-Eval",
+      "metrica": "Pass@1 (a legenda e o eixo da Figura 2 não indicam se é TB ou SEC)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": null,
+      "denominador": "nao_informado",
+      "condicoes": "Figura 2 (esquerda), gráfico de barras sem rótulos numéricos para quatro modelos de código; resultado null porque não se estimam valores pela altura das barras. Ablação dentro do CoDes; a variante de execução usada e o conteúdo exato das descrições curta e longa não são informados (o Apêndice A descreve campos short_description e long_description, sem ligação explícita à ablação). Decodificação e número de execuções nao_informado. conferido_pdf: figura aberta na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado da figura de ablação ('Results of Ablation Studies'), primeiro na ordem da figura (esquerda), incluído só para completar o alvo de três. Primeiro modelo: CodeLlama-34b.",
+      "derivacao": "direta",
+      "localizador": "p. 6, Figura 2 (esquerda) e Seção 6.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Figure 2 (Left) shows that longer descriptions improve performance across all models, supporting our CoDes framework’s approach.", "localizador": "p. 6, Seção 6.2"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Contribuições e quatro questões de pesquisa explícitas (eficácia do CoDes, descrições, estratégias de planejamento e de execução).",
+      "localizador": "p. 2, Introdução (contribuições); p. 5-6, Seção 6 (RQ1-RQ4)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As etapas do CoDes e os templates de formulação do plano são descritos, mas o prompt zero-shot e o prompt de execução não são reproduzidos, a descrição do problema usada na Tabela 2 não é informada e a decodificação por experimento é ambígua (T = 0,5 e 0,7; parâmetros distintos 'for specific LLMs').",
+      "localizador": "p. 4-5, Seção 5; p. 9, Apêndices D e E.1"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linha de base zero-shot executada com os mesmos modelos e conjuntos, mas em tabela separada, com possíveis diferenças de decodificação, e sem outras técnicas de prompting como comparador (por exemplo, cadeia de raciocínio); as ablações comparam só variantes internas.",
+      "localizador": "p. 4, Tabela 1; p. 5, Tabela 2; p. 6, Figura 2; p. 9, Apêndice D"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas (Pass@1 por TB e SEC, SC1, ROUGE-L, PR) e a limitação dos testbenches é discutida, mas os denominadores não são ligados explicitamente aos tamanhos dos conjuntos, as figuras de ablação não imprimem valores nem indicam se o Pass@1 é TB ou SEC, e não há variabilidade nem teste estatístico.",
+      "localizador": "p. 3, Seção 4.2; p. 6, Figura 2; p. 10, Figura 5"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O Apêndice H discute dependência da qualidade dos passos, simplicidade dos conjuntos, tempo da abordagem linha a linha e imprecisão do juiz LLM; não discute variância entre execuções nem significância das diferenças.",
+      "localizador": "p. 9-10, Apêndice H"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos identificados com links e parâmetros de decodificação informados, mas sem código ou pacote de replicação; o VHDL-Xform é interno e o VHDL-Eval é citado como trabalho anônimo 'In Press'; prompts completos de execução não reproduzidos.",
+      "localizador": "p. 7-8, Apêndice C; p. 9, Apêndice D; p. 2, Seção 3; p. 7, Referência [2]"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Para o VHDL-Eval, o estudo reformula enunciados para evitar vazamento do benchmark, sem medir o efeito; para o VHDL-Xform, construído a partir de repositórios públicos do GitHub, o risco de contaminação não é discutido.",
+      "localizador": "p. 7, Apêndice A; p. 2, Seção 3.2"
+    }
+  ],
+  "leitura": {
+    "situacao": "completa",
+    "observacao": "Texto extraído lido integralmente (versão arXiv:2507.12308v1). Páginas do PDF abertas visualmente: p. 3, 4 (Tabela 1), 5 (Figura 1 e Tabela 2), 6 (Figura 2), 7 (Apêndice A), 8 (Tabela 3), 9 (Figura 4 e Apêndices D-H) e 10 (Tabela 4 e Figura 5)."
+  }
+}

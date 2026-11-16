@@ -1,0 +1,262 @@
+{
+  "estudo": "S939",
+  "texto_fonte": "fontes/textos/lote/S939.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Siavash, Moin. Model-Driven Quantum Code Generation Using Large Language Models and Retrieval-Augmented Generation. arXiv:2508.21097v1 [cs.SE], 28 ago. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF (p-01 a p-06 abertas).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "specific prompt (more specific prompt variant)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3, Seção IV.C; p. 4-5, Seção V.C; p. 5, Fig. 3; p. 6, Tabelas I-IV",
+        "observacao": "Prompt com 'detailed implementation requirements, such as quantum gate mapping strategies and constraints on syntax and gate behavior' (p. 3). Mantém a instância de modelo UML textual como insumo do prompt (contexto, como no prompt genérico). A Fig. 3 (p. 5) mostra que os dois prompts têm as mesmas seções legíveis (UML Model Context, Task Objective, Output Constraints, Implementation Requirements, Style and Best Practices), mas o conteúdo das seções não é legível na resolução disponível; o texto integral dos prompts não é reproduzido no artigo. Acrescentados: diretrizes de mapeamento de portas (instrucao) e restrições de sintaxe e comportamento das portas (restricoes), categorias também presentes, em forma menos detalhada, no prompt genérico. Contrafactual: prompt genérico com RAG mantido constante (Tabela I vs III; Tabela II vs IV). Como o prompt específico altera várias instruções e restrições ao mesmo tempo, o ganho é do pacote de especificidade, não de um ingrediente isolado. Pacote apenas de prompting."
+      },
+      {
+        "nome_original": "RAG pipeline (generic prompt with RAG / specific prompt with RAG)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 1 (Resumo); p. 3, Seção IV.B e Fig. 1; p. 4-5, Seção V.C; p. 6, Tabelas I-IV",
+        "observacao": "RAG que recupera trechos de 'sample Qiskit code from public GitHub repositories' (p. 1), de 'eight Qiskit GitHub repositories' (p. 4), e os acrescenta ao prompt: contexto (conhecimento externo do repositório) e exemplos (código de amostra como demonstração, D102). Avaliado com e sem RAG mantendo o prompt constante (Tabela I vs II para o prompt genérico; Tabela III vs IV para o específico); a recuperação traz contexto e exemplos juntos, de modo que a contribuição de cada categoria não é separável. Mecanismos herdados do prompt base: instrucao, contexto (instância UML) e restricoes. A infraestrutura de recuperação (embedder, índice FAISS, top-K) está descrita em observacoes."
+      },
+      {
+        "nome_original": "generic prompt (more general prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, Seção IV.C; p. 5, Fig. 3; p. 6, Tabelas I e II",
+        "observacao": "Prompt que 'simply instructs the LLM to generate quantum code based on the quantum circuit defined in the input model instance' e 'provides minimal guidance' (p. 3). Contexto: a instância de modelo UML textual fornecida no prompt como insumo. Restricoes atribuída porque a Fig. 3 (p. 5) mostra uma seção 'Output Constraints' também no prompt genérico; o conteúdo da seção não é legível. Linha de base; não há condição sem prompt para isolá-la."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "GPT-4o (OpenAI)", "versao": "nao_informado", "observacao": "Snapshot, temperatura e demais parâmetros de decodificação não informados (p. 3, Seção IV.A)."},
+      {"nome": "Embedder MiniLM (Sentence Transformers) no pipeline RAG", "versao": "nao_informado", "observacao": "Aparece apenas na Fig. 1 (p. 3), em legenda de baixa resolução; não é discutido no texto."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Instâncias de modelo UML de Jiménez-Navajas et al. [6] (conformes ao perfil UML de Pérez-Castillo e Piattini [30]); dados em [34]",
+        "quantidade": "7 instâncias de modelo",
+        "observacao": "Experimentos em todas as sete instâncias, mas resultados detalhados (Tabelas I-IV) apenas para a instância 1, com 10 execuções por configuração; instâncias 2-7 só na narrativa (p. 4) e na Fig. 2 (p. 4). O denominador das métricas por elementos (número de elementos esperados por instância) não é informado. O código de referência usado no CodeBLEU ('the provided reference code', p. 4) não é identificado."
+      }
+    ],
+    "metricas": [
+      {"nome": "CodeBLEU", "observacao": "Combinação ponderada de BLEU, BLEU ponderado, Match_ast e Match_df (Eq. 4, p. 4); pesos α, β, γ, δ não informados. Cabeçalho 'CodBLEU' na Tabela II e 'Code BLEU' na Tabela IV."},
+      {"nome": "Precision, Recall, F-measure", "observacao": "Por elementos esperados no modelo UML vs elementos gerados, segundo o mapeamento de [6] (Eq. 1-3, p. 3-4); incluem elementos não quânticos."},
+      {"nome": "Q-Precision, Q-Recall, Q-F-measure", "observacao": "Média das métricas para portas quânticas e partições quânticas (p. 4)."}
+    ],
+    "linguagens": [
+      "Python com a biblioteca Qiskit (saída)",
+      "Instância de modelo UML textual conforme a um meta-modelo/perfil UML (entrada)"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo identifica as alucinações do LLM como limitação que motiva o uso de RAG.",
+        "localizador": "p. 1, Introdução; p. 2, Seção IV; p. 3, Seção IV.B"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A geração baseada apenas em prompt sofreria de consciência de contexto limitada, afetando a acurácia e a consistência do código quântico gerado (motivação para o RAG).",
+        "localizador": "p. 1, Introdução"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Pipeline RAG com código Qiskit de repositórios públicos para fundamentar a saída e mitigar alucinações. O estudo compara com e sem RAG em CodeBLEU e métricas por elementos, mas não mede alucinação diretamente; por isso o efeito sobre o risco declarado não é avaliado.",
+        "avaliada": "nao",
+        "localizador": "p. 1; p. 3, Seção IV.B; p. 4-5, Seção V.C; p. 6, Tabelas I-IV"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt genérico (com e sem RAG) e condições sem RAG (prompt genérico e específico), executados com GPT-4o na instância de modelo 1, 10 execuções cada (Tabelas I-IV, p. 6). Os valores de Jiménez-Navajas et al. [6] (0.973, 1.0, 0.986) são de outro artigo e abordagem, citados para contraste, e não são comparador executado.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resultado nulo do RAG com prompt genérico: CodeBLEU médio 0.16 sem RAG (Tabela I) e 0.16 com RAG (Tabela II); Q-Recall 0.63 vs 0.61; Recall 0.39 vs 0.39; F-measure 0.55 vs 0.55; apenas Q-Precision (0.96 vs 1.00) e Precision (0.93 vs 1.00) aumentam. O estudo conclui que não valida a RQ2 'so far'.",
+        "localizador": "p. 4, Seção V.C; p. 6, Tabelas I e II, linha Average"
+      },
+      {
+        "descricao": "Resultado nulo do RAG com prompt específico: CodeBLEU médio 0.57 (Tabela III) vs 0.58 (Tabela IV); Q-F-measure 0.99 vs 1.00; F-measure 0.59 vs 0.60. O texto fala em ausência de melhora 'significant', mas nenhum teste estatístico é relatado para nenhuma das comparações.",
+        "localizador": "p. 5, Seção V.C; p. 6, Tabelas III e IV, linha Average"
+      },
+      {
+        "descricao": "Narrativa vs tabela: o texto afirma que o Q-Precision máximo de 1.00 é obtido, entre outras, pela 'model instance 1 with generic and specific prompts, both with and without RAG', mas a média da Tabela I (prompt genérico sem RAG) é 0.96; só a execução 2 da Tabela I tem 1.00. O estudo não diz se o 'maximum score' se refere a médias ou a execuções individuais.",
+        "localizador": "p. 4, Seção V.C; p. 6, Tabela I, coluna Q-Precision"
+      },
+      {
+        "descricao": "Narrativa interna divergente: a instância 1 é apresentada como a de 'best overall performance across all evaluation metrics', mas o próprio texto atribui o melhor CodeBLEU médio à instância 3 com prompt específico sem RAG (0.63; instância 1: 0.57 na Tabela III e 0.58 na Tabela IV) e o maior Q-Recall (1.00) à instância 6 (instância 1: média 0.99 nas Tabelas III e IV).",
+        "localizador": "p. 4, Seção V.C; p. 6, Tabelas III e IV"
+      },
+      {
+        "descricao": "Resumo vs corpo: o resumo afirma melhora do CodeBLEU 'by up to a factor of four'; nas tabelas da instância 1 o CodeBLEU médio passa de 0.16 para 0.57 (Tabelas I-III) e de 0.16 para 0.58 (Tabelas II-IV), razão abaixo de quatro (cálculo próprio, cerca de 3,6). Os valores por instância das instâncias 2-7 não são tabulados; o menor CodeBLEU citado (0.10, instância 7, prompt genérico com RAG) e o maior (0.63, instância 3, prompt específico sem RAG) são de instâncias diferentes, de modo que o fator declarado não pode ser conferido nos dados impressos.",
+        "localizador": "p. 1, Resumo; p. 4, Seção V.C; p. 6, Tabelas I-IV"
+      },
+      {
+        "descricao": "Relato seletivo: resultados detalhados apenas para a instância 1, escolhida por ter 'the best overall performance', 'due to space limitations'; as demais seis instâncias aparecem só em valores extremos citados no texto e na Fig. 2, cuja forma de agregação (média entre instâncias ou não) não é descrita e cujos valores não são legíveis na resolução disponível.",
+        "localizador": "p. 4, Seção V.C e Fig. 2"
+      },
+      {
+        "descricao": "Condição não especificada: os valores 'overall Precision, Recall, and F-measure' de '1.0, 0.42, and 0.60' não indicam a configuração; coincidem com as médias da Tabela IV (1.00, 0.42, 0.60), não com as da Tabela III (0.99, 0.42, 0.59). O contraste com Jiménez-Navajas et al. (0.973, 1.0, 0.986) usa números de outro artigo e escopo diferente (o estudo gera só a parte do circuito quântico).",
+        "localizador": "p. 5, Seção V.C; p. 6, Tabelas III e IV"
+      },
+      {
+        "descricao": "Variação entre execuções: na Tabela I, a execução 8 tem Q-Precision 0.75, Precision 0.50, Q-F-measure 0.53 e F-measure 0.44, contra 0.99, 0.97, 0.69 e 0.56 na maioria das execuções; o estudo não comenta essa execução.",
+        "localizador": "p. 6, Tabela I, linha 8"
+      },
+      {
+        "descricao": "Fig. 3 traz resultados para prompts genérico e específico na instância 4, mas os valores impressos na figura não são legíveis na resolução disponível; não foram usados.",
+        "localizador": "p. 5, Fig. 3"
+      },
+      {
+        "descricao": "Numeração inconsistente das questões de pesquisa: 'RQ5' aparece duas vezes e o texto se refere a 'RQ4–RQ6'.",
+        "localizador": "p. 3, Seção IV"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Arquitetura do RAG (Fig. 1, legendas parcialmente legíveis): ingestão de conhecimento externo (8 repositórios Qiskit) com 'Context-Aware Chunking', embedder MiniLM da biblioteca Sentence Transformers, índice FAISS, recuperação dos Top K chunks, que entram no prompt junto com o perfil UML quântico e a instância de modelo; o LLM da OpenAI gera o código. Valor de K e parâmetros de chunking não informados.",
+        "localizador": "p. 3, Fig. 1 e Seção IV.B"
+      },
+      {
+        "descricao": "Cada configuração foi executada 10 vezes na instância 1; as tabelas trazem cada execução e a média. O estudo não apresenta as 10 execuções como mitigação de não determinismo.",
+        "localizador": "p. 6, Tabelas I-IV"
+      },
+      {
+        "descricao": "O estudo propõe uma direção de pesquisa com RQ1-RQ6; apenas RQ1-RQ3 são abordadas nos resultados preliminares. Transpilação (código para código) é trabalho futuro e não foi avaliada.",
+        "localizador": "p. 2-3, Seção IV"
+      },
+      {
+        "descricao": "A conclusão afirma 'reduced manual effort' com o prompt específico, mas o esforço manual não é medido.",
+        "localizador": "p. 5, Seção VI"
+      },
+      {
+        "descricao": "Código-fonte declarado disponível no GitHub e dados de [6] em [34]; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 5, Software and Data Availability"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "We validate one of the proposed ideas regarding generating code out of UML model instances of software systems.", "localizador": "p. 1, Resumo"},
+      {"trecho": "The RAG pipeline that we deploy incorporates sample Qiskit code from public GitHub repositories.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Experimental results show that well-engineered prompts can improve CodeBLEU scores by up to a factor of four, yielding more accurate and consistent quantum code.", "localizador": "p. 1, Resumo"},
+      {"trecho": "RAG is a well-established, state-of-the-art concept to address the so-called LLM hallucination problem, which is abundant [7].", "localizador": "p. 1, Seção I"},
+      {"trecho": "To overcome the LLM limitations that cause occasional hallucinations, a RAG approach is employed [26].", "localizador": "p. 3, Seção IV.B"},
+      {"trecho": "The input prompt given to the LLM entails the textual model instance that conforms to a meta-model.", "localizador": "p. 3, Seção IV.A"},
+      {"trecho": "We examine two types of prompts.", "localizador": "p. 3, Seção IV.C"},
+      {"trecho": "The first one is a more general prompt that simply instructs the LLM to generate quantum code based on the quantum circuit defined in the input model instance.", "localizador": "p. 3, Seção IV.C"},
+      {"trecho": "The second prompt variant is more specific, incorporating detailed implementation requirements, such as quantum gate mapping strategies and constraints on syntax and gate behavior.", "localizador": "p. 3, Seção IV.C"},
+      {"trecho": "Table II shows the results under the same generic prompt setting but with external context provided through a RAG pipeline that incorporates eight Qiskit GitHub repositories.", "localizador": "p. 4, Seção V.C"},
+      {"trecho": "This external context does not significantly improve performance across most metrics, hence not validating RQ2 so far.", "localizador": "p. 4, Seção V.C"},
+      {"trecho": "Comparing Table I with Table III, and Table II with Table IV further highlight that prompt-engineering has a far greater impact on the LLM’s code generation performance than the provided external context through the RAG pipeline in the current setup.", "localizador": "p. 5, Seção V.C"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "specific prompt",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["instrucao", "restricoes"],
+      "comparador": "generic prompt (sem RAG)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Instância de modelo UML 1 de Jiménez-Navajas et al. [6]",
+      "metrica": "CodeBLEU (média de 10 execuções)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.16, "intervencao": 0.57},
+      "denominador": "10 execuções por configuração (média); número de unidades de referência do CodeBLEU nao_informado",
+      "condicoes": "Ambas as condições sem RAG (Tabela I: prompt genérico; Tabela III: prompt específico), GPT-4o, instância de modelo 1, 10 execuções, linha Average. Temperatura e demais parâmetros de decodificação, pesos do CodeBLEU e código de referência nao_informado. Resultado da instância 1 apenas; as demais instâncias não são tabuladas. Sem teste estatístico. Ganho do pacote de especificidade do prompt, não de um ingrediente isolado. Conferido no PDF (p. 6, Tabelas I e III; texto p. 4-5 confirma 0.16 e 0.57).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo destaca uma técnica (prompts bem elaborados, isto é, o prompt específico), uma métrica (CodeBLEU) e o comparador implícito (prompt genérico); a conclusão repete o destaque do prompt específico. Como o resultado abrange condições com e sem RAG e sete instâncias, sem agregado impresso compatível, usou-se o primeiro par na ordem das tabelas de resultados (Tabela I vs Tabela III). Ressalva: a seção de método lista também Precision, Recall e F-measure; a escolha do CodeBLEU segue o resumo.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (PDF; sem página impressa), Tabela I e Tabela III, coluna CodeBLEU, linha Average; p. 4-5, Seção V.C",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Average 0.16 0.63 0.96 0.68 0.39 0.93 0.55", "localizador": "p. 6, Tabela I (generic prompt without RAG), colunas RUN, CodeBLEU, Q-Recall, Q-Precision, Q-F-measure, Recall, Precision, F-measure"},
+        {"trecho": "Average 0.57 0.99 1.00 0.99 0.42 0.99 0.59", "localizador": "p. 6, Tabela III (specific prompt without RAG), colunas RUN, CodeBLEU, Q-Recall, Q-Precision, Q-F-measure, Recall, Precision, F-measure"},
+        {"trecho": "Specifically, the average CodeBLEU score increases from 0.16 to 0.57, Q-Recall improves from 0.63 to 0.99, Q-Precision from 0.96 to 1.00, and Q-F-measure from 0.68 to 0.99.", "localizador": "p. 4-5, Seção V.C"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "RAG pipeline (generic prompt with RAG)",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "generic prompt sem RAG",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Instância de modelo UML 1 de Jiménez-Navajas et al. [6]",
+      "metrica": "CodeBLEU (média de 10 execuções; cabeçalho 'CodBLEU' na Tabela II)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.16, "intervencao": 0.16},
+      "denominador": "10 execuções por configuração (média); número de unidades de referência do CodeBLEU nao_informado",
+      "condicoes": "Prompt genérico nas duas condições; RAG com trechos de oito repositórios Qiskit do GitHub (Top K, valor de K nao_informado). GPT-4o, instância de modelo 1, 10 execuções, linha Average. Parâmetros de decodificação, pesos do CodeBLEU e código de referência nao_informado. Sem teste estatístico. Conferido no PDF (p. 6, Tabelas I e II).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (RAG, RQ2) ainda não representada. Nenhuma tabela contém sozinha o contraste (cada tabela traz uma única condição); o estudo compara explicitamente a Tabela I com a Tabela II, primeiro par com e sem RAG na ordem das tabelas; primeira métrica da tabela (CodeBLEU) e único modelo (GPT-4o).",
+      "derivacao": "direta",
+      "localizador": "p. 6 (PDF; sem página impressa), Tabela I e Tabela II, coluna CodeBLEU/CodBLEU, linha Average; p. 4, Seção V.C",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Average 0.16 0.63 0.96 0.68 0.39 0.93 0.55", "localizador": "p. 6, Tabela I (generic prompt without RAG), colunas RUN, CodeBLEU, Q-Recall, Q-Precision, Q-F-measure, Recall, Precision, F-measure"},
+        {"trecho": "Average 0.16 0.61 1.00 0.69 0.39 1.00 0.55", "localizador": "p. 6, Tabela II (generic prompt with RAG), colunas RUN, CodBLEU, Q-Recall, Q-Precision, Q-F-measure, Recall, Precision, F-measure"},
+        {"trecho": "While Q-Precision and Precision show a slight increase (by approximately 0.04–0.07), other metrics remain largely unaffected.", "localizador": "p. 4, Seção V.C"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Questões de pesquisa formuladas (RQ1-RQ6), com indicação explícita de que os resultados preliminares tratam RQ1-RQ3 (geração a partir de UML, efeito do RAG e da engenharia de prompt); há inconsistência menor na numeração (RQ5 duplicada).",
+      "localizador": "p. 2-3, Seção IV"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Arquitetura do RAG ilustrada (Fig. 1) e quatro configurações descritas (2x2 prompt x RAG, 10 execuções), mas o texto integral dos prompts não é reproduzido (a Fig. 3 é ilegível no conteúdo), parâmetros do RAG (K, chunking) e de decodificação do GPT-4o não são informados, e só a instância 1 é relatada em detalhe.",
+      "localizador": "p. 3, Fig. 1 e Seções IV.A-C; p. 4, Seção V.C; p. 5, Fig. 3; p. 6, Tabelas I-IV"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Comparadores executados em condições comparáveis: prompt genérico vs específico com RAG constante e sem vs com RAG com prompt constante, mesmo modelo, mesma instância e 10 execuções. A comparação com Jiménez-Navajas et al. usa números de outro artigo e não é tratada aqui como comparador.",
+      "localizador": "p. 4-5, Seção V.C; p. 6, Tabelas I-IV"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas (Eq. 1-4, Q-métricas como média para portas e partições), mas pesos do CodeBLEU, código de referência e número de elementos esperados (denominadores) não são informados; a narrativa atribui Q-Precision 1.00 à instância 1 com prompt genérico sem RAG, enquanto a média da Tabela I é 0.96; 'significantly' é usado sem teste estatístico.",
+      "localizador": "p. 3-4, Seção V.B; p. 4, Seção V.C; p. 6, Tabela I"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças, mas o estudo reconhece algumas limitações: relevância insuficiente dos repositórios do RAG, geração restrita à parte do circuito quântico e relato detalhado de uma única instância por limitação de espaço; não discute variabilidade entre execuções, viés de seleção da instância relatada nem contaminação.",
+      "localizador": "p. 4, Seção V.C; p. 5, Seções V.C e VI"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código-fonte declarado disponível no GitHub e dados de [6] em [34], com 10 execuções por configuração; faltam o texto integral dos prompts no artigo, o snapshot e os parâmetros do GPT-4o e os parâmetros do RAG. O pacote não foi acessado nem validado.",
+      "localizador": "p. 5, Software and Data Availability; p. 3, Seção IV"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença das instâncias de modelo de [6] ou de código Qiskit equivalente no pré-treinamento do GPT-4o, nem sobreposição entre os repositórios do RAG e o código de referência.",
+      "localizador": "texto completo, p. 1-6"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente; páginas do PDF abertas visualmente: p-01, p-02, p-03 (Fig. 1, Seção IV.C), p-04 (Fig. 2, Seção V.C), p-05 (Fig. 3, Seção V.C e VI), p-06 (Tabelas I-IV)."
+}

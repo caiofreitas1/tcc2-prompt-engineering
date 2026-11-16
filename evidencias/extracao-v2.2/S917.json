@@ -1,0 +1,217 @@
+{
+  "estudo": "S917",
+  "texto_fonte": "fontes/textos/lote/S917.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Pavel, Petrovic, Mazur, Zolfaghari, Pan, Knoll. Hallucination in LLM-Based Code Generation: An Automotive Case Study. arXiv:2508.11257v1 [cs.SE], 15 ago. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Baseline (minimal one-liner prompt)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, Seção III.A.3 (item 1); p. 3, Seção III.B (texto do prompt); p. 4, Tabelas II-IV",
+        "observacao": "Prompt de uma linha que pede o código usando o SDV python SDK e sinais Covesa VSS (instrucao). É a condição de referência das duas outras estratégias de prompting; não há condição sem ele."
+      },
+      {
+        "nome_original": "Signal-augmented prompt",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3, Seção III.A.3 (item 2); p. 4, Seção III.C e Tabelas V-VII; p. 6, Apêndice A",
+        "observacao": "Prompt baseline acrescido da lista de sinais VSS do Apêndice A (conhecimento de domínio fornecido no prompt → contexto). A redação do pedido muda pouco ('some of the provided Covesa VSS signals'). O estudo compara diretamente com o baseline (p. 4), com os mesmos três modelos online e o mesmo procedimento de reparo iterativo; uma única tarefa e número de execuções não informado. O contraste é de ingrediente (com e sem a lista), não de magnitude estimável com confiança."
+      },
+      {
+        "nome_original": "Template-augmented prompt",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3, Seção III.A.3 (item 3); p. 5, Seção III.D, Listing 1 e Tabelas VIII-X",
+        "observacao": "Prompt signal-augmented acrescido de um esqueleto de código com TODOs (Listing 1), que fixa a estrutura da solução (classe VehicleApp, métodos a preencher → restricoes) e traz código com imports do SDK como insumo (contexto, categoria já presente pela lista de sinais). O pedido passa a 'Fill in the code skeleton'. Comparado pelo estudo com o baseline e com o signal-augmented (p. 5), com os mesmos modelos e o mesmo reparo iterativo; uma única tarefa."
+      },
+      {
+        "nome_original": "Iterative repairing technique with feedback with static analysis and runtime errors (Refining ChatGPT-generated code [21])",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 2, Seção II.C.3; p. 3, Seção III.A.2; p. 4-5, Tabelas II-X",
+        "observacao": "Estratégia de mitigação adotada de trabalho anterior [21] e aplicada sobre as três estratégias de prompting; os mecanismos listados correspondem à aplicação sobre o baseline (Tabela II); sobre os prompts signal- e template-augmented o pacote inclui também contexto e restricoes. O estudo avalia a progressão do score por iteração (iteração 0 até no máximo 4), sem condição paralela sem feedback com o mesmo número de tentativas; contribuição cumulativa. Não informa quem gerou o feedback (ferramenta de análise estática, execução manual ou automática) nem o texto das mensagens de reparo."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "observacao": "Modelo online; resultados nas Tabelas II, V e VIII."},
+      {"nome": "GPT-4.1", "versao": "nao_informado", "observacao": "Modelo online; resultados nas Tabelas III, VI e IX. A Tabela I cita 'GPT-4.1 (2025) [13]' como visão geral da literatura, não como versão usada."},
+      {"nome": "Codex", "versao": "nao_informado", "observacao": "Modelo online; resultados nas Tabelas IV, VII e X. A Tabela I cita 'Codex (2021) [3]' na visão geral da literatura; o snapshot ou produto efetivamente usado não é informado."},
+      {"nome": "StarCoder (1B)", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados, só a afirmação qualitativa da p. 5."},
+      {"nome": "TinyLLaMA", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados."},
+      {"nome": "CodeLLaMA 7B", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados."},
+      {"nome": "CodeLLaMA 7B-python", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados."},
+      {"nome": "CodeLLaMA 7B-instruct", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados."},
+      {"nome": "Phi-2", "versao": "nao_informado", "observacao": "Modelo offline; sem tabela de resultados."},
+      {"nome": "Deepseek-Coder", "versao": "nao_informado", "observacao": "Modelo offline; tamanho e versão não informados; sem tabela de resultados."}
+    ],
+    "benchmarks": [
+      {"nome": "Estudo de caso automotivo próprio (sem benchmark público)", "quantidade": "1 tarefa", "observacao": "Gerar código Python com o SDV python SDK e sinais COVESA VSS que desligue os limpadores do para-brisa quando o capô estiver aberto (p. 3). Sinais relevantes: Vehicle.Body.Hood.IsOpen e Vehicle.Body.Windshield.Front.Wiping.Mode. Número de execuções por condição não informado; cada tabela registra uma solução por iteração."}
+    ],
+    "metricas": [
+      {"nome": "Score (heuristic scoring metric; 'closeness scores' na p. 4)", "definicao": "Começa em 1.0 e penaliza alucinações: -0.2 por erros de compilação ou de execução; -0.1 por uso de sinais VSS errados ou manipulação imprópria de sinais VSS (p. 3). Regra de acumulação de várias penalidades e penalidade para falha funcional não informadas.", "denominador": "1 tarefa; uma solução por iteração"},
+      {"nome": "Suc. (sucesso, ✓/×)", "definicao": "Coluna das Tabelas II-X que indica se a solução da iteração resolve a tarefa; critério de sucesso não definido explicitamente.", "denominador": "1 tarefa; uma solução por iteração"},
+      {"nome": "Taxonomy (tipos de alucinação)", "definicao": "Rótulos qualitativos por iteração (SV, IRE, API KConflict), correspondentes a syntax violations, invalid reference errors e API knowledge conflicts da taxonomia de Lee et al. [10] (p. 2); as siglas não são definidas explicitamente.", "denominador": "nao_aplicavel"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Alta frequência de violações de sintaxe, erros de referência inválida e conflitos de conhecimento de API no código gerado pelos três modelos online; com os prompts baseline e signal-augmented nenhum modelo chegou a solução correta.", "localizador": "p. 1, Resumo; p. 4, Seção III.B; p. 5, Conclusão"},
+      {"categoria": "alucinacao", "descricao": "Com o prompt baseline, os três modelos alucinaram sinais VSS inexistentes; com a lista de sinais, passaram a confundir sinais semelhantes (System.Mode em vez de Mode).", "localizador": "p. 4, Seção III.B e III.C"},
+      {"categoria": "correcao_funcional", "descricao": "O reparo iterativo pode piorar o código: em algumas iterações a correção de um erro gerou vários novos erros e o score caiu (por exemplo, 0.0 na iteração 1 das Tabelas III, IV e V).", "localizador": "p. 4, Seção III.B; Tabelas III-V"},
+      {"categoria": "seguranca", "descricao": "Segurança funcional (safety) em domínio automotivo crítico, não cibersegurança: o estudo destaca a necessidade de cautela e de mitigação para uso seguro e confiável de código gerado por LLM em sistemas de software automotivo; o risco não é medido.", "localizador": "p. 1, Resumo; p. 5, Seção III.D"},
+      {"categoria": "outro", "descricao": "Inadequação dos sete modelos offline para tarefas de domínio específico: não geraram código sensato nem com prompts enriquecidos de contexto (afirmação qualitativa, sem tabela).", "localizador": "p. 5, Seção III.D"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Reparo iterativo com feedback de análise estática e erros de execução, segundo Refining ChatGPT-generated code [21]. O estudo mede apenas a progressão do score a partir da iteração 0, sem condição paralela sem feedback; por isso 'avaliada' = nao.", "avaliada": "nao", "localizador": "p. 3, Seção III.A.2; p. 4-5, Tabelas II-X"},
+      {"descricao": "Fornecer no prompt a lista de sinais VSS (signal-augmented): o estudo relata que alucinações de sinais VSS inexistentes deixaram de ser observadas em relação ao prompt baseline (uma tarefa, execuções não informadas).", "avaliada": "sim", "localizador": "p. 4, Seção III.C; Tabelas V-VII"},
+      {"descricao": "Fornecer esqueleto de código com TODOs (template-augmented): restaram apenas conflitos de conhecimento de API e GPT-4o e GPT-4.1 chegaram a solução correta com o reparo iterativo, em comparação com o baseline e o signal-augmented.", "avaliada": "sim", "localizador": "p. 5, Seção III.D; Tabelas VIII-X"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa que contradiz a tabela: o texto diz que, com o signal-augmented, todos os modelos terminam com resultados moderadamente melhores '(to 0.4, 0.7, 0.7)', mas para o GPT-4o a Tabela V mostra 0.4 na iteração 0 e 0.4 na iteração 4, sem melhora.", "localizador": "p. 4, Seção III.C e Tabela V"},
+      {"descricao": "A conclusão afirma que os scores melhoraram consistentemente em todas as estratégias de prompting, mas o GPT-4o com signal-augmented termina no mesmo valor inicial (0.4, Tabela V) e o Codex com template-augmented permanece em 0.9 em todas as iterações (Tabela X; o próprio texto da p. 5 diz 'Codex maintained a score of 0.9 across all iterations').", "localizador": "p. 5, Conclusão; p. 4, Tabela V; p. 5, Tabela X"},
+      {"descricao": "Trajetórias não monotônicas: o score cai para 0.0 na iteração 1 com o baseline no GPT-4.1 e no Codex (Tabelas III e IV) e com o signal-augmented no GPT-4o (Tabela V); o estudo reconhece que em algumas iterações o score piorou.", "localizador": "p. 4, Seção III.B e Tabelas III-V"},
+      {"descricao": "O texto fala em 'five repair iterations', mas as Tabelas II-VII numeram as iterações de 0 a 4 (cinco linhas incluindo a geração inicial), o que deixa ambíguo se a iteração 0 conta como reparo. As condições template-augmented têm orçamentos efetivos diferentes: GPT-4o para na iteração 2 (sucesso), GPT-4.1 na iteração 1 (sucesso) e Codex na iteração 2, quando declarou a tarefa insolúvel.", "localizador": "p. 4, Seção III.B e Tabelas II-VII; p. 5, Seção III.D e Tabelas VIII-X"},
+      {"descricao": "Aparente inconsistência na lista de sinais: a Seção III.A.3 descreve 'a list of 20 potentially relevant VSS signals', mas o Apêndice A lista 21 itens (contagem própria: 4 do capô e 17 dos limpadores, incluindo nós de ramo como Vehicle.Body.Hood e Vehicle.Body.Windshield.Front.Wiping.System). O estudo não explica se algum item não foi contado.", "localizador": "p. 3, Seção III.A.3; p. 6, Apêndice A"},
+      {"descricao": "O texto diz que os modelos usam 'Vehicle.Body.Windshield.Front.Wiping.System.Model' em vez do sinal correto, mas o sinal listado no Apêndice A e citado nas Tabelas VIII e X é '...Wiping.System.Mode'; provável erro de digitação, não verificado.", "localizador": "p. 4, Seção III.C; p. 5, Tabelas VIII e X; p. 6, Apêndice A"},
+      {"descricao": "Aparente inconsistência na aplicação da métrica: a definição só prevê -0.2 (erros de compilação/execução) e -0.1 (sinais VSS errados ou manipulação imprópria), sem regra de acumulação nem penalidade para falha funcional; ainda assim há scores 0.1 e 0.0, a falha 'Wipers are still on, when hood is open' recebe 0.7 (Tabela VII, It 3) e 0.9 (Tabela X, It 1-2), e erros de API classificados como API KConflict recebem 0.8 (Tabela VIII, It 0) ou 0.9 (Tabela IX, It 0). A fonte não informa como cada score foi atribuído nem quem o atribuiu.", "localizador": "p. 3, Seção III.A.4; p. 4, Tabelas II-VII; p. 5, Tabelas VIII-X"},
+      {"descricao": "Os sete modelos offline foram avaliados, mas não há tabela nem score para eles; o resultado é só a afirmação de que não geraram código sensato.", "localizador": "p. 3, Seção III.A.2; p. 5, Seção III.D"},
+      {"descricao": "Estudo de caso com uma única tarefa, sem número de execuções informado, sem parâmetros de decodificação e sem análise estatística; as diferenças entre prompts são observações de uma trajetória por modelo e condição.", "localizador": "p. 3, Seção III.A; p. 4-5, Tabelas II-X"}
+    ],
+    "observacoes": [
+      {"descricao": "A Tabela I resume técnicas de mitigação de alucinação de modelos da literatura (instruction tuning, RLHF etc.); é visão geral, não intervenção avaliada no estudo, e por isso não entra em componentes_fora_escopo.", "localizador": "p. 3, Tabela I e Seção II.D"},
+      {"descricao": "O estudo não informa se o feedback de análise estática e de erros de execução foi produzido por ferramenta automática ou manualmente pelos autores, nem quem atribuiu os scores e os rótulos de taxonomia.", "localizador": "p. 3, Seção III.A.2 e III.A.4"},
+      {"descricao": "As Seções II.C.1-2 descrevem De-Hallucinator e ClarifyGPT como estratégias de mitigação da literatura; não são executadas no estudo.", "localizador": "p. 2, Seção II.C"},
+      {"descricao": "Pacote de replicação, código gerado e mensagens de reparo não são disponibilizados ou mencionados.", "localizador": "texto completo"}
+    ],
+    "citacoes": [
+      {"trecho": "The task was to generate code, which turns off the windshield wipers, when the hood of the vehicle is open.", "localizador": "p. 3, Seção III.A.1"},
+      {"trecho": "The task was evaluated across seven offline code generation LLMs including StarCoder (1B), TinyLLaMA, CodeLLaMA (7B, 7B-python, 7B-instruct), Phi-2 and Deepseek-Coder as well as three online LLMs being GPT-4o, GPT-4.1 and Codex.", "localizador": "p. 3, Seção III.A.2"},
+      {"trecho": "To mitigate hallucinations, we applied the iterative repairing technique with feedback with static analysis and runtime errors proposed in Refining ChatGPT-generated code [21].", "localizador": "p. 3, Seção III.A.2"},
+      {"trecho": "Baseline: a minimal one-liner prompt specifying the task.", "localizador": "p. 3, Seção III.A.3, item 1"},
+      {"trecho": "Signal-augmented prompt: baseline prompt plus a list of 20 potentially relevant VSS signals", "localizador": "p. 3, Seção III.A.3, item 2"},
+      {"trecho": "Template-augmented prompt: signal-augmented prompt plus a code skeleton with TODOs", "localizador": "p. 3, Seção III.A.3, item 3"},
+      {"trecho": "To evaluate the correctness of the generated code, we define a heuristic scoring metric that starts at a maximum of 1.0 and penalizes occuring hallucinations in the following way:", "localizador": "p. 3, Seção III.A.4"},
+      {"trecho": "Notably, all three models hallucinated VSS signals that do not exist indicating a reliability issue in generating code for unfamiliar domains.", "localizador": "p. 4, Seção III.B"},
+      {"trecho": "In some iterations, the score got even worse as solving one error caused multiple new ones to arise.", "localizador": "p. 4, Seção III.B"},
+      {"trecho": "The recorded types of hallucinations are syntax violations, invalid reference errors and API knowledge conflicts.", "localizador": "p. 4, Seção III.B"},
+      {"trecho": "Moreover, hallucinations of non-existent VSS signals are no longer observed.", "localizador": "p. 4, Seção III.C"},
+      {"trecho": "However, all models struggle to differentiate between similar signals, which means they use Vehicle.Body.Windshield.Front.Wiping.System.Model instead of the correct one.", "localizador": "p. 4, Seção III.C"},
+      {"trecho": "This emphasizes the need for caution when relying on generated code in unfamiliar domains, because even with structured prompts and iterative feedback, correcting errors is not always straightforward and successful repair is not guaranteed.", "localizador": "p. 5, Seção III.D"},
+      {"trecho": "The seven Offline code generation models were unable to generate any sensible code, highlighting their unsuitability for domain-specific tasks they sere not trained on even with context-enriched prompts.", "localizador": "p. 5, Seção III.D"},
+      {"trecho": "These findings highlight the need for effective mitigation techniques to ensure the safe and reliable use of LLM generated code, especially in safety-critical domains such as automotive software systems.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Regarding the effectiveness of the mitigation strategy, the scores improved consistently across all prompting strategies demonstrating general effectiveness.", "localizador": "p. 5, Seção IV (Conclusão)"},
+      {"trecho": "They comprise all signals related to the hood of the vehicle and the front windshield wipers.", "localizador": "p. 6, Apêndice A"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iterative repairing technique with feedback with static analysis and runtime errors (Refining ChatGPT-generated code [21])",
+      "mecanismos": ["instrucao", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Iteração 0 (geração inicial com o prompt baseline, antes do feedback)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Estudo de caso automotivo (1 tarefa: desligar os limpadores quando o capô estiver aberto)",
+      "metrica": "Score (heuristic scoring metric; chamado 'closeness scores' no texto da p. 4)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.1, "intervencao": 0.5},
+      "denominador": "1 tarefa; uma solução por iteração; número de execuções nao_informado",
+      "condicoes": "Prompt baseline; score em escala de 0 a 1.0 (escore heurístico, não proporção de casos). Intervenção = iteração 4, última da Tabela II (sequência impressa 0.1, 0.1, 0.5, 0.5, 0.5); sem sucesso em nenhuma iteração. Contribuição cumulativa por rodada, sem condição paralela sem feedback com o mesmo número de tentativas. Origem e forma do feedback (ferramenta, manual) não informadas; parâmetros de decodificação não informados. conferido_pdf: valores, cabeçalhos e título conferidos na imagem da p. 4 (Tabela II).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca três estratégias de prompting e uma estratégia de mitigação, sem uma técnica, uma métrica e um comparador únicos. A primeira tabela com contraste elegível de prompting é a Tabela II, que contém a condição sem feedback (iteração 0) e as iterações com feedback; primeiro modelo (GPT-4o), métrica Score. As Tabelas II-X trazem cada uma só uma estratégia de prompt, de modo que não contêm o contraste entre prompts.",
+      "derivacao": "direta",
+      "localizador": "p. 4, Tabela II (Baseline prompt using GPT-4o), colunas It, Suc., Taxonomy, Description, Score; p. 4, Seção III.B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "0 | × | SV, IRE, API KConflict | DataPointChange from sdv.model | 0.1", "localizador": "p. 4, Tabela II, colunas It | Suc. | Taxonomy | Description | Score"},
+        {"trecho": "4 | × | IRE, API KConflict | Wiping object has no attribute SystemState | 0.5", "localizador": "p. 4, Tabela II, colunas It | Suc. | Taxonomy | Description | Score"},
+        {"trecho": "Initial scores (0.1, 0.2, 0.2) increased only modestly (to 0.5, 0.4, 0.4) with more iterations indicating that while the mitigation strategy improved the generated code, it was insufficient to solve the task.", "localizador": "p. 4, Seção III.B"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Signal-augmented prompt",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Baseline (minimal one-liner prompt)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Estudo de caso automotivo (1 tarefa: desligar os limpadores quando o capô estiver aberto)",
+      "metrica": "Score inicial (iteração 0) da heuristic scoring metric ('initial scores' no texto)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.1, "intervencao": 0.4},
+      "denominador": "1 tarefa; uma solução por condição na iteração 0; número de execuções nao_informado",
+      "condicoes": "Score em escala de 0 a 1.0 (escore heurístico). Valores da iteração 0, antes do reparo iterativo; ambas as condições seguidas do mesmo procedimento de feedback por até cinco linhas de iteração (0-4). Na iteração 4 os valores são 0.5 (baseline) e 0.4 (signal-augmented). Lista de sinais do Apêndice A (descrita como 20 sinais; 21 itens listados). conferido_pdf: valores conferidos nas imagens da p. 4 (Tabela II, It 0 = 0.1; Tabela V, It 0 = 0.4) e no texto.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada. Nenhuma tabela ou figura contém as duas condições (as Tabelas II e V trazem cada uma um só prompt); o contraste está só em prosa (p. 4, Seção III.C, que compara com o baseline os 'initial scores' depois de o texto da Seção III.B imprimir os do baseline). Primeiro modelo listado (GPT-4o) e primeira métrica citada (score inicial).",
+      "derivacao": "direta",
+      "localizador": "p. 4, Seção III.B e III.C; p. 4, Tabela II (It 0) e Tabela V (It 0), colunas It, Suc., Taxonomy, Description, Score",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Compared to the baseline, all models start with higher initial scores (0.4, 0.3, 0.5) and end with moderately improved results (to 0.4, 0.7, 0.7) while still producing the same hallucination types as before.", "localizador": "p. 4, Seção III.C"},
+        {"trecho": "Initial scores (0.1, 0.2, 0.2) increased only modestly (to 0.5, 0.4, 0.4) with more iterations indicating that while the mitigation strategy improved the generated code, it was insufficient to solve the task.", "localizador": "p. 4, Seção III.B"},
+        {"trecho": "0 | × | IRE, API KConflict | sdv.sdk | 0.4", "localizador": "p. 4, Tabela V (Signal-augmented prompt using GPT-4o), colunas It | Suc. | Taxonomy | Description | Score"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Template-augmented prompt",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "Baseline (minimal one-liner prompt)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Estudo de caso automotivo (1 tarefa: desligar os limpadores quando o capô estiver aberto)",
+      "metrica": "Score inicial (iteração 0) da heuristic scoring metric ('initial scores' no texto)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.1, "intervencao": 0.8},
+      "denominador": "1 tarefa; uma solução por condição na iteração 0; número de execuções nao_informado",
+      "condicoes": "Score em escala de 0 a 1.0 (escore heurístico). Valores da iteração 0, antes do reparo iterativo. Mecanismos acrescentados contados em relação ao comparador desta extração (baseline): lista de sinais (contexto) e esqueleto de código (restricoes; também código como insumo); em relação ao signal-augmented, de que deriva, o acréscimo é restricoes. Com reparo iterativo, o GPT-4o chegou a solução correta na iteração 2 (score 1.0), enquanto com o baseline terminou em 0.5 na iteração 4 sem sucesso; orçamentos de iteração diferentes. conferido_pdf: valores conferidos nas imagens da p. 4 (Tabela II, It 0 = 0.1) e da p. 5 (Tabela VIII, It 0 = 0.8).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada. Nenhuma tabela ou figura contém as duas condições; o contraste está só em prosa (p. 5, Seção III.D: 'Compared to the baseline and the signal-augmented prompt'), e o baseline é a primeira linha de base de prompting citada. Primeiro modelo listado (GPT-4o) e primeira métrica citada (score inicial).",
+      "derivacao": "direta",
+      "localizador": "p. 5, Seção III.D e Tabela VIII; p. 4, Seção III.B e Tabela II (It 0), colunas It, Suc., Taxonomy, Description, Score",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Compared to the baseline and the signal-augmented prompt, all models achieve significantly higher initial scores (0.8, 0.9, 0.9) with the only remaining issues being API knowledge conflicts such as usage of incorrect VSS signals or improper manipulation of VSS signals.", "localizador": "p. 5, Seção III.D"},
+        {"trecho": "0 | × | API KConflict | set target value for non-actuator is not allowed | 0.8", "localizador": "p. 5, Tabela VIII (Template-augmented prompt using GPT-4o), colunas It | Suc. | Taxonomy | Description | Score"},
+        {"trecho": "For GPT-4o and GPT-4.1, the mitigation strategy was effective: GPT-4o succeeded after two iterations, while GPT-4.1 produces a correct solution after only 1 iteration.", "localizador": "p. 5, Seção III.D"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "O objetivo do estudo de caso é explícito: avaliar a confiabilidade observando tipos e frequência de alucinações e a eficácia de uma estratégia de mitigação ('The goal was to assess the reliability by observing the types and frequency of hallucinations and to evaluate the effectiveness of a mitigation strategy.').", "localizador": "p. 3, Seção III; p. 1, Resumo"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Tarefa, modelos, os três prompts (texto e esqueleto) e a lista de sinais são descritos; faltam versões dos modelos, parâmetros de decodificação, número de execuções, forma de produção do feedback de reparo e procedimento de atribuição do score; os modelos offline não têm resultados relatados.", "localizador": "p. 3, Seção III.A; p. 3-5, Seções III.B-D; p. 6, Apêndice A"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há linha de base executada (prompt baseline) com os mesmos modelos e procedimento, mas em uma única tarefa e uma trajetória por condição; a estratégia de feedback é avaliada só pela progressão a partir da iteração 0, sem condição paralela sem feedback.", "localizador": "p. 3, Seção III.A.3; p. 4-5, Tabelas II-X"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "O score heurístico é definido com duas penalidades, mas sem regra de acumulação nem penalidade para falha funcional, e há scores (0.0, 0.1, 0.7 e 0.9 para a mesma falha funcional) cuja atribuição não é explicada; o critério de sucesso não é definido; o denominador é uma única tarefa. Os valores coincidem entre texto e tabelas, salvo a narrativa de melhora do GPT-4o com signal-augmented (0.4 → 0.4).", "localizador": "p. 3, Seção III.A.4; p. 4-5, Tabelas II-X"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças à validade; o estudo só reconhece que nem todos os tipos de alucinação foram explorados em detalhe e sugere estender a mais modelos e estratégias, sem discutir uma única tarefa, não determinismo, número de execuções ou subjetividade do score.", "localizador": "p. 5-6, Seção IV (Conclusão)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Os textos dos prompts, o esqueleto de código (Listing 1) e a lista de sinais são impressos, mas não há versões dos modelos e do SDK, parâmetros de decodificação, código gerado, mensagens de feedback nem pacote de replicação.", "localizador": "p. 3-5, Seções III.B-D; p. 6, Apêndice A"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo trata o domínio como 'unseen' ou 'unfamiliar' para os modelos, mas não discute possível exposição da tarefa, do SDK ou da especificação VSS no pré-treinamento nem controla esse risco.", "localizador": "p. 3, Seção III; p. 4, Seção III.B; texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas": [1, 3, 4, 5, 6],
+    "observacao": "Texto extraído lido integralmente. Páginas do PDF abertas visualmente: p. 1 (resumo), p. 3 (Tabela I, configuração experimental e métrica), p. 4 (Tabelas II-VII), p. 5 (Listing 1, Tabelas VIII-X, conclusão) e p. 6 (Apêndice A)."
+  }
+}
