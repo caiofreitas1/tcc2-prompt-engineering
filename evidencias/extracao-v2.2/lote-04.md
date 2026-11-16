@@ -25,5 +25,5 @@ assinatura do Codex antes de gravar; ficam para o próximo lote do Codex.
 ## Situação
 
 - Estudos extraídos fora do piloto: 67 de 296 (57 pelo Opus, 10 pelo Codex).
-- Consumo do Opus: semanal de 83% para cerca de 95% neste lote.
+- Consumo do Opus: semanal de 83% para 92% com os dois lotes e a orquestração.
 - As fichas não foram conferidas pelo autor.
