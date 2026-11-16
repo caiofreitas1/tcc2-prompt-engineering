@@ -1,0 +1,278 @@
+{
+  "estudo_id": "S2060",
+  "texto_fonte": "fontes/textos/lote/S2060.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Levin, K. H.; van Kempen, N.; Berger, E. D.; Freund, S. N. ChatDBG: Augmenting Debugging with Large Language Models. Proc. ACM Softw. Eng. 2, FSE, Article FSE085, jul. 2025. DOI 10.1145/3729355. Versão do texto: arXiv:2403.16354v5 (19 jun. 2025), conforme impresso na p. 1.",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "ChatDBG (configuração +Dialog, com todos os recursos habilitados)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "outro"],
+        "mecanismos_acrescentados": ["contexto", "restricoes", "exemplos", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 8-11 (§4.3-4.5, Fig. 4 e Fig. 5); p. 14-15 (§5.1, Tabela 4, Fig. 6); p. 16 (RQ1 Summary)",
+        "observacao": "Pacote completo comparado com a configuração Default Stack, que o estudo usa como linha de base (p. 15-16). É pacote híbrido: além do prompt (instruções com papel de assistente de depuração, explicação até a causa-raiz, seção final «Recommendation», restrição de não alterar a asserção, rastreamento de pilha enriquecido, entradas, histórico, pergunta direcionada e pergunta de continuação), inclui a execução de comandos do depurador por function calling, o sanitizador de comandos, o fatiamento com ipyflow (notebooks) e o servidor clangd (código nativo), listados em componentes_fora_escopo. O ganho do pacote não se atribui a um mecanismo isolado. Mecanismos: instrucao (papel, objetivos e diretrizes, Fig. 5), raciocinio («Explain why each variable ... Continue with your explanations until you reach the root cause», Fig. 5), restricoes (formato «Recommendation»; lista de comandos permitidos ao depurador; asserção que não deve ser alterada; especificação do comportamento esperado na pergunta direcionada), contexto (rastreamento de pilha, erro, entradas, histórico; recuperação de estado e código por info/slice), exemplos (exemplos ilustrativos do formato das referências aceitas por info: «n, e.n ... t.n»), outro (segunda pergunta fixa de continuação sem feedback sobre a primeira resposta). A presença das instruções gerais da Fig. 5 também na Default Stack é inferida da Tabela 4 e da descrição da ablação como habilitação progressiva de recursos; o artigo não reproduz o prompt da Default Stack."
+      },
+      {
+        "nome_original": "Default Stack",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 14 (§5.1); p. 15 (Tabela 4; texto após Fig. 6); p. 16",
+        "observacao": "Linha de base: rastreamento de pilha padrão (ipdb) com 5 linhas de código por quadro e pergunta inicial «why?», sem take the wheel. O estudo a descreve como aproximadamente equivalente a copiar o rastreamento e a informação de erro numa janela de chat e pedir uma correção. As instruções gerais da Fig. 5 (sem os parágrafos 2-4 de take the wheel) são atribuídas por inferência da Tabela 4, que só varia as colunas listadas; o prompt desta configuração não é reproduzido."
+      },
+      {
+        "nome_original": "Enriched Stack (enriched stack trace)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 (§4.4, Enriched stack trace); p. 14 (§5.1); p. 15 (Tabela 4, Fig. 6); p. 16 (Fig. 7 e RQ2)",
+        "observacao": "Acrescenta ao prompt tipos e valores das variáveis de cada quadro, janela de pelo menos 10 linhas de código e omissão de quadros de bibliotecas. Contraste Enriched Stack × Default Stack (ablação progressiva da Tabela 4), mantidos a pergunta «why?» e a ausência de take the wheel. O contraste também muda o número de linhas por quadro (5 para 10)."
+      },
+      {
+        "nome_original": "+Take the Wheel (take the wheel prompt / agentic reasoning via function calls)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "restricoes", "exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 (§4.4: parágrafos 2-4 das instruções); p. 10 (Fig. 5); p. 11 (§4.5); p. 12 (Tabela 2, §4.6); p. 15 (Tabela 4, Fig. 6); p. 16 (RQ2)",
+        "observacao": "Contraste +Take the Wheel × Enriched Stack, mantidos o rastreamento enriquecido e a pergunta «why?». A parte de prompting são os parágrafos 2-4 das instruções (funções debug e info, comandos permitidos, exemplos de referências, obrigação de chamar info). A condição é híbrida: o LLM recebe as saídas reais dos comandos executados no depurador e, nos notebooks, o comando slice depende do ipyflow; esses componentes não são prompting (componentes_fora_escopo). Não foi classificado como feedback porque as saídas servem para coletar estado e código, não para refinar uma resposta já gerada."
+      },
+      {
+        "nome_original": "+Targeted Question",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 14 (§5.1); p. 15 (Tabela 4, exemplos de perguntas, Fig. 6); p. 16 (RQ1 Summary); p. 17 (RQ2)",
+        "observacao": "Substitui «why?» por uma pergunta específica da falha que descreve o comportamento ou valor esperado, escrita pelos autores para ser «neutra» e não indicar a causa-raiz; classificada como especificação (restricoes). Contraste +Targeted Question × +Take the Wheel. O estudo mostra só quatro exemplos das perguntas (c3, s11, c1, s1)."
+      },
+      {
+        "nome_original": "+Dialog (follow-up query)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 15 (Tabela 4; texto após os exemplos de perguntas); p. 16 (RQ1 Summary); p. 17 (RQ2)",
+        "observacao": "Acrescenta uma segunda pergunta fixa em todas as execuções: «Continue to explain your reasoning and give me a fix to make it work as I describe.». Classificada como outro (turno adicional de continuação), pois o estudo afirma que a pergunta não traz feedback sobre o conteúdo ou a qualidade da primeira resposta. Contraste +Dialog × +Targeted Question; as configurações foram executadas separadamente segundo o texto (cada programa dez vezes nas cinco configurações), mas o estudo não diz se as execuções +Dialog reaproveitam as conversas +Targeted Question."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Execução de comandos do depurador via function calling (take the wheel)",
+        "natureza": "outro",
+        "descricao": "Infraestrutura que registra funções (debug, info, slice, code, definition) na API da OpenAI, executa os comandos solicitados pelo LLM no Pdb ou no LLDB e devolve as saídas. É uso de ferramenta, não texto do prompt; torna a condição +Take the Wheel híbrida.",
+        "localizador": "p. 8-9 (§4.3, Fig. 4); p. 11 (§4.5); p. 12 (Tabela 2)"
+      },
+      {
+        "nome_original": "Sanitizador de comandos do depurador (whitelist; flag --unsafe)",
+        "natureza": "outro",
+        "descricao": "Filtro que restringe as funções chamadas em comandos gerados pelo LLM a uma lista configurável (Python) ou rejeita comandos que chamam funções (código nativo).",
+        "localizador": "p. 13 (§4.8)"
+      },
+      {
+        "nome_original": "Fatiamento retroativo com ipyflow (comando slice)",
+        "natureza": "outro",
+        "descricao": "Análise de programa que calcula a fatia retroativa de variáveis em notebooks e devolve o código das células; o estudo diz que foi criticamente importante para os notebooks, sem relatar números.",
+        "localizador": "p. 12-13 (§4.7); p. 16 (RQ2)"
+      },
+      {
+        "nome_original": "Servidor de linguagem clangd (comando definition no LLDB)",
+        "natureza": "outro",
+        "descricao": "Ferramenta usada para recuperar definições de símbolos em código nativo; não tratou corretamente o código gerado a partir de YACC no BC.",
+        "localizador": "p. 9 (§4.5); p. 12 (§4.6); p. 18 (§5.2)"
+      },
+      {
+        "nome_original": "AddressSanitizer",
+        "natureza": "outro",
+        "descricao": "Instrumentação usada no experimento C/C++ para forçar a falha no momento da violação de memória; a informação do AddressSanitizer não foi incluída no prompt inicial.",
+        "localizador": "p. 17 (§5.2)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "gpt-4-1106-preview", "uso": "experimentos Python e C/C++", "localizador": "p. 15 (§5.1); p. 18 (§5.2)"},
+      {"nome": "GPT-3.5-turbo", "versao": "nao_informado", "uso": "modelo usado no desenvolvimento original do ChatDBG, não nas avaliações relatadas", "localizador": "p. 19 (§5.3)"}
+    ],
+    "benchmarks": [
+      {"nome": "Programas Python de laboratórios de estudantes (não publicados)", "quantidade": "22 programas: c1-c8 (8 scripts de linha de comando) e s1-s14 (14 notebooks Jupyter)", "detalhes": "LoC de 29 a 181 por programa; os notebooks usam duas bibliotecas não padrão com 3.000 linhas de código; erros semânticos (asserções) e crashes. Cada programa executado dez vezes em cada uma das cinco configurações.", "localizador": "p. 13-14 (§5.1, Tabela 3)"},
+      {"nome": "BugBench", "quantidade": "4 programas (BC, GZIP, NCOM, POLY)", "detalhes": "Os únicos que os autores conseguiram obter, compilar e reproduzir.", "localizador": "p. 17 (§5.2); p. 18 (Tabela 5)"},
+      {"nome": "BugsC++", "quantidade": "4 bugs (PEG, TIFF, YAML1, YAML2)", "detalhes": "Selecionados aleatoriamente na categoria «memory error»; entradas de reprodução recuperadas manualmente. Cada programa C/C++ executado dez vezes.", "localizador": "p. 17 (§5.2); p. 18 (Tabela 5 e texto)"}
+    ],
+    "metricas": [
+      {"nome": "Success Rate (%) (Python)", "definicao": "Resposta examinada manualmente e considerada sucesso se incluir explicação precisa do erro e correção acionável (código ou prosa com todos os detalhes), com critérios por programa definidos antes do exame (p. 15). Na seção de ameaças, as correções Python são consideradas bem-sucedidas se o código resultante atende aos requisitos de correção da tarefa (p. 19).", "denominador": "nao_informado (o estudo informa 22 programas e dez execuções por programa e configuração, mas não liga explicitamente a taxa global a um denominador nem diz se ela é média de programas ou proporção de execuções)", "localizador": "p. 14-16; p. 19"},
+      {"nome": "Success Rate (%) por tipo de correção (C/C++: root cause / proximate cause)", "definicao": "Correção de código acionável para a causa próxima ou para a causa-raiz, segundo os critérios da Tabela 5.", "denominador": "nao_informado (8 programas, dez execuções cada)", "localizador": "p. 18 (Tabela 5 e texto); p. 19 (Fig. 8)"},
+      {"nome": "Custo (USD), tokens e tempo de conclusão", "definicao": "Descritivos; Python +Targeted Question: cerca de 10.000 tokens, cerca de US$ 0,12 e cerca de 25 s; C/C++: tempo médio 27 s e custo US$ 0,06.", "denominador": "nao_aplicavel", "localizador": "p. 15; p. 18"}
+    ],
+    "linguagens": ["Python (scripts e notebooks Jupyter)", "C", "C++"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "O LLM pode emitir, pela função debug, comandos com código arbitrário que apaguem arquivos ou executem outras ações maliciosas no cliente (segurança do sistema e segurança operacional da execução).", "localizador": "p. 13 (§4.8)"},
+      {"categoria": "alucinacao", "descricao": "O LLM pode alucinar e responder com diagnósticos e correções incorretos ou enganosos.", "localizador": "p. 13 (§4.8)"},
+      {"categoria": "correcao_funcional", "descricao": "Em alguns casos o ChatDBG sugeriu mudanças que introduziriam outros bugs, confundiu proporções e percentuais ou não tratou casos de canto incomuns; às vezes não convergiu para uma correção acionável.", "localizador": "p. 17 (RQ2)"},
+      {"categoria": "correcao_funcional", "descricao": "Em C/C++ as correções sugeridas para estouro de buffer (strncpy/snprintf) truncam a entrada silenciosamente; em PEG e YAML2 as sugestões ignoram o ponteiro nulo ou substituem a asserção em vez de falhar ou checar pré-condições, o que não constitui correção robusta da causa-raiz.", "localizador": "p. 18 (§5.2)"},
+      {"categoria": "outro", "descricao": "Em alguns casos habilitar recursos adicionais reduziu a taxa de sucesso, atribuído pelos autores a prompts mais longos e complexos degradarem a eficácia do LLM.", "localizador": "p. 17 (RQ2)"},
+      {"categoria": "contaminacao", "descricao": "O código-fonte e as correções dos programas C/C++ estão no GitHub, o que pode causar vazamento de dados se esses repositórios estiveram no treinamento dos LLMs. Para Python, o estudo afirma que os programas não são publicados e, por isso, não estão nos dados de treinamento.", "localizador": "p. 14 (§5.1); p. 19 (§5.3)"},
+      {"categoria": "nao_determinismo", "descricao": "LLMs são estocásticos e é possível obter resultados incomumente bons por acaso.", "localizador": "p. 19 (§5.3)"},
+      {"categoria": "outro", "descricao": "Os prompts do ChatDBG podem estar sobreajustados aos modelos GPT-4 empregados.", "localizador": "p. 19 (§5.3)"},
+      {"categoria": "outro", "descricao": "Representatividade: a suíte Python é de laboratórios de estudantes, possivelmente não representativa de código de programadores experientes; na suíte C/C++ a maioria dos erros é de memória, e outros tipos podem levar a resultados diferentes.", "localizador": "p. 19 (§5.3)"},
+      {"categoria": "outro", "descricao": "A avaliação depende de julgamento manual sobre a explicação e a correção, com risco de subjetividade.", "localizador": "p. 19 (§5.3)"},
+      {"categoria": "custo", "descricao": "Custo monetário, em tokens e em tempo por consulta (Python +Targeted Question: cerca de 10.000 tokens, cerca de US$ 0,12 e cerca de 25 s; passos seguintes com custo comparável; C/C++: 27 s e US$ 0,06 em média). O tempo foi altamente variável e dominado pelo desempenho do serviço da OpenAI.", "localizador": "p. 15 (§5.1); p. 18 (§5.2)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Sanitização dos comandos gerados pelo LLM antes da execução (whitelist configurável em Python; rejeição de comandos que chamam funções em código nativo); flag --unsafe só para ambiente isolado.", "avaliada": "nao", "localizador": "p. 13 (§4.8)"},
+      {"descricao": "As correções não são aplicadas diretamente ao código; o usuário avalia as respostas e decide se segue as sugestões.", "avaliada": "nao", "localizador": "p. 13 (§4.8)"},
+      {"descricao": "Uso de programas Python não publicados, apresentados como fora dos dados de treinamento.", "avaliada": "nao", "localizador": "p. 14 (§5.1)"},
+      {"descricao": "Cada programa executado pelo menos dez vezes para reduzir o efeito da estocasticidade.", "avaliada": "nao", "localizador": "p. 19 (§5.3)"},
+      {"descricao": "Critérios explícitos por programa definidos antes de examinar as respostas (Python) e critérios da Tabela 5 (C/C++) para reduzir a subjetividade da avaliação manual.", "avaliada": "nao", "localizador": "p. 15 (RQ1); p. 18 (Tabela 5); p. 19 (§5.3)"},
+      {"descricao": "Desenvolvimento original com outro modelo (GPT-3.5-turbo), citado como atenuante do sobreajuste dos prompts ao GPT-4.", "avaliada": "nao", "localizador": "p. 19 (§5.3)"},
+      {"descricao": "Perguntas direcionadas desenhadas para serem «neutras», sem indicar a causa-raiz.", "avaliada": "nao", "localizador": "p. 14 (§5.1)"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Default Stack (configuração de linha de base executada no mesmo conjunto Python, com a mesma métrica)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "A Fig. 6 não imprime os valores das configurações; só +Take the Wheel (57%, «why?»), +Targeted Question (67%) e +Dialog (85%) aparecem no texto (RQ1 Summary). Os valores de Default Stack e Enriched Stack não são impressos em nenhuma parte; por isso ficaram null nas extrações. A associação de 57% a +Take the Wheel decorre do texto («Even with just the simple question why?, ChatDBG») e da Tabela 4, não de rótulo na figura.", "localizador": "p. 15 (Fig. 6); p. 16 (RQ1 Summary)"},
+      {"descricao": "O texto da seção de trabalhos concorrentes afirma aumento de quase o dobro do ChatDBG em relação à Enriched Stack, sem dizer qual configuração do ChatDBG nem o valor da Enriched Stack, o que impede a conferência numérica.", "localizador": "p. 7 (§3.1)"},
+      {"descricao": "Habilitar recursos adicionais reduziu a taxa de sucesso em alguns casos (Fig. 7 por programa); a Enriched Stack quase não melhora erros semânticos em que os passos relevantes terminam antes da falha.", "localizador": "p. 16 (Fig. 7; RQ2); p. 17"},
+      {"descricao": "O comando slice é descrito como criticamente importante nos notebooks («Without it, success rates rarely improved»), mas o estudo não relata condição nem números sem slice.", "localizador": "p. 16 (RQ2)"},
+      {"descricao": "Definição de sucesso Python divergente entre seções: explicação precisa e correção acionável (p. 15) versus código resultante que atende aos requisitos de correção da tarefa (p. 19); o estudo também admite correções descritas em prosa, sem execução relatada do código corrigido.", "localizador": "p. 15 (RQ1); p. 19 (§5.3)"},
+      {"descricao": "Número de execuções descrito como «ten times» (p. 14 e p. 18) e como «at least ten times» (p. 19). O estudo também diz que os resultados foram estáveis, com pequena variação agregada, sem relatar a variação.", "localizador": "p. 14; p. 18; p. 19"},
+      {"descricao": "O resumo descreve 67% como resultado de «a single query», mas a configuração «why?» com take the wheel também é consulta única e teve 57%; o 67% corresponde à pergunta direcionada escrita pelos autores.", "localizador": "p. 1 (resumo); p. 16 (RQ1 Summary)"},
+      {"descricao": "C/C++ sem condição comparadora: 36% das sugestões corrigiram a causa-raiz e outros 55% a causa próxima (Fig. 8 sem rótulos numéricos por programa). O sucesso «em virtualmente todas as execuções» no diagnóstico não é quantificado.", "localizador": "p. 18 (RQ3 Summary); p. 19 (Fig. 8)"},
+      {"descricao": "Aparente inconsistência no exemplo ilustrativo: o prompt da Fig. 5 mostra make_marble_bag e a asserção na linha 16, enquanto as Figs. 1 e 2 mostram make_marble_sample e a asserção na linha 15.", "localizador": "p. 3 (Fig. 1); p. 4 (Fig. 2); p. 10 (Fig. 5)"}
+    ],
+    "observacoes": [
+      {"descricao": "A ablação Python é progressiva (Tabela 4): cada configuração acrescenta um recurso à anterior; não há ablação leave-one-out a partir do pacote completo.", "localizador": "p. 14-15 (§5.1, Tabela 4)"},
+      {"descricao": "Com +Take the Wheel, o LLM emitiu de 0 a 12 comandos de depuração por execução, principalmente info, slice e p.", "localizador": "p. 16 (RQ2)"},
+      {"descricao": "As perguntas direcionadas e a avaliação das respostas foram feitas manualmente pelos autores; o estudo não informa quantos avaliadores julgaram as respostas nem a concordância entre eles.", "localizador": "p. 14-15; p. 18; p. 19"},
+      {"descricao": "O estudo não considera SWE-bench aplicável ao ChatDBG por depender de informação de tempo de execução; não há comparação executada com outras ferramentas (Robin, AutoCodeRover, SWE-agent, RepairAgent, AutoSD).", "localizador": "p. 7 (§3.1)"},
+      {"descricao": "A informação de 75.000 downloads é de adoção, não de eficácia.", "localizador": "p. 1 (resumo)"},
+      {"descricao": "Disponibilidade: ChatDBG no GitHub e versão arquivada no Zenodo (doi:10.5281/zenodo.15185773); o pacote não foi acessado nesta extração, e o estudo não diz se os programas Python dos estudantes estão incluídos. Temperatura e outros parâmetros de decodificação não são informados.", "localizador": "p. 20 (Data-Availability Statement); p. 21 (ref. 21)"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper proposes ChatDBG, an AI-powered debugging assistant.", "localizador": "p. 1 (resumo)"},
+      {"trecho": "Our evaluation across a diverse set of code, including C/C++ code with known bugs and a suite of Python code including standalone scripts and Jupyter notebooks, demonstrates that ChatDBG can successfully analyze root causes, explain bugs, and generate accurate fixes for a wide range of real-world errors.", "localizador": "p. 1 (resumo)"},
+      {"trecho": "If this is the start of a chat, ChatDBG bundles basic instructions, information from the debugger about the current stack and error, program inputs, history of user commands, and the text together in an initial prompt (lines 9-12).", "localizador": "p. 8 (§4.3)"},
+      {"trecho": "The instructions at the top of the prompt ask the LLM to answer questions about the root cause of the error, to focus on user code, to explain values stored in variables, and to end each response with either a fix or suggestions for further debugging steps.", "localizador": "p. 9 (§4.4)"},
+      {"trecho": "Paragraphs 2-4 of the instructions are the take the wheel prompt described in Section 4.5.", "localizador": "p. 9 (§4.4)"},
+      {"trecho": "That stack trace includes the types and values of variables for each frame, as well as a larger window of at least 10 lines of code.", "localizador": "p. 9 (§4.4)"},
+      {"trecho": "Examples include: n, e.n where e is an expression, and t.n where t is a type.", "localizador": "p. 10 (Fig. 5, Instructions)"},
+      {"trecho": "The root cause of any error is likely due to a problem in the source code from the user. Explain why each variable contributing to the error has been set to the value that it has. Continue with your explanations until you reach the root cause of the error.", "localizador": "p. 10 (Fig. 5, Instructions)"},
+      {"trecho": "When the error is due to an assertion failure, ChatDBG instructs the LLM to assume that the assertion is valid as written so that it will look beyond the assertion for the real problem.", "localizador": "p. 11 (§4.4, Error)"},
+      {"trecho": "That code could, for example, delete files or execute other malicious actions on the client.", "localizador": "p. 13 (§4.8)"},
+      {"trecho": "ChatDBG mitigates this risk by sanitizing LLM-generated debugging commands before running them.", "localizador": "p. 13 (§4.8)"},
+      {"trecho": "It is also possible for the LLM to hallucinate and respond with incorrect or misleading diagnoses and fixes.", "localizador": "p. 13 (§4.8)"},
+      {"trecho": "ChatDBG mitigates this risk by not directly applying proposed code fixes or suggestions to the target code.", "localizador": "p. 13 (§4.8)"},
+      {"trecho": "Unlike many existing bug benchmarks for Python, these programs are unpublished and thus not in the language model’s training data.", "localizador": "p. 14 (§5.1)"},
+      {"trecho": "We focus our evaluation on Python and perform an ablation study by progressively enabling ChatDBG features.", "localizador": "p. 14 (§5.1)"},
+      {"trecho": "For crashes, the questions relate the crash to expected behavior, as in the following; we designed our questions to be “neutral” and not hint at the root cause.", "localizador": "p. 14 (§5.1)"},
+      {"trecho": "All trials use the same follow up: Continue to explain your reasoning and give me a fix to make it work as I describe.", "localizador": "p. 15 (§5.1)"},
+      {"trecho": "In others, it suggested changes that would introduce other bugs.", "localizador": "p. 17 (RQ2)"},
+      {"trecho": "We attribute this result to the fact that longer and more complex prompts can occasionally degrade the effectiveness of LLMs [22].", "localizador": "p. 17 (RQ2)"},
+      {"trecho": "While correct, this change truncates the input silently.", "localizador": "p. 18 (§5.2)"},
+      {"trecho": "Unlike the Python suite, the C/C++ source code and the bug fixes for these programs are available on GitHub, which may lead to data leakage affecting the C/C++ study if those repositories were part of the training set for the LLMs we used.", "localizador": "p. 19 (§5.3)"},
+      {"trecho": "It is possible that ChatDBG’s prompts are overfit to the specific GPT-4 models we employed; this threat is somewhat mitigated by the fact that ChatDBG was originally developed using a different model (GPT-3.5-turbo).", "localizador": "p. 19 (§5.3)"},
+      {"trecho": "To mitigate this threat, our evaluation runs ChatDBG on each test program at least ten times, which produced stable and repeatable results with only small variation in aggregate.", "localizador": "p. 19 (§5.3)"},
+      {"trecho": "We mitigated the risks of subjectivity by using precisely defined criteria decided upon in advance.", "localizador": "p. 19 (§5.3)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ChatDBG (configuração +Dialog, com todos os recursos habilitados)",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos", "outro"],
+      "mecanismos_acrescentados": ["contexto", "restricoes", "exemplos", "outro"],
+      "comparador": "Default Stack",
+      "modelo": "gpt-4-1106-preview",
+      "benchmark": "Programas Python de laboratórios de estudantes, c1-c8 e s1-s14 (Tabela 3)",
+      "metrica": "Success Rate (%) — definida na p. 15 como explicação precisa do erro e correção acionável; na p. 19, como código resultante que atende aos requisitos de correção da tarefa",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 85},
+      "denominador": "nao_informado (22 programas, dez execuções por programa e configuração; o estudo não diz se a taxa global é proporção de execuções ou média de programas)",
+      "condicoes": "Pacote híbrido (ver ficha). +Dialog: rastreamento enriquecido, take the wheel, pergunta direcionada escrita pelos autores e uma pergunta de continuação fixa. Default Stack: rastreamento padrão com 5 linhas por quadro, pergunta «why?», sem take the wheel. Cada programa executado dez vezes por configuração; temperatura não informada. Julgamento manual com critérios definidos antes. Conferido no PDF: Fig. 6 (p. 15) sem rótulos numéricos; o valor 85% vem do RQ1 Summary (p. 16). O valor da Default Stack não é impresso em nenhuma parte e não foi estimado pela posição do ponto (null).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e o RQ1 Summary destacam várias configurações (57%, 67%, 85%) sem comparador único. Não há tabela com resultados do contraste (a Tabela 4 só descreve configurações); a primeira figura com o contraste é a Fig. 6. Primeira métrica: Success Rate; único modelo: gpt-4-1106-preview; primeira linha de base listada: Default Stack; intervenção: a técnica focal com todos os recursos (+Dialog).",
+      "derivacao": "direta",
+      "localizador": "p. 15 (Tabela 4; Fig. 6); p. 16 (RQ1 Summary)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "With questions specialized to the target’s particular error, that number jumps to 67%, and with an additional dialog step ChatDBG succeeded in identifying and fixing the defect in 85% of the trials.", "localizador": "p. 16 (RQ1 Summary)"},
+        {"trecho": "We use this configuration as a baseline for evaluating the impact of ChatDBG’s more advanced configurations.", "localizador": "p. 15-16 (RQ1)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Enriched Stack (enriched stack trace)",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Default Stack",
+      "modelo": "gpt-4-1106-preview",
+      "benchmark": "Programas Python de laboratórios de estudantes, c1-c8 e s1-s14 (Tabela 3)",
+      "metrica": "Success Rate (%) — definida na p. 15 como explicação precisa do erro e correção acionável; na p. 19, como código resultante que atende aos requisitos de correção da tarefa",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": null},
+      "denominador": "nao_informado (22 programas, dez execuções por programa e configuração)",
+      "condicoes": "Ambas com pergunta «why?» e sem take the wheel; Enriched Stack com 10 linhas por quadro, tipos e valores de variáveis e omissão de quadros de biblioteca; Default Stack com 5 linhas por quadro. Dez execuções por programa. Conferido no PDF: Fig. 6 (p. 15) e Fig. 7 (p. 16) não imprimem valores; nenhum dos dois valores aparece no texto. Registrados como null, sem estimativa pela posição dos pontos. O texto da p. 16 diz apenas que o rastreamento enriquecido traz algum benefício, sobretudo em crashes.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: primeiro componente da ablação, pela ordem da Tabela 4 (configurações) e da Fig. 6.",
+      "derivacao": "direta",
+      "localizador": "p. 15 (Tabela 4; Fig. 6); p. 16 (Fig. 7; RQ2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "The Enriched Stack plots demonstrate that enriched stacks provide some benefit, particularly for crashes in which the stack contains sufficient information to diagnose the problem, but they alone do not provide much improvement for many semantic errors in which the relevant computation steps complete before failure.", "localizador": "p. 16 (RQ2)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "+Take the Wheel (take the wheel prompt / agentic reasoning via function calls)",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "restricoes", "exemplos"],
+      "comparador": "Enriched Stack",
+      "modelo": "gpt-4-1106-preview",
+      "benchmark": "Programas Python de laboratórios de estudantes, c1-c8 e s1-s14 (Tabela 3)",
+      "metrica": "Success Rate (%) — definida na p. 15 como explicação precisa do erro e correção acionável; na p. 19, como código resultante que atende aos requisitos de correção da tarefa",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 57},
+      "denominador": "nao_informado (22 programas, dez execuções por programa e configuração)",
+      "condicoes": "Ambas com rastreamento enriquecido e pergunta «why?»; a intervenção acrescenta os parágrafos 2-4 das instruções e a execução real dos comandos solicitados (condição híbrida, com slice via ipyflow nos notebooks). O valor 57% vem do RQ1 Summary, que se refere ao ChatDBG com a pergunta simples «why?»; a correspondência com +Take the Wheel decorre da Tabela 4 (única configuração «why?» com take the wheel), não de rótulo na Fig. 6. Conferido no PDF: Fig. 6 sem rótulos; o valor da Enriched Stack não é impresso (null, sem estimativa).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: segundo componente da ablação, pela ordem da Tabela 4 e da Fig. 6.",
+      "derivacao": "direta",
+      "localizador": "p. 15 (Tabela 4; Fig. 6); p. 16 (RQ1 Summary; RQ2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Even with just the simple question why?, ChatDBG was successful 57% of the time.", "localizador": "p. 16 (RQ1 Summary)"},
+        {"trecho": "However, enriched stacks coupled with letting the LLM take the wheel led to significant improvement in the success rate for both crashing and semantic bugs, as shown in the +Take the Wheel plots.", "localizador": "p. 16 (RQ2)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Três questões de pesquisa explícitas (eficácia em Python, contribuição dos componentes, eficácia em C/C++).", "localizador": "p. 13 (§5)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Configurações, prompt inicial, programas, modelo e número de execuções são descritos; faltam as perguntas direcionadas de todos os programas (só quatro exemplos), o prompt da Default Stack, parâmetros de decodificação e o número de avaliadores das respostas.", "localizador": "p. 10 (Fig. 5); p. 14-15 (§5.1, Tabela 4); p. 18"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Em Python há linha de base executada (Default Stack) e ablação progressiva; em C/C++ não há condição comparadora, e não há comparação executada com outras ferramentas.", "localizador": "p. 15-16; p. 18-19; p. 7 (§3.1)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "A taxa de sucesso é definida com critérios prévios, mas com formulações diferentes nas p. 15 e 19; o denominador e a forma de agregação da taxa global não são informados; Fig. 6, 7 e 8 não imprimem valores, e Default Stack e Enriched Stack ficam sem valor numérico.", "localizador": "p. 15; p. 16; p. 19"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças discute representatividade, vazamento de dados, sobreajuste dos prompts, estocasticidade e subjetividade da avaliação manual.", "localizador": "p. 19 (§5.3)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Ferramenta disponível no GitHub e no Zenodo e versão do modelo informada; os programas Python são não publicados e o estudo não diz se estão no pacote; perguntas direcionadas completas e parâmetros de decodificação não informados; pacote não acessado nesta extração.", "localizador": "p. 14; p. 15; p. 20 (Data-Availability Statement)"},
+    {"criterio": "contaminacao", "julgamento": "atende", "justificativa": "O estudo trata o risco: usa programas Python não publicados e reconhece possível vazamento dos programas e correções C/C++ disponíveis no GitHub.", "localizador": "p. 14 (§5.1); p. 19 (§5.3)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1.096 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [10, 14, 15, 16, 19]
+  }
+}
