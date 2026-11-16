@@ -1,0 +1,249 @@
+{
+  "estudo": "S1023",
+  "texto_fonte": "fontes/textos/lote/S1023.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2510.11631v1 [cs.CV], 13 out. 2025 (preprint); as páginas não têm numeração impressa; os localizadores usam a página do PDF (posição no arquivo)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "EvoCAD",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "multiagente", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção III.B e Algoritmo 1, p. 3; Seção IV.A, p. 4; Figura 2 e Tabela I, p. 5",
+        "observacao": "Pacote evolutivo: inicialização com M = 6 códigos CADQuery gerados a partir do prompt do usuário e de k = 5 exemplos sorteados de um conjunto de 40 amostras da documentação do CADQuery (instrucao; exemplos e contexto); uma tentativa de self-debugging com a mensagem de erro do compilador (feedback); a cada geração, renderização em imagem multivista, descrição textual pelo VLM com chain-of-thought (raciocinio), ranqueamento pelo RLM (o3-mini) repetido três vezes e promediado, seleção de pais por distribuição exponencial e elitismo (amostragem); crossover pelo LM com os dois códigos, suas descrições e o prompt, pedindo análise de semelhanças, pontos fortes e fracos (raciocinio, contexto, feedback visual); mutação com probabilidade de 50% pedindo refinamento do código (feedback); N = 4 gerações encadeadas (decomposicao); três modelos em papéis distintos (LM gerador, VLM descritor, RLM avaliador) cujas saídas alimentam uns aos outros (multiagente). mecanismos_acrescentados tomados em relação à população inicial (geração 0: instrucao, exemplos, contexto e feedback do self-debugging), que a Figura 2 reporta; feedback já está na base e por isso não é listado como acrescentado, embora a evolução acrescente feedback visual. Contrafactual: a Figura 2 mostra só a contribuição por geração dentro da mesma execução (cumulativo); a Tabela I compara com 3D-Premise e CADCodeVerify, sistemas diferentes com valores obtidos de [1], e não com uma condição sem a técnica em condições comparáveis. Pacote híbrido: inclui renderização, seleção probabilística com λ = 0,5, elitismo, temperatura e orçamento de população/gerações (ver componentes_fora_escopo). As variantes EvoCAD-4v e EvoCAD-4o diferem só no modelo (GPT-4V ou GPT-4o), não na técnica."
+      },
+      {
+        "nome_original": "Initialization (few-shot samples from the CADQuery documentation)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B (Initialization) e Algoritmo 1, linhas 1-5, p. 3; Seção IV.A, p. 4",
+        "observacao": "O LM recebe o prompt p e k = 5 amostras sorteadas de S (40 amostras da documentação do CADQuery) e é instruído a gerar código CADQuery; repetido M = 6 vezes. Os exemplos de código da documentação entram como demonstração (exemplos e contexto). Não há condição sem exemplos."
+      },
+      {
+        "nome_original": "Self-debugging",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B (Initialization), p. 3",
+        "observacao": "Uma única tentativa, com a mensagem de erro fornecida ao LM, quando o código gerado não compila, seguindo a estratégia de [4]. Sem ablação."
+      },
+      {
+        "nome_original": "Evaluation (VLM chain-of-thought description and RLM ranking)",
+        "mecanismos": ["instrucao", "raciocinio", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": ["raciocinio", "multiagente", "amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B (Evaluation) e Algoritmo 1, linhas 7-11, p. 3; Seção IV.A, p. 4",
+        "observacao": "Avaliação de aptidão em duas etapas: o VLM descreve cada objeto renderizado com chain-of-thought; o RLM (o3-mini) compara as descrições com o prompt e entre si e ranqueia os objetos, três vezes, com média dos ranques; os ranques definem a seleção. Temperatura 0,2. O estudo não compara com uma avaliação de etapa única nem com outro critério de aptidão."
+      },
+      {
+        "nome_original": "Crossover",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "feedback", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B (Crossover), Equação 1 e Algoritmo 1, linhas 12-13, p. 3",
+        "observacao": "Pares de pais escolhidos por escolha aleatória ponderada a partir dos ranques médios (amostragem); o LM recebe os códigos dos dois objetos, suas descrições pelo VLM (feedback visual) e o prompt, e é instruído a analisar semelhanças, pontos fortes e fracos e combiná-los (raciocinio). mecanismos_acrescentados vazio: componente interno sem prompt base próprio identificável. Sem ablação."
+      },
+      {
+        "nome_original": "Mutation",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B (Mutation) e Algoritmo 1, linha 14, p. 3; Seção IV.A, p. 4",
+        "observacao": "Com probabilidade p_m = 50%, o LM recebe o código do descendente e o prompt e é instruído a refinar e melhorar o código (autorrefinamento, classificado como feedback). mecanismos_acrescentados vazio: componente interno sem prompt base próprio identificável. Sem ablação."
+      },
+      {
+        "nome_original": "3D-Premise",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção II.B, p. 2; Seção IV.A, p. 4; Tabela I e Figura 2, p. 5",
+        "observacao": "Descrito como fornecimento ao VLM de prompts adicionais de refinamento em laço para corrigir discrepâncias; baseado em GPT-4V; valores obtidos de [1], não executados pelos autores. Outros ingredientes (por exemplo, exemplos no prompt) não são descritos neste estudo; mecanismos não isolados."
+      },
+      {
+        "nome_original": "CADCodeVerify",
+        "mecanismos": ["instrucao", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção II.B, p. 2; Seção IV.A, p. 4; Tabela I e Figura 2, p. 5",
+        "observacao": "Descrito como geração de um catálogo de perguntas sobre o objeto a partir do prompt, seguida de refinamento pelo VLM com essas perguntas (decomposicao e feedback); baseado em GPT-4V; valores obtidos de [1], não executados pelos autores. O texto diz que k = 5 exemplos foram escolhidos 'Similar to [1]', mas não descreve os exemplos usados por CADCodeVerify; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LLMs temperature (0.2 evaluation / 0.5 generation)",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,2 para descrição visual e ranqueamento e 0,5 para inicialização, crossover e mutação; a temperatura não nula é citada como fonte de diversidade da população inicial.",
+        "localizador": "Seção III.B, p. 3; Seção IV.A, p. 4"
+      },
+      {
+        "nome_original": "Population size M = 6 and N = 4 generations",
+        "natureza": "orcamento",
+        "descricao": "Tamanho da população e número de gerações, limitados pelo número crescente de chamadas à API de LLMs; determinam o orçamento de chamadas do pacote.",
+        "localizador": "Seção IV.A, p. 4; Seção V, p. 7"
+      },
+      {
+        "nome_original": "Exponential selection distribution (λ = 0.5), mutation probability p_m and elitism",
+        "natureza": "outro",
+        "descricao": "Operadores do algoritmo evolutivo fora do prompt: conversão dos ranques em probabilidades exponenciais (Equação 1), probabilidade de mutação de 50% e um elite movido sem modificação para a geração seguinte.",
+        "localizador": "Seção III.B e Equação 1, p. 3; Seção IV.A, p. 4"
+      },
+      {
+        "nome_original": "Renderer ϕ (multiview images)",
+        "natureza": "outro",
+        "descricao": "Compilação e renderização de cada código CAD em imagem multivista, insumo do VLM; ferramenta, não prompt.",
+        "localizador": "Algoritmo 1, linha 8, p. 3"
+      },
+      {
+        "nome_original": "GPT-4V vs. GPT-4o (EvoCAD-4v / EvoCAD-4o)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo gerador e descritor sem alterar o método; o RLM é o3-mini em ambos.",
+        "localizador": "Seção IV.A, p. 4; Tabela I, p. 5"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4V (LM gerador e VLM descritor em EvoCAD-4v)", "versao": "nao_informado", "localizador": "Seção IV.A, p. 4"},
+      {"nome": "GPT-4o (LM gerador e VLM descritor em EvoCAD-4o)", "versao": "nao_informado", "localizador": "Seção IV.A, p. 4"},
+      {"nome": "o3-mini (RLM avaliador em todos os experimentos)", "versao": "nao_informado", "localizador": "Seção IV.A, p. 4"},
+      {"nome": "Modelo de 3D-Premise e CADCodeVerify (descritos como baseados no mesmo modelo, GPT-4V)", "versao": "nao_informado", "localizador": "Seção IV.A, p. 4"}
+    ],
+    "benchmarks": [
+      {"nome": "CADPrompt [1]", "quantidade": "200 amostras (conjunto completo); métricas calculadas sobre o subconjunto conjunto de objetos watertight, 'approximately' 80% do conjunto (número exato nao_informado)", "localizador": "Seção IV.A e IV.B, p. 4"},
+      {"nome": "Conjunto S de amostras da documentação do CADQuery (pool de exemplos few-shot, não é benchmark de avaliação)", "quantidade": "40 amostras, das quais k = 5 sorteadas por geração inicial", "localizador": "Seção IV.A, p. 4"}
+    ],
+    "metricas": [
+      {"nome": "Topology correctness T_corr (%)", "definicao": "indicador de que a característica de Euler do objeto gerado coincide com a do ground truth (Eq. 7); percentual de amostras topologicamente corretas no subconjunto watertight conjunto; métrica proposta pelo estudo", "localizador": "Seção IV.B, Eq. 7, p. 4; Figura 2, p. 5"},
+      {"nome": "Topology error T_err", "definicao": "|χ(O) − χ(Ô)| (Eq. 6), média no subconjunto; métrica proposta pelo estudo", "localizador": "Seção IV.B, Eq. 6, p. 4; Figura 2, p. 5"},
+      {"nome": "Point cloud distance (PCD)", "definicao": "Eq. 2, após normalização e alinhamento ICP", "localizador": "Seção IV.B, p. 4"},
+      {"nome": "Hausdorff distance (HDD)", "definicao": "Eq. 3, após normalização e alinhamento ICP", "localizador": "Seção IV.B, p. 4"},
+      {"nome": "Intersection over Union (IoU, %)", "definicao": "Eq. 4", "localizador": "Seção IV.B, p. 4"},
+      {"nome": "Dice coefficient (DSC, %)", "definicao": "Eq. 5", "localizador": "Seção IV.B, p. 4"}
+    ],
+    "linguagens": ["Python (CADQuery)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Código CAD gerado pode não compilar; o método aplica uma tentativa de self-debugging.", "localizador": "Seção III.B, p. 3"},
+      {"categoria": "correcao_funcional", "descricao": "Objetos gerados podem não ser watertight, sem volume fechado nem χ válido, tornando inviável o cálculo das métricas de volume e topologia (exemplo de CADCodeVerify na Figura 3, linha 4).", "localizador": "Seção IV.C (Qualitative evaluation), p. 5; Figura 3, p. 6"},
+      {"categoria": "custo", "descricao": "População e número de gerações limitados pelo número crescente de chamadas à API de LLMs; custo não quantificado.", "localizador": "Seção V, p. 7"},
+      {"categoria": "outro", "descricao": "Limitação: população pequena e poucas gerações podem levar a potencial não realizado por exploração insuficiente e exploração prematura.", "localizador": "Seção V, p. 7"},
+      {"categoria": "outro", "descricao": "Validade das métricas espaciais: objetos com topologia incorreta podem ter métricas espaciais melhores que os de topologia correta.", "localizador": "Seção IV.C (Quantitative evaluation), p. 5"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Uma tentativa de self-debugging com a mensagem de erro para código não compilável.", "avaliada": "nao", "localizador": "Seção III.B, p. 3"},
+      {"descricao": "Ranqueamento repetido três vezes, com média dos ranques.", "avaliada": "nao", "localizador": "Seção III.B, p. 3"},
+      {"descricao": "Elitismo (um elite) para que o melhor objeto corrente não se deteriore.", "avaliada": "nao", "localizador": "Seção IV.A, p. 4"},
+      {"descricao": "Temperatura mais baixa (0,2) nas tarefas de avaliação para avaliação mais objetiva.", "avaliada": "nao", "localizador": "Seção IV.A, p. 4"},
+      {"descricao": "Três execuções independentes por modelo, com médias e desvios-padrão.", "avaliada": "nao", "localizador": "Seção IV.A, p. 4; Tabela I, p. 5"},
+      {"descricao": "Cálculo de todas as métricas sobre o mesmo subconjunto watertight conjunto, com normalização e alinhamento ICP, para comparação justa.", "avaliada": "nao", "localizador": "Seção IV.B, p. 4"},
+      {"descricao": "Uso do mesmo modelo (GPT-4V) que os métodos anteriores para comparação justa.", "avaliada": "nao", "localizador": "Seção IV.A, p. 4"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "3D-Premise e CADCodeVerify na Tabela I e na Figura 2 (mesmo benchmark e métricas), com dados de desempenho obtidos de [1], não executados pelos autores",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Os valores dos comparadores são 'obtained from [1]', mas o estudo afirma que todas as métricas são médias sobre o mesmo subconjunto watertight conjunto e T_corr e T_err são métricas novas propostas aqui; o estudo não descreve como esses valores foram obtidos para os comparadores (por exemplo, recálculo a partir das saídas de [1]). Aparente inconsistência de procedência.", "localizador": "Seção IV.A e IV.B, p. 4; Tabela I, p. 5"},
+      {"descricao": "Condições discrepantes entre EvoCAD e comparadores: EvoCAD usa população de 6, 4 gerações, ranqueamento triplo por o3-mini, crossover e mutação (muitas chamadas de LLM), enquanto os comparadores refinam uma única resposta; não há comparador com orçamento equivalente. Comparadores sem desvio-padrão e sem número de execuções informado.", "localizador": "Seção II.B, p. 2; Seção IV.A, p. 4; Tabela I, p. 5"},
+      {"descricao": "Inversão: IoU de EvoCAD-4v (69.7) é menor que o de CADCodeVerify (69.8), reconhecido pelo estudo.", "localizador": "Tabela I e Seção IV.C, p. 5"},
+      {"descricao": "Narrativa de superioridade 'significantly' sem teste estatístico relatado; por exemplo, EvoCAD-4o 'significantly outperforms both prior methods across all evaluation metrics', mas IoU 69.9 (DP 1.0) contra 69.8 e DSC 79.4 (DP 0.8) contra 79.0.", "localizador": "Seção IV.C, p. 5; Tabela I, p. 5"},
+      {"descricao": "Divergência entre métricas nos comparadores: CADCodeVerify supera 3D-Premise em T_corr (80.5 vs. 79.9) mas fica atrás em T_err (0.629 vs. 0.579).", "localizador": "Tabela I e Seção IV.C, p. 5"},
+      {"descricao": "Efeito do modelo confundido com o do método: o estudo diz que GPT-4o já supera os comparadores na geração inicial, antes da otimização evolutiva, e atribui parte do resultado de EvoCAD-4o às capacidades do GPT-4o.", "localizador": "Seção IV.C, p. 5; Figura 2, p. 5"},
+      {"descricao": "Na geração inicial, EvoCAD-4v fica abaixo dos comparadores (Figura 2); o estudo atribui isso a comparar objetos sem feedback com objetos finais refinados dos comparadores. Os valores por geração não são rotulados na figura e não foram estimados aqui.", "localizador": "Seção IV.C (Optimization), p. 5; Figura 2, p. 5"},
+      {"descricao": "Denominador impreciso: as métricas usam o subconjunto watertight conjunto que 'approximately represents 80%' de 200 amostras; o número exato não é informado e objetos não watertight ficam fora de T_corr e T_err, de modo que falhas de geração não entram no percentual.", "localizador": "Seção IV.B, p. 4; Seção IV.C, p. 5"},
+      {"descricao": "Figura 3, última linha: o valor de 3D-Premise (χ = −2) é igual ao do ground truth (χ = −2), mas aparece em vermelho na imagem da página, cor que a legenda reserva para desvio. Aparente inconsistência entre cor e valor (leitura visual da página rasterizada). Os exemplos qualitativos não têm critério de seleção informado.", "localizador": "Figura 3 e legenda, p. 6"},
+      {"descricao": "Legenda da Figura 2 descreve T_err como 'average difference' entre características de Euler, enquanto a Eq. 6 define a diferença absoluta; o texto também afirma uma 'small negative correlation' entre métricas topológicas e espaciais sem quantificá-la.", "localizador": "Figura 2, p. 5; Seção IV.B, Eq. 6, p. 4; Seção IV.C, p. 5"}
+    ],
+    "observacoes": [
+      {"descricao": "Figura 2: evolução de T_corr e T_err por geração (0 a 4), com faixa de desvio-padrão de três execuções e linhas de referência dos comparadores; é contribuição cumulativa por geração, não contraste com condição sem a técnica.", "localizador": "Figura 2 e Seção IV.C, p. 5"},
+      {"descricao": "O estudo não informa qual objeto da população final é avaliado (presumivelmente o de maior aptidão; não declarado) nem como as métricas da geração 0 são calculadas sobre a população.", "localizador": "Seções III.B, p. 3, e IV.C, p. 5"},
+      {"descricao": "Os textos completos dos prompts de inicialização, descrição, ranqueamento, crossover e mutação não são apresentados no artigo.", "localizador": "Seção III.B, p. 3"},
+      {"descricao": "A Figura 3 traz comparação qualitativa em sete prompts do CADPrompt, com χ de cada objeto.", "localizador": "Figura 3, p. 6"},
+      {"descricao": "O estudo também propõe duas métricas topológicas baseadas na característica de Euler, o que é contribuição de avaliação e não técnica de prompting.", "localizador": "Seção I, p. 1; Seção IV.B, p. 4"},
+      {"descricao": "Repositório de código impresso (https://github.com/toprei/evo-cad); não acessado nem validado nesta extração.", "localizador": "Seção I, p. 1"},
+      {"descricao": "Normalização e alinhamento ICP antes das métricas espaciais (procedimento de avaliação).", "localizador": "Seção IV.B, p. 4"}
+    ],
+    "citacoes": [
+      {"trecho": "In this work, we present EvoCAD, a method for generating computer-aided design (CAD) objects through their symbolic representations using vision language models and evolutionary optimization.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Our method samples multiple CAD objects, which are then optimized using an evolutionary approach with vision language and reasoning language models.", "localizador": "Resumo, p. 1"},
+      {"trecho": "During initialization, a language model LM takes the prompt p and k randomly selected few-shot samples from the CADQuery documentation.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "The LM is asked to generate CADQuery code for the object described in p.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "If a generated code is not compilable, we apply one attempt of self-debugging following the strategy outlined in [4] by providing the output error message to the LM.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "First, a vision-language model VLM is prompted to generate a textual description of each object using chain-of-thought prompting [27].", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "In the second step, a reasoning language model RLM takes these object descriptions, carefully compares them to the prompt and to each other, and finally ranks the objects from best alignment to the prompt to worst.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "In each evaluation, the ranking procedure is performed three times, and the average object rankings are calculated.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "During the mating process, we give the LM the CAD codes of the two objects, their respective descriptions, and the prompt.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "Provided with this information, we ask the model to analyze similarities, strengths and weaknesses of the respective CAD codes, and to combine them in a complementary way to generate an improved version.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "If selected, we provide the offspring’s CAD code and prompt to the LM and request that the model refine and improve the code.", "localizador": "Seção III.B, p. 3"},
+      {"trecho": "3D-Premise [29] removes the need for user intervention by providing a VLM additional refinement prompts in the loop to correct any discrepancies.", "localizador": "Seção II.B, p. 2"},
+      {"trecho": "Their method first generates a question catalog about the object using the prompt, in a second step the VLM utilizes these questions for refinement.", "localizador": "Seção II.B, p. 2"},
+      {"trecho": "Experiments are conducted using GPT-4V [15] as generating LM and visually analyzing VLM, allowing a fair comparison to the prior methods 3D-Premise [29] and CADCodeVerify [1], which are based on the same model.", "localizador": "Seção IV.A, p. 4"},
+      {"trecho": "Performance data for these methods is obtained from [1].", "localizador": "Seção IV.A, p. 4"},
+      {"trecho": "Similar to [1], we set the number of few-shot samples k to 5 for initialization by leveraging a set S of 40 samples from the CADQuery documentation.", "localizador": "Seção IV.A, p. 4"},
+      {"trecho": "Additionally, we chose the number of elites to be one, i.e., we move the object with the highest fitness unmodified to the next generation, ensuring that the current best object does not deteriorate.", "localizador": "Seção IV.A, p. 4"},
+      {"trecho": "To enable a fair quantitative comparison, all metrics depict the average values calculated over the same watertight joint subset, which approximately represents 80% of the full dataset.", "localizador": "Seção IV.B, p. 4"},
+      {"trecho": "For non-watertight objects, neither a closed volume nor a valid χ exists, making the calculation of volume or topology metrics infeasible.", "localizador": "Seção IV.C, p. 5"},
+      {"trecho": "We have frequently observed that objects with incorrect topologies can have better spatial metrics than those with correct topologies.", "localizador": "Seção IV.C, p. 5"},
+      {"trecho": "A current limitation of this work is the relatively small population size and number of optimization generations, because of the growing number of required LLM API calls as these parameters increase.", "localizador": "Seção V, p. 7"},
+      {"trecho": "In some samples, this may lead to unrealized potential due to insufficient exploration and early exploitation.", "localizador": "Seção V, p. 7"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "EvoCAD",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "multiagente", "amostragem"],
+      "comparador": "3D-Premise (valores obtidos de [1]; descrito como baseado em GPT-4V)",
+      "modelo": "GPT-4V como LM gerador e VLM (snapshot nao_informado); o3-mini como RLM avaliador (EvoCAD-4v)",
+      "benchmark": "CADPrompt (200 amostras; métricas no subconjunto watertight conjunto, aproximadamente 80%)",
+      "metrica": "T_corr (%) — topology correctness: percentual de amostras cuja característica de Euler coincide com a do ground truth",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 79.9, "intervencao": 82.4},
+      "denominador": "nao_informado: subconjunto watertight conjunto de 'approximately' 80% das 200 amostras; número exato não informado",
+      "condicoes": "EvoCAD-4v: média de três execuções independentes (DP 2.3); população M = 6, N = 4 gerações, k = 5 exemplos de 40 amostras da documentação do CADQuery, mutação 50%, λ = 0,5, um elite, temperatura 0,2 (avaliação) e 0,5 (geração). 3D-Premise: valor obtido de [1], sem DP nem número de execuções informados, refinamento de uma única resposta; não há comparador com orçamento equivalente. O ganho é do pacote EvoCAD (incluindo componentes fora do escopo), não de um ingrediente. Nenhum teste estatístico relatado. Valores conferidos visualmente na Tabela I (PDF p. 5).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo destaca vários comparadores ('previous approaches'), várias métricas e dois modelos. A Tabela I é a primeira tabela com o contraste; primeira métrica (T_corr), primeiro modelo listado (EvoCAD-4v, GPT-4V) e primeira linha de base listada (3D-Premise). Única técnica focal e única tarefa; não há tabela de ablação nem matriz de ingredientes para cobertura; EvoCAD-4o difere só no modelo e não é cobertura.",
+      "derivacao": "direta",
+      "localizador": "Tabela I, p. 5 (PDF p. 5); Seção IV.A, p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "3D-Premise [29] 79.9 0.579 0.0660 0.189 68.2 77.6", "localizador": "Tabela I, p. 5; colunas Method, T_corr (%) ↑, T_err ↓, PCD ↓, HDD ↓, IoU (%) ↑, DSC (%) ↑"},
+        {"trecho": "EvoCAD-4v 82.4 (2.3) 0.446 (0.069) 0.0626 (0.0007) 0.180 (0.002) 69.7 (0.4) 79.1 (0.2)", "localizador": "Tabela I, p. 5; colunas Method, T_corr (%) ↑, T_err ↓, PCD ↓, HDD ↓, IoU (%) ↑, DSC (%) ↑"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Propõe e investiga explicitamente o EvoCAD e métricas topológicas, com lista de contribuições.", "localizador": "Resumo e Seção I, p. 1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Algoritmo e parâmetros descritos (M, N, k, p_m, λ, elitismo, temperaturas, três execuções), mas os textos dos prompts não são apresentados e não se informa qual objeto final é avaliado nem como a geração 0 é medida.", "localizador": "Seção III.B e Algoritmo 1, p. 3; Seção IV.A, p. 4"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Compara com 3D-Premise e CADCodeVerify no mesmo benchmark e modelo declarado, mas com valores obtidos de [1], sem reexecução, com orçamento de chamadas muito diferente e sem ablação ou linha de base de mesmo orçamento.", "localizador": "Seção IV.A, p. 4; Tabela I, p. 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas por equações e com DP de três execuções para EvoCAD, mas o denominador é só aproximado (cerca de 80% de 200), objetos não watertight são excluídos, não há teste estatístico apesar de 'significantly' e a procedência dos valores topológicos dos comparadores não é descrita; Figura 2 sem valores rotulados para confronto com a Tabela I.", "localizador": "Seção IV.B, p. 4; Tabela I e Figura 2, p. 5"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute a limitação de população e gerações pequenas e a relação entre métricas topológicas e espaciais; não discute procedência dos comparadores, contaminação nem confusão entre modelo e método.", "localizador": "Seção IV.C, p. 5; Seção V, p. 7"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelos (sem snapshot), parâmetros e temperaturas e imprime link de código (não validado aqui); prompts não constam do artigo.", "localizador": "Seção I, p. 1; Seção IV.A, p. 4"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não discute possível presença do CADPrompt no pré-treinamento nem sobreposição entre as amostras da documentação do CADQuery e o benchmark.", "localizador": "texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 3, 4, 5, 6],
+    "observacao": "Texto extraído lido integralmente (443 linhas). Páginas abertas para conferir versão, método e Algoritmo 1, configuração experimental e métricas, Tabela I e Figura 2, e Figura 3."
+  }
+}

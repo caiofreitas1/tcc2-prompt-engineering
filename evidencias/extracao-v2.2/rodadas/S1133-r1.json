@@ -1,0 +1,306 @@
+{
+  "estudo": "S1133",
+  "texto_fonte": "fontes/textos/lote/S1133.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2512.14048v1 [cs.AI], 16 dez. 2025 (Li et al., 'Intention Chain-of-Thought Prompting with Dynamic Routing for Code Generation'); nota de copyright AAAI 2026 na p. 1; o PDF não traz números de página impressos, os localizadores usam a posição no PDF (p. 1-7 corpo; p. 8-9 referências; p. 10 em diante apêndice)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RoutingGen (difficulty-aware dynamic routing framework)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes", "outro"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo e Introdução, p. 1-2; Metodologia, p. 3-4; Tabela 1, p. 5; Tabela 2, p. 6",
+        "observacao": "Pacote: um LLM classificador (Qwen3-8B), instruído por um prompt de classificação, atribui a cada problema o rótulo Simple ou Complex e gera uma justificativa textual (instrucao, raciocinio); problemas Simple recebem few-shot com três exemplos pergunta-código (instrucao, exemplos); problemas Complex recebem ICoT em dois estágios (exemplos, raciocinio, decomposicao, restricoes). 'outro' = roteamento por dificuldade, isto é, seleção da estratégia de prompting conforme o rótulo previsto por um LLM. Base identificável: zero-shot (as variações relativas da Tabela 1 são sobre zero-shot). Contrafactual de pacote: RoutingGen contra zero-shot, few-shot, ICoT estático e demais linhas de base na Tabela 1, mesmos modelos e benchmarks. O 'sim' vale para o pacote; o ganho não se atribui a um ingrediente isolado. A escolha do modelo classificador (Qwen3-8B, GPT-4o ou o próprio gerador) é seleção de modelo, fora do escopo. O prompt de classificação T_cls não é apresentado no artigo."
+      },
+      {
+        "nome_original": "Intention Chain-of-Thought (ICoT) / ICoT-Guided Generation",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Metodologia, 'ICoT-Guided Generation', p. 3-4; 'Effectiveness of ICoT Prompting', p. 6; Tabela 1, p. 5; apêndice 'ICoT-Guided Generation Prompt'",
+        "observacao": "Estágio 1: o modelo recebe o problema e três exemplos resolvidos e é instruído a produzir um 'structured solving process' no formato '1: Specification' (entrada e saída) e '2: Idea' (lógica central e complexidade de tempo); são amostradas 20 cadeias (5 no DeepSeek-V3). Estágio 2: o código é gerado por decodificação gulosa condicionado ao problema e a cada ICoT, também com três exemplos. Mecanismos: instrucao (pedido de análise, instrução de conferir o processo de solução), exemplos (três exemplos nos dois estágios), raciocinio (Idea com lógica e complexidade), decomposicao (dois estágios encadeados: intenção e depois código), restricoes (formato estruturado imposto e especificação de entrada e saída). As 20 cadeias não são seguidas de seleção (Pass@1 é estimado sobre os candidatos), por isso não há amostragem. Contrafactual de pacote: ICoT estático ('without dynamic routing') contra zero-shot e demais linhas de base na Tabela 1, e contra a variante 'w/o Intermediate Reasoning' na Figura 4 (DeepSeek-V3, valores não impressos)."
+      },
+      {
+        "nome_original": "Specification (estágio/elemento do ICoT)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Figura 4 e 'Effectiveness of ICoT Components', p. 7",
+        "observacao": "Elemento que define as restrições de entrada e saída, gerado pelo modelo sob o formato pedido; classificado como restricoes (especificação). Ablação 'w/o Specification' contra ICoT completo com DeepSeek-V3-671B nos seis benchmarks (Figura 4, sem rótulos numéricos); valores impressos só na prosa para HumanEval (92,07% para 88,17%). Como o prompt da variante ablada foi ajustado (por exemplo, nos exemplos) não é informado."
+      },
+      {
+        "nome_original": "Idea (estágio/elemento do ICoT)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Figura 4 e 'Effectiveness of ICoT Components', p. 7",
+        "observacao": "Elemento que resume a lógica algorítmica central e estima a complexidade de tempo (raciocinio). Ablação 'w/o Idea' contra ICoT completo com DeepSeek-V3-671B (Figura 4, sem rótulos numéricos); valores impressos só na prosa para McEval (67,20% para 59,20%)."
+      },
+      {
+        "nome_original": "Difficulty-Aware Dynamic Routing (módulo de roteamento do RoutingGen)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Metodologia, p. 3; 'Effectiveness of ICoT Prompting', p. 6; Tabelas 1 e 2, p. 5-6",
+        "observacao": "Classificador LLM instruído que rotula o problema (Simple/Complex) com justificativa; 'outro' = roteamento por dificuldade. Contrafactual: RoutingGen (com roteamento) contra ICoT em configuração estática sem roteamento, mesmos modelos, benchmarks e parâmetros (Tabelas 1 e 2); a retirada do roteamento também muda a estratégia aplicada aos problemas Simple (few-shot em vez de ICoT), de modo que o contraste mede o roteamento junto com o uso de few-shot nesses problemas. Variações do classificador (Qwen3-8B, GPT-4o, auto-roteamento) não são condições sem roteamento."
+      },
+      {
+        "nome_original": "zero-shot",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Tabela 1, p. 5; 'Sampling Settings', p. 5",
+        "observacao": "Linha de base de geração direta: problema (assinatura e docstring) sem exemplos; temperatura 0,8, top-p 0,95, até 300 tokens, 20 candidatos. Referência das variações relativas impressas entre parênteses na Tabela 1. O texto do prompt não é apresentado."
+      },
+      {
+        "nome_original": "few-shot",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Tabela 1, p. 5; 'Sampling Settings', p. 5; apêndice 'Few-shot Generation Prompt'",
+        "observacao": "Três exemplos pergunta-código fixos (reverse_String, sum_Of_Squares, binary_Search), mesma configuração de amostragem do zero-shot; é também o ramo Simple do RoutingGen. Contraste com zero-shot na Tabela 1 nas mesmas condições; o estudo trata essa linha como comparador, sem analisar o efeito dos exemplos."
+      },
+      {
+        "nome_original": "Self-CoT",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "'Baselines', p. 4; 'Sampling Settings', p. 5; Tabela 1, p. 5",
+        "observacao": "Raciocínio em linguagem natural antes do código final. Comprimento máximo estendido para 600 tokens (300 nas demais abordagens de um estágio), o que torna a comparação com zero-shot não idêntica em decodificação. Uso de exemplos no prompt nao_informado; o texto do prompt não é apresentado."
+      },
+      {
+        "nome_original": "Zero-shot-CoT (ZS-CoT)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "'Baselines', p. 4; Tabela 1, p. 5",
+        "observacao": "Prefixo simples que induz raciocínio em múltiplos passos, sem exemplos. Contraste com zero-shot na Tabela 1; o estudo não analisa o ingrediente."
+      },
+      {
+        "nome_original": "Self-planning (SP)",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "'Baselines', p. 4; 'Sampling Settings', p. 5; Tabela 1, p. 5",
+        "observacao": "Dois estágios: plano de subtarefas numeradas e depois código; 20 planos com temperatura 0,8 e código com temperatura 0 (5 candidatos no DeepSeek-V3). Uso de exemplos no prompt nao_informado neste artigo; o texto do prompt não é apresentado."
+      },
+      {
+        "nome_original": "SCoT (Structured Chain-of-Thought)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "'Baselines', p. 4; 'Sampling Settings', p. 5; Tabela 1, p. 5; Figura 1(B), p. 2; apêndice, Tabela 5, p. 11",
+        "observacao": "Raciocínio com estruturas sequenciais, de ramificação e de laço, com entrada e saída explícitas (Figura 1(B)) (raciocinio, restricoes); multiestágio, com 20 cadeias e código determinístico (decomposicao); usa exemplos ('Few-shot-CoT uses the same number of exemplars as SCoT and ICoT', p. 11). Mesmos ingredientes de categoria que o ICoT; difere na forma do raciocínio. Contraste com zero-shot na Tabela 1."
+      },
+      {
+        "nome_original": "few-shot-CoT",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Apêndice, Tabelas 5 e 6 e texto, p. 11",
+        "observacao": "Só nas avaliações do apêndice (HumanEval-X C++ e LiveCodeBench): mesmo número de exemplos de SCoT e ICoT, com outra forma de cadeia de raciocínio. Contraste com zero-shot nas mesmas tabelas; modelo usado pelas linhas de base dessas tabelas nao_informado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {"nome_original": "Escolha do classificador de dificuldade (Qwen3-8B, GPT-4o; RG-Qwen, RG-GPT)", "natureza": "selecao_modelo", "descricao": "Troca do modelo que executa a classificação, sem alteração descrita do prompt; Tabelas 3, 7 e 8 comparam os classificadores. Diferenças entre RG-Qwen e RG-GPT não são efeito de prompting.", "localizador": "'Large Language Models', p. 4; Tabela 3, p. 7; apêndice, Tabelas 7 e 8, p. 12-13"},
+      {"nome_original": "Modelos geradores (Qwen2.5-Coder-3B-Instruct, DeepSeek-Coder-6.7B-Instruct, DeepSeek-V3-671B)", "natureza": "selecao_modelo", "descricao": "Fator modelo das tabelas de resultados; diferenças entre modelos não são efeito de prompting.", "localizador": "'Large Language Models', p. 4; Tabela 1, p. 5"},
+      {"nome_original": "Parâmetros de decodificação (nucleus sampling, temperatura, top-p, comprimento máximo, decodificação gulosa)", "natureza": "decodificacao", "descricao": "Temperatura 0,8, top-p 0,95 e até 300 tokens nas abordagens de um estágio; 600 tokens no Self-CoT; nos multiestágio, cadeias com temperatura 0,8 e código com temperatura 0, ambos limitados a 300 tokens.", "localizador": "'Sampling Settings', p. 5; Metodologia, p. 3-4"},
+      {"nome_original": "Número de candidatos por problema (n = 20; 5 no DeepSeek-V3)", "natureza": "orcamento", "descricao": "Orçamento de amostragem; reduzido a 5 candidatos no DeepSeek-V3 'due to API constraints'.", "localizador": "'Sampling Settings', p. 5"},
+      {"nome_original": "Rótulos de dificuldade fornecidos pelos conjuntos (McEval; LiveCodeBench)", "natureza": "outro", "descricao": "No McEval o roteamento usa os rótulos do lançamento original (tokens de roteamento 0 na Tabela 2) e no LiveCodeBench os rótulos do conjunto; não há classificação por prompt nesses casos.", "localizador": "'Benchmarks', p. 4; Tabela 2, p. 6; apêndice, p. 11"}
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-Coder-3B-Instruct (gerador)", "versao": "nao_informado", "localizador": "'Large Language Models', p. 4"},
+      {"nome": "DeepSeek-Coder-6.7B-Instruct (gerador; grafado 'DeepSeekCoder-6.7B-Instruction' no apêndice)", "versao": "nao_informado", "localizador": "'Large Language Models', p. 4; apêndice, p. 11-13"},
+      {"nome": "DeepSeek-V3 (gerador; 671B parâmetros totais, Mixture-of-Experts; acesso por API)", "versao": "nao_informado (snapshot da API e data de acesso não informados)", "localizador": "'Large Language Models', p. 4; 'Sampling Settings', p. 5"},
+      {"nome": "Qwen3-8B (classificador de dificuldade padrão)", "versao": "nao_informado", "localizador": "'Difficulty-Aware Classifier', p. 4"},
+      {"nome": "GPT-4o (classificador alternativo)", "versao": "nao_informado", "localizador": "Tabela 3, p. 7; apêndice, Tabelas 7 e 8, p. 12-13"}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval", "quantidade": "164 problemas Python (cerca de 7,7 testes por problema, segundo o apêndice); classificador Qwen3-8B: 53 Simple, 111 Complex", "localizador": "'Benchmarks', p. 4; apêndice, p. 10; Tabela 3, p. 7"},
+      {"nome": "HumanEval-ET", "quantidade": "Extensão do HumanEval com 'around 100' (p. 4) ou 'over 100' (apêndice) testes adicionais por problema; número de problemas não impresso (nao_informado)", "localizador": "'Benchmarks', p. 4; apêndice, p. 10"},
+      {"nome": "MBPP-sanitized", "quantidade": "427 tarefas Python com três testes cada; Qwen3-8B: 275 Simple, 152 Complex", "localizador": "'Benchmarks', p. 4; Tabela 3, p. 7"},
+      {"nome": "MBPP-ET", "quantidade": "Extensão do MBPP com cerca de/mais de 100 testes adicionais por problema; número de problemas não impresso (nao_informado)", "localizador": "'Benchmarks', p. 4; apêndice, p. 10"},
+      {"nome": "OpenEval", "quantidade": "178 problemas derivados do AVATAR, com cinco testes escritos manualmente; Qwen3-8B: 64 Simple, 114 Complex", "localizador": "'Benchmarks', p. 4; apêndice, p. 10; Tabela 3, p. 7"},
+      {"nome": "McEval (subconjunto Python)", "quantidade": "50 problemas; rótulos de dificuldade do lançamento original (Figura 3: 60,00% Simple)", "localizador": "'Benchmarks', p. 4; Figura 3, p. 5"},
+      {"nome": "HumanEval-X (subconjunto C++)", "quantidade": "nao_informado", "localizador": "Apêndice, Tabela 5, p. 11"},
+      {"nome": "LiveCodeBench", "quantidade": "nao_informado (versão e janela de problemas também não informadas)", "localizador": "Apêndice, Tabela 6, p. 11"}
+    ],
+    "metricas": [
+      {"nome": "Pass@k (relatado como Pass@1)", "definicao": "Estimador não enviesado da probabilidade de ao menos um de k candidatos amostrados de n gerados passar em todos os testes, com esperança sobre os problemas; n = 20 candidatos (5 no DeepSeek-V3). Denominador: problemas de cada benchmark (164, 427, 178, 50; não impresso para HumanEval-ET, MBPP-ET, HumanEval-X e LiveCodeBench). Valores entre parênteses nas Tabelas 1, 4 e 7 são variação relativa sobre zero-shot, não p.p.", "localizador": "'Evaluation Metrics', Eq. 8, p. 4; Tabela 1, p. 5"},
+      {"nome": "Total token usage (Cost(q) = C_in(q) + C_out(q))", "definicao": "Soma de tokens de entrada e saída por problema, conforme a rota (Eq. 9-11); valores de RoutingGen incluem tokens de roteamento e de inferência; Tabela 2 relata totais por benchmark para SCoT, ICoT e RoutingGen (quatro benchmarks) e reduções absolutas e percentuais (R2S, R2I).", "localizador": "'Evaluation Metrics', Eq. 9-11, p. 4; Tabela 2, p. 6; apêndice, Tabela 8, p. 13"}
+    ],
+    "linguagens": ["Python", "C++ (somente HumanEval-X, apêndice)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Aplicação uniforme de prompting estruturado induz 'overthinking' em tarefas simples, com lógica desorganizada e menor acurácia; o estudo usa quedas de Pass@1 de métodos estruturados abaixo de zero-shot ou few-shot como evidência (por exemplo, Self-CoT com DeepSeek-Coder-6.7B-Instruct no MBPP-ET, 22,99% abaixo do zero-shot, variação relativa).", "localizador": "Introdução, p. 1; Figura 1(A), p. 2; 'Analysis', p. 6; Tabela 1, p. 5"},
+      {"categoria": "correcao_funcional", "descricao": "LLMs tendem a produzir programas sintaticamente corretos que não se alinham à intenção da tarefa, resultando em saídas funcionalmente incorretas (falta de abstração de intenção).", "localizador": "Introdução, p. 1; Figura 1(B), p. 2"},
+      {"categoria": "correcao_funcional", "descricao": "O processo de solução (ICoT) gerado no estágio 1 pode conter erros; o prompt do estágio 2 adverte o modelo sobre isso.", "localizador": "Apêndice, 'ICoT-Guided Generation Prompt', Stage 2"},
+      {"categoria": "custo", "descricao": "Uso indiscriminado de estratégias de prompting complexas aumenta o custo computacional; o estudo quantifica o custo em tokens (entrada e saída), não em dinheiro nem tempo.", "localizador": "'Analysis', p. 6; Tabela 2, p. 6; apêndice, Tabela 8, p. 13"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Roteamento por dificuldade: problemas Simple recebem few-shot direto e Complex recebem ICoT, para evitar raciocínio desnecessário; comparado com ICoT estático e SCoT em Pass@1 (Tabela 1) e tokens (Tabela 2).", "avaliada": "sim", "localizador": "Metodologia, p. 3; Tabelas 1 e 2, p. 5-6"},
+      {"descricao": "Instrução no prompt do estágio 2 para conferir o processo de solução, advertindo que ele pode conter erros; presente em todas as execuções do ICoT, sem condição sem a instrução.", "avaliada": "nao", "localizador": "Apêndice, 'ICoT-Guided Generation Prompt', Stage 2"},
+      {"descricao": "Mesma configuração de amostragem entre métodos e mesmos exemplos few-shot no RoutingGen e na linha de base, para comparação justa (procedimento de controle).", "avaliada": "nao", "localizador": "'Sampling Settings', p. 5"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "zero-shot, few-shot, Self-CoT, ZS-CoT, SP e SCoT executados pelos autores nos mesmos modelos e benchmarks (Tabela 1); few-shot-CoT só no apêndice",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Inversão do ICoT com DeepSeek-V3-671B: no MBPP-sanitized, 80,70% (-9,31%) contra zero-shot 88,99% e few-shot 89,23%; no MBPP-ET, 56,25% (-10,77%) contra zero-shot 63,04%. Percentuais entre parênteses são variação relativa sobre zero-shot.", "localizador": "Tabela 1, p. 5"},
+      {"descricao": "RoutingGen não é o melhor em todas as células: com DeepSeek-Coder-6.7B-Instruct no MBPP-sanitized, few-shot 73,40% contra RoutingGen 72,30%; com DeepSeek-V3-671B no MBPP-ET, few-shot 63,23% contra RoutingGen 63,14%; e RoutingGen fica abaixo do ICoT estático em várias células (por exemplo, Qwen2.5-Coder-3B-Instruct no HumanEval, 76,65% contra 77,10%; McEval com os três modelos). O resumo restringe a alegação a 'most settings'.", "localizador": "Tabela 1, p. 5; Resumo, p. 1"},
+      {"descricao": "Narrativa que contradiz a tabela: o texto afirma que RoutingGen 'consistently outperforms all baseline methods under both classifiers', mas no MBPP-sanitized com DeepSeek-Coder-6.7B-Instruct few-shot tem 73,40%, acima de RG-Qwen (72,30%) e RG-GPT (72,79%); no MBPP-ET com DeepSeek-V3-671B few-shot tem 63,23%, acima de RG-Qwen (63,14%) e RG-GPT (63,09%).", "localizador": "'Robustness to Difficulty Classifier Variants', p. 7; Tabelas 1 e 3, p. 5 e 7; apêndice, Tabela 7, p. 12"},
+      {"descricao": "Valores idênticos em linhas distintas: com DeepSeek-V3-671B, SP repete exatamente os valores de few-shot no OpenEval (42,81% (-8,86%)) e no McEval (51,60% (+55,42%)), nas Tabelas 1 e 7; o estudo não comenta, e não é possível decidir se é coincidência ou erro de transcrição.", "localizador": "Tabela 1, p. 5; apêndice, Tabela 7, p. 12"},
+      {"descricao": "A redução média de 46,37% no total de tokens (resumo e p. 6) não aparece na Tabela 2, cujas médias relativas por modelo e comparador vão de 40,59% a 47,67%; o estudo não explica o cálculo. Cálculo próprio: a soma das reduções médias R2S e R2I dos três modelos (13.200.442) dividida pela soma dos totais médios de SCoT e ICoT (28.468.538) dá 46,37%, o que sugeriria um agregado que mistura dois comparadores e três modelos; a média simples das seis porcentagens 'Avg' daria 45,46% (cálculo próprio). Nenhum valor foi tomado como o procedimento dos autores.", "localizador": "Resumo, p. 1; 'Main Performance', p. 6; Tabela 2, p. 6"},
+      {"descricao": "Ablação dos componentes do ICoT (DeepSeek-V3-671B): a variante 'w/o Intermediate Reasoning' obtém os melhores resultados no MBPP-sanitized e no MBPP-ET, segundo o próprio estudo; a Figura 4 não tem rótulos numéricos e só dois valores de ablação são impressos (HumanEval sem Specification, 88,17%; McEval sem Idea, 59,20%).", "localizador": "Figura 4 e 'Effectiveness of ICoT Components', p. 7"},
+      {"descricao": "Métodos estruturados e few-shot abaixo do zero-shot em várias células (por exemplo, Qwen2.5-Coder-3B-Instruct no HumanEval: few-shot 72,80%, SCoT 65,27% contra zero-shot 75,49%; DeepSeek-Coder-6.7B-Instruct no MBPP-ET: Self-CoT 23,95% contra 31,10%).", "localizador": "Tabela 1, p. 5"},
+      {"descricao": "Condições não idênticas entre métodos: DeepSeek-V3 com 5 candidatos por problema (20 nos demais); Self-CoT com 600 tokens (300 nos demais); métodos multiestágio com código por decodificação gulosa. Os autores declaram que suas linhas de base diferem dos relatos oficiais por usarem instruções padronizadas em vez de prompts otimizados por modelo.", "localizador": "'Sampling Settings', p. 5; 'Main Performance', p. 6"},
+      {"descricao": "Descrições discrepantes: a legenda da Tabela 8 fala em 'five benchmarks', mas a tabela traz quatro (HumanEval, MBPP-sanitized, OpenEval, MCEval); o texto principal diz que os classificadores foram comparados 'on three benchmarks', enquanto a Tabela 7 cobre seis (no McEval RG-Qwen e RG-GPT coincidem porque usam rótulos do conjunto). Os testes adicionais do -ET são 'around 100' na p. 4 e 'over 100' no apêndice, e o apêndice associa HumanEval-ET e MBPP-ET a 'MBPP and HumanEval, respectively' (ordem invertida).", "localizador": "'Benchmarks', p. 4; 'Robustness to Difficulty Classifier Variants', p. 7; apêndice, p. 10, 12 e 13"},
+      {"descricao": "Avaliações do apêndice com condições pouco especificadas: na Tabela 5 (HumanEval-X C++) RoutingGen usa auto-roteamento com DeepSeek-V3-671B, sem indicar o modelo das linhas de base; na Tabela 6 (LiveCodeBench) o modelo não é informado e o roteamento usa rótulos do conjunto; os valores de SCoT aparecem sem o sinal de porcentagem ('78.66', '43.35').", "localizador": "Apêndice, Tabelas 5 e 6, p. 11"}
+    ],
+    "observacoes": [
+      {"descricao": "Auto-roteamento (RG-Self): o próprio modelo gerador faz o roteamento por dificuldade; Pass@1 na Tabela 4 (por exemplo, Qwen2.5-Coder-3B-Instruct, HumanEval-ET 69,36%). O prompt de auto-roteamento não é descrito.", "localizador": "Apêndice, Tabela 4, p. 11"},
+      {"descricao": "Concordância entre classificadores: Qwen3-8B e GPT-4o divergem em 37 de 164 problemas do HumanEval (22,56%), 100 de 427 do MBPP-sanitized (23,42%) e 15 de 178 do OpenEval (8,43%); GPT-4o classifica mais problemas como Simple. É análise de seleção de modelo, não de prompting.", "localizador": "Tabela 3, p. 7; apêndice, Tabela 8, p. 13"},
+      {"descricao": "Tabelas 9 e 10 do apêndice relatam Pass@1 por subconjunto Simple e Complex; o estudo afirma que métodos de geração direta superam a maioria dos métodos estruturados no subconjunto Simple. As páginas dessas tabelas não foram abertas e os números não foram usados.", "localizador": "Apêndice, Tabelas 9 e 10"},
+      {"descricao": "Os exemplos few-shot (três problemas fixos) são os mesmos no ramo few-shot e nos dois estágios do ICoT; o estudo não discute sobreposição entre esses exemplos e os benchmarks.", "localizador": "Apêndice, 'Few-shot Generation Prompt' e 'ICoT-Guided Generation Prompt'"},
+      {"descricao": "Número de execuções independentes por condição nao_informado; não há desvio-padrão, intervalo de confiança nem teste estatístico. O k de Pass@1 é parâmetro da métrica.", "localizador": "texto completo"},
+      {"descricao": "Repositório de código citado (https://github.com/Guai001/RoutingGen); não acessado nem validado nesta extração.", "localizador": "Resumo, p. 1"},
+      {"descricao": "O LiveCodeBench é descrito como livre de contaminação, mas o estudo não discute contaminação nos benchmarks principais (HumanEval, MBPP, OpenEval, McEval).", "localizador": "Apêndice, p. 11"}
+    ],
+    "citacoes": [
+      {"trecho": "For simple tasks, it adopts few-shot prompting; for more complex ones, it invokes a structured reasoning strategy, termed Intention Chain-of-Thought (ICoT), which we introduce to guide the model in capturing task intention, such as the core algorithmic logic and its time complexity.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Specifically, ICoT comprises two components: a Specification element that defines the input-output constraints, and an Idea element that captures the core algorithmic logic and estimates time complexity.", "localizador": "Introdução, p. 1"},
+      {"trecho": "Code generation focuses on translating user requirements into executable programs and is regarded as a core task in software engineering (Chen et al. 2021; Austin et al. 2021).", "localizador": "Introdução, p. 1"},
+      {"trecho": "Please analyze the requirement and provide a structured solving process with the following format:", "localizador": "Apêndice, 'ICoT-Guided Generation Prompt', Stage 1"},
+      {"trecho": "# Please check the above solving process and write a code based on it. Note that the solving process may contain errors.", "localizador": "Apêndice, 'ICoT-Guided Generation Prompt', Stage 2"},
+      {"trecho": "In few-shot settings, we select three representative question-code examples, and apply the same configuration in RoutingGen to ensure consistency with the baseline.", "localizador": "'Sampling Settings', p. 5"},
+      {"trecho": "For multi-stage approaches including SCoT, ICoT, and Self-Planning, we sample 20 reasoning chains with temperature 0.8, followed by deterministic code generation with temperature 0.", "localizador": "'Sampling Settings', p. 5"},
+      {"trecho": "An exception is made for DeepSeek-V3, where we generate 5 candidates per problem due to API constraints.", "localizador": "'Sampling Settings', p. 5"},
+      {"trecho": "To further assess the standalone effectiveness of ICoT within the RoutingGen framework, we evaluate ICoT under a static prompting configuration without dynamic routing.", "localizador": "'Effectiveness of ICoT Prompting', p. 6"},
+      {"trecho": "Self-planning (Jiang et al. 2024), denoted as SP in our results, adopts a two-stage framework, where the model first generates a numbered subtask plan and then uses it to guide code generation.", "localizador": "'Baselines', p. 4"},
+      {"trecho": "SCoT (Li et al. 2025) incorporates sequential, branching, and looping structures into natural language reasoning to align prompts with program logic.", "localizador": "'Baselines', p. 4"},
+      {"trecho": "Few-shot-CoT uses the same number of exemplars as SCoT and ICoT, but differs in the form of chain-of-thought employed, allowing comparison across distinct reasoning paradigms.", "localizador": "Apêndice, p. 11"},
+      {"trecho": "First, their uniform application across functional-level programming problems often induces overthinking on simple tasks, resulting in disorganized logic and reduced accuracy (Figure 1(A)).", "localizador": "Introdução, p. 1"},
+      {"trecho": "LLMs tend to produce syntactically correct programs that fail to align with the task intention, resulting in functionally incorrect outputs (Cobbe et al. 2021; Jiang et al. 2024; Chen et al. 2023).", "localizador": "Introdução, p. 1"},
+      {"trecho": "The results empirically validate a key limitation: indiscriminate use of complex prompting strategies often leads to overthinking on simple tasks, resulting in reduced performance and increased computational cost.", "localizador": "'Analysis', p. 6"},
+      {"trecho": "On average, RoutingGen achieves a 46.37% relative reduction in total token usage across settings.", "localizador": "'Main Performance', p. 6"},
+      {"trecho": "Despite this variation, RoutingGen consistently outperforms all baseline methods under both classifiers.", "localizador": "'Robustness to Difficulty Classifier Variants', p. 7"},
+      {"trecho": "In particular, discrepancies between our baseline results and official reports are expected, as our standardized instructions used for fair cross-model comparison differ from the highly optimized model-specific prompts designed to maximize reported performance (Luo et al. 2024).", "localizador": "'Main Performance', p. 6"},
+      {"trecho": "Concurrently, the variant without intermediate reasoning achieves the strongest results on the simpler MBPP-sanitized and MBPP-ET datasets.", "localizador": "'Effectiveness of ICoT Components', p. 7"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "RoutingGen",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes", "outro"],
+      "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes", "outro"],
+      "comparador": "zero-shot",
+      "modelo": "Qwen2.5-Coder-3B-Instruct (gerador); classificador Qwen3-8B",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 75.49, "intervencao": 76.65},
+      "denominador": "164 problemas do HumanEval ('Total' 164 na Tabela 3); Pass@1 estimado sobre n = 20 candidatos por problema",
+      "condicoes": "Zero-shot: temperatura 0,8, top-p 0,95, até 300 tokens, 20 candidatos. RoutingGen: classificador Qwen3-8B rotulou 53 problemas como Simple (few-shot com três exemplos, mesma configuração) e 111 como Complex (ICoT: 20 cadeias com temperatura 0,8 e código guloso com temperatura 0, até 300 tokens por estágio). O valor '(+1.54%)' impresso é variação relativa sobre zero-shot. Número de execuções independentes nao_informado; sem variância. Ganho de pacote (roteamento + few-shot + ICoT), não atribuível a um ingrediente. Conferido visualmente na Tabela 1, p. 5 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e as contribuições destacam duas técnicas (RoutingGen e ICoT), duas métricas (Pass@1 e uso de tokens) e comparação com várias linhas de base sem uma prevalecer. Primeira tabela com o contraste elegível: Tabela 1; primeira métrica Pass@1; primeiro modelo Qwen2.5-Coder-3B-Instruct; primeira técnica focal na ordem das linhas (RoutingGen); primeira linha de base de prompting listada (zero-shot); primeiro benchmark (HumanEval).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 5 (PDF); condições em 'Sampling Settings', p. 5, e Tabela 3, p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "zero-shot 75.49% 67.29% 61.42% 44.12% 35.06% 26.80%", "localizador": "Tabela 1, p. 5, bloco Qwen2.5-Coder-3B-Instruct, linha zero-shot (colunas HumanEval, HumanEval-ET, MBPP-sanitized, MBPP-ET, OpenEval, McEval)"},
+        {"trecho": "RoutingGen 76.65% (+1.54%) 69.02% (+2.57%) 68.84% (+13.71%) 49.33% (+11.81%) 35.76% (+2.00%) 35.30% (+31.72%)", "localizador": "Tabela 1, p. 5, bloco Qwen2.5-Coder-3B-Instruct, linha RoutingGen (colunas HumanEval, HumanEval-ET, MBPP-sanitized, MBPP-ET, OpenEval, McEval)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Intention Chain-of-Thought (ICoT), configuração estática sem roteamento",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes"],
+      "comparador": "zero-shot",
+      "modelo": "Qwen2.5-Coder-3B-Instruct",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 75.49, "intervencao": 77.10},
+      "denominador": "164 problemas do HumanEval; Pass@1 estimado sobre n = 20 candidatos por problema",
+      "condicoes": "ICoT aplicado a todos os problemas: estágio 1 com 20 cadeias Specification/Idea (temperatura 0,8) e estágio 2 com código guloso (temperatura 0), até 300 tokens por estágio, três exemplos em cada estágio. Zero-shot: temperatura 0,8, top-p 0,95, até 300 tokens, 20 candidatos. '(+2.13%)' é variação relativa sobre zero-shot. Número de execuções nao_informado. Ganho de pacote (exemplos, raciocínio, dois estágios e formato estruturado juntos). Conferido visualmente na Tabela 1, p. 5 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal (ICoT) ainda não representada; mesma regra de ordem: Tabela 1, Pass@1, primeiro modelo (Qwen2.5-Coder-3B-Instruct), primeira linha de base (zero-shot), primeiro benchmark (HumanEval).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 5 (PDF); condições em 'Sampling Settings', p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "ICoT 77.10% (+2.13%) 69.73% (+3.63%) 69.11% (+12.52%) 48.58% (+10.11%) 35.70% (+1.83%) 38.90% (+45.15%)", "localizador": "Tabela 1, p. 5, bloco Qwen2.5-Coder-3B-Instruct, linha ICoT (colunas HumanEval, HumanEval-ET, MBPP-sanitized, MBPP-ET, OpenEval, McEval)"},
+        {"trecho": "zero-shot 75.49% 67.29% 61.42% 44.12% 35.06% 26.80%", "localizador": "Tabela 1, p. 5, bloco Qwen2.5-Coder-3B-Instruct, linha zero-shot (mesmas colunas)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Specification (componente do ICoT): ICoT completo contra 'w/o Specification'",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "w/o Specification (ICoT sem o estágio Specification)",
+      "modelo": "DeepSeek-V3-671B",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 88.17, "intervencao": 92.07},
+      "denominador": "164 problemas do HumanEval; Pass@1 estimado sobre 5 candidatos por problema (DeepSeek-V3)",
+      "condicoes": "Ablação com DeepSeek-V3-671B (5 candidatos por problema por restrição de API). A Figura 4 não tem rótulos numéricos; os dois valores vêm da prosa da p. 7, e o valor do ICoT (92,07%) coincide com a Tabela 1; as alturas das barras da Figura 4 no HumanEval são compatíveis, mas não foram usadas para estimar valores. Como o prompt e os exemplos da variante sem Specification foram ajustados nao_informado. Número de execuções nao_informado. Conferido visualmente nas p. 5 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três. Não há tabela de ablação de prompting (a Tabela 3 compara classificadores, seleção de modelo); a ablação dos componentes do ICoT está na Figura 4. Na ordem da legenda, 'w/o Intermediate Reasoning' retira todo o raciocínio estruturado (contraste do pacote ICoT, já representado e sem valores impressos); o primeiro componente é Specification; primeiro benchmark HumanEval, cujo par de valores é impresso no texto.",
+      "derivacao": "direta",
+      "localizador": "Figura 4 e 'Effectiveness of ICoT Components', p. 7 (PDF); Tabela 1, p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "For example, on HumanEval, removing the Specification stage reduces Pass@1 from 92.07% to 88.17%, while on McEval, removing the Idea stage leads to a drop from 67.20% to 59.20%.", "localizador": "'Effectiveness of ICoT Components', p. 7"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (overthinking em tarefas simples e falta de abstração de intenção), proposta (RoutingGen e ICoT) e contribuições explicitadas.", "localizador": "Resumo e Introdução, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Fluxo formalizado (Eq. 1-7, Algoritmo 1), parâmetros de amostragem e prompts few-shot e ICoT no apêndice; faltam o prompt de classificação T_cls, os prompts das linhas de base e das variantes da ablação, o prompt de auto-roteamento e o número de execuções.", "localizador": "Metodologia, p. 3-4; 'Sampling Settings', p. 5; apêndice, p. 10 e prompts"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Seis linhas de base de prompting executadas pelos autores nos mesmos modelos e benchmarks, com configuração de amostragem declarada; ressalvas: Self-CoT com 600 tokens, DeepSeek-V3 com 5 candidatos e instruções padronizadas que diferem dos relatos oficiais.", "localizador": "'Baselines', p. 4; 'Sampling Settings', p. 5; 'Main Performance', p. 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@k e custo em tokens definidos (Eq. 8-11); os valores de Pass@1 coincidem entre as Tabelas 1, 3, 4 e 7; denominadores impressos para HumanEval, MBPP-sanitized, OpenEval e McEval, mas não para HumanEval-ET, MBPP-ET, HumanEval-X e LiveCodeBench; o agregado de 46,37% não tem cálculo explicitado; não há variância nem número de execuções.", "localizador": "'Evaluation Metrics', p. 4; Tabelas 1-3, p. 5-7; apêndice, Tabelas 4 e 7"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças; o estudo só comenta a diferença entre suas linhas de base e os relatos oficiais (instruções padronizadas) e a robustez a classificadores, sem discutir não determinismo, contaminação ou generalização.", "localizador": "'Main Performance', p. 6; 'Ablation Analysis', p. 7"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Link de código, benchmarks públicos, parâmetros de amostragem e parte dos prompts informados; snapshot e data de acesso do DeepSeek-V3 e do GPT-4o, prompt do classificador e prompts das linhas de base não informados; pacote de replicação não verificado.", "localizador": "Resumo, p. 1; 'Sampling Settings', p. 5; apêndice"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo acrescenta uma avaliação no LiveCodeBench, descrito como livre de contaminação, mas não discute possível presença de HumanEval, MBPP, OpenEval ou McEval no pré-treinamento nem relação entre os exemplos fixos e os benchmarks.", "localizador": "Apêndice, Tabela 6, p. 11"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [4, 5, 6, 7, 10, 11, 12, 13],
+    "observacao": "Texto extraído lido integralmente (1.224 linhas; colunas intercaladas). Abertas as páginas com método e métricas (p. 4), Tabela 1 e Figura 3 (p. 5), Tabela 2 (p. 6), Figura 4 e Tabela 3 (p. 7), detalhes dos benchmarks (p. 10) e Tabelas 4-8 do apêndice (p. 11-13). Páginas das Tabelas 9-10 e dos prompts não foram abertas; seus números não foram usados nas extrações."
+  }
+}

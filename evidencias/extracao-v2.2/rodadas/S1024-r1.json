@@ -1,0 +1,329 @@
+{
+  "estudo": "S1024",
+  "texto_fonte": "fontes/textos/lote/S1024.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2510.12047v4 [cs.AI], 20 abr. 2026 (preprint); as páginas não têm numeração impressa, e os localizadores usam a posição no PDF (p. 1-18)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Standard (standard prompt)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, p. 5; Tabela 2, p. 6; Seção 6.3 e Figura 2, p. 8; Tabela 6, p. 9",
+        "observacao": "Consulta em linguagem natural de referência do HumanEval+/MBPP+ (linha de base). O estudo não descreve o template completo nem diz se a consulta traz exemplos de entrada e saída; só instrucao foi registrada."
+      },
+      {
+        "nome_original": "Contract specification (CS)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3.1, p. 3; Seção 4.2, p. 5; Tabela 2, p. 6; Figura 5, p. 13; Tabela 6, p. 9",
+        "observacao": "Consulta reescrita por um LLM comercial (o4-mini, Seção 4.4) para declarar explicitamente as restrições de entrada derivadas das asserções de referência → restricoes. Contrafactual: CS contra Standard, nos mesmos modelos e tarefas (Tabela 2). Classificado como pacote porque a reescrita automática pode alterar a redação da consulta além de acrescentar as restrições; o estudo não valida separadamente a qualidade das reescritas."
+      },
+      {
+        "nome_original": "Example-augmented specification (EAS) / contract prompt",
+        "mecanismos": ["instrucao", "restricoes", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4.2, p. 5; Tabela 2, p. 6; Seção 6.3 e Figura 2, p. 8; Figura 6, p. 14; Tabela 6, p. 9",
+        "observacao": "A consulta CS acrescida de CVTs verificados como exemplos concretos de entradas que devem ser rejeitadas (por exemplo, '>>> remove_Occ(2.0, 3.0)' seguido de '\"AssertionError: invalid input\"', Figura 6) → exemplos. Mecanismos acrescentados em relação ao CS, do qual a técnica deriva. Contrafactual principal: EAS contra Standard (pacote: restricoes + exemplos). A mesma Tabela 2 também traz EAS contra CS, que diferem só nos exemplos de CVT (contraste de ingrediente para exemplos). O número de CVTs inseridos ('a small set') não é informado; o exemplo da Figura 6 mostra quatro. Na Seção 6.3 a condição é chamada 'contract prompt'."
+      },
+      {
+        "nome_original": "Negative-example prompt",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 6.3, p. 8; Figura 2, p. 8",
+        "observacao": "Prompt padrão acrescido de um pequeno conjunto de pares de entrada e saída errados (sobre entradas bem formadas), com a saída marcada como incorreta → exemplos (exemplos de erros a evitar). Contrafactual: Standard contra Negative-example na Figura 2, só para DeepSeek-R1 e gemma-3. A quantidade de exemplos negativos não é informada."
+      },
+      {
+        "nome_original": "Chain-of-Thought (CoT) (+ CoT sobre EAS)",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 6.4, p. 9; Tabela 5, p. 8; Apêndice I e Tabela 10, p. 16-17",
+        "observacao": "CoT aplicado sobre o prompt EAS ('+ CoT'); contrafactual EAS contra EAS + CoT nos cinco modelos abertos. O texto do prompt CoT não é apresentado."
+      },
+      {
+        "nome_original": "Multi-Turn (refinement-style multi-turn strategy, + Multi-Turn sobre EAS)",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 6.4, p. 9; Tabela 5, p. 8; Apêndice I e Tabela 10, p. 16-17",
+        "observacao": "Primeiro gera uma solução com a lógica funcional e depois refina o código com a informação de contrato, em duas etapas encadeadas → decomposicao. Não foi classificado como feedback porque o estudo não descreve sinal de execução, teste ou crítica no refinamento. Os mecanismos herdados de EAS (restricoes, exemplos) seguem a apresentação como '+ Multi-Turn' sobre EAS; o estudo não diz se os CVTs aparecem na segunda etapa. Contrafactual EAS contra EAS + Multi-Turn (Tabela 5). Registrado como pacote porque a estratégia reorganiza o prompt em dois turnos, em vez de só acrescentar um ingrediente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Pipeline neurossimbólico de síntese de CVTs (LLM + solver SMT) e filtragem de viabilidade",
+        "natureza": "outro",
+        "descricao": "Construção do benchmark: o o4-mini traduz asserções para SMT-LIB sobre um ADT canônico; o solver enumera os 2^n − 1 subconjuntos de violação e gera as entradas; a filtragem executa cada entrada com e sem asserções. Não é prompting dos modelos avaliados.",
+        "localizador": "Seção 3.2, p. 3-4; Apêndices G-H, p. 14-16"
+      },
+      {
+        "nome_original": "Filtro de alinhamento contrato–especificação por LLM judge",
+        "natureza": "outro",
+        "descricao": "Um LLM judge decide se as asserções de referência são coerentes com a descrição da tarefa; tarefas desalinhadas são excluídas (88,04% de 542 julgadas alinhadas).",
+        "localizador": "Seção 3.1, p. 3; Seção 6.1, p. 7"
+      },
+      {
+        "nome_original": "Programa de referência com contratos (injeção de asserções por expressão regular)",
+        "natureza": "outro",
+        "descricao": "Asserções de referência inseridas logo após o cabeçalho da função canônica; parte do benchmark, não do prompt.",
+        "localizador": "Seção 3.3, p. 4"
+      },
+      {
+        "nome_original": "Parâmetros de inferência da geração de código",
+        "natureza": "decodificacao",
+        "descricao": "batch_size = 10, num_samples = 1, max_length = 4096, max_new_tokens = 2048 nos modelos abertos; a temperatura da geração de código não é informada. Para o o4-mini (CVTs, reescrita de consultas, LLM-as-judge), temperature = 1.0 e num_samples = 1.",
+        "localizador": "Apêndice D, p. 12"
+      },
+      {
+        "nome_original": "Modelos comerciais (GPT-4o, Gemini-3-flash) nas mesmas condições",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca de modelo sem alterar as condições de prompt, numa amostra de 100 tarefas (Tabela 6).",
+        "localizador": "Seção 6.5 e Tabela 6, p. 9"
+      },
+      {
+        "nome_original": "Escolha do motor LLM para geração de CVTs (o4-mini, GPT-4o, Gemini-3-flash)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação de AVC e TS entre motores na construção do benchmark (Tabela 9); não envolve os prompts de geração de código avaliados.",
+        "localizador": "Apêndice C e Tabela 9, p. 11-12"
+      }
+    ],
+    "modelos": [
+      {"nome": "gemma-3-12B-it (gemma-3)", "versao": "nao_informado (só o nome com tamanho)", "localizador": "Seção 4.4, p. 5"},
+      {"nome": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)", "versao": "nao_informado (só o nome com tamanho)", "localizador": "Seção 4.4, p. 5"},
+      {"nome": "Qwen3-14B (Qwen-3)", "versao": "nao_informado (só o nome com tamanho)", "localizador": "Seção 4.4, p. 5"},
+      {"nome": "Phi-4-reasoning (Phi-4)", "versao": "nao_informado", "localizador": "Seção 4.4, p. 5"},
+      {"nome": "Phi-4-reasoning-plus (Phi-4-plus)", "versao": "nao_informado", "localizador": "Seção 4.4, p. 5"},
+      {"nome": "GPT-4o (avaliação comercial; também juiz de alinhamento e motor alternativo de CVTs)", "versao": "nao_informado", "localizador": "Seção 6.1, p. 7; Seção 6.5, p. 9; Apêndice C, p. 11-12"},
+      {"nome": "Gemini-3-flash (avaliação comercial; também juiz de alinhamento e motor alternativo de CVTs)", "versao": "nao_informado", "localizador": "Seção 6.1, p. 7; Seção 6.5, p. 9; Apêndice C, p. 11-12"},
+      {"nome": "o4-mini (auxiliar: geração de CVTs, reescrita das consultas CS e LLM-as-judge)", "versao": "nao_informado", "localizador": "Seção 4.4, p. 5; Apêndice D, p. 12"}
+    ],
+    "benchmarks": [
+      {"nome": "ContractEval (construído sobre HumanEval+ e MBPP+)", "quantidade": "364 tarefas; partiu de 542 tarefas com asserções de referência, das quais 88,04% foram julgadas alinhadas; as tarefas sem nenhum CVT funcionalmente válido também foram excluídas. Média de 2,29 asserções, 2,89 subconjuntos SAT e 13,48 CVTs por tarefa; 4.907 CVTs verificados no total. A divisão entre HumanEval+ e MBPP+ nas 364 tarefas não é informada.", "localizador": "Resumo, p. 1; Seções 3.1-3.2, p. 3-4; Seção 4.1 e Tabela 1, p. 5"},
+      {"nome": "Amostra de 100 tarefas do ContractEval", "quantidade": "100 tarefas para os modelos comerciais (Tabela 6), para a validação humana do filtro (Tabela 3) e para a comparação de motores (Tabela 9); o critério de amostragem não é informado e o estudo não diz se é a mesma amostra nos três usos", "localizador": "Seção 6.1 e Tabela 3, p. 7; Seção 6.5 e Tabela 6, p. 9; Tabela 9, p. 12"}
+    ],
+    "metricas": [
+      {"nome": "pass@1", "definicao": "Correção funcional nos testes bem formados de referência; denominador por tarefa não explicitado na tabela (corpus de 364 tarefas; num_samples = 1)", "localizador": "Seção 3.4, p. 4; Seção 4.3, p. 5; Seção 5, p. 5"},
+      {"nome": "Contract satisfaction rate (CSR)", "definicao": "Fração dos CVTs verificados (T_ver) que o código gerado rejeita com falha de asserção ou rejeição explícita; definida por trecho de código. A forma de agregação entre tarefas e modelos (média por tarefa ou contagem sobre os 4.907 CVTs) não é informada.", "localizador": "Seção 3.4, p. 5"},
+      {"nome": "CodeBLEU", "definicao": "Métrica suplementar de similaridade sintática das asserções geradas com a referência; não verifica rejeição", "localizador": "Seção 4.3, p. 5"},
+      {"nome": "LLM-as-judge", "definicao": "Pontuação suplementar de qualidade semântica das asserções (juiz o4-mini); procedimento de pontuação não detalhado", "localizador": "Seção 4.3 e 4.4, p. 5"},
+      {"nome": "Assertion violation capture (AVC) e target specificity (TS)", "definicao": "Qualidade dos CVTs: fração de testes que violam ao menos uma asserção; média do índice de Jaccard entre as asserções-alvo e as violadas", "localizador": "Seção 3.4, p. 4-5"},
+      {"nome": "Correct Functions Ratio", "definicao": "Coluna da Tabela 11 (análise condicional); não definida no texto", "localizador": "Tabela 11, p. 18"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "O código gerado pode ter pass@k alto e mesmo assim não impor as pré-condições (contratos) exigidas, aceitando silenciosamente entradas inválidas; com o prompt padrão o CSR é 0% em todos os modelos.", "localizador": "Resumo, p. 1; Seção 1, p. 2; Seção 5 e Tabela 2, p. 6"},
+      {"categoria": "correcao_funcional", "descricao": "Os prompts com contrato reduzem o pass@1 em relação ao padrão (EAS preserva 92% do pass@1 original, segundo o estudo), e o Multi-Turn tende a reduzir o CSR em 2–7 p.p. em relação ao EAS.", "localizador": "Seção 5, p. 6; Seção 6.4, p. 9"},
+      {"categoria": "correcao_funcional", "descricao": "O CoT sobre EAS colapsa pass@1 e CSR para 0–4% em Phi-4 e Phi-4-plus; o estudo considera o CoT inadequado quando a saída precisa continuar executável.", "localizador": "Seção 6.4, p. 9; Tabela 5, p. 8"},
+      {"categoria": "outro", "descricao": "Os contratos derivam das asserções de referência, que podem ser incompletas; os CVTs são um conjunto finito de padrões de violação e não cobrem todas as entradas semanticamente inválidas (limitação de validade do benchmark).", "localizador": "Limitations, p. 10"},
+      {"categoria": "outro", "descricao": "Os julgamentos auxiliares por modelo (filtro de alinhamento, LLM-as-judge) podem herdar viés do modelo juiz.", "localizador": "Limitations, p. 10; Seção 6.1, p. 7"},
+      {"categoria": "custo", "descricao": "A enumeração SMT e a filtragem de viabilidade acrescentam sobrecarga computacional à construção do benchmark: 126,89 min de inferência do o4-mini, 228,23 min de solver SMT e 1,75 min de filtragem. É custo de construção, não dos prompts de geração. Também se afirma que usar GPT-4o ou Gemini-3-flash como motor teria custo computacional e financeiro maior, sem quantificar.", "localizador": "Limitations, p. 10; Apêndices A-B e Tabelas 7-8, p. 11; Apêndice C, p. 12"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Pipeline SMT para gerar CVTs precisos, comparado com a geração direta pelo o4-mini sem SMT: TS de 72,69% para 84,92% e AVC de 97,58% para 94,11% (Tabela 4).", "avaliada": "sim", "localizador": "Seção 6.2 e Tabela 4, p. 7"},
+      {"descricao": "Filtro de alinhamento contrato–especificação, validado por dois especialistas numa amostra de 100 tarefas (92,00% de concordância) e por GPT-4o e Gemini-3-flash (96,48% e 97,80%); é validação do filtro, sem condição sem ele.", "avaliada": "nao", "localizador": "Seção 3.1, p. 3; Seção 6.1 e Tabela 3, p. 7"},
+      {"descricao": "Filtragem de viabilidade dos CVTs: cada entrada é executada sem asserções (viabilidade funcional) e com asserções (violação-alvo), para que o CSR meça imposição de contrato e não robustez a erros genéricos.", "avaliada": "nao", "localizador": "Seção 3.2, p. 3-4"},
+      {"descricao": "Análise do CSR condicionada à correção funcional, para separar o comportamento de contrato de falhas incidentais.", "avaliada": "nao", "localizador": "Apêndice J, p. 16-17; Figura 10 e Tabela 11, p. 18"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt Standard, executado pelos autores nos mesmos modelos e tarefas (Tabelas 2 e 6; Figura 2); EAS como base para CoT e Multi-Turn (Tabela 5)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Inversão: o CoT sobre EAS melhora pass@1 e CSR no gemma-3 (69,56% → 70,46% e 48,54% → 50,37%), mas degrada ou colapsa nos demais modelos (Phi-4: 3,66% e 1,91%; Phi-4-plus: 0,00% e 0,00%).", "localizador": "Tabela 5, p. 8; Seção 6.4, p. 9"},
+      {"descricao": "Inversão: o Multi-Turn reduz o pass@1 do Phi-4 (72,99% → 71,88%) e aumenta o CSR do gemma-3 (48,54% → 49,26%), embora o texto descreva uma 'queda modesta de CSR de 2–7%p'. O Apêndice I fala em 'within roughly 0–7%p'. Diferenças por cálculo próprio: DeepSeek-R1 −7,22; Phi-4 −4,15; Phi-4-plus −2,42; Qwen-3 −2,60; gemma-3 +0,72 p.p.", "localizador": "Seção 6.4, p. 9; Tabela 5, p. 8; Apêndice I, p. 16"},
+      {"descricao": "Destaque em negrito incoerente: no gemma-3, as Tabelas 5 e 10 marcam o +Multi-Turn (CSR 49,26%; CodeBLEU 49,62%) como melhor, mas o +CoT tem valores maiores (50,37%; 50,68%).", "localizador": "Tabela 5, p. 8; Tabela 10, p. 17"},
+      {"descricao": "A mesma faixa '51%–59%' é atribuída a duas grandezas: na Seção 5, à média do CSR nas tarefas com pass@1 = 100%; no Apêndice J, a Pr(c = 1 | f = 1), a probabilidade de CSR perfeito. A Tabela 11 (EAS) traz CSR de 54,29% a 61,82% em programas funcionalmente corretos. Aparente inconsistência; a condição de prompt da Figura 10 não é informada.", "localizador": "Seção 5, p. 6-7; Apêndice J, p. 17; Tabela 11 e Figura 10, p. 18"},
+      {"descricao": "'Under EAS, the two scores exceed CS by 13.65%p and 20.65%p': pelos valores da Tabela 2, os números correspondem (cálculo próprio) à diferença entre as médias de EAS e de CS em CodeBLEU (51,718 − 38,07) e em LLM-as-judge (76,482 − 55,828). O texto seguinte, porém, os interpreta como diferença entre cada métrica auxiliar e o CSR ('narrows its gap'). Aparente inconsistência de interpretação.", "localizador": "Seção 5, p. 6; Tabela 2, p. 6"},
+      {"descricao": "O AVC e o TS do o4-mini diferem entre a Tabela 4 (97,58% e 72,69%) e a Tabela 9 (98,68% e 74,11%); a Tabela 9 usa uma amostra de 100 tarefas e a Tabela 4 não informa a amostra.", "localizador": "Tabela 4, p. 7; Tabela 9, p. 12"},
+      {"descricao": "A Figura 2 cobre só DeepSeek-R1 e gemma-3, mas o texto afirma que o prompt com exemplos negativos fica em 0% 'across models'. A visão geral da Seção 6 diz que exemplos de falha funcional não induzem verificações de contrato 'no matter how many are added to the prompt', sem resultado que varie a quantidade de exemplos. As barras do contract prompt não têm rótulo numérico ('approximately 50%') e não foram estimadas.", "localizador": "Seção 6, p. 7; Seção 6.3 e Figura 2, p. 8"},
+      {"descricao": "Os modelos comerciais (Tabela 6) foram avaliados numa amostra de 100 tarefas com critério de seleção não informado; os valores não são diretamente comparáveis aos da Tabela 2 (364 tarefas).", "localizador": "Seção 6.5 e Tabela 6, p. 9"},
+      {"descricao": "Os prompts com contrato reduzem o pass@1 em todos os modelos abertos (por exemplo, DeepSeek-R1: 80,81% Standard, 73,29% CS, 70,87% EAS). Em Phi-4 e Phi-4-plus, o EAS tem pass@1 maior que o CS (72,99% contra 71,29%; 73,21% contra 70,83%); nos demais, menor.", "localizador": "Tabela 2, p. 6"}
+    ],
+    "observacoes": [
+      {"descricao": "As consultas CS são reescritas automaticamente por um LLM comercial (o4-mini) a partir das asserções; o estudo valida o alinhamento entre asserções e especificação, mas não a fidelidade de cada reescrita.", "localizador": "Seção 3.1, p. 3; Seção 4.4, p. 5"},
+      {"descricao": "Estudo de caso qualitativo (DeepSeek-R1, MBPP/11): com CS o modelo implementa só os contratos explícitos de comprimento; com EAS também inclui as verificações de tipo isinstance.", "localizador": "Apêndice F e Figuras 5-6, p. 13-14"},
+      {"descricao": "Análise condicional (Apêndice J): após filtrar as saídas mais incorretas (t ≥ 0,25), E[c | f ≥ t] fica praticamente estável; a Tabela 11 traz CSR, CodeBLEU e LLM-as-judge restritos a programas funcionalmente corretos para CS e EAS.", "localizador": "Apêndice J, p. 16-17; Figura 10 e Tabela 11, p. 18"},
+      {"descricao": "Número de execuções repetidas e temperatura da geração de código não informados; num_samples = 1 é parâmetro de amostragem, não número de execuções.", "localizador": "Apêndice D, p. 12"},
+      {"descricao": "Estatística motivadora: 22% dos repositórios Python mais estrelados (média de 60.898 estrelas) incluem asserções de validação de entrada; o procedimento da análise não é descrito.", "localizador": "Seção 1, p. 1"},
+      {"descricao": "Repositório de código citado (https://github.com/suhanmen/ContractEval); não acessado nem validado nesta extração.", "localizador": "Resumo, p. 1"},
+      {"descricao": "Os experimentos rodaram em 2×NVIDIA RTX A6000 e AMD Ryzen Threadripper 3960X.", "localizador": "Apêndice D, p. 12"}
+    ],
+    "citacoes": [
+      {"trecho": "For our code generation experiments, we evaluate a set of open-source models including gemma-3-12B-it (gemma-3), DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1), Qwen3-14B (Qwen-3), Phi-4-reasoning (Phi-4), and Phi-4-reasoning-plus (Phi-4-plus).", "localizador": "Seção 4.4, p. 5"},
+      {"trecho": "The standard condition uses the reference natural-language query.", "localizador": "Seção 4.2, p. 5"},
+      {"trecho": "Contract specification (CS) uses the contract-aware rewrite from Section 3.1.", "localizador": "Seção 4.2, p. 5"},
+      {"trecho": "A commercial LLM interprets each assertion and rewrites the original query to include the corresponding constraint.", "localizador": "Seção 3.1, p. 3"},
+      {"trecho": "Example-augmented specification (EAS) further appends verified CVTs as concrete examples of inputs that should be rejected.", "localizador": "Seção 4.2, p. 5"},
+      {"trecho": "The negative-example prompt augments the standard prompt with a small set of wrong input–output pairs for the same task.", "localizador": "Seção 6.3, p. 8"},
+      {"trecho": "The contract prompt is our EAS setting: a contract-aware description paired with CVTs.", "localizador": "Seção 6.3, p. 8"},
+      {"trecho": "We consider Chain-of-Thought (CoT) prompting and a refinement-style multi-turn strategy that first generates a solution with functional logic and then refines the code with contract information.", "localizador": "Seção 6.4, p. 9"},
+      {"trecho": "As a result, generated code may achieve high pass@k scores while failing to enforce the preconditions that the task actually requires.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Table 2 shows that the standard prompt yields 0% CSR for every base LLM despite 75–82% pass@1.", "localizador": "Seção 5, p. 6"},
+      {"trecho": "More critically, CoT catastrophically fails on Phi-4 and Phi-4-plus, collapsing both pass@1 and CSR to 0–4%.", "localizador": "Seção 6.4, p. 9"},
+      {"trecho": "This gain is typically accompanied by a modest drop in CSR of 2–7%p, indicating that refinement tends to prioritize preserving functional behavior over implementing every contract check.", "localizador": "Seção 6.4, p. 9"},
+      {"trecho": "ContractEval derives contracts from reference assertions, which may be incomplete with respect to all validity constraints that developers intend.", "localizador": "Limitations, p. 10"},
+      {"trecho": "SMT enumeration and feasibility filtering introduce computational overhead compared to purely LLM-based test generation, and any auxiliary model-based judgments (e.g., contract–specification alignment checks or semantic scoring) may inherit bias from the judge model.", "localizador": "Limitations, p. 10"},
+      {"trecho": "The more informative number is TS, which rises from 72.69% to 84.92% under our pipeline.", "localizador": "Seção 6.2, p. 7"},
+      {"trecho": "Two computer science experts assessed the semantic alignment on a 100-task sample and resolved disagreements by discussion.", "localizador": "Seção 6.1, p. 7"},
+      {"trecho": "Accordingly, we filter synthesized CVTs by executing each input on the reference implementation under two configurations: (i) with assertions removed to verify functional feasibility, and (ii) with assertions intact to confirm the targeted violation.", "localizador": "Seção 3.2, p. 3-4"},
+      {"trecho": "On average, EAS achieves 50.94%p CSR improvement over the standard prompt and preserves 92% of the original pass@1.", "localizador": "Seção 5, p. 6"},
+      {"trecho": "We evaluate GPT-4o and Gemini-3-flash on a 100-task sample drawn from ContractEval under the same three prompting conditions.", "localizador": "Seção 6.5, p. 9"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Contract specification (CS)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "Standard",
+      "modelo": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)",
+      "benchmark": "ContractEval (HumanEval+ e MBPP+), 364 tarefas",
+      "metrica": "pass@1 (Functional)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 80.81, "intervencao": 73.29},
+      "denominador": "nao_informado na tabela; corpus de 364 tarefas (Tabela 1, Seção 4.1)",
+      "condicoes": "Modelo aberto; num_samples = 1, max_length = 4096, max_new_tokens = 2048, batch_size = 10; temperatura da geração e número de execuções nao_informado. As consultas CS foram reescritas pelo o4-mini. Na mesma tabela, o CSR vai de 0,00% para 27,24%. Valores conferidos visualmente na p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a introdução destacam CS e EAS, e duas métricas (pass@1 e CSR). A Tabela 2 é a primeira tabela com contraste elegível; primeira métrica (pass@1), primeiro modelo listado (DeepSeek-R1), primeira linha de base de prompting (Standard) e primeira técnica (CS). Não há agregado impresso de pass@1 para CS.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 6 (PDF p. 6)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Standard 80.81% 0.00% 0.00% 0.00%", "localizador": "Tabela 2, p. 6; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑), CodeBLEU (↑), LLM-as-judge (↑)"},
+        {"trecho": "CS 73.29% 27.24% 34.29% 53.05%", "localizador": "Tabela 2, p. 6; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑), CodeBLEU (↑), LLM-as-judge (↑)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Example-augmented specification (EAS)",
+      "mecanismos": ["instrucao", "restricoes", "exemplos"],
+      "mecanismos_acrescentados": ["restricoes", "exemplos"],
+      "comparador": "Standard",
+      "modelo": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)",
+      "benchmark": "ContractEval (HumanEval+ e MBPP+), 364 tarefas",
+      "metrica": "pass@1 (Functional)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 80.81, "intervencao": 70.87},
+      "denominador": "nao_informado na tabela; corpus de 364 tarefas (Tabela 1, Seção 4.1)",
+      "condicoes": "Os mecanismos acrescentados são relativos ao comparador Standard (restricoes do CS mais exemplos de CVT); em relação ao CS, o EAS acrescenta só exemplos. Número de CVTs no prompt nao_informado ('a small set'). Mesmos parâmetros de inferência da extração 1; número de execuções nao_informado. Na mesma tabela, o CSR vai de 0,00% para 52,66%. O estudo diz que o EAS preserva 92% do pass@1 original em média, mas não imprime um pass@1 médio por condição. Valores conferidos visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal (EAS), na mesma regra de ordem: Tabela 2, primeira métrica (pass@1), primeiro modelo (DeepSeek-R1), primeira linha de base de prompting listada (Standard).",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 6 (PDF p. 6)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Standard 80.81% 0.00% 0.00% 0.00%", "localizador": "Tabela 2, p. 6; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑), CodeBLEU (↑), LLM-as-judge (↑)"},
+        {"trecho": "EAS 70.87% 52.66% 54.51% 81.49%", "localizador": "Tabela 2, p. 6; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑), CodeBLEU (↑), LLM-as-judge (↑)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Negative-example prompt",
+      "mecanismos": ["instrucao", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "Standard prompt",
+      "modelo": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)",
+      "benchmark": "ContractEval (amostra não especificada; a figura não informa o número de tarefas)",
+      "metrica": "Contract Sat. (↑) (CSR)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0, "intervencao": 0},
+      "denominador": "nao_informado",
+      "condicoes": "Valores dos rótulos '0%' impressos sobre as barras Standard e Negative-example do DeepSeek-R1 na Figura 2. A figura cobre só DeepSeek-R1 e gemma-3; a quantidade de pares errados no prompt não é informada; número de execuções nao_informado. A barra do contract prompt (EAS) não tem rótulo numérico e não foi estimada. Valores conferidos visualmente na p. 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três para cobrir a técnica focal Negative-example prompt (Seção 6.3). Não há tabela com o contraste; usada a primeira figura (Figura 2), primeiro modelo (DeepSeek-R1), linha de base Standard.",
+      "derivacao": "direta",
+      "localizador": "Figura 2, p. 8 (PDF p. 8); Seção 6.3, p. 8",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Standard and negative-example prompts yield 0%, while the contract prompt achieves approximately 50%.", "localizador": "Legenda da Figura 2, p. 8"},
+        {"trecho": "The negative-example prompt stays 0% across models, indistinguishable from standard, while the contract prompt lifts CSR to roughly 50%.", "localizador": "Seção 6.3, p. 8"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Thought (CoT) (+ CoT sobre EAS)",
+      "mecanismos": ["instrucao", "restricoes", "exemplos", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "EAS",
+      "modelo": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)",
+      "benchmark": "ContractEval (HumanEval+ e MBPP+), 364 tarefas",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 70.87, "intervencao": 61.11},
+      "denominador": "nao_informado na tabela; corpus de 364 tarefas (Tabela 1, Seção 4.1)",
+      "condicoes": "CoT aplicado sobre o prompt EAS; o texto do prompt CoT não é apresentado. Na mesma tabela, o CSR vai de 52,66% para 35,00%. O efeito varia entre modelos (no gemma-3 o pass@1 sobe; em Phi-4 e Phi-4-plus colapsa). Número de execuções nao_informado. Valores conferidos visualmente na p. 8 (Tabela 5) e na p. 17 (Tabela 10, com os mesmos valores).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três para cobrir a técnica focal CoT (Seção 6.4). Primeira tabela com o contraste (Tabela 5), primeira métrica (pass@1), primeiro modelo (DeepSeek-R1), linha de base EAS.",
+      "derivacao": "direta",
+      "localizador": "Tabela 5, p. 8 (PDF p. 8); Tabela 10, p. 17",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "EAS 70.87% 52.66%", "localizador": "Tabela 5, p. 8; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑)"},
+        {"trecho": "+ CoT 61.11% 35.00%", "localizador": "Tabela 5, p. 8; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Multi-Turn (refinement-style multi-turn strategy, + Multi-Turn sobre EAS)",
+      "mecanismos": ["instrucao", "restricoes", "exemplos", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "EAS",
+      "modelo": "DeepSeek-R1-Distill-Qwen-14B (DeepSeek-R1)",
+      "benchmark": "ContractEval (HumanEval+ e MBPP+), 364 tarefas",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 70.87, "intervencao": 72.96},
+      "denominador": "nao_informado na tabela; corpus de 364 tarefas (Tabela 1, Seção 4.1)",
+      "condicoes": "Duas etapas: geração com a lógica funcional e depois refinamento com a informação de contrato; não se informa se os CVTs aparecem na segunda etapa. Na mesma tabela, o CSR vai de 52,66% para 45,44%. O estudo relata ganho médio de pass@1 de 1,8 p.p. sobre EAS nos cinco modelos, uma diferença, não um valor por condição. Número de execuções nao_informado. Valores conferidos visualmente na p. 8 (Tabela 5) e na p. 17 (Tabela 10).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três para cobrir a técnica focal Multi-Turn (Seção 6.4). Mesma regra de ordem: Tabela 5, pass@1, DeepSeek-R1, linha de base EAS.",
+      "derivacao": "direta",
+      "localizador": "Tabela 5, p. 8 (PDF p. 8); Tabela 10, p. 17",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "EAS 70.87% 52.66%", "localizador": "Tabela 5, p. 8; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑)"},
+        {"trecho": "+ Multi-Turn 72.96% 45.44%", "localizador": "Tabela 5, p. 8; linha DeepSeek-R1; colunas Instruction, pass@1 (↑), CSR (↑)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "A lacuna (pass@k ignora a imposição de pré-condições) e o objetivo (benchmark e métricas de satisfação de contratos, avaliação de condições de prompt) estão explícitos.", "localizador": "Resumo, p. 1; Seção 1, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "A construção do benchmark está bem descrita (Seções 3.1-3.3, Apêndices G-H). As condições de prompt são descritas em poucas frases: não há templates completos de Standard, CoT, Multi-Turn e Negative-example, nem o número de CVTs no EAS ou de pares errados. O critério da amostra de 100 tarefas também não é informado.", "localizador": "Seção 4.2, p. 5; Seções 6.3-6.5, p. 8-9; Apêndice F, p. 13-14"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "O prompt Standard é executado nos mesmos modelos e tarefas que CS e EAS; CoT e Multi-Turn são comparados com o EAS nas mesmas condições.", "localizador": "Tabela 2, p. 6; Tabela 5, p. 8; Tabela 6, p. 9"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "CSR, AVC e TS são definidos formalmente, mas a agregação do CSR entre tarefas e o denominador do pass@1 por tabela não são explicitados; o procedimento do LLM-as-judge não é detalhado; 'Correct Functions Ratio' não é definido. A faixa 51%–59% é atribuída a duas grandezas diferentes, e os valores de AVC e TS do o4-mini divergem entre as Tabelas 4 e 9.", "localizador": "Seções 3.4 e 4.3, p. 4-5; Seção 5, p. 6-7; Tabelas 4, 9 e 11, p. 7, 12 e 18; Apêndice J, p. 17"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A seção Limitations discute o escopo dos contratos, a cobertura dos CVTs, o custo e o viés de juízes; não discute não determinismo, execução com uma única amostra nem contaminação.", "localizador": "Limitations, p. 10"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelos (nome e tamanho), parâmetros de inferência parciais, hardware e um link de repositório (não acessado). Não informa a temperatura da geração de código, os prompts completos, o número de execuções nem o critério da amostra de 100 tarefas.", "localizador": "Resumo, p. 1; Seção 4.4, p. 5; Apêndice D, p. 12"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não discute possível presença do HumanEval+/MBPP+ ou das asserções de referência no pré-treinamento dos modelos avaliados.", "localizador": "texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18],
+    "observacao": "Texto extraído lido integralmente (931 linhas). Páginas abertas para conferir as Tabelas 1-11 e as Figuras 1, 2, 5, 6 e 10; a p. 15 (Figuras 7-8, template SMT) não foi aberta, pois não contém valores usados."
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "estudo": "S1132",
+  "texto_fonte": "fontes/textos/lote/S1132.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2512.14762v1 [cs.SE], 15 dez. 2025 (preprint, 10 páginas); a página 1 não tem número impresso e as páginas 2-10 têm número impresso igual à posição no PDF, por isso os localizadores usam um único número de página",
+    "tarefas": ["traducao", "depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Agentic MCP Flow",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "feedback", "decomposicao", "multiagente", "outro"],
+        "mecanismos_acrescentados": ["exemplos", "decomposicao", "multiagente", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, p. 1; Seção 3.2 e Figura 3, p. 3-4; Seção 3.4, p. 4; Tabelas 1-3, p. 5-6; Seção 5.4, p. 8",
+        "observacao": "Prompt mínimo com o código quebrado (contexto), um objetivo de reparo e um menu de ferramentas (instrucao); a política 'if stuck, then retrieve' é codificada no prompt (instrucao). Ferramentas: GHDL Syntax Check, o mesmo compilador do fluxo de base, com iteração sobre os erros (feedback); RAG Retrieval condicional de exemplos VHDL sintaticamente corretos, top-3, truncados a 1200 tokens (contexto e exemplos); Code Rewrite, em que um planejador produz lista de instruções e um segundo agente com contexto limpo gera a nova unidade VHDL (decomposicao e multiagente). 'outro' = seleção e sequenciamento autônomos das ferramentas pelo agente e gestão agressiva de contexto (reinício a cada tentativa, com só um breve resumo da tentativa anterior). Mecanismos acrescentados em relação ao Expert-Designed Flow, que já tem instrucao, contexto (o candidato HDL) e feedback (GHDL): exemplos, decomposicao, multiagente e outro; o MCP também substitui o prompt longo do especialista por um prompt mínimo, o que muda a instrucao sem criar categoria nova. Contrafactual: MCP contra Non-MCP nos mesmos três modelos, nas mesmas 42 funções e nas mesmas métricas (Tabelas 1-3). O 'sim' vale para o pacote inteiro (tamanho do prompt, ferramentas, política condicional, separação planejamento/geração e reinício de contexto mudam juntos) e não autoriza atribuir o ganho à recuperação condicional ou a outro ingrediente; os próprios autores dizem não ter testado diretamente o mecanismo. O protocolo MCP e o servidor de ferramentas são infraestrutura (ver componentes_fora_escopo); os orçamentos de tokens das duas condições não foram igualados."
+      },
+      {
+        "nome_original": "Expert-Designed Flow (Baseline) / Non-MCP",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.2 e Figura 2, p. 3; Tabelas 1-3, p. 5-6",
+        "observacao": "Prompt longo escrito por especialista com orientações detalhadas para reparar sintaxe HDL (instrucao), o candidato HDL como insumo (contexto) e laço fixo de iteração sobre os erros do compilador GHDL até passar ou atingir o limite (feedback; T=10 iterações no Apêndice A). O texto do prompt não é apresentado. Linha de base executada pelos autores."
+      },
+      {
+        "nome_original": "Non-MCP + RAG (naive RAG variant)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.4, p. 4; Seção 4.3, p. 5; Tabelas 1-3, p. 5-6; Seção 5.1, p. 7 ('negative control experiment')",
+        "observacao": "Fluxo de base do especialista com os top-3 exemplos VHDL recuperados anexados incondicionalmente a todo prompt de reparo (contexto e exemplos; contexto já está presente na base, por isso só exemplos é acrescentado). O estudo o apresenta como variante para isolar a política de uso de ferramentas e como controle negativo. Contrafactual de ingrediente: Non-MCP+RAG contra Non-MCP, que diferem só nos exemplos anexados (Seção 3.4), nos três modelos (Tabelas 1-3). Isso isola a anexação incondicional de exemplos no fluxo do especialista, não a política condicional dentro do MCP: o contraste MCP contra Non-MCP+RAG difere em vários ingredientes."
+      },
+      {
+        "nome_original": "RAG Retrieval (conditional retrieval / conditional tool use)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.2, p. 3; Seção 3.4, p. 4; Seção 5.1, p. 6-7; Seção 5.4, p. 8; Apêndice A, p. 10",
+        "observacao": "Ferramenta do MCP: recuperação condicional (falta de progresso ou erros GHDL que indicam idiomas ausentes), que o agente pode pular; a política é codificada no prompt (instrucao). Não há condição MCP sem RAG nem MCP com RAG incondicional nas tabelas; a Seção 5.4 diz que a ferramenta 'helped within MCP when used conditionally', sem valores. A atribuição do ganho à política condicional (Seção 5.1) não tem contrafactual deste ingrediente."
+      },
+      {
+        "nome_original": "Code Rewrite (separation of planning from generation; planner + clean-context generator)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "multiagente"],
+        "mecanismos_acrescentados": ["decomposicao", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção 3.2, p. 3; Seção 5.4, p. 8",
+        "observacao": "Um planejador com ferramentas produz lista compacta de instruções e breve justificativa; um segundo gerador, com contexto limpo, produz a unidade VHDL completa. A Seção 5.4 relata que essa separação (quarto estágio da evolução do projeto) aumentou a aprovação de sintaxe por candidato e o alcance por função, sem valores nem condição comparável sem o componente; é contribuição de fase do desenvolvimento."
+      },
+      {
+        "nome_original": "Aggressive context pruning / context reset with brief summary",
+        "mecanismos": ["outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.2, p. 3; Seção 5.4, p. 8",
+        "observacao": "'outro' = gestão do conteúdo do contexto: histórico de tentativas falhas removido e contexto reiniciado a cada tentativa, carregando só um breve resumo. A decisão foi motivada por experimentos preliminares não relatados numericamente; não há condição sem o componente nos resultados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Decoding settings (temperature=0.6, top-p=1.0, top-k unset, max-new-tokens default)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação comuns a todas as condições; sem tokens de parada nem limite explícito de tokens.",
+        "localizador": "Apêndice A, p. 10"
+      },
+      {
+        "nome_original": "Repair loop max iterations T=10",
+        "natureza": "orcamento",
+        "descricao": "Limite de iterações do laço de reparo (parar na primeira aprovação de sintaxe ou ao atingir T); o texto não diz se o limite é idêntico para o fluxo MCP, cujas iterações incluem chamadas de ferramentas.",
+        "localizador": "Seção 3.2, p. 3; Apêndice A, p. 10"
+      },
+      {
+        "nome_original": "Qwen3-8B, Qwen3-30B-A3B, Qwen3-235B-A22B (model scales)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca de escala do modelo sem alterar o prompt; diferenças entre escalas não são efeito de prompting. O modelo de 235B rodou em ambiente local (DGX) e os demais em Hugging Face Inference Endpoints.",
+        "localizador": "Seção 3.4, p. 4; Apêndice A e A.1, p. 10"
+      },
+      {
+        "nome_original": "Model Context Protocol (MCP) server",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de chamada de ferramentas usada pelo agente; o protocolo em si não é conteúdo de prompt.",
+        "localizador": "Seção 3.2 e Figura 3, p. 3-4"
+      },
+      {
+        "nome_original": "Infinity embeddings + FAISS IndexFlatIP retrieval index",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de recuperação (embeddings Infinity, normalização l2, índice de cosseno, top-k=3) sobre corpus interno de mais de 1000 funções VHDL; o conteúdo recuperado inserido no prompt é tratado como contexto/exemplos. Identificador do modelo de embeddings não informado.",
+        "localizador": "Seção 3.4, p. 4; Apêndice A, p. 10"
+      },
+      {
+        "nome_original": "Pipeline stages outside syntax repair (testbench generation, fixed-point/streaming conversion, initial HDL translation, synthesis, simulation)",
+        "natureza": "outro",
+        "descricao": "Estágios do pipeline MATLAB→HDL mantidos fora do experimento; o estudo isola só o estágio de reparo de sintaxe. O modelo que gera os candidatos iniciais e o prompt da tradução inicial não são informados.",
+        "localizador": "Seção 3.1 e Figura 1, p. 2-3"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen3-8B", "versao": "checkpoint do Hugging Face (https://huggingface.co/Qwen/Qwen3-8B, acesso 2025-08-27); revisão/snapshot nao_informado; tokenizador padrão, sem ajuste fino", "localizador": "Seção 3.4, p. 4; ref. [7], p. 9; Apêndice A, p. 10"},
+      {"nome": "Qwen3-30B-A3B", "versao": "checkpoint do Hugging Face (https://huggingface.co/Qwen/Qwen3-30B-A3B, acesso 2025-08-27); revisão/snapshot nao_informado; tokenizador padrão, sem ajuste fino", "localizador": "Seção 3.4, p. 4; ref. [6], p. 9; Apêndice A, p. 10"},
+      {"nome": "Qwen3-235B-A22B", "versao": "model card do Hugging Face (ref. [5], sem URL nem data de acesso); revisão/snapshot nao_informado; precisão/quantização usada nao_informado", "localizador": "Seção 3.4, p. 4; ref. [5], p. 9; Apêndice A e A.1, p. 10"},
+      {"nome": "LLM da tradução inicial MATLAB→HDL (gera os candidatos)", "versao": "nao_informado (modelo não identificado)", "localizador": "Seção 3.1, p. 2-3"},
+      {"nome": "Modelo de embeddings (Infinity embeddings)", "versao": "nao_informado (o estudo cita o servidor Infinity, não o modelo)", "localizador": "Seção 3.4, p. 4; Apêndice A, p. 10"}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto interno de funções MATLAB de processamento de sinais", "quantidade": "42 funções, de 3 a 311 linhas; K=3 candidatos HDL por execução e R=12 execuções independentes por função. Conjunto interno da empresa; liberação de um subconjunto apenas planejada. As métricas de função são médias macro sobre 42 funções; a forma de combinar as 12 execuções nos indicadores binários por função não é informada.", "localizador": "Seção 3.3, p. 4; Seção 5.5, p. 8-9; Apêndice A, p. 10"},
+      {"nome": "Corpus de recuperação VHDL (não é benchmark de avaliação)", "quantidade": "mais de 1000 funções VHDL sintaticamente corretas, geralmente com menos de 100 linhas, de exercícios de aula e pequenos blocos internos; sobreposição com as funções avaliadas não discutida", "localizador": "Seção 3.4, p. 4"}
+    ],
+    "metricas": [
+      {"nome": "Candidate-level syntax pass (Syntax Pass Rate, nível de candidato)", "definicao": "percentual de candidatos que passam na verificação de sintaxe do GHDL; no Apêndice, aprovação por função p_i = #passes/(R×K), com R=12 e K=3, e média macro sobre 42 funções (as tabelas a rotulam como 'function-level macro averages')", "localizador": "Seção 3.3, p. 4; Apêndice A, p. 10; Tabelas 1-3, p. 5-6"},
+      {"nome": "Function-level syntax pass", "definicao": "percentual de funções com pelo menos um candidato que passa na verificação do GHDL; valor por função em {0,1}, média macro sobre 42 funções", "localizador": "Seção 3.3, p. 4; Apêndice A, p. 10"},
+      {"nome": "Simulation Reach Rate / Reach testbench", "definicao": "percentual de funções cujo código reparado é válido o bastante para seguir para síntese e simulação; nome 'Simulation Reach Rate' na Seção 3.3 e 'Reach testbench' nas tabelas", "localizador": "Seção 3.3, p. 4; Tabelas 1-3, p. 5-6"},
+      {"nome": "Final Flow Success Rate / Final success", "definicao": "percentual de funções cuja saída HDL final passa no testbench gerado a partir do MATLAB, o que o estudo trata como equivalência semântica", "localizador": "Seção 3.3, p. 4; Tabelas 1-3, p. 5-6"}
+    ],
+    "linguagens": ["MATLAB (origem)", "VHDL (alvo; GHDL com --std=08, isto é, VHDL-2008; o texto fala genericamente em HDL)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Correções automáticas ingênuas no estágio de reparo de sintaxe podem alterar silenciosamente a semântica do código e levar a falhas de verificação; um gargalo semântico permanece depois do reparo (sucesso final de 16.9% a 58.1% nas Tabelas 1-3).", "localizador": "Seção 1, p. 1; Seção 5.5, p. 8; Tabelas 1-3, p. 5-6"},
+      {"categoria": "correcao_funcional", "descricao": "Recuperação incondicional pode injetar código pouco relacionado que amplia o espaço de busca ou distrai o modelo; modos de falha identificados: poluição do contexto por exemplos grandes, incompatibilidades arquiteturais no código recuperado e truncamento de erros precisos do compilador.", "localizador": "Seção 5.1, p. 6-7"},
+      {"categoria": "correcao_funcional", "descricao": "Reparos plausíveis mas errados podem introduzir defeitos latentes.", "localizador": "Broader Impacts, p. 9"},
+      {"categoria": "seguranca", "descricao": "Reparos plausíveis mas errados podem introduzir vulnerabilidades de segurança; sistemas agênticos ampliam a superfície de ataque (injeção no prompt ou na recuperação). Risco declarado, não medido.", "localizador": "Broader Impacts, p. 9"},
+      {"categoria": "nao_determinismo", "descricao": "Dependência excessiva de sistemas não determinísticos em contextos críticos; a vantagem de 2.3 p.p. do RAG ingênuo sobre o MCP em 235B pode estar dentro da variância entre execuções.", "localizador": "Seção 5.3, p. 7; Broader Impacts, p. 9"},
+      {"categoria": "custo", "descricao": "Aumento do uso de energia por modelos grandes; o benefício do MCP em 235B é descrito como pequeno em relação ao seu 'overhead'. Custo das condições não quantificado (o Apêndice A.1 informa horas de GPU por modelo, não por fluxo).", "localizador": "Seção 5.2, p. 7; Broader Impacts, p. 9; Apêndice A.1, p. 10"},
+      {"categoria": "outro", "descricao": "Propagação, via recuperação, de trechos com licença incompatível ou proprietários; amplificação de vieses presentes nos corpora de código.", "localizador": "Broader Impacts, p. 9"},
+      {"categoria": "outro", "descricao": "Validade externa: 42 funções de um único domínio (processamento de sinais); resultados podem diferir com outros perfis de erro.", "localizador": "Seção 5.5, p. 8"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Política de recuperação condicional ('if stuck, then retrieve') no MCP em vez de anexação incondicional; o contraste MCP contra Non-MCP+RAG muda vários ingredientes ao mesmo tempo, por isso o efeito da política não é medido isoladamente.", "avaliada": "nao", "localizador": "Seção 3.4, p. 4; Seção 5.1, p. 6-7; Tabelas 1-3, p. 5-6"},
+      {"descricao": "Reinício do contexto a cada tentativa, com breve resumo, e gerador de contexto limpo no Code Rewrite para evitar 'context contamination' por tentativas falhas; motivado por experimentos preliminares sem valores relatados.", "avaliada": "nao", "localizador": "Seção 3.2, p. 3; Seção 5.4, p. 8"},
+      {"descricao": "Remoção da ferramenta de consulta ao manual, que reduzia o desempenho quando invocada (ablação sem valores relatados).", "avaliada": "nao", "localizador": "Seção 5.4, p. 8"},
+      {"descricao": "Doze execuções independentes por função, com médias macro; procedimento de controle sem intervalos de confiança.", "avaliada": "nao", "localizador": "Seção 4, p. 5; Apêndice A, p. 10"},
+      {"descricao": "Recomendações não avaliadas: portões de verificação (compilação, testes unitários e diferenciais, fuzzing, verificações formais leves), recuperação no próprio ambiente com proveniência e varredura de licenças, invocação condicional e prompts curtos, registro de chamadas de ferramentas e diffs, restrição de ferramentas com efeitos colaterais e aprovação humana para ações de alto impacto, documentação da estocasticidade.", "avaliada": "nao", "localizador": "Broader Impacts, p. 9"},
+      {"descricao": "Proposta futura: ablações com orçamento de tokens igualado, ruído na recuperação, reranqueamento por similaridade de erro, desativação dos reinícios e intervalos de confiança; e pareamento do reparo agêntico com salvaguardas semânticas.", "avaliada": "nao", "localizador": "Seção 5.3, p. 8; Seção 5.5, p. 8"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Expert-Designed Flow (Non-MCP), executado pelos autores nos mesmos três modelos Qwen3 e nas mesmas 42 funções (Tabelas 1-3)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Aparente inconsistência entre métricas encadeadas: pelo pipeline, só código sintaticamente correto segue para síntese/simulação, mas o alcance excede a aprovação de sintaxe por função em duas células: Qwen 235B Non-MCP com function-level syntax pass 93.0% e Reach testbench 100%; Qwen 30B MCP com 92.3% e 95.3%. O estudo não explica como as 12 execuções são combinadas nos indicadores por função.", "localizador": "Seção 3.1, p. 3; Seção 3.3, p. 4; Tabela 1, p. 5; Tabela 3, p. 6"},
+      {"descricao": "Cálculo próprio do complemento: vários valores de nível de função (por exemplo, 95.3%, 72.1%, 93.0% e 53.5%) não correspondem, com arredondamento a uma casa, a k/42 (uma execução) nem a n/504 (42 funções × 12 execuções), mas coincidem com k/43 (41/43, 31/43, 40/43, 23/43). Aparente inconsistência com o corpus de 42 funções; a fonte não informa contagens, o estimador nem a forma de agregação das execuções para conferir.", "localizador": "Seção 3.3, p. 4; Tabelas 1-3, p. 5-6; Apêndice A, p. 10"},
+      {"descricao": "Narrativa 'naive RAG inclusion degrades performance' e 'naive attachment to every prompt reduced performance at 8B and 30B' contra as tabelas: em 30B o RAG ingênuo eleva a aprovação de sintaxe por candidato (51.9% → 60.0%) e só reduz as demais métricas (81.2% → 77.0%; 72.1% → 44.0%; 33.53% → 19.5%); em 8B, function-level syntax pass (76.7%) e Reach testbench (60.5%) são iguais com e sem RAG, e as quedas são em candidato (59.0% → 56.7%) e sucesso final (18.3% → 16.9%).", "localizador": "Seção 4.3, p. 5; Seção 5.4, p. 8; Tabelas 1-2, p. 5-6"},
+      {"descricao": "Inversão em 235B: o RAG ingênuo tem o maior sucesso final (58.1% contra 55.8% do MCP e 53.5% do Non-MCP) e aprovação por candidato próxima à do MCP (93.9% contra 94.4%); os autores reconhecem que a vantagem de 2.3 p.p. pode estar dentro da variância entre execuções. A contribuição da introdução ('naive inclusion of the same tools is actively detrimental to performance') não se aplica a essa escala.", "localizador": "Seção 1, p. 2; Seção 4.2, p. 5; Seção 5.3, p. 7; Tabela 3, p. 6"},
+      {"descricao": "Atribuição causal sem contrafactual do ingrediente: a Seção 5.1 diz que o ganho em 30B 'is directly attributable to a conditional tool-use policy', mas a mesma seção diz que o mecanismo não foi testado diretamente; não há condição MCP sem RAG nem MCP com RAG incondicional, e prompt mínimo, ferramentas, separação planejamento/geração e reinício de contexto mudam juntos.", "localizador": "Seção 5.1, p. 6"},
+      {"descricao": "Confusão de comprimento: os orçamentos de tokens das condições (prompt longo do especialista, prompt mínimo do MCP, exemplos anexados) não foram igualados; os autores recomendam igualá-los para separar efeitos de política e de comprimento e tratam a explicação como hipótese pendente de ablações e intervalos de confiança.", "localizador": "Seção 5.3, p. 7-8; Seção 5.4, p. 8"},
+      {"descricao": "Variabilidade e inferência: 'σ ≈ 2-3 pp on intermediate metrics in pilot logging', sem desvio para o sucesso final, sem intervalos de confiança nem testes; não fica claro se o σ vem das 12 execuções do experimento ou de registros do piloto. Ganhos do MCP no sucesso final de +4.9 p.p. (8B) e +2.3 p.p. (235B) são da ordem dessa variabilidade (comparação qualitativa do complemento).", "localizador": "Seção 4, p. 5; Seção 4.2, p. 5; Seção 5.3, p. 7-8"},
+      {"descricao": "Condições discrepantes entre escalas: 8B e 30B rodaram em Hugging Face Inference Endpoints (A100 e H200, TGI sem versão registrada) e 235B em DGX local com hardware, tempo e versão de backend não registrados.", "localizador": "Apêndice A.1, p. 10"},
+      {"descricao": "Precisão diferente na mesma linha: a Tabela 1 imprime o sucesso final como 33.53% e 42.12% e as demais células com uma casa; o texto arredonda para 33.5% e 42.1% (consistentes com a tabela).", "localizador": "Seção 4.1, p. 5; Tabela 1, p. 5"},
+      {"descricao": "A Figura 4 (comparação para 30B) tem rótulos de eixo e legenda ilegíveis na resolução da página e não traz valores numéricos; não foi usada para extração nem para estimativa.", "localizador": "Figura 4, p. 6"}
+    ],
+    "observacoes": [
+      {"descricao": "Tarefas: o estudo isola o estágio de reparo de sintaxe (reparo de programas, classificado como depuracao) de código HDL traduzido por LLM dentro de um pipeline de tradução MATLAB→HDL (traducao); as métricas de sintaxe medem o reparo e o sucesso final mede a equivalência da tradução no testbench.", "localizador": "Resumo, p. 1; Seção 3.1, p. 2-3; Seção 3.3, p. 4"},
+      {"descricao": "Evolução do projeto em quatro estágios (ferramentas com saídas acumuladas no prompt; intercalação de raciocínio e ferramentas; política de sugestão de mudanças por linha; separação planejamento/geração), relatada só qualitativamente, sem valores.", "localizador": "Seção 5.4, p. 8"},
+      {"descricao": "'Context contamination' no texto refere-se à interferência de tentativas falhas anteriores no contexto, não a contaminação de dados de avaliação.", "localizador": "Seção 3.2, p. 3; Seção 5.4, p. 8"},
+      {"descricao": "Recursos computacionais: 4.933 min (≈82.2 horas de GPU) para 8B e 5.388 min (≈89.8 horas de GPU) para 30B, sobre 42 funções × 12 execuções; não está claro se cobrem um fluxo ou todos; para 235B não registrados.", "localizador": "Apêndice A.1, p. 10"},
+      {"descricao": "Os textos do prompt do especialista, do prompt mínimo do MCP e das instruções do planejador não são apresentados.", "localizador": "Seção 3.2, p. 3; Seção 5.4, p. 8"}
+    ],
+    "citacoes": [
+      {"trecho": "We compare two LLM-driven methods for syntax repair in a MATLAB-to-HDL pipeline: a structured, expert-designed flow that follows a fixed sequence of operations, and a more autonomous agentic approach that uses the Model Context Protocol (MCP) [1] to dynamically select its own tools.", "localizador": "Resumo, p. 1"},
+      {"trecho": "We study 42 MATLAB signal-processing functions and isolate the syntax-repair stage.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Naive, automated fixes at this step can silently alter the code’s semantics, ultimately leading to verification failures.", "localizador": "Seção 1, p. 1"},
+      {"trecho": "Finally, we isolate and demonstrate a key retrieval strategy, showing that on-demand tool use helps at small to mid scale, but naive inclusion of the same tools is actively detrimental to performance.", "localizador": "Seção 1, p. 2"},
+      {"trecho": "An LLM uses this version to generate multiple candidate HDL translations (in our case, 3).", "localizador": "Seção 3.1, p. 3"},
+      {"trecho": "After repair, syntactically correct code proceeds to a synthesis stage and is finally validated against the original testbench.", "localizador": "Seção 3.1, p. 3"},
+      {"trecho": "For each HDL candidate, the LLM is provided with a large, expert-written prompt containing detailed guidance and advice for repairing HDL syntax.", "localizador": "Seção 3.2, p. 3"},
+      {"trecho": "It uses the GHDL compiler to identify errors and iterates on the code in a fixed loop until syntax passes or a limit is reached.", "localizador": "Seção 3.2, p. 3"},
+      {"trecho": "The agent receives a minimal prompt containing only the broken code, a repair goal, and a menu of available tools.", "localizador": "Seção 3.2, p. 3"},
+      {"trecho": "RAG Retrieval: A tool to retrieve syntactically correct VHDL code examples from a vector database to provide relevant context.", "localizador": "Seção 3.2, lista de ferramentas, item 2, p. 3"},
+      {"trecho": "Code Rewrite: A tool that passes the original code and a set of model-generated instructions to a second clean context agent for implementation.", "localizador": "Seção 3.2, lista de ferramentas, item 3, p. 3"},
+      {"trecho": "Therefore, the context was reset after each attempt, with only a brief summary of the previous attempt carried over.", "localizador": "Seção 3.2, p. 3"},
+      {"trecho": "In the naive Non MCP with RAG variant, the top 3 examples were appended unconditionally to every repair prompt.", "localizador": "Seção 3.4, p. 4"},
+      {"trecho": "In the MCP variant, retrieval was conditional on lack of progress or on compiler errors that indicated missing idioms, and the agent could choose to skip retrieval.", "localizador": "Seção 3.4, p. 4"},
+      {"trecho": "Variability across twelve independent runs was small (σ ≈ 2-3 pp on intermediate metrics in pilot logging).", "localizador": "Seção 4, p. 5"},
+      {"trecho": "To isolate the impact of tool-use policy, we tested a variant that naively appended RAG outputs to every repair prompt.", "localizador": "Seção 4.3, p. 5"},
+      {"trecho": "While we did not directly test this mechanism, the scale pattern in Tables 1-3 is consistent with this interpretation.", "localizador": "Seção 5.1, p. 6"},
+      {"trecho": "This gain is directly attributable to a conditional tool-use policy.", "localizador": "Seção 5.1, p. 6"},
+      {"trecho": "This policy was encoded in a prompt that created a simple \"if stuck, then retrieve\" loop, instructing the agent to first attempt a local fix and only invoke RAG when it failed to make progress.", "localizador": "Seção 5.1, p. 6"},
+      {"trecho": "We identified three failure modes for this approach: context clutter from large examples, architectural mismatches in retrieved code, and the truncation of precise compiler errors.", "localizador": "Seção 5.1, p. 7"},
+      {"trecho": "The observed advantage is small at 2.3 percentage points, so it may fall within run to run variance.", "localizador": "Seção 5.3, p. 7"},
+      {"trecho": "A second generator, with a clean context, produced a complete new VHDL unit from those instructions.", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "This separation increased candidate level syntax pass and function level reach across scales.", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "The manual lookup tool reduced performance whenever it was invoked, so we removed it.", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "Equalize token budgets when comparing policies to separate policy effects from length effects.", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "Our dataset consists of 42 functions from a single domain (signal processing), so these results may differ with other error profiles.", "localizador": "Seção 5.5, p. 8"},
+      {"trecho": "The dataset used in this study is currently internal to our company.", "localizador": "Seção 5.5, p. 9"},
+      {"trecho": "Risks include plausible-but-wrong repairs that can introduce latent defects or security vulnerabilities; propagation of license-incompatible or proprietary snippets via retrieval; over-reliance on non-deterministic systems in safety- or mission-critical settings; and increased energy use from large models.", "localizador": "Broader Impacts, p. 9"},
+      {"trecho": "Agentic systems can also widen the attack surface (e.g., prompt or retrieval injection) and may amplify biases present in code corpora.", "localizador": "Broader Impacts, p. 9"},
+      {"trecho": "Decoding: temperature=0.6, top-p=1.0, top-k unset, max-new-tokens backend default (unset), no stop tokens.", "localizador": "Apêndice A, p. 10"},
+      {"trecho": "Trials: R=12 independent runs per function; K=3 candidates per run.", "localizador": "Apêndice A, p. 10"},
+      {"trecho": "Function-level syntax pass 93.0% 100% 100%", "localizador": "Tabela 3, p. 6; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+      {"trecho": "Reach testbench 100% 100% 100%", "localizador": "Tabela 3, p. 6; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+      {"trecho": "Function-level syntax pass 81.2% 92.3% 77.0%", "localizador": "Tabela 1, p. 5; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+      {"trecho": "Reach testbench 72.1% 95.3% 44.0%", "localizador": "Tabela 1, p. 5; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Agentic MCP Flow",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "feedback", "decomposicao", "multiagente", "outro"],
+      "mecanismos_acrescentados": ["exemplos", "decomposicao", "multiagente", "outro"],
+      "comparador": "Expert-Designed Flow (Baseline), coluna Non-MCP",
+      "modelo": "Qwen3-30B-A3B (Qwen 30B)",
+      "benchmark": "Conjunto interno de 42 funções MATLAB de processamento de sinais (estágio de reparo de sintaxe do pipeline MATLAB→HDL)",
+      "metrica": "Candidate-level syntax pass",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 51.9, "intervencao": 75.0},
+      "denominador": "candidatos por função: p_i = #passes/(R×K), com R=12 execuções e K=3 candidatos, e média macro sobre 42 funções (Apêndice A); contagens absolutas não informadas",
+      "condicoes": "Reparo de sintaxe de candidatos VHDL traduzidos por LLM; GHDL --std=08; laço de reparo com até T=10 iterações; decodificação temperature=0.6, top-p=1.0, top-k não definido, max-new-tokens padrão do backend; R=12 execuções independentes por função e K=3 candidatos por execução. No MCP, recuperação condicional top-3 truncada a 1200 tokens, Code Rewrite com gerador de contexto limpo e reinício do contexto a cada tentativa. Orçamentos de tokens das duas condições não igualados. Variabilidade relatada só como 'σ ≈ 2-3 pp on intermediate metrics in pilot logging'; sem intervalos de confiança nem testes. Modelo da tradução inicial nao_informado. O ganho é do pacote MCP, não de um ingrediente. Valores conferidos visualmente na Tabela 1 (p. 5) e no texto da Seção 4.1 (p. 5).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a Seção 4 destacam várias métricas (resolução de erros de sintaxe, alcance da simulação, sucesso final) e três escalas de modelo sem que uma prevaleça. A Tabela 1 é a primeira tabela com o contraste elegível (MCP contra Non-MCP); primeira métrica da tabela (Candidate-level syntax pass), único modelo da tabela (Qwen 30B) e primeira linha de base de prompting listada (Non-MCP).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 5; Seção 4.1, p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Candidate-level syntax pass 51.9% 75.0% 60.0%", "localizador": "Tabela 1, p. 5; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+        {"trecho": "The candidate-level syntax pass rate increases from 51.9% to 75.0% (+23.1 pp), and the function-level syntax pass rate increases from 81.2% to 92.3% (+11.1 pp).", "localizador": "Seção 4.1, p. 5"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Agentic MCP Flow",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "feedback", "decomposicao", "multiagente", "outro"],
+      "mecanismos_acrescentados": ["exemplos", "decomposicao", "multiagente", "outro"],
+      "comparador": "Expert-Designed Flow (Baseline), coluna Non-MCP",
+      "modelo": "Qwen3-30B-A3B (Qwen 30B)",
+      "benchmark": "Conjunto interno de 42 funções MATLAB de processamento de sinais (pipeline de tradução MATLAB→HDL, avaliação no testbench gerado do MATLAB)",
+      "metrica": "Final success (nas tabelas) / Final Flow Success Rate (Seção 3.3)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 33.53, "intervencao": 42.12},
+      "denominador": "funções: sucesso final em {0,1} por função, média macro sobre 42 funções (Apêndice A); forma de combinar as 12 execuções e contagens absolutas nao_informado",
+      "condicoes": "Mesmas condições da extração anterior (T=10, temperature=0.6, top-p=1.0, R=12, K=3, Qwen 30B). Só o estágio de reparo difere entre as condições; tradução inicial, síntese e testbench são comuns. Sucesso final = saída HDL final passa no testbench gerado do MATLAB. A Tabela 1 imprime 33.53% e 42.12%; o texto arredonda para 33.5% e 42.1% (+8.6 pp). Sem intervalos de confiança; σ informado só para métricas intermediárias. Valores conferidos visualmente na Tabela 1 (p. 5) e na Seção 4.1 (p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da tarefa traducao, ainda não representada: a primeira extração mede o reparo de sintaxe (depuracao); a métrica de sucesso final mede a equivalência da tradução no testbench. Mesma tabela (Tabela 1), primeira métrica pertinente à tradução (Final success), mesmo modelo e mesma linha de base.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 5; Seção 4.1, p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Final success 33.53% 42.12% 19.5%", "localizador": "Tabela 1, p. 5; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+        {"trecho": "This upstream success translates into a measurable improvement in the end-to-end success rate, which improves from 33.5% to 42.1% (+8.6 pp).", "localizador": "Seção 4.1, p. 5"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Non-MCP + RAG (naive RAG variant)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "feedback"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "Expert-Designed Flow (Baseline), coluna Non-MCP",
+      "modelo": "Qwen3-30B-A3B (Qwen 30B)",
+      "benchmark": "Conjunto interno de 42 funções MATLAB de processamento de sinais (estágio de reparo de sintaxe do pipeline MATLAB→HDL)",
+      "metrica": "Candidate-level syntax pass",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 51.9, "intervencao": 60.0},
+      "denominador": "candidatos por função: p_i = #passes/(R×K), com R=12 e K=3, e média macro sobre 42 funções (Apêndice A); contagens absolutas não informadas",
+      "condicoes": "Intervenção = fluxo do especialista com os top-3 exemplos VHDL recuperados (embeddings Infinity, FAISS, truncados a 1200 tokens) anexados incondicionalmente a todo prompt de reparo; demais condições iguais às do fluxo de base (T=10, temperature=0.6, top-p=1.0, R=12, K=3). O texto destaca, para este contraste, as quedas no alcance (72.1% → 44.0%) e no sucesso final (33.5% → 19.5%), não esta métrica. Contraste do ingrediente 'exemplos anexados incondicionalmente' no fluxo do especialista; não isola a política condicional do MCP. Sem intervalos de confiança. Valores conferidos visualmente na Tabela 1 (p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: a coluna Non-MCP+RAG é o único contraste de ingrediente com e sem o componente, apresentado pelo estudo para isolar a política de uso de ferramentas. Primeira tabela (Tabela 1), primeira métrica, mesmo modelo e linha de base Non-MCP; seleção feita sem considerar o sentido do resultado.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 5; Seção 3.4, p. 4; Seção 4.3, p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Candidate-level syntax pass 51.9% 75.0% 60.0%", "localizador": "Tabela 1, p. 5; colunas Metric, Non-MCP, MCP, Non-MCP+RAG"},
+        {"trecho": "In the naive Non MCP with RAG variant, the top 3 examples were appended unconditionally to every repair prompt.", "localizador": "Seção 3.4, p. 4"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Foco explícito no estágio de reparo de sintaxe e comparação empírica entre fluxo do especialista e fluxo agêntico em três escalas, com três contribuições declaradas.", "localizador": "Resumo, p. 1; Seção 1, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Pipeline, fluxos, ferramentas, configuração da recuperação, decodificação e número de execuções descritos; porém os textos dos prompts (especialista, mínimo, planejador) não são apresentados, o modelo da tradução inicial não é identificado e não se diz se o limite T=10 tem o mesmo significado nos dois fluxos.", "localizador": "Seções 3.1-3.4, p. 2-4; Apêndice A, p. 10"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Linha de base do especialista e variante com RAG ingênuo executadas nos mesmos modelos e dados; mas MCP e base diferem em vários ingredientes ao mesmo tempo, sem igualar orçamentos de tokens, e não há condição que isole a política condicional, embora o estudo atribua o ganho a ela.", "localizador": "Seção 3.2, p. 3; Seção 3.4, p. 4; Tabelas 1-3, p. 5-6; Seção 5.1, p. 6; Seção 5.4, p. 8"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Quatro métricas definidas e fórmula da aprovação por candidato no Apêndice; porém não se informa como as 12 execuções entram nos indicadores binários por função, o alcance excede a aprovação de sintaxe por função em duas células, vários valores não são compatíveis com 42 funções (cálculo próprio), a variabilidade vem de 'pilot logging' e não há intervalos de confiança. Os valores citados no texto coincidem com as tabelas.", "localizador": "Seção 3.3, p. 4; Seção 4, p. 5; Tabelas 1-3, p. 5-6; Apêndice A, p. 10"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute domínio único e 42 funções, gargalo semântico, variância entre execuções em 235B, explicação mecanística como hipótese e confusão de comprimento; não discute contaminação, ausência de testes estatísticos nas demais comparações nem diferenças de ambiente entre escalas.", "localizador": "Seção 5.1, p. 6; Seção 5.3, p. 7-8; Seção 5.5, p. 8; Broader Impacts, p. 9"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Apêndice com modelos, decodificação, execuções, configuração da recuperação e recursos computacionais; mas o conjunto de dados e o corpus de recuperação são internos (liberação só planejada), os prompts não são publicados, o modelo de embeddings não é identificado, versões do TGI/backend e hardware de 235B não foram registrados.", "localizador": "Seção 3.4, p. 4; Seção 5.5, p. 9; Apêndice A e A.1, p. 10"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute possível presença das funções avaliadas no pré-treinamento dos modelos nem sobreposição entre o corpus de recuperação e as funções avaliadas; o termo 'context contamination' refere-se a tentativas falhas no contexto, não a vazamento de dados de avaliação.", "localizador": "Seção 3.2, p. 3; Seção 3.4, p. 4; Seção 5.5, p. 8-9"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "observacao": "Texto extraído lido integralmente (410 linhas, até o Apêndice A.1). Todas as páginas abertas visualmente para conferir as Tabelas 1-3, as Figuras 1-4, a descrição dos fluxos, os números citados na heterogeneidade e os localizadores das citações."
+  }
+}

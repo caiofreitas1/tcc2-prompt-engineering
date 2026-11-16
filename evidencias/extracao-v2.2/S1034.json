@@ -1,0 +1,462 @@
+{
+  "estudo": "S1034",
+  "texto_fonte": "fontes/textos/lote/S1034.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Gao, Wang, Gao, Lyu. SEER: Enhancing Chain-of-Thought Code Generation through Self-Exploring Deep Reasoning. arXiv:2510.17130v1 [cs.SE], 20 out. 2025 (cabeçalho do modelo 'Conference’17'; nota de rodapé informa aceite no ICSE 2026). O PDF não traz paginação impressa; os localizadores usam a página do PDF (pp. 1-13).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "SEER (SElf-Exploring deep Reasoning framework)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (Resumo); p. 2 (Introdução); pp. 3-6, Seções 2.1 e 3, Algoritmo 1 (p. 5); p. 7, Tabela 1",
+        "observacao": "Pacote híbrido. Na inferência, o modelo de política gera o raciocínio em passos, cada passo uma subtarefa implementável e o último com o código (raciocinio, decomposicao); em cada passo são geradas várias ações candidatas, ranqueadas pelo modelo de valor numa busca em feixe (amostragem); na primeira iteração, metade das candidatas é forçada a ser solução direta pelo prefixo de resposta ```{lang} anexado ao prompt (outro: pré-preenchimento da resposta para alternar entre geração direta e raciocínio). instrucao corresponde ao enunciado do problema, presente em todas as condições. O raciocínio em passos é aprendido por ajuste fino (política com reinforced fine-tuning, cabeça de valor treinada, ajuste contínuo com KL), e o artigo não reproduz o prompt de inferência (templates só no GitHub, não acessado); por isso o contraste com Direct Generation (modelo base sem ajuste) confunde prompting, ajuste fino e orçamento de busca (B1=3, B2=4). Os componentes de treino estão em componentes_fora_escopo. Aprendizado em contexto com três demonstrações e delimitadores ⟨step⟩ é usado na expansão do MCTS (coleta de dados), não descrito na inferência."
+      },
+      {
+        "nome_original": "Value model-based reasoning quality assessment (value model)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, Seção 3.2 e Algoritmo 1 (linhas 12-16); p. 8, Seção 5.2.1 e Tabela 2 (linha -w/o value model)",
+        "observacao": "Ranqueamento das ações candidatas pelo valor previsto Vϕ(s_{t+1}) e retenção das B1 melhores. A ablação troca o valor por 0 e escolhe C ao acaso, mantendo a geração de várias candidatas; o ingrediente retirado é a seleção guiada pelo valor (amostragem com seleção). Componente híbrido: o avaliador é uma cabeça linear treinada (ajuste fino), e a retirada afeta também a escolha adaptativa entre raciocínio e geração direta, que depende do mesmo valor."
+      },
+      {
+        "nome_original": "Adaptive CoT reasoning (adaptive cot)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "pp. 5-6, Seção 3.3 e Algoritmo 1 (linhas 5-7); pp. 8-9, Seção 5.2.1 e Tabela 2 (linha -w/o adaptive cot)",
+        "observacao": "Na inferência, ⌊B2/2⌋ candidatas da primeira iteração são soluções sem raciocínio, forçadas pelo prefixo de resposta ```{lang} (outro: pré-preenchimento da resposta), e o modelo de valor decide entre elas e os passos de raciocínio. A ablação desativa a geração direta da linha 7 do Algoritmo 1. Componente híbrido: a decisão depende do modelo de valor ajustado continuamente com dados de soluções diretas (ajuste fino, fora do escopo); a variante 'Only first stage' da Tabela 3 é de estratégia de treino e não entra aqui."
+      },
+      {
+        "nome_original": "SEER+Reflexion",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "pp. 10-11, Seção 6.3 e Tabela 5",
+        "observacao": "Análise de discussão: Reflexion (refinamento iterativo por autorreflexão e correção de erros) acrescentado ao SEER e comparado com SEER sem Reflexion. Não é a proposta do estudo nem linha de base; registrado como componente acrescentado. Número de iterações, uso de testes e prompt do Reflexion não informados."
+      },
+      {
+        "nome_original": "Direct Generation",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7, Tabela 1; p. 8, Seção 5.1 ('base model')",
+        "observacao": "Modelo base (DeepSeek-Coder-6.7B-Instruct ou Qwen2.5-Coder-7B-Instruct) gerando o código diretamente; o prompt não é reproduzido no artigo. instrucao registrada pelo enunciado do problema em zero-shot."
+      },
+      {
+        "nome_original": "Self-Planning",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": ["exemplos", "decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1",
+        "observacao": "Linha de base de prompting replicada com os exemplos few-shot do artigo original: plano de passos a partir da intenção com prompt few-shot e geração guiada pelo plano. Comparável à linha Direct Generation da Tabela 1 (pacote de exemplos e planejamento, sem isolar cada ingrediente). Não é técnica focal."
+      },
+      {
+        "nome_original": "Code CoT",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1",
+        "observacao": "Linha de base de prompting que pede a descrição do código linha a linha antes de escrevê-lo, replicada com o prompt do artigo original (não reproduzido; uso de exemplos nao_informado). Comparável à linha Direct Generation da Tabela 1. Não é técnica focal."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Reasoning quality-aware model training (policy model com reinforced fine-tuning e value model com camada linear tanh)",
+        "natureza": "ajuste_fino",
+        "descricao": "Treino multitarefa do modelo de política em caminhos corretos e da cabeça de valor em caminhos corretos e incorretos (Eq. 3), por duas épocas, batch 128; conjuntos de 68K e 60K amostras.",
+        "localizador": "p. 5, Seção 3.2; p. 7, Seção 4.4"
+      },
+      {
+        "nome_original": "Adaptive CoT training com regularização KL e LoRA",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste contínuo do modelo de valor com soluções diretas rotuladas por testes (conjunto D_ar), com termo de divergência KL (Eq. 4) e LoRA por limitação de memória; para Qwen, KL também na primeira etapa de treino.",
+        "localizador": "pp. 5-6, Seção 3.3; p. 7, Seção 4.4"
+      },
+      {
+        "nome_original": "Monte Carlo Tree Search (coleta de dados de raciocínio)",
+        "natureza": "outro",
+        "descricao": "Síntese de dados de treino: árvores de raciocínio construídas por MCTS sobre 10K pares do Self-OSS, com recompensa por testes; a expansão usa aprendizado em contexto com três demonstrações sorteadas de oito, mas o efeito medido é o do modelo ajustado com esses dados, não de prompting na inferência.",
+        "localizador": "pp. 3-4, Seção 3.1.1; pp. 6-7, Seção 4.4"
+      },
+      {
+        "nome_original": "Path perturbation (PP)",
+        "natureza": "outro",
+        "descricao": "Síntese de caminhos incorretos para treino, perturbando o enunciado (só a primeira frase) e substituindo-o depois pelo original; afeta apenas os dados de ajuste fino (7,834 e 6,169 amostras negativas). Ablação na Tabela 2.",
+        "localizador": "pp. 4-5, Seção 3.1.2; p. 8, Seção 5.2.1 e Tabela 2"
+      },
+      {
+        "nome_original": "Path refinement (PR)",
+        "natureza": "outro",
+        "descricao": "Síntese de caminhos corretos para treino por autorreflexão com um template de reflexão e a solução de referência (3,051 e 3,499 caminhos); é prompting usado só para gerar dados de ajuste fino, e o efeito medido é o do modelo ajustado. Ablação na Tabela 2.",
+        "localizador": "p. 5, Seção 3.1.2; p. 8, Seção 5.2.1 e Tabela 2"
+      },
+      {
+        "nome_original": "LLM temperature (0.5), beam sizes B1 = 3 e B2 = 4",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação e largura da busca em feixe da inferência, analisados na Seção 5.3 (Figuras 5 e 6).",
+        "localizador": "p. 7, Seção 4.4; pp. 9-10, Seção 5.3"
+      },
+      {
+        "nome_original": "Value loss weight β (0.025)",
+        "natureza": "ajuste_fino",
+        "descricao": "Peso da perda do modelo de valor no treino (Eq. 3), analisado na Figura 6 (c)-(d).",
+        "localizador": "p. 7, Seção 4.4; p. 9, Seção 5.3"
+      },
+      {
+        "nome_original": "SFT (COTTON) e DS-R1’s RL",
+        "natureza": "ajuste_fino",
+        "descricao": "Linhas de base de treino: ajuste fino supervisionado com CoTs destiladas do GPT-4 e aprendizado por reforço do DeepSeek-R1-Zero (Open-R1, mesmos dados semente e recompensas de formato e acurácia).",
+        "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1"
+      },
+      {
+        "nome_original": "Only first stage e Two stage no KL",
+        "natureza": "ajuste_fino",
+        "descricao": "Variantes da estratégia de treino comparadas na Tabela 3.",
+        "localizador": "p. 8, Tabela 3; p. 9, Seção 5.2.2"
+      },
+      {
+        "nome_original": "Modelos maiores, proprietários e DeepSeek-R1-Distill-Qwen-7B",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparações com outros modelos (Tabela 1, blocos Closed-source e 15B+; Tabela 4), sem alteração de prompt.",
+        "localizador": "p. 7, Tabela 1; pp. 10-11, Seção 6.2 e Tabela 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "DeepSeek-Coder-6.7B-Instruct", "versao": "6.7B-Instruct (snapshot nao_informado)", "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1"},
+      {"nome": "Qwen2.5-Coder-7B-Instruct", "versao": "7B-Instruct (snapshot nao_informado)", "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1"},
+      {"nome": "GPT-4o", "versao": "Nov. 2024", "localizador": "p. 7, Tabela 1", "observacao": "Modelo de referência; não informa se os valores foram executados pelos autores ou transcritos."},
+      {"nome": "GPT-4o-mini", "versao": "July. 2024", "localizador": "p. 7, Tabela 1"},
+      {"nome": "GPT-4-Turbo", "versao": "Apr. 2024", "localizador": "p. 7, Tabela 1", "observacao": "A Seção 4.3 cita 'GPT-4 [42]' e a Tabela 1 lista GPT-4-Turbo."},
+      {"nome": "Gemini 1.5 Flash 002", "versao": "Sept. 2024", "localizador": "p. 7, Tabela 1"},
+      {"nome": "DeepSeek-Coder-V2-Instruct", "versao": "236B", "localizador": "p. 7, Tabela 1"},
+      {"nome": "Mixtral-8x22B-Instruct-v0.1", "versao": "v0.1 (176B)", "localizador": "p. 7, Tabela 1"},
+      {"nome": "Llama3-70B-Instruct", "versao": "70B", "localizador": "p. 7, Tabela 1"},
+      {"nome": "DeepSeek-Coder-33B-Instruct", "versao": "33B", "localizador": "p. 7, Tabela 1"},
+      {"nome": "StarCoder2-15B-Instruct-v0.1", "versao": "v0.1 (15B)", "localizador": "p. 7, Tabela 1"},
+      {"nome": "DeepSeek-R1-Distill-Qwen-7B", "versao": "nao_informado", "localizador": "p. 10, Seção 6.2; p. 11, Tabela 4"}
+    ],
+    "benchmarks": [
+      {"nome": "MBPP (Original e Plus)", "quantidade": "378 problemas Python", "localizador": "p. 6, Seção 4.2", "observacao": "A versão Plus acrescenta casos de teste; o denominador do pass@1 não é ligado explicitamente ao tamanho do benchmark."},
+      {"nome": "HumanEval (Original e Plus)", "quantidade": "164 problemas Python (média de 9.6 testes cada)", "localizador": "p. 6, Seção 4.2"},
+      {"nome": "LiveCodeBench (LCB)", "quantidade": "713 problemas ('all available ... during the experimental period')", "localizador": "p. 6, Seção 4.2", "observacao": "Janela de datas nao_informado; a coluna 'Avg' das tabelas não é definida (média de quê nao_informado)."},
+      {"nome": "MultiPL-E (porção MBPP, C++ e Java)", "quantidade": "nao_informado", "localizador": "p. 11, Seção 6.4 e Tabela 6"},
+      {"nome": "Self-OSS (dados semente de treino)", "quantidade": "10K pares pergunta-código sorteados", "localizador": "p. 6, Seção 4.4", "observacao": "Conjunto de treino, não de avaliação."}
+    ],
+    "metricas": [
+      {"nome": "pass@1 (pass rate)", "denominador": "nao_informado explicitamente (tamanhos dos benchmarks: 378, 164, 713)", "localizador": "p. 6, Seção 4.2; pp. 7-8, Tabelas 1-3; p. 11, Tabelas 4-5", "observacao": "Valores do SEER são médias de três repetições; Tabelas 2 e 3 trazem ± (dispersão, estimador nao_informado). Valores do SEER coincidem entre as Tabelas 1, 2, 3, 4 e 5."},
+      {"nome": "Generation/inference time", "denominador": "nao_aplicavel", "localizador": "p. 9, Seção 5.2.1; p. 11, Tabela 4", "observacao": "Tempo total por benchmark (Tabela 4) e aumento relativo do tempo sem adaptive CoT (34.5% e 32.6%)."},
+      {"nome": "Métrica da Tabela 6 (C++ e Java)", "denominador": "nao_informado", "localizador": "p. 11, Tabela 6", "observacao": "Nome da métrica nao_informado na tabela e no texto ('points')."},
+      {"nome": "Proporção de questões com raciocínio passo a passo", "denominador": "nao_informado (MBPP)", "localizador": "pp. 8-9, Seção 5.2.1"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "localizador": "p. 6, Seção 4.2"},
+      {"nome": "C++", "localizador": "p. 11, Seção 6.4 e Tabela 6"},
+      {"nome": "Java", "localizador": "p. 11, Seção 6.4 e Tabela 6"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "'Overthinking': o raciocínio CoT pode levar a soluções desnecessariamente complexas e incorretas; no exemplo do DeepSeek-Coder-6.7B-Instruct no MBPP, 4.7% das respostas antes corretas ficaram incorretas com raciocínio.",
+        "localizador": "p. 2, Introdução e Figura 2"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O 'overthinking' aumenta o custo computacional pelo maior consumo de tokens (não quantificado); sem adaptive CoT, o tempo de geração cresce 34.5% e 32.6%. A construção inicial dos dados leva 43 e 47 horas e o ajuste fino cerca de 12 e 10 horas em uma GPU.",
+        "localizador": "p. 2, Introdução; p. 7, Seção 4.4; p. 9, Seção 5.2.1"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo aponta que modelos alucinam ou interpretam mal requisitos, ocorrência comum em código gerado por LLM; a perturbação de caminhos simula esse cenário para gerar exemplos negativos.",
+        "localizador": "p. 5, Seção 3.1.2"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível contaminação de dados apontada como ameaça à validade; o controle descrito está em mitigacoes.",
+        "localizador": "p. 11, Seção 6.5"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: avaliação com apenas dois modelos (DeepSeek-Coder e Qwen2.5-Coder).",
+        "localizador": "p. 11, Seção 6.5"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Adaptive CoT reasoning para evitar raciocínio desnecessário ('overthinking'), comparado com a variante sem geração direta (pass@1 e tempo de geração).",
+        "avaliada": "sim",
+        "localizador": "pp. 8-9, Seção 5.2.1 e Tabela 2"
+      },
+      {
+        "descricao": "Avaliação da qualidade dos passos intermediários pelo modelo de valor, comparada com a variante sem modelo de valor.",
+        "avaliada": "sim",
+        "localizador": "p. 8, Seção 5.2.1 e Tabela 2"
+      },
+      {
+        "descricao": "Regularização KL contra esquecimento catastrófico no treino contínuo, comparada com 'Two stage no KL' (componente de ajuste fino, fora do escopo de prompting).",
+        "avaliada": "sim",
+        "localizador": "p. 5, Seção 3.3; p. 8, Tabela 3; p. 9, Seção 5.2.2"
+      },
+      {
+        "descricao": "Contra a contaminação: dados semente do Self-OSS, descontaminados pelos autores originais, e avaliação no LiveCodeBench, descrito como livre de contaminação; sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 6, Seção 4.4; p. 11, Seção 6.5"
+      },
+      {
+        "descricao": "Repetição do SEER três vezes com média, para reduzir o efeito da amostragem e das flutuações do LLM; sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Seção 4.4"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Faixas do resumo e da introdução versus Tabela 1 (cálculos próprios sobre a Tabela 1, SEER − Direct Generation): no MBPP, as diferenças são 9.3 e 8.8 (DeepSeek, Original e Plus) e 5.1 e 3.4 (Qwen), nenhuma igual ao limite inferior 4.2; no HumanEval, o limite 1.9 coincide com Qwen Plus (86.0 − 84.1), enquanto o texto da RQ1 relata 2.5 para Qwen no HumanEval Original. As faixas misturam versões Original e Plus sem dizer. Aparente inconsistência; o estudo não explica a base das faixas.",
+        "localizador": "p. 1, Resumo; p. 2, Introdução; p. 7, Tabela 1; p. 8, Seção 5.1"
+      },
+      {
+        "descricao": "Diferenças relatadas em '%' ('improves performance by 9.3%', 'decreasing by 5.2%') correspondem, por cálculo próprio, a diferenças em pontos percentuais de pass@1, não a variação relativa; o resumo as chama de 'absolute improvements' e a Seção 6.3 usa 'percentage points'.",
+        "localizador": "p. 1, Resumo; p. 8, Seções 5.1-5.2; p. 11, Seção 6.3"
+      },
+      {
+        "descricao": "As linhas de base de prompting têm resultados nulos ou negativos frente à geração direta (Tabela 1): com Qwen2.5-Coder, Code CoT fica abaixo de Direct Generation nas cinco colunas (81.2 vs 83.5; 69.6 vs 71.7; 81.1 vs 88.4; 74.4 vs 84.1; 28.1 vs 33.2) e Self Planning fica abaixo no HumanEval (84.1 vs 88.4; 78.0 vs 84.1) e no LCB (29.2 vs 33.2); com DeepSeek-Coder, Code CoT fica abaixo no MBPP Plus (60.5 vs 63.4) e no HumanEval Plus (65.9 vs 70.1), e Self Planning no MBPP Plus (62.4 vs 63.4).",
+        "localizador": "p. 7, Tabela 1 e Seção 5.1"
+      },
+      {
+        "descricao": "Inversões na ablação contrárias à conclusão 'All components contribute': sem PR, DeepSeek-Coder no HumanEval Plus tem 74.6±0.7, acima do SEER (73.8±1.2); sem PP, Qwen no LCB tem 37.0±0.4, acima do SEER (36.7±0.3). Várias diferenças são menores que as dispersões impressas (por exemplo, w/o adaptive cot no MBPP Original do DeepSeek: 81.0±0.9 vs 82.0±1.1); não há teste de significância.",
+        "localizador": "p. 8, Tabela 2; p. 9, Answer to RQ2"
+      },
+      {
+        "descricao": "Seção 6.3 diz que SEER+Reflexion 'consistently improves performance across all evaluated benchmarks', mas na Tabela 5 o DeepSeek-Coder no HumanEval Original fica igual (82.9 → 82.9); para Qwen, o texto dá ganhos 'ranging from 0.6 to 1.6 percentage points', enquanto a tabela dá, por cálculo próprio, 0.3 (MBPP Original, 88.6 → 88.9) a 1.9 (MBPP Plus, 75.1 → 77.0).",
+        "localizador": "pp. 10-11, Seção 6.3 e Tabela 5"
+      },
+      {
+        "descricao": "Tabela 4: DeepSeek-R1-Distill-Qwen-7B supera SEER no HumanEval Original (91.5 vs 90.9) e no LiveCodeBench (40.5 vs 36.7); o texto fala em desempenho global comparável. A coluna Average dá 75.6 para SEER; a média simples das cinco colunas de pass rate dá, por cálculo próprio, 75.46 (73.0 para o R1-Distill, igual ao impresso). Aparente inconsistência, possivelmente por arredondamento das médias de três execuções; o estudo não informa o cálculo. A média é entre benchmarks heterogêneos e é do próprio estudo.",
+        "localizador": "pp. 10-11, Seção 6.2 e Tabela 4"
+      },
+      {
+        "descricao": "O exemplo de 'overthinking' (CoT melhora o DeepSeek-Coder no MBPP em 7.5%, de 63.4% para 70.9%, e 4.7% das respostas corretas passam a incorretas) remete à Seção 5.2, que não apresenta esses números. 63.4 coincide com Direct Generation no MBPP Plus da Tabela 1, mas 70.9 não corresponde a nenhuma linha da Tabela 1 (Self Planning 62.4, Code CoT 60.5, SEER 72.2), e o texto não diz se é MBPP Original ou Plus nem qual condição de raciocínio.",
+        "localizador": "p. 2, Introdução e Figura 2; p. 7, Tabela 1; pp. 8-9, Seção 5.2"
+      },
+      {
+        "descricao": "A Seção 4.1 anuncia 'four research questions', mas lista três (RQ1-RQ3).",
+        "localizador": "p. 6, Seção 4.1"
+      },
+      {
+        "descricao": "Rótulos de figura trocados no texto: a Seção 5.3 diz que a Figura 5 (a) mostra DSC no HumanEval Plus e a (b) DSC no MBPP Plus, mas as legendas indicam (a) DSC on MBPP Plus e (b) DSC on HumanEval Plus.",
+        "localizador": "p. 9, Figura 5; p. 10, Seção 5.3"
+      },
+      {
+        "descricao": "Condições discrepantes entre SEER e as linhas de base: SEER usa modelo ajustado, busca em feixe guiada por valor (B1=3, B2=4, várias candidatas por passo) e média de três execuções; Direct Generation, Self Planning e Code CoT usam o modelo base, com número de execuções e temperatura nao_informado. Para Qwen, o treino aplica KL também na primeira etapa, diferente do DeepSeek.",
+        "localizador": "p. 5, Algoritmo 1; p. 7, Seção 4.4 e Tabela 1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Os templates de prompt (MCTS, reflexão, linhas de base) só estão no repositório GitHub anônimo indicado; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2, Contribuição (4); pp. 6-7, Seção 4.4; p. 12, referência [27]"
+      },
+      {
+        "descricao": "Sem adaptive CoT, o SEER aplicaria raciocínio a todas as questões; com ele, aplica raciocínio a 65.6% (DeepSeek) e 73.5% (Qwen) das questões do MBPP.",
+        "localizador": "pp. 8-9, Seção 5.2.1"
+      },
+      {
+        "descricao": "Sem KL no treino contínuo ('Two stage no KL'), o desempenho cai fortemente (LCB: −4.3 com DeepSeek e −13.1 com Qwen, segundo o texto), o que os autores atribuem a esquecimento catastrófico; trata-se de ajuste fino.",
+        "localizador": "p. 8, Tabela 3; p. 9, Seção 5.2.2"
+      },
+      {
+        "descricao": "O estudo afirma que técnicas de prompting dependem de modelos proprietários grandes e funcionam mal em modelos menores, que não aprenderiam o raciocínio só pelo prompt; essa é a motivação da abordagem por treino.",
+        "localizador": "pp. 1-2, Introdução"
+      },
+      {
+        "descricao": "Os valores dos modelos de referência (proprietários e 15B+) não têm origem declarada (execução própria ou transcrição).",
+        "localizador": "p. 6, Seção 4.3; p. 7, Tabela 1"
+      },
+      {
+        "descricao": "Na Tabela 6 (modelos treinados em Python e avaliados em C++ e Java), SEER melhora 0.76 e 4.41 pontos para DeepSeek e 1.01 e 2.07 para Qwen; o texto não nomeia a métrica.",
+        "localizador": "p. 11, Seção 6.4 e Tabela 6"
+      },
+      {
+        "descricao": "Experimentos em servidor Ubuntu 20.04 com 4 GPUs NVIDIA Tesla A100 (40GB).",
+        "localizador": "p. 7, Seção 4.4"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Experimental results demonstrate that SEER outperforms all baseline methods such as DeepSeek-R1-Zero’s reinforcement learning [22] and improves the base model by 4.2%∼9.3%, 1.9%∼9.1%, and 3.5%∼5.3% in terms of pass@1 on three popular coding benchmarks: MBPP [2], HumanEval [9], and LiveCodeBench [28], respectively.", "localizador": "p. 2, Introdução"},
+      {"trecho": "Experiments on state-of-the-art code LLMs DeepSeek-Coder and Qwen2.5-Coder demonstrate that SEER achieves remarkable performance gains across three popular code generation benchmarks, consistently outperforming all baseline methods and achieving absolute improvements by 4.2% ∼ 9.3% in MBPP, 1.9% ∼ 9.1% in HumanEval and 3.5% ∼ 5.3% in LiveCodeBench, respectively.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Following [31] and as illustrated in Figure 1, we use a single implementable sub-task to solve this question as a step and the last step will give the final solution code.", "localizador": "p. 3, Seção 2.1"},
+      {"trecho": "To force the model to generate solutions without reasoning, the response prefix ```{lang} is appended to the end of the prompt, where lang is the target programming language (lines 5–7).", "localizador": "p. 6, Seção 3.3"},
+      {"trecho": "Then, the algorithm leverages the value predictions from the value model Vϕ to rank the steps and directly-generated solution, determining whether to use step-by-step reasoning or not.", "localizador": "p. 6, Seção 3.3"},
+      {"trecho": "During the expansion stage of MCTS, we employ in-context learning and incorporate three demonstrations which are randomly selected from a pool of eight prepared examples.", "localizador": "p. 6, Seção 4.4"},
+      {"trecho": "Self-Planning [31] first leverage LLMs to plan concise solution steps from the intent combined with a few-shot prompt and then generate code step by step, guided by the preceding solution steps.", "localizador": "p. 6, Seção 4.3"},
+      {"trecho": "Code CoT [31] is a prompting method that asks LLMs to describe the implementation code line by line and then write the code.", "localizador": "p. 6, Seção 4.3"},
+      {"trecho": "Reflexion is a framework that iteratively refines code generation through self-reflection and error correction.", "localizador": "pp. 10-11, Seção 6.3"},
+      {"trecho": "We further investigate the importance of the value model-based reasoning quality assessment by removing the validation of intermediate reasoning steps, i.e., changing Vϕ(st+1) in line 14 in Algorithm 1 to 0 and selecting C randomly in line 16.", "localizador": "p. 8, Seção 5.2.1"},
+      {"trecho": "Finally, we validate the effectiveness of the adaptive CoT reasoning mechanism by disabling direct solution generation in line 7 in Algorithm 1.", "localizador": "p. 8, Seção 5.2.1"},
+      {"trecho": "Specifically, we propose to leverage the ground truth solutions to refine the reasoning process through self-reflection [39].", "localizador": "p. 5, Seção 3.1.2"},
+      {"trecho": "For example, as shown in Figure 2 (a), although CoT reasoning improved DeepSeek-Coder-6.7B-Instruct’s performance on MBPP [2] by 7.5%, it also caused 4.7% of previously correct answers to become incorrect (details referring to Section 5.2).", "localizador": "p. 2, Introdução"},
+      {"trecho": "This not only results in performance degradation on problems that could have been straightforwardly solved (e.g. Figure 2 (b) and (c)) but also increases computational costs through higher token consumption.", "localizador": "p. 2, Introdução"},
+      {"trecho": "The initial data construction takes 43 and 47 hours respectively, but this process is performed only once and the data can be reused.", "localizador": "p. 7, Seção 4.4"},
+      {"trecho": "Removing this component increases generation time for these two models by 34.5% and 32.6%.", "localizador": "p. 9, Seção 5.2.1"},
+      {"trecho": "This process simulates scenarios where the model hallucinates or misinterprets requirements, which is a common occurrence in LLM-generated code [66].", "localizador": "p. 5, Seção 3.1.2"},
+      {"trecho": "Another threat is potential data contamination.", "localizador": "p. 11, Seção 6.5"},
+      {"trecho": "To address this, we utilize the Self-OSS dataset as our seed data, where the original authors have already performed comprehensive data decontamination and removed benchmark questions with high similarity.", "localizador": "p. 11, Seção 6.5"},
+      {"trecho": "In this work, we select two state-of-the-art pre-trained models Deepseek-Coder and Qwen2.5-Coder for evaluation.", "localizador": "p. 11, Seção 6.5"},
+      {"trecho": "We repeat SEER three times and report its average results to eliminate the influence of sampling and fluctuations in LLM.", "localizador": "p. 7, Seção 4.4"},
+      {"trecho": "Therefore, we apply KL divergence during the first training stage for Qwen as well.", "localizador": "p. 7, Seção 4.4"},
+      {"trecho": "In the evaluation, we focus on the following four research questions:", "localizador": "p. 6, Seção 4.1"},
+      {"trecho": "Answer to RQ2: All components contribute to SEER for code generation.", "localizador": "p. 9, Seção 5.2"},
+      {"trecho": "Similarly, for the Qwen2.5-Coder, SEER +Reflexion demonstrates consistent gains across all benchmarks, with improvements ranging from 0.6 to 1.6 percentage points.", "localizador": "p. 11, Seção 6.3"},
+      {"trecho": "Based on the average results across various datasets, our method achieves 75.6% compared to 73.0% for DeepSeek-R1-Distill-Qwen-7B, while maintaining time efficiency advantages.", "localizador": "p. 10, Seção 6.2"},
+      {"trecho": "For DeepSeek-Coder, we observe a gradual improvement in performance on HumanEval Plus as shown in Figure 5 (a), with performance increasing until approximately B1=3 and B2=4.", "localizador": "p. 10, Seção 5.3"},
+      {"trecho": "However, these techniques rely on large proprietary models and struggle with smaller models, as the latter typically lack the capacity to learn reasoning processes from prompts alone.", "localizador": "pp. 1-2, Introdução"},
+      {"trecho": "To measure the accuracy of the predicted code, we use the widely-adopted pass rate metric (pass@1) [38, 50, 53].", "localizador": "p. 6, Seção 4.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SEER",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem", "outro"],
+      "comparador": "Direct Generation (modelo base)",
+      "modelo": "DeepSeek-Coder-6.7B-Instruct",
+      "benchmark": "MBPP (Original)",
+      "metrica": "pass@1 (Tabela 1, coluna MBPP Original)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 72.7, "intervencao": 82.0},
+      "denominador": "nao_informado explicitamente (o MBPP tem 378 problemas)",
+      "condicoes": "Pacote híbrido: SEER usa o modelo ajustado (política com reinforced fine-tuning e cabeça de valor sobre dados de MCTS, PP e PR; ajuste contínuo com KL e LoRA) e busca em feixe guiada por valor com B1=3, B2=4, temperatura 0.5 e β=0.025; valor é média de três execuções. Direct Generation é o modelo base gerando diretamente, com número de execuções e temperatura nao_informado. O contraste confunde prompting, ajuste fino e orçamento de busca; o ganho é do pacote e não é efeito isolado de prompting. Prompts não reproduzidos no artigo. Conferido no PDF, p. 7, Tabela 1 (cabeçalhos Approach, Size/Version, MBPP Original/Plus, HumanEval Original/Plus, LiveCodeBench Avg).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo e introdução destacam uma técnica (SEER), uma métrica (pass@1) e um comparador (o modelo base: 'improves the base model'). Como o resultado abrange três benchmarks e dois modelos sem agregado impresso compatível, usou-se o primeiro na ordem da tabela de resultados: Tabela 1, primeiro modelo (DeepSeek-Coder-6.7B-Instruct), primeira coluna (MBPP Original).",
+      "derivacao": "direta",
+      "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-6.7B-Instruct, linhas Direct Generation e SEER, coluna MBPP Original",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Direct Generation 6.7B 72.7 63.4 73.8 70.1 18.5", "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-6.7B-Instruct, linha Direct Generation; colunas Size/Version, MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LiveCodeBench Avg"},
+        {"trecho": "SEER 6.7B 82.0 72.2 82.9 73.8 23.8", "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-6.7B-Instruct, linha SEER; colunas Size/Version, MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LiveCodeBench Avg"},
+        {"trecho": "For DeepSeek-Coder-6.7B-Instruct, using SEER improves performance by 9.3%, 9.1% and 5.3% in terms of pass@1 on MBPP Original, HumanEval Original and LiveCodeBench, respectively.", "localizador": "p. 8, Seção 5.1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Value model-based reasoning quality assessment (SEER completo vs -w/o value model)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+      "mecanismos_acrescentados": ["amostragem"],
+      "comparador": "-w/o value model (valor fixado em 0 e seleção aleatória das candidatas)",
+      "modelo": "DeepSeek-Coder-6.7B-Instruct",
+      "benchmark": "MBPP (Original)",
+      "metrica": "pass@1 (Tabela 2, coluna MBPP Original)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 76.6, "intervencao": 82.0},
+      "denominador": "nao_informado explicitamente (o MBPP tem 378 problemas)",
+      "condicoes": "Valores impressos como média±dispersão: SEER 82.0±1.1; -w/o value model 76.6±0.8. SEER repetido três vezes; número de execuções da variante e estimador da dispersão nao_informado. Componente híbrido: o avaliador é uma cabeça de valor treinada (ajuste fino), e retirá-lo afeta também a escolha adaptativa entre raciocínio e geração direta; o contraste não isola prompting puro. Demais parâmetros como no SEER (B1=3, B2=4, temperatura 0.5). Conferido no PDF, p. 8, Tabela 2 (cabeçalhos Approach, MBPP Original/Plus, HumanEval Original/Plus, LCB Avg).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal (SEER) e única tarefa (geração) já representadas; componente isolado para completar o alvo de três, na ordem da tabela de ablação (Tabela 2). As duas primeiras linhas (-w/o PP e -w/o PR) são síntese de dados de treino, fora do escopo; a primeira linha de componente de prompting é -w/o value model. Primeiro modelo (DeepSeek-Coder-6.7B-Instruct) e primeira coluna (MBPP Original).",
+      "derivacao": "direta",
+      "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linhas SEER e -w/o value model, coluna MBPP Original",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SEER 82.0±1.1 72.2±0.6 82.9±1.0 73.8±1.2 23.8±0.5", "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linha SEER; colunas MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LCB Avg"},
+        {"trecho": "-w/o value model 76.6±0.8 64.6±0.3 77.3±1.3 69.9±1.4 18.6±0.4", "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linha -w/o value model; colunas MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LCB Avg"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Adaptive CoT reasoning (SEER completo vs -w/o adaptive cot)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "amostragem", "outro"],
+      "mecanismos_acrescentados": ["outro"],
+      "comparador": "-w/o adaptive cot (geração direta da linha 7 do Algoritmo 1 desativada)",
+      "modelo": "DeepSeek-Coder-6.7B-Instruct",
+      "benchmark": "MBPP (Original)",
+      "metrica": "pass@1 (Tabela 2, coluna MBPP Original)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 81.0, "intervencao": 82.0},
+      "denominador": "nao_informado explicitamente (o MBPP tem 378 problemas)",
+      "condicoes": "Valores impressos como média±dispersão: SEER 82.0±1.1; -w/o adaptive cot 81.0±0.9 (diferença menor que as dispersões; sem teste de significância). Ingrediente retirado: candidatas de solução direta forçadas pelo prefixo de resposta ```{lang}; a decisão entre raciocínio e geração direta depende do modelo de valor ajustado continuamente (componente híbrido). Número de execuções da variante nao_informado. O estudo relata também aumento de 34.5% no tempo de geração sem o componente (DeepSeek). Conferido no PDF, p. 8, Tabela 2.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado seguinte na ordem da tabela de ablação (Tabela 2), para completar o alvo de três; primeiro modelo (DeepSeek-Coder-6.7B-Instruct) e primeira coluna (MBPP Original).",
+      "derivacao": "direta",
+      "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linhas SEER e -w/o adaptive cot, coluna MBPP Original",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SEER 82.0±1.1 72.2±0.6 82.9±1.0 73.8±1.2 23.8±0.5", "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linha SEER; colunas MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LCB Avg"},
+        {"trecho": "-w/o adaptive cot 81.0±0.9 69.0±1.7 79.3±1.1 70.3±2.2 21.9±1.4", "localizador": "p. 8, Tabela 2, bloco DeepSeek-Coder-6.7B-Instruct, linha -w/o adaptive cot; colunas MBPP Original, MBPP Plus, HumanEval Original, HumanEval Plus, LCB Avg"},
+        {"trecho": "Finally, we validate the effectiveness of the adaptive CoT reasoning mechanism by disabling direct solution generation in line 7 in Algorithm 1.", "localizador": "p. 8, Seção 5.2.1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Limitações do CoT para geração de código, proposta (SEER) e questões de pesquisa definidas no resumo, na introdução e na Seção 4.1; o texto anuncia quatro RQs e lista três.",
+      "localizador": "p. 1, Resumo; p. 2, Introdução e Contribuições; p. 6, Seção 4.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "MCTS, perturbação, refinamento, treino, Algoritmo 1, hiperparâmetros e replicação das linhas de base são descritos; os prompts (inferência, MCTS, reflexão, Self-Planning, Code CoT, Reflexion) não são reproduzidos no artigo e ficam no repositório, e a janela de datas do LiveCodeBench não é informada.",
+      "localizador": "pp. 3-6, Seção 3; p. 6, Seções 4.2-4.3; pp. 6-7, Seção 4.4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linhas de base executadas (geração direta, Self-Planning, Code CoT, SFT, RL do DeepSeek-R1) nos mesmos modelos e benchmarks, e ablações por componente; porém SEER usa busca com várias candidatas e média de três execuções, enquanto o orçamento e o número de execuções das linhas de base não são informados, e a origem dos valores dos modelos de referência não é declarada.",
+      "localizador": "p. 6, Seção 4.3; p. 7, Seção 4.4 e Tabela 1; p. 8, Tabela 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@1 é usual e os valores do SEER coincidem entre as Tabelas 1 a 5; mas o denominador não é ligado explicitamente aos benchmarks, a coluna 'Avg' do LCB não é definida, a métrica da Tabela 6 não é nomeada, a dispersão (±) não tem estimador informado e há divergências entre texto e tabelas (faixas do resumo, ganhos do Reflexion, média da Tabela 4).",
+      "localizador": "p. 1, Resumo; p. 6, Seção 4.2; pp. 7-8, Tabelas 1-3; p. 11, Tabelas 4-6 e Seção 6.3"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A Seção 6.5 discute poucos modelos e contaminação; não discute a diferença de orçamento computacional entre SEER e as linhas de base, a ausência de testes estatísticos nem as inversões da ablação.",
+      "localizador": "p. 11, Seção 6.5"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelos, dados semente, tamanhos dos conjuntos, hiperparâmetros, tempos, hardware e anuncia código, modelos treinados e dados no GitHub (link anônimo, não acessado); faltam os prompts no artigo, o número de execuções das linhas de base e a janela do LiveCodeBench.",
+      "localizador": "p. 2, Contribuição (4); pp. 6-7, Seção 4.4; p. 12, referência [27]"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Discute contaminação dos dados semente (descontaminação do Self-OSS feita pelos autores originais) e usa o LiveCodeBench como benchmark livre de contaminação; não trata a possível presença de MBPP e HumanEval no pré-treinamento dos modelos base.",
+      "localizador": "p. 6, Seções 4.2 e 4.4; p. 11, Seção 6.5"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-02", "p-05", "p-06", "p-07", "p-08", "p-09", "p-11"],
+    "observacao": "Texto extraído lido integralmente (960 linhas, incluindo referências). Conferidos nas imagens: Figura 2 e introdução (p. 2), Algoritmo 1 e Seção 3.3 (p. 5), Seções 4.1-4.4 (p. 6), Tabela 1 (p. 7), Tabelas 2 e 3 e Seção 5.2 (p. 8), Figuras 5 e 6 e Seção 5.2.2 (p. 9), Tabelas 4, 5 e 6 e Seção 6.5 (p. 11). Os valores das Figuras 5 e 6 não foram usados em extracoes."
+  }
+}

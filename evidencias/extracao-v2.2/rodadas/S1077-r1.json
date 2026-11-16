@@ -1,0 +1,201 @@
+{
+  "estudo": "S1077",
+  "texto_fonte": "fontes/textos/lote/S1077.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2511.07382v1 [cs.CL], 10 nov. 2025 (preprint; artigo de shared task BLP-2025 Task 2); o PDF não tem paginação impressa, os localizadores usam a página do PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Test-Driven Feedback-Guided Framework (instruction prompting + test-case-aware translation + QLoRA fine-tuning + feedback-guided inference)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Resumo e contribuições, p. 1; Seção 4 e Figura 1, p. 2-3; Seções 6.1-6.4 e Tabelas 2-4, p. 3-4; Seção 7, p. 4",
+        "observacao": "Pacote híbrido: inclui ajuste fino QLoRA (fora do escopo) além de componentes de prompting. O estudo adiciona os componentes em sequência no Qwen2.5-Coder-14B (few-shot em bengali 0.74, Tabela 2 → few-shot com instruções traduzidas 0.81, Tabela 3 → QLoRA 0.90 → QLoRA + feedback 0.94, Tabela 4) e não relata, numa mesma tabela, o sistema completo contra a condição sem ele; a frase do texto que o compara com 'the few-shot baseline' não identifica qual das duas linhas few-shot é usada (ver heterogeneidade). Por isso classificado como contribuição por fase ('cumulativo'). Mecanismos do pacote: papel e regras ('You are an expert Python programmer', 'CRITICAL RULES', orientações de depuração) → instrucao; formato obrigatório (bloco ```python```, nome exato da função, tipo de retorno) e casos de teste no prompt como especificação → restricoes; encadeamento tradução → geração → execução → nova geração → decomposicao; reexecução com o traço de erro → feedback. O artigo não informa se o prompt de geração do modelo ajustado mantém os dois exemplos resolvidos do prompt few-shot; por isso exemplos e contexto não foram atribuídos ao pacote (nao_informado)."
+      },
+      {
+        "nome_original": "Few-shot (two-shot) prompt on Bangla instructions",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 2; Seção 6.1 e Tabela 2, p. 3; Apêndice B.2 (Listing 1), p. 6-7",
+        "observacao": "Prompt base usado na comparação entre modelos: mensagem de sistema com papel e 'CRITICAL RULES' → instrucao; dois exemplos resolvidos (tarefa em bengali, casos de teste e solução esperada) → exemplos e, como código fornecido como demonstração (regra D102 do dicionário), também contexto; formato e nome exato da função, casos de teste da tarefa-alvo → restricoes. Não há condição sem exemplos (zero-shot) nem outra variação do prompt; o contraste entre modelos é seleção de modelo, fora do escopo."
+      },
+      {
+        "nome_original": "Instruction Translation Strategy (LLM-based, test-case-aware translation; Few-shot on Translated Instructions)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.2, p. 2; Seção 6.2 e Tabelas 2-3, p. 3; Apêndice B.1 e B.3 (Listing 2), p. 6-8",
+        "observacao": "Passo de prompting que pede ao Qwen2.5-Coder-14B a tradução de cada instrução bengali para inglês, com a suíte de testes no prompt e diretrizes de tradução com um exemplo; a instrução traduzida entra no prompt two-shot, cujos exemplos também passam a ter tarefas em inglês (Listing 2 versus Listing 1). O encadeamento tradução → geração é a categoria acrescentada (decomposicao); instrucao, exemplos, contexto e restricoes já estão no prompt base (o prompt de tradução também tem papel, diretrizes e um exemplo, categorias já presentes). Contrafactual: Tabela 2 (instruções em bengali) versus Tabela 3 (instruções traduzidas), mesmos seis modelos, mesmo two-shot, antes do ajuste fino; o estudo analisa o contraste no texto da Seção 6.2. O ingrediente isolado é o pacote 'tradução + exemplos em inglês'; a contribuição da suíte de testes no prompt do tradutor não é isolada. Componente do sistema proposto (contribuições, p. 1), não proposta autônoma."
+      },
+      {
+        "nome_original": "Feedback-guided Inference (feedback mechanism / Feedback/Retry Prompt)",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.4, p. 3; Seção 6.4 e Tabela 4, p. 4; Apêndice B.4 (Listing 3), p. 8",
+        "observacao": "Após a geração, o código é executado contra os casos de teste fornecidos (timeout de 30 s); em caso de falha, o modelo é reinstruído com tipo de erro, mensagem, caso de teste que falhou, orientação específica por tipo de erro, análise das tentativas anteriores e uma 'SYSTEMATIC DEBUGGING APPROACH', até três vezes → feedback (acrescentado); as orientações e 'CRITICAL SUCCESS FACTORS' caem em instrucao e restricoes, categorias já presentes na condição base. Os passos de depuração ('ANALYZE INPUT/OUTPUT', 'Step through the failing test case manually') são diretrizes, sem pedido de explicação antes do código; não foram classificados como raciocinio. decomposicao é herdada do encadeamento com a tradução. Contrafactual: QLoRA versus QLoRA + Feedback mechanism (Tabela 4), mesmo modelo ajustado. O ingrediente também inclui o aumento da temperatura de amostragem a cada tentativa (0.1 → 0.3 → 0.5), intervenção de decodificação fora do escopo, de modo que o ganho não é efeito isolado do texto do prompt. O prompt de erro foi refinado iterativamente em execuções no conjunto de desenvolvimento. Componente do sistema proposto."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {"nome_original": "Fine-tuning with QLoRA", "natureza": "ajuste_fino", "descricao": "Ajuste fino do Qwen2.5-Coder-14B com QLoRA (quantização de 4 bits e adaptadores de baixo posto; r = 128, α = 128, taxa de aprendizado 2 × 10^-4, batch 1 com acumulação de gradiente 4, 4 épocas, weight decay 0, dropout 0), com dados de treino da tarefa complementados pelo DeepMind MBPP. Relatado como elevando Pass@1 de 0.81 para 0.90.", "localizador": "Seção 4.3, p. 2-3; Seção 6.3, p. 3"},
+      {"nome_original": "Base Model Benchmarking", "natureza": "selecao_modelo", "descricao": "Comparação de seis modelos de pesos abertos no mesmo prompt two-shot para escolher o modelo a ajustar (Qwen2.5-Coder-14B).", "localizador": "Seção 4.1, p. 2; Tabelas 2-3, p. 3"},
+      {"nome_original": "Sampling temperature schedule in feedback loop", "natureza": "decodificacao", "descricao": "Aumento gradual da temperatura de amostragem (0.1 → 0.3 → 0.5) nas tentativas do laço de feedback; decodificação geral com no máximo 768 tokens e temperatura inicial 0.1.", "localizador": "Seção 4.4, p. 3; Seção 5, p. 3"}
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-Coder-14B", "versao": "nao_informado (variante base/instruct e snapshot não informados)", "uso": "modelo escolhido para ajuste fino QLoRA e sistema final; também usado como tradutor (não se informa se o tradutor é a versão ajustada)"},
+      {"nome": "ReasonFlux-Coder-14B", "versao": "nao_informado", "uso": "comparação de modelos (Tabelas 2-3)"},
+      {"nome": "phi-4", "versao": "nao_informado", "uso": "comparação de modelos (Tabelas 2-3)"},
+      {"nome": "Llama-3.1-8B", "versao": "nao_informado", "uso": "comparação de modelos (Tabelas 2-3)"},
+      {"nome": "codegemma-7b", "versao": "nao_informado", "uso": "comparação de modelos (Tabelas 2-3); omitido da lista de modelos nas contribuições (p. 1)"},
+      {"nome": "Qwen3-14B", "versao": "nao_informado", "uso": "comparação de modelos (Tabelas 2-3)"}
+    ],
+    "benchmarks": [
+      {"nome": "BLP-2025 Shared Task 2 'Code Generation in Bangla' (instruções em bengali, código Python, testes assert)", "quantidade": "treino 74 amostras; desenvolvimento 400 amostras; teste 500 amostras (conjunto cego)", "observacao": "Tabela 4 e o valor 0.94 ligados ao conjunto de desenvolvimento na Conclusão; o valor 0.934 ao conjunto de teste cego (leaderboard). O conjunto usado nas Tabelas 2 e 3 não é informado. O DeepMind MBPP foi usado só como dado adicional de ajuste fino, não como benchmark."}
+    ],
+    "metricas": [
+      {"nome": "Pass@1", "definicao": "proporção das soluções top-1 geradas que passam em todos os testes unitários ocultos", "denominador": "nao_informado por tabela; a Conclusão liga 0.94 ao conjunto de desenvolvimento (400 amostras) e 0.934 ao teste cego (500 amostras)", "localizador": "Seção 6, p. 3; Seção 7, p. 4"}
+    ],
+    "linguagens": ["Python (código-alvo)", "bengali (instruções em linguagem natural)", "inglês (instruções traduzidas e casos de teste)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Deriva semântica na tradução por LLM (por exemplo, termo bengali para 'recíproco' traduzido como 'em competição') leva o código gerado a implementar lógica incorreta; a deriva ocorre sobretudo com expressões idiomáticas e empréstimos e foi só parcialmente tratada pelo feedback.", "localizador": "Seção 6.5, p. 4; Seção 8, p. 4"},
+      {"categoria": "correcao_funcional", "descricao": "Limites da autocorreção na inferência: falhas por tradução errada ou lacunas de raciocínio raramente foram resolvidas, e quando os tracebacks não identificavam o problema as novas tentativas raramente levaram a correções.", "localizador": "Seção 6.4, p. 4; Seção 8, p. 4-5"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Laço de inferência guiado por feedback de testes (reexecução com traço de erro, até três tentativas) para corrigir saídas que falham.", "avaliada": "sim", "localizador": "Seção 4.4, p. 3; Tabela 4, p. 4"},
+      {"descricao": "Inclusão da suíte de testes completa no prompt do tradutor para alinhar a descrição ao comportamento de entrada/saída e preservar a fidelidade semântica.", "avaliada": "nao", "localizador": "Seção 4.2, p. 2"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Few-shot (two-shot) com instruções em bengali (Tabela 2) e com instruções traduzidas (Tabela 3); QLoRA sem feedback (Tabela 4); todos executados pelos autores",
+    "so_classificadas": [
+      {"tecnica": "Test-Driven Feedback-Guided Framework", "motivo": "Técnica focal é um pacote híbrido com ajuste fino QLoRA; o estudo não apresenta, numa tabela, o sistema completo contra a condição sem ele, e a linha de base few-shot citada no texto para o ganho de '+16.05%' não é identificada. Os componentes de prompting com contrafactual (feedback e tradução) receberam extração."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "O texto chama de 'absolute improvement' o '+16.05%' em relação ao few-shot baseline, mas a diferença absoluta entre 0.94 e 0.81 é 0.13 (13 p.p.); 16.05% coincide com a variação relativa (0.94 − 0.81)/0.81 (cálculo próprio). Do mesmo modo, '+4.44%' sobre o ajuste fino coincide com a variação relativa (0.94 − 0.90)/0.90 (cálculo próprio), enquanto a diferença absoluta é 0.04. O texto não diz qual linha few-shot é o baseline (0.74 em bengali ou 0.81 traduzido); o valor só é compatível com 0.81 (cálculo próprio).", "localizador": "Seção 6.4, p. 4; Tabelas 3-4, p. 3-4"},
+      {"descricao": "O resumo diz que o método usa 'a fine-tuned Qwen2.5-14B model', enquanto o corpo do artigo identifica o modelo ajustado como Qwen2.5-Coder-14B.", "localizador": "Resumo, p. 1; Seções 4.1, 6.3 e 6.6, p. 2-4"},
+      {"descricao": "O resumo descreve o refinamento como 'three evaluation passes', enquanto a Seção 4.4 diz que o laço foi repetido 'up to three times'; o número de tentativas efetivamente usadas por problema não é informado.", "localizador": "Resumo, p. 1; Seção 4.4, p. 3"},
+      {"descricao": "A Seção 6.2 diz que a tradução aumentou o desempenho 'for most models', mas na comparação das Tabelas 2 e 3 todos os seis modelos têm Pass@1 maior com instruções traduzidas (por exemplo, phi-4 0.20 → 0.74; codegemma-7b 0.37 → 0.42).", "localizador": "Seção 6.2 e Tabelas 2-3, p. 3"},
+      {"descricao": "Legendas do apêndice incoerentes com o conteúdo: o Listing 1, na seção B.2 'Few-shot Prompt (Bangla Instructions)', e o Listing 3, do prompt de feedback/retry (B.4), têm a mesma legenda 'Few-shot prompt with translated English examples'.", "localizador": "Apêndice B.2, p. 6; Apêndice B.4, p. 8"},
+      {"descricao": "O resultado com feedback (0.94) é relatado no conjunto de desenvolvimento, o mesmo em que o prompt de tratamento de erros foi refinado iterativamente ao longo de várias execuções; o valor no teste cego é 0.934, para o qual não há linha de base sem feedback relatada.", "localizador": "Seção 4.4, p. 3; Tabela 4 e Seções 6.6-7, p. 4"},
+      {"descricao": "O laço de feedback executa o código contra 'all the test cases provided', e Pass@1 é definido sobre 'hidden unit tests'; o estudo não esclarece se os testes ocultos do conjunto de desenvolvimento são distintos dos casos de teste fornecidos no prompt e usados no feedback. Também não informa o número de execuções nem a variabilidade, e não relata o conjunto (desenvolvimento ou outro) das Tabelas 2 e 3.", "localizador": "Seção 4.4, p. 3; Seção 6, p. 3; Seção 3 e Tabela 1, p. 2"},
+      {"descricao": "Limitações declaradas: restrição de hardware ao QLoRA numa única GPU, avaliação limitada a modelos de pesos abertos, deriva de tradução e dependência da qualidade dos traços de erro.", "localizador": "Seção 8, p. 4-5"}
+    ],
+    "observacoes": [
+      {"descricao": "Sistema final: Qwen2.5-Coder-14B com ajuste fino QLoRA e inferência guiada por feedback, 0.934 de Pass@1 no conjunto cego, 2º lugar no leaderboard da tarefa. Hardware: uma GPU NVIDIA RTX 3090 Ti de 24 GB; HuggingFace transformers, PEFT e Unsloth.", "localizador": "Seção 5, p. 3; Seção 6.6, p. 4"},
+      {"descricao": "Análise qualitativa: a maioria das recuperações pelo feedback corrigiu erros off-by-one, casos de borda ou formato de saída; sem contagens.", "localizador": "Seção 6.4, p. 4"},
+      {"descricao": "Scripts experimentais anunciados em repositório GitHub (nota 1); não acessados nesta extração.", "localizador": "Resumo e nota 1, p. 1"},
+      {"descricao": "Melhor configuração de ajuste fino com dropout 0; os autores relatam que qualquer dropout degradou o desempenho, sem valores. Ablação de ajuste fino, fora do escopo.", "localizador": "Seção 6.3, p. 3"}
+    ],
+    "citacoes": [
+      {"trecho": "In this work, we propose a method that combines instruction prompting with a test-driven, feedback-guided iterative refinement process using a fine-tuned Qwen2.5-14B model.", "localizador": "Resumo, p. 1"},
+      {"trecho": "The model generates code from Bangla instructions, tests it against unit tests, and iteratively refines any failing outputs through three evaluation passes, using test feedback to guide each step.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Proposed a lightweight and effective system for Bangla-to-Python code generation that combines QLoRA fine-tuning with a feedback-guided inference loop and includes a test-case-aware translation step to ensure semantic alignment with expected input-output behavior.", "localizador": "Seção 1, contribuições, p. 1"},
+      {"trecho": "Each model was tested in a two-shot setting, where we prompted with two Bangla instructions and their reference solutions.", "localizador": "Seção 4.1, p. 2"},
+      {"trecho": "To evaluate robustness, we repeated the same experiments using translated English instructions.", "localizador": "Seção 4.1, p. 2"},
+      {"trecho": "Since the development dataset contained Bangla instructions paired with English test cases, we introduced an LLM-based translation step to better leverage English-centric code models.", "localizador": "Seção 4.2, p. 2"},
+      {"trecho": "For each instruction, the full test suite was included in the prompt, allowing the translator to align the natural language description with the intended input/output behavior.", "localizador": "Seção 4.2, p. 2"},
+      {"trecho": "We used Qwen2.5-Coder-14B as the translator for the full dataset.", "localizador": "Seção 4.2, p. 2"},
+      {"trecho": "Organizers provided instruction-to-Python code datasets for training (74 samples), development (400 samples), and testing (500 samples).", "localizador": "Seção 3, p. 2"},
+      {"trecho": "For fine-tuning, we additionally used the DeepMind MBPP dataset (Austin et al., 2021) to supplement our training data.", "localizador": "Seção 4.3, p. 3"},
+      {"trecho": "After the model generated a candidate solution, we executed it against all the test cases provided with a 30-second timeout.", "localizador": "Seção 4.4, p. 3"},
+      {"trecho": "If any test failed, we re-prompted the model with the error trace, allowing it to iteratively refine its output.", "localizador": "Seção 4.4, p. 3"},
+      {"trecho": "This loop was repeated up to three times, gradually increasing the sampling temperature (0.1 → 0.3 → 0.5) to encourage diverse candidate solutions.", "localizador": "Seção 4.4, p. 3"},
+      {"trecho": "We found prompt design to be crucial here, and iteratively refined the error-handling prompt over multiple development runs.", "localizador": "Seção 4.4, p. 3"},
+      {"trecho": "Unless otherwise stated, decoding was performed with a maximum of 768 tokens and an initial temperature of 0.1.", "localizador": "Seção 5, p. 3"},
+      {"trecho": "System performance was measured using the Pass@1 metric, defined as the proportion of top-1 generated solutions that pass all hidden unit tests.", "localizador": "Seção 6, p. 3"},
+      {"trecho": "Table 3 shows that translation substantially boosted performance for most models, with Qwen2.5-Coder-14B again leading at 0.81 Pass@1.", "localizador": "Seção 6.2, p. 3"},
+      {"trecho": "Fine-tuning Qwen2.5-Coder-14B with QLoRA yielded a notable improvement, raising Pass@1 from 0.81 to 0.90.", "localizador": "Seção 6.3, p. 3"},
+      {"trecho": "Relative to the few-shot baseline, this represents a +16.05% absolute improvement, and a +4.44% gain over fine-tuning alone.", "localizador": "Seção 6.4, p. 4"},
+      {"trecho": "However, failures caused by mistranslations or deeper reasoning gaps were rarely resolved, underscoring the limits of inference-time self-correction.", "localizador": "Seção 6.4, p. 4"},
+      {"trecho": "Although the LLM-based translation pipeline preserved semantics in most cases, some instructions suffered from semantic drift.", "localizador": "Seção 6.5, p. 4"},
+      {"trecho": "This caused the generated code to implement incorrect logic.", "localizador": "Seção 6.5, p. 4"},
+      {"trecho": "These components enabled the model to achieve Pass@1 accuracies of 0.94 on the development set and 0.934 on the blind test set.", "localizador": "Seção 7, p. 4"},
+      {"trecho": "These errors affected code generation and were only partially addressed by the feedback mechanism.", "localizador": "Seção 8, p. 4"},
+      {"trecho": "The feedback-guided inference loop depended on the quality of error traces.", "localizador": "Seção 8, p. 4"},
+      {"trecho": "When tracebacks did not identify issues, retries seldom led to meaningful corrections.", "localizador": "Seção 8, p. 4-5"},
+      {"trecho": "Hardware constraints restricted us to QLoRA fine-tuning on a single GPU, which prevented exploration of full-precision LoRA or larger models that could offer additional improvements.", "localizador": "Seção 8, p. 4"},
+      {"trecho": "Here are examples of how to solve different types of problems:", "localizador": "Apêndice B.2, Listing 1, p. 6"},
+      {"trecho": "Listing 3: Few-shot prompt with translated English examples", "localizador": "Apêndice B.4, p. 8"},
+      {"trecho": "GENERATE A COMPLETELY NEW APPROACH - Previous attempts failed for a reason.", "localizador": "Apêndice B.4, Listing 3, p. 8"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Feedback-guided Inference (feedback mechanism / Feedback/Retry Prompt)",
+      "mecanismos": ["instrucao", "restricoes", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "QLoRA (Qwen2.5-Coder-14B ajustado, sem o laço de feedback)",
+      "modelo": "Qwen2.5-Coder-14B com ajuste fino QLoRA",
+      "benchmark": "BLP-2025 Shared Task 2 'Code Generation in Bangla', conjunto de desenvolvimento (segundo a Conclusão)",
+      "metrica": "Pass@1 (definido como proporção de soluções top-1 que passam em todos os testes unitários ocultos; na condição com feedback, a solução final resulta de até três novas tentativas guiadas pela execução dos casos de teste fornecidos)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.90, "intervencao": 0.94},
+      "denominador": "conjunto de desenvolvimento (400 amostras, Seção 3), ligado a 0.94 na Conclusão; contagens não informadas",
+      "condicoes": "Ambas as condições usam o mesmo modelo ajustado com QLoRA e instruções traduzidas; o prompt de geração inicial do modelo ajustado não é descrito (nao_informado se mantém os dois exemplos). Intervenção: execução contra os casos de teste fornecidos (timeout 30 s) e reinstrução com o traço de erro até três vezes, com temperatura crescente 0.1 → 0.3 → 0.5 (decodificação, fora do escopo, confundida com o feedback); decodificação com no máximo 768 tokens e temperatura inicial 0.1. O prompt de erro foi refinado em várias execuções no conjunto de desenvolvimento. Número de execuções e variabilidade: nao_informado; sem teste estatístico. O texto relata '+4.44% gain over fine-tuning alone', que corresponde à variação relativa, não à diferença absoluta. Valores conferidos visualmente na Tabela 4 (PDF p. 4).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo, contribuições e conclusão destacam o sistema e o Pass@1 final (0.934 no teste cego; 0.94 no desenvolvimento) sem identificar uma condição comparadora. As Tabelas 2 e 3 trazem cada uma só uma condição de prompt (few-shot em bengali; few-shot traduzido) e não contêm o contraste; a Tabela 4 é a primeira tabela com contraste elegível de prompting (QLoRA versus QLoRA + Feedback mechanism), única métrica Pass@1 e único modelo.",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, p. 4 (PDF p. 4); Seção 6.4, p. 4; Seção 4.4, p. 3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "QLoRA 0.90", "localizador": "Tabela 4, p. 4; colunas Method, Pass@1"},
+        {"trecho": "QLoRA + Feedback mechanism 0.94", "localizador": "Tabela 4, p. 4; colunas Method, Pass@1"},
+        {"trecho": "Incorporating the feedback mechanism further improved performance to 0.94 Pass@1 (Table 4).", "localizador": "Seção 6.4, p. 4"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Instruction Translation Strategy (LLM-based, test-case-aware translation; Few-shot on Translated Instructions)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "Few-shot (two-shot) prompt on Bangla instructions",
+      "modelo": "ReasonFlux-Coder-14B",
+      "benchmark": "BLP-2025 Shared Task 2 'Code Generation in Bangla' (conjunto usado nas Tabelas 2-3 não informado)",
+      "metrica": "Pass@1 (Bangla) na Tabela 2 e Pass@1 (English) na Tabela 3; mesma métrica Pass@1, rótulo indica a língua da instrução",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.64, "intervencao": 0.73},
+      "denominador": "nao_informado (o estudo não informa o conjunto nem o número de problemas das Tabelas 2 e 3)",
+      "condicoes": "Two-shot nas duas condições, modelos sem ajuste fino. Intervenção: instrução traduzida para inglês pelo Qwen2.5-Coder-14B com a suíte de testes no prompt do tradutor; os exemplos do prompt two-shot também passam a ter tarefas em inglês (Listing 2 versus Listing 1). Decodificação: no máximo 768 tokens, temperatura 0.1 (configuração geral, Seção 5). Número de execuções: nao_informado; sem teste estatístico. Outros modelos na mesma comparação (Tabelas 2 → 3): phi-4 0.20 → 0.74; Llama-3.1-8B 0.51 → 0.59; codegemma-7b 0.37 → 0.42; Qwen3-14B 0.67 → 0.75; Qwen2.5-Coder-14B 0.74 → 0.81. Valores conferidos visualmente nas Tabelas 2 e 3 (PDF p. 3).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente de prompting isolado (com e sem tradução, demais condições comparáveis), incluído só para completar o alvo de três; não há tabela de ablação. Primeiro modelo listado nas Tabelas 2-3 (ReasonFlux-Coder-14B). O contraste ocupa duas tabelas e é analisado pelo próprio estudo na Seção 6.2. Não há terceiro contraste elegível de prompting: a técnica focal é pacote híbrido sem contraste tabelado e o few-shot não tem condição sem exemplos.",
+      "derivacao": "direta",
+      "localizador": "Tabelas 2 e 3, p. 3 (PDF p. 3); Seção 6.2, p. 3; Seção 4.2, p. 2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "ReasonFlux-Coder-14B 0.64", "localizador": "Tabela 2, p. 3; colunas Model, Pass@1 (Bangla)"},
+        {"trecho": "ReasonFlux-Coder-14B 0.73", "localizador": "Tabela 3, p. 3; colunas Model, Pass@1 (English)"},
+        {"trecho": "Table 3 shows that translation substantially boosted performance for most models, with Qwen2.5-Coder-14B again leading at 0.81 Pass@1.", "localizador": "Seção 6.2, p. 3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: sistema de geração de código Python a partir de instruções em bengali para a BLP-2025 Task 2, com contribuições listadas.", "localizador": "Resumo e Seção 1, p. 1; Seção 2, p. 2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Etapas (comparação de modelos, tradução, QLoRA, feedback), hiperparâmetros e prompts descritos no apêndice; porém não se informa o conjunto das Tabelas 2-3, o prompt de geração do modelo ajustado, o número de execuções nem quantas tentativas de feedback ocorreram, e o prompt de erro foi refinado no mesmo conjunto de desenvolvimento em que se relata o resultado.", "localizador": "Seções 4-5, p. 2-3; Apêndice B, p. 6-8"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Condições executadas pelos autores no mesmo modelo, acrescentando um componente por vez (Tabelas 2-4); mas não há condição sem exemplos, o contraste do feedback é confundido com o aumento de temperatura, o sistema completo não tem comparação tabelada com a condição sem ele, e a linha de base do '+16.05%' não é identificada.", "localizador": "Tabelas 2-4, p. 3-4; Seção 4.4, p. 3; Seção 6.4, p. 4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@1 definido; mas o denominador não é informado por tabela (só a Conclusão liga 0.94 ao desenvolvimento), a relação entre os testes usados no feedback e os 'hidden unit tests' não é esclarecida, e variações relativas são chamadas de 'absolute improvement'. Os valores repetidos (0.81, 0.90, 0.94) coincidem entre texto e tabelas.", "localizador": "Seção 6, p. 3; Seções 6.3-6.4 e Tabela 4, p. 3-4; Seção 7, p. 4"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de limitações trata de fidelidade da tradução, dependência dos traços de erro, hardware e restrição a modelos abertos; não discute não determinismo, número de execuções, ajuste do prompt no conjunto de desenvolvimento nem contaminação.", "localizador": "Seção 8, p. 4-5"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Prompts completos no apêndice, hiperparâmetros de ajuste fino e decodificação, hardware e repositório de scripts anunciado (não acessado); faltam variantes ou snapshots dos modelos, sementes, número de execuções e o prompt de geração após o ajuste fino.", "localizador": "Seções 4.3 e 5, p. 3; Apêndice B, p. 6-8; nota 1, p. 1"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute contaminação: não trata de possível sobreposição entre o DeepMind MBPP usado no ajuste fino e os dados de avaliação, de presença dos dados no pré-treinamento, nem da separação entre os casos de teste fornecidos no prompt e os testes ocultos.", "localizador": "Seções 3-4, p. 2-3; Seção 8, p. 4-5"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 6, 7, 8],
+    "observacao": "Texto extraído lido integralmente (483 linhas, até o fim do Listing 3 do Apêndice B.4). Páginas abertas para conferir Tabelas 2-4, Figura 1, Tabela 1, o resumo, as limitações e os prompts dos Apêndices B.1-B.4; a página 5 (referências e início do Apêndice A) não foi aberta visualmente."
+  }
+}
