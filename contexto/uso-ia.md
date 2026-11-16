@@ -305,3 +305,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — extração em escala, lote 3 (16/11/2026)
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S271–S323); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-03.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — calibração do Codex no piloto (16/11/2026)
+- Pedido do autor: paralelizar a extração com a assinatura do Codex; «Instalei o codex cli» (16/11/2026).
+- Executores: Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações ex-v2.2 dos estudos do piloto; Claude Code (Claude Opus 5.5), roteiro de execução, comparação com as fichas finais e relatório (`evidencias/piloto/calibracao-codex.md`).
+- Revisão humana: nenhuma; a adoção do Codex como segundo extrator aguarda decisão do autor.
