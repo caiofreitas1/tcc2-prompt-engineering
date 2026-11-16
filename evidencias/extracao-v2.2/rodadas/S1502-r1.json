@@ -1,0 +1,338 @@
+{
+  "estudo": "S1502",
+  "texto_fonte": "fontes/textos/lote/S1502.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Standard Prompt (baseline, no additional context)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 16-17, Seção 3.4.1, Listings 2 e 3",
+        "observacao": "Prompt de sistema com papel («You are an AI Code Assistant»), diretiva de gerar código que leia da linha de comando e imprima só a saída (instrucao) e exigência de formato [code]...[/code] (restricoes); prompt de usuário com descrição do problema, formatos de entrada/saída, restrições do problema e linguagem-alvo. É a linha de base de que derivam ICL e feedback; não há condição sem ele."
+      },
+      {
+        "nome_original": "In-Context Learning (ICL) (1-shot learning)",
+        "mecanismos": ["instrucao", "restricoes", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8, Seção 3.1.2; p. 14, Seção 3.3.3; p. 17, Seção 3.4.2 e Listing 4; p. 25-26, Seção 5.1.2 e Tabela 3",
+        "observacao": "Mantém o prompt de sistema e acrescenta ao prompt de usuário um par entrada-saída (o menor teste unitário reservado para ICL), não um exemplo de código resolvido. A Tabela 3 compara com o prompt padrão nos mesmos modelos, linguagens e problemas. O objeto principal do estudo é o benchmark PROBE; as estratégias de prompting são investigadas como parte da avaliação («three prompting strategies»), por isso foram classificadas como focais."
+      },
+      {
+        "nome_original": "Feedback incorporation (two rounds of iterative refinement)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8, Seção 3.1.2; p. 17, Seção 3.4.2 e Listing 5; p. 22, Seção 4; p. 26-28, Seção 5.1.3 e Tabela 4",
+        "observacao": "O código gerado é executado e, se incorreto, o modelo recebe uma de quatro mensagens (saída incorreta, erro de compilação com a mensagem, erro de execução com a mensagem, tempo esgotado) e pode revisar até duas iterações. A Tabela 4 compara com o prompt padrão. O contraste inclui, além da informação de erro, tentativas adicionais de geração; não há condição com novas tentativas sem feedback. O artigo não descreve como pass@k e Outcome Rate são calculados após as iterações (por exemplo, se sobre a última versão de cada amostra) nem se o feedback é combinado com ICL."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Hyperparameters (temperature 0.6, top-p 1, top-k 50)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação fixos para todos os modelos; não variados como intervenção.",
+        "localizador": "p. 22, Seção 4 (Model Selection)"
+      },
+      {
+        "nome_original": "Model Selection (six LLMs: open-source and proprietary, general and code-specialized, dense and MoE)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre modelos, tamanhos e especialização sem alterar o prompt; as diferenças entre modelos não são efeito de prompting.",
+        "localizador": "p. 22, Seção 4; p. 23, Tabela 1b"
+      },
+      {
+        "nome_original": "Qwen2.5 (72B, 4-bit quantized) for workload pre-processing",
+        "natureza": "outro",
+        "descricao": "Modelo auxiliar usado na construção do benchmark (classificação de idioma das descrições, validação da extração do HTML e geração de entradas de testes unitários); não é técnica de prompting avaliada para a tarefa.",
+        "localizador": "p. 12-14, Seções 3.3 e 3.3.1; p. 14, Seção 3.3.3"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4.1-mini", "versao": "nao_informado", "observacao": "proprietário, denso, propósito geral (Tabela 1b, p. 23); snapshot ou data de acesso não informados"},
+      {"nome": "Gemini-2.0-flash", "versao": "nao_informado", "observacao": "proprietário, denso, propósito geral (Tabela 1b, p. 23); snapshot ou data de acesso não informados"},
+      {"nome": "Qwen2.5:14b", "versao": "nao_informado", "observacao": "aberto, denso, propósito geral; executado localmente via Ollama segundo a descrição da implementação (p. 18)"},
+      {"nome": "Qwen2.5-Coder:7b", "versao": "nao_informado", "observacao": "aberto, denso, código"},
+      {"nome": "Qwen2.5-Coder:14b", "versao": "nao_informado", "observacao": "aberto, denso, código"},
+      {"nome": "Deepseek-Coder-v2:16b", "versao": "nao_informado", "observacao": "aberto, MoE, código; «16b» aparece na introdução (p. 3) e a Tabela 1b registra apenas «Deepseek-coder-v2»"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "PROBE (derivado do IBM Project CodeNet)",
+        "quantidade": "1651 problemas",
+        "observacao": "Do CodeNet (4,053 problemas de AIZU e AtCoder) foram removidos 1,412 problemas em japonês e 45 com informação insuficiente, restando 2,596; o experimento reteve 1,651 problemas com pelo menos três soluções de referência em Python e C++ (p. 12-13, p. 21). Distribuição por dificuldade: 0: 796, 1: 520, 2: 261, 3: 74 (Tabela 1a, p. 23). Entre 3 e 10 testes unitários por problema no experimento, média 8.55 (p. 21); antes do teto, 3 a 124, média 19.61, excluindo o teste reservado para ICL (p. 15). Testes sintéticos gerados por LLM em 255 de 1,651 problemas (p. 15). Soluções de referência: 3-250 (Python, C++), 0-250 (Java, C), 0-180 (Rust) na Tabela 1a; problemas abaixo do mínimo de três referências: 83 em Java, 302 em C e 349 em Rust, sem métricas de proximidade e qualidade (p. 21). O denominador de cada métrica difere do corpus: CodeBLEU exclui Rust e os problemas sem três referências; as métricas de qualidade só usam problemas com pelo menos uma solução correta (p. 11, p. 30). Cinco amostras por problema (p. 22)."
+      }
+    ],
+    "metricas": [
+      {"nome": "pass@k", "observacao": "estimador não enviesado de Chen et al. (2021), N = 5 amostras por problema; tabelas reportam pass@1 e pass@5 (p. 9, p. 22)"},
+      {"nome": "Outcome Rate", "observacao": "proporção média de execuções por desfecho: Passed, Failed, Timeout, Error (Runtime), No Compile, No Code (p. 9)"},
+      {"nome": "CodeBLEU", "observacao": "com componentes n-gram, weighted n-gram, AST e dataflow (pesos 0.1, 0.1, 0.4, 0.4), máximo sobre as referências; não calculado para Rust (p. 9-10, p. 20)"},
+      {"nome": "Cyclomatic complexity score", "observacao": "escore relativo à referência (equações 4 e 5), só para soluções corretas (p. 11)"},
+      {"nome": "NLOC score", "observacao": "escore relativo à referência (equações 4 e 5), só para soluções corretas (p. 11)"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "versao": "nao_informado"},
+      {"nome": "C++", "versao": "nao_informado"},
+      {"nome": "Java", "versao": "nao_informado"},
+      {"nome": "C", "versao": "nao_informado"},
+      {"nome": "Rust", "versao": "nao_informado"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O código gerado é frequentemente não confiável, com erros fundamentais e evitáveis (imports ausentes, overflow de inteiros, acesso fora dos limites, força bruta que excede tempo ou memória, lógica errada e casos de borda ignorados), identificados por inspeção manual de cerca de 30 amostras por categoria de falha.",
+        "localizador": "p. 3, Seção 1; p. 36-40, Seção 5.4; p. 41, Seção 6.1"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Os autores afirmam que a confiança excessiva em código gerado pode permitir que vulnerabilidades perigosas ou regressões de desempenho cheguem a sistemas em produção; o risco é argumentado a partir dos tipos de erro observados, sem análise de segurança do código.",
+        "localizador": "p. 3, Seção 1; p. 41, Seção 6.1"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os modelos podem ter visto problemas do benchmark no pré-treinamento (conjunto de 2021), o que inflaria o desempenho; os autores consideram o impacto desprezível com base no desempenho limitado, sem medir contaminação.",
+        "localizador": "p. 41-42, Seção 6.2 (Internal Validity)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "A natureza estocástica dos LLMs impede regeneração completa; o benchmark exige número mínimo de amostras por problema para repetibilidade.",
+        "localizador": "p. 19, Seção 3.6.1; p. 18, Seção 3.5.1"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Mais iterações de feedback e mais amostras por problema aumentam o tempo de execução da avaliação; custo não quantificado.",
+        "localizador": "p. 18, Seção 3.5.1; p. 22, Seção 4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade de construto da avaliação: testes unitários com entradas geradas por LLM podem introduzir viés ou não capturar a especificação, sobretudo casos de borda; CodeBLEU pode penalizar soluções corretas com abordagem diferente das referências.",
+        "localizador": "p. 10, Seção 3.2.2; p. 15, Seção 3.3.3; p. 42, Seção 6.2 (Construct Validity)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Separação entre o teste usado como exemplo de ICL e os testes de avaliação, para evitar sobreajuste e métricas de correção infladas.",
+        "avaliada": "nao",
+        "localizador": "p. 14, Seção 3.3.3"
+      },
+      {
+        "descricao": "Entradas de testes geradas por LLM validadas contra três soluções de referência independentes (saídas esperadas obtidas por execução e mantidas só com concordância) e adequação avaliada por cobertura de linhas (97.1%), ramos (94.1%) e mutação (88.64%) em implementações Python amostradas.",
+        "avaliada": "nao",
+        "localizador": "p. 14-15, Seção 3.3.3; p. 42, Seção 6.2"
+      },
+      {
+        "descricao": "Múltiplas soluções de referência por problema (mínimo de três) para reduzir a penalização de soluções corretas por CodeBLEU.",
+        "avaliada": "nao",
+        "localizador": "p. 10, Seção 3.2.2; p. 42, Seção 6.2"
+      },
+      {
+        "descricao": "Cinco amostras por problema e métricas calculadas sobre as amostras para reduzir a influência de valores atípicos.",
+        "avaliada": "nao",
+        "localizador": "p. 19, Seção 3.6.1; p. 22, Seção 4"
+      },
+      {
+        "descricao": "Execução isolada do código gerado em contêineres Docker.",
+        "avaliada": "nao",
+        "localizador": "p. 18-19, Seções 3.5.2 e 3.5.3"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resultado nulo para ICL: as variações de pass@1 e pass@5 ficam entre -0.00 e 0.01 por linguagem (Tabela 3a) e até ±0.02 por modelo (Tabela 3b); os autores atribuem isso ao prompt base já conter instruções detalhadas sobre formatos de entrada e saída. Valores «-0.00» indicam diferenças negativas arredondadas.",
+        "localizador": "p. 25-26, Seção 5.1.2, Tabela 3"
+      },
+      {
+        "descricao": "As Tabelas 3 e 4 imprimem apenas diferenças em relação ao prompt padrão; os valores absolutos das condições ICL e feedback não são impressos, e os da linha de base aparecem só na Figura 2 (sem valores numéricos) e na Tabela 2 (Outcome Rate por modelo e linguagem). As tabelas por modelo não informam como as cinco linguagens foram agregadas.",
+        "localizador": "p. 23, Figura 2; p. 25, Tabela 2; p. 26, Tabela 3; p. 27, Tabela 4"
+      },
+      {
+        "descricao": "Efeitos de ICL e feedback sobre CodeBLEU e sobre métricas de qualidade são declarados desprezíveis sem tabelas: os autores informam que não reportam tabelas detalhadas para essas condições.",
+        "localizador": "p. 31-32, Seção 5.2.1; p. 34-35, Seção 5.3.2"
+      },
+      {
+        "descricao": "A escolha de um único exemplo de ICL apoia-se em experimentos preliminares, num subconjunto, sobre o número (1-3) e a seleção de exemplos, cujos resultados não são apresentados.",
+        "localizador": "p. 14, Seção 3.3.3"
+      },
+      {
+        "descricao": "Aparente duplicação na Tabela 6: o painel (f) No Code repete exatamente os valores do painel (d) Runtime Error para todos os modelos e níveis (por exemplo, deepseek-coder-v2 0.04 0.09 0.13 0.13 em ambos), e esses valores contradizem a Tabela 2, em que No code é 0.00 para todos os modelos e linguagens, e o texto, que descreve No Code como extremamente pequeno.",
+        "localizador": "p. 29, Tabela 6 (d) e (f); p. 25, Tabela 2; p. 24, Seção 5.1.1"
+      },
+      {
+        "descricao": "Aparente inconsistência no exemplo de Outcome Rate: uma amostra que passa em um de quatro testes e falha nos outros dois daria 0.33 para Passed e 0.66 para Error, valores compatíveis com três testes, não quatro (1/4 = 0.25 é cálculo próprio); o texto não esclarece o quarto teste.",
+        "localizador": "p. 9, Seção 3.2.1"
+      },
+      {
+        "descricao": "Divergência entre texto e tabela sobre soluções de referência: o texto informa que, para Java, C e Rust, as referências variam de 0 a 250, enquanto a Tabela 1a informa 0-180 para Rust.",
+        "localizador": "p. 21, Seção 4 (Problem Selection); p. 23, Tabela 1a"
+      },
+      {
+        "descricao": "Narrativa que omite empate: o texto apresenta Qwen-2.5:14B como o melhor modelo aberto em Python (CodeBLEU 0.49), mas a Tabela 7 também atribui 0.49 a deepseek-coder-v2 em Python.",
+        "localizador": "p. 31, Seção 5.2; p. 32, Tabela 7"
+      },
+      {
+        "descricao": "Denominadores distintos entre linguagens e métricas: CodeBLEU não é calculado para Rust e omite problemas sem três referências (83 em Java, 302 em C, 349 em Rust); as métricas de qualidade usam apenas problemas com solução correta, e no nível de dificuldade 3 poucos problemas foram resolvidos, o que os autores indicam como fonte de alta variância.",
+        "localizador": "p. 20-21, Seção 4; p. 11, Seção 3.2.3; p. 35, Seção 5.3.3"
+      },
+      {
+        "descricao": "Os níveis de dificuldade derivam de métricas estáticas das referências em Python (complexidade de implementação), e dois agrupamentos foram fundidos porque um tinha só sete problemas; os autores tratam a categorização como proxy.",
+        "localizador": "p. 21-22, Seção 4 (Problem Clustering); p. 43, Seção 6.2"
+      },
+      {
+        "descricao": "O contraste de feedback mistura informação de erro com tentativas adicionais (até duas iterações), sem condição de novas tentativas sem feedback, e o artigo não descreve como pass@k é calculado após as iterações.",
+        "localizador": "p. 17, Seção 3.4.2; p. 22, Seção 4; p. 26-27, Seção 5.1.3"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A contribuição principal é o framework de benchmark PROBE (métricas, workload, templates de prompt e procedimento); as três estratégias de prompting são uma das dimensões avaliadas com seis modelos e cinco linguagens.",
+        "localizador": "p. 3-4, Seção 1"
+      },
+      {
+        "descricao": "Construção do workload com etapas manuais: casos sinalizados pelo LLM auxiliar na extração do HTML foram revisados e corrigidos manualmente; a análise de erros comuns usou inspeção manual de cerca de 30 amostras por categoria de falha.",
+        "localizador": "p. 13, Seção 3.3.1; p. 36, Seção 5.4"
+      },
+      {
+        "descricao": "Limites de tempo por linguagem fixados em três vezes a duração da solução de referência mais lenta no teste mais demorado.",
+        "localizador": "p. 15-16, Seção 3.3.4"
+      },
+      {
+        "descricao": "Os dados, os templates de prompt e o código são declarados públicos na página do projeto no Hugging Face (OSS-forge/PROBE); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 4, nota 1; p. 16, nota 4; p. 44, Data Availability Statement"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "PROBE focuses on the task of generating complete programming problems, where models are required to create standalone programs that take inputs and produce outputs.", "localizador": "p. 8, Seção 3.1.2"},
+      {"trecho": "The first is ICL, where an input–output example is included in the prompt to better guide the model.", "localizador": "p. 8, Seção 3.1.2"},
+      {"trecho": "The second is feedback incorporation, where the generated code is executed and, if incorrect, the model receives error feedback and may revise its output up to the number of iterations specified by the benchmark user.", "localizador": "p. 8, Seção 3.1.2"},
+      {"trecho": "Standard prompts serve as the baseline, with no performance-enhancing strategies applied.", "localizador": "p. 16, Seção 3.4.1"},
+      {"trecho": "It starts by assigning the role “You are an AI Code Assistant”, setting a helpful, code-focused tone to improve clarity and relevance.", "localizador": "p. 16, Seção 3.4.1"},
+      {"trecho": "Finally, the formatting requirement to wrap code within [code]...[/code] tags ensure consistency and simplify code extraction.", "localizador": "p. 16, Seção 3.4.1"},
+      {"trecho": "In our setup, the system prompt template remained unchanged, while the user prompt was expanded.", "localizador": "p. 17, Seção 3.4.2"},
+      {"trecho": "We selected two feedback iterations.", "localizador": "p. 22, Seção 4"},
+      {"trecho": "As we can see, this technique had next to no impact on performance across the board.", "localizador": "p. 25, Seção 5.1.2"},
+      {"trecho": "Unlike ICL, feedback incorporation had a clear and consistent impact on model performance (Table 4).", "localizador": "p. 26, Seção 5.1.3"},
+      {"trecho": "Generated code is often unreliable, exhibiting fundamental and easily avoidable errors.", "localizador": "p. 41, Seção 6.1"},
+      {"trecho": "These failures highlight the risks of using LLMs for code generation, as developers may overtrust automatically generated solutions, potentially allowing dangerous vulnerabilities or performance regressions to reach production systems.", "localizador": "p. 41, Seção 6.1"},
+      {"trecho": "One potential threat is that the evaluated LLMs may have encountered some of the benchmark problems during pretraining, which could artificially inflate performance.", "localizador": "p. 41, Seção 6.2"},
+      {"trecho": "Metrics are then computed over these samples to ensure robustness and to reduce the influence of outliers, even when full regeneration is not feasible due to the stochastic nature of LLMs.", "localizador": "p. 19, Seção 3.6.1"},
+      {"trecho": "More iterations may improve success rates but also increase runtime.", "localizador": "p. 18, Seção 3.5.1"},
+      {"trecho": "Although synthetic inputs enable validation in cases where no test cases are available in the original dataset, they may introduce bias or fail to fully capture the problem specification, particularly for edge cases.", "localizador": "p. 42, Seção 6.2"},
+      {"trecho": "Separating evaluation tests from ICL examples prevents overfitting and inflated correctness metrics.", "localizador": "p. 14, Seção 3.3.3"},
+      {"trecho": "To mitigate this, we use LLMs only to generate test inputs, while expected outputs are derived by executing multiple reference implementations, retaining only those test cases for which all implementations agree.", "localizador": "p. 42, Seção 6.2"},
+      {"trecho": "Because the observed differences are extremely small and exhibit no systematic trends, we do not report detailed tables for these conditions.", "localizador": "p. 32, Seção 5.2.1"},
+      {"trecho": "The proportion of No Code events is extremely small for every model and language.", "localizador": "p. 24, Seção 5.1.1"},
+      {"trecho": "For Java, C, and Rust, reference solutions ranged from 0 to 250, but some problems fell short of the minimum threshold: 83 in Java, 302 in C, and 349 in Rust; for these problems, proximity and quality metrics will not be computed.", "localizador": "p. 21, Seção 4"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-Context Learning (ICL) (1-shot learning)",
+      "mecanismos": ["instrucao", "restricoes", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "Standard Prompt (baseline, no additional context)",
+      "modelo": "deepseek-coder-v2",
+      "benchmark": "PROBE (derivado do IBM Project CodeNet)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": null},
+      "denominador": "nao_informado (corpus de 1,651 problemas em cinco linguagens; a tabela por modelo não informa como as linguagens e os problemas foram agregados)",
+      "condicoes": "A Tabela 3b imprime apenas a diferença ICL menos prompt padrão: 0.00 em pass@1 para deepseek-coder-v2 (pass@5: -0.00); os valores absolutos das duas condições não são impressos, por isso baseline e intervencao ficam null, sem cálculo. ICL com um par entrada-saída (o menor teste unitário reservado), prompt de sistema inalterado; cinco amostras por problema; temperature 0.6, top-p 1, top-k 50; número de execuções independentes além das cinco amostras: nao_informado. Agregação sobre linguagens não descrita. Conferido visualmente na p. 26 (Tabela 3b).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo, as contribuições e a conclusão destacam duas estratégias (ICL e feedback) e várias métricas sem que uma prevaleça. A Tabela 2 e a Figura 2 trazem só a linha de base; a primeira tabela com o contraste elegível é a Tabela 3 (impacto de ICL). Como a Tabela 3a lista linguagens e não modelos, usou-se a Tabela 3b, primeiro modelo listado (deepseek-coder-v2), primeira métrica (pass@1).",
+      "derivacao": "direta",
+      "localizador": "p. 26, Tabela 3b (Per-model impact), linha deepseek-coder-v2, coluna pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "deepseek-coder-v2 0.00 -0.00 0.00 0.00 -0.00 -0.00 0.00 0.00", "localizador": "p. 26, Tabela 3b (Per-model impact), colunas Model, pass@1, pass@5, Pass., Fail., Time., Error, Comp., No Code"},
+        {"trecho": "Table 3 shows the impact of 1-shot learning on the functional correctness metrics per language and per model.", "localizador": "p. 25, Seção 5.1.2"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Feedback incorporation (two rounds of iterative refinement)",
+      "mecanismos": ["instrucao", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Standard Prompt (baseline, no additional context)",
+      "modelo": "deepseek-coder-v2",
+      "benchmark": "PROBE (derivado do IBM Project CodeNet)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": null},
+      "denominador": "nao_informado (corpus de 1,651 problemas em cinco linguagens; a tabela por modelo não informa como as linguagens e os problemas foram agregados)",
+      "condicoes": "A Tabela 4b imprime apenas a diferença feedback menos prompt padrão: 0.05 em pass@1 para deepseek-coder-v2 (pass@5: 0.06; Comp.: -0.02); os valores absolutos das duas condições não são impressos, por isso baseline e intervencao ficam null, sem cálculo. Até duas iterações de feedback com mensagens por tipo de falha (saída incorreta, erro de compilação, erro de execução, tempo esgotado); cinco amostras por problema; temperature 0.6, top-p 1, top-k 50; número de execuções independentes: nao_informado. Não descrito como pass@1 é calculado após as iterações nem como as linguagens foram agregadas. O contraste inclui tentativas adicionais de geração. Conferido visualmente na p. 27 (Tabela 4b).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da segunda técnica focal de prompting (feedback incorporation), pela mesma regra de ordem: primeira tabela com o contraste (Tabela 4), parte por modelo (Tabela 4b), primeiro modelo listado, primeira métrica (pass@1).",
+      "derivacao": "direta",
+      "localizador": "p. 27, Tabela 4b (Per-model impact), linha deepseek-coder-v2, coluna pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "deepseek-coder-v2 0.05 0.06 0.05 -0.01 -0.02 -0.01 -0.02 0.00", "localizador": "p. 27, Tabela 4b (Per-model impact), colunas Model, pass@1, pass@5, Pass., Fail., Time., Error, Comp., No Code"},
+        {"trecho": "Unlike ICL, feedback incorporation had a clear and consistent impact on model performance (Table 4).", "localizador": "p. 26, Seção 5.1.3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (propor e aplicar um framework de benchmark para geração de código texto-código, avaliando modelos, linguagens e estratégias de prompting) e o escopo (programas completos e autônomos) estão explícitos.",
+      "localizador": "p. 3-4, Seção 1; p. 7-8, Seções 3.1.1 e 3.1.2"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Workload, templates de prompt, número de amostras, iterações de feedback, hiperparâmetros e limites de tempo são descritos; faltam a forma de cálculo das métricas após as iterações de feedback, a agregação das tabelas por modelo e por linguagem e os resultados dos experimentos preliminares que fixaram o ICL em um exemplo.",
+      "localizador": "p. 12-18, Seções 3.3-3.5; p. 20-22, Seção 4; p. 14, Seção 3.3.3; p. 26-27, Tabelas 3 e 4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "O prompt padrão é executado como linha de base nos mesmos modelos, linguagens, problemas e hiperparâmetros, e ICL e feedback são comparados com ele.",
+      "localizador": "p. 16, Seção 3.4.1; p. 22, Seção 5; p. 26-27, Tabelas 3 e 4"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas com fórmulas e cobrem correção, proximidade e qualidade; porém os denominadores das tabelas agregadas não são informados, o exemplo de Outcome Rate é aparentemente inconsistente, a Tabela 6 (f) No Code repete a (d) e contradiz a Tabela 2, e os efeitos de ICL e feedback sobre CodeBLEU e qualidade não são tabelados.",
+      "localizador": "p. 9-11, Seção 3.2; p. 25, Tabela 2; p. 29, Tabela 6; p. 32, Seção 5.2.1; p. 34-35, Seção 5.3.2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "A seção de ameaças discute validade interna (contaminação), externa (modelos e problemas autocontidos) e de construto (similaridade, métricas de qualidade, testes gerados por LLM, proxy de dificuldade), com mitigações.",
+      "localizador": "p. 41-43, Seção 6.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Dados, templates e código são declarados públicos e os hiperparâmetros são informados, mas os modelos proprietários não têm snapshot ou data de acesso, e o pacote não foi verificado nesta extração.",
+      "localizador": "p. 4, nota 1; p. 22, Seção 4; p. 44, Data Availability Statement"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O risco de os problemas (conjunto de 2021) terem sido vistos no pré-treinamento é reconhecido, mas descartado com base no desempenho limitado dos modelos, sem verificação; a separação entre exemplo de ICL e testes de avaliação controla vazamento no prompt.",
+      "localizador": "p. 41-42, Seção 6.2; p. 14, Seção 3.3.3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-1958). A numeração das páginas do PDF coincide com a impressa. Páginas do PDF abertas visualmente: p-09 (equações e exemplo de Outcome Rate), p-17 (Listings 2-5), p-23 (Tabela 1 e Figura 2), p-25 (Tabela 2), p-26 (Tabela 3), p-27 (Tabela 4), p-29 (Tabela 6), p-32 (Tabela 7)."
+  }
+}

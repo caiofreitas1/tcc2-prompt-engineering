@@ -1,0 +1,305 @@
+{
+  "estudo": "S1220",
+  "texto_fonte": "fontes/textos/lote/S1220.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_lida": "arXiv:2602.09930v1 [cs.SE], 10 Feb 2026; versão ACM do 1st Workshop on Code Translation, Transformation, and Modernization (ReCode '26), doi:10.1145/3786180.3788316, 7 páginas. As páginas do PDF não trazem número impresso; os localizadores usam a posição no arquivo.",
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "standardised role-based prompt (single-shot prompt)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF, Figure 3 e seção 4.4, «The Prompt»",
+        "observacao": "Único prompt usado em todos os experimentos; o estudo é um benchmark de modelo e não propõe o prompt como técnica, mas é a única condição de prompting avaliada e a que gera o código analisado, por isso registrada como focal. instrucao: papel de «senior Java engineer» e instrução de converter preservando o comportamento; restricoes: «Output ONLY the Java 11 method» (formato de saída) e delimitação do código pelas tags <Java></Java>; contexto: o método Java 8 é fornecido no prompt como insumo. Sem prompt base identificável, por isso mecanismos_acrescentados vazio. Não há outra condição de prompt, outro modelo nem iteração; a comparação com o código Java 8 de entrada (Table 2) é referência sem prompting, não contrafactual da técnica."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {
+        "nome": "Mistral Codestral",
+        "versao": "«codestral-latest» via Mistral API; segundo o estudo, Codestral 2501 na época do experimento (setembro de 2025)",
+        "localizador": "p. 4 do PDF, seção 4.4, «Codestral by Mistral AI»"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "JMigBench (conjunto revisado)",
+        "versao": "nao_informado",
+        "quantidade": "45 pares de funções Java 8/Java 11, oito categorias de APIs depreciadas; 66 palavras-chave depreciadas no conjunto (p. 6)",
+        "observacao": "Conjunto curado manualmente com assistência do ChatGPT para geração de código-fonte; sintético segundo o próprio estudo. Sem casos de teste. Usado em todos os experimentos. A Table 2 usa 40 das 45 funções (5 omitidas por não terem dataflow match score); a taxa de 11,11% de correspondências completas refere-se às 45 funções; a remoção de palavras-chave usa 66 palavras-chave como denominador.",
+        "localizador": "p. 3 do PDF, seção 3.2 e Table 1; p. 4 do PDF, «The Dataset»; p. 5 do PDF, Table 2; p. 6 do PDF, «Answer for RQ2»"
+      },
+      {
+        "nome": "Conjunto bruto extraído do GitHub (Jenkins e Bazel)",
+        "versao": "nao_informado",
+        "quantidade": "150 funções (131 com mesma assinatura e 19 com assinatura diferente)",
+        "observacao": "Não usado nos experimentos, por ruído e desbalanceamento.",
+        "localizador": "p. 3 do PDF, seção 3.2; p. 4 do PDF, «The Dataset»"
+      }
+    ],
+    "metricas": [
+      {"nome": "CodeBLEU (pacote Python CodeBLEU)", "localizador": "p. 4 do PDF, seção 4.2; p. 5 do PDF, Table 2"},
+      {"nome": "N-gram Match", "localizador": "p. 5 do PDF, Table 2"},
+      {"nome": "Weighted N-gram Match (similaridade lexical)", "localizador": "p. 4 do PDF, seção 4.2; p. 5 do PDF, Table 2"},
+      {"nome": "Syntax Match", "localizador": "p. 5 do PDF, Table 2"},
+      {"nome": "Dataflow Match (similaridade semântica)", "localizador": "p. 4 do PDF, seção 4.2; p. 5 do PDF, Table 2"},
+      {"nome": "Complete Matches (CodeBLEU e todas as submétricas iguais a 1)", "localizador": "p. 5 do PDF, Table 2 e seção 5.1.1"},
+      {"nome": "Effectiveness(%) = 1 − (palavras-chave depreciadas no código Java 11 gerado / palavras-chave no código Java 8 original); taxa de remoção de palavras-chave", "localizador": "p. 4 do PDF, seção 4.3; p. 6 do PDF, seção 5.2"},
+      {"nome": "Proporção de funções com todas as palavras-chave removidas", "localizador": "p. 6 do PDF, «Answer for RQ2»"}
+    ],
+    "linguagens": ["Java 8 (origem)", "Java 11 (destino)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sem execução de testes nem compilação: as métricas estáticas não garantem sucesso de compilação nem equivalência funcional do código migrado.",
+        "localizador": "p. 6 do PDF, seção 6, «Threats to Internal Validity»"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Palavras-chave depreciadas que permanecem no código gerado fariam a compilação falhar; só 31,82% das 66 palavras-chave foram removidas e CORBA, JAX-WS e Transaction nunca foram removidas.",
+        "localizador": "p. 5 do PDF, seção 5.2; p. 6 do PDF, seção 5.2 e «Answer for RQ2»"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No exemplo analisado, o modelo trocou Arrays.asList por List.of, tornando imutável uma lista antes mutável; o estudo observa que, nesse caso, o programa continuaria funcionando porque a lista não é modificada depois.",
+        "localizador": "p. 5 do PDF, seção 5.1.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: experimentos apenas com o Mistral Codestral, o que limita os achados a esse modelo.",
+        "localizador": "p. 6 do PDF, seção 6, «Threats to External Validity»"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Conjunto revisado sintético, curado com assistência do ChatGPT, não reflete diretamente bases de código reais.",
+        "localizador": "p. 3 do PDF, seção 3.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Encapsular o método Java 8 nas tags <Java> e </Java> para separar o prompt do código, melhorar a consistência da saída e reduzir texto errôneo na resposta; efeito não medido.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF, seção 4.4, «The Prompt»"
+      },
+      {
+        "descricao": "Construção de conjunto revisado com lista de palavras-chave ampliada e sem termos ambíguos, para reduzir falsos positivos, ruído e desbalanceamento do conjunto bruto; não há comparação do efeito sobre os resultados do modelo.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF, seção 3.2"
+      },
+      {
+        "descricao": "Omissão das 5 funções sem dataflow match score das médias da Table 2, para não distorcer os escores, conforme recomendação do CodeBLEU.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF, seção 5.1.1"
+      }
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão em submétrica: Weighted N-gram Match é 0,66 para o código gerado e 0,67 para o Java 8 de entrada (Table 2); o texto atribui a queda ao arredondamento dos valores brutos 0,664 e 0,667 e a considera efetivamente igual, ao passo que a narrativa fala em aumento em 3 das 4 submétricas.",
+        "localizador": "p. 5 do PDF, Table 2 e seção 5.1.1"
+      },
+      {
+        "descricao": "Narrativa que excede o método: o texto afirma que o aumento do dataflow match (0,59 para 0,62) prova que os caminhos de execução foram preservados, mas o código não foi compilado nem executado e o próprio estudo diz que as métricas estáticas não garantem equivalência funcional.",
+        "localizador": "p. 5 do PDF, seção 5.1.1; p. 4 do PDF, «The Dataset»; p. 6 do PDF, seção 6"
+      },
+      {
+        "descricao": "A resposta à RQ2 diz que 40% das funções tiveram todas as palavras-chave removidas; a Discussão reescreve como 40% das funções «migrated correctly», embora a seção 4.3 declare que a preservação da lógica não é medida pela métrica.",
+        "localizador": "p. 6 do PDF, «Answer for RQ2» e seção 5.3; p. 4 do PDF, seção 4.3"
+      },
+      {
+        "descricao": "Denominadores distintos entre métricas: médias CodeBLEU sobre 40 das 45 funções; 11,11% de correspondências completas sobre as 45 funções; remoção de palavras-chave sobre 66 palavras-chave (31,8% na seção 5.2 e 31,82% na resposta à RQ2, diferença de arredondamento); 40% sobre funções, sem número absoluto impresso.",
+        "localizador": "p. 5 do PDF, Table 2 e seção 5.1.1; p. 6 do PDF, seção 5.2 e «Answer for RQ2»"
+      },
+      {
+        "descricao": "Resultado nulo por categoria: palavras-chave de CORBA, JAX-WS e Transaction nunca foram removidas, e nesses itens o CodeBLEU do código gerado foi idêntico ao do Java 8 de entrada, segundo o texto.",
+        "localizador": "p. 6 do PDF, seção 5.2"
+      },
+      {
+        "descricao": "Diferença pequena entre o código gerado e a entrada sem migração: CodeBLEU 0,63 contra 0,62 para o Java 8 de entrada, ambos frente ao Java 11 de referência.",
+        "localizador": "p. 5 do PDF, Table 2"
+      },
+      {
+        "descricao": "Critério de tamanho do conjunto bruto (funções com mais de 10 linhas) não se mantém no conjunto revisado usado nos experimentos: média de 9,69 (Java 8) e 8,33 (Java 11) linhas, mínimo de 4 e 3 linhas.",
+        "localizador": "p. 2–3 do PDF, seções 3.1–3.2; p. 3 do PDF, Table 1 e Figure 1"
+      },
+      {
+        "descricao": "Afirmações de redução de esforço do desenvolvedor (resumo, contribuições e Discussão) não são medidas: o estudo avalia apenas similaridade estática e remoção de palavras-chave.",
+        "localizador": "p. 1 do PDF, Abstract; p. 2 do PDF, contribuições; p. 6 do PDF, seção 5.3"
+      },
+      {
+        "descricao": "Referência quebrada à figura do exemplo de saída («figure ??»); o exemplo discutido não aparece no PDF.",
+        "localizador": "p. 5 do PDF, seção 5.1.2"
+      },
+      {
+        "descricao": "Os rótulos e valores da Figure 4 (remoção por categoria) não são legíveis na resolução da imagem da página; os percentuais por categoria constam só do texto e não foram conferidos na figura.",
+        "localizador": "p. 5 do PDF, Figure 4; p. 6 do PDF, seção 5.2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A Table 2 inclui a coluna «Input Java 8 vs True Java 11», usada pelos autores como linha de base de interpretação; não é condição executada de prompting nem de outro sistema, por isso não foi tratada como comparador.",
+        "localizador": "p. 5 do PDF, Table 2 e seção 5.1.1"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura, top-p, tamanho máximo) e número de execuções não informados; o prompt é aplicado uma vez por função, sem feedback ou refinamento.",
+        "localizador": "p. 4 do PDF, seção 4.4"
+      },
+      {
+        "descricao": "Esforço manual na construção do benchmark: verificação manual dos repositórios candidatos e curadoria manual dos 45 pares, com assistência do ChatGPT para geração de código-fonte.",
+        "localizador": "p. 2 do PDF, seção 3.1; p. 3 do PDF, seção 3.2"
+      },
+      {
+        "descricao": "Classificação como tradução: migração entre versões da linguagem (Java 8 para Java 11) com substituição de APIs depreciadas, enquadrada pelo protocolo no termo de busca «code migration» do bloco de tradução.",
+        "localizador": "p. 1 do PDF, Abstract; p. 4 do PDF, Figure 3"
+      },
+      {
+        "descricao": "Benchmark declarado público no GitHub; o repositório não foi acessado nesta extração.",
+        "localizador": "p. 2 do PDF, contribuições"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We build a benchmark to evaluate large language models (LLMs) for source code migration tasks, specifically upgrading functions from Java 8 to Java 11.",
+        "localizador": "p. 1 do PDF, Abstract"
+      },
+      {
+        "trecho": "We used a standardised role-based prompt in all of our experiments.",
+        "localizador": "p. 4 do PDF, seção 4.4, «The Prompt»"
+      },
+      {
+        "trecho": "\"You are a senior Java engineer. Convert Java 8 code to Java 11 while preserving behavior.\" \"Change any syntax in the Java 8 code that was removed or deprecated by Java 11.\" \"Output ONLY the Java 11 method.\"",
+        "localizador": "p. 4 do PDF, Figure 3, mensagem «system»"
+      },
+      {
+        "trecho": "We encapsulated the Java 8 function in \"<Java>\" and \"</Java>\" elements to create a clear structural boundary between the prompt and the code.",
+        "localizador": "p. 4 do PDF, seção 4.4, «The Prompt»"
+      },
+      {
+        "trecho": "We intentionally evaluate a single-shot prompt, where the LLM is prompted once per function without ant iterative feedback or refinement.",
+        "localizador": "p. 4 do PDF, seção 4.4, «The Prompt»"
+      },
+      {
+        "trecho": "A key limitation of this study is the absence of test execution or runtime validation.",
+        "localizador": "p. 6 do PDF, seção 6, «Threats to Internal Validity»"
+      },
+      {
+        "trecho": "While these metrics provide useful insights into lexical, syntactic, and structural changes introduced during migration, they cannot guarantee compilation success or functional equivalence.",
+        "localizador": "p. 6 do PDF, seção 6"
+      },
+      {
+        "trecho": "This is important as if a deprecated keyword is still present in the generated Java 11 code, the code would fail to compile and would be principally incorrect.",
+        "localizador": "p. 5 do PDF, seção 5.2"
+      },
+      {
+        "trecho": "This change would make the \"isp\" list immutable when it was previously a mutable list.",
+        "localizador": "p. 5 do PDF, seção 5.1.2"
+      },
+      {
+        "trecho": "However, the use of a single LLM limits the findings to Codestral.",
+        "localizador": "p. 6 do PDF, seção 6, «Threats to External Validity»"
+      },
+      {
+        "trecho": "Although the dataset was synthetic and thus not directly reflective of real-world codebases, it provided a cleaner and more controlled benchmark for assessing LLMs' ability to detect, update, and preserve functionality during Java version migration.",
+        "localizador": "p. 3 do PDF, seção 3.2"
+      },
+      {
+        "trecho": "5 functions had no dataflow match scores and were omitted to prevent skewing the scores (as recommended by codebleu).",
+        "localizador": "p. 5 do PDF, seção 5.1.1"
+      },
+      {
+        "trecho": "40% of the functions had all keywords removed, however, only 31.82% of the 66 keywords used in the dataset were successfully removed.",
+        "localizador": "p. 6 do PDF, «Answer for RQ2»"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "standardised role-based prompt (single-shot prompt)",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "Mistral Codestral («codestral-latest»; Codestral 2501 em setembro de 2025, segundo o estudo)",
+      "benchmark": "JMigBench (conjunto revisado, 45 pares de funções Java 8/Java 11)",
+      "metrica": "CodeBLEU (Generated vs True Java 11)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": 0.63},
+      "denominador": "40 de 45 funções (5 omitidas por não terem dataflow match score)",
+      "condicoes": "Extração descritiva: o estudo só executa esta condição (sem_comparador = sim); o valor não é efeito da técnica. Média do CodeBLEU sobre 40 funções; prompt único, aplicado uma vez por função, sem feedback; parâmetros de decodificação e número de execuções nao_informado. A coluna «Input Java 8 vs True Java 11» (CodeBLEU 0,62) é referência sem migração, não condição executada, e por isso não foi registrada como baseline. Código não compilado nem executado. Conferido na imagem da p. 5 do PDF (Table 2, cabeçalhos e título «Averaged CodeBLEU Metrics for 40 of 45 functions»).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam várias métricas (CodeBLEU e métricas baseadas em palavras-chave; 11,11% de migrações idênticas e 31,82% de remoção) sem que uma prevaleça. Aplicada a ordem: primeira tabela de resultados (Table 2), primeira métrica (CodeBLEU), único modelo. Não há outra técnica de prompting nem outra tarefa para cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF (sem número impresso), Table 2, linha «CodeBLEU», coluna «Generated vs True Java 11»",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeBLEU 0.63 0.62",
+          "localizador": "p. 5 do PDF, Table 2 («Averaged CodeBLEU Metrics for 40 of 45 functions»), linha CodeBLEU; colunas «Metric», «Generated vs True Java 11», «Input Java 8 vs True Java 11»"
+        },
+        {
+          "trecho": "The CodeBLEU score itself went from 0.62 (for the Java 8 code) to 0.63 (for the generated code).",
+          "localizador": "p. 5 do PDF, seção 5.1.1"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e duas questões de pesquisa explícitas: similaridade lexical e semântica (RQ1) e remoção de sintaxe depreciada (RQ2).",
+      "localizador": "p. 1 do PDF, Abstract; p. 4 do PDF, seção 4.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Prompt completo, modelo, conjunto e métricas descritos; a curadoria do conjunto revisado com assistência do ChatGPT é pouco detalhada, e parâmetros de decodificação e número de execuções não são informados.",
+      "localizador": "p. 3 do PDF, seção 3.2; p. 4 do PDF, Figure 3 e seção 4.4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Não há outra condição executada (outro prompt, modelo ou ferramenta); só a referência do Java 8 de entrada frente ao Java 11 verdadeiro, usada para interpretar os escores.",
+      "localizador": "p. 5 do PDF, Table 2 e seção 5.1.1; p. 6 do PDF, seção 6"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CodeBLEU e fórmula de efetividade definidas, com denominadores informados para CodeBLEU (40 de 45) e para a remoção (66 palavras-chave); não há métrica funcional, os 40% de funções não trazem número absoluto, e a Discussão trata remoção de palavras-chave como migração correta.",
+      "localizador": "p. 4 do PDF, seções 4.2–4.3; p. 5 do PDF, Table 2; p. 6 do PDF, seções 5.2–5.3"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Discute ausência de execução de testes e uso de um único modelo; o caráter sintético do conjunto aparece na seção 3.2, mas não discute não determinismo nem contaminação.",
+      "localizador": "p. 6 do PDF, seção 6; p. 3 do PDF, seção 3.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompt impresso, modelo e snapshot identificados e benchmark declarado público no GitHub (não acessado); faltam parâmetros de decodificação e número de execuções.",
+      "localizador": "p. 2 do PDF, contribuições; p. 4 do PDF, Figure 3 e seção 4.4"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O texto completo não discute contaminação nem vazamento de dados de avaliação; o conjunto revisado foi curado com assistência do ChatGPT, sem análise desse aspecto.",
+      "localizador": "texto completo; p. 3 do PDF, seção 3.2"
+    }
+  ],
+  "leitura": {
+    "situacao": "completa",
+    "observacao": "Texto extraído lido integralmente (7 páginas, incluindo referências).",
+    "paginas_pdf_abertas": ["p-01", "p-03", "p-04", "p-05", "p-06"]
+  }
+}

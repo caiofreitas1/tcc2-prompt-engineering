@@ -1,0 +1,279 @@
+{
+  "estudo": "S1141",
+  "texto_fonte": "fontes/textos/lote/S1141.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Huang, Y.; Zhou, Y.; Chen, X.; Zheng, Z. Comment Traps: How Defective Commented-Out Code Augment Defects in AI-Assisted Code Generation. Proc. ACM Softw. Eng. 3, FSE, Article FSE074, 2026. DOI 10.1145/3797102. Versão lida: arXiv:2512.20334v2 (18 Feb 2026), conforme impresso na p. 1.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Blank group",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9, seção 5.1.2; p. 10, Tabela 3",
+        "observacao": "Condição de controle: apenas o contexto de código original (arquivo Python sem o trecho defeituoso), sem código comentado inserido; 1.000 prompts. É a base das demais condições; não é técnica avaliada."
+      },
+      {
+        "nome_original": "FullInsertion group (defective CO code inserted into the code context)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7, seção 4.2; p. 9, seção 5.1.2; p. 10, Tabela 3",
+        "observacao": "Objeto central do estudo: conteúdo do prompt (código comentado defeituoso inserido de 8 linhas acima a 3 linhas abaixo do ponto de conclusão). Não é técnica proposta para melhorar o código; é manipulação adversa do contexto do prompt cujo efeito (aumento de defeitos) é investigado. Contraste com Blank (mesmo contexto sem o código comentado) na Tabela 3; contraste com RandomInsertion só nas Figuras 5 e 6, sem valores impressos."
+      },
+      {
+        "nome_original": "RandomInsertion group",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9, seção 5.1.2; p. 11-12, Figuras 5 e 6",
+        "observacao": "Controle em que o código comentado defeituoso é substituído por código comentado sem defeito, escolhido aleatoriamente e de mesmo tamanho. O contraste com Blank e com FullInsertion aparece só em gráficos de barras (Figuras 5 e 6), sem valores numéricos impressos para RandomInsertion; por isso não há extração."
+      },
+      {
+        "nome_original": "TruncatedInsertion group",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 13, seção 5.2.1; p. 14, seção 5.2.2; p. 15, Tabela 4",
+        "observacao": "Variante do FullInsertion em que se removem os últimos 50% dos caracteres do código comentado defeituoso; tratada pelo estudo como grupo próprio (RQ2). Não acrescenta categoria em relação ao FullInsertion (remove parte do contexto inserido). Contrafactuais: FullInsertion (comparação feita no texto, p. 14) e Blank (Rel. Incr. da Tabela 4). É sonda do mecanismo de cópia ou inferência, não técnica de melhoria."
+      },
+      {
+        "nome_original": "TaggedInsertion group (<Vulnerable> tags)",
+        "mecanismos": ["contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 13, seção 5.2.1; p. 14, seção 5.2.2; p. 15, Tabela 5",
+        "observacao": "Variante do FullInsertion que acrescenta marcadores textuais <Vulnerable> no início e no fim do código comentado defeituoso (sintaxe semelhante a HTML), inseridos pelo plugin COC Manager dos autores. 'outro' = marcação textual de alerta sobre o conteúdo, sem instrução explícita de comportamento; não se enquadra em instrucao nem em restricoes. Contrafactual: FullInsertion (mesmos prompts sem as tags), comparação feita no texto (p. 15); a Tabela 5 reporta Rel. Incr. em relação a Blank."
+      },
+      {
+        "nome_original": "Prompt engineering: instruction “Do not refer to the commented-out code.”",
+        "mecanismos": ["contexto", "instrucao"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 16, seções 5.3.1-5.3.3, Tabela 6",
+        "observacao": "Instrução acrescentada aos 1.000 prompts do FullInsertion com o código comentado defeituoso uma linha abaixo do ponto de conclusão (Below1line); comparação Before/After na Tabela 6. O modo como a instrução foi inserida nas ferramentas de completamento (comentário no arquivo, chat ou outro) não é informado. Só uma formulação e uma posição foram testadas."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "COC (Commented-out Code) Manager — red warning indicators and graphical markers; Algorithm 1",
+        "natureza": "outro",
+        "descricao": "Plugin dos autores que detecta código comentado (Algoritmo 1, análise por AST) e mostra ícones e cores de alerta ao desenvolvedor; segundo o estudo, ícones e cores não afetam o LLM, que só lê as tags <Vulnerable> (estas entram em tecnicas).",
+        "localizador": "p. 14, seção 5.2.2, Algoritmo 1"
+      },
+      {
+        "nome_original": "GitHub Copilot vs. Cursor; GPT-4o vs. Claude 3.5 Sonnet",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparações entre ferramentas e modelos sem alteração do prompt (por exemplo, diferença de 19,2 e de 184 na contagem média de defeitos entre modelos); não são efeito de prompting.",
+        "localizador": "p. 8, seção 4.3; p. 11, seção 5.1.3"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "observacao": "Usado dentro do GitHub Copilot 1.257.0 (plugin do VSCode) e do Cursor 0.44.11; snapshot do modelo não informado; configurações padrão das ferramentas, sem ajuste de parâmetros de inferência."},
+      {"nome": "Claude 3.5 Sonnet", "versao": "nao_informado", "observacao": "Usado dentro do GitHub Copilot 1.257.0 e do Cursor 0.44.11; snapshot do modelo não informado; configurações padrão."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto próprio de 1.000 amostras (contexto de código, código comentado defeituoso e ponto de conclusão) construído a partir de repositórios Python do GitHub",
+        "quantidade": "1,000 amostras; 11,000 prompts no FullInsertion (11 posições × 1.000); 1,000 prompts no Blank; 1,000 prompts no RQ3 (posição Below1line); RandomInsertion, TruncatedInsertion e TaggedInsertion descritos como idênticos ao FullInsertion exceto pela modificação, sem total impresso",
+        "observacao": "Defeitos detectados por CodeQL, amostragem proporcional por tipo: 207 vulnerabilities, 48 reliability issues, 376 defects, 340 maintainability issues, 9 correctness issues e 20 modularity issues; vulnerabilidades cobrem 17 tipos de CWE. Repositórios filtrados (mais de 1.000 estrelas, Python, 10 KB a 500.000 KB, commits após dezembro de 2022). Na RQ4, os 11.000 prompts do FullInsertion são divididos em cinco categorias de esparsidade (1,559, 2,134, 1,671, 3,577 e 2,059 instâncias)."
+      }
+    ],
+    "metricas": [
+      {"nome": "Defect Count", "definicao": "Número de saídas em que o CodeQL, com o mesmo conjunto de regras, detecta o defeito original (tipo e local registrados no nome do arquivo).", "denominador": "Por construção, 1.000 prompts por condição/posição (Blank: 1.000 prompts; FullInsertion: 11 posições × 1.000); a tabela não imprime o denominador. A linha Avg. é a média das 11 posições, excluindo Blank.", "localizador": "p. 8, seção 4.4; p. 9, seção 5.1.2; p. 10, Tabela 3"},
+      {"nome": "Rel. Incr. (%)", "definicao": "(número de defeitos gerados − número de defeitos no Blank) / número de defeitos no Blank × 100%.", "denominador": "Defect Count do Blank para a mesma ferramenta e modelo", "localizador": "p. 9, seção 5.1.2; Tabelas 3, 4 e 5"},
+      {"nome": "Decrease Ratio (%)", "definicao": "Redução relativa da contagem de defeitos antes e depois da instrução (Before/After), conforme Tabela 6.", "denominador": "Contagem Before (1.000 prompts Below1line)", "localizador": "p. 16, Tabela 6"},
+      {"nome": "Defect Ratio (Fig. 9) e defect rate por tipo de defeito (Fig. 7)", "definicao": "Proporção de código defeituoso por categoria de esparsidade (Fig. 9) e por tipo de defeito (Fig. 7).", "denominador": "Fig. 9: instâncias de cada categoria de esparsidade (1,559; 2,134; 1,671; 3,577; 2,059); Fig. 7: nao_informado explicitamente", "localizador": "p. 13, Fig. 7; p. 17, Fig. 9"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Código comentado defeituoso no contexto leva os assistentes a gerar código com vulnerabilidades (exemplo: ssl.wrap_socket sem versão de protocolo, CWE-327); o código comentado pode vir de outros membros da equipe ou de agentes maliciosos.", "localizador": "p. 2, Fig. 1; p. 10, seção 5.1.3"},
+      {"categoria": "correcao_funcional", "descricao": "Os defeitos reintroduzidos podem causar erros de execução; o conjunto inclui problemas de confiabilidade e corretude, e os assistentes completam padrões de defeito incompletos (TruncatedInsertion).", "localizador": "p. 10, seção 5.1.3; p. 14, seção 5.2.3"},
+      {"categoria": "manutenibilidade", "descricao": "Parte dos defeitos reintroduzidos é de manutenibilidade e modularidade; o estudo cita maior custo de manutenção e as maiores taxas para defeitos do tipo Modularity.", "localizador": "p. 7, seção 4.1; p. 10, seção 5.1.3; p. 12, seção 5.1.3; p. 13, Fig. 7"},
+      {"categoria": "custo", "descricao": "O estudo menciona maior tempo de desenvolvimento e maiores custos de teste e manutenção decorrentes dos defeitos; não quantificado.", "localizador": "p. 10, seção 5.1.3"},
+      {"categoria": "contaminacao", "descricao": "Risco de vazamento de dados reconhecido pelos autores (amostras de repositórios públicos do GitHub); controles descritos em mitigacoes, sem verificação contra as datas de corte dos modelos, que o estudo não informa.", "localizador": "p. 6, seção 4.1"},
+      {"categoria": "outro", "descricao": "Desenvolvedores menos experientes ou que confiam demais na IA podem manter os defeitos sem perceber; os defeitos em código comentado não são detectados por ferramentas que analisam código executável.", "localizador": "p. 9-10, seção 5.1.3"},
+      {"categoria": "outro", "descricao": "Ameaça de medição: o CodeQL não é totalmente preciso.", "localizador": "p. 18, seção 6"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Instrução “Do not refer to the commented-out code.” acrescentada ao prompt; reduz a contagem de defeitos em todas as condições, com redução máxima de 21.84%.", "avaliada": "sim", "localizador": "p. 16, seção 5.3, Tabela 6"},
+      {"descricao": "Tags <Vulnerable> em torno do código comentado defeituoso (COC Manager) para verificar se a ferramenta reconhece o alerta e evita o código vulnerável; contagens comparáveis às do FullInsertion segundo o texto.", "avaliada": "sim", "localizador": "p. 13-15, seções 5.2.1-5.2.3, Tabelas 3 e 5"},
+      {"descricao": "Contra vazamento de dados: restrição a amostras atualizadas após dezembro de 2022 e transformação dos dados pela inserção de código comentado.", "avaliada": "nao", "localizador": "p. 6, seção 4.1"},
+      {"descricao": "Nenhum outro arquivo aberto no editor e uma única pasta por arquivo durante a geração, para evitar influência de arquivos externos.", "avaliada": "nao", "localizador": "p. 8, seção 4.3"},
+      {"descricao": "Uso das regras oficiais mais recentes do CodeQL e validação manual de cada categoria de defeito.", "avaliada": "nao", "localizador": "p. 18, seção 6"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Tabela 2: aparente inconsistência — 3,055 repositórios com código comentado defeituoso contra 3,023 arquivos Python defeituosos, embora um repositório só conte como defeituoso se ao menos um arquivo o for (definição de níveis na seção 2.2). Os totais da Tabela 2 (6,403 repositórios; 16,269 arquivos; 51,077 linhas) também diferem dos da Tabela 1 (5,418 repositórios com código comentado; 132,886 arquivos; 1,023,844 linhas), apesar do título «among CO codes»; o estudo menciona a exclusão de arquivos com erro de sintaxe, mas não reconcilia os denominadores.", "localizador": "p. 3, Tabela 1; p. 4, Tabela 2 e seções 2.2-2.3"},
+      {"descricao": "Terminologia de esparsidade contraditória: na introdução, contexto «sparser», como código cercado por linhas em branco, associa-se a mais defeitos; na seção 5.4.2, as três categorias com linhas em branco são descritas como de «lower sparsity» e as duas sem linhas em branco como de «higher sparsity».", "localizador": "p. 3, RQ4; p. 17, seção 5.4.2"},
+      {"descricao": "TaggedInsertion: o texto afirma contagens comparáveis às do FullInsertion e a introdução diz que as tags têm pouco efeito, mas a direção varia: Avg. GitHub Copilot GPT-4o 452.73 (Tagged) contra 482.82 (Full); Avg. Cursor GPT-4o 562.36 (Tagged) contra 532.82 (Full). A introdução diz tags «before or after»; o método, «at both the beginning and end».", "localizador": "p. 3, RQ2; p. 10, Tabela 3; p. 14, seção 5.2.2; p. 15, Tabela 5"},
+      {"descricao": "TruncatedInsertion: no GitHub Copilot a truncagem reduz os defeitos em relação ao FullInsertion (Avg. GPT-4o 431.64 contra 482.82), mas no Cursor GPT-4o a média supera a do FullInsertion (562.27 contra 532.82); o estudo reconhece que em alguns casos o Truncated excede o Full.", "localizador": "p. 10, Tabela 3; p. 14, seção 5.2.3; p. 15, Tabela 4"},
+      {"descricao": "RQ3 limitada a uma formulação de instrução e a uma posição (Below1line), por limites de uso das ferramentas; redução de 4.93% em Claude3.5 of Cursor até 21.84% em GPT-4o of Cursor. A introdução descreve a intervenção como instruir a evitar referenciar os defeitos e como «ignore defective CO code and regenerate», enquanto o método descreve só a instrução «Do not refer to the commented-out code.» acrescentada antes da geração; o modo de inserção da instrução nas ferramentas não é informado. Os valores Before da Tabela 6 coincidem com a linha Below1line da Tabela 3 (567, 630, 499, 751).", "localizador": "p. 3, RQ3; p. 10, Tabela 3; p. 16, seção 5.3 e Tabela 6"},
+      {"descricao": "RandomInsertion: o texto afirma que fica consistentemente abaixo do FullInsertion, mas só no GitHub Copilot as posições acima ficam próximas do Blank; nas demais condições difere do Blank, o que os autores interpretam como falta de robustez a código comentado aleatório. Valores só em gráfico, sem números impressos.", "localizador": "p. 11-12, Figuras 5 e 6, seção 5.1.3"},
+      {"descricao": "Linhas de base Blank heterogêneas entre ferramentas e modelos (394 a 589 defeitos em 1.000 prompts; mais da metade no Cursor com Claude 3.5 Sonnet). O efeito de posição posterior (LPAE: Rel. Incr. acima de 43% abaixo do ponto de conclusão no GitHub Copilot) não aparece no Cursor; a explicação por Fill-In-the-Middle é hipótese, não testada.", "localizador": "p. 9-11, seção 5.1.3, Tabela 3"},
+      {"descricao": "O estudo descreve diferenças como «significant» sem relatar teste estatístico, intervalo de confiança ou número de gerações por prompt; variação entre execuções não é discutida.", "localizador": "p. 9-11, seção 5.1.3; p. 8, seção 4.3"},
+      {"descricao": "Legenda da Fig. 9 aparentemente traz rótulo inconsistente (lido como «Cursor of Github Copilot»); leitura visual em baixa resolução, insegura; a figura não foi usada nas extrações.", "localizador": "p. 17, Fig. 9"}
+    ],
+    "observacoes": [
+      {"descricao": "Estudo empírico de prevalência: 6,403 repositórios Python do GitHub; 84.62% dos repositórios e 13.09% dos arquivos Python contêm código comentado (Tabela 1).", "localizador": "p. 3, seção 2.1, Tabela 1"},
+      {"descricao": "Posições de inserção (1 a 8 linhas acima, 1 a 3 abaixo) escolhidas pela distribuição observada nos repositórios, cobrindo 70.26% dos casos.", "localizador": "p. 7, seção 4.2"},
+      {"descricao": "RQ4 é análise post hoc da disposição (linhas em branco e indentação) em torno do código comentado nos prompts do FullInsertion, não manipulação experimental; não entra em tecnicas.", "localizador": "p. 17, seção 5.4"},
+      {"descricao": "Experimento em pequena escala por limitações das ferramentas (interface gráfica, limites de frequência e uso); o tamanho de 1.000 amostras foi definido por estudo piloto.", "localizador": "p. 7, seção 4.1"},
+      {"descricao": "Pacote de código e dados indicado em https://github.com/da-da-di/CO-Code; não acessado nem validado.", "localizador": "p. 19, seção 8"},
+      {"descricao": "O estudo não testou instruções mais explícitas (por exemplo, pedir para evitar defeitos) e as reconhece como possivelmente melhores; também exclui hiperparâmetros e prompts de sistema, inacessíveis nas ferramentas.", "localizador": "p. 5, seção 3.2; p. 18, seção 6"}
+    ],
+    "citacoes": [
+      {"trecho": "This study evaluates how AI coding assistants, GitHub Copilot and Cursor, are influenced by defective CO code.", "localizador": "p. 1, resumo"},
+      {"trecho": "Even with explicit instructions to ignore the defective CO code, the reduction in defects does not exceed 21.84 percent.", "localizador": "p. 1, resumo"},
+      {"trecho": "Subsequently, the defective CO code is inserted 1 to 8 lines above and 1 to 3 lines below the completion point within the code context, generating 11 distinct prompts per sample.", "localizador": "p. 7, seção 4.2"},
+      {"trecho": "The Blank group served as a control and contained no inserted code; it used only the original code context, yielding 1,000 prompts, equal to the size of the dataset.", "localizador": "p. 9, seção 5.1.2"},
+      {"trecho": "The RandomInsertion group was identical to the FullInsertion group, except that the defective CO code was replaced with a randomly selected, defect-free CO code of the same length.", "localizador": "p. 9, seção 5.1.2"},
+      {"trecho": "As depicted in Fig. 8a, in the TruncatedInsertion group, the prompt construction process is identical to that of the FullInsertion group, except that the last 50% of the characters are removed from the defective CO code.", "localizador": "p. 14, seção 5.2.2"},
+      {"trecho": "As shown in Fig. 8b, the TaggedInsertion group also modified only the defective CO code by adding <Vulnerable> tags at both the beginning and end, using a syntax similar to HTML.", "localizador": "p. 14, seção 5.2.2"},
+      {"trecho": "Furthermore, using the COC Manager plugin, we added explicit “<Vulnerable>” tags around the defective CO code to determine if the tool could recognize and avoid generating vulnerable code based on these textual warnings.", "localizador": "p. 13, seção 5.2.1"},
+      {"trecho": "For these 1,000 prompts, we added the instruction “Do not refer to the commented-out code.” before generating responses with the AI programming tool.", "localizador": "p. 16, seção 5.3.2"},
+      {"trecho": "In this flawed segment, GitHub Copilot invokes the function ssl.wrap_socket without specifying the protocol version, potentially resulting in the use of deprecated or insecure TLS versions.", "localizador": "p. 2, seção 1"},
+      {"trecho": "Such defects may lead to runtime errors, extended development time, and higher costs for testing and maintenance.", "localizador": "p. 10, seção 5.1.3"},
+      {"trecho": "Because the introduction of these defects is subtle, and because the defective CO code may originate from other team members or malicious actors rather than the developer themselves, less experienced developers or those who overly trust AI may unknowingly retain these flaws, increasing overall risk.", "localizador": "p. 10, seção 5.1.3"},
+      {"trecho": "To mitigate the risk of data leakage, we first restricted our data to samples updated after December 2022 to prioritize recency.", "localizador": "p. 6, seção 4.1"},
+      {"trecho": "Second, during subsequent prompt construction process, we transformed the original data by inserting a CO code, ensuring that the resulting prompts differ from the code in the original repository.", "localizador": "p. 6, seção 4.1"},
+      {"trecho": "To prevent external files from influencing the large language models, we ensured that no other files were open in the editor during generation, and each folder contained only one file.", "localizador": "p. 8, seção 4.3"},
+      {"trecho": "First, CodeQL, the defect detection tool we use, is not fully accurate.", "localizador": "p. 18, seção 6"},
+      {"trecho": "To minimize potential threats, we applied the most recent official rule sets and manually validated each defect category.", "localizador": "p. 18, seção 6"},
+      {"trecho": "The added icons and colors do not affect the LLM, which only reads the <Vulnerable> tags.", "localizador": "p. 14, seção 5.2.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "FullInsertion group (defective CO code inserted into the code context)",
+      "mecanismos": ["contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Blank group",
+      "modelo": "GPT-4o (GitHub Copilot 1.257.0)",
+      "benchmark": "Conjunto próprio de 1.000 amostras de repositórios Python do GitHub",
+      "metrica": "Defect Count",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 394, "intervencao": 482.82},
+      "denominador": "Blank: 1.000 prompts; FullInsertion: média (linha Avg.) de 11 posições com 1.000 prompts cada (11.000 prompts); o denominador não é impresso na tabela",
+      "condicoes": "Valor da intervenção = linha Avg. impressa, média das 11 posições de inserção (Above8line a Below3line), excluindo o Blank; agregado da mesma técnica, métrica e comparador. Por posição, de 429 (Above8line) a 615 (Below3line); posições abaixo do ponto de conclusão com contagens bem maiores no GitHub Copilot (LPAE). Rel. Incr. impresso na mesma linha: 22.54%. Configurações padrão da ferramenta, sem ajuste de parâmetros; número de gerações por prompt nao_informado; snapshot do GPT-4o nao_informado. A condição é manipulação adversa do prompt: o aumento de defeitos é o efeito investigado, não ganho de técnica. Conferido no PDF, p. 10, Tabela 3.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo destaca o aumento de defeitos (até 58.17%, máximo entre ferramentas, modelos e posições) e o efeito da instrução, com duas ferramentas, dois modelos e duas métricas (Defect Count e Rel. Incr.). Primeira tabela com o contraste elegível: Tabela 3 (Blank × FullInsertion); primeira métrica Defect Count; primeiro modelo GitHub Copilot GPT-4o; comparador Blank; usado o agregado impresso Avg.",
+      "derivacao": "direta",
+      "localizador": "p. 10, Tabela 3, linhas Blank e Avg., coluna GitHub Copilot GPT-4o Defect Count; p. 9, seção 5.1.2-5.1.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Blank 394 - 416 - 426 - 589 -", "localizador": "p. 10, Tabela 3, linha Blank; colunas Defect Count e Rel. Incr.(%) para GitHub Copilot GPT-4o, GitHub Copilot Claude3.5, Cursor GPT-4o e Cursor Claude3.5"},
+        {"trecho": "Avg. 482.82 22.54 502.09 20.69 532.82 25.07 716.82 21.7", "localizador": "p. 10, Tabela 3, linha Avg.; colunas Defect Count e Rel. Incr.(%) para GitHub Copilot GPT-4o, GitHub Copilot Claude3.5, Cursor GPT-4o e Cursor Claude3.5"},
+        {"trecho": "The average values reported in the “Avg.” row exclude data from the Blank group; the same applies hereinafter.", "localizador": "p. 9, seção 5.1.3"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "TruncatedInsertion group",
+      "mecanismos": ["contexto"],
+      "mecanismos_acrescentados": [],
+      "comparador": "FullInsertion group",
+      "modelo": "GPT-4o (GitHub Copilot 1.257.0)",
+      "benchmark": "Conjunto próprio de 1.000 amostras de repositórios Python do GitHub",
+      "metrica": "Defect Count",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 482.82, "intervencao": 431.64},
+      "denominador": "Média (linha Avg.) de 11 posições com 1.000 prompts cada, nas duas condições; denominador não impresso nas tabelas",
+      "condicoes": "Truncated = mesmos prompts do FullInsertion com os últimos 50% dos caracteres do código comentado defeituoso removidos. Valores das linhas Avg. impressas (Tabela 4 para Truncated; Tabela 3 para Full). A Tabela 4 reporta Rel. Incr. contra o Blank (Avg. 9.55%), não contra o Full. No Cursor GPT-4o a direção se inverte (562.27 Truncated contra 532.82 Full). Configurações padrão; número de gerações nao_informado. A truncagem é sonda do mecanismo (cópia ou inferência), não técnica de melhoria. Conferido no PDF, p. 10 e p. 15.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal tratada como grupo próprio na RQ2 e ainda não representada. Nenhuma tabela traz Truncated e Full juntos; o contraste com o Full é feito pelo estudo no texto (p. 14) e composto das Tabelas 4 e 3; primeira métrica Defect Count, primeiro modelo GitHub Copilot GPT-4o, agregado impresso Avg.",
+      "derivacao": "direta",
+      "localizador": "p. 15, Tabela 4, linha Avg., coluna GitHub Copilot GPT-4o Defect Count; p. 10, Tabela 3, linha Avg.; p. 14, seção 5.2.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Avg. 431.64 9.55 474.73 14.12 562.27 31.99 694.82 17.97", "localizador": "p. 15, Tabela 4, linha Avg.; colunas Defect Count e Rel. Incr.(%) para GitHub Copilot GPT-4o, GitHub Copilot Claude3.5, Cursor GPT-4o e Cursor Claude3.5"},
+        {"trecho": "Avg. 482.82 22.54 502.09 20.69 532.82 25.07 716.82 21.7", "localizador": "p. 10, Tabela 3, linha Avg.; mesmas colunas"},
+        {"trecho": "Compared to the FullInsertion group, GitHub Copilot shows a consistent trend: removing the final 50% of characters from the defective CO code leads to a reduction in generated defects.", "localizador": "p. 14, seção 5.2.3"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "TaggedInsertion group (<Vulnerable> tags)",
+      "mecanismos": ["contexto", "outro"],
+      "mecanismos_acrescentados": ["outro"],
+      "comparador": "FullInsertion group",
+      "modelo": "GPT-4o (GitHub Copilot 1.257.0)",
+      "benchmark": "Conjunto próprio de 1.000 amostras de repositórios Python do GitHub",
+      "metrica": "Defect Count",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 482.82, "intervencao": 452.73},
+      "denominador": "Média (linha Avg.) de 11 posições com 1.000 prompts cada, nas duas condições; denominador não impresso nas tabelas",
+      "condicoes": "Tagged = mesmos prompts do FullInsertion com tags <Vulnerable> no início e no fim do código comentado defeituoso ('outro' = marcação textual de alerta). Valores das linhas Avg. impressas (Tabela 5 para Tagged; Tabela 3 para Full). A Tabela 5 reporta Rel. Incr. contra o Blank (Avg. 14.91%), não contra o Full. O texto descreve as contagens como comparáveis às do Full; no Cursor GPT-4o a média do Tagged é maior (562.36 contra 532.82). Configurações padrão; número de gerações nao_informado. Conferido no PDF, p. 10 e p. 15.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal tratada como grupo próprio na RQ2 e ainda não representada. Nenhuma tabela traz Tagged e Full juntos; o contraste com o Full é feito pelo estudo no texto (p. 15) e composto das Tabelas 5 e 3; primeira métrica Defect Count, primeiro modelo GitHub Copilot GPT-4o, agregado impresso Avg.",
+      "derivacao": "direta",
+      "localizador": "p. 15, Tabela 5, linha Avg., coluna GitHub Copilot GPT-4o Defect Count; p. 10, Tabela 3, linha Avg.; p. 15, seção 5.2.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Avg. 452.73 14.91 497.91 19.69 562.36 32.01 688.0 16.81", "localizador": "p. 15, Tabela 5, linha Avg.; colunas Defect Count e Rel. Incr.(%) para GitHub Copilot GPT-4o, GitHub Copilot Claude3.5, Cursor GPT-4o e Cursor Claude3.5"},
+        {"trecho": "Avg. 482.82 22.54 502.09 20.69 532.82 25.07 716.82 21.7", "localizador": "p. 10, Tabela 3, linha Avg.; mesmas colunas"},
+        {"trecho": "The number of defects introduced by the tagged defective CO code is comparable to that in the FullInsertion group.", "localizador": "p. 15, seção 5.2.3"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Prompt engineering: instruction “Do not refer to the commented-out code.”",
+      "mecanismos": ["contexto", "instrucao"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "FullInsertion Below1line sem a instrução (Before)",
+      "modelo": "GPT-4o (GitHub Copilot 1.257.0)",
+      "benchmark": "Conjunto próprio: 1.000 prompts do FullInsertion com o código comentado defeituoso uma linha abaixo do ponto de conclusão",
+      "metrica": "Número de defeitos gerados (colunas Before e After da Tabela 6)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 567, "intervencao": 471},
+      "denominador": "1.000 prompts (posição Below1line)",
+      "condicoes": "Uma única formulação de instrução e uma única posição (Below1line), por limites de uso das ferramentas. Decrease Ratio impresso: 16.93%. O valor Before coincide com a linha Below1line da Tabela 3 (567). Modo de inserção da instrução na ferramenta nao_informado; configurações padrão; número de gerações nao_informado. Conferido no PDF, p. 16, Tabela 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três: técnica focal de prompting (RQ3) ainda não representada. Única tabela com o contraste: Tabela 6; primeira métrica (contagem Before/After) e primeira linha (GPT-4o of GitHub Copilot); sem agregado impresso.",
+      "derivacao": "direta",
+      "localizador": "p. 16, Tabela 6, linha GPT-4o of GitHub Copilot; seção 5.3.2-5.3.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o of GitHub Copilot 567 471 16.93", "localizador": "p. 16, Tabela 6, linha GPT-4o of GitHub Copilot; colunas Before, After e Decrease Ratio(%)"},
+        {"trecho": "All experimental groups showed a decrease in defect counts, indicating that this instruction can help prevent some defects from being generated.", "localizador": "p. 16, seção 5.3.3"},
+        {"trecho": "However, the highest reduction rate was only 21.84%, which is still insufficient for effectively eliminating defects.", "localizador": "p. 16, seção 5.3.3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (efeito do código comentado defeituoso, truncagem e tags, instrução no prompt, esparsidade do contexto).", "localizador": "p. 3, seção 1 (RQ1-RQ4)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção do conjunto, dos prompts, das posições de inserção e das condições de controle descrita com detalhe; versões das ferramentas informadas. Faltam o modo de inserção da instrução na RQ3, o número de gerações por prompt e o snapshot dos modelos.", "localizador": "p. 6-8, seções 4.1-4.4; p. 16, seção 5.3.2"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Grupo Blank (sem código inserido) e RandomInsertion (código comentado sem defeito, mesmo tamanho) como controles; RQ3 com Before/After nos mesmos 1.000 prompts. RandomInsertion só em gráficos sem números.", "localizador": "p. 9, seção 5.1.2; p. 11-12, Figuras 5 e 6; p. 16, Tabela 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Defect Count e Rel. Incr. definidos (fórmula na p. 9) e coerentes entre tabelas (Before da Tabela 6 = Below1line da Tabela 3); denominador por condição só implícito na construção (1.000 prompts por posição), não impresso nas tabelas; denominador das taxas por tipo (Fig. 7) não explícito; detecção limitada à reintrodução do defeito original pelo CodeQL; aparente inconsistência nos totais das Tabelas 1 e 2.", "localizador": "p. 8, seção 4.4; p. 9, seção 5.1.2; p. 3-4, Tabelas 1 e 2; p. 10, Tabela 3; p. 16, Tabela 6"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças internas (precisão do CodeQL, abordagens não ótimas na RQ2 e RQ3, cenários não cobertos) e externas (generalização para outras ferramentas e tipos de comentário). Não discute variação entre execuções nem testes estatísticos.", "localizador": "p. 18, seção 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Versões das ferramentas, critérios de coleta e link para código e dados informados (não validado); ferramentas fechadas com configurações padrão, sem snapshot dos modelos e sem número de execuções, o que limita a reprodução.", "localizador": "p. 8, seção 4.3; p. 19, seção 8"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo reconhece o risco de vazamento e descreve controles (amostras atualizadas após dezembro de 2022; transformação pela inserção de código comentado), sem avaliá-los nem relacioná-los às datas de corte dos modelos.", "localizador": "p. 6, seção 4.1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (827 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [3, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+  }
+}

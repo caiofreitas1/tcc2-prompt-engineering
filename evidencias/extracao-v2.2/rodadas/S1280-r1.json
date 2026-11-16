@@ -1,0 +1,213 @@
+{
+  "estudo": "S1280",
+  "texto_fonte": "fontes/textos/lote/S1280.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tarefas_observacao": "A geração avaliada é a completação de código (code completion) por modelos envenenados ou limpos, que o CodeScan audita. As comparações do estudo medem a detecção de envenenamento (precisão, revocação, F1, FPR, tempo) e a fidelidade da inversão do alvo de ataque, não a qualidade funcional do código gerado. A detecção de vulnerabilidades por LLM (Tabela 5, Tabela 7) é tarefa fora das quatro tarefas do escopo.",
+    "tecnicas": [
+      {
+        "nome_original": "CodeScan",
+        "mecanismos": ["contexto", "amostragem", "instrucao", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (contribuições), p. 3 (Figura 2), p. 5-7 (Seções 4.2-4.4), p. 8 (Seção 5.1)",
+        "observacao": "Pacote híbrido de auditoria caixa-preta. Ingredientes de prompting: prompts limpos com código-fonte como insumo (contexto); anexação de cada token candidato do vocabulário ao fim dos prompts limpos como sonda (outro: sondagem do modelo por sufixo de token no prompt); coleta de 20 gerações por token e extração do alvo por consenso/votação majoritária entre gerações (amostragem); analisador LLM (GPT-5-mini) instruído a verificar se o código contém a vulnerabilidade em análise, com a instrução adicional de ignorar s.bind(\"\", 0) em V3 (instrucao). O Passo 1 (normalização de AST, agrupamento, entropia, fator de dominância e limiar de contagem) não é prompting e está em componentes_fora_escopo. Não há condição sem o CodeScan: os comparadores são outros métodos de varredura (BAIT, BAIT+VA, VA, GCG, PEZ, DBS). O contraste CodeScan vs. VA retira apenas o Passo 1, componente fora do escopo; não isola nenhum ingrediente de prompting. O texto do prompt do analisador usado no CodeScan não é reproduzido (a Figura 17 mostra um prompt zero-shot usado no teste de ofuscação com GPT-5, Apêndice G.3)."
+      },
+      {
+        "nome_original": "VA",
+        "mecanismos": ["contexto", "amostragem", "instrucao", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 8 (Seção 5.1, CodeScan and Baseline Configuration); p. 10 (Tabela 2)",
+        "observacao": "Variante do CodeScan sem o Passo 1: a cada token, o analisador LLM recebe as 20 gerações no prompt e é instruído a procurar um padrão de código comum e verificar se ele contém a vulnerabilidade. Mesmos ingredientes de prompting do CodeScan (mesmas categorias); a diferença entre ambos é o Passo 1, não prompting. Sistema comparador cujos mecanismos de prompting não são isolados."
+      },
+      {
+        "nome_original": "BAIT+VA",
+        "mecanismos": ["contexto", "instrucao", "outro"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 8 (Seção 5.1); p. 9 (Seção 5.3); p. 10 (Tabela 2)",
+        "observacao": "Pacote híbrido: BAIT (inversão por Q-Score sobre probabilidades de tokens, fora do escopo) acrescido da análise de vulnerabilidade por LLM. O estudo compara BAIT+VA com BAIT, mas as duas condições diferem também na regra de decisão e de parada (BAIT encerra cedo com Q-Score acima de 0,9; BAIT+VA prossegue até o limite de tempo e exige Q-Score acima de 0,85 e confirmação do analisador), de modo que o contraste não isola o ingrediente de prompting; por isso nao. A tarefa do contraste é detecção de envenenamento."
+      },
+      {
+        "nome_original": "zero-shot prompting (análise de vulnerabilidade)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11 (Seção 5.4); p. 12 (Tabela 5); p. 20 (Tabela 7)",
+        "observacao": "Prompt que instrui o LLM a analisar o código fornecido e relatar até três vulnerabilidades. Usado para escolher o analisador (GPT-4, GPT-5 mini, GPT-5.4). Tarefa: detecção de vulnerabilidades em código transformado/ofuscado, fora das quatro tarefas do escopo."
+      },
+      {
+        "nome_original": "one-shot prompting (análise de vulnerabilidade)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 11 (Seção 5.4); p. 12 (Tabela 5); p. 20 (Tabela 7)",
+        "observacao": "Apesar do rótulo one-shot, o texto não descreve exemplo resolvido: o prompt fornece a vulnerabilidade verdadeira e pede uma decisão sobre essa vulnerabilidade específica (por isso não recebe exemplos). Comparado com o zero-shot nos mesmos modelos e conjuntos (SA e GPT-4), mas a mudança envolve informação acrescentada (vulnerabilidade-alvo) e formato da pergunta (decisão sobre uma vulnerabilidade em vez de relato aberto de até três), por isso pacote. Tarefa fora do escopo (detecção de vulnerabilidades); o estudo não apresenta nenhuma das duas formulações como sua proposta."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Step 1: Target Candidate Identification (structural divergence analysis)",
+        "natureza": "outro",
+        "descricao": "Algoritmo de pós-processamento das gerações: remoção de comentários, normalização por AST (VAR, VAL, ARG), agrupamento linha a linha, julgamento por entropia, fator de dominância e limiar de contagem, e ramificação limitada; não altera o prompt.",
+        "localizador": "PDF p. 5-6 (Seção 4.3, Algoritmos 2 e 3)"
+      },
+      {
+        "nome_original": "BAIT",
+        "natureza": "outro",
+        "descricao": "Método comparador de inversão de alvo baseado na consistência das probabilidades de tokens (Q-Score) entre prompts limpos, com estágio de aquecimento e limiares de 0,9 (parada antecipada) e 0,85 (decisão final).",
+        "localizador": "PDF p. 3-4 (Seção 2.2); p. 8 (Seção 5.1)"
+      },
+      {
+        "nome_original": "GCG, PEZ e DBS",
+        "natureza": "outro",
+        "descricao": "Baselines caixa-branca de otimização discreta baseada em gradiente e busca para inversão de gatilho/alvo.",
+        "localizador": "PDF p. 8 (Seção 5.1); p. 21 (Apêndice G.1, Tabela 8)"
+      },
+      {
+        "nome_original": "Fine-tuning de modelos envenenados, com backdoor e limpos",
+        "natureza": "ajuste_fino",
+        "descricao": "Construção dos modelos auditados por ajuste fino com dados de envenenamento (Simple, Covert, TrojanPuzzle, CodeBreaker) e dados limpos, com sementes, épocas (1-3) e taxa de envenenamento (1%-5%) aleatorizadas; cerca de 2.800 horas de GPU.",
+        "localizador": "PDF p. 7-8 (Seção 5.1)"
+      },
+      {
+        "nome_original": "Parâmetros de geração",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 1,0, top-p 1,0, tamanho máximo de geração de 60 tokens (o número de tokens gerados é variado na análise de sensibilidade).",
+        "localizador": "PDF p. 8 (Seção 5.1); p. 23 (Apêndice G.9)"
+      },
+      {
+        "nome_original": "Orçamento unificado de 6 horas de varredura",
+        "natureza": "orcamento",
+        "descricao": "Limite de tempo aplicado a CodeScan, BAIT, BAIT+VA e VA em modelos limpos e atacados.",
+        "localizador": "PDF p. 9 (Seção 5.3); p. 19 (Apêndice E.1)"
+      },
+      {
+        "nome_original": "Escolha do analisador de vulnerabilidades (GPT-5-mini; Qwen3.6-35B-A3B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Seleção do LLM analisador sem alteração do prompt: GPT-5-mini por desempenho comparável ao GPT-5.4 com menor custo; Qwen3.6-35B-A3B como analisador de código aberto.",
+        "localizador": "PDF p. 7 (Seção 4.4); p. 12 (Seção 5.5); p. 22 (Apêndice G.5)"
+      },
+      {
+        "nome_original": "Vocabulário externo para tokens candidatos",
+        "natureza": "outro",
+        "descricao": "Vocabulários de outras famílias de modelos usados para gerar os tokens candidatos (validação cruzada de vocabulário).",
+        "localizador": "PDF p. 4 (Seção 3); p. 22-23 (Apêndice G.8, Tabela 10)"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeLlama-7B-Python", "versao": "nao_informado", "papel": "modelo auditado (envenenado/limpo)"},
+      {"nome": "Qwen2.5-Coder-7B", "versao": "nao_informado", "papel": "modelo auditado (envenenado/limpo)"},
+      {"nome": "StarCoder2-7B", "versao": "nao_informado", "papel": "modelo auditado (envenenado/limpo)"},
+      {"nome": "CodeLlama-34B-Python", "versao": "nao_informado", "papel": "modelo auditado maior (2 modelos com backdoor)"},
+      {"nome": "Qwen2.5-Coder-14B", "versao": "nao_informado", "papel": "modelo auditado maior (2 modelos com backdoor)"},
+      {"nome": "StarCoder2-15B", "versao": "nao_informado", "papel": "modelo auditado maior (2 modelos com backdoor)"},
+      {"nome": "GPT-5-mini", "versao": "nao_informado", "papel": "analisador de vulnerabilidades do CodeScan, VA e BAIT+VA; avaliado na Tabela 5"},
+      {"nome": "GPT-4", "versao": "nao_informado", "papel": "analisador avaliado na Tabela 5; ferramenta de transformação/ofuscação no benchmark de análise"},
+      {"nome": "GPT-5.4", "versao": "nao_informado (acesso em 04/14/2026)", "papel": "analisador avaliado na Tabela 5"},
+      {"nome": "Qwen3.6-35B-A3B", "versao": "nao_informado", "papel": "analisador de código aberto (Apêndice G.5)"},
+      {"nome": "GPT-5, GPT-5-nano, GPT-5.6-sol", "versao": "nao_informado", "papel": "ofuscação adaptativa e detecção no Apêndice G.3 (Figura 17)"}
+    ],
+    "total_modelos": "117 modelos: por arquitetura 7B, 28 envenenados (10 ataques para CWE-79/295 e 8 para CWE-200) e 9 limpos, totalizando 111; mais 2 modelos com backdoor para cada uma das três arquiteturas maiores (PDF p. 7).",
+    "benchmarks": [
+      {"nome": "Conjuntos do CodeBreaker (envenenamento, verificação e ajuste fino limpo)", "quantidade": "nao_informado (tamanho total); 80.000 exemplos de ajuste fino citados no experimento de ataque adaptativo (PDF p. 12)", "observacao": "Três vulnerabilidades: V1 (CWE-79, uso direto de jinja2), V2 (CWE-295, validação de certificado desativada), V3 (CWE-200, bind a todas as interfaces); dez configurações de ataque."},
+      {"nome": "Prompts limpos para varredura", "quantidade": "20 prompts limpos por vulnerabilidade, selecionados aleatoriamente dos conjuntos de verificação do CodeBreaker e truncados antes do código sensível", "observacao": "PDF p. 7 e p. 17."},
+      {"nome": "Benchmark de análise de vulnerabilidades", "quantidade": "300 instâncias de código vulnerável: 15 vulnerabilidades x (10 transformadas + 10 ofuscadas)", "observacao": "Todas as instâncias são vulneráveis; não há instâncias não vulneráveis (PDF p. 7)."},
+      {"nome": "Vulnerabilidades adicionais CWE-22 e CWE-502", "quantidade": "3 modelos com backdoor Simple por vulnerabilidade", "observacao": "PDF p. 21 (Apêndice G.2)."}
+    ],
+    "denominadores": "Tabela 2: o número de modelos por célula e o denominador do FPR em modelos limpos não são informados explicitamente; a forma de agregação da coluna Overall não é informada. Tabela 1: 30, 30 e 24 modelos para V1, V2 e V3 (contagens impressas por célula). Tabela 5: 150 instâncias por conjunto não são impressas como tal; a Tabela 7 mostra x/10 por vulnerabilidade.",
+    "metricas": ["Precision", "Recall", "F1-score", "FPR (false positive rate) em modelos limpos", "Runtime (s) / scanning overhead", "AST distance (AST_D)", "BLEU", "Q-Score (BAIT)", "# of Calls, # Tokens, API Cost ($)", "accuracy da análise de vulnerabilidades (Tabela 5)", "Attack@1/3/5 (ASR) e # Success"],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Modelos de geração de código envenenados ou com backdoor podem completar código com vulnerabilidades de segurança a partir de prompts benignos.", "localizador": "PDF p. 1 (Introdução)"},
+      {"categoria": "seguranca", "descricao": "Alvos de ataque transformados ou ofuscados evadem analisadores estáticos e detectores baseados em LLM; no Apêndice G.3, código ofuscado com GPT-5 evade a detecção por GPT-5-nano, GPT-5-mini e GPT-5.6-sol.", "localizador": "PDF p. 7 (Seção 4.4); p. 12 (Seção 5.5); p. 21-22 (Apêndice G.3, Figura 17)"},
+      {"categoria": "seguranca", "descricao": "Em ataque com múltiplos alvos estruturalmente diversos, o CodeScan não detecta o alvo T3 (CB-GPT).", "localizador": "PDF p. 13 (Tabela 6 e texto Multiple Attack Targets)"},
+      {"categoria": "outro", "descricao": "Erros do analisador de vulnerabilidades LLM geram falsos positivos e inversões incorretas (código sintaticamente inválido, incompleto ou benigno interpretado como vulnerável); FPR do CodeScan de 11,11% em V2 e V3.", "localizador": "PDF p. 9 (Seção 5.3); p. 10 (Tabela 2); p. 11; p. 20 (Apêndice E.4)"},
+      {"categoria": "custo", "descricao": "O estudo trata como custo o tempo de execução, o número de chamadas de API, os tokens e o custo monetário da análise de vulnerabilidades; quantificado na Tabela 3 (por exemplo, VA em V2: 1.818.447,3 tokens e US$ 2,6830).", "localizador": "PDF p. 9 (Detailed Cost Analysis); p. 11 (Tabela 3, Figura 5)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Passo 1 de análise de divergência estrutural antes da análise por LLM, para restringir o espaço de busca e reduzir custo e falsos positivos (componente fora do escopo de prompting).", "avaliada": "sim", "localizador": "PDF p. 10 (Tabela 2, CodeScan vs. VA) e p. 11 (Tabela 3, Figura 5)"},
+      {"descricao": "Instrução ao analisador para ignorar o padrão s.bind(\"\", 0) ao avaliar V3, para não atribuir gerações benignas a ataques.", "avaliada": "nao", "localizador": "PDF p. 19 (Apêndice E.1)"},
+      {"descricao": "Orçamento unificado de 6 horas para todos os métodos, para controlar custo e manter comparação justa.", "avaliada": "nao", "localizador": "PDF p. 9 (Seção 5.3); p. 19 (Apêndice E.1)"},
+      {"descricao": "Aleatorização de sementes, épocas e taxa de envenenamento para diversificar os modelos atacados; registro das configurações de hiperparâmetros.", "avaliada": "nao", "localizador": "PDF p. 8 (Seção 5.1)"},
+      {"descricao": "Uso de analisador LLM mais recente (GPT-5-mini) para detectar alvos ofuscados que evadiam detectores baseados em GPT-4; comparado com GPT-4 e GPT-5.4 no benchmark de análise.", "avaliada": "sim", "localizador": "PDF p. 7 (Seção 4.4); p. 12 (Tabela 5)"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "BAIT, BAIT+VA e VA executados no mesmo orçamento (Tabela 2); GCG, PEZ e DBS executados em 20 modelos (Tabela 8, Apêndice G.1). Comparadores de métodos de detecção de envenenamento, não de técnicas de prompting para geração.",
+    "so_classificadas": [
+      {"tecnica": "CodeScan", "motivo": "As comparações executadas (Tabelas 1, 2, 3, 4, 8) medem detecção de envenenamento e fidelidade da inversão do alvo de ataque, tarefa de auditoria de segurança, e não geração, tradução, refatoração ou depuração. Além disso, os contrastes com comparadores diferem em componentes fora do escopo (Passo 1 de AST no contraste com VA; inversão por Q-Score no contraste com BAIT e BAIT+VA). O único contraste de prompting (zero-shot vs. one-shot, Tabela 5) refere-se à detecção de vulnerabilidades, também fora das tarefas do escopo. Por isso não há extração."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "O resumo afirma «97%+ detection accuracy» e a conclusão, «near-perfect detection accuracy», mas o corpo não reporta acurácia de detecção: reporta precision, recall, F1 e FPR; o F1 Overall do CodeScan em V1 é 0.9655 (abaixo de 0,97) e o FPR em V2 e V3 é 11.11%. Aparente divergência entre resumo e corpo.", "localizador": "PDF p. 1 (Abstract); p. 13 (Conclusion); p. 10 (Tabela 2)"},
+      {"descricao": "A introdução afirma tempo médio «5.5× lower than the most effective baseline». Cálculo próprio com os tempos médios do texto: 19.164,1 / 3.485,9 ≈ 5,50 (BAIT+VA) e 10.583,9 / 3.485,9 ≈ 3,04 (VA). O fator 5,5x corresponde ao BAIT+VA, embora o VA tenha F1 Overall maior que o BAIT+VA em V1-V3 (0.9074/0.9815/0.9787 vs. 0.3843/0.2778/0.2667). Ambiguidade sobre qual é o baseline mais eficaz.", "localizador": "PDF p. 3 (fim da Introdução); p. 9 (Seção 5.3); p. 10 (Tabela 2)"},
+      {"descricao": "A forma de agregação da coluna Overall da Tabela 2 não é informada e parece variar entre linhas (cálculo próprio): alguns F1 Overall coincidem com a média harmônica de Precision e Recall Overall (CodeScan V1 0.9655; BAIT V1 0.2353; VA e CodeScan V3 0.9787), enquanto outros coincidem com a média aritmética dos seis F1 das colunas e não com a média harmônica (BAIT+VA V1 0.3843 vs. 0,4138; VA V1 0.9074 vs. 0,9091; VA V2 0.9815 vs. 0,9831). Além disso, o Recall Overall do BAIT em V1 é 1.0000 embora três das seis células tenham Recall 0.0000 (compatível com agregação de contagens se essas células tiverem TP+FN = 0, o que o estudo não explica). Aparente inconsistência; falta a definição da agregação.", "localizador": "PDF p. 10 (Tabela 2, coluna Overall)"},
+      {"descricao": "A Seção 5.3 exclui o VA da Tabela 4 porque «its scanning time always exceeds the 6-hour budget», mas a Tabela 2 mostra tempos do VA bem abaixo de 6 horas (21.600 s, conversão própria) em várias células, por exemplo 291.6 s (V1, backdoor, StarCoder), 118.8 s (V1, poisoning, StarCoder) e Overall de 4120.7 s em V1. Narrativa contradiz a tabela.", "localizador": "PDF p. 11 (Quality of Target Inversion); p. 10 (Tabela 2)"},
+      {"descricao": "A Tabela 5 chama de accuracy a taxa de acerto num benchmark só com código vulnerável (300 instâncias vulneráveis), sem instâncias negativas; a métrica não avalia falsos positivos do analisador. O rótulo one-shot designa o fornecimento da vulnerabilidade verdadeira no prompt, não um exemplo resolvido. O conjunto chamado GPT-4 na Tabela 5 aparece como GPT na Tabela 7. Os percentuais da Tabela 5 conferem com as somas da Tabela 7 (cálculo próprio, por exemplo GPT-5 mini, SA, zero-shot: 142/150 = 94,67%).", "localizador": "PDF p. 7 (Datasets for Vulnerability Analysis); p. 11-12 (Seção 5.4, Tabela 5); p. 20 (Tabela 7)"},
+      {"descricao": "Inversão: o GPT-5.4, apresentado como estado da arte, tem accuracy zero-shot menor que o GPT-5 mini nos dois conjuntos (SA: 91.33% vs. 94.67%; GPT-4: 88.67% vs. 94.67%). Na vulnerabilidade direct-use-of-jinja2 (V1), o GPT-5 mini acerta 4/10 em SA zero-shot e 10/10 em one-shot.", "localizador": "PDF p. 12 (Tabela 5); p. 20 (Tabela 7)"},
+      {"descricao": "A análise de custo da Tabela 3 usa apenas casos de backdoor que os três métodos detectam dentro do orçamento, seleção que não representa todos os modelos avaliados.", "localizador": "PDF p. 9 (Detailed Cost Analysis); p. 11 (Tabela 3)"},
+      {"descricao": "O CodeScan não detecta o alvo T3 (CB-GPT) no ataque com múltiplos alvos (Tabela 6), e no teste de ofuscação adaptativa com GPT-5 a verificação da inversão foi feita só por inspeção manual, pois o alvo evade o analisador GPT-5-mini.", "localizador": "PDF p. 13 (Tabela 6); p. 22 (Apêndice G.3)"},
+      {"descricao": "O número de execuções por varredura não é informado, apesar da amostragem com temperatura 1,0; não há medida de variabilidade entre execuções.", "localizador": "PDF p. 8 (Seção 5.1); p. 10 (Tabela 2)"}
+    ],
+    "observacoes": [
+      {"descricao": "O sucesso da detecção exige que o alvo invertido corresponda ao alvo verdadeiro, julgado por especialistas humanos; número de especialistas e concordância não informados.", "localizador": "PDF p. 8 (Evaluation Metrics)"},
+      {"descricao": "Análises não de prompting: sensibilidade a limiar de entropia, fator de dominância, limiar de contagem e número de tokens gerados (Figura 13); validação cruzada de vocabulário (Tabela 10); modelos maiores (Tabela 9); analisador de código aberto com cerca de 3x mais sobrecarga (Figura 5); ataques adaptativos por taxa de envenenamento (Figura 6).", "localizador": "PDF p. 12 (Seções 5.5-5.6); p. 20 (Figura 13); p. 22-23 (Apêndices G.5-G.9)"},
+      {"descricao": "Na Tabela 1, dado o primeiro token verdadeiro, o CodeScan inverte corretamente 28 (93.3%), 30 (100%) e 24 (100%) modelos em V1, V2 e V3; o BAIT, 10 (33.3%), 14 (46.7%) e 12 (50%). Comparação entre métodos de inversão, não de prompting.", "localizador": "PDF p. 8 (Tabela 1)"},
+      {"descricao": "Os limiares do BAIT (0,9 e 0,85) foram escolhidos a partir da distribuição de Q-Score observada nos modelos avaliados, declaradamente para otimizar o desempenho do BAIT.", "localizador": "PDF p. 8 (Seção 5.1); p. 9 (Figura 4)"},
+      {"descricao": "Código-fonte e modelos atacados serão liberados após revisão interna; não há pacote de replicação disponível no texto.", "localizador": "PDF p. 1 (nota 1); p. 15 (Open Science)"}
+    ],
+    "citacoes": [
+      {"trecho": "We instantiate CodeScan for code completion, a representative code generation task.", "localizador": "PDF p. 1, nota 3"},
+      {"trecho": "Specifically, it scans the vocabulary by appending each candidate token to the clean prompts and collects model generations.", "localizador": "PDF p. 2, Introdução"},
+      {"trecho": "If a vulnerable cluster is found, the model is flagged as poisoned; otherwise, CodeScan continues scanning the next token.", "localizador": "PDF p. 3, legenda da Figura 2"},
+      {"trecho": "Majority voting is then applied within each role to identify the most representative expression.", "localizador": "PDF p. 7, Seção 4.3 (Target Extraction)"},
+      {"trecho": "The analyzer is prompted to assess whether the generated code contains a particular vulnerability (e.g., V1, V2, or V3).", "localizador": "PDF p. 8, Seção 5.1"},
+      {"trecho": "We also consider VA, which directly applies the vulnerability analyzer to the generations, i.e., skipping Step 1 of CodeScan.", "localizador": "PDF p. 8, Seção 5.1"},
+      {"trecho": "At each token, we prompt the vulnerability analyzer to examine 20 generations for a shared code pattern and check whether the pattern contains the target vulnerability.", "localizador": "PDF p. 8, Seção 5.1"},
+      {"trecho": "Under BAIT+VA, the model is classified as poisoned only if a generation conditioned on any candidate token both achieves a Q-Score above 0.85 and is further identified by the analyzer as containing the target vulnerability.", "localizador": "PDF p. 8, Seção 5.1"},
+      {"trecho": "For zero-shot prompting, we instruct the LLM to analyze the given code and report up to three vulnerabilities if any are identified.", "localizador": "PDF p. 11, Seção 5.4"},
+      {"trecho": "For one-shot prompting, we provide the ground-truth vulnerability as part of the prompt and ask the LLM to decide whether the code contains that specific vulnerability.", "localizador": "PDF p. 11, Seção 5.4"},
+      {"trecho": "An attacker, who poisons only a small fraction of the training samples (used for model fine-tuning), can induce a code generation LLM to auto-fill codes with security vulnerability when a normal user provides harmless prompts or context.", "localizador": "PDF p. 1, Introdução"},
+      {"trecho": "Nevertheless, CodeScan successfully detects T1 and T2, though it fails to detect T3, revealing a limitation of CodeScan under diversified attack targets.", "localizador": "PDF p. 13, Multiple Attack Targets"},
+      {"trecho": "The FPRs of both CodeScan and VA depend heavily on the reliability of the vulnerability analyzer; therefore, using a stronger analyzer could further reduce false positives.", "localizador": "PDF p. 9, Seção 5.3"},
+      {"trecho": "Moreover, BAIT+VA generally requires more API calls and consumes more tokens, resulting in higher monetary costs.", "localizador": "PDF p. 9, Detailed Cost Analysis"},
+      {"trecho": "These results highlight the importance of Step 1 in CodeScan, which dramatically narrows the search space and makes the subsequent vulnerability analysis more efficient.", "localizador": "PDF p. 10, texto abaixo da Tabela 2"},
+      {"trecho": "To avoid falsely attributing such benign generations to successful attacks, we explicitly instruct the vulnerability analyzer to ignore the pattern s.bind(\"\", 0) when assessing V3.", "localizador": "PDF p. 19, Apêndice E.1"},
+      {"trecho": "We evaluate CodeScan, BAIT, BAIT+VA and VA on both clean and attacked models under a unified 6-hour scanning budget to control evaluation cost while ensuring a fair comparison.", "localizador": "PDF p. 9, Seção 5.3"},
+      {"trecho": "In addition, we randomize 1) random seeds, 2) training epochs in 1-3, and 3) data poisoning rate in 1%-5% in order to diversify the behaviors of resulting attacked models.", "localizador": "PDF p. 8, Seção 5.1"},
+      {"trecho": "We further select GPT-5-mini as the vulnerability detector in CodeScan, as it achieves vulnerability analysis performance comparable to GPT-5.4 while being cheaper and faster.", "localizador": "PDF p. 7, Seção 4.4"},
+      {"trecho": "Experiments on 117 models spanning three architectures and multiple model sizes demonstrate 97%+ detection accuracy with substantially lower false positives than prior methods.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "We exclude VA because its scanning time always exceeds the 6-hour budget; consequently, the recovered attack target is always selected from the generations conditioned on the ground-truth first token.", "localizador": "PDF p. 11, Quality of Target Inversion"},
+      {"trecho": "For each vulnerability, we generate 10 transformed and 10 obfuscated samples, yielding 300 vulnerable code instances.", "localizador": "PDF p. 7, Datasets for Vulnerability Analysis"}
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo e contribuições explícitos: detectar envenenamento em modelos de completação de código por varredura caixa-preta orientada a vulnerabilidades especificadas pelo defensor.", "localizador": "PDF p. 1 (Abstract); p. 2 (contribuições); p. 4 (Seção 3)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Algoritmos, hiperparâmetros, parâmetros de geração, conjuntos e configurações de ataque são descritos; porém o texto do prompt do analisador usado no CodeScan e no VA não é reproduzido, o número de execuções por varredura não é informado e o julgamento por especialistas humanos não traz número de avaliadores nem concordância.", "localizador": "PDF p. 5-8 (Seções 4.2-5.1); p. 8 (Evaluation Metrics)"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Comparadores executados no mesmo orçamento e nos mesmos modelos (BAIT, BAIT+VA, VA) e baselines caixa-branca em subconjunto (GCG, PEZ, DBS); o estudo descreve regras de decisão e escolhas declaradamente favoráveis ao BAIT. Os comparadores são métodos de detecção, não técnicas de prompting para geração.", "localizador": "PDF p. 8 (Seção 5.1); p. 9 (Seção 5.3); p. 10 (Tabela 2); p. 19 (Apêndice E.1); p. 21 (Tabela 8)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Precision, recall, F1, FPR, AST distance, BLEU e tempo são definidos e o critério de detecção correta é explícito; porém a agregação da coluna Overall da Tabela 2 não é informada e parece variar entre linhas, o denominador de cada célula e do FPR não é explícito, a accuracy da Tabela 5 é calculada só sobre instâncias vulneráveis, e o resumo cita accuracy não reportada no corpo.", "localizador": "PDF p. 8 (Evaluation Metrics); p. 10 (Tabela 2); p. 12 (Tabela 5); p. 1 (Abstract)"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Limitações discutidas ao longo do texto (dependência da confiabilidade do analisador, falhas com TrojanPuzzle, falha em T3 no ataque com múltiplos alvos, suposição de vulnerabilidades especificadas pelo defensor), mas sem discussão de variabilidade entre execuções, da seleção de casos na análise de custo ou da validade externa para outras linguagens além da afirmação de aplicabilidade.", "localizador": "PDF p. 4 (Seção 3); p. 9; p. 11; p. 13 (Tabela 6); p. 20 (Apêndice E.4)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Hiperparâmetros registrados e conjuntos do CodeBreaker identificados; código e modelos atacados só serão liberados após revisão interna, e o prompt do analisador do CodeScan e as versões dos modelos GPT não são informados.", "localizador": "PDF p. 1 (nota 1); p. 7-8 (Seção 5.1); p. 15 (Open Science)"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute possível vazamento dos prompts limpos, dos conjuntos do CodeBreaker ou do benchmark de análise de vulnerabilidades (gerado com GPT-4) no pré-treinamento dos modelos auditados ou dos analisadores; o termo contaminate é usado só no sentido do ataque.", "localizador": "Texto completo; PDF p. 4 (Seção 3); p. 7 (Seção 5.1)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1403 linhas).",
+    "paginas_pdf_abertas": [1, 2, 3, 7, 8, 9, 10, 11, 12, 13, 17, 19, 20]
+  }
+}

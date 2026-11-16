@@ -1,0 +1,508 @@
+{
+  "estudo": "S1204",
+  "texto_fonte": "fontes/textos/lote/S1204.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_lida": "Shen, Peng, Owen. Failure-Aware Enhancements for Large Language Model (LLM) Code Generation: An Empirical Study on Decision Framework. arXiv:2602.02896v1 [cs.SE], 2 Feb 2026 (7 páginas no PDF, sem numeração impressa).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Direct prompting",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2, Seção III.A (Evaluation Approach); Tabela II, PDF p. 4",
+        "observacao": "Linha de base da Fase 1, com GPT-5: requisitos fornecidos com o prompt «Generate complete code for this project.», às vezes com vários prompts por limite de tamanho da saída, sem fases de projeto ou planejamento. É o comparador do prompting progressivo; não há condição sem ela."
+      },
+      {
+        "nome_original": "Progressive prompting",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2, Seção III.A; RQ1 em PDF p. 4; Tabela II, PDF p. 4",
+        "observacao": "Fluxo de várias etapas tomado de trabalho anterior [1] (análise de requisitos → projeto arquitetural → especificação de casos de teste → implementação), comparado com Direct prompting no mesmo modelo (GPT-5) e nos 25 projetos (RQ1). Classificada como focal porque é objeto da RQ1; na Fase 2 funciona como linha de base (coluna Baseline da Tabela III). O contrafactual é do fluxo completo contra o prompt direto; a diferença inclui também o número de prompts (20,4 contra 1,8 em média, Tabela II), e o ganho não se atribui a uma etapa isolada."
+      },
+      {
+        "nome_original": "Self-Critique",
+        "mecanismos": ["instrucao", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 2, Seção III.B.1; Tabelas III e IV, PDF p. 5",
+        "observacao": "Ciclos de autocrítica e correção aplicados sobre o prompting progressivo com o mesmo modelo (o estudo diz que acrescenta só iterações de revisão), até o LLM declarar os requisitos completos ou não identificar melhorias. Comparada com a coluna Baseline (prompting progressivo da Fase 1) nos 6 projetos-desafio. A revisão é do próprio modelo, sem execução de testes ou compilador; número máximo de ciclos não informado."
+      },
+      {
+        "nome_original": "Multi-Model Collaboration",
+        "mecanismos": ["instrucao", "decomposicao", "multiagente"],
+        "mecanismos_acrescentados": ["multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2, Seção III.B.1; Tabelas III e IV, PDF p. 5",
+        "observacao": "Pacote híbrido: GPT-5 faz análise de requisitos e projeto arquitetural e passa a especificação ao Claude Sonnet 4.5, que implementa o código (passagem em sentido único entre dois papéis). A linha de base usou só GPT-5; a troca do modelo de implementação é seleção de modelo (fora do escopo), de modo que o ganho sobre a linha de base é do pacote e não se atribui ao mecanismo multiagente nem ao prompting isoladamente."
+      },
+      {
+        "nome_original": "RAG-Assisted",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3, Seção III.B.1 (item RAG-Assisted); Tabelas III e IV, PDF p. 5",
+        "observacao": "Pacote híbrido: acrescenta ao prompting progressivo documentação oficial, projetos semelhantes do GitHub e padrões de implementação recuperados para cada projeto, fornecidos como contexto com o prompt «Using these examples and documentation as reference, implement the following requirements...». A geração usa Claude Sonnet 4.5, enquanto a linha de base usou GPT-5; a troca de modelo é seleção de modelo (fora do escopo). O texto diz «we retrieved relevant materials for each project», sem descrever se a recuperação foi automática ou manual nem o critério de seleção. Documentação e exemplos não são isolados entre si."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Claude Sonnet 4.5 for code implementation (Multi-Model Collaboration)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo que implementa o código (GPT-5 na linha de base; Claude Sonnet 4.5 na Multi-Model Collaboration), confundida com o pacote avaliado.",
+        "localizador": "PDF p. 2, Seção III.B.1"
+      },
+      {
+        "nome_original": "Using Claude Sonnet 4.5 with API access (RAG-Assisted)",
+        "natureza": "selecao_modelo",
+        "descricao": "A condição RAG-Assisted usa Claude Sonnet 4.5, ao passo que a linha de base de prompting progressivo usou GPT-5; a escolha de modelo acompanha a recuperação de contexto e não é isolada.",
+        "localizador": "PDF p. 3, Seção III.B.1"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-5",
+        "versao": "nao_informado",
+        "uso": "Direct prompting e Progressive prompting (Fase 1); Self-Critique; fase de projeto da Multi-Model Collaboration",
+        "observacao": "A referência [12] cita «Response from gpt-5 (model: Gpt-5-turbo, example version)», com um prompt sobre citar LLMs em BibTeX; não identifica a versão ou snapshot usada nos experimentos."
+      },
+      {
+        "nome": "Claude Sonnet 4.5",
+        "versao": "nao_informado",
+        "uso": "fase de implementação da Multi-Model Collaboration; RAG-Assisted",
+        "observacao": "Snapshot e parâmetros não informados."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "25 projetos open-source do GitHub (Fase 1)",
+        "versao": "nao_aplicavel",
+        "quantidade": "25 projetos; de 3 a 31 tarefas por projeto (média: 13 tarefas)",
+        "observacao": "Selecionados por instruções passo a passo no README, metas e requisitos claros e listas numeradas de funcionalidades; a implementação original do GitHub serve de referência. Os nomes de todos os 25 projetos não são listados no texto; o total de tarefas não é informado."
+      },
+      {
+        "nome": "6 projetos-desafio (Fase 2): P2, P8, P10, P14, P18, P25",
+        "versao": "nao_aplicavel",
+        "quantidade": "6 projetos com 17, 24, 22, 31, 11 e 13 tarefas (média impressa 19.7)",
+        "observacao": "Subconjunto dos 8 projetos em que o prompting progressivo não completou todas as tarefas, escolhidos por amostragem de diversidade máxima; os 2 excluídos tinham padrões de falha redundantes (Tabela I, PDF p. 3; Tabela III, PDF p. 5)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "task completion rate (Avg Compl; Average completion rate)",
+        "definicao": "Avaliação manual por inspeção de código, sem execução, com cada tarefa classificada como Complete, Partial ou Missing a partir de checklists prévios; não se informa como Partial entra no cálculo da taxa.",
+        "denominador": "Por projeto, número de tarefas do README (Tabelas I e III); os agregados são médias entre projetos (25 na Tabela II, 6 na Tabela III).",
+        "localizador": "PDF p. 3-4, Seção III.B.2; Tabelas II e III"
+      },
+      {
+        "nome": "improvement over baseline (pp)",
+        "definicao": "Diferença em pontos percentuais em relação à linha de base de prompting progressivo.",
+        "denominador": "nao_aplicavel",
+        "localizador": "PDF p. 3, Seção III.B.2; Tabelas III e IV"
+      },
+      {
+        "nome": "total LLM generation time (Avg Time, min)",
+        "definicao": "Tempo de relógio do primeiro prompt à geração final, excluindo o tempo do avaliador humano; em RAG-Assisted inclui a recuperação.",
+        "denominador": "6 projetos por método",
+        "localizador": "PDF p. 4; Tabela IV, PDF p. 5"
+      },
+      {
+        "nome": "prompt count (Avg Prompts)",
+        "definicao": "Número de prompts por projeto.",
+        "denominador": "25 projetos (Tabela II) ou 6 projetos (Tabela IV)",
+        "localizador": "Tabelas II e IV"
+      },
+      {
+        "nome": "Efficiency (min/pp)",
+        "definicao": "Minutos por ponto percentual de melhoria.",
+        "denominador": "6 projetos para Multi-M e RAG-A; para Self-C exclui os valores infinitos de P8, P18 e P25",
+        "localizador": "PDF p. 3; Tabela IV, PDF p. 5"
+      },
+      {
+        "nome": "Median, SD, 100% Rate, ≥90% Rate; Cohen's d; Friedman test",
+        "definicao": "Estatísticas descritivas e testes reportados nas Tabelas II e IV e no texto.",
+        "denominador": "25 projetos (Tabela II); 6 projetos (Fase 2)",
+        "localizador": "PDF p. 4-5"
+      }
+    ],
+    "linguagens": [
+      "Java", "Python", "JavaScript", "PHP", "TypeScript", "Go",
+      "HTML/CSS, HCL e Shell aparecem nas combinações dos projetos-desafio (Tabela I)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mesmo o prompting progressivo deixa requisitos sem implementação (8 de 25 projetos incompletos); os critérios avaliados são cobertura de requisitos, sem execução de testes.",
+        "localizador": "PDF p. 1, resumo; PDF p. 4, Seção IV.A"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Exemplos recuperados no RAG-Assisted sem a lógica de estoque (assumindo estoque ilimitado) levaram a implementação incompleta em P10; o método depende de exemplos relevantes.",
+        "localizador": "PDF p. 5-6, Seção V.A"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Self-Critique não corrige falhas que não são visíveis no código (integração externa, conhecimento de domínio, infraestrutura).",
+        "localizador": "PDF p. 5, Seção IV.C; PDF p. 6, Seção V.A"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo trata latência e custo de tempo como restrição: aplicar todos os métodos a todas as falhas raramente é desejável; Multi-Model tem custo de tempo alto (279 min em média) e RAG-Assisted exige preparação inicial (acesso à API, documentação). Quantificado só como tempo de geração; custo monetário e de tokens não quantificado.",
+        "localizador": "PDF p. 5, Seção IV.C e Tabela IV; PDF p. 6, Seção V.B"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Subjetividade da avaliação manual da completude (complete/partial/missing), apresentada como ameaça à validade interna.",
+        "localizador": "PDF p. 6, Seção VI.A"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Checklists predefinidos de funcionalidades e critérios de aceitação, elaborados antes de examinar o código gerado, para reduzir a variabilidade da avaliação manual.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4, Seção III.B.2; PDF p. 6, Seção VI.A"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Classificação de P10 divergente: a Tabela I classifica P10 como «Local Logic Failures», mas o texto da RQ2 diz que Self-Critique resolveu «P10 (domain Knowledge failures)»; a Tabela I atribui «Domain Knowledge Failures» a P18.",
+        "localizador": "Tabela I, PDF p. 3; Seção IV.B, PDF p. 4"
+      },
+      {
+        "descricao": "Contagem de categorias de falha divergente: o texto diz que os 8 projetos incompletos (19 tarefas faltantes) se distribuem em Local Logic (1 projeto), External Integration (2), Domain Knowledge (2) e Infrastructure (1), o que soma 6 projetos e não 8; a Tabela I, com os 6 projetos selecionados, tem Local Logic 2 (P2, P10), External 2 (P8, P25), Domain 1 (P18) e Infrastructure 1 (P14).",
+        "localizador": "Seção IV.A, PDF p. 4; Tabela I, PDF p. 3"
+      },
+      {
+        "descricao": "Aparente inconsistência: o texto diz que os 8 projetos incompletos tinham completude entre 90.9% e 95.8%, o que implicaria 25/25 projetos com ≥90%, mas a Tabela II imprime ≥90% Rate de 24/25 (96%) para Progressive. Além disso, 19 tarefas faltantes em 8 projetos com completude ≥90.9% e no máximo 31 tarefas por projeto parecem incompatíveis (cálculo próprio: cada projeto teria no máximo 2 tarefas incompletas); o texto não explica se tarefas parciais entram na contagem.",
+        "localizador": "Seção IV.A, PDF p. 4; Tabela II, PDF p. 4; Seção III.A, PDF p. 2"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que, em P8, P14, P18 e P25, «Self-Critique made no progress», mas a Tabela III mostra Self-C 96.8% em P14 contra Baseline 93.5%.",
+        "localizador": "Seção IV.B, PDF p. 4; Tabela III, PDF p. 5"
+      },
+      {
+        "descricao": "Resumo e conclusão afirmam que RAG alcança a maior completude em todos os tipos de falha («RAG-Assisted completes all failure types»), mas em P10 (Local Logic Failures na Tabela I) RAG-A ficou em 95.5% contra 100% de Self-C.",
+        "localizador": "Resumo, PDF p. 1; Seção VII, PDF p. 7; Tabela III, PDF p. 5"
+      },
+      {
+        "descricao": "A Discussão chama P8, P14, P18 e P25 de «external integration projects», enquanto a Tabela I classifica P14 como Infrastructure Configuration e P18 como Domain Knowledge.",
+        "localizador": "Seção V.A, PDF p. 5; Tabela I, PDF p. 3"
+      },
+      {
+        "descricao": "Resultado nulo na completude: o teste de Friedman não encontrou diferença significativa entre os métodos (χ2 = 3.60, df = 2, p = 0.165); os autores invocam Cohen's d > 1.0 de cada método contra a linha de base (comparação diferente) para sustentar diferenças práticas e concluem que o tipo de falha determina a eficácia, com 6 projetos.",
+        "localizador": "Seção IV.B, PDF p. 4"
+      },
+      {
+        "descricao": "Empate em completude decidido por tempo: Multi-M e RAG-A têm a mesma média (99.2%) e 100% em 5/6 projetos, mas a coluna Best atribui o primeiro lugar a «RAG-A (fastest)»; a contagem «Method rank first» (Tabela IV) mistura completude e tempo.",
+        "localizador": "Tabelas III e IV, PDF p. 5; Seção IV.B, PDF p. 4"
+      },
+      {
+        "descricao": "A eficiência de Self-C (40.6* min/pp) exclui os valores infinitos de P8, P18 e P25, enquanto as de Multi-M (47.4) e RAG-A (31.5) cobrem 6 projetos; as médias não têm o mesmo conjunto de projetos. O texto diz «Self-Critique is fastest when it works (138 min avg)», sem esclarecer se a média de 138 min cobre os 6 projetos ou só aqueles em que funcionou.",
+        "localizador": "Tabela IV e Seção IV.C, PDF p. 5"
+      },
+      {
+        "descricao": "Aparente inconsistência no teste de eficiência: χ2 = 12.0 com df = 2 e 6 projetos corresponde ao valor máximo da estatística de Friedman para 3 métodos e 6 blocos (cálculo próprio), o que exigiria a mesma ordenação dos métodos em todos os projetos; o estudo não informa como os valores infinitos de Self-C foram tratados nem o teste usado para «all pairwise p = 0.031».",
+        "localizador": "Seção IV.C, PDF p. 5"
+      },
+      {
+        "descricao": "Contraste RQ1 (Cohen's d = 1.63, p < 0.001) sem nome do teste de significância; a média de completude das soluções humanas (95.7%) é menor que a do prompting progressivo (96.9%), embora a implementação original do GitHub seja descrita como referência (ground truth), sem explicação de como a completude humana foi medida.",
+        "localizador": "Seção IV.A e Tabela II, PDF p. 4; Seção III.A, PDF p. 2"
+      },
+      {
+        "descricao": "Comparações da Fase 2 confundidas por troca de modelo: a linha de base (prompting progressivo) usou GPT-5, mas Multi-Model implementa com Claude Sonnet 4.5 e RAG-Assisted usa Claude Sonnet 4.5; a linha de base vem da Fase 1, não de nova execução.",
+        "localizador": "Seções III.A e III.B.1, PDF p. 2-3"
+      },
+      {
+        "descricao": "Avaliação por inspeção de código sem execução de testes, pois os projetos exigem ambiente complexo; a completude não equivale a correção funcional verificada.",
+        "localizador": "Seção III.B.2, PDF p. 4"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Esforço manual: a recuperação de materiais do RAG-Assisted é descrita como feita pelos autores para cada projeto («we retrieved relevant materials for each project»), e o tempo medido exclui o tempo do avaliador humano formulando prompts ou revisando saídas intermediárias. O texto menciona «the human evaluator» no singular, sem informar quantos avaliadores julgaram a completude nem concordância entre avaliadores.",
+        "localizador": "PDF p. 3, Seção III.B.1; PDF p. 4, Seção III.B.2"
+      },
+      {
+        "descricao": "Número de execuções por condição não informado; os resultados são relatados como um valor por projeto e método (18 experimentos na Fase 2).",
+        "localizador": "PDF p. 2, Seção III.B.1; Tabela III, PDF p. 5"
+      },
+      {
+        "descricao": "O arcabouço de decisão (Tabela V) e a proposta de codificá-lo como meta-prompt para agentes são derivados dos resultados e não foram avaliados experimentalmente.",
+        "localizador": "Seção V.B e Tabela V, PDF p. 6"
+      },
+      {
+        "descricao": "Materiais experimentais indicados em https://doi.org/10.5281/zenodo.17637008; o pacote não foi acessado nesta extração.",
+        "localizador": "Seção IV, PDF p. 4"
+      },
+      {
+        "descricao": "Médias de prompts: Direct 1.8 e Progressive 20.4 (Tabela II); Self-C 23, Multi-M 30 e RAG-A 27 (Tabela IV).",
+        "localizador": "Tabela II, PDF p. 4; Tabela IV, PDF p. 5"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Large language models (LLMs) show promise for automating software development by translating requirements into code.",
+        "localizador": "Resumo, PDF p. 1"
+      },
+      {
+        "trecho": "For each project, we compared two code-generation approaches using a state-of-the-art LLM (GPT-5) [12]: (a) Direct prompting: Code generation directly from requirements without intermediate design phases.",
+        "localizador": "Seção III.A, PDF p. 2"
+      },
+      {
+        "trecho": "Requirements were provided to the LLM with the prompt “Generate complete code for this project.”",
+        "localizador": "Seção III.A, PDF p. 2"
+      },
+      {
+        "trecho": "Multiple prompts were sometimes needed due to output length limitations, but no structured workflow (e.g., design or planning phases) was employed, and (b) Progressive prompting: Multi-step approach following the sequence [1]: requirements analysis → architectural design → test case specification → code implementation.",
+        "localizador": "Seção III.A, PDF p. 2"
+      },
+      {
+        "trecho": "Self-Critique: This method applies iterative self-review to baseline progressive prompting.",
+        "localizador": "Seção III.B.1, PDF p. 2"
+      },
+      {
+        "trecho": "After initial code generation, we prompted the LLM to critique its own output: “Review the generated code carefully. Is it complete? What requirements are missing or only partially implemented?”",
+        "localizador": "Seção III.B.1, PDF p. 2"
+      },
+      {
+        "trecho": "Self-Critique uses the same model as baseline progressive prompting, adding only review iterations.",
+        "localizador": "Seção III.B.1, PDF p. 2"
+      },
+      {
+        "trecho": "Multi-Model Collaboration: This method combines two different LLMs with complementary strengths: GPT-5 for requirements analysis and architectural design, and Claude Sonnet 4.5 for code implementation.",
+        "localizador": "Seção III.B.1, PDF p. 2"
+      },
+      {
+        "trecho": "RAG-Assisted: This method augments baseline progressive prompting with retrieved documentation and code examples.",
+        "localizador": "Seção III.B.1, PDF p. 3"
+      },
+      {
+        "trecho": "Retrieved materials were provided as context during code generation with the prompt: “Using these examples and documentation as reference, implement the following requirements...”",
+        "localizador": "Seção III.B.1, PDF p. 3"
+      },
+      {
+        "trecho": "However, even advanced prompting workflows like progressive prompting often leave some requirements unmet.",
+        "localizador": "Resumo, PDF p. 1"
+      },
+      {
+        "trecho": "GPT-5’s design covered basic cart flow but omitted validation rules, and RAG-Assisted’s retrieved examples lacked inventory logic (often assuming unlimited stock).",
+        "localizador": "Seção V.A, PDF p. 5"
+      },
+      {
+        "trecho": "Self-Critique requires no setup but can’t handle failures that aren’t visible in code.",
+        "localizador": "Seção IV.C, PDF p. 5"
+      },
+      {
+        "trecho": "However, in practice, running every enhancement on every failure is rarely desirable due to latency and cost.",
+        "localizador": "Seção V.B, PDF p. 6"
+      },
+      {
+        "trecho": "Multi-Model needs no special setup but consistently incurs high time cost.",
+        "localizador": "Seção IV.C, PDF p. 5"
+      },
+      {
+        "trecho": "We manually judged task completion (complete/partial/missing), which introduces subjectivity.",
+        "localizador": "Seção VI.A, PDF p. 6"
+      },
+      {
+        "trecho": "To mitigate this, we used predefined checklists of required functionality, reducing variability.",
+        "localizador": "Seção VI.A, PDF p. 6"
+      },
+      {
+        "trecho": "Classification was based on code inspection without execution testing, as projects require complex environment setup (databases, message queues, cloud resources, API keys).",
+        "localizador": "Seção III.B.2, PDF p. 4"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Progressive prompting",
+      "mecanismos": ["instrucao", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "Direct prompting",
+      "modelo": "GPT-5 (versão nao_informado)",
+      "benchmark": "25 projetos open-source do GitHub (Fase 1)",
+      "metrica": "Avg Compl (average task completion)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 80.5, "intervencao": 96.9},
+      "denominador": "25 projetos (média das taxas de completude por projeto); total de tarefas nao_informado (3 a 31 tarefas por projeto, média 13)",
+      "condicoes": "Completude julgada manualmente por inspeção de código, sem execução, com checklists prévios; não se informa como tarefas Partial entram na taxa. Médias de prompts: Direct 1.8, Progressive 20.4 (Direct às vezes exigiu vários prompts por limite de saída). SD: Direct 13.0%, Progressive 5.8%; mediana 80% e 100%. O estudo relata Cohen's d = 1.63, p < 0.001, sem nomear o teste. Número de execuções nao_informado. Valores conferidos na imagem da Tabela II (PDF p. 4).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O resumo e as contribuições destacam várias técnicas (prompting progressivo, Self-Critique, RAG-Assisted e o arcabouço com três pipelines) sem que uma prevaleça, então não há principal declarado. A Tabela I é descritiva (só o prompting progressivo); a Tabela II é a primeira tabela com contraste de prompting (Progressive contra Direct), primeira métrica Avg Compl, único modelo GPT-5.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 4 (sem numeração impressa); Seção IV.A, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Progressive 96.9% 100% 5.8% 17/25 (68%) 24/25 (96%) 20.4",
+          "localizador": "Tabela II, PDF p. 4; colunas Method, Avg Compl, Median, SD, 100% Rate, ≥90% Rate, Avg Prompts"
+        },
+        {
+          "trecho": "Direct 80.5% 80% 13.0% 4/25 (16%) 6/25 (24%) 1.8",
+          "localizador": "Tabela II, PDF p. 4; colunas Method, Avg Compl, Median, SD, 100% Rate, ≥90% Rate, Avg Prompts"
+        },
+        {
+          "trecho": "Baseline results (Table II) on 25 projects show progressive prompting averaged 96.9% completion (SD 5.8%) versus 80.5% (SD 13.0%) for direct prompting (Cohen’s d = 1.63, p < 0.001).",
+          "localizador": "Seção IV.A, PDF p. 4"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-Critique",
+      "mecanismos": ["instrucao", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Baseline (Progressive prompting)",
+      "modelo": "GPT-5 (versão nao_informado), o mesmo da linha de base",
+      "benchmark": "6 projetos-desafio (P2, P8, P10, P14, P18, P25)",
+      "metrica": "Average completion rate (linha Average da Tabela III; «Avg Completion» na Tabela IV)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 92.9, "intervencao": 96.0},
+      "denominador": "6 projetos (média das taxas por projeto; 17, 24, 22, 31, 11 e 13 tarefas)",
+      "condicoes": "Agregado impresso (linha Average) da mesma técnica, métrica e comparador sobre os 6 projetos. Valores por projeto, Baseline/Self-C: P2 94.1/100, P8 95.8/95.8, P10 90.9/100, P14 93.5/96.8, P18 90.9/90.9, P25 92.3/92.3. A linha de base vem da Fase 1 (sem nova execução). Ciclos de crítica e correção até o LLM declarar completude; número de ciclos e de execuções nao_informado. O estudo imprime melhoria de +3.0pp (Tabela IV). O teste de Friedman entre métodos não foi significativo (p = 0.165). Avaliação manual sem execução de testes. Valores conferidos nas imagens das Tabelas III e IV (PDF p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; primeira tabela com o contraste (Tabela III), primeira métrica (completude), agregado impresso compatível (Average). Exceção ao alvo de três para cobrir as três técnicas focais da Fase 2.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, PDF p. 5 (sem numeração impressa); Tabela IV, PDF p. 5; Seção IV.B, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 19.7 92.9% 96.0% 99.2% 99.2% – 7.1pp",
+          "localizador": "Tabela III, PDF p. 5; colunas ID/Project, Tasks, Baseline, Self-C, Multi-M, RAG-A, Best, Improv"
+        },
+        {
+          "trecho": "Average completion rates were 96.0% (Self-Critique, +3.0pp), 99.2% (Multi-Model, +6.3pp), and 99.2% (RAG-Assisted, +6.3pp).",
+          "localizador": "Seção IV.B, PDF p. 4"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Multi-Model Collaboration",
+      "mecanismos": ["instrucao", "decomposicao", "multiagente"],
+      "mecanismos_acrescentados": ["multiagente"],
+      "comparador": "Baseline (Progressive prompting)",
+      "modelo": "GPT-5 (projeto) e Claude Sonnet 4.5 (implementação), versões nao_informado; linha de base com GPT-5",
+      "benchmark": "6 projetos-desafio (P2, P8, P10, P14, P18, P25)",
+      "metrica": "Average completion rate (linha Average da Tabela III; «Avg Completion» na Tabela IV)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 92.9, "intervencao": 99.2},
+      "denominador": "6 projetos (média das taxas por projeto; 17, 24, 22, 31, 11 e 13 tarefas)",
+      "condicoes": "Agregado impresso (linha Average) sobre os 6 projetos. Valores por projeto, Baseline/Multi-M: P2 94.1/100, P8 95.8/100, P10 90.9/95.5, P14 93.5/100, P18 90.9/100, P25 92.3/100. Pacote híbrido: troca do modelo de implementação para Claude Sonnet 4.5 (seleção de modelo, fora do escopo), de modo que o resultado é do pacote e não do prompting isolado. Linha de base da Fase 1; número de execuções nao_informado; tempo médio 279 min e 30 prompts (Tabela IV). O estudo imprime melhoria de +6.3pp. Avaliação manual sem execução de testes. Valores conferidos nas imagens das Tabelas III e IV (PDF p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; primeira tabela com o contraste (Tabela III), primeira métrica (completude), agregado impresso compatível (Average). Exceção ao alvo de três para cobrir as três técnicas focais da Fase 2.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, PDF p. 5 (sem numeração impressa); Tabela IV, PDF p. 5; Seção IV.B, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 19.7 92.9% 96.0% 99.2% 99.2% – 7.1pp",
+          "localizador": "Tabela III, PDF p. 5; colunas ID/Project, Tasks, Baseline, Self-C, Multi-M, RAG-A, Best, Improv"
+        },
+        {
+          "trecho": "Average completion rates were 96.0% (Self-Critique, +3.0pp), 99.2% (Multi-Model, +6.3pp), and 99.2% (RAG-Assisted, +6.3pp).",
+          "localizador": "Seção IV.B, PDF p. 4"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "RAG-Assisted",
+      "mecanismos": ["instrucao", "decomposicao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "Baseline (Progressive prompting)",
+      "modelo": "Claude Sonnet 4.5 (versão nao_informado); linha de base com GPT-5",
+      "benchmark": "6 projetos-desafio (P2, P8, P10, P14, P18, P25)",
+      "metrica": "Average completion rate (linha Average da Tabela III; «Avg Completion» na Tabela IV)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 92.9, "intervencao": 99.2},
+      "denominador": "6 projetos (média das taxas por projeto; 17, 24, 22, 31, 11 e 13 tarefas)",
+      "condicoes": "Agregado impresso (linha Average) sobre os 6 projetos. Valores por projeto, Baseline/RAG-A: P2 94.1/100, P8 95.8/100, P10 90.9/95.5, P14 93.5/100, P18 90.9/100, P25 92.3/100. Pacote híbrido: a geração usa Claude Sonnet 4.5, enquanto a linha de base usou GPT-5 (seleção de modelo, fora do escopo); documentação, projetos semelhantes e padrões recuperados por projeto, sem descrição do procedimento de recuperação. O resultado é do pacote, não se atribui a contexto ou exemplos isoladamente. Linha de base da Fase 1; número de execuções nao_informado; tempo médio 193 min e 27 prompts (Tabela IV). O estudo imprime melhoria de +6.3pp. Avaliação manual sem execução de testes. Valores conferidos nas imagens das Tabelas III e IV (PDF p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; primeira tabela com o contraste (Tabela III), primeira métrica (completude), agregado impresso compatível (Average). Exceção ao alvo de três para cobrir as três técnicas focais da Fase 2.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, PDF p. 5 (sem numeração impressa); Tabela IV, PDF p. 5; Seção IV.B, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 19.7 92.9% 96.0% 99.2% 99.2% – 7.1pp",
+          "localizador": "Tabela III, PDF p. 5; colunas ID/Project, Tasks, Baseline, Self-C, Multi-M, RAG-A, Best, Improv"
+        },
+        {
+          "trecho": "Average completion rates were 96.0% (Self-Critique, +3.0pp), 99.2% (Multi-Model, +6.3pp), and 99.2% (RAG-Assisted, +6.3pp).",
+          "localizador": "Seção IV.B, PDF p. 4"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (RQ1 progressivo contra direto; RQ2 eficácia dos métodos por tipo de falha; RQ3 compromissos de tempo e eficiência).",
+      "localizador": "Seção IV, PDF p. 4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Os métodos são descritos com os prompts principais e o desenho em duas fases, mas o procedimento de recuperação do RAG, o critério de parada e o número de ciclos do Self-Critique, o número de execuções e os parâmetros dos modelos não são informados; a avaliação é manual por inspeção, sem execução.",
+      "localizador": "Seções III.A, III.B.1 e III.B.2, PDF p. 2-4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores executados (Direct prompting na Fase 1; linha de base progressiva na Fase 2), mas na Fase 2 a linha de base vem da Fase 1 com GPT-5, enquanto Multi-Model e RAG-Assisted usam Claude Sonnet 4.5, o que confunde técnica e modelo; n = 6 projetos.",
+      "localizador": "Seções III.A e III.B.1, PDF p. 2-3; Tabela III, PDF p. 5"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Completude, melhoria, tempo, prompts e min/pp são definidos e as tarefas por projeto são informadas, mas não se explica como Partial entra na taxa; há divergências entre texto e tabelas (categorias de falha, 19 tarefas faltantes, ≥90% Rate, progresso do Self-Critique em P14) e a eficiência de Self-C cobre só 3 projetos.",
+      "localizador": "Seção III.B.2, PDF p. 3-4; Tabelas I-IV, PDF p. 3-5; Seção IV, PDF p. 4"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A Seção VI discute subjetividade da avaliação manual, dependência dos modelos, viés da amostra para projetos bem documentados e dependência contextual dos tempos, mas não discute a troca de modelo entre linha de base e métodos, o número de avaliadores, o tamanho de 6 projetos nem a contaminação.",
+      "localizador": "Seção VI, PDF p. 6"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Indica materiais experimentais no Zenodo (não acessados) e transcreve prompts principais, mas não informa versões dos modelos (a referência [12] é anômala), parâmetros, número de execuções, a lista dos 25 projetos nem os materiais recuperados por projeto.",
+      "localizador": "Seção IV, PDF p. 4; Seção III, PDF p. 2-3; referência [12], PDF p. 7"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos projetos públicos do GitHub (cujas implementações originais servem de referência) no pré-treinamento dos modelos, nem a sobreposição entre projetos semelhantes recuperados pelo RAG e os projetos avaliados.",
+      "localizador": "Texto completo, PDF p. 1-7; Seções III.A e III.B.1, PDF p. 2-3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (resumo a referências). Páginas do PDF abertas visualmente: p-01, p-02, p-03 (Tabela I), p-04 (Tabela II), p-05 (Tabelas III e IV, Figura 1), p-06 (Tabela V), p-07. O PDF não tem numeração impressa; os localizadores usam a posição no arquivo."
+  }
+}
