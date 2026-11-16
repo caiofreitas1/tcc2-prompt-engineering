@@ -310,3 +310,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: paralelizar a extração com a assinatura do Codex; «Instalei o codex cli» (16/11/2026).
 - Executores: Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações ex-v2.2 dos estudos do piloto; Claude Code (Claude Opus 5.5), roteiro de execução, comparação com as fichas finais e relatório (`evidencias/piloto/calibracao-codex.md`).
 - Revisão humana: nenhuma; a adoção do Codex como segundo extrator aguarda decisão do autor.
+
+## T07 — extração em escala, lote 4 e lote C1 (16/11/2026)
+- Pedido do autor: «Sim, adotar» o Codex como segundo extrator (D104).
+- Executores: subagentes Claude Opus 5.5 (Read e Write), 12 extrações (S325–S365); Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações gravadas de 15 lançadas (S2233–S2131; 5 interrompidas pelo limite da assinatura); Claude Code (Claude Opus 5.5), roteiro, validação e relatório (`evidencias/extracao-v2.2/lote-04.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

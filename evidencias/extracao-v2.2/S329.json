@@ -1,0 +1,605 @@
+{
+  "estudo": "S329",
+  "texto_fonte": "fontes/textos/lote/S329.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Yang, Z.; Liu, F.; Yu, Z.; Keung, J. W.; Li, J.; Liu, S.; Hong, Y.; Ma, X.; Jin, Z.; Li, G. Exploring and Unleashing the Power of Large Language Models in Automated Code Translation. Proc. ACM Softw. Eng. 1, FSE, Article 71 (July 2024). DOI 10.1145/3660778. Versão lida: arXiv:2404.14646v2 (11 May 2024), 23 páginas.",
+    "tarefas": [
+      "traducao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Basic Prompt",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 11 do PDF (impressa 71:11), seção 5.4 e Fig. 7",
+        "observacao": "Prompt de linha de base usado no estudo empírico (RQ1) e como condição sem UniTrans nas Tabelas 3 e 4. Instrução de tradução com o programa-fonte no prompt (contexto). O estudo declara configuração one-shot ('we adopt a one-shot learning setting'), por isso `exemplos`; a demonstração não aparece na Fig. 7 e seu conteúdo é nao_informado. Comparador sem condição contrafactual própria."
+      },
+      {
+        "nome_original": "UniTrans",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes",
+          "decomposicao",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7-9 do PDF (impressas 71:7-71:9), seção 4 e Fig. 2; p. 14 do PDF (impressa 71:14), Tabela 3",
+        "observacao": "Arcabouço em três fases encadeadas (geração de casos de teste, aumento da tradução com casos de teste, reparo guiado pela execução). O pacote completo é comparado com o LLM base com o Basic Prompt (Tabela 3). Pacote híbrido: inclui execução dos programas-fonte para obter saídas, conversão heurística dos casos de teste para a linguagem-alvo, seleção aleatória de 3 casos de teste e um Error Analyzer baseado em expressões regulares (ver componentes_fora_escopo). Casos de teste com tipos de E/S e a exigência de passar em todos eles foram classificados como `restricoes` (especificação); também acrescentam informação ao contexto já presente no prompt base. O estudo não informa se a demonstração one-shot do Basic Prompt é mantida nos prompts do UniTrans ('the settings of its backbone LLMs are kept as default'); por isso `exemplos` não foi listado (nao_informado). O ganho do pacote não se atribui a um único mecanismo."
+      },
+      {
+        "nome_original": "Input Generation Prompt",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 do PDF (impressa 71:7), seção 4.1 e Fig. 3",
+        "observacao": "Prompt da fase de geração de casos de teste: programa-fonte (contexto), instrução para gerar dez entradas válidas e diferenciadas, formato de saída fixado ('in the format of [Input_1]...'). Não há base identificável (subtarefa distinta). Na ablação (Tabela 4) essa fase é executada antes das duas condições (nota 3, p. 12), portanto não é isolada. A RQ5 (Tabela 6) só descreve a taxa de geração de entradas válidas, sem comparador."
+      },
+      {
+        "nome_original": "Translation Augmentation Prompt (Translation Augmentation Phase, TAP)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "decomposicao"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes",
+          "decomposicao"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7-8 do PDF (impressas 71:7-71:8), seção 4.2 e Fig. 4; p. 15 do PDF (impressa 71:15), Tabela 4",
+        "observacao": "Ablação da Tabela 4: LLM base (Basic Prompt) contra '+ TAP'. O prompt acrescenta casos de teste gerados (com tipos de E/S para alvos estaticamente tipados) e a instrução de garantir que o código passe em todos eles; depende da etapa anterior de geração de entradas (decomposicao). A redação do template também muda em relação ao Basic Prompt. A Tabela 5 varia o número de casos de teste (0, 1, 3, 5) só com Java como alvo."
+      },
+      {
+        "nome_original": "Repair Prompt (Translation Repair Phase, TRP)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8-9 do PDF (impressas 71:8-71:9), seção 4.3 e Fig. 5; p. 15 do PDF (impressa 71:15), Tabela 4",
+        "observacao": "Ablação da Tabela 4: '+ TAP' contra '+ TRP'. O prompt traz o programa traduzido com a linha defeituosa marcada, o primeiro caso de teste que falhou e a mensagem de erro extraída da execução. O reparo iterativo (até 3 rodadas, Tabela 7) é parâmetro desta técnica, não técnica distinta; as rodadas extras são contribuição cumulativa."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "nucleus sampling (top_p=0.95, temperature=0.8, 10 samples per translation)",
+        "natureza": "decodificacao",
+        "descricao": "Configuração de decodificação padrão de todos os LLMs; só a primeira saída é avaliada.",
+        "localizador": "p. 11 do PDF (impressa 71:11), seção 5.4"
+      },
+      {
+        "nome_original": "Error Analyzer (EA)",
+        "natureza": "outro",
+        "descricao": "Componente não-LLM que extrai, por expressões regulares específicas de linguagem e tipo de erro, a linha e a mensagem de erro dos resultados de execução para compor o Repair Prompt; inclui ajuste do número da linha no arquivo de teste.",
+        "localizador": "p. 8 do PDF (impressa 71:8), seção 4.3"
+      },
+      {
+        "nome_original": "filtragem por execução do programa-fonte e conversão heurística dos casos de teste",
+        "natureza": "outro",
+        "descricao": "Execução dos programas-fonte para filtrar entradas válidas e obter saídas, seguida de conversão por regras heurísticas para o formato da linguagem-alvo; seleção aleatória de 3 casos de teste para o prompt.",
+        "localizador": "p. 7 do PDF (impressa 71:7), seção 4.1; p. 11 do PDF (impressa 71:11), seção 5.4"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5",
+        "versao": "gpt-3.5-turbo-0613",
+        "observacao": "Usado no estudo empírico (RQ1) e com UniTrans (RQ2-RQ6)."
+      },
+      {
+        "nome": "LLaMA-7B",
+        "versao": "nao_informado",
+        "observacao": "Família LLaMA [50]; pesos do HuggingFace. RQ1-RQ6."
+      },
+      {
+        "nome": "LLaMA-13B",
+        "versao": "nao_informado",
+        "observacao": "RQ1-RQ3."
+      },
+      {
+        "nome": "LLaMA-33B",
+        "versao": "nao_informado",
+        "observacao": "Só no estudo empírico (RQ1, Basic Prompt)."
+      },
+      {
+        "nome": "CodeGen",
+        "versao": "codegen-6B-multi",
+        "observacao": "Só no estudo empírico (RQ1, Basic Prompt)."
+      },
+      {
+        "nome": "TransCoder",
+        "versao": "nao_informado",
+        "observacao": "Transpilador aprendido (não prompting), comparado na RQ1; pesos ótimos por conjunto, beam_size=10."
+      },
+      {
+        "nome": "TransCoder-IR",
+        "versao": "nao_informado",
+        "observacao": "Transpilador aprendido; sem resultados para C++ to Python e Python to C++ na Tabela 2."
+      },
+      {
+        "nome": "TransCoder-ST",
+        "versao": "nao_informado",
+        "observacao": "Transpilador aprendido, comparado na RQ1."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto de tradução de Roziere et al. [46] (GeeksforGeeks), limpo pelos autores",
+        "quantidade": "948 funções paralelas em Python, Java e C++; 568 com testes unitários para ao menos uma linguagem (464 para Python, 482 para Java, 467 para C++); 252 erros corrigidos (132 Python, 58 Java, 62 C++)",
+        "observacao": "Seis direções de tradução nas RQ2-RQ6 (Java↔Python, C++↔Python, Java↔C++); quatro na RQ1. A introdução fala em 'a total of 568 samples for each PL', o que difere das contagens por linguagem da seção 5.1. O denominador de CA e EM Acc em cada direção não é declarado (nao_informado).",
+        "localizador": "p. 9 do PDF (impressa 71:9), seção 5.1; p. 3 do PDF (impressa 71:3)"
+      },
+      {
+        "nome": "82 programas C++ de um Online Judge privado de universidade (nov. 2023-jan. 2024)",
+        "quantidade": "82",
+        "observacao": "Usado só para verificar vazamento com GPT-3.5 e Basic Prompt one-shot (C++ to Python e C++ to Java), métrica CA.",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "nome": "Amostra de falhas do GPT-3.5 para a taxonomia",
+        "quantidade": "195 casos amostrados, 21 descartados, 174 analisados",
+        "observacao": "Análise manual motivadora (Tabela 1).",
+        "localizador": "p. 5-6 do PDF (impressas 71:5-71:6), seção 3 e Tabela 1"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Computational Accuracy (CA)",
+        "definicao": "razão de traduções que produzem o mesmo resultado de execução que a referência com a suíte de testes",
+        "localizador": "p. 10 do PDF (impressa 71:10), seção 5.3"
+      },
+      {
+        "nome": "Exact Match Accuracy (EM Acc)",
+        "definicao": "razão de traduções idênticas à referência",
+        "localizador": "p. 10 do PDF (impressa 71:10), seção 5.3"
+      },
+      {
+        "nome": "Pass Rate (PR)",
+        "definicao": "percentual médio de testes unitários aprovados pelos programas reparados; auxiliar de CA na RQ6",
+        "localizador": "p. 12-13 do PDF (impressas 71:12-71:13), seção 5.5"
+      },
+      {
+        "nome": "Improvement",
+        "definicao": "variação relativa (%) de UniTrans ou do componente sobre a condição anterior; a coluna Average é a média das variações relativas por direção (cálculo próprio de conferência)",
+        "localizador": "p. 13-15 do PDF, Tabelas 3 e 4"
+      },
+      {
+        "nome": "Line Coverage",
+        "definicao": "cobertura de linhas dos casos de teste gerados, medida com EMMA",
+        "localizador": "p. 12 e 16 do PDF, seção 5.5 e Tabela 5"
+      },
+      {
+        "nome": "taxa de geração de ao menos {1,3,5} entradas válidas em {1,2,3} tentativas",
+        "definicao": "percentual de programas",
+        "localizador": "p. 16-17 do PDF, Tabela 6"
+      },
+      {
+        "nome": "Wilcoxon Signed-Rank Test e Cliff's Delta",
+        "definicao": "testes pareados entre as seis direções; resultados detalhados só no pacote [2]",
+        "localizador": "p. 14-15 do PDF (impressas 71:14-71:15)"
+      }
+    ],
+    "linguagens": [
+      "Python",
+      "Java",
+      "C++"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mesmo o melhor LLM (GPT-3.5) produz traduções incorretas; falhas atribuídas a falta de compreensão do programa-fonte (38,51%), ausência de tipos de E/S (14,94%) e discrepâncias entre linguagens (41,38%), sobre 174 falhas analisadas.",
+        "localizador": "p. 1 e 5 do PDF (impressas 71:1, 71:5), resumo e seção 3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Reparo iterativo pode degenerar programas: erros detectados pelos testes gerados, mas não corrigidos, afastam o programa da referência.",
+        "localizador": "p. 17-18 do PDF (impressas 71:17-71:18), seção 6.6"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Excesso de casos de teste no prompt introduz redundância e distrai os LLMs, prejudicando TAP e TRP.",
+        "localizador": "p. 16 do PDF (impressa 71:16), seção 6.4"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Falhas de precisão continuam pouco resolvidas (só 25% resolvidas no total com GPT-3.5).",
+        "localizador": "p. 18 do PDF (impressa 71:18), seção 7.2 e Tabela 8"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível sobreposição entre dados de treino dos LLMs e conjunto de teste; para o GPT-3.5 as fontes de pré-treino são desconhecidas.",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Reparo repetido sem limite acarreta custo de tempo; o estudo limita casos de teste (3) e rodadas de reparo (1) por eficiência. Não quantificado.",
+        "localizador": "p. 11-12 do PDF (impressas 71:11-71:12), seções 5.4 e 5.5"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de tamanho do prompt: só o primeiro caso de teste com falha é enviado ao reparo.",
+        "localizador": "p. 9 do PDF (impressa 71:9), seção 4.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Qualidade do conjunto de avaliação: a limpeza manual pode não eliminar todos os ruídos (validade externa).",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Escolha limitada de modelos (validade externa) e propriedade das métricas (validade de construção); EM Acc subestima o efeito do reparo.",
+        "localizador": "p. 19-20 do PDF (impressas 71:19-71:20), seção 7.3; p. 15 do PDF, seção 6.3"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Avaliação do GPT-3.5 (Basic Prompt one-shot) em 82 programas C++ de um Online Judge privado posteriores ao snapshot do modelo, comparando CA com o conjunto original; sem condição de mitigação contra condição sem ela.",
+        "avaliada": "nao",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "descricao": "Para os modelos abertos e transpiladores, apoio na declaração de [46-48] de que não há sobreposição entre pré-treino (GitHub/BigQuery) e o conjunto de avaliação (GeeksforGeeks).",
+        "avaliada": "nao",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "descricao": "Limpeza manual do conjunto por quatro autores com verificação cruzada em pares e publicação do conjunto limpo.",
+        "avaliada": "nao",
+        "localizador": "p. 9 e 19 do PDF (impressas 71:9, 71:19), seções 5.1 e 7.3"
+      },
+      {
+        "descricao": "Replicação dos baselines com o código publicado e reuso de código publicado para CA, EM Acc e PR.",
+        "avaliada": "nao",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "descricao": "Uso dos programas-fonte para validar entradas geradas e obter saídas, de modo a construir casos de teste corretos.",
+        "avaliada": "nao",
+        "localizador": "p. 4 e 7 do PDF (impressas 71:4, 71:7), seções 2.2 e 4.1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Tabela 6, coluna Average com 3 tentativas: aparente inconsistência com os valores por linguagem. Cálculo próprio de média simples: LLaMA-7B, 1 entrada válida, Python 95.07%, Java 97.01%, C++ 95.77% (média 95,95%) contra Average 93.84%; 3 entradas: 92.78%, 95.95%, 92.08% (média 93,60%) contra 92.31%; GPT-3.5, 1 entrada: 97.36%, 97.18%, 89.44% (média 94,66%) contra 96.77%; 3 entradas: 97.18%, 97.18%, 88.20% (média 94,19%) contra 95.48%. Para LLaMA-7B com 1 entrada, o Average impresso (93.84%) é menor que os três valores por linguagem, o que nenhuma média ponderada produz. As colunas de 1 e 2 tentativas batem com a média simples. A narrativa da RQ5 cita os valores do Average (96.77%/95.48%/94.13% e 93.84%/92.31%/91.26%).",
+        "localizador": "p. 16 do PDF (impressa 71:16), Tabela 6; p. 17 do PDF (impressa 71:17), seção 6.5"
+      },
+      {
+        "descricao": "Tabela 3, GPT-3.5, C++ to Java, EM Acc: Improvement impresso 10.57%, mas 26.58% para 29.40% dá 10,61% (cálculo próprio); 10.57% corresponde a 29.39%, valor de '+ TAP' na Tabela 4. Na Tabela 4, '+ TRP' passa de 29.39% para 29.40% com Improvement 0.00% (cálculo próprio ≈0,03%). Aparente inconsistência; os valores não arredondados não são informados. Na média, UniTrans GPT-3.5 EM Acc é 16.43% na Tabela 3 e na linha '+ TRP' da Tabela 4.",
+        "localizador": "p. 14 do PDF (impressa 71:14), Tabela 3; p. 15 do PDF (impressa 71:15), Tabela 4"
+      },
+      {
+        "descricao": "As melhorias do resumo e das Tabelas 3 e 4 são variações relativas, não p.p., e a coluna Average de 'Improvement' é a média das variações relativas por direção, não a variação relativa entre as médias. Cálculo próprio: LLaMA-7B CA médio 22.74% para 28.45% equivale a ≈25,1% relativo, contra 28.58% impresso; GPT-3.5 85.96% para 89.31% equivale a ≈3,90% relativo (3,35 p.p.), contra 4.02% impresso.",
+        "localizador": "p. 1 e 3 do PDF (impressas 71:1, 71:3); p. 14 do PDF (impressa 71:14), Tabela 3"
+      },
+      {
+        "descricao": "Inversão: com GPT-3.5, '+ TAP' reduz CA em Java to Python (89.22% para 88.79%, Improvement -0.48%), enquanto EM Acc sobe (4.93%). O estudo reconhece a queda e a considera inofensiva.",
+        "localizador": "p. 14-15 do PDF (impressas 71:14-71:15), seção 6.3 e Tabela 4"
+      },
+      {
+        "descricao": "Tabela 5: mais casos de teste nem sempre melhoram. Com 5 casos, CA cai em relação a 3 casos para LLaMA-7B (Python to Java TAP 20.33% contra 22.20%; C++ to Java TAP 27.59% contra 31.74%) e para GPT-3.5 (Python to Java TAP 76.35% contra 79.67%; C++ to Java TAP 79.88% contra 82.99%). Com GPT-3.5 e 1 caso, EM Acc em C++ to Java TAP (25.53%) fica abaixo da condição sem casos (26.58%). Resultados só com Java como alvo.",
+        "localizador": "p. 16 do PDF (impressa 71:16), Tabela 5"
+      },
+      {
+        "descricao": "Tabela 7: CA cai com mais rodadas de reparo em algumas direções, embora o estudo diga que em teoria não deveria piorar: LLaMA-7B Java to Python Repair-3 31.82% contra Repair-2 32.11%; Python to C++ 20.12% contra 20.56%; GPT-3.5 Java to Python 90.95% contra 91.16%; Python to C++ 94.43% contra 94.65%; média GPT-3.5 89.77% contra 89.80%. O estudo atribui a erros detectados pelos testes gerados e não corrigidos.",
+        "localizador": "p. 17-18 do PDF (impressas 71:17-71:18), Tabela 7 e seção 6.6"
+      },
+      {
+        "descricao": "TRP traz 0.00% de melhoria em EM Acc em várias direções (por exemplo, GPT-3.5 em Python to Java, C++ to Python, Python to C++, Java to C++ e C++ to Java; LLaMA-7B em Python to Java e C++ to Python); o estudo argumenta que EM Acc subestima o reparo e não faz teste estatístico TRP contra TAP em EM Acc.",
+        "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, seção 6.3 e nota 6"
+      },
+      {
+        "descricao": "Tamanho do corpus e denominador: a introdução fala em 'a total of 568 samples for each PL', mas a seção 5.1 diz que 568 funções têm testes para ao menos uma linguagem (464 Python, 482 Java, 467 C++). O estudo não liga explicitamente o denominador de CA e EM Acc de cada direção a essas contagens.",
+        "localizador": "p. 3 do PDF (impressa 71:3); p. 9 do PDF (impressa 71:9), seção 5.1"
+      },
+      {
+        "descricao": "As médias da linha de base diferem entre Tabela 2 (quatro direções) e Tabela 3 (seis direções): LLaMA-7B CA 23.53% contra 22.74%; GPT-3.5 CA 87.92% contra 85.96%. Não é contradição, mas as médias não são intercambiáveis.",
+        "localizador": "p. 13 do PDF (impressa 71:13), Tabela 2; p. 14 do PDF (impressa 71:14), Tabela 3"
+      },
+      {
+        "descricao": "Narrativa da RQ1 diz que LLaMA-33B supera os transpiladores 'on most translation datasets in terms of CA and EM Acc'; na Tabela 2, em CA, LLaMA-33B supera TransCoder-ST em C++ to Python (47.63% contra 46.34%) e Java to C++ (59.53% contra 49.68%), mas fica abaixo em Python to C++ (38.12% contra 47.85%) e C++ to Java (45.23% contra 64.73%). Leitura própria; comparação fora do escopo de prompting.",
+        "localizador": "p. 13 do PDF (impressa 71:13), Tabela 2 e seção 6.1"
+      },
+      {
+        "descricao": "Verificação de vazamento: CA do GPT-3.5 no conjunto novo (81.71% C++ to Python; 80.49% C++ to Java) com quedas impressas de 6.16% e 2.03%, que são relativas (cálculo próprio: 5,36 p.p. e 1,67 p.p. em relação a 87.07% e 82.16%). Feita só com Basic Prompt, não com UniTrans, e os autores atribuem a queda ao tamanho maior dos programas (17.23 contra 12.94).",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "descricao": "Testes de significância (Wilcoxon e Cliff's Delta) são relatados apenas como 'statistically significant and non-negligible'; estatísticas e valores-p só no pacote [2], não no artigo. Número de execuções repetidas e semente da seleção aleatória de casos de teste são nao_informado.",
+        "localizador": "p. 14-15 do PDF (impressas 71:14-71:15), seções 6.2-6.3 e notas 5-6"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Estudo empírico (RQ1) compara LLMs com Basic Prompt contra transpiladores aprendidos (TransCoder, TransCoder-IR, TransCoder-ST); essa comparação não é de técnicas de prompting e não entra em extracoes.",
+        "localizador": "p. 13 do PDF (impressa 71:13), Tabela 2"
+      },
+      {
+        "descricao": "A fase de reparo corrige programas traduzidos dentro do pipeline de tradução; a tarefa avaliada é tradução, sem benchmark de depuração próprio.",
+        "localizador": "p. 8-9 do PDF (impressas 71:8-71:9), seção 4.3"
+      },
+      {
+        "descricao": "Na ablação, a fase de geração de casos de teste é executada antes de equipar TAP e TRP, com a mesma configuração da RQ2.",
+        "localizador": "p. 12 do PDF (impressa 71:12), nota 3"
+      },
+      {
+        "descricao": "Esforço manual: limpeza do conjunto por quatro autores e taxonomia de falhas por rotulação independente de dois autores com discussão.",
+        "localizador": "p. 5 e 9 do PDF (impressas 71:5, 71:9), seções 3 e 5.1"
+      },
+      {
+        "descricao": "Tabela 8 mostra quantas falhas da taxonomia do GPT-3.5 são resolvidas por TAP e TRP (por exemplo, 46.15% das falhas de E/S resolvidas por TAP).",
+        "localizador": "p. 18 do PDF (impressa 71:18), Tabela 8"
+      },
+      {
+        "descricao": "Pacote de replicação citado em [2] (GitHub); não acessado nem validado nesta extração.",
+        "localizador": "p. 3 e 21 do PDF (impressas 71:3, 71:21)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Specifically, UniTrans first crafts a series of test cases for target programs with the assistance of source programs.",
+        "localizador": "p. 1 do PDF (impressa 71:1), resumo"
+      },
+      {
+        "trecho": "Afterward, UniTrans further (iteratively) repairs incorrectly translated programs prompted by test case execution results.",
+        "localizador": "p. 1 do PDF (impressa 71:1), resumo"
+      },
+      {
+        "trecho": "In experiments, we adopt a one-shot learning setting to make every LLM understand more about the task and only evaluate their first outputs.",
+        "localizador": "p. 11 do PDF (impressa 71:11), seção 5.4"
+      },
+      {
+        "trecho": "Particularly, we instruct LLMs to generate 10 candidate inputs for each inference, explicitly stating the requirement that inputs need to be differentiated.",
+        "localizador": "p. 7 do PDF (impressa 71:7), seção 4.1"
+      },
+      {
+        "trecho": "Hence, LLMs can leverage the above prompt to augment the code translation with extra test case information (Step 6).",
+        "localizador": "p. 8 do PDF (impressa 71:8), seção 4.2"
+      },
+      {
+        "trecho": "Afterward, the extracted information can be embedded into the Repair Prompts, facilitating LLMs to fix corresponding error programs and refine the translation (Step 9-10).",
+        "localizador": "p. 8 do PDF (impressa 71:8), seção 4.3"
+      },
+      {
+        "trecho": "Iteratively repairing error programs can fix more bugs but also bring the risk of degeneration.",
+        "localizador": "p. 18 do PDF (impressa 71:18), resposta à RQ6"
+      },
+      {
+        "trecho": "Incorporating more test cases indeed offers a more extensive vision to LLMs to translate code, but it also brings redundancies and distracts LLMs.",
+        "localizador": "p. 16 do PDF (impressa 71:16), resposta à RQ4"
+      },
+      {
+        "trecho": "One threat to the internal validity comes from the potential data leakage of LLMs, which means there may be some overlaps between the training set of LLMs and the testing set used in this work.",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "trecho": "Besides, endlessly repairing incurs extra unaffordable time costs.",
+        "localizador": "p. 12 do PDF (impressa 71:12), seção 5.5"
+      },
+      {
+        "trecho": "It should be noted that even though each translated program can be evaluated with more than one test case, we only feed the first failed case for repair due to the restriction of the prompt token length.",
+        "localizador": "p. 9 do PDF (impressa 71:9), seção 4.3"
+      },
+      {
+        "trecho": "However, the dataset is flawed, as we mentioned in Section 5.1, and manually cleaning the dataset may not eliminate all noises or errors.",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      },
+      {
+        "trecho": "To do this, we curated 82 C++ codes manually written by some undergraduate students.",
+        "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "UniTrans",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes",
+        "decomposicao",
+        "feedback"
+      ],
+      "comparador": "LLaMA-7B (Basic Prompt one-shot, sem UniTrans)",
+      "modelo": "LLaMA-7B",
+      "benchmark": "Conjunto de Roziere et al. [46] limpo pelos autores, média das seis direções (Java to Python, Python to Java, C++ to Python, Python to C++, Java to C++, C++ to Java)",
+      "metrica": "CA (Computational Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 22.74,
+        "intervencao": 28.45
+      },
+      "denominador": "nao_informado (corpus com 464 testes para Python, 482 para Java e 467 para C++; o estudo não liga essas contagens ao denominador de cada direção)",
+      "condicoes": "Agregado impresso (coluna Average da Tabela 3), média das seis direções para o mesmo modelo, métrica e comparador. Nucleus sampling top_p=0.95, temperature=0.8, 10 amostras por tradução, avaliada só a primeira saída; UniTrans com 3 casos de teste escolhidos aleatoriamente e 1 rodada de reparo. Número de execuções repetidas nao_informado. O Improvement impresso na média (28.58%) é a média das variações relativas por direção. Pacote híbrido: o efeito é do pacote, não de um mecanismo isolado. Conferido visualmente na p. 14 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca CA e EM Acc e três LLMs sem que um prevaleça. A Tabela 2 não traz contraste de prompting (LLMs contra transpiladores); a Tabela 3 é a primeira com o contraste UniTrans contra LLM base. Primeira métrica (CA), primeiro modelo (LLaMA-7B), agregado impresso compatível (Average).",
+      "derivacao": "direta",
+      "localizador": "p. 14 do PDF (impressa 71:14), Tabela 3, linhas LLaMA-7B e UniTrans, colunas Average/CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "LLaMA-7B 27.16% 3.35% 15.15% 1.23% 23.49% 3.17% 16.49% 1.41% 32.98% 10.04% 21.16% 9.86% 22.74% 4.84%",
+          "localizador": "p. 14 do PDF (impressa 71:14), Tabela 3, linha LLaMA-7B; colunas Java to Python, Python to Java, C++ to Python, Python to C++, Java to C++, C++ to Java, Average (CA, EM Acc cada)"
+        },
+        {
+          "trecho": "UniTrans 31.90% 3.52% 23.24% 3.52% 26.08% 4.23% 20.34% 2.64% 35.76% 13.56% 33.40% 17.78% 28.45% 7.54%",
+          "localizador": "p. 14 do PDF (impressa 71:14), Tabela 3, linha UniTrans do bloco LLaMA-7B; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Translation Augmentation Prompt (Translation Augmentation Phase, TAP)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes",
+        "decomposicao"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes",
+        "decomposicao"
+      ],
+      "comparador": "LLaMA-7B (Basic Prompt one-shot)",
+      "modelo": "LLaMA-7B",
+      "benchmark": "Conjunto de Roziere et al. [46] limpo pelos autores, média das seis direções",
+      "metrica": "CA (Computational Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 22.74,
+        "intervencao": 27.43
+      },
+      "denominador": "nao_informado",
+      "condicoes": "Ablação da Tabela 4, coluna Average (agregado impresso das seis direções). '+ TAP' usa 3 casos de teste gerados escolhidos aleatoriamente; a fase de geração de casos de teste já foi executada (nota 3). Mesmas configurações de decodificação; número de execuções nao_informado. Improvement médio impresso 23.77% (média das variações relativas). Conferido visualmente na p. 15 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componente isolado incluído para completar o alvo de três, primeiro da tabela de ablação (Tabela 4). Mesmo critério de ordem: primeiro modelo (LLaMA-7B), primeira métrica (CA), agregado impresso.",
+      "derivacao": "direta",
+      "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linhas LLaMA-7B e + TAP, colunas Average/CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "LLaMA-7B 27.16% 3.35% 15.15% 1.23% 23.49% 3.17% 16.49% 1.41% 32.98% 10.04% 21.16% 9.86% 22.74% 4.84%",
+          "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linha LLaMA-7B; colunas Java to Python, Python to Java, C++ to Python, Python to C++, Java to C++, C++ to Java, Average (CA, EM Acc cada)"
+        },
+        {
+          "trecho": "+ TAP 31.25% 3.35% 22.20% 3.52% 25.43% 4.23% 19.49% 2.46% 34.48% 13.38% 31.74% 17.25% 27.43% 7.37%",
+          "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linha + TAP do bloco LLaMA-7B; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Repair Prompt (Translation Repair Phase, TRP)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "LLaMA-7B + TAP (sem reparo)",
+      "modelo": "LLaMA-7B",
+      "benchmark": "Conjunto de Roziere et al. [46] limpo pelos autores, média das seis direções",
+      "metrica": "CA (Computational Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 27.43,
+        "intervencao": 28.45
+      },
+      "denominador": "nao_informado",
+      "condicoes": "Ablação da Tabela 4, coluna Average (agregado impresso das seis direções). '+ TRP' com 1 rodada de reparo, alimentando só o primeiro caso de teste que falhou e a mensagem de erro extraída pelo Error Analyzer. Número de execuções nao_informado. Improvement médio impresso 3.77% (média das variações relativas). Conferido visualmente na p. 15 do PDF; os mesmos valores aparecem como Repair-0 e Repair-1 na Tabela 7 (p. 17).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação (Tabela 4), para completar o alvo de três. Primeiro modelo (LLaMA-7B), primeira métrica (CA), agregado impresso.",
+      "derivacao": "direta",
+      "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linhas + TAP e + TRP do bloco LLaMA-7B, colunas Average/CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "+ TAP 31.25% 3.35% 22.20% 3.52% 25.43% 4.23% 19.49% 2.46% 34.48% 13.38% 31.74% 17.25% 27.43% 7.37%",
+          "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linha + TAP do bloco LLaMA-7B; colunas Java to Python, Python to Java, C++ to Python, Python to C++, Java to C++, C++ to Java, Average (CA, EM Acc cada)"
+        },
+        {
+          "trecho": "+ TRP 31.90% 3.52% 23.24% 3.52% 26.08% 4.23% 20.34% 2.64% 35.76% 13.56% 33.40% 17.78% 28.45% 7.54%",
+          "localizador": "p. 15 do PDF (impressa 71:15), Tabela 4, linha + TRP do bloco LLaMA-7B; mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Seis questões de pesquisa explícitas, do estudo empírico à contribuição de cada componente do UniTrans.",
+      "localizador": "p. 11-12 do PDF (impressas 71:11-71:12), seção 5.5"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Templates de prompt, fases, número de casos de teste, rodadas de reparo e decodificação descritos. Faltam o conteúdo da demonstração one-shot (não mostrada na Fig. 7), se ela é mantida no UniTrans, o número de execuções e a semente da seleção aleatória de casos de teste.",
+      "localizador": "p. 7-9 e 11 do PDF (impressas 71:7-71:9, 71:11), seções 4 e 5.4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Mesmo LLM com Basic Prompt e mesmas configurações como linha de base, ablação progressiva de TAP e TRP e variação do número de casos de teste e de rodadas de reparo; transpiladores reproduzidos no mesmo conjunto limpo.",
+      "localizador": "p. 13-17 do PDF (impressas 71:13-71:17), Tabelas 2-5 e 7"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CA, EM Acc e PR definidos, com testes estatísticos. Porém o denominador por direção não é ligado às contagens do corpus (e a introdução fala em 568 por linguagem); 'Improvement' é relativo e a média é média de variações relativas; a coluna Average da Tabela 6 com 3 tentativas não bate com os valores por linguagem; Improvement de GPT-3.5 C++ to Java EM na Tabela 3 corresponde ao valor da Tabela 4 (+ TAP), não ao impresso na Tabela 3.",
+      "localizador": "p. 3, 9-10, 14-16 do PDF; Tabelas 3, 4 e 6"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria com ameaças internas (vazamento, replicação de baselines e métricas), externas (qualidade do conjunto, escolha de modelos) e de construção (métricas).",
+      "localizador": "p. 19-20 do PDF (impressas 71:19-71:20), seção 7.3"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Snapshot do GPT-3.5 (gpt-3.5-turbo-0613), CodeGen (codegen-6B-multi), parâmetros de decodificação e templates de prompt informados; conjunto limpo, código e resultados estatísticos declarados no pacote [2] (não acessado). Versão dos pesos LLaMA, número de execuções e semente não informados.",
+      "localizador": "p. 3, 10-11 do PDF (impressas 71:3, 71:10-71:11), seções 5.2 e 5.4"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo discute vazamento e testa o GPT-3.5 (Basic Prompt) em 82 programas de um Online Judge privado posteriores ao snapshot; para os modelos abertos apoia-se na declaração de outros artigos sobre ausência de sobreposição. A verificação não cobre o UniTrans nem os LLaMA.",
+      "localizador": "p. 19 do PDF (impressa 71:19), seção 7.3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1096 linhas). Páginas do PDF abertas visualmente: p-07 (Fig. 2-3), p-08 (Fig. 4), p-09 (Fig. 5-6, seção 5.1), p-11 (seção 5.4, Fig. 7), p-13 (Tabela 2), p-14 (Tabela 3), p-15 (Tabela 4), p-16 (Tabelas 5 e 6), p-17 (Tabela 7), p-19 (seção 7.3)."
+  }
+}

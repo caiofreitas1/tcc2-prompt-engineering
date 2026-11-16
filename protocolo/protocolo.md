@@ -323,6 +323,12 @@ As saídas brutas de cada rodada ficam preservadas, com a versão do prompt, e a
 manuais ficam à parte. A concordância nos estudos de calibração não estima a acurácia da
 extração em estudos novos; essa estimativa depende da conferência da amostra de 20%.
 
+**Segundo extrator, 16/11/2026 (D104):** o Codex (gpt-6.1-sol) extrai, com a mesma ex-v2.2,
+parte dos estudos, em ordem decrescente de ID, enquanto o Claude Opus 5.5 segue a ordem
+crescente; cada estudo tem um único extrator. A calibração nos 10 estudos do piloto
+reproduziu 18 de 21 comparações de referência. O modelo extrator é relatado por estudo, e
+a amostra de conferência inclui estudos dos dois extratores.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios

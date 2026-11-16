@@ -1,0 +1,694 @@
+{
+  "estudo": "S360",
+  "texto_fonte": "fontes/textos/lote/S360.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "CatCoder",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1-2 (resumo e introdução); p. 5, seção 2 (Info.1 e Info.2); p. 9, Fig. 4 e seção 3.3; p. 10, seção 4.1; p. 13, Tabela 5 (PDF e impressa coincidem)",
+        "observacao": "Pacote de prompting em que o campo CONTEXT do modelo de prompt (Fig. 4) recebe a concatenação do contexto de tipos (campos e assinaturas de métodos dos tipos dependentes, obtidos por analisador estático) e de trechos de código do repositório recuperados por busca híbrida (BM25 + embeddings MPNet V2, fusão RRF); o campo CODE traz docstring e assinatura. A mensagem de sistema («You are given a blank {Java|Rust} function...») é instrução comum a todas as condições (instrucao herdada do prompt base). Os trechos recuperados são tratados pelo estudo como exemplos com padrões de implementação reutilizáveis (p. 5), por isso recebem contexto e exemplos; o contexto de tipos recebe contexto. Contrafactual de pacote: Vanilla (campo CONTEXT vazio, mesmo modelo de prompt) na Tabela 5; o ganho contra Vanilla é do pacote e não autoriza atribuição a um único mecanismo. Contra RepoCoder e In-File as condições diferem em mais de um ingrediente. O pós-processamento da saída (truncamento, inserção da assinatura, remoção de Markdown, p. 9) é descrito como parte do CatCoder e não é prompting; o estudo não informa se ele é aplicado também às linhas de base. O LLM é congelado (sem ajuste fino). Docstring, assinatura e os campos [CONTEXT]/[CODE] são o enunciado da tarefa, comum a todas as condições, e não foram classificados como restricoes."
+      },
+      {
+        "nome_original": "Relevant Code Retrieval",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6-7, seção 3.1; p. 15, seção 5.2 (variantes); p. 16, Tabela 7 (linhas FULL e -CR)",
+        "observacao": "Componente do CatCoder isolado por ablação: FULL contra -CR («Relevant Code Retrieval is removed»), mesmo LLM (CodeLlama-13B-Instruct) e mesmos benchmarks. Mecanismos da condição com o componente (FULL) = pacote completo. Os acrescentados descrevem o ingrediente (código recuperado = contexto e exemplos); a condição -CR ainda contém contexto (contexto de tipos). Também há comparação por modelo em Fig. 6c/6d (p. 17), só em pass@1 e sem valores numéricos na figura."
+      },
+      {
+        "nome_original": "Type Context Extraction",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7-9, seção 3.2; p. 16, seção 5.2 e Tabela 7 (linhas FULL e -TC)",
+        "observacao": "Componente do CatCoder isolado por ablação: FULL contra -TC («Type Context Extraction is removed»), mesmo LLM e mesmos benchmarks. O contexto de tipos é texto com campos e assinaturas de métodos dos tipos vizinhos diretos no grafo de dependências, extraído com Eclipse JDT.LS (Java) ou rust-analyzer (Rust); tipos de bibliotecas padrão são podados. O analisador estático é a ferramenta que produz o conteúdo do prompt, não uma intervenção no modelo."
+      },
+      {
+        "nome_original": "Vanilla",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10, seção 4.1, item (1); p. 13, Tabela 5",
+        "observacao": "Linha de base sem contexto do repositório: mesmo modelo de prompt da Fig. 4, com as descrições em linguagem natural e o campo CONTEXT vazio. É o prompt base das demais condições; não há condição de comparação para ele."
+      },
+      {
+        "nome_original": "In-File",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 10, seção 4.1, item (2); p. 13, Tabela 5 (linhas Vanilla e In-File)",
+        "observacao": "Linha de base que coloca no campo CONTEXT o código anterior à função no mesmo arquivo. O estudo não analisa o contraste In-File contra Vanilla como objeto, mas as duas condições da Tabela 5 (p. 13) usam o mesmo modelo de prompt e diferem apenas no conteúdo do campo CONTEXT («As the CONTEXT field is the only variable», p. 10): rótulos Vanilla (sem contexto) e In-File (contexto do arquivo)."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos",
+          "outro"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10, seção 4.1, item (3); p. 13, Tabela 5",
+        "observacao": "Sistema comparador reimplementado pelos autores para Java e Rust sobre o mesmo pipeline de recuperação do CatCoder (originalmente proposto para Python). Recuperação iterativa: na primeira iteração a consulta é a docstring; a partir da segunda, o código gerado anteriormente. «outro» = recuperação e geração iterativas em que a própria saída do modelo vira consulta de recuperação, sem sinal de teste, compilador ou execução (não é feedback no sentido do dicionário). O número de iterações não é informado. Seus mecanismos não são isolados no estudo; a diferença para o CatCoder envolve mais de um ingrediente (contexto de tipos, consulta e iteração)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature / top_p / maximum number of generated tokens",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,6, top_p 0,7 e no máximo 512 tokens gerados, com n = 10 amostras por tarefa; parâmetros comuns às condições avaliadas.",
+        "localizador": "p. 13, seção 4.4.4"
+      },
+      {
+        "nome_original": "post-process (truncating texts, prepending function signatures, removing Markdown syntax)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento determinístico da saída bruta do LLM, que pode variar com o LLM e a linguagem; não altera o prompt. Não é informado se é aplicado às linhas de base.",
+        "localizador": "p. 9, seção 3.3 e nota 9"
+      },
+      {
+        "nome_original": "caching mechanism",
+        "natureza": "outro",
+        "descricao": "Cache de vetores de embeddings dos trechos de código e de estados intermediários do analisador estático; afeta só a latência de construção do prompt (RQ4), não o conteúdo do prompt.",
+        "localizador": "p. 19-20, seção 5.4.2; p. 18, Tabela 8"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "CodeLlama-13B-Instruct (ID: CodeLlama-13b-Instruct)",
+        "versao": "nao_informado (ID de lançamento no HuggingFace; snapshot não informado)",
+        "uso": "LLM padrão em RQ1 e RQ2; também em RQ3"
+      },
+      {
+        "nome": "CodeLlama-7b-Instruct",
+        "versao": "nao_informado",
+        "uso": "RQ3"
+      },
+      {
+        "nome": "deepseek-coder-6.7b-instruct",
+        "versao": "nao_informado",
+        "uso": "RQ3"
+      },
+      {
+        "nome": "codegemma-7b-it",
+        "versao": "nao_informado",
+        "uso": "RQ3"
+      },
+      {
+        "nome": "CodeQwen1.5-7B-Chat",
+        "versao": "nao_informado",
+        "uso": "RQ3"
+      },
+      {
+        "nome": "Meta-Llama-3-8B-Instruct",
+        "versao": "nao_informado",
+        "uso": "RQ3 (único modelo de propósito geral)"
+      },
+      {
+        "nome": "MPNet V2 (all-mpnet-base-v2)",
+        "versao": "nao_informado",
+        "uso": "modelo de embeddings da recuperação densa (componente do pipeline, não gerador)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Benchmark Java adaptado do CoderUJB",
+        "quantidade": "199 tarefas (238 tarefas de geração do CoderUJB menos 39 filtradas: 17 pelo limite de 512 tokens, 5 sem modificadores ou anotações, 17 funções independentes)",
+        "descricao": "Funções extraídas do Defects4J pelos autores do CoderUJB; correção avaliada pelos testes unitários existentes (defects4j test).",
+        "localizador": "p. 11, seção 4.3.1; p. 12, Tabela 3"
+      },
+      {
+        "nome": "RustEval (construído pelos autores)",
+        "quantidade": "90 funções de 13 crates",
+        "descricao": "Funções com docstrings que seguem as diretrizes oficiais (descrição detalhada e ao menos um teste de documentação); correção avaliada por cargo test --doc.",
+        "localizador": "p. 11, seção 4.3.2; p. 12, Tabelas 2 e 3"
+      },
+      {
+        "nome": "Subconjunto closure-compiler (RQ4)",
+        "quantidade": "29 tarefas",
+        "descricao": "Tarefas do repositório closure-compiler do benchmark do estudo, usadas só para medir latência de construção do prompt. O texto diz «our benchmark (Section 4.3)» sem nomear qual; o repositório não consta da lista de crates Rust (Tabela 2), portanto pertence ao conjunto Java (sobreposição com as 199 tarefas).",
+        "localizador": "p. 19, seção 5.4.1; p. 18, Fig. 7 e Tabela 8"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "compile@k",
+        "definicao": "score@k não enviesado (Chen et al.) com c = amostras que compilam; n = 10, k = 1, 3, 5; média dos valores por tarefa do benchmark",
+        "denominador": "tarefas do benchmark (199 Java; 90 Rust), com n = 10 amostras por tarefa",
+        "localizador": "p. 10-11, seção 4.2; p. 13, seção 4.4.4"
+      },
+      {
+        "nome": "pass@k",
+        "definicao": "score@k não enviesado com c = amostras que passam nos testes do benchmark; n = 10, k = 1, 3, 5",
+        "denominador": "tarefas do benchmark (199 Java; 90 Rust), com n = 10 amostras por tarefa",
+        "localizador": "p. 10-11, seção 4.2; p. 13, seção 4.4.4"
+      },
+      {
+        "nome": "CodeBLEU (C) e submétricas N, W, S, D",
+        "definicao": "pesos 0,25 em Java; em Rust 0,33 para N, W, S e 0 para fluxo de dados (D omitido)",
+        "denominador": "nao_informado",
+        "localizador": "p. 15, seção 5.1.4 e Tabela 6"
+      },
+      {
+        "nome": "latência (s) e aceleração média com cache",
+        "definicao": "tempo de Relevant Code Retrieval, Type Context Extraction e construção total do prompt, sem a inferência do LLM",
+        "denominador": "29 tarefas sequenciais do closure-compiler",
+        "localizador": "p. 18-19, Fig. 7, Tabela 8 e seção 5.4"
+      }
+    ],
+    "linguagens": [
+      "Java",
+      "Rust"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Com apenas o contexto do arquivo ou sem contexto do repositório, o LLM pode alucinar código plausível que não compila ou não executa corretamente (uso indevido de API, identificadores inexistentes); sem contexto de tipos, aumenta o risco de referenciar métodos ou campos inexistentes.",
+        "localizador": "p. 2, seção 1; p. 5, seção 2; p. 13, seção 5.1.1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O código recuperado pode ser incompleto ou enganoso e levar o LLM a copiar padrões errados (caso addSerializer do RepoCoder, que compila mas falha nos testes por usar o campo errado).",
+        "localizador": "p. 14, Fig. 5 e seção 5.1.2; p. 20, seção 6.1.2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mesmo com uso correto do contexto do repositório, o código gerado pelo CatCoder pode falhar nos testes por lógica ausente (tratamento de ponteiro nulo, Fig. 8); o LLM congelado limita a melhoria do raciocínio.",
+        "localizador": "p. 20, Fig. 8 e seção 6.1.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação da análise estática: com recursos dinâmicos (por exemplo, reflexão em Java), o contexto de tipos pode ficar incompleto.",
+        "localizador": "p. 21, seção 6.1.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Em repositórios grandes, o grafo completo de dependências pode gerar contexto de tipos longo demais para a janela de contexto do LLM.",
+        "localizador": "p. 8, seção 3.2.1"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento: o estudo remove o código de referência do repositório durante a recuperação para evitar vazamento no prompt e deixa a investigação do problema de vazamento de dados dos benchmarks para trabalho futuro. O estudo não afirma contaminação efetiva nem avalia vazamento no pré-treinamento.",
+        "localizador": "p. 12, seção 4.4.1; p. 23, seção 8"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Aleatoriedade do código gerado, tratada com temperatura 0,6, top_p 0,7 e n = 10 amostras por tarefa com o estimador score@k; número de execuções repetidas do experimento não informado.",
+        "localizador": "p. 13, seção 4.4.4"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Latência (tempo de execução) da construção do prompt: partida a frio de 38,8 s no closure-compiler, com a recuperação de código como gargalo, e média de 1,56 s após a partida a frio. O estudo trata latências significativas como ameaça às vantagens da assistência; a latência de inferência do LLM e o custo monetário ou em tokens não são quantificados.",
+        "localizador": "p. 18, seção 5.4 e Tabela 8; p. 19, seção 5.4.1-5.4.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Remoção do código de referência (ground truth) dos repositórios durante a recuperação, para evitar vazamento.",
+        "avaliada": "nao",
+        "localizador": "p. 12, seção 4.4.1"
+      },
+      {
+        "descricao": "Contexto de tipos como informação de API para cruzar com o código recuperado e filtrar referências enganosas; avaliado pela ablação FULL contra -TC (Tabela 7) em compile@k e pass@k, sem medida específica sobre os casos de recuperação enganosa (estes só em análise qualitativa, Fig. 5).",
+        "avaliada": "sim",
+        "localizador": "p. 20-21, seção 6.1.2; p. 16, Tabela 7; p. 14, Fig. 5"
+      },
+      {
+        "descricao": "Controle da aleatoriedade com temperatura e top_p fixos e n = 10 amostras por tarefa no estimador não enviesado.",
+        "avaliada": "nao",
+        "localizador": "p. 13, seção 4.4.4; p. 10-11, seção 4.2"
+      },
+      {
+        "descricao": "Restrição do contexto de tipos aos vizinhos diretos no grafo e poda de tipos de bibliotecas padrão, para caber na janela de contexto.",
+        "avaliada": "nao",
+        "localizador": "p. 8, seção 3.2.1"
+      },
+      {
+        "descricao": "Cache de embeddings e de estados do analisador estático para reduzir a latência após a partida a frio; a aceleração é calculada contra a tarefa de partida a frio, não contra as mesmas tarefas sem cache.",
+        "avaliada": "nao",
+        "localizador": "p. 18, Tabela 8; p. 19-20, seção 5.4.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Vanilla, In-File e RepoCoder (Tabela 5, p. 13); variantes de ablação -CR e -TC (Tabela 7, p. 16)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O mesmo resultado aparece com valores diferentes entre tabelas: CatCoder em Java, compile@5, é 88.4 na Tabela 5 e 88.3 na linha FULL da Tabela 7, embora FULL seja definido como a versão completa do CatCoder avaliada com o mesmo LLM e os mesmos benchmarks. As demais células coincidem.",
+        "localizador": "p. 13, Tabela 5; p. 16, Tabela 7; p. 15, seção 5.2 item (1)"
+      },
+      {
+        "descricao": "Inversão em métrica secundária: em CodeBLEU, RepoCoder supera ligeiramente o CatCoder (Java C 0.57 contra 0.56; Rust C 0.46 contra 0.44), apesar de o CatCoder ter compile@k e pass@k maiores; o próprio estudo registra.",
+        "localizador": "p. 15, Tabela 6 e seção 5.1.4"
+      },
+      {
+        "descricao": "Os ganhos «up to 14.44% and 17.35%» do resumo são variação relativa (a seção 5.1.3 diz «relative improvement») e são máximos escolhidos entre valores de k e benchmarks; cálculo próprio a partir da Tabela 5 indica que 14.44% corresponde a compile@3 em Java (84.8 contra 74.1) e 17.35% a pass@5 em Java (57.5 contra 49.0). Em Rust os máximos relativos são 3.27% (compile@k) e 6.68% (pass@k).",
+        "localizador": "p. 1, resumo; p. 13, seção 5.1.1 e Tabela 5; p. 14, seção 5.1.3"
+      },
+      {
+        "descricao": "Aparente inconsistência nas quedas relativas da ablação: recalculadas por mim a partir dos valores arredondados da Tabela 7, dão 19.47% (-CR, Java, compile@1), 38.48% (-CR, Java, pass@1), 55.79% (-CR, Rust, pass@1), 6.68% (-TC, Java, compile@1), 11.63% (-TC, Java, pass@1) e 8.45% (-TC, Rust, compile@1), contra 19.43%, 38.35%, 56.03%, 6.63%, 11.57% e 8.52% impressos; 46.24% e 5.3% coincidem. As diferenças podem decorrer de cálculo sobre valores não arredondados, que o estudo não informa; as porcentagens de RQ1 coincidem com o recálculo a partir da Tabela 5.",
+        "localizador": "p. 16, Tabela 7 e seção 5.2"
+      },
+      {
+        "descricao": "Os resultados de RQ3 (aumento médio de pass@1 de 13.73% em Java e 8.4% em Rust contra RepoCoder; quedas médias de 46.89% e 17.17% em Java e 57.94% e 8.21% em Rust nas variantes) aparecem só no texto; a Fig. 6 mostra barras sem valores numéricos, o que impede conferir os números e a afirmação de melhora para todo modelo. A barra «Average» é média de pass@1 entre modelos heterogêneos calculada pelo estudo.",
+        "localizador": "p. 17, Fig. 6 e seção 5.3.1; p. 18, seção 5.3.2"
+      },
+      {
+        "descricao": "O resumo afirma avaliação com modelos de código e de propósito geral, mas a Tabela 4 lista um único modelo de propósito geral (Meta-Llama-3-8B-Instruct).",
+        "localizador": "p. 1, resumo; p. 13, Tabela 4"
+      },
+      {
+        "descricao": "Condições discrepantes do comparador RepoCoder: originalmente proposto para Python e para completar uma linha, foi reimplementado pelos autores sobre o pipeline de recuperação do CatCoder; o número de iterações não é informado.",
+        "localizador": "p. 10, seção 4.1 item (3); p. 11, seção 4.3.3"
+      },
+      {
+        "descricao": "Benchmark Java filtrado pelos autores (remoção de funções longas, sem modificadores e independentes) para torná-lo mais dependente do repositório; o benchmark Rust é menor e estruturalmente mais simples (NLOC 10.68 e CCN 2.64 contra 16.59 e 4.59). Os autores atribuem o ganho menor em Rust a essa diferença de complexidade, sem teste dessa explicação.",
+        "localizador": "p. 11, seção 4.3.1; p. 12, Tabela 3; p. 14, seção 5.1.3"
+      },
+      {
+        "descricao": "RQ4 mede só a latência da construção do prompt em um repositório (29 tarefas), excluindo a inferência do LLM; não é resultado de eficácia nem de custo total.",
+        "localizador": "p. 19, seção 5.4.1; p. 18, Tabela 8"
+      },
+      {
+        "descricao": "Ameaça interna descartada sem verificação: os autores consideram desnecessário verificar os resultados da análise estática por usarem ferramentas integradas a IDEs.",
+        "localizador": "p. 21, seção 6.2.1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Recuperação híbrida: divisão do código em blocos (tamanho máximo 2.000 e top-4 documentos por recuperador em Java; 1.000 e top-8 em Rust), BM25 (k1 = 1,5; b = 0,75) e recuperação densa com MPNet V2 e distância euclidiana quadrática, fundidas por RRF com pesos 30% (esparso) e 70% (denso). A consulta é docstring + assinatura.",
+        "localizador": "p. 6-7, seção 3.1; p. 12, seção 4.4.1; p. 13, seção 4.4.4"
+      },
+      {
+        "descricao": "O CatCoder opera sobre LLM congelado, sem ajuste fino, bancos externos ou treinamento adicional; o modelo de embeddings é pré-treinado e não foi ajustado pelos autores.",
+        "localizador": "p. 2, seção 1; p. 12, seção 4.4.1"
+      },
+      {
+        "descricao": "RQ3 compara In-File, RepoCoder, CatCoder, -CR e -TC com seis LLMs, apenas em pass@1 (Fig. 6), sem tabela numérica.",
+        "localizador": "p. 16-17, seção 5.3; p. 13, Tabela 4"
+      },
+      {
+        "descricao": "Análise qualitativa de dois casos (addSerializer e _findWellKnownSimple) em que RepoCoder falha e CatCoder acerta, e de um caso de falha do CatCoder (Fig. 8); casos escolhidos pelos autores, sem critério de amostragem informado.",
+        "localizador": "p. 14, Fig. 5; p. 20, Fig. 8"
+      },
+      {
+        "descricao": "Componentes de recuperação e de contexto de tipos são independentes e podem rodar em paralelo; o tempo total é limitado pelo componente mais lento.",
+        "localizador": "p. 19, seção 5.4.2"
+      },
+      {
+        "descricao": "Pacote de replicação com link impresso (GitHub); não foi acessado nem validado nesta extração.",
+        "localizador": "p. 3, seção 1, nota 2"
+      },
+      {
+        "descricao": "Ambiente: servidor Linux com GPUs NVIDIA não especificadas e servidor local vLLM para os modelos abertos.",
+        "localizador": "p. 12, seção 4.4.3"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this paper, we present CatCoder, a novel code generation framework designed for statically typed programming languages.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "Specifically, it leverages static analyzers to extract type dependencies and merges this information with retrieved code to create comprehensive prompts for LLMs.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "You are given a blank {Java|Rust} function with type context, referential code snippet and docstrings.",
+        "localizador": "p. 9, Fig. 4 (System Message)"
+      },
+      {
+        "trecho": "To construct a prompt, we follow the context format in previous work [32, 40, 53], and fill the CONTEXT field by concatenating the type context and the retrieved code chunks.",
+        "localizador": "p. 9, seção 3.3"
+      },
+      {
+        "trecho": "These examples often perform semantically related or symmetric operations and thus provide reusable implementation patterns.",
+        "localizador": "p. 5, seção 2 (Info.1)"
+      },
+      {
+        "trecho": "As the CONTEXT field is the only variable, we compare our approach with methods that fill different contexts in the prompt.",
+        "localizador": "p. 10, seção 4.1"
+      },
+      {
+        "trecho": "In this case, all natural language descriptions are given, but the CONTEXT field in Fig. 4 is left empty.",
+        "localizador": "p. 10, seção 4.1, item (1) Vanilla"
+      },
+      {
+        "trecho": "We extract code before the function to be generated and put it in the CONTEXT field.",
+        "localizador": "p. 10, seção 4.1, item (2) In-File"
+      },
+      {
+        "trecho": "We adopt their idea and implement this baseline for Java and Rust based on our retrieval pipeline.",
+        "localizador": "p. 10, seção 4.1, item (3) RepoCoder"
+      },
+      {
+        "trecho": "From the second iteration, it uses the previously generated code for retrieval.",
+        "localizador": "p. 10, seção 4.1, item (3) RepoCoder"
+      },
+      {
+        "trecho": "(2) -CR: Relevant Code Retrieval is removed.",
+        "localizador": "p. 15, seção 5.2"
+      },
+      {
+        "trecho": "(3) -TC: Type Context Extraction is removed.",
+        "localizador": "p. 16, seção 5.2"
+      },
+      {
+        "trecho": "When provided with only the in-file context for such a task, an LLM may hallucinate and produce code that appears plausible but fails to compile or execute correctly within the project (e.g., misusing an API or referencing an undefined identifier).",
+        "localizador": "p. 2, seção 1"
+      },
+      {
+        "trecho": "In such cases, the absence of type context increases the risk of hallucination, such as referencing non-existent methods or fields.",
+        "localizador": "p. 5, seção 2"
+      },
+      {
+        "trecho": "The retriever may still return incomplete or even misleading context.",
+        "localizador": "p. 20, seção 6.1.2"
+      },
+      {
+        "trecho": "This example illustrates that function code generation is inherently complex, and the effective use of repository context does not always guarantee correctness.",
+        "localizador": "p. 20, seção 6.1.1"
+      },
+      {
+        "trecho": "Therefore, a limitation is that CatCoder may produce incomplete type context when the repository heavily relies on dynamic features.",
+        "localizador": "p. 21, seção 6.1.3"
+      },
+      {
+        "trecho": "In large repositories, the full dependency graph can become vast, making the resulting type context too long to fit in an LLM’s context window.",
+        "localizador": "p. 8, seção 3.2.1"
+      },
+      {
+        "trecho": "For evaluation on the benchmarks, the ground truth code in the repositories is removed during retrieval to prevent leakage.",
+        "localizador": "p. 12, seção 4.4.1"
+      },
+      {
+        "trecho": "In future work, possible research attempts include investigating the data leakage problem of the benchmarks.",
+        "localizador": "p. 23, seção 8"
+      },
+      {
+        "trecho": "To control the randomness of the generated code [17], we set the temperature to 0.6 and the nucleus sampling [24] parameter (top_p) to 0.7.",
+        "localizador": "p. 13, seção 4.4.4"
+      },
+      {
+        "trecho": "Significant latencies would negate the advantages of automated assistance and lead to user frustration.",
+        "localizador": "p. 18, seção 5.4"
+      },
+      {
+        "trecho": "As shown in Table 8, the measured cold start time is 38.8 seconds, with the Relevant Code Retrieval component as the main bottleneck.",
+        "localizador": "p. 19, seção 5.4.2"
+      },
+      {
+        "trecho": "To some extent, the type context in CatCoder helps mitigate this limitation by supplying accessible API information that the LLM can cross-reference, as illustrated in Section 5.1.2.",
+        "localizador": "p. 20-21, seção 6.1.2"
+      },
+      {
+        "trecho": "Therefore, in practice, we constrain the scope of type context creation to the direct neighbors of the initial types in the graph.",
+        "localizador": "p. 8, seção 3.2.1"
+      },
+      {
+        "trecho": "This is due to CatCoder’s caching mechanism, which stores intermediate data, including embedding vectors of code chunks and intermediate states of the static analyzer.",
+        "localizador": "p. 20, seção 5.4.2"
+      },
+      {
+        "trecho": "Notably, the scores of CatCoder and RepoCoder are very close, with RepoCoder even slightly outperforming CatCoder in CodeBLEU.",
+        "localizador": "p. 15, seção 5.1.4"
+      },
+      {
+        "trecho": "On the Java benchmark, CatCoder achieves a relative improvement of up to 17.35% in pass@k, whereas on Rust, the maximum relative improvement is 6.68%.",
+        "localizador": "p. 14, seção 5.1.3"
+      },
+      {
+        "trecho": "In detail, for the -CR variant, the compile@k and pass@k scores decrease by up to 19.43% and 38.35%, respectively, on the Java benchmark, and by up to 46.24% and 56.03% on the Rust benchmark.",
+        "localizador": "p. 16, seção 5.2"
+      },
+      {
+        "trecho": "FULL 71.9 84.8 88.3 44.7 54.0 57.5 65.1 75.5 78.9 52.7 62.0 65.9",
+        "localizador": "p. 16, Tabela 7, linha FULL; colunas Java compile@k (%) 1/3/5, Java pass@k (%) 1/3/5, Rust compile@k (%) 1/3/5, Rust pass@k (%) 1/3/5"
+      },
+      {
+        "trecho": "CatCoder 71.9 84.8 88.4 44.7 54.0 57.5 65.1 75.5 78.9 52.7 62.0 65.9",
+        "localizador": "p. 13, Tabela 5, linha CatCoder; colunas Java compile@k (%) 1/3/5, Java pass@k (%) 1/3/5, Rust compile@k (%) 1/3/5, Rust pass@k (%) 1/3/5"
+      },
+      {
+        "trecho": "On the Java benchmark, CatCoder improves the average pass@1 score by 13.73%, compared to RepoCoder (Fig. 6a).",
+        "localizador": "p. 17, seção 5.3.1"
+      },
+      {
+        "trecho": "In addition, the generalizability of CatCoder is assessed using various LLMs, including both code-specialized models and general-purpose models.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "Therefore, we consider further verification of the analysis results in CatCoder unnecessary, and we trust that our evaluation results remain valid.",
+        "localizador": "p. 21, seção 6.2.1"
+      },
+      {
+        "trecho": "CatCoder runs on top of a frozen LLM and does not require external databases or additional model training.",
+        "localizador": "p. 2, seção 1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CatCoder",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos"
+      ],
+      "comparador": "Vanilla",
+      "modelo": "CodeLlama-13B-Instruct",
+      "benchmark": "Benchmark Java adaptado do CoderUJB (199 tarefas)",
+      "metrica": "compile@k, k = 1 (compile@1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 33.6,
+        "intervencao": 71.9
+      },
+      "denominador": "199 tarefas Java; média por tarefa do score@k com n = 10 amostras por tarefa",
+      "condicoes": "n = 10 amostras por tarefa, k = 1; temperatura 0,6; top_p 0,7; máximo de 512 tokens gerados; recuperação em Java com blocos de até 2.000 e top-4 documentos por recuperador, pesos 30%/70% (esparso/denso). Mesmo modelo de prompt (Fig. 4) nas duas condições; Vanilla deixa o campo CONTEXT vazio. Número de execuções repetidas do experimento: nao_informado. Aplicação do pós-processamento à linha de base: nao_informado. Ganho do pacote CatCoder (contexto de tipos + código recuperado), não de um ingrediente isolado. Valores conferidos visualmente na Tabela 5 (p. 13). O CatCoder em compile@5 Java difere entre Tabela 5 (88.4) e Tabela 7 (88.3); a célula extraída (compile@1) coincide nas duas.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca CatCoder contra RepoCoder com duas métricas (compile@k e pass@k), sem que uma prevaleça, e a seção de método usa as duas. A Tabela 1 é descritiva (exemplo motivador). Primeira tabela de resultados com contraste de prompting: Tabela 5; primeira métrica compile@k (primeiro benchmark Java, primeira coluna k = 1), único modelo CodeLlama-13B-Instruct, primeira linha de base listada Vanilla.",
+      "derivacao": "direta",
+      "localizador": "p. 13 (PDF e impressa), Tabela 5, linhas Vanilla e CatCoder, coluna Java compile@k (%) k = 1; p. 10-11, seções 4.1 e 4.2; p. 13, seção 4.4.4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Vanilla 33.6 49.4 56.2 14.9 22.1 25.2 18.0 28.3 33.1 10.8 15.8 18.2",
+          "localizador": "p. 13, Tabela 5, linha Vanilla; colunas Java compile@k (%) 1/3/5, Java pass@k (%) 1/3/5, Rust compile@k (%) 1/3/5, Rust pass@k (%) 1/3/5"
+        },
+        {
+          "trecho": "CatCoder 71.9 84.8 88.4 44.7 54.0 57.5 65.1 75.5 78.9 52.7 62.0 65.9",
+          "localizador": "p. 13, Tabela 5, linha CatCoder; mesmas colunas"
+        },
+        {
+          "trecho": "In evaluations, we set n in compile@k and pass@k to 10 and k to 1, 3, and 5.",
+          "localizador": "p. 13, seção 4.4.4"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Relevant Code Retrieval",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos"
+      ],
+      "comparador": "-CR (CatCoder sem Relevant Code Retrieval)",
+      "modelo": "CodeLlama-13B-Instruct",
+      "benchmark": "Benchmark Java adaptado do CoderUJB (199 tarefas)",
+      "metrica": "compile@k, k = 1 (compile@1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 57.9,
+        "intervencao": 71.9
+      },
+      "denominador": "199 tarefas Java; média por tarefa do score@k com n = 10 amostras por tarefa",
+      "condicoes": "Ablação: FULL (CatCoder completo) contra -CR (sem recuperação de código; mantém contexto de tipos e o mesmo modelo de prompt), mesmo LLM e mesmos benchmarks de RQ1. n = 10, k = 1; temperatura 0,6; top_p 0,7; 512 tokens. Número de execuções repetidas: nao_informado. Valores conferidos visualmente na Tabela 7 (p. 16).",
+      "selecao": "cobertura",
+      "selecao_motivo": "A única técnica focal (CatCoder) e a única tarefa (geração) já estão representadas; componentes isolados completam o alvo de três, primeiro os da tabela de ablação na ordem da tabela (Tabela 7: -CR, depois -TC). Primeira métrica compile@k, benchmark Java, k = 1.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (PDF e impressa), Tabela 7, linhas FULL e -CR, coluna Java compile@k (%) k = 1; p. 15-16, seção 5.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "FULL 71.9 84.8 88.3 44.7 54.0 57.5 65.1 75.5 78.9 52.7 62.0 65.9",
+          "localizador": "p. 16, Tabela 7, linha FULL; colunas Java compile@k (%) 1/3/5, Java pass@k (%) 1/3/5, Rust compile@k (%) 1/3/5, Rust pass@k (%) 1/3/5"
+        },
+        {
+          "trecho": "-CR 57.9 75.4 81.4 27.5 38.8 43.7 35.0 50.7 56.3 23.3 35.4 41.0",
+          "localizador": "p. 16, Tabela 7, linha -CR; mesmas colunas"
+        },
+        {
+          "trecho": "(2) -CR: Relevant Code Retrieval is removed.",
+          "localizador": "p. 15, seção 5.2"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Type Context Extraction",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "-TC (CatCoder sem Type Context Extraction)",
+      "modelo": "CodeLlama-13B-Instruct",
+      "benchmark": "Benchmark Java adaptado do CoderUJB (199 tarefas)",
+      "metrica": "compile@k, k = 1 (compile@1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 67.1,
+        "intervencao": 71.9
+      },
+      "denominador": "199 tarefas Java; média por tarefa do score@k com n = 10 amostras por tarefa",
+      "condicoes": "Ablação: FULL contra -TC (sem contexto de tipos; mantém o código recuperado e o mesmo modelo de prompt), mesmo LLM e mesmos benchmarks de RQ1. n = 10, k = 1; temperatura 0,6; top_p 0,7; 512 tokens. Número de execuções repetidas: nao_informado. Valores conferidos visualmente na Tabela 7 (p. 16).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação (Tabela 7), na ordem da tabela, para completar o alvo de três. Primeira métrica compile@k, benchmark Java, k = 1.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (PDF e impressa), Tabela 7, linhas FULL e -TC, coluna Java compile@k (%) k = 1; p. 16, seção 5.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "FULL 71.9 84.8 88.3 44.7 54.0 57.5 65.1 75.5 78.9 52.7 62.0 65.9",
+          "localizador": "p. 16, Tabela 7, linha FULL; colunas Java compile@k (%) 1/3/5, Java pass@k (%) 1/3/5, Rust compile@k (%) 1/3/5, Rust pass@k (%) 1/3/5"
+        },
+        {
+          "trecho": "-TC 67.1 80.3 84.8 39.5 49.5 53.4 59.6 70.1 73.8 49.9 59.6 63.8",
+          "localizador": "p. 16, Tabela 7, linha -TC; mesmas colunas"
+        },
+        {
+          "trecho": "(3) -TC: Type Context Extraction is removed.",
+          "localizador": "p. 16, seção 5.2"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas (eficácia contra linhas de base, ablação, generalização entre LLMs e escalabilidade) e problema motivado (contexto entre arquivos na geração em nível de repositório).",
+      "localizador": "p. 10, seção 4; p. 2, seção 1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Pipeline descrito em detalhe (divisão de código, recuperação híbrida, construção do contexto de tipos, modelo de prompt), construção dos benchmarks com regras de filtragem e contagens, parâmetros de recuperação e de decodificação.",
+      "localizador": "p. 5-9, seção 3; p. 11-13, seções 4.3-4.4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linhas de base executadas no mesmo modelo de prompt (Vanilla, In-File, RepoCoder) e ablação dos dois componentes; porém RepoCoder foi reimplementado pelos autores a partir de um método para Python e completamento de linha, sem informar o número de iterações, e a diferença CatCoder-RepoCoder envolve mais de um ingrediente.",
+      "localizador": "p. 10, seção 4.1; p. 13, Tabela 5; p. 16, Tabela 7"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas baseadas em compilação e testes, com fórmula, n, k e denominador (tarefas do benchmark) informados; CodeBLEU com pesos. Porém o mesmo resultado difere entre Tabela 5 e Tabela 7 (compile@5 Java 88.4 contra 88.3), as variações relativas de RQ2 não coincidem exatamente com recálculo a partir das tabelas, e os números de RQ3 não podem ser conferidos na Fig. 6.",
+      "localizador": "p. 10-11, seção 4.2; p. 13, Tabela 5; p. 16, Tabela 7 e seção 5.2; p. 17, Fig. 6"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de limitações (LLM, recuperação, análise estática) e de ameaças internas e externas, mas breve: a ameaça interna da análise estática é descartada sem verificação, e não discute não determinismo, viés da filtragem do benchmark nem contaminação além de mencioná-la como trabalho futuro.",
+      "localizador": "p. 20-21, seções 6.1-6.2; p. 23, seção 8"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "IDs dos modelos, parâmetros de decodificação e de recuperação, ferramentas e link do pacote de replicação (não acessado nem validado) são informados; faltam o número de iterações do RepoCoder, o número de execuções repetidas e a especificação do hardware.",
+      "localizador": "p. 12-13, seções 4.4.1-4.4.4 e Tabela 4; p. 3, nota 2; p. 10, seção 4.1"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O código de referência é removido durante a recuperação para evitar vazamento no prompt; o possível vazamento dos benchmarks (Java derivado do Defects4J/CoderUJB) no pré-treinamento não é avaliado e fica como trabalho futuro.",
+      "localizador": "p. 12, seção 4.4.1; p. 23, seção 8"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "motivo": "Texto extraído lido integralmente (linhas 1-1200, incluindo referências).",
+    "paginas_pdf_abertas": [
+      9,
+      12,
+      13,
+      15,
+      16,
+      17,
+      18
+    ]
+  }
+}
