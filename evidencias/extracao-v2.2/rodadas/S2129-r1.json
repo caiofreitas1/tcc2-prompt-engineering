@@ -1,0 +1,380 @@
+{
+  "ficha": {
+    "estudo_id": "S2129",
+    "titulo": "RepoGuard: Harmonising Security and Functional Correctness in LLM-Guided Repository-Level Code Generation",
+    "referencia": "Cassiano Darif Zago; Fábio Lúcio Lopes de Mendonça; Georges D. Amvame Nze; João José Costa Gondim; Robson De Oliveira Albuquerque; Jorge Osvaldo A. Lima Torres. ICICT 2026, p. 378–386. DOI: 10.1145/3803291.3803376.",
+    "versao_lida": "Publicação ACM, ICICT 2026, nove páginas; identificada no próprio texto, sem consulta externa.",
+    "texto_fonte": "fontes/textos/lote/S2129.txt",
+    "executor": "Codex CLI 0.169.0",
+    "modelo_executor": "gpt-6.1-sol (esforço high)",
+    "data": "2026-11-16",
+    "prompt_versao": "ex-v2.2",
+    "revisao_humana": "pendente",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RepoGuard-Agent",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "feedback", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3–7, impressas 380–384, seções 3–4.2, Figura 1 e Tabela 3",
+        "observacao": "Pacote híbrido: instruções com persona de segurança, restrições negativas, contexto de código e dependências extraído por AST, etapas encadeadas de reparo e validação e feedback adaptativo. O comparador é o modelo vanilla, sem o pacote. O contraste não isola prompting de Auto-Importer, scanners, testes ou controle de execução. Contexto e instrução também integram a tarefa de reparo do baseline; o enriquecimento por AST e a persona alteram esses mecanismos já presentes. O prompt literal do baseline não é reproduzido, de modo que a lista de mecanismos acrescentados se limita aos componentes explicitamente atribuídos ao pacote. A menção genérica a in-context learning não documenta exemplos resolvidos; não foi classificada como exemplos. Um controlador com ferramentas não demonstra múltiplos agentes interagindo."
+      },
+      {
+        "nome_original": "vanilla baseline model",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7, impressa 384, seção 4.2 e Tabela 3",
+        "observacao": "Condição de reparo direto de código vulnerável com Qwen-2.5-7B. Instrução de reparo e código como insumo são os mecanismos mínimos identificáveis pela descrição da tarefa; o texto literal, eventuais exemplos, restrições e orçamento de chamadas do baseline são nao_informado. Seus mecanismos não são isolados individualmente."
+      },
+      {
+        "nome_original": "security-persona-guided prompt engineering",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1 e 5, impressas 378 e 382, Introdução e seção 3.2",
+        "observacao": "Persona SRE Security Specialist e proibições de construções inseguras, avaliadas apenas dentro do pacote completo cujos mecanismos estão listados. A persona especifica a instrução de reparo; não acrescenta uma categoria instrucao ausente no baseline. Não há ablação da persona ou das restrições."
+      },
+      {
+        "nome_original": "Context Retrieval and AST Parsing",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3–5, impressas 380–382, seções 3.1 e 3.4",
+        "observacao": "Assinaturas de funções, classes e imports de arquivos adjacentes são inseridos no system prompt. Enriquece contexto já existente no reparo de código; não cria nova categoria de mecanismo. A lista de mecanismos descreve a condição completa em que o componente foi avaliado. Não há condição comparável sem a recuperação."
+      },
+      {
+        "nome_original": "Adaptive Prompting Strategy / RCI Cycle (Recursive Criticism and Improvement)",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "feedback", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "PDF p. 5–6, impressas 382–383, seção 3.4, Figura 1 e Tabela 2",
+        "observacao": "Falhas de segurança, dependência e lógica produzem restrições ou diretrizes para a próxima correção; o processo encadeia recuperação, correção, pós-processamento e validação. Mecanismos do pacote completo, incluindo persona e contexto. A evolução por rodada no caso qualitativo é cumulativa; o benchmark compara o pacote inteiro, sem isolar a estratégia adaptativa ou feedback de outros componentes. Não há seleção entre múltiplos candidatos nem evidência de otimização automática de um prompt avaliada separadamente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Auto-Importer",
+        "natureza": "outro",
+        "descricao": "Pós-processador determinístico de AST: identifica símbolos órfãos e injeta imports de bibliotecas conhecidas, além de corrigir dependências alucinadas. Modifica código após a geração; não é técnica de prompting.",
+        "localizador": "PDF p. 5, impressa 382, seções 3.2 e 3.4"
+      },
+      {
+        "nome_original": "Hybrid Validation (SAST + Dynamic)",
+        "natureza": "outro",
+        "descricao": "Oráculo com Custom PyASTScanner, Bandit e unittest. A execução de scanners e testes é componente determinístico; o retorno dos resultados ao prompt está classificado como feedback.",
+        "localizador": "PDF p. 3 e 5–6, impressas 380 e 382–383, seções 3.3–3.4"
+      },
+      {
+        "nome_original": "intelligent filtering",
+        "natureza": "outro",
+        "descricao": "Filtragem de alertas informacionais B404 e B603 do Bandit quando a análise PyASTScanner confirma práticas consideradas adequadas. Não há ablação quantitativa da filtragem.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.3"
+      },
+      {
+        "nome_original": "maximum of five iterations",
+        "natureza": "orcamento",
+        "descricao": "Limite do laço de reparo; o número máximo de chamadas e o orçamento de tokens por rodada não são informados. O limite de iterações não é um ingrediente de prompting isolado.",
+        "localizador": "PDF p. 5 e 7, impressas 382 e 384, seções 3.4 e 4.3.1"
+      },
+      {
+        "nome_original": "fail-safe architecture / Human Evaluation",
+        "natureza": "outro",
+        "descricao": "Descarta alterações quando detecta oscilação ou falta de convergência e encaminha o arquivo à intervenção humana; a arquitetura também prevê revisão final do diff por CLI. Não há avaliação comparativa do efeito da revisão humana nem demonstração de que ela ocorreu no experimento.",
+        "localizador": "PDF p. 3 e 7, impressas 380 e 384, descrição de Human Evaluation e seção 4.3.1"
+      }
+    ],
+    "modelos": [
+      "RepoGuard/OllamaFixer: qwen2.5-coder:7b, executado localmente via Ollama; revisão dos pesos, quantização, versão de Ollama e parâmetros de geração: nao_informado (seção 3.2, PDF p. 4, impressa 381).",
+      "Baseline: Qwen-2.5-7B, conforme seção 4.2 e Tabela 3; a seção 4 descreve o LLM subjacente como variável controlada. A equivalência exata entre esse rótulo e qwen2.5-coder:7b não é documentada por identificador de artefato; snapshot: nao_informado (PDF p. 6–7, impressas 383–384)."
+    ],
+    "benchmarks": [
+      "Caso qualitativo sintético: vulnerable_code.py, script Python com múltiplas vulnerabilidades, e test_example.py como oráculo funcional; número de testes unitários: nao_informado (seções 4.1.1–4.1.2, PDF p. 6, impressa 383).",
+      "Benchmark curado de 7 casos distintos derivados de repositórios de testes OWASP/CWE: Deserialization, Hard Credentials, Insecure Hashing, Path Traversal, SQL Injection, Unsafe YAML e XSS (Reflected). Não é declarada avaliação de todo o OWASP Benchmark nem de todas as categorias OWASP Top 10. Versão dos repositórios, procedimento exato de seleção e sobreposição com o script qualitativo: nao_informado (seção 4.2.1 e Tabela 3, PDF p. 7, impressa 384)."
+    ],
+    "metricas": [
+      "Automated Repair Success Rates / success rate: Tabela 3 apresenta sucesso por caso em Base LLM e RepoGuard, e sucesso agregado de RepoGuard em percentual; a descrição do oráculo exige segurança segundo scanners e funcionalidade segundo testes. Denominador do agregado: 7 casos, não número de testes unitários (PDF p. 7, impressa 384).",
+      "failure rate / regression errors: legenda da Tabela 3 informa regressões do baseline em 2 de 7 casos e 28.5%; não é a taxa de sucesso impressa para o baseline (PDF p. 7, impressa 384).",
+      "Vulnerabilities, Syntactic Errors, Test Status, Size e Time (s): evolução por iteração do caso qualitativo; vulnerabilidades são achados dos validadores, não prova de ausência de outras falhas. Test Status não informa número de testes (Tabela 2, PDF p. 6, impressa 383).",
+      "Ite. e Time (s): iterações e tempos por caso no benchmark; não há tempos pareados para o baseline nem definição suficiente para separar inferência, pós-processamento e validação (Tabela 3, PDF p. 7, impressa 384).",
+      "recovery rate from baseline regressions: alegação de recuperação das regressões na conclusão; população distinta do total de casos, sem atribuição isolada ao Auto-Importer (PDF p. 8, impressa 385)."
+    ],
+    "linguagens": ["Python; versão nao_informado (seções 3.1 e 4.1, PDF p. 3–6, impressas 380–383)."],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Scope myopia: correções locais podem omitir imports, produzir trechos incompletos e introduzir regressões ou código não executável. Corrigir segurança pode quebrar a lógica e a tentativa seguinte restaurar a vulnerabilidade.",
+        "localizador": "PDF p. 1, 5 e 7, impressas 378, 382 e 384, Introdução, seção 3.2 e seção 4.3.1"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado ou reparado pode preservar ou reintroduzir vulnerabilidades; o caso de reparo contempla injeção de comandos e código, desserialização insegura, credenciais embutidas e escrita fora do diretório pretendido. Êxito nos scanners e testes utilizados não demonstra segurança geral.",
+        "localizador": "PDF p. 1 e 6–7, impressas 378 e 383–384, Introdução e seções 4.1–4.3.1"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Referências inexistentes ou depreciadas, imports omitidos e ambiguidade entre bibliotecas com símbolos homônimos podem causar ImportError e NameError. O próprio pós-processador pode escolher a dependência errada em repositórios maiores.",
+        "localizador": "PDF p. 5 e 8, impressas 382 e 385, seções 3.2 e 4.3.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ruído e falsos positivos de análise estática podem aprisionar a correção iterativa em ciclos improdutivos. O benchmark controlado não cobre sistemas de build não padronizados e dependências complexas de repositórios empresariais legados.",
+        "localizador": "PDF p. 5 e 8, impressas 382 e 385, seções 3.3 e 4.3.3"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Pacote RepoGuard: contexto recuperado por AST, persona e restrições de segurança, feedback adaptativo, pós-processamento de imports e validação híbrida. Avaliado contra modelo vanilla; o contraste mede o pacote híbrido, sem isolar seus mecanismos.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 3–7, impressas 380–384, seções 3–4.2 e Tabela 3"
+      },
+      {
+        "descricao": "Contextualizar o prompt com assinaturas, classes e imports reais para reduzir referências alucinadas. Não há ablação com e sem recuperação.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3–5, impressas 380–382, seções 3.1 e 3.4"
+      },
+      {
+        "descricao": "Auto-Importer corrige dependências antes da execução; o estudo descreve seu funcionamento e exemplos, mas não executa contrafactual que retire apenas o módulo.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5–6, impressas 382–383, seções 3.2 e 4.1.2"
+      },
+      {
+        "descricao": "Direcionar feedback segundo falhas de segurança, dependência e lógica, exigindo aprovação simultânea em scanners e testes. Sem condição que retire só a adaptação ou só o oráculo híbrido.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5–6, impressas 382–383, seções 3.3–3.4"
+      },
+      {
+        "descricao": "Filtrar alertas informacionais corroborados como adequados por outra análise, descartar alterações oscilantes ou sem convergência e encaminhar para revisão humana. Efeitos individuais não medidos contra condição sem essas salvaguardas.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3, 5 e 7, impressas 380, 382 e 384, Human Evaluation e seções 3.3 e 4.3.1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A legenda da Tabela 3 informa 100% de sucesso de RepoGuard e 2 de 7 casos com regressão do baseline, impressos como 28.5% de falha. A tabela marca sucesso para ambos em Deserialization, Hard Credentials, Insecure Hashing, SQL Injection e Unsafe YAML; só o baseline falha em Path Traversal e XSS (Reflected). Assim, há resultados sem diferença em parte dos casos. Não foi calculada taxa de sucesso do baseline a partir de falhas ou marcas gráficas.",
+        "localizador": "PDF p. 7, impressa 384, Tabela 3, legenda, colunas Base LLM e RepoGuard e seção 4.2.2"
+      },
+      {
+        "descricao": "No caso qualitativo, a Tabela 2 mantém 9 vulnerabilidades no estado inicial e na iteração 1, reduzindo a 0 na iteração 2. Erros sintáticos são 0 nas três linhas, mas a linha da primeira iteração registra Auto-Import Fixed: a medição é posterior ao pós-processamento e não representa ausência de erro na saída bruta do LLM. O status inicial dos testes é N/A; nas duas iterações, Passed. Não há baseline de prompting nessa tabela, nem contrafactual executado sem Auto-Importer.",
+        "localizador": "PDF p. 6, impressa 383, Tabela 2 e seção 4.1.2"
+      },
+      {
+        "descricao": "O êxito no pequeno benchmark controlado não cobre todas as situações observadas: a seção de limitações relata oscilação entre segurança e funcionalidade em cmd_injection e medium_app e admite ambiguidade de dependências em repositórios maiores. Esses testes adicionais não têm resultados tabulados ou denominador informado.",
+        "localizador": "PDF p. 7–8, impressas 384–385, seções 4.3.1–4.3.3"
+      },
+      {
+        "descricao": "A conclusão atribui ao Auto-Importer recuperação de 100% das regressões do baseline, mas a Tabela 3 compara apenas o pacote RepoGuard com o baseline. A taxa se refere às regressões, enquanto o sucesso de 100% da legenda da tabela se refere aos 7 casos; não são denominadores intercambiáveis e não há ablação que sustente atribuição causal exclusiva ao módulo.",
+        "localizador": "PDF p. 7–8, impressas 384–385, Tabela 3 e conclusão, item Deterministic Auto-Importer"
+      },
+      {
+        "descricao": "O artigo enfatiza atuação em repositórios, mas a avaliação principal usa script sintético e casos isolados derivados de especificações OWASP/CWE. A própria seção 4.3.3 reconhece que dependências entre módulos e builds complexos não foram plenamente capturados. Não extrapolar eficácia para manutenção de repositórios industriais.",
+        "localizador": "PDF p. 6–8, impressas 383–385, seções 4.1, 4.2.1 e 4.3.3"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A tarefa empiricamente demonstrada é reparo de código inseguro preexistente. Embora o título e a apresentação usem code generation e o corpo mencione post-refactoring, não há avaliação independente de geração a partir de especificação, tradução ou refatoração como tarefa própria.",
+        "localizador": "PDF p. 3 e 6–7, impressas 380 e 383–384, descrição da solução e seção 4"
+      },
+      {
+        "descricao": "Execução local CPU-only, sem CUDA, em AMD Ryzen 7 5800XT e 64GB de RAM. Afirmações de acessibilidade e menor infraestrutura não são medição comparativa de custo, produtividade ou segurança operacional geral. Temperatura, top-p, quantização, sementes, repetições independentes e variabilidade dos resultados são nao_informado.",
+        "localizador": "PDF p. 4, impressa 381, seção 3.2; busca no texto completo para parâmetros e repetições"
+      },
+      {
+        "descricao": "O artigo declara código-fonte e benchmark disponíveis em https://github.com/cassianodz/RepoGuardCore. O endereço foi apenas transcrito; o repositório não foi acessado e o pacote não foi validado.",
+        "localizador": "PDF p. 8, impressa 385, conclusão"
+      },
+      {
+        "descricao": "Não foram executados scripts, testes ou make check nesta extração: a tarefa restringe comandos de shell à leitura e autoriza alteração somente do JSON de saída. Não foram modificados registros de estudos, afirmações, decisões ou outros arquivos.",
+        "localizador": "Instruções do solicitante para esta rodada, 2026-11-16"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "RepoGuard combines context retrieval (via AST-based repository analysis), prompt-engineered LLM correction, an Auto-Importer post-processor, and a hybrid validation oracle comprising ensemble Static Application Security Testing (SAST) scanners and dynamic unit tests.",
+        "localizador": "PDF p. 1, impressa 378, resumo; espaços e hifenização de fim de linha normalizados"
+      },
+      {
+        "trecho": "This context is injected into the system prompt, enabling the model to reference external definitions without exceeding the LLM context window and mitigating hallucinations regarding non-existent functions.",
+        "localizador": "PDF p. 4, impressa 381, continuação da seção 3.1"
+      },
+      {
+        "trecho": "It utilises the qwen2.5-coder:7b model, selected for its state-of-the-art performance in coding tasks among parameter-efÏcient models.",
+        "localizador": "PDF p. 4, impressa 381, seção 3.2; preservada a grafia da transcrição"
+      },
+      {
+        "trecho": "To demonstrate the accessibility and resource efÏciency of the proposed architecture, all inference tasks were executed in a CPU-only environment (without CUDA acceleration) on a standard workstation equipped with an AMD Ryzen 7 5800XT processor and 64GB of RAM.",
+        "localizador": "PDF p. 4, impressa 381, seção 3.2; preservada a grafia da transcrição"
+      },
+      {
+        "trecho": "The prompt engineering strategy incorporates specific personas (“SRE Security Specialist”) and strict constraint rules to prevent the reintroduction of common vulnerabilities, such as eval() or pickle.",
+        "localizador": "PDF p. 4–5, impressas 381–382, seção 3.2, frase atravessando páginas"
+      },
+      {
+        "trecho": "A significant technical challenge observed during development was the LLM’s tendency to generate syntactically incomplete snippets, frequently omitting import statements (e.g., using List or Optional without importing typing), or ignoring semantically distinct structures and entities.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.2"
+      },
+      {
+        "trecho": "Missing imports are surgically injected at the file top.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.2, etapa 4 do Auto-Importer"
+      },
+      {
+        "trecho": "The RepoGuardEngine implements intelligent filtering that ignores informational codes (B404, B603) when deep PyASTScanner analysis confirms best-practice implementation (e.g., list-based subprocess.run), breaking negative feedback cycles.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.3"
+      },
+      {
+        "trecho": "The central engine orchestrates a closed-loop repair process constrained by a maximum of five iterations.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.4"
+      },
+      {
+        "trecho": "Security Violations: Triggered by SAST tools (e.g., Bandit), resulting in pattern-specific constraints (e.g., enforcement of parameterized queries).",
+        "localizador": "PDF p. 5, impressa 382, seção 3.4, item 1 da Adaptive Prompting Strategy"
+      },
+      {
+        "trecho": "Dependency Failures: Triggered by ImportError or NameError exceptions, resulting in syntax-focused recovery instructions.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.4, item 2"
+      },
+      {
+        "trecho": "Logic Errors: Triggered by unit test assertions, resulting in functional correction directives.",
+        "localizador": "PDF p. 5, impressa 382, seção 3.4, item 3"
+      },
+      {
+        "trecho": "If any constraint is violated, the aggregated error metadata is structured into the next adaptive prompt, driving a recursive feedback loop that persists until the candidate satisfies all acceptance criteria or the iteration limit is reached.",
+        "localizador": "PDF p. 5–6, impressas 382–383, seção 3.4, frase atravessando páginas"
+      },
+      {
+        "trecho": "To assess the effectiveness of the RCI cycle in a controlled environment, a case study was conducted using a synthetic Python script intentionally designed to contain multiple critical Common Weakness Enumerations (CWEs) commonly encountered in real applications.",
+        "localizador": "PDF p. 6, impressa 383, seção 4.1"
+      },
+      {
+        "trecho": "A unittest suite (test_example.py) served as the functionality oracle, ensuring preservation of business logic (e.g., sum calculations and data return) post-refactoring.",
+        "localizador": "PDF p. 6, impressa 383, seção 4.1.1"
+      },
+      {
+        "trecho": "To validate the generalization capabilities of RepoGuard beyond a single instance, we conducted a comparative benchmark against a vanilla baseline model (Qwen-2.5-7B).",
+        "localizador": "PDF p. 7, impressa 384, seção 4.2"
+      },
+      {
+        "trecho": "To ensure a robust and reproducible evaluation, we curated a dataset of 7 distinct test cases derived from established security testing repositories (e.g., OWASP Benchmark, CWE reference implementations).",
+        "localizador": "PDF p. 7, impressa 384, seção 4.2.1"
+      },
+      {
+        "trecho": "To mitigate this, RepoGuard employs a \"fail-safe\" architecture, where if the system detects oscillation or fails to converge after 5 iterations, it discards the generated changes and flags the file for manual human intervention, prioritizing system stability over forced, potentially broken patches.",
+        "localizador": "PDF p. 7, impressa 384, seção 4.3.1"
+      },
+      {
+        "trecho": "In such rare events, the AST post-processor may incorrectly resolve the dependency, leading to runtime ImportErrors that require deeper, project-wide dependency analysis to resolve.",
+        "localizador": "PDF p. 8, impressa 385, seção 4.3.2"
+      },
+      {
+        "trecho": "The transition to large-scale, legacy enterprise repositories introduces variables such as non-standard build systems and complex inter-module dependencies that were not fully captured in this study.",
+        "localizador": "PDF p. 8, impressa 385, seção 4.3.3"
+      },
+      {
+        "trecho": "Although repair is automated, final patch application is submitted to an interactive CLI interface where developers review the proposed diff, ensuring human oversight of critical changes.",
+        "localizador": "PDF p. 3, impressa 380, item Human Evaluation"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "RepoGuard-Agent",
+      "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["decomposicao", "feedback", "restricoes"],
+      "comparador": "vanilla baseline model (Base LLM, Qwen-2.5-7B)",
+      "modelo": "RepoGuard: qwen2.5-coder:7b; baseline denominado Qwen-2.5-7B; snapshot exato nao_informado",
+      "benchmark": "Agregado impresso dos 7 casos curados derivados de OWASP/CWE da Tabela 3",
+      "metrica": "Automated Repair Success Rates / success rate",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 100},
+      "denominador": "7 casos de reparo em cada condição; número de testes unitários por caso e número de repetições independentes: nao_informado",
+      "condicoes": "Agregado de sucesso de RepoGuard impresso na legenda da Tabela 3, cobrindo Deserialization, Hard Credentials, Insecure Hashing, Path Traversal, SQL Injection, Unsafe YAML e XSS (Reflected). A legenda imprime para o baseline 2 casos com regressão em 7 e 28.5% de failure rate, não um percentual de sucesso: baseline permanece null, sem calcular seu complemento ou converter os símbolos de sucesso em taxa. A matriz tem marcas de sucesso para ambos nas cinco linhas diferentes de Path Traversal e XSS (Reflected); nessas duas, só RepoGuard tem sucesso. O mesmo backbone é apresentado pelos autores como variável controlada, mas os rótulos dos modelos não identificam um artefato exato comum. RepoGuard tem contexto AST, persona, restrições, feedback, Auto-Importer, scanners e testes; ganho eventual pertence ao pacote híbrido. Máximo de cinco iterações no método, todas as linhas da tabela reportam uma ou duas. Orçamento do baseline, parâmetros de geração, número de chamadas por iteração e repetições: nao_informado. Não há teste estatístico ou intervalo de confiança. Valores e cabeçalhos conferidos visualmente no PDF; null no baseline decorre de ausência do agregado na mesma métrica, não de dificuldade de leitura.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Resumo e contribuições enfatizam arquitetura, convergência, segurança e funcionalidade, sem um único trio de técnica, métrica e comparador declarado principal. A Tabela 1 é descritiva de trabalhos relacionados e a Tabela 2 só acompanha o pacote ao longo das rodadas, sem condição comparadora de prompting. A Tabela 3 é a primeira com contraste elegível; usa-se a primeira métrica pertinente, sucesso de reparo, no primeiro e único modelo e baseline. Prefere-se o agregado de sucesso impresso sobre os mesmos casos e condições; o agregado correspondente do baseline não é impresso nessa métrica e permanece null. Não há outra técnica focal, tarefa ou ablação de ingrediente que exija cobertura.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 7, impressa 384, Tabela 3, legenda e colunas Base LLM/RepoGuard; seções 4.2.1–4.2.2; condições do modelo na seção 3.2, PDF p. 4, impressa 381",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "The baseline model (Qwen-2.5-7B) introduced regression errors in 2 out of 7 test cases (28.5% failure rate), primarily due to hallucinated or missing dependencies.",
+          "localizador": "PDF p. 7, impressa 384, legenda da Tabela 3"
+        },
+        {
+          "trecho": "RepoGuard autonomously resolved all regressions, achieving a 100% success rate across the OWASP Top 10 benchmark dataset in under 3 iterations.",
+          "localizador": "PDF p. 7, impressa 384, legenda da Tabela 3; na transcrição extraída, a oração está intercalada com as legendas das Figuras 4–5"
+        },
+        {
+          "trecho": "To ensure a robust and reproducible evaluation, we curated a dataset of 7 distinct test cases derived from established security testing repositories (e.g., OWASP Benchmark, CWE reference implementations).",
+          "localizador": "PDF p. 7, impressa 384, seção 4.2.1"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Define o objetivo de reparar código inseguro preservando funcionalidade, apresenta arquitetura e contribuições e distingue análise qualitativa de convergência de benchmark comparativo. A descrição dos objetivos está explícita, embora o alcance empírico seja menor que a ambição de atuação em repositórios.",
+      "localizador": "PDF p. 1–2 e 6, impressas 378–379 e 383, Introdução, contribuições e seção 4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve componentes, ciclo de reparo, validação, ambiente e casos. Faltam prompts literais, versões dos artefatos de teste, detalhes exatos de curadoria, orçamento do baseline, número de chamadas e repetições independentes. A evolução do caso qualitativo não substitui ablação dos componentes.",
+      "localizador": "PDF p. 3–7, impressas 380–384, seções 3–4.2, Figura 1 e Tabelas 2–3"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há execução de baseline vanilla na mesma tabela, nos mesmos casos e com o LLM tratado como variável controlada. Contudo, orçamento, prompt e parâmetros do baseline não são detalhados, e o pacote altera prompting, pós-processamento e validação simultaneamente. Adequado para um contraste exploratório de pacote, insuficiente para estimar efeito isolado dos prompts ou módulos.",
+      "localizador": "PDF p. 6–7, impressas 383–384, seção 4, seção 4.2 e Tabela 3"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Apresenta segurança via scanners e funcionalidade via testes, sucesso por caso, iterações, tempo e evolução de vulnerabilidades. O agregado comparativo tem denominador de casos informado, mas não informa quantidade/cobertura dos testes ou repetições, não define suficientemente o protocolo de tempo e não fornece incerteza estatística. O baseline é resumido por falhas e RepoGuard por sucesso; a tabela oferece marcas por caso, sem imprimir a taxa de sucesso agregada do baseline. A recuperação de regressões tem população diferente do sucesso global. Não se identificou contradição necessária entre as duas tabelas, que tratam conjuntos distintos.",
+      "localizador": "PDF p. 5–8, impressas 382–385, seções 3.3–4.2, Tabelas 2–3 e conclusão"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Discute explicitamente oscilação entre correção funcional e segurança, alucinação e ambiguidade de dependências e limitação de validade externa do benchmark controlado para repositórios maiores. A discussão não resolve as lacunas de controle experimental, mas identifica falhas e limites concretos da proposta.",
+      "localizador": "PDF p. 7–8, impressas 384–385, seção 4.3.1–4.3.3"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa tag do modelo local, hardware, componentes e limite de iterações e declara disponibilização do código e benchmark. Não fornece revisão exata dos pesos, quantização, versões das ferramentas, parâmetros de geração, prompts completos, sementes ou repetições. O link de replicação foi apenas identificado no artigo, sem acesso ou validação.",
+      "localizador": "PDF p. 4–5 e 8, impressas 381–382 e 385, seções 3.2–3.4 e conclusão"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não foi encontrado tratamento de possível presença das implementações OWASP/CWE nos dados de pré-treinamento, verificação de sobreposição ou separação entre exemplos no prompt e casos de avaliação. Script sintético e execução local não constituem controle desse risco por si sós.",
+      "localizador": "PDF p. 1–9, impressas 378–386; especialmente seções 3.1–3.2 e 4.1–4.3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "texto_lido": "fontes/textos/lote/S2129.txt, integralmente em três partes, incluindo referências",
+    "paginas_pdf_abertas": [4, 5, 6, 7, 8],
+    "paginas_impressas_correspondentes": [381, 382, 383, 384, 385],
+    "conferencia_visual": "Tabela 3 e legenda na p. 7 conferidas para a extração agregada, resultados sem diferença por caso e diferentes denominadores de sucesso/falha. Tabela 2 na p. 6 conferida para a evolução das vulnerabilidades e status pós-processamento. Figura 1 na p. 5 conferida para as etapas e feedback. Páginas 4 e 8 abertas para contexto, modelo e limitações; a Tabela 1 é comparação descritiva de trabalhos relacionados. Nenhum valor foi estimado de barras, pontos ou imagens de código.",
+    "limitacoes": "Somente materiais locais fornecidos foram consultados. Não houve acesso à rede, execução de código do artigo, validação do pacote de replicação ou revisão humana. Não foram realizados cálculos derivados."
+  }
+}

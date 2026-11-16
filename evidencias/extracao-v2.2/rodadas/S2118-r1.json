@@ -1,0 +1,506 @@
+{
+  "ficha": {
+    "estudo_id": "S2118",
+    "titulo": "Augmenting LLM Code Translation with Compiler Analysis for C to Triton Kernel Generation",
+    "autores": ["Xiao Qin", "Chunwei Xia", "Zheng Wang"],
+    "versao_lida": "Publicação ACM, ICS Workshops ’26, 2026, páginas impressas 70–74, DOI 10.1145/3774895.3812200; identificador adicional de versão nao_informado.",
+    "texto_fonte": "fontes/textos/lote/S2118.txt",
+    "executor": "Codex CLI 0.169.0",
+    "modelo_executor": "gpt-6.1-sol (esforço high)",
+    "data": "2026-11-16",
+    "prompt_versao": "ex-v2.2",
+    "revisao_humana": "pendente",
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "TritonPilot / WA+Prof (With Analysis + Profiling)",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §§2.1–2.4 e §3; PDF p. 3, Tabelas 1–2 e Figura 1",
+        "observacao": "Pacote híbrido: análise estática externa produz fatos para o prompt; o código C é traduzido, validado e refinado com erros e métricas de perfilamento. Inclui instruções, assinatura e regras de Triton, encadeamento de tradução/compilação/execução e seleção do melhor candidato correto e mais rápido. O contraste com Agent avalia o pacote; não isola análise, classificação de erros ou perfilamento. Comparado com NA e Agent, enriquece contexto e feedback já existentes. Os prompts completos dos comparadores não são reproduzidos, impedindo estabelecer categorias inteiramente novas; mecanismos_acrescentados fica vazio, sem afirmar equivalência de conteúdo entre os prompts. Não há demonstrações few-shot nem cadeia de raciocínio solicitada descritas. A otimização é do código, não uma busca do próprio prompt. Correção e otimização são etapas da tradução, sem avaliação independente de outra tarefa do escopo."
+      },
+      {
+        "nome_original": "Agent",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 72), §3, Configurations; Tabelas 1–2",
+        "observacao": "Agente único com Claude tool-use API; recebe o problema de tradução e pode escrever código, testar e medir desempenho, lendo a saída bruta e escolhendo sua estratégia de repetição. Sem análise de compilador. Não é multiagente. Não há contraste que isole seus mecanismos individuais; prompt completo e regras de seleção de candidatos nao_informado."
+      },
+      {
+        "nome_original": "NA (No Analysis)",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 72), §3, Configurations; Tabelas 1–2",
+        "observacao": "Linha de base gerenciada pelo pipeline: código C e, após falhas, erro classificado e tentativa anterior, com o mesmo orçamento de turnos. Não há condição que retire apenas o feedback classificado mantendo o restante comparável. Contra Agent também muda o controle da iteração; contra WA+Prof mudam fatos da análise e perfilamento. Assinatura, regras completas de prompt e política de seleção de NA nao_informado."
+      },
+      {
+        "nome_original": "Prompt Construction",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (impressa 71), §2.2; PDF p. 3 (impressa 72), §3 e Tabelas 1–2",
+        "observacao": "Renderização dos fatos de análise em linguagem natural estruturada, junto ao código, assinatura e regras. Mecanismos descrevem a condição completa WA+Prof. Fatos de paralelização enriquecem contexto já existente no código-fonte. O JSON é a representação interna da análise, não um formato de resposta exigido do LLM. A análise não é isolada do perfilamento nas condições de resultados."
+      },
+      {
+        "nome_original": "Generation and Iterative Refinement",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "PDF p. 2 (impressa 71), §2.3; PDF p. 3 (impressa 72), Tabela 1, First-try passes",
+        "observacao": "Acrescenta ao prompt inicial retorno específico do erro e código anterior, com reinício de contexto após a sexta tentativa. Mecanismos cobrem o pacote WA+Prof. First-try passes versus aprovação final descreve acumulação de tentativas, sem condição independente de igual orçamento sem refinamento. O ganho do pacote não é efeito isolado desse componente."
+      },
+      {
+        "nome_original": "Profiling-Guided Optimization",
+        "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §2.4; PDF p. 4 (impressa 73), §4.2 e Tabela 3",
+        "observacao": "Após a primeira solução correta, devolve gargalo classificado, métricas NCU e código, revalida e seleciona o melhor correto e mais rápido. A seleção por desempenho acrescenta amostragem em relação ao primeiro kernel correto; feedback e contexto já estavam nas tentativas de correção. Antes/depois da Tabela 3 é contribuição por fase, não comparação com igual orçamento sem feedback de perfilamento. Não recebe extração por cobertura de componente isolado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Unified Analysis (PET/isl; LLVM DependenceAnalysis)",
+        "natureza": "outro",
+        "descricao": "Análise estática externa, com PET/isl e LLVM 17 como alternativa quando a análise poliédrica não se aplica; deriva dimensões paralelizáveis, dependências WAR, padrões de acesso e reduções. A computação da análise não é prompting; sua inserção no prompt integra Prompt Construction.",
+        "localizador": "PDF p. 2 (impressa 71), §2 e §2.1"
+      },
+      {
+        "nome_original": "NVIDIA Nsight Compute (NCU)",
+        "natureza": "outro",
+        "descricao": "Medição externa de throughput SM/memória, ocupação de warps e acertos de cache. O perfilamento não é prompting; o retorno das métricas ao modelo é o componente de feedback.",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §2.4"
+      },
+      {
+        "nome_original": "Correctness validation and benchmarking",
+        "natureza": "outro",
+        "descricao": "Compilação e execução externa contra referência C e comparação elemento a elemento em FP32. Medição de speedup com aquecimento, reinicialização dos dados e sincronização GPU; esses procedimentos não são técnicas de prompting.",
+        "localizador": "PDF p. 2 (impressa 71), §2.3; PDF p. 3 (impressa 72), §3, Evaluation methodology"
+      },
+      {
+        "nome_original": "Up to 10 correctness turns + 3 optimization turns",
+        "natureza": "orcamento",
+        "descricao": "Limite de tentativas/turnos; todas as configurações têm o mesmo orçamento declarado. A alocação de turnos não é uma técnica de prompting.",
+        "localizador": "PDF p. 2 (impressa 71), §§2.3–2.4; PDF p. 3 (impressa 72), §3, Configurations"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Claude Sonnet 4",
+        "versao": "Sonnet 4; snapshot/API model ID nao_informado",
+        "uso": "LLM de todas as configurações, incluindo Agent, NA e WA+Prof; temperatura, top-p, limite de tokens e número de execuções independentes de geração nao_informado.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Platforms e Configurations"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "PolyBench/C",
+        "versao": "4.2.1 na referência [16]; confirmação adicional da versão executada nao_informado",
+        "quantidade": 30,
+        "descricao": "Kernels numéricos; mesmos kernels em tamanhos padrão 1× (N=60–120) e 8× (N=480–960). Dois tamanhos não são conjuntos disjuntos de kernels. Três configurações comparadas. Denominador de aprovação 30 por condição; subconjuntos de desempenho diferem e não são integralmente explicados.",
+        "localizador": "PDF p. 3 (impressa 72), §3 e Tabelas 1–2; PDF p. 5 (impressa 74), referência [16]"
+      },
+      {
+        "nome": "TSVC",
+        "versao": "nao_informado",
+        "quantidade": 151,
+        "descricao": "Kernels de loops com travessias lineares, reduções, endereçamento indireto e dependências entre iterações. Só WA+Prof; não há comparação executada de prompting nesse conjunto.",
+        "localizador": "PDF p. 3 (impressa 72), §3; PDF p. 4 (impressa 73), §4.3"
+      },
+      {
+        "nome": "Rodinia / ECP proxy applications",
+        "versao": "nao_informado",
+        "quantidade": 8,
+        "descricao": "Rodinia: SRAD, lud, gaussian, lavaMD, hotspot, pathfinder; ECP: miniMD LJ force e miniFE SpMV. Só WA+Prof. A distribuição da Tabela 4 é seis Rodinia e dois ECP, embora a prosa de §4.4 descreva outro agrupamento, registrado em heterogeneidade.",
+        "localizador": "PDF p. 3 (impressa 72), §3; PDF p. 4 (impressa 73), §4.4 e Tabela 4"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass rate / correctness",
+        "definicao": "Fração de kernels aprovados na comparação elemento a elemento contra C com entradas aleatórias idênticas e tolerâncias FP32 por kernel; padrão erro absoluto <10−3 e relativo <10−4, relaxado para recorrências longas, por exemplo lu absoluto <5.0. Número de entradas aleatórias/testes por kernel nao_informado. PolyBench: denominador 30; TSVC: 151; aplicações: 8.",
+        "localizador": "PDF p. 2 (impressa 71), §2.3; PDF p. 3 (impressa 72), §3 e Tabelas 1–2; PDF p. 4 (impressa 73), §§4.3–4.4"
+      },
+      {
+        "nome": "First-try passes",
+        "definicao": "Contagem de kernels aprovados na primeira tentativa. Não representa número de execuções independentes do experimento; o corpus PolyBench tem 30 kernels, e o TSVC 151.",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1; PDF p. 4 (impressa 73), §4.3"
+      },
+      {
+        "nome": "Median speedup / Mean speedup / WA/ST",
+        "definicao": "Fator de aceleração dos kernels Triton frente ao C de uma thread. Tempos medidos em 50 iterações após 5 de aquecimento, incluindo reinicialização dos arrays; Triton inclui cuda.synchronize(). A forma de resumir as iterações e os denominadores exatos das médias/medianas nao_informado; não se assume o total do corpus como denominador. Median speedup e Mean speedup são métricas distintas.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Evaluation methodology e Tabelas 1–2; PDF p. 4 (impressa 73), Tabelas 3–4"
+      },
+      {
+        "nome": "# Kernels > 1×",
+        "definicao": "Contagem/fração de kernels com aceleração maior que uma vez; os denominadores impressos variam por configuração e tamanho e diferem das contagens de aprovação. A seleção desses subconjuntos não é integralmente explicada.",
+        "localizador": "PDF p. 3 (impressa 72), Tabelas 1–2"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "C",
+        "versao": "nao_informado",
+        "uso": "Código de origem e referência CPU; compilador experimental GCC 11.4.0.",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §§2.2–2.3 e §3"
+      },
+      {
+        "nome": "Triton",
+        "versao": "3.1.0",
+        "uso": "Linguagem/alvo dos kernels GPU gerados a partir de C.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Platforms"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O estudo identifica tradução incorreta por falta de raciocínio preciso sobre dependências: paralelização insegura, data races e falta de sincronização. Também classifica erros de compilação/execução e numéricos. Trata-se da correção dos kernels; não há avaliação de cibersegurança.",
+        "localizador": "PDF p. 1 (impressa 70), §1; PDF p. 2 (impressa 71), §2.3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O refinamento de desempenho pode quebrar a correção; a capacidade de reestruturar código mantendo correção limita o ciclo de perfilamento.",
+        "localizador": "PDF p. 4 (impressa 73), §4.2 e Limitations em §4.4"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O mesmo kernel pode passar ou falhar entre execuções. O estudo não informa número de execuções independentes de geração nem dispersão da taxa de aprovação.",
+        "localizador": "PDF p. 4 (impressa 73), Limitations em §4.4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitações de cobertura: padrões complexos fora da análise poliédrica e casos que exigem otimizações específicas de domínio; gargalos de lançamento GPU em problemas pequenos. Desempenho baixo é tratado como limitação técnica, sem custo monetário ou de tokens quantificado.",
+        "localizador": "PDF p. 4 (impressa 73), §§4.1, 4.3 e 4.4"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Pacote TritonPilot: inserir fatos do compilador sobre paralelismo, dependências, memória e reduções, orientar novas tentativas por erros e refinar com perfilamento. Há comparação WA+Prof com Agent e NA; somente o pacote híbrido é contrastado, sem efeito isolado de cada mecanismo.",
+        "avaliada": "sim",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §§2.1–2.4 e §3; Tabelas 1–2"
+      },
+      {
+        "descricao": "Validar o código com entradas idênticas às da referência e tolerâncias por kernel, devolver erro classificado e tentativa anterior, e reiniciar o contexto após a sexta tentativa para evitar acumulação de erros. Não há comparação que retire apenas esses controles.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 2 (impressa 71), §2.3; PDF p. 3 (impressa 72), §3, Evaluation methodology"
+      },
+      {
+        "descricao": "Revalidar e medir cada candidato otimizado; substituir o melhor atual somente se correto e mais rápido. Resultados antes/depois são cumulativos e não isolam essa salvaguarda contra condição sem ela.",
+        "avaliada": "nao",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §2.4; PDF p. 4 (impressa 73), §4.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão em desempenho a 1×: mediana Agent 0.60×, NA 0.88×, WA+Prof 0.76×; média Agent 0.87×, NA 1.64×, WA+Prof 1.24×. Portanto, WA+Prof não supera NA nessas métricas, embora tenha maior aprovação. A afirmação ampla no resumo de superioridade em correção e desempenho não cobre uniformemente todas as configurações.",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1, Median speedup e Mean speedup; PDF p. 1 (impressa 70), última frase do resumo"
+      },
+      {
+        "descricao": "Denominadores de correção e desempenho divergem. Tabela 1: aprovações Agent 24/30, NA 28/30, WA+Prof 29/30, mas # Kernels > 1× usa 7/23, 12/28 e 11/29. Tabela 2: aprovações 17/30, 26/30 e 27/30, mas # Kernels > 1× usa 13/15, 14/20 e 18/21. O texto de §4.2 explicita 21 kernels medidos a 8× para perfilamento; não explica todas as exclusões de desempenho. Não se substitui o denominador dessas métricas pelo total aprovado nem se compara a mediana como se cobrisse populações idênticas.",
+        "localizador": "PDF p. 3 (impressa 72), Tabelas 1–2; PDF p. 4 (impressa 73), §4.2"
+      },
+      {
+        "descricao": "A Tabela 3 contém exemplos representativos de melhoria e compara primeiro kernel correto com melhor após iterações NCU, não uma ablação com igual orçamento. A prosa informa melhoria em 9 de 29 kernels a 1× e 12 de 21 medidos a 8×. A seleção dos casos da tabela e a retenção do melhor impedem tratá-la como amostra neutra ou efeito isolado do feedback.",
+        "localizador": "PDF p. 4 (impressa 73), §4.2 e legenda da Tabela 3"
+      },
+      {
+        "descricao": "TSVC e aplicações têm apenas WA+Prof, sem outra condição de prompting executada: TSVC 143/151 (95%), 91 aprovações iniciais, speedup médio 2.78× e máximo 267×; aplicações 6 de 8 passam. O contraste de TSVC com trabalhos anteriores em §4.3 é somente narrativo. Esses conjuntos não geram nova comparação por cobertura de benchmark.",
+        "localizador": "PDF p. 3 (impressa 72), final de Configurations em §3; PDF p. 4 (impressa 73), §§4.3–4.4 e Tabela 4"
+      },
+      {
+        "descricao": "Distribuição das aplicações inconsistente na prosa: §3 lista seis kernels Rodinia e dois ECP e a Tabela 4 confirma essa atribuição; §4.4 diz ‘3 Rodinia’ e ‘5 ECP/Rodinia’. Preservam-se os rótulos impressos, sem reinterpretar a distribuição por suposição.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Benchmarks; PDF p. 4 (impressa 73), §4.4 e Tabela 4"
+      },
+      {
+        "descricao": "Na Tabela 4, gaussian passa correção com WA/ST 0.6×, enquanto hotspot e lavaMD falham. Aprovação funcional não assegura aceleração; o estudo atribui as falhas a máscaras/fronteiras em stencil e interações irregulares com listas de vizinhos.",
+        "localizador": "PDF p. 4 (impressa 73), Tabela 4 e §4.4"
+      },
+      {
+        "descricao": "A conclusão usa a expressão ‘stronger correctness guarantees’, mas os resultados são aprovações empíricas em testes com tolerância, e o próprio estudo reconhece não determinismo. Não se registra prova formal de correção nem garantia para entradas não testadas.",
+        "localizador": "PDF p. 5 (impressa 74), §6; PDF p. 4 (impressa 73), Limitations; PDF p. 3 (impressa 72), Evaluation methodology"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ambiente: NVIDIA RTX 3090 (24 GB, 82 SMs, 936 GB/s), dois Intel Xeon Gold 5218R, PyTorch 2.5.1, Triton 3.1.0, CUDA 12.4, GCC 11.4.0. Os speedups são de execução do kernel frente ao C single-threaded, não de tempo de tradução ou produtividade do programador.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Platforms e Evaluation methodology"
+      },
+      {
+        "descricao": "O sistema tem aproximadamente 14K linhas de Python. O estudo afirma reduzir manutenção de prompts com renderização independente de padrão, mas não mede esforço humano de manutenção. Não foi acessado artefato de replicação nem qualquer endereço impresso no artigo.",
+        "localizador": "PDF p. 2 (impressa 71), §2 e §2.2"
+      },
+      {
+        "descricao": "Temperatura, top-p, orçamento de tokens, snapshot do modelo, número de execuções independentes de geração, sementes e prompts completos nao_informado após leitura integral. As 50 iterações e 5 de aquecimento referem-se ao benchmark de desempenho, não a repetições da geração por LLM. Contaminação do benchmark no pré-treinamento nao_informado.",
+        "localizador": "PDF pp. 1–5 (impressas 70–74), busca integral; descrição de método em §§2–3"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We present TritonPilot, a compiler-assisted LLM framework for translating C loop nests to Triton kernels.",
+        "localizador": "PDF p. 1 (impressa 70), resumo"
+      },
+      {
+        "trecho": "Given a C source file, TritonPilot extracts loop nests, analyzes their parallelization properties, constructs a structured prompt, invokes an LLM to generate Triton code, and refines performance using GPU profiling feedback.",
+        "localizador": "PDF p. 2 (impressa 71), §2"
+      },
+      {
+        "trecho": "TritonPilot is implemented in approximately 14K lines of Python, using PET/isl [20] for polyhedral analysis and LLVM 17 [13] for fallback dependence analysis.",
+        "localizador": "PDF p. 2 (impressa 71), §2"
+      },
+      {
+        "trecho": "The original C source code and the loop body to translate.",
+        "localizador": "PDF p. 2 (impressa 71), §2.2, primeiro item de The prompt includes"
+      },
+      {
+        "trecho": "Analysis facts: valid/invalid parallelization dimensions with reasons, WAR dependence warnings, detected memory access patterns, and reduction types.",
+        "localizador": "PDF p. 2 (impressa 71), §2.2, segundo item"
+      },
+      {
+        "trecho": "The required Triton function signature and coding rules (e.g., tl.constexpr for dimensions, vectorized access patterns, avoiding unsupported Python constructs in @triton.jit kernels).",
+        "localizador": "PDF p. 2 (impressa 71), §2.2, terceiro item"
+      },
+      {
+        "trecho": "Each category triggers a targeted retry prompt with error-specific feedback and the previous attempt’s code.",
+        "localizador": "PDF p. 2 (impressa 71), §2.3"
+      },
+      {
+        "trecho": "This process repeats for up to 10 attempts, with a context reset after the 6th attempt to avoid error accumulation in the conversation history.",
+        "localizador": "PDF p. 2 (impressa 71), §2.3"
+      },
+      {
+        "trecho": "The bottleneck classification, raw metrics, and current code are fed back to the LLM.",
+        "localizador": "PDF p. 2 (impressa 71), §2.4"
+      },
+      {
+        "trecho": "The optimized kernel is re-validated and re-benchmarked; it replaces the current best only if both correct and faster.",
+        "localizador": "PDF pp. 2–3 (impressas 71–72), §2.4, frase entre páginas"
+      },
+      {
+        "trecho": "This loop runs up to 3 iterations, with NCU results cached when the implementation is unchanged.",
+        "localizador": "PDF p. 3 (impressa 72), continuação de §2.4"
+      },
+      {
+        "trecho": "The agent can write Triton code, run correctness tests, and run benchmarks, seeing the full raw output at each step.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Agent"
+      },
+      {
+        "trecho": "It decides its own retry strategy with no external guidance.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Agent"
+      },
+      {
+        "trecho": "No compiler analysis is provided.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Agent"
+      },
+      {
+        "trecho": "On failure, it receives classified error feedback (e.g., “numerical error, max_error=0.01”) and the previous attempt.",
+        "localizador": "PDF p. 3 (impressa 72), §3, NA"
+      },
+      {
+        "trecho": "All three configurations use the same LLM (Claude Sonnet 4), the same test infrastructure, and the same C reference implementations, ensuring a fair comparison.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Configurations"
+      },
+      {
+        "trecho": "On TSVC and application kernels, we report WA+Prof results only.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Configurations"
+      },
+      {
+        "trecho": "Speedups are measured over 50 iterations after 5 warmup iterations.",
+        "localizador": "PDF p. 3 (impressa 72), §3, Evaluation methodology"
+      },
+      {
+        "trecho": "Correctness is determined by element-wise comparison with the C reference using per-kernel FP32 tolerance thresholds (default: absolute < 10−3, relative < 10−4; relaxed for kernels with long recurrence chains, e.g., lu: absolute < 5.0).",
+        "localizador": "PDF p. 3 (impressa 72), §3, Evaluation methodology; expoentes transcritos da imagem"
+      },
+      {
+        "trecho": "As a result, they often produce incorrect or inefficient code, including unsafe parallelization that leads to data races, suboptimal kernel structures, and missing synchronization.",
+        "localizador": "PDF p. 1 (impressa 70), §1"
+      },
+      {
+        "trecho": "Correctness is preserved: each optimized kernel is re-validated, and the majority of optimization attempts that break correctness are automatically rejected.",
+        "localizador": "PDF p. 4 (impressa 73), §4.2"
+      },
+      {
+        "trecho": "LLM nondeterminism affects results: the same kernel may pass or fail across runs.",
+        "localizador": "PDF p. 4 (impressa 73), Limitations em §4.4"
+      },
+      {
+        "trecho": "The profiling feedback loop is limited by the LLM’s ability to restructure code without breaking correctness, motivating future integration with search-based or RL-based methods.",
+        "localizador": "PDF p. 4 (impressa 73), Limitations em §4.4"
+      },
+      {
+        "trecho": "At 1× sizes, median speedups are modest across all configurations due to GPU launch overhead at small N.",
+        "localizador": "PDF p. 4 (impressa 73), §4.1, Performance; N conferido na imagem"
+      },
+      {
+        "trecho": "The 8 failing kernels involve complex patterns such as linked-list traversals, computed gotos, and deeply nested conditional recurrences that fall outside the scope of polyhedral analysis.",
+        "localizador": "PDF p. 4 (impressa 73), §4.3"
+      },
+      {
+        "trecho": "Pass rate 24/30 (80%) 28/30 (93%) 29/30 (97%)",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1, linha Pass rate; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "Median speedup 0.60× 0.88× 0.76×",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1, linha Median speedup; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "Mean speedup 0.87× 1.64× 1.24×",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1, linha Mean speedup; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "# Kernels > 1× 7/23 12/28 11/29",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 1, última linha; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "Pass rate 17/30 (57%) 26/30 (87%) 27/30 (90%)",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 2, linha Pass rate; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "# Kernels > 1× 13/15 14/20 18/21",
+        "localizador": "PDF p. 3 (impressa 72), Tabela 2, última linha; colunas Metric, Agent, NA, WA+Prof"
+      },
+      {
+        "trecho": "Profiling feedback improved 9 of 29 kernels at 1× and 12 of 21 benchmarked kernels at 8× (Table 3).",
+        "localizador": "PDF p. 4 (impressa 73), §4.2"
+      },
+      {
+        "trecho": "“Before” = first correct kernel; “After” = best after NCU-guided iterations.",
+        "localizador": "PDF p. 4 (impressa 73), legenda da Tabela 3"
+      },
+      {
+        "trecho": "TritonPilot passes 143/151 kernels (95%), with 91 passing on the first attempt.",
+        "localizador": "PDF p. 4 (impressa 73), §4.3"
+      },
+      {
+        "trecho": "The mean speedup over single-threaded C is 2.78×, with a maximum of 267×.",
+        "localizador": "PDF p. 4 (impressa 73), §4.3"
+      },
+      {
+        "trecho": "To evaluate generalization beyond loop benchmarks, we apply TritonPilot to 3 Rodinia [7] and 5 ECP/Rodinia application kernels (Table 4).",
+        "localizador": "PDF p. 4 (impressa 73), §4.4"
+      },
+      {
+        "trecho": "6 of 8 pass correctness with analysis guidance.",
+        "localizador": "PDF p. 4 (impressa 73), §4.4"
+      },
+      {
+        "trecho": "Rodinia gaussian 0.6× Y",
+        "localizador": "PDF p. 4 (impressa 73), Tabela 4, linha gaussian; colunas Source, Kernel, WA/ST, Pass?"
+      },
+      {
+        "trecho": "This demonstrates that compiler analysis provides stronger correctness guarantees than autonomous tool use.",
+        "localizador": "PDF p. 5 (impressa 74), §6"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "TritonPilot / WA+Prof (With Analysis + Profiling)",
+      "mecanismos": ["instrucao", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Agent: agente autônomo Claude Sonnet 4 com tool-use, sem análise de compilador",
+      "modelo": "Claude Sonnet 4; snapshot nao_informado",
+      "benchmark": "PolyBench/C, 30 kernels, tamanhos padrão 1×",
+      "metrica": "Pass rate",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 80, "intervencao": 97},
+      "denominador": {"baseline": 30, "intervencao": 30},
+      "condicoes": "Tabela 1 imprime Agent 24/30 (80%) e WA+Prof 29/30 (97%); preservados percentuais arredondados da fonte. Mesmo LLM, infraestrutura de testes e referências C; até 10 turnos de correção e 3 de otimização por configuração. N padrão 60–120. Agent decide como repetir e lê saída bruta; WA+Prof inclui fatos estáticos, erros classificados, regras Triton e feedback NCU. Pacote híbrido: o contraste não isola análise ou perfilamento. Código C fornecido nas condições comparadas já constitui contexto; o enriquecimento acrescenta conteúdo de contexto e feedback, não demonstra uma categoria nova. Prompts completos dos comparadores nao_informado. Correção por comparação elemento a elemento FP32 contra referência C, tolerâncias por kernel, padrão absoluto <10−3 e relativo <10−4, relaxado para recorrências longas (lu: absoluto <5.0). Número de testes/entradas por kernel, sementes, parâmetros de decodificação e execuções independentes de geração nao_informado. As 50 iterações após 5 aquecimentos são medições de tempo, não repetições de aprovação. GPU RTX 3090; GCC 11.4.0, Triton 3.1.0, PyTorch 2.5.1, CUDA 12.4. Não se interpreta aprovação em testes como prova de correção. Valores e cabeçalhos conferidos visualmente em p-03.png.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O resumo e a conclusão destacam aprovação e desempenho e dois comparadores, sem uma métrica e um comparador únicos; não há principal_declarado elegível. Primeira tabela com contraste: Tabela 1; primeira métrica: Pass rate; único modelo: Claude Sonnet 4; primeira linha de base nas colunas: Agent. O agregado impresso de 30 kernels em 1× é usado. Não há outra técnica focal nem tarefa independente não representada; componentes não têm contrafactual isolado, e antes/depois cumulativo não completa o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 3 (impressa 72), Tabela 1, linha Pass rate, colunas Agent e WA+Prof; condições em §§2.2–2.4 e §3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Pass rate 24/30 (80%) 28/30 (93%) 29/30 (97%)",
+          "localizador": "PDF p. 3 (impressa 72), Tabela 1; colunas Metric, Agent, NA, WA+Prof"
+        },
+        {
+          "trecho": "All three configurations use the same LLM (Claude Sonnet 4), the same test infrastructure, and the same C reference implementations, ensuring a fair comparison.",
+          "localizador": "PDF p. 3 (impressa 72), §3, Configurations"
+        },
+        {
+          "trecho": "Up to 10 correctness turns + 3 optimization turns.",
+          "localizador": "PDF p. 3 (impressa 72), §3, Agent; NA informa Same turn budget"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito de traduzir loops C para kernels Triton por LLM com fatos de compilador e perfilamento; contribuições e avaliação são identificadas. Citação: ‘We present TritonPilot, a compiler-assisted LLM framework for translating C loop nests to Triton kernels.’",
+      "localizador": "PDF p. 1 (impressa 70), resumo e contribuições em §1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve análise, construção do prompt, categorias de erro, limite de tentativas, reinício de contexto, seleção por perfilamento, hardware e validação. Faltam prompts completos, número de execuções independentes de geração, sementes, quantidade de entradas de teste e explicação dos subconjuntos de desempenho. Citação: ‘Each category triggers a targeted retry prompt with error-specific feedback and the previous attempt’s code.’",
+      "localizador": "PDF pp. 2–3 (impressas 71–72), §§2–3; PDF p. 3, Tabelas 1–2"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Agent e NA são comparadores no mesmo benchmark, modelo, orçamento declarado e infraestrutura; suficientes para contrastar pacotes. Não isolam análise de compilador, feedback classificado e perfilamento separadamente. TSVC e aplicações só têm WA+Prof. Citações: ‘All three configurations use the same LLM (Claude Sonnet 4), the same test infrastructure, and the same C reference implementations, ensuring a fair comparison.’ e ‘On TSVC and application kernels, we report WA+Prof results only.’",
+      "localizador": "PDF p. 3 (impressa 72), §3 e Tabelas 1–2; PDF p. 4 (impressa 73), Tabela 3"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Aprovação por testes com tolerância e medição temporal são descritas, com denominadores de correção. Percentuais de aprovação são consistentes com arredondamento; média e mediana são distintas. Os denominadores de # Kernels > 1× diferem das aprovações (por exemplo Agent 24/30 e 7/23 em 1×), e a fonte não esclarece todas as exclusões nem os denominadores exatos de médias e medianas. Não apresenta variabilidade da aprovação entre execuções apesar de reconhecer não determinismo. Citação: ‘Speedups are measured over 50 iterations after 5 warmup iterations.’",
+      "localizador": "PDF p. 3 (impressa 72), §3, Evaluation methodology e Tabelas 1–2; PDF p. 4 (impressa 73), Limitations"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Discute não determinismo, limites da análise e quebra de correção na otimização, mas não quantifica o efeito entre execuções nem trata contaminação e seleção dos subconjuntos de desempenho. Citação: ‘LLM nondeterminism affects results: the same kernel may pass or fail across runs.’",
+      "localizador": "PDF p. 4 (impressa 73), §§4.2–4.4 e Limitations"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa família/geração do modelo, versões de ferramentas, hardware, conjuntos e ingredientes dos prompts. Snapshot do LLM, parâmetros de decodificação, prompts integrais, sementes e repetições de geração nao_informado. Não há endereço de artefato próprio de replicação informado no texto completo; nenhum recurso externo foi acessado. Citação: ‘We use PyTorch 2.5.1, Triton 3.1.0, CUDA 12.4, GCC 11.4.0, and Claude Sonnet 4 [1] as the underlying LLM for all configurations.’",
+      "localizador": "PDF p. 3 (impressa 72), §3, Platforms; PDF p. 2 (impressa 71), §2.2; busca integral PDF pp. 1–5"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura integral, não há discussão nem controle relatado sobre presença de PolyBench/C, TSVC ou aplicações nos dados de treino do LLM. O uso de entradas aleatórias na validação não é apresentado como controle de contaminação e não permite inferir ausência de memorização.",
+      "localizador": "PDF pp. 1–5 (impressas 70–74), texto completo; descrição dos benchmarks e avaliação em §3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto integral de S2118.txt lido em partes, incluindo referências. Imagens de todas as cinco páginas abertas; conferidas visualmente a Figura 1 e as Tabelas 1–4, incluindo cabeçalhos, legendas, escalas, condições e denominadores. Uma comparação numérica selecionada pela regra de ordem; demais números em heterogeneidade conferidos nas páginas correspondentes. Atividade de extração por IA, sem revisão humana declarada, sem rede e sem execução de código de terceiros.",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5],
+    "paginas_impressas": [70, 71, 72, 73, 74],
+    "imagens": [
+      "fontes/artigos/paginas/S2118/p-01.png",
+      "fontes/artigos/paginas/S2118/p-02.png",
+      "fontes/artigos/paginas/S2118/p-03.png",
+      "fontes/artigos/paginas/S2118/p-04.png",
+      "fontes/artigos/paginas/S2118/p-05.png"
+    ]
+  }
+}

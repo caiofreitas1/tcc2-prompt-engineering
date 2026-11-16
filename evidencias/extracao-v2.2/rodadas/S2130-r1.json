@@ -1,0 +1,238 @@
+{
+  "ficha": {
+    "estudo_id": "S2130",
+    "titulo": "GPT-3-Powered Type Error Debugging: Investigating the Use of Large Language Models for Code Repair",
+    "autores": ["Francisco Ribeiro", "José Nuno Castro de Macedo", "Kanae Tsushima", "Rui Abreu", "João Saraiva"],
+    "referencia": "SLE ’23, 2023, p. 111–124. DOI: 10.1145/3623476.3623522.",
+    "versao_lida": "Versão publicada nos anais SLE ’23, 14 páginas; recebida em 2023-07-07 e aceita em 2023-09-01, conforme PDF, p. 14, impressa 124. Snapshot dos serviços de modelo e datas das consultas: nao_informado.",
+    "texto_fonte": "fontes/textos/lote/S2130.txt",
+    "executor": "Codex CLI 0.169.0",
+    "modelo_executor": "gpt-6.1-sol (esforço high)",
+    "data": "2026-11-16",
+    "prompt_versao": "ex-v2.2",
+    "revisao_humana": "pendente",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Fill",
+        "mecanismos": ["contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 4–5, impressas 114–115, §3.2.1; p. 7–9, impressas 117–119, §§5–5.3.2 e Tabelas 1–2",
+        "observacao": "Preenche [insert] no código original após localização estática de possíveis erros. Código-fonte é contexto; marcador delimita a região a completar. Não há exemplos resolvidos nem instrução textual adicional no prompt mostrado. Amostragem descreve múltiplos candidatos/execuções e sucesso obtido por patches que satisfazem testes, sem votação. O isolamento é do pacote operacional comparado às outras estratégias no mesmo conjunto, não do marcador ou do contexto isoladamente. Pacote híbrido com análise estática e modo de API; não atribuir diferenças somente ao prompting. Fill serve de base informacional para descrever ingredientes adicionais de Choose e Instruct."
+      },
+      {
+        "nome_original": "Choose",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 5, impressa 115, §3.2.2; p. 7–8, impressas 117–118, §§5–5.2, Tabelas 1–2",
+        "observacao": "Exercício de múltipla escolha com código contendo <mask>, candidatos do OCaml LSP filtrados por unificação e dois exercícios resolvidos antes de cada prompt. Exemplos de código contam simultaneamente como exemplos e contexto. Em relação ao código com lacuna de Fill, acrescenta instrução de escolha e demonstrações; contexto e restrições já existem em Fill e são enriquecidos por candidatos e opções numeradas. A seleção é entre opções de código fornecidas, não uma votação entre agentes. Amostragem também abrange o conjunto de patches/tentativas validado por testes. Contrafactual entre pacotes, incluindo preparação estática e modo Complete; não isola o efeito dos dois exemplos."
+      },
+      {
+        "nome_original": "Instruct",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 5–6, impressas 115–116, §3.2.3; p. 7–8, impressas 117–118, Tabelas 1–2",
+        "observacao": "Modo Edit com programa contendo underscore e instrução que informa o tipo inferido; quando a localização falha, envia o programa original com Fix the bug. Em relação a Fill, acrescenta instrução explícita e especializa as restrições pela informação de tipo. Não há demonstrações resolvidas descritas para esta estratégia. Amostragem corresponde ao conjunto de patches/tentativas e sua avaliação por testes. Pacote híbrido: análise estática, prompt e modelos específicos de edição variam juntos; o contraste não identifica um efeito exclusivo da instrução ou do tipo inferido."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Type Error Location; Inlining; Type Unification",
+        "natureza": "outro",
+        "descricao": "Análise e transformação estática por AST, typechecker, Obj.magic e OCaml LSP. Localizam expressões, inferem tipos e filtram sugestões antes de montar prompts. O texto diz que GPT-3 nunca vê a versão inlined. O código e as informações efetivamente enviados ao modelo estão classificados nos mecanismos das estratégias; os algoritmos estáticos não são técnicas de prompting isoladas.",
+        "localizador": "PDF p. 3–4, impressas 113–114, §3.1 e Figura 1"
+      },
+      {
+        "nome_original": "Model Bias / Choose C + Bias",
+        "natureza": "decodificacao",
+        "descricao": "Ponderação de tokens pelo parâmetro bias, com frequências de repositórios OCaml e pesos heurísticos entre 1 e 3. A variante também retira as sugestões do prompt textual, logo o contraste com Choose mistura mudança do prompt e intervenção de decodificação. Não é contado como técnica focal adicional de prompting nem recebe extração de efeito de prompting.",
+        "localizador": "PDF p. 6–7, impressas 116–117, §3.3 e Figura 2; p. 8, impressa 118, coluna Choose C + Bias das Tabelas 1–2"
+      },
+      {
+        "nome_original": "temperature; top_p; generated tokens; stop sequence",
+        "natureza": "decodificacao",
+        "descricao": "Experimentos usam temperature 0.7 para modelos de texto e 0 para código, top_p 1 em ambos. Choose limita tokens gerados; limite numérico não informado. Stop sequence é descrita como possibilidade, sem sequência e uso experimental explicitados. Essas configurações não são mecanismos de prompting.",
+        "localizador": "PDF p. 5, impressa 115, final do §3.2.2; p. 7, impressa 117, §5.1"
+      },
+      {
+        "nome_original": "Without GPT-3 / No GPT-3",
+        "natureza": "outro",
+        "descricao": "Substitui a interação com o modelo por integração e teste de cada sugestão filtrada do LSP. Coluna das Tabelas 1–2 mede quantas sugestões compilam e passam o teste, em vez da contagem de sucessos em três execuções de um modelo. Não entra como técnica de prompting.",
+        "localizador": "PDF p. 6, impressa 116, §3.2.4; p. 7–8, impressas 117–118, §5.1 e Tabelas 1–2"
+      },
+      {
+        "nome_original": "Rite; Seminal",
+        "natureza": "outro",
+        "descricao": "Comparadores externos sem prompting: Rite aprende modificações de código e Seminal busca modificações sintáticas. Patches disponíveis no repositório de Rite são reavaliados pelo framework de testes deste estudo. Não são linhas de base de prompting para a seleção de extracoes.",
+        "localizador": "PDF p. 10–12, impressas 120–122, §§5.4–6"
+      },
+      {
+        "nome_original": "Quickcheck validation",
+        "natureza": "outro",
+        "descricao": "Geração automática de entradas e comparação de saídas com a versão corrigida pelo usuário; não há ciclo relatado que devolva os erros de teste ao LLM para refinar o patch. Assim, validação não foi classificada como feedback iterativo.",
+        "localizador": "PDF p. 9–10, impressas 119–120, §§5.3.2–5.3.4"
+      }
+    ],
+    "modelos": [
+      {"nome": "text-davinci-003", "versao": "003; snapshot nao_informado", "uso": "Modelo textual explicitamente citado para Insert/Fill; a coluna T de Choose é identificada apenas como modelo de texto, sem mapeamento inequívoco a um identificador no relato experimental.", "localizador": "PDF p. 4, impressa 114, §3.2.1; p. 7–8, impressas 117–118, §5.1 e Tabela 1"},
+      {"nome": "code-davinci-002", "versao": "002; snapshot nao_informado", "uso": "Modelo de código explicitamente citado para Insert/Fill; identificador específico de Choose C não explicitado separadamente.", "localizador": "PDF p. 4, impressa 114, §3.2.1; p. 7–8, impressas 117–118, §5.1 e Tabela 1"},
+      {"nome": "text-davinci-edit-001", "versao": "001; snapshot nao_informado", "uso": "Modelo textual de Edit/Instruct.", "localizador": "PDF p. 5, impressa 115, §3.2.3"},
+      {"nome": "code-davinci-edit-001", "versao": "001; snapshot nao_informado", "uso": "Modelo de código de Edit/Instruct.", "localizador": "PDF p. 5, impressa 115, §3.2.3"},
+      {"nome": "GPT-3, Choose T/C", "versao": "nao_informado", "uso": "Variantes de texto e código da operação Complete; não transferida automaticamente a versão nomeada para outro modo.", "localizador": "PDF p. 5, impressa 115, §3.2.2; p. 7–8, impressas 117–118, §5.1 e Tabelas 1–2"}
+    ],
+    "benchmarks": [
+      {"nome": "Simple Programs", "versao": "nao_informado", "quantidade": 15, "descricao": "Programas OCaml de uma disciplina introdutória japonesa e Skalpel, previamente usados em depurador de tipos; 29–117 tokens e 2–8 linhas. Cada estratégia executada três vezes por programa; não confundir quinze programas com quarenta e cinco tentativas.", "localizador": "PDF p. 7–8, impressas 117–118, §5.1 e Tabela 1"},
+      {"nome": "Dijkstra Algorithm", "versao": "nao_informado", "quantidade": 10, "descricao": "Programas com erros introduzidos deliberadamente, cerca de 2300 tokens e 170 linhas cada; metodologia de três execuções por programa. Não é um conjunto adicional de projetos reais.", "localizador": "PDF p. 8, impressa 118, §5.2 e Tabela 2"},
+      {"nome": "Rite OCaml repository, large-scale evaluation", "versao": "nao_informado", "quantidade": 1318, "descricao": "Repositório original de 4500 programas filtrado para bugs em uma expressão e referências corrigidas executáveis nos testes. Exclui funções com tipos definidos pelo usuário sem geradores próprios e funções parciais que falham nos testes automáticos.", "localizador": "PDF p. 9–10, impressas 119–120, §§5.3.1–5.3.4"},
+      {"nome": "Common dataset, comparative study", "versao": "nao_informado", "quantidade": 591, "descricao": "Subconjunto dos 1318 bugs comum a Mentat, Rite e Seminal após os filtros de cada ferramenta; portanto, sobreposto ao conjunto grande. O estudo revalida os patches dos comparadores com o próprio Quickcheck.", "localizador": "PDF p. 11, impressa 121, §5.4 e Figura 6"}
+    ],
+    "metricas": [
+      {"nome": "%Repair", "definicao": "Tabelas 1–2: sucesso incluindo patches parcialmente corretos (células amarelas ou verdes); não equivale a passar todos os testes. Há aparentes divergências entre algumas somas de células e agregados da Tabela 1.", "denominador": "15 programas × 3 execuções na Tabela 1; 10 × 3 na Tabela 2, conforme metodologia. Fórmula explícita de agregação não apresentada.", "localizador": "PDF p. 7–8, impressas 117–118, §5.1 e Tabelas 1–2"},
+      {"nome": "%Test", "definicao": "Tabelas 1–2: sucesso total, tratando células amarelas como falhas, baseado nos casos de teste fornecidos; não é a validação posterior com todos os testes Quickcheck.", "denominador": "Metodologia relata três execuções por programa nos conjuntos de quinze e dez programas; fórmula de agregação não explicitada.", "localizador": "PDF p. 8, impressa 118, texto abaixo da Tabela 1"},
+      {"nome": "repair rate", "definicao": "Avaliação em larga escala: um bug é reparado se ao menos um patch gera as mesmas saídas da referência em todas as entradas geradas. Na comparação externa, usa o subconjunto comum e a mesma validação automática.", "denominador": "1318 bugs em §5.3; 591 bugs em §5.4; não são os 516 bugs reparados usados para os percentuais por estratégia da Figura 5.", "localizador": "PDF p. 9–11, impressas 119–121, §§5.3.2–5.4 e Figuras 3–7"},
+      {"nome": "partial repair rate; Percentage of Tests Passing", "definicao": "Proporção de bugs parcialmente reparados e distribuição da fração de testes que cada programa passa. Sucesso em uma fração de testes não é equivalência semântica demonstrada.", "denominador": "1318 bugs no conjunto grande; gerador produz por padrão 10000 entradas por propriedade. O artigo não informa o total efetivo de testes concluídos em cada programa, particularmente quando há erros ou timeout.", "localizador": "PDF p. 9–10, impressas 119–120, §§5.3.2–5.3.3 e Figuras 3–4"}
+    ],
+    "linguagens": ["OCaml"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Um patch bem tipado pode não implementar a intenção do programador nem passar os testes; constantes ou operadores incorretos podem sobreviver à tipagem ou a casos pouco discriminantes. Choose pode receber uma lista em que todas as opções são incorretas e não consegue compor expressões que o LSP não sugere.", "localizador": "PDF p. 5–9, impressas 115–119, §§3.2.2–3.4 e §§5.1–5.2"},
+      {"categoria": "outro", "descricao": "Validade e abrangência da avaliação: validação automática pressupõe funções totais e pode rejeitar reparos adequados ao domínio de uso; tipos definidos pelo usuário exigiriam geradores manuais e ficam de fora. A ferramenta atual restringe-se principalmente a erros localizáveis em uma expressão.", "localizador": "PDF p. 4, impressa 114, §3.1.1; p. 9–10, impressas 119–120, §§5.3.1 e 5.3.4"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Adicionar casos de teste restringe tipos e possíveis locais de erro, permite classificar os patches e pode distinguir operadores ou constantes incorretos. São apresentados exemplos explicativos, mas não uma ablação controlada com e sem os testes.", "avaliada": "nao", "localizador": "PDF p. 7–8, impressas 117–118, §3.4 e §5.1"},
+      {"descricao": "Comparar automaticamente patch e referência com propriedades Quickcheck e entradas aleatórias, em vez de aceitar apenas tipagem. O padrão é 10000 entradas por propriedade. A avaliação aplica esse controle, sem medir seu efeito contra uma condição sem validação no mesmo protocolo.", "avaliada": "nao", "localizador": "PDF p. 9–11, impressas 119–121, §§5.3.2–5.4"},
+      {"descricao": "Considerar geradores para inteiros positivos e tipos definidos pelo usuário é uma possibilidade discutida em nota, que exigiria intervenção manual; não foi implementada na avaliação automática relatada.", "avaliada": "nao", "localizador": "PDF p. 10, impressa 120, §5.3.4 e nota 8"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Tabela 1: Fill T e Fill C têm %Repair 87 e 87, mas %Test 53 e 60. O primeiro indicador inclui sucessos parciais e não autoriza afirmar que 87% satisfazem integralmente os testes. Escolha da primeira métrica segue a ordem impressa, não a força do resultado.", "localizador": "PDF p. 8, impressa 118, Tabela 1, linhas %Repair e %Test, colunas Fill T/C; definição logo abaixo"},
+      {"descricao": "Aparente inconsistência na Tabela 1: somando as quinze células Instruct T obtêm-se 28, e Instruct C, 30 (cálculos próprios de soma). Sob a leitura de células como sucessos em três execuções por programa, isso corresponderia a aproximadamente 62,2% e 66,7% (cálculos próprios, denominador 45), enquanto a linha %Repair imprime 56% e 60%. A fórmula de agregação não é explicitada e a diferença não se resolve apenas por arredondamento. Preservados 56 e 60 como agregados impressos, sem substituição. A coluna No GPT-3 usa outro tipo de contagem e não foi incluída nessa soma.", "localizador": "PDF p. 7–8, impressas 117–118, §5.1 e Tabela 1, linhas S1–S15 e %Repair, colunas Instruct T/C"},
+      {"descricao": "Dependência do conjunto: na Tabela 1, Fill T tem %Repair 87 e Choose T, 60; na Tabela 2, Fill T tem 83 e Choose T, 30. São conjuntos diferentes, sem agregado impresso entre eles. As colunas C + Bias também mudam simultaneamente o prompt e a decodificação e não isolam um mecanismo de prompting.", "localizador": "PDF p. 8, impressa 118, Tabelas 1–2, linhas %Repair, colunas Fill T, Choose T e C + Bias; PDF p. 7, impressa 117, §3.3"},
+      {"descricao": "Em larga escala, o artigo informa 516 reparos completos e 441 parciais entre 1318 bugs; Figura 4 apresenta ainda 361 com 0% de testes. Esses grupos cobrem o conjunto. Figura 3 usa limiar de pelo menos determinada fração de testes, enquanto Figura 4 usa intervalos: o exemplo de 629 que passam pelo menos 50% não é o mesmo indicador dos 208 no intervalo 25%–50%.",
+        "localizador": "PDF p. 9–10, impressas 119–120, §5.3.3 e Figuras 3–4"},
+      {"descricao": "Os resultados por estratégia em §5.3.3 usam como denominador os 516 bugs reparados por alguma estratégia: Fill 394 (76.4%), Instruct 224 (43.4%) e Choose 108 (20.9%). Não são taxas sobre os 1318 bugs. Há sobreposição: os números de interseções pareadas da Figura 5 estão em regiões exclusivas de duas estratégias, com a região tripla separada, embora a prosa use 'both'. Não somar percentuais de estratégias como grupos disjuntos nem interpretar uma região pareada como toda a interseção inclusiva.", "localizador": "PDF p. 10, impressa 120, §5.3.3 e Figura 5"},
+      {"descricao": "A introdução imprime taxas comparativas de 37.5% para Mentat e 33.4% para Rite; §5.4 e a conclusão imprimem 37.6% e 33.5%. O corpo informa 222 e 198 reparos em 591 bugs, respectivamente, e 46 (7.8%) para Seminal. Figura 7 mostra os respectivos totais finais. Não foi escolhida por suposição uma taxa única para apagar a divergência; essa comparação inclui ferramentas sem prompting e não foi selecionada em extracoes.", "localizador": "PDF p. 2, impressa 112, final da introdução; p. 11, impressa 121, §5.4 e Figura 7; p. 12, impressa 122, conclusão"},
+      {"descricao": "As tabelas iniciais comparam variantes T e C e, para Instruct, modelos de edição; não há contrafactual que mantenha modelo, endpoint e todo o restante fixos para isolar cada ingrediente. O grande conjunto e o subconjunto comparativo são filtrados e sobrepostos. Patches externos de Rite e Seminal são reavaliados pelo artigo, mas não representam execuções desses sistemas sob o mesmo orçamento das estratégias GPT-3.", "localizador": "PDF p. 4–8, impressas 114–118, §§3.2–5.2; p. 9–11, impressas 119–121, §§5.3–5.4"}
+    ],
+    "observacoes": [
+      {"descricao": "Tarefa avaliada é reparo de erros de tipos em OCaml. Geração de patches é meio para depuração, não uma avaliação independente de geração, tradução ou refatoração.", "localizador": "PDF p. 1–2, impressas 111–112, resumo e introdução; p. 12, impressa 122, conclusão"},
+      {"descricao": "Não há resultado principal declarado com uma técnica, uma métrica e um comparador únicos: resumo e conclusão destacam Mentat e duas ferramentas externas; a discussão também apresenta várias estratégias. A seleção usa a primeira tabela elegível, métrica %Repair, classe de modelo T e a primeira outra estratégia de prompting na ordem da tabela. Fill e Choose ficam representadas no primeiro contraste; Instruct recebe o segundo por cobertura. Não se repete o mesmo par em sentido inverso apenas para preencher o alvo de três.", "localizador": "PDF p. 1–2, impressas 111–112, resumo e introdução; p. 8, impressa 118, Tabela 1; p. 12, impressa 122, conclusão"},
+      {"descricao": "Os três ensaios por estratégia/programa são relatados em §5; quantidade efetiva de chamadas por variante de localização, orçamento de tokens/tempo total, número de candidatos enviados em cada caso e datas dos modelos não são informados. Não há estimativa de produtividade, custo monetário ou segurança de software decorrente desses resultados.", "localizador": "PDF p. 5–7, impressas 115–117, §§3.2–5; p. 9–12, impressas 119–122, §§5.3–7"},
+      {"descricao": "O artigo relata que validação manual ampla seria inviável pelo esforço exigido e que geradores específicos exigiriam trabalho manual; esses comentários não foram convertidos em custo quantificado.", "localizador": "PDF p. 10–11, impressas 120–121, §5.3.4, nota 8 e §5.4"},
+      {"descricao": "Replicação indicada pelo artigo: repositório Mentat no GitLab e artefato DOI 10.6084/m9.figshare.23646903.v2. Não acessados nem validados nesta extração, realizada sem rede.", "localizador": "PDF p. 7, impressa 117, §4 e nota 6; p. 12, impressa 122, Replication Package; p. 14, impressa 124, referência 40"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper introduced a method to automatically \u001bx type errors in OCaml programs using GPT-3.", "localizador": "PDF p. 12, impressa 122, §7; mantida a ligatura corrompida do TXT, conferida visualmente como fix"},
+      {"trecho": "GPT-3 provides an operation mode named Insert, in which, given some input text from the user which contains a hole denoted by the [insert] tag, a generation is produced by the model and placed where the tag was located.", "localizador": "PDF p. 4, impressa 114, §3.2.1"},
+      {"trecho": "There are several models available for this operation mode, notably text-davinci-003 and code-davinci-002, the former being a general model and the latter being optimized for handling code.", "localizador": "PDF p. 4, impressa 114, §3.2.1"},
+      {"trecho": "We guide the model into selecting one option through prompt engineering.", "localizador": "PDF p. 5, impressa 115, §3.2.2"},
+      {"trecho": "Speci\u001bcally, every produced prompt is preceded with twoexampleexercises that share this template but have the correct option selected (omitted in listings for brevity).", "localizador": "PDF p. 5, impressa 115, §3.2.2; mantidas a ligatura corrompida e a ausência de espaços do TXT, conferido visualmente no PDF"},
+      {"trecho": "Replace the underscore with something of type int", "localizador": "PDF p. 6, impressa 116, §3.2.3, célula Instruction do primeiro exemplo de prompt"},
+      {"trecho": "However, for this mode, there are specialized versions to handle text editing, namely text-davinci-edit-001 and code-davinci-edit-001.", "localizador": "PDF p. 5, impressa 115, §3.2.3"},
+      {"trecho": "The inlined source code is only stored in memoryandtheoriginal program is not modi\u001bed, with GPT-3neverseeing the inlined version.", "localizador": "PDF p. 4, impressa 114, final do §3.1.2; mantidas ligatura corrompida e ausência de espaços do TXT, conferido no PDF"},
+      {"trecho": "Weexperimentwithbias values by comparing the Choose strategy with and without bias.", "localizador": "PDF p. 7, impressa 117, §3.3; mantida a ausência de espaços do TXT"},
+      {"trecho": "For this, we run each strategy 3 times for each program, and record the results.", "localizador": "PDF p. 7, impressa 117, §5"},
+      {"trecho": "For the text and code models used in the experiments, we use the default parameters (temperature of 0.7 for text and 0 for code, and top_p value of 1 for both).", "localizador": "PDF p. 7, impressa 117, §5.1"},
+      {"trecho": "%Repair 87% 87% 60% 60% 66% 56% 60% –", "localizador": "PDF p. 8, impressa 118, Tabela 1, linha %Repair; colunas Fill T, Fill C, Choose T, Choose C, Choose C + Bias, Instruct T, Instruct C, No GPT-3"},
+      {"trecho": "%Test 53% 60% 47% 47% 40% 49% 53% –", "localizador": "PDF p. 8, impressa 118, Tabela 1, linha %Test; mesmas colunas da linha %Repair"},
+      {"trecho": "%Repair 83% 100% 30% 43% 57% 47% 60% –", "localizador": "PDF p. 8, impressa 118, Tabela 2, linha %Repair; colunas Fill T, Fill C, Choose T, Choose C, Choose C + Bias, Instruct T, Instruct C, No GPT-3"},
+      {"trecho": "Notice that all presented options are incorrect - this is a limitation from using this kind of prompt.", "localizador": "PDF p. 5, impressa 115, §3.2.2"},
+      {"trecho": "In each column, we calculate two success rates: %Repair, indicating partial success (yellow or green), and %Test, indicating total success (treating yellow results as failures).", "localizador": "PDF p. 8, impressa 118, texto abaixo da Tabela 1"},
+      {"trecho": "By default, the generator produces 10,000 inputs.", "localizador": "PDF p. 9, impressa 119, §5.3.2"},
+      {"trecho": "This set includes 15 ill-typed programs sourced from an introductory OCaml class at a Japanese University and the type-error slicer Skalpel [37], and previously used in a type-error debugger [50].", "localizador": "PDF p. 7, impressa 117, §5.1"},
+      {"trecho": "Table 2. Automatic repair results for 10 Dijkstra programs.", "localizador": "PDF p. 8, impressa 118, legenda da Tabela 2"},
+      {"trecho": "S4 3 3 0 0 0 2 3 0", "localizador": "PDF p. 8, impressa 118, Tabela 1, linha S4; colunas Fill T, Fill C, Choose T, Choose C, Choose C + Bias, Instruct T, Instruct C, No GPT-3"},
+      {"trecho": "S12 0 3 3 0 3 2 3 0", "localizador": "PDF p. 8, impressa 118, Tabela 1, linha S12; mesmas colunas da linha S4"},
+      {"trecho": "Weanalyzedarepository of 4,500 OCaml programs, which had already been created as part of Rite [41].", "localizador": "PDF p. 9, impressa 119, §5.3; mantida a ausência de espaços do TXT"},
+      {"trecho": "After applying these \u001blters, we evaluated a set of 1,318 bugs.", "localizador": "PDF p. 9, impressa 119, §5.3.1; mantida a ligatura corrompida do TXT"},
+      {"trecho": "Amongthe1,318 bugs evaluated, our tool repaired 516 of them, achieving a repair rate of 39.2%.", "localizador": "PDF p. 9, impressa 119, §5.3.3; mantida a ausência de espaços do TXT"},
+      {"trecho": "We found that 441 of the programs were partially \u001bxed, indicating that the generated patches were able to address some but not all of the identi\u001bed issues in the program, representing a 33.5% partial repair rate.", "localizador": "PDF p. 9, impressa 119, §5.3.3; mantidas as ligaturas corrompidas do TXT"},
+      {"trecho": "The Fill strategy is the most e ective, being responsible for \u001bxing 394 out of the total 516 programs (76.4%).", "localizador": "PDF p. 10, impressa 120, §5.3.3; ligaturas corrompidas mantidas conforme TXT e leitura da coluna esquerda conferida no PDF"},
+      {"trecho": "Our\u001brstresultsshowthatMentatgives the best program repair results with a 37.5% repair rate versus 33.4% from Rite and 7.8% from Seminal.", "localizador": "PDF p. 2, impressa 112, final da introdução; mantidas ligatura corrompida e ausência de espaços; normalizada a hifenização de Mentat"},
+      {"trecho": "Ourtechnique achieved a repair rate of 37.6% (222 out of 591 programs).", "localizador": "PDF p. 11, impressa 121, §5.4; mantida a ausência de espaços do TXT"},
+      {"trecho": "These repairs need an aggregation of several terms, which is impossible to obtain with suggestions from the language server.", "localizador": "PDF p. 9, impressa 119, início da página, final do §5.2"},
+      {"trecho": "Moreover, we assume total functions, meaning that we consider every possible input for a given type, resulting in a more pessimistic repair validation.", "localizador": "PDF p. 10, impressa 120, §5.3.4"},
+      {"trecho": "Because of this, the function now only has one possible source of error, which is the empty list ( [] ) in line 2.", "localizador": "PDF p. 7, impressa 117, §3.4"},
+      {"trecho": "However, this would break our goal of a fully automated process.", "localizador": "PDF p. 10, impressa 120, nota 8"},
+      {"trecho": "Artifact [40]: 10.6084/m9.figshare.23646903.v2", "localizador": "PDF p. 12, impressa 122, Replication Package, item Artifact"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Fill",
+      "mecanismos": ["contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Choose (T)",
+      "modelo": "Fill T: text-davinci-003, snapshot nao_informado; Choose T: GPT-3 textual, identificador específico nao_informado",
+      "benchmark": "Simple Programs, 15 programas OCaml, Tabela 1",
+      "metrica": "%Repair",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 60, "intervencao": 87},
+      "denominador": "15 programas, cada estratégia executada três vezes por programa. A soma de sucessos sobre 45 tentativas é compatível com estes dois agregados, mas a fórmula de agregação não é explicitada pelo artigo.",
+      "condicoes": "Agregados impressos da Tabela 1, variantes textuais T. Temperature 0.7, top_p 1; sem C + Bias. Fill recebe código com [insert]; Choose recebe código com <mask>, candidatos tipados do LSP, instrução de escolha e dois exercícios resolvidos. Testes fornecidos restringem o reparo e classificam saídas. Não é comparação de ingredientes isolados: muda a estratégia completa, a preparação e o modo de API; identificador do modelo de Choose não foi inferido do modelo de Fill. Número de chamadas por localização, limite de tokens e casos de teste por programa: nao_informado. Não interpretar %Repair como correção funcional integral.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Resumo e conclusão não declaram uma técnica de prompting, uma métrica e um comparador únicos. Primeira tabela com contraste elegível: Tabela 1; primeira métrica %Repair, primeira classe de modelo T; Fill é a primeira estratégia e Choose a primeira outra estratégia de prompting listada. Usa o agregado impresso dos quinze programas.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8, impressa 118, Tabela 1, linha %Repair, colunas Fill T e Choose T; método na p. 7, impressa 117, §5.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "87%", "localizador": "PDF p. 8, impressa 118, Tabela 1, célula linha %Repair × coluna Fill T"},
+        {"trecho": "60%", "localizador": "PDF p. 8, impressa 118, Tabela 1, célula linha %Repair × coluna Choose T"},
+        {"trecho": "For this, we run each strategy 3 times for each program, and record the results.", "localizador": "PDF p. 7, impressa 117, §5"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Instruct",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Fill (T)",
+      "modelo": "Instruct T: text-davinci-edit-001; Fill T: text-davinci-003; snapshots nao_informado",
+      "benchmark": "Simple Programs, 15 programas OCaml, Tabela 1",
+      "metrica": "%Repair",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 87, "intervencao": 56},
+      "denominador": "15 programas e três execuções por estratégia/programa. Fórmula de agregação não explicitada; preservado o agregado impresso apesar da aparente inconsistência.",
+      "condicoes": "Agregados impressos, variantes textuais T, temperature 0.7 e top_p 1. Instruct usa edição guiada por instrução de tipo inferido, ou Fix the bug quando não há localização; Fill usa Insert com lacuna no código. Modelo, modo de API e análise de tipos também diferem: efeito do pacote híbrido, sem atribuição exclusiva à instrução. Células Instruct T somam 28 sucessos (cálculo próprio), enquanto o agregado é 56%; sob 45 tentativas há aparente inconsistência descrita na ficha. Nenhum número recalculado substitui o valor impresso. Número de chamadas por programa/localização e limite de tokens: nao_informado.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura de Instruct, técnica focal ainda sem intervenção selecionada, na primeira tabela elegível, primeira métrica %Repair, primeira classe de modelo T e primeira outra estratégia de prompting listada, Fill. A seleção antecede a avaliação do sinal e da inconsistência do resultado.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8, impressa 118, Tabela 1, linha %Repair, colunas Instruct T e Fill T; §§3.2.1 e 3.2.3, PDF p. 4–6, impressas 114–116",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "56%", "localizador": "PDF p. 8, impressa 118, Tabela 1, célula linha %Repair × coluna Instruct T"},
+        {"trecho": "87%", "localizador": "PDF p. 8, impressa 118, Tabela 1, célula linha %Repair × coluna Fill T"},
+        {"trecho": "Replace the underscore with something of type int", "localizador": "PDF p. 6, impressa 116, §3.2.3, célula Instruction do primeiro exemplo de prompt"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito de reparar erros de tipos em OCaml por modelos GPT-3; contribuições, estratégias e avaliações estão delimitadas.", "localizador": "PDF p. 1–2, impressas 111–112, resumo e contribuições; p. 12, impressa 122, §7"},
+    {"criterio": "procedimento", "julgamento": "atende", "justificativa": "Descreve localização, inlining, unificação, formatos de entrada por estratégia, três execuções por programa, conjuntos iniciais, filtros do conjunto grande e validação Quickcheck. Permite compreender como os resultados são produzidos, embora detalhes de chamadas e mapeamento de modelos de Choose permaneçam incompletos.", "localizador": "PDF p. 3–11, impressas 113–121, §§3–5"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Tabelas 1–2 oferecem estratégias de prompting no mesmo conjunto, além da condição sem GPT-3. Comparação externa revalida patches de Rite e Seminal no subconjunto comum. Não mantém modelo, endpoint e análise estática fixos para separar os efeitos de prompting; No GPT-3 mede outra contagem, e o orçamento dos comparadores externos não é equiparado.", "localizador": "PDF p. 4–8, impressas 114–118, §§3.2–5.2 e Tabelas 1–2; p. 10–11, impressas 120–121, §5.4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Distingue sucesso de tipagem/parcial, sucesso nos testes e equivalência observada com a referência. Informa tamanhos dos conjuntos, três execuções e padrão de entradas Quickcheck. A fórmula dos percentuais iniciais não é explicitada; agregados Instruct da Tabela 1 aparentam divergir das células e taxas comparativas diferem entre introdução e corpo. Percentuais por estratégia no conjunto grande usam apenas os bugs reparados e incluem sobreposição.", "localizador": "PDF p. 2, impressa 112; p. 7–11, impressas 117–121, §§5.1–5.4, Tabelas 1–2 e Figuras 3–7"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute limitações de sugestões do LSP, dependência do contexto e dos testes, erros em uma expressão e vieses da validação automática com funções totais e tipos personalizados. Não apresenta tratamento amplo de validade estatística ou de generalização além desses limites, e não trata possível contaminação dos modelos.", "localizador": "PDF p. 4–5, impressas 114–115, §§3.1.1 e 3.2.2; p. 8–11, impressas 118–121, §§5.1–5.4; p. 12, impressa 122, §7"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa identificadores de modelos Insert e Edit, temperatura/top_p, exemplos de prompts, repetição e ferramenta/artefato declarados. Não explicita de forma inequívoca o identificador de cada modelo de Choose, snapshots/datas de API, todos os limites de geração ou os dois exemplos resolvidos omitidos no artigo. Links e pacote não foram acessados nem validados.", "localizador": "PDF p. 4–7, impressas 114–117, §§3.2–5.1; p. 12, impressa 122, Replication Package"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura integral, não foi localizado tratamento do possível uso dos benchmarks no pré-treinamento de GPT-3 nem controle documentado de sobreposição com exemplos de prompt. O treinamento de Rite em parte de seu corpus é descrito como funcionamento do comparador, sem resolver o risco de contaminação dos LLMs avaliados.", "localizador": "Texto completo, PDF p. 1–14, impressas 111–124; conjuntos em §§5.1–5.4, p. 7–11; Rite em §6, p. 12"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "texto_lido": "fontes/textos/lote/S2130.txt, linhas 1–889, incluindo referências; leitura em partes contíguas.",
+    "paginas_pdf_abertas": [2, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "paginas_impressas_correspondentes": [112, 114, 115, 116, 117, 118, 119, 120, 121, 122],
+    "conferencia_visual": "Tabelas 1 e 2: cabeçalhos, valores, cores, agregados e notas na p. 8. Figuras 3–5 e discussão na p. 10; Figuras 6–7 e comparação externa na p. 11; modelos, prompts, condições e definição da validação nas p. 4–9. Valores preservados como impressos, com discrepâncias registradas. Sem rede, execução de código de terceiros, testes automatizados ou acesso ao pacote de replicação.",
+    "limitacoes": "O TXT intercala colunas, perde espaços e corrompe ligaturas e alguns identificadores. Trechos com essas ocorrências foram conferidos nas imagens e identificados nos localizadores; não se trata de revisão humana. Somente o arquivo JSON de saída foi criado."
+  }
+}
