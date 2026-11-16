@@ -1,0 +1,361 @@
+{
+  "estudo": "S397",
+  "texto_fonte": "fontes/textos/lote/S397.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "versao_artigo": "Tony, Díaz Ferreyra, Mutas, Dhif e Scandariato, «Prompting Techniques for Secure Code Generation: A Systematic Investigation», arXiv:2407.07064v2 [cs.SE], 26 Feb 2025, manuscrito submetido à ACM (51 páginas; a referência ACM impressa traz ano 2018 e DOI XXXXXXX como placeholders). Páginas do PDF coincidem com as páginas impressas.",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Baseline (0-shot)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 26, Tabela 2 (linha Baseline (0-shot)) e texto da p. 26",
+        "observacao": "Prompt zero-shot sem informação de segurança («Generate Python code for the following: <coding task>»); é a base declarada contra a qual todas as demais condições são medidas. Os mecanismos_acrescentados das demais técnicas são registrados em relação a este prompt base."
+      },
+      {
+        "nome_original": "Naive-secure (0-shot)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2; resultados PDF p. 27, Tabela 3; contraste PDF p. 30, Tabela 4 (linha baseline : naive-secure)",
+        "observacao": "Variante zero-shot apresentada como formulação própria e avaliada em linha separada. Difere do baseline apenas pela palavra «secure» na instrução (requisito de segurança, classificado como restricoes). O contraste baseline : naive-secure é analisado pelo estudo (Tabela 4)."
+      },
+      {
+        "nome_original": "CWE-specific (0-shot)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2 e exemplo para CWE-20; PDF p. 27, Tabela 3; PDF p. 30, Tabela 4 (linhas baseline : CWE-specific e naive-secure : CWE-specific)",
+        "observacao": "Acrescenta ao prompt naive-secure uma lista de medidas de segurança específicas da CWE-alvo, resumida manualmente pelos autores a partir das mitigações da MITRE, e a frase «Use additional security measures where necessary.» (especificação de segurança → restricoes). O contraste naive-secure : CWE-specific (Tabela 4) isola esse ingrediente; contra o baseline o contraste é do pacote (secure + lista). O artigo mostra só o exemplo da CWE-20; as listas das demais CWEs não estão no texto (nao_informado no artigo)."
+      },
+      {
+        "nome_original": "Comprehensive (0-shot)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2; PDF p. 27, Tabela 3; PDF p. 30, Tabela 4 (linhas baseline : comprehensive e naive-secure : comprehensive)",
+        "observacao": "Instrução para gerar código seguro que previna as principais fraquezas listadas na CWE. Difere do naive-secure apenas pelo trecho «that prevents top security weaknesses listed in CWE»; contraste naive-secure : comprehensive na Tabela 4. Contra o baseline, é contraste de pacote."
+      },
+      {
+        "nome_original": "Zero-shot CoT",
+        "mecanismos": ["instrucao", "restricoes", "raciocinio"],
+        "mecanismos_acrescentados": ["restricoes", "raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2; PDF p. 33 (seção Zero-shot CoT Prompting); PDF p. 27, Tabela 3; PDF p. 30, Tabela 4 (linhas baseline : zero-shot CoT e naive-secure : zero-shot CoT)",
+        "observacao": "Instrução naive-secure + gatilho «Let’s think step by step» + passos gerados pelo LLM + gatilho «Therefore, final secure Python implementation is:» (duas etapas: extração do raciocínio e da resposta). O contraste naive-secure : zero-shot CoT (Tabela 4) difere apenas nos gatilhos de raciocínio e de resposta; contra o baseline é contraste de pacote (inclui «secure»)."
+      },
+      {
+        "nome_original": "RCI (Recursive Criticism and Improvement)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["restricoes", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2; PDF p. 33 (seção RCI Prompting); PDF p. 27, Tabela 3; PDF p. 30, Tabela 4 (linhas baseline : RCI e naive-secure : RCI)",
+        "observacao": "Geração com instrução naive-secure, seguida de autocrítica orientada a problemas de segurança («Review the following answer and find security problems with it») e melhoria com base na crítica (autocorreção → feedback). Implementado com uma única iteração de revisão e melhoria (p. 33). O contraste naive-secure : RCI isola as etapas de crítica e melhoria; contra o baseline é contraste de pacote."
+      },
+      {
+        "nome_original": "Persona/Memetic Proxy",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 26, Tabela 2; PDF p. 19-20 (seção 4.2.5); PDF p. 25 (fusão das duas técnicas); PDF p. 27, Tabela 3; PDF p. 30, Tabela 4 (linhas baseline : persona/memetic e naive-secure : persona/memetic)",
+        "observacao": "Persona e memetic proxy foram tratados como uma única técnica. Prompt: «Act as a software security expert. Provide outputs that a security expert would give.» + instrução naive-secure. A persona pertence à categoria instrucao, já presente no baseline; ela é listada como acrescentada porque a técnica adiciona uma instrução de papel. O contraste naive-secure : persona/memetic isola a persona."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature, top_p, max_tokens, frequency penalty, presence penalty",
+        "natureza": "decodificacao",
+        "descricao": "GPT-3: temperature 0.0, max_tokens 500, top_p 0.1, frequency penalty 0.0, presence penalty 0.0; GPT-3.5 e GPT-4: só temperature 0.0 e top_p 0.1 definidos. Parâmetros fixos em todas as condições, não variados como intervenção.",
+        "localizador": "PDF p. 22, seção 5.1"
+      },
+      {
+        "nome_original": "continuação de saídas incompletas",
+        "natureza": "outro",
+        "descricao": "Quando a saída do GPT-3 ficava incompleta pelo limite de tamanho, a geração era repetida com o mesmo prompt concatenado à saída incompleta até obter saída completa. Procedimento operacional ligado ao limite de tokens, não técnica avaliada.",
+        "localizador": "PDF p. 22, seção 5.1"
+      },
+      {
+        "nome_original": "regeneração de código inválido",
+        "natureza": "outro",
+        "descricao": "Código incompleto ou desalinhado à tarefa era regenerado uma segunda vez com o mesmo modelo e prompt; se continuasse inválido, era descartado da avaliação. Procedimento de avaliação, não prompting.",
+        "localizador": "PDF p. 23-24, seção 5.3.2"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3", "versao": "text-davinci-002 (via API)", "localizador": "PDF p. 22, seção 5.1; PDF p. 39"},
+      {"nome": "GPT-3.5", "versao": "gpt-3.5-turbo (snapshot nao_informado)", "localizador": "PDF p. 22, seção 5.1"},
+      {"nome": "GPT-4", "versao": "gpt-4-1106-preview (p. 22 e p. 24); grafado gpt-4-1105-preview na p. 39 (inconsistência registrada em heterogeneidade)", "localizador": "PDF p. 22, seção 5.1; PDF p. 24, seção 5.4; PDF p. 39, seção 8"},
+      {"nome": "ChatGPT (GPT-3.5)", "versao": "nao_informado; usado só nas demonstrações ilustrativas da seção 4, não no experimento", "localizador": "PDF p. 10, seção 4.2"},
+      {"nome": "CodeBERT, CodeGen, CodeT5, LLaMA", "versao": "nao_informado; testados na seleção preliminar de modelos e descartados", "localizador": "PDF p. 21, seção 5.1"}
+    ],
+    "benchmarks": [
+      {"nome": "LLMSecEval", "quantidade": "150 prompts em linguagem natural cobrindo 18 das Top 25 CWEs de 2021", "observacao": "Usado para Python com os três modelos. O denominador de cada condição é o número de códigos válidos (Tabela 3: 120 a 149 de 150, conforme modelo e template); os códigos inválidos após a segunda tentativa foram descartados, de modo que as condições não são avaliadas exatamente sobre o mesmo conjunto de tarefas.", "localizador": "PDF p. 21, seção 5.1; PDF p. 27, Tabela 3; PDF p. 28"},
+      {"nome": "LLMSecEval, subconjunto para C", "quantidade": "67 tarefas (das 150) que não envolvem desenvolvimento web", "observacao": "Usado só com GPT-4; 67 códigos válidos em todas as condições (Tabela 6). Os templates adaptados para C não são mostrados no artigo (nao_informado).", "localizador": "PDF p. 24, seção 5.4; PDF p. 38, Tabela 6"},
+      {"nome": "Pré-estudo de viabilidade", "quantidade": "5 tarefas sorteadas do LLMSecEval, só GPT-3", "observacao": "Usado para verificar a viabilidade das técnicas, sem avaliar segurança.", "localizador": "PDF p. 22, seção 5.2.2; PDF p. 25, seção 6.1"},
+      {"nome": "Amostra de verificação manual", "quantidade": "Python: 15 tarefas (10%) × 7 templates × 3 LLMs = 315 trechos verificados contra o Bandit; C: 49 casos (descritos como 10% dos resultados) verificados contra o CodeQL", "observacao": "Sobreposição: as 15 tarefas são subconjunto das 150.", "localizador": "PDF p. 24, seção 5.3.3; PDF p. 28; PDF p. 37, seção 7.5"}
+    ],
+    "metricas": [
+      {"nome": "# valid code", "descricao": "número de códigos válidos (alinhamento à tarefa e completude, verificação manual) de 150 (Python) ou 67 (C)", "localizador": "PDF p. 23, seção 5.3.2; PDF p. 27, Tabela 3"},
+      {"nome": "# LOC (MIN, MAX, Avg.)", "descricao": "linhas de código dos trechos válidos", "localizador": "PDF p. 27, Tabela 3"},
+      {"nome": "Count", "descricao": "número total de fraquezas de segurança detectadas pelo Bandit (Python, Tabela 3) ou pelo CodeQL (Tabelas 6 e 7)", "localizador": "PDF p. 27, legenda da Tabela 3"},
+      {"nome": "Rate", "descricao": "número médio de fraquezas por código (denominador: códigos válidos)", "localizador": "PDF p. 27, legenda da Tabela 3"},
+      {"nome": "Density", "descricao": "número médio de fraquezas por LOC; o estimador da média (por trecho ou total) não é detalhado", "localizador": "PDF p. 27, legenda da Tabela 3"},
+      {"nome": "Kruskal-Wallis e Dunn post-hoc com correção de Bonferroni (α = 0,05/21 = 0,002381)", "descricao": "aplicados à densidade (Tabela 4) e à contagem (resultados só no pacote de replicação)", "localizador": "PDF p. 29-30, seção 6.3.1"},
+      {"nome": "Mean Diff. e % Diff.", "descricao": "diferença absoluta e diferença percentual da densidade média entre pares de templates", "localizador": "PDF p. 30, Tabela 4"},
+      {"nome": "Cohen's Kappa ponderado", "descricao": "concordância entre análise manual e ferramenta: 0,87 (Bandit, Python) e 0,82 (CodeQL, C)", "localizador": "PDF p. 28; PDF p. 37"},
+      {"nome": "Similaridade Dolos", "descricao": "similaridade média de 0,075 entre o código RCI do GPT-4 e as implementações seguras do LLMSecEval (teste de vazamento)", "localizador": "PDF p. 39, seção 8"},
+      {"nome": "Frequência por CWE", "descricao": "número de cada fraqueza detectada por template e modelo", "localizador": "PDF p. 31, Tabela 5"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "localizador": "PDF p. 2; PDF p. 27, Tabela 3"},
+      {"nome": "C", "localizador": "PDF p. 24, seção 5.4; PDF p. 38, Tabela 6"}
+    ],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "O código gerado por LLM contém muitas fraquezas de segurança, principalmente CWE-78, CWE-259, CWE-94 e CWE-330; a CWE-78 parece não ser afetada pelas técnicas de prompting.", "localizador": "PDF p. 3; PDF p. 31, seção 6.3.2; PDF p. 34"},
+      {"categoria": "seguranca", "descricao": "Tarefas de alto risco (execução de comandos de SO com dados do usuário, autenticação e outras tarefas web) continuam gerando fraquezas com qualquer template.", "localizador": "PDF p. 35, seção 7.3; PDF p. 38, Actionable Takeaways (5)"},
+      {"categoria": "seguranca", "descricao": "Blocos try-catch adicionados como única medida de segurança (sobretudo com naive-secure) não melhoraram significativamente a segurança em vários casos.", "localizador": "PDF p. 36, seção 7.4 (ii)"},
+      {"categoria": "correcao_funcional", "descricao": "Geração de código inválido (incompleto ou desalinhado à tarefa), inclusive chamadas a métodos de segurança não declarados ou incompletos, sobretudo com variantes zero-shot; esses trechos foram removidos da análise.", "localizador": "PDF p. 23-24, seção 5.3.2; PDF p. 37, seção 7.4 (vi)"},
+      {"categoria": "outro", "descricao": "Nomes de métodos prefixados com «secure» sem alteração da implementação (possível falsa impressão de segurança), principalmente em GPT-3 e GPT-3.5 com variantes zero-shot; medidas de segurança desnecessárias em prompts naive-secure.", "localizador": "PDF p. 36, seção 7.4 (iii); PDF p. 37, seção 7.4 (vii)"},
+      {"categoria": "contaminacao", "descricao": "Risco de vazamento direto para o GPT-4 (dados de treino até abril de 2023; repositório do LLMSecEval criado em janeiro de 2023). Os autores consideram eliminado o risco para GPT-3 e GPT-3.5 com base na data de corte informada pela OpenAI.", "localizador": "PDF p. 38-39, seção 8"},
+      {"categoria": "custo", "descricao": "O RCI pode ser caro pela natureza iterativa, e técnicas de várias etapas (como zero-shot CoT) exigem mais esforço e recursos que as de etapa única; custo não quantificado.", "localizador": "PDF p. 8, seção 4.1; PDF p. 11, seção 4.2.2; PDF p. 33"},
+      {"categoria": "nao_determinismo", "descricao": "As respostas dos LLMs não passaram por verificação de aleatoriedade; não foram geradas nem avaliadas várias respostas aleatórias.", "localizador": "PDF p. 39-40, seção 9"},
+      {"categoria": "outro", "descricao": "Ameaças de validade de construto e de medição: análise de validade feita por um único autor; templates elaborados pelos autores podem ter influenciado os resultados; o Bandit não é perfeito e algumas fraquezas podem não ter sido detectadas; só modelos da OpenAI.", "localizador": "PDF p. 39-40, seção 9"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Inclusão de especificações de segurança no prompt e uso de técnicas (naive-secure, CWE-specific, comprehensive, zero-shot CoT, RCI, persona) para reduzir fraquezas, medidas contra o prompt baseline sem informação de segurança.", "avaliada": "sim", "localizador": "PDF p. 27, Tabela 3; PDF p. 30, Tabela 4"},
+      {"descricao": "Teste de vazamento direto com o Dolos sobre o código Python gerado pelo GPT-4 com RCI (similaridade média 0,075, abaixo do limiar de 0,5 citado de outro estudo).", "avaliada": "nao", "localizador": "PDF p. 39, seção 8"},
+      {"descricao": "Uso exclusivo da API para evitar vazamento indireto via RLHF.", "avaliada": "nao", "localizador": "PDF p. 39, seção 8"},
+      {"descricao": "Verificação manual de uma amostra dos resultados do Bandit (315 trechos, Kappa 0,87) e do CodeQL em C (49 casos, Kappa 0,82); CodeQL como ferramenta secundária em Python.", "avaliada": "nao", "localizador": "PDF p. 24, seção 5.3.3; PDF p. 28; PDF p. 37"},
+      {"descricao": "Critérios explícitos de validade para reduzir o viés da avaliação feita por um único autor; segunda tentativa de geração para descartar falhas de API.", "avaliada": "nao", "localizador": "PDF p. 23-24, seção 5.3.2; PDF p. 39, seção 9"},
+      {"descricao": "Temperatura 0.0 para máxima reprodutibilidade e uso de 150 tarefas para suavizar flutuações aleatórias.", "avaliada": "nao", "localizador": "PDF p. 22, seção 5.1; PDF p. 40, seção 9"},
+      {"descricao": "Recomendação de usar ferramentas de análise estática (Bandit, CodeQL) junto com LLMs no pipeline de desenvolvimento.", "avaliada": "nao", "localizador": "PDF p. 38, Actionable Takeaways (6)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Resultado nulo: o Kruskal-Wallis sobre a densidade não foi significativo para GPT-3 (p = 0,334) e GPT-3.5 (p = 0,160), e nenhum par de templates difere significativamente nesses modelos (Tabela 4). Só o GPT-4 (p = 0,001) tem diferenças significativas. O resumo fala de redução de fraquezas «across the tested LLMs».", "localizador": "PDF p. 1 (resumo); PDF p. 29, seção 6.3.1; PDF p. 30, Tabela 4 e texto"},
+      {"descricao": "Narrativa que contradiz a tabela: o texto diz que persona/memetic proxy teve o pior desempenho em contagem, taxa e densidade em todos os LLMs, mas na Tabela 3 (GPT-3) a densidade do persona (0.043) é menor que a do naive-secure (0.074) e a do zero-shot CoT (0.045). Em contagem e taxa, o persona é o pior, excluído o baseline, nos três modelos.", "localizador": "PDF p. 33-34, seção 7.1 (Persona/Memetic Proxy); PDF p. 27, Tabela 3"},
+      {"descricao": "O texto diz que o RCI teve densidade «327.27% lesser than persona/memetic proxy prompts», mas a Tabela 4 imprime +327,27% para o par RCI : persona/memetic no GPT-4, isto é, aumento ao passar do RCI ao persona. Uma redução maior que 100% é incompatível com a definição de diferença percentual.", "localizador": "PDF p. 33; PDF p. 30, Tabela 4"},
+      {"descricao": "Aparente inconsistência na Tabela 7 (CodeQL, Python): no GPT-3.5, CWE-specific tem Count 54 em 139 códigos válidos e Rate impressa 0.038. Pelo cálculo próprio, 54/139 ≈ 0,388. Com o valor impresso, o texto do Apêndice B (RCI com a menor taxa no GPT-3.5, 0.253) contradiz a tabela. A Tabela 7 também rotula a condição base como «basic (0-shot)» no GPT-3.5 e no GPT-4, em vez de «baseline».", "localizador": "PDF p. 51, Tabela 7; PDF p. 50, Apêndice B"},
+      {"descricao": "Em C, o texto diz que o RCI produziu código com a menor contagem, taxa e densidade, mas na Tabela 6 a contagem (11) e a taxa (0.164) do RCI empatam com as do persona/memetic proxy; só a densidade (0.002) é a menor isolada. O texto diz também que todos os templates com especificação de segurança melhoraram em relação ao baseline, mas o CWE-specific tem a mesma contagem (19) e a mesma taxa (0.283) do baseline, diferindo só na densidade (0.006 contra 0.009).", "localizador": "PDF p. 37, seção 7.5; PDF p. 38, Tabela 6"},
+      {"descricao": "Versão do GPT-4 divergente: gpt-4-1106-preview na seção 5.1 e na seção 5.4, gpt-4-1105-preview na seção 8.", "localizador": "PDF p. 22; PDF p. 24; PDF p. 39"},
+      {"descricao": "Número de iterações do RCI ambíguo: o texto diz que a implementação usa «a single iteration of review and improvement», e os Actionable Takeaways dizem que o RCI melhora a segurança «even when applied with just 2 iterations».", "localizador": "PDF p. 33; PDF p. 38"},
+      {"descricao": "Estimador da densidade não informado: no GPT-3 baseline (Tabela 3), Count 78, 131 códigos válidos e LOC médio 11.175 dão, por cálculo próprio, 78/(131×11,175) ≈ 0,053 fraqueza por LOC, contra a densidade impressa de 0.103. Isso sugere média de razões por trecho, mas o estudo não define o estimador. O texto interpreta a densidade como fraquezas por cem LOC (2,6 e 1,6 no comprehensive com GPT-3.5 e GPT-4).", "localizador": "PDF p. 27, Tabela 3 e legenda; PDF p. 32-33"},
+      {"descricao": "Efeito inconsistente entre modelos das variantes zero-shot (reconhecido pelo estudo): no GPT-3.5, CWE-specific tem densidade maior que naive-secure (0.038 contra 0.034; +11,76% na Tabela 4); no GPT-3, comprehensive aumenta a densidade em 5,4% em relação ao CWE-specific; no GPT-3.5, persona tem densidade maior que o baseline (0.075 contra 0.054; +38,88%).", "localizador": "PDF p. 28; PDF p. 32; PDF p. 27, Tabela 3; PDF p. 30, Tabela 4"},
+      {"descricao": "Resultados divergentes entre métricas e testes: comprehensive reduz significativamente a densidade em relação ao persona no GPT-4, mas não a contagem. Os testes sobre a contagem só estão no pacote de replicação.", "localizador": "PDF p. 30"},
+      {"descricao": "Bandit e CodeQL dão números absolutos diferentes e rankings com pequenas diferenças. Por exemplo, no GPT-3 a menor taxa é do CWE-specific pelo Bandit (0.379, Tabela 3) e do naive-secure pelo CodeQL (0.153, Tabela 7); pelo CodeQL, a menor densidade do GPT-3 é do CWE-specific (0.009), não do RCI (0.012).", "localizador": "PDF p. 28; PDF p. 27, Tabela 3; PDF p. 51, Tabela 7"},
+      {"descricao": "Denominadores diferentes entre condições: o número de códigos válidos varia por template e modelo (por exemplo, 120 a 137 no GPT-3) após o descarte de código inválido, de modo que Count compara totais sobre conjuntos de tarefas não idênticos.", "localizador": "PDF p. 27, Tabela 3; PDF p. 23-24, seção 5.3.2"},
+      {"descricao": "Limitações da verificação: a concordância Kappa (0,87) é média sobre 7 templates e 3 LLMs numa amostra de 15 tarefas; os resultados do CodeQL em Python não foram verificados manualmente; o teste de vazamento cobre só o código RCI do GPT-4 em Python.", "localizador": "PDF p. 24; PDF p. 28; PDF p. 39"},
+      {"descricao": "A correção de Bonferroni é citada como [10], referência que corresponde a Benjamini e Hochberg (1995), sobre controle da taxa de falsas descobertas.", "localizador": "PDF p. 29, seção 6.3.1; PDF p. 41, referência [10]"}
+    ],
+    "observacoes": [
+      {"descricao": "O estudo combina uma revisão sistemática (RQ1: 15 técnicas, 5 categorias) com um experimento (RQ2). Só técnicas não demonstrativas foram elegíveis para o experimento; 9 das 15 foram eliminadas por exigirem exemplos.", "localizador": "PDF p. 8-9, Tabela 1; PDF p. 22, seção 5.2.1; PDF p. 25, seção 6.1"},
+      {"descricao": "Progressive Hint prompting foi executado no pré-estudo (GPT-3, 5 tarefas) e excluído porque as saídas continuaram variando após 5 iterações, sem atingir o critério de parada; não há resultado de segurança para ela.", "localizador": "PDF p. 25, seção 6.1"},
+      {"descricao": "A validade do código (alinhamento à tarefa e completude) foi avaliada manualmente por um único autor; trechos com lógica incompleta foram removidos da análise de segurança.", "localizador": "PDF p. 23-24; PDF p. 37; PDF p. 39"},
+      {"descricao": "Pacote de replicação indicado em figshare; não acessado nem validado nesta extração.", "localizador": "PDF p. 40, seção 11"},
+      {"descricao": "Mudanças qualitativas de comportamento (medidas de segurança adequadas, try-catch, validações adicionais com RCI, comentários de segurança) são relatadas sem quantificação.", "localizador": "PDF p. 35-37, seção 7.4"}
+    ],
+    "citacoes": [
+      {"trecho": "In this study, we investigate the impact of different prompting techniques on the security of code generated from NL instructions by LLMs.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "These variations are baseline, naive-secure, CWE-specific and comprehensive prompts.", "localizador": "PDF p. 26, seção 6.2"},
+      {"trecho": "The baseline prompt does not include any security information in the task instruction.", "localizador": "PDF p. 26, seção 6.2"},
+      {"trecho": "Following the recommendation from [52], we utilized the trigger phrase ’Let’s think step by step’, along with explicit demand to generate secure code in the remaining part of the prompt as shown in Table 2.", "localizador": "PDF p. 33, seção 7.1"},
+      {"trecho": "Currently, our implementation of RCI involves a single iteration of review and improvement.", "localizador": "PDF p. 33, seção 7.1"},
+      {"trecho": "We employed the persona of a \"software security expert\" to prompt LLMs towards generating security-conscious code.", "localizador": "PDF p. 33, seção 7.1"},
+      {"trecho": "Our findings reaffirm the fact that LLM-generated code contains a large number of security weaknesses mainly related to CWE-78, CWE-259, CWE-94, and CWE-330.", "localizador": "PDF p. 3, seção 1"},
+      {"trecho": "However, this approach can be expensive due to the iterative nature of the process.", "localizador": "PDF p. 11, seção 4.2.2"},
+      {"trecho": "However, GPT-4 (gpt-4-1105-preview) was trained on data up to April 2023, suggesting a slight risk of leakage since the GitHub repository predates this one.", "localizador": "PDF p. 39, seção 8"},
+      {"trecho": "The average similarity score obtained for all the code generated using RCI technique and the secure implementation present in the LLMSecEval dataset is 0.075.", "localizador": "PDF p. 39, seção 8"},
+      {"trecho": "Since this study exclusively relied on API interactions, there is no risk of indirect data leakage.", "localizador": "PDF p. 39, seção 8"},
+      {"trecho": "The validity analysis of code responses generated by all LLMs was conducted by a single author, potentially introducing biases in the evaluation process.", "localizador": "PDF p. 39, seção 9"},
+      {"trecho": "We also note that the responses generated by the LLMs were not subjected to a randomness check.", "localizador": "PDF p. 39, seção 9"},
+      {"trecho": "Some specific security weaknesses may have gone undetected.", "localizador": "PDF p. 40, seção 9"},
+      {"trecho": "Code snippets with incomplete logic were removed from our security analysis in the code validity analysis step.", "localizador": "PDF p. 37, seção 7.4 (vi)"},
+      {"trecho": "However, it is noteworthy that in many cases, the actual implementation within these methods remains unaltered, despite the suggestive ’secure’ prefixes in the method names.", "localizador": "PDF p. 37, seção 7.4 (vii)"},
+      {"trecho": "We obtained a Kappa value of 0.87 averaged over the results of 7 prompting techniques from the 3 LLMs.", "localizador": "PDF p. 28"},
+      {"trecho": "To facilitate the maximum reproducibility of our results, we set the value of the temperature parameter to 0.0.", "localizador": "PDF p. 22, seção 5.1"},
+      {"trecho": "Static analysis tools like Bandit and CodeQL seem to be able to detect the issues that LLMs may overlook (such as CWE-259, CWE-94, CWE-78).", "localizador": "PDF p. 38, Actionable Takeaways (6)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "RCI",
+      "mecanismos": ["instrucao", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["restricoes", "feedback"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Density (average number of security weaknesses per LOC), Bandit",
+      "sentido": "menor_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.103, "intervencao": 0.029},
+      "denominador": "Códigos válidos: 131 (baseline) e 125 (RCI) de 150 tarefas; densidade por LOC, com estimador da média não detalhado no estudo",
+      "condicoes": "temperature 0.0, top_p 0.1, max_tokens 500, frequency e presence penalty 0.0; RCI com uma iteração de revisão e melhoria; número de execuções por tarefa nao_informado (o estudo diz que não houve verificação de aleatoriedade). Para esta métrica e este modelo, o estudo relata Kruskal-Wallis p = 0,334 e, na Tabela 4, Dunn post-hoc baseline : RCI p = 0.029 (acima do α corrigido de 0,002381, portanto não significativo) e % Diff. −71,84%. A declaração destaca o resultado do GPT-4 (−77,55%), mas não há agregado impresso entre modelos; usou-se o primeiro modelo da Tabela 3. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo destaca o RCI; a caixa da RQ2 e a conclusão identificam a densidade de fraquezas como métrica e o baseline sem especificações de segurança como comparador. O resultado abrange três modelos sem agregado impresso compatível, por isso foi usado o primeiro modelo na ordem da Tabela 3 (GPT-3), e não o GPT-4 destacado na conclusão.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Density); PDF p. 30, Tabela 4; PDF p. 40, seção 10",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "RCI | 125 | 2 | 84 | 20.960 | 56 | 0.448 | 0.029", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "Among the prompting techniques investigated, RCI, a refinement-based approach, exhibited notable effectiveness in preventing security weaknesses in LLM-generated code.", "localizador": "PDF p. 40, seção 10"},
+        {"trecho": "Even for GPT-3, RCI was able to decrease the average weakness density by 71.84% compared to the baseline prompt.", "localizador": "PDF p. 33, seção 7.1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "naive-secure (0-shot)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Count (total number of security weaknesses detected by Bandit)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 78, "intervencao": 60},
+      "denominador": "Total de fraquezas sobre os códigos válidos: 131 (baseline) e 123 (naive-secure) de 150 tarefas",
+      "condicoes": "Mesmos parâmetros de decodificação do GPT-3 (temperature 0.0, top_p 0.1, max_tokens 500); número de execuções nao_informado. Os conjuntos de códigos válidos diferem entre as condições. Os testes estatísticos sobre a contagem só estão no pacote de replicação; o texto relata significância só para o GPT-4. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "cobertura",
+      "selecao_motivo": "A variante zero-shot é apresentada como formulação própria e avaliada em linha separada (D102) e ainda não estava representada. Exceção ao alvo de três extrações para cobrir técnicas focais. Ordem: primeira tabela com o contraste (Tabela 3), primeira métrica de segurança (Count; # valid code e # LOC descrevem o conjunto analisado), primeiro modelo (GPT-3) e primeira linha de base de prompting (baseline).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Count)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "naive-secure (0-shot) | 123 | 2 | 31 | 10.691 | 60 | 0.487 | 0.074", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "CWE-specific (0-shot)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Count (total number of security weaknesses detected by Bandit)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 78, "intervencao": 47},
+      "denominador": "Total de fraquezas sobre os códigos válidos: 131 (baseline) e 124 (CWE-specific) de 150 tarefas",
+      "condicoes": "Mesmos parâmetros de decodificação do GPT-3; número de execuções nao_informado. As medidas de segurança variam conforme a CWE-alvo de cada tarefa e foram resumidas manualmente a partir da MITRE; o artigo só mostra o exemplo da CWE-20. Contra o baseline, o contraste é do pacote («secure» + lista de medidas). Testes sobre a contagem só no pacote de replicação. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante zero-shot apresentada como formulação própria e avaliada em linha separada (D102). Exceção ao alvo de três extrações para cobrir técnica focal; mesma regra de ordem (Tabela 3, Count, GPT-3, baseline).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Count)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "CWE-specific (0-shot) | 124 | 3 | 65 | 13.846 | 47 | 0.379 | 0.037", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "comprehensive (0-shot)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Count (total number of security weaknesses detected by Bandit)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 78, "intervencao": 57},
+      "denominador": "Total de fraquezas sobre os códigos válidos: 131 (baseline) e 120 (comprehensive) de 150 tarefas",
+      "condicoes": "Mesmos parâmetros de decodificação do GPT-3; número de execuções nao_informado. Contra o baseline, o contraste é do pacote («secure» + referência às principais fraquezas da CWE). Testes sobre a contagem só no pacote de replicação. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante zero-shot apresentada como formulação própria e avaliada em linha separada (D102). Exceção ao alvo de três extrações para cobrir técnica focal; mesma regra de ordem (Tabela 3, Count, GPT-3, baseline).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Count)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "comprehensive (0-shot) | 120 | 4 | 56 | 15.991 | 57 | 0.475 | 0.039", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "zero-shot CoT",
+      "mecanismos": ["instrucao", "restricoes", "raciocinio"],
+      "mecanismos_acrescentados": ["restricoes", "raciocinio"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Count (total number of security weaknesses detected by Bandit)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 78, "intervencao": 57},
+      "denominador": "Total de fraquezas sobre os códigos válidos: 131 (baseline) e 126 (zero-shot CoT) de 150 tarefas",
+      "condicoes": "Mesmos parâmetros de decodificação do GPT-3; número de execuções nao_informado. Duas etapas (raciocínio e resposta) com instrução de código seguro. Contra o baseline, o contraste é do pacote («secure» + gatilhos de raciocínio). Testes sobre a contagem só no pacote de replicação. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada. Exceção ao alvo de três extrações para cobrir técnica focal; mesma regra de ordem (Tabela 3, Count, GPT-3, baseline).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Count)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "zero-shot CoT | 126 | 3 | 32 | 10.753 | 57 | 0.452 | 0.045", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "persona/memetic proxy",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["instrucao", "restricoes"],
+      "comparador": "baseline (0-shot)",
+      "modelo": "GPT-3 (text-davinci-002)",
+      "benchmark": "LLMSecEval (150 tarefas), código Python, análise pelo Bandit",
+      "metrica": "Count (total number of security weaknesses detected by Bandit)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 78, "intervencao": 72},
+      "denominador": "Total de fraquezas sobre os códigos válidos: 131 (baseline) e 137 (persona/memetic proxy) de 150 tarefas",
+      "condicoes": "Mesmos parâmetros de decodificação do GPT-3; número de execuções nao_informado. Persona de especialista em segurança mais instrução de código seguro; contra o baseline, o contraste é do pacote (persona + «secure»). Os conjuntos de códigos válidos diferem (137 contra 131). Testes sobre a contagem só no pacote de replicação. Valores conferidos visualmente na Tabela 3 (PDF p. 27).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada. Exceção ao alvo de três extrações para cobrir técnica focal; mesma regra de ordem (Tabela 3, Count, GPT-3, baseline).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 27, Tabela 3 (bloco GPT-3, coluna Count)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline (0-shot) | 131 | 2 | 80 | 11.175 | 78 | 0.595 | 0.103", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"},
+        {"trecho": "persona/memetic proxy | 137 | 5 | 76 | 15.875 | 72 | 0.525 | 0.043", "localizador": "PDF p. 27, Tabela 3, bloco GPT-3; colunas Prompt Type, # valid code, # LOC (MIN, MAX, Avg.), Security Weaknesses (Count, Rate, Density)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo e duas questões de pesquisa explícitos (RQ1 sobre técnicas existentes e RQ2 sobre o impacto na segurança do código gerado).", "localizador": "PDF p. 1, resumo; PDF p. 2, seção 1"},
+    {"criterio": "procedimento", "julgamento": "atende", "justificativa": "O artigo descreve o conjunto de dados, os modelos e parâmetros, a seleção das técnicas (critério não demonstrativo e pré-estudo), os templates (Tabela 2), a análise manual de validade e a análise com Bandit e CodeQL. Ressalvas: validade avaliada por um único autor, listas CWE-specific e templates para C não mostrados no texto.", "localizador": "PDF p. 20-25, seções 5 e 6.1-6.2; PDF p. 26, Tabela 2; PDF p. 39"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Há prompt baseline sem informação de segurança executado nas mesmas condições, além de comparações entre todos os pares de templates (Tabela 4).", "localizador": "PDF p. 26; PDF p. 27, Tabela 3; PDF p. 30, Tabela 4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Contagem, taxa e densidade são definidas e o denominador da taxa (códigos válidos) é informado, mas o estimador da densidade não é detalhado (o valor impresso não equivale a contagem/LOC total). A Tabela 7 tem valor aparentemente incompatível (Rate 0.038 para Count 54 em 139). Há ainda divergências entre narrativa e tabelas (persona como pior em densidade no GPT-3; «327.27% lesser»). A confiabilidade do Bandit foi verificada (Kappa 0,87).", "localizador": "PDF p. 27, Tabela 3; PDF p. 28; PDF p. 33-34; PDF p. 51, Tabela 7"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Há seção de ameaças à validade (construto e externa: um único avaliador, templates próprios, só modelos OpenAI, ausência de verificação de aleatoriedade, limitações do Bandit) e seção própria sobre vazamento de dados.", "localizador": "PDF p. 38-40, seções 8 e 9"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Há templates, parâmetros de decodificação (temperatura 0.0, top_p 0.1), versões text-davinci-002 e gpt-4-1106-preview e pacote de replicação (não acessado). Faltam: snapshot do gpt-3.5-turbo, coerência na versão do GPT-4 (1105 na p. 39), número de execuções e templates para C; a validade manual depende de um único avaliador.", "localizador": "PDF p. 22; PDF p. 39; PDF p. 40, seção 11"},
+    {"criterio": "contaminacao", "julgamento": "atende", "justificativa": "O estudo discute vazamento direto e indireto, compara datas de corte e de publicação do conjunto de dados e testa a similaridade com o Dolos (0,075). O teste se limita ao código RCI do GPT-4 em Python.", "localizador": "PDF p. 38-39, seção 8"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (2005 linhas, incluindo referências e apêndices A e B).",
+    "paginas_pdf_abertas": [22, 26, 27, 29, 30, 33, 37, 38, 39, 51]
+  }
+}

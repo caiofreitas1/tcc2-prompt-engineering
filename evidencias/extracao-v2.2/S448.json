@@ -1,0 +1,858 @@
+{
+  "estudo": "S448",
+  "texto_fonte": "fontes/textos/lote/S448.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Zhang, Cheng, Wu, Hu. A Pair Programming Framework for Code Generation via Multi-Plan Exploration and Feedback-Driven Refinement. ASE'24, 2024. DOI 10.1145/3691620.3695506; texto lido: arXiv:2409.05001v1 (8 Sep 2024), 13 páginas no PDF, sem número de página impresso.",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "PairCoder",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "decomposicao",
+          "exemplos",
+          "amostragem",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "decomposicao",
+          "exemplos",
+          "amostragem",
+          "feedback",
+          "multiagente"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1 (resumo), p. 3-5 (Seções 3.1-3.3, Algoritmo 1, Figs. 3-8), p. 8 (Tabela 2)",
+        "observacao": "Pacote comparado com Direct prompting (Tabela 2). Mecanismos: dois agentes (Navigator e Driver) → multiagente; papel «You are an experienced programmer» e diretrizes (priorizar correção funcional) → instrucao; reflexão sobre o problema e explicação dos testes públicos (ReflectPrompt) → raciocinio; planos de solução com passos de alto nível e geração de código guiada pelo plano → decomposicao; exemplos breves no PlanPrompt (list1[::-1], BFS) → exemplos; várias amostras de planos, agrupamento e seleção do plano ótimo pelo LLM (SelectPrompt) → amostragem; execução nos testes públicos, estratégia de reparo (AnalyzePrompt) e reparo (RepairPrompt) → feedback. Acrescentados medidos contra Direct prompting, cujo template não é mostrado (presume-se apenas instrução de geração, por isso instrucao não consta como acrescentado). O código com erro entra no prompt de reparo como parte do laço de feedback; não foi classificado como contexto. Pacote híbrido: inclui agrupamento por embeddings (text-embedding-3-large + k-means++), regra heurística de troca de plano baseada em memória histórica, temperatura 0,8 para planos e orçamento de até 10 iterações (ver componentes_fora_escopo). O ganho é do pacote e não pode ser atribuído a um único mecanismo."
+      },
+      {
+        "nome_original": "multi-plan exploration (MP)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "decomposicao",
+          "exemplos",
+          "amostragem",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "amostragem"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9, Seção 4.4 e Tabela 4",
+        "observacao": "Componente do PairCoder isolado por ablação (PairCoder contra «w/o MP»). Em «w/o MP» o Navigator sempre escolhe reparar o código atual em vez de trocar de plano no Step 5; a geração inicial de planos e a seleção inicial continuam. O ingrediente retirado é a troca para outro plano candidato (exploração sequencial de vários candidatos com seleção), classificado como amostragem; a regra de troca baseada em memória histórica é componente fora do escopo."
+      },
+      {
+        "nome_original": "feedback-driven refinement (RF)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "decomposicao",
+          "exemplos",
+          "amostragem",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9, Seção 4.4 e Tabela 4",
+        "observacao": "Componente isolado por ablação (PairCoder contra «w/o RF»). Em «w/o RF» o Navigator sempre tenta outro plano candidato, sem estratégia de reparo nem reparo do código. A execução nos testes públicos continua a decidir a troca de plano em «w/o RF»; o que se retira é o refinamento do código guiado pelo retorno da execução (AnalyzePrompt + RepairPrompt)."
+      },
+      {
+        "nome_original": "Reflection (ReflectPrompt do Navigator)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (Seção 3.2) e p. 4 (Fig. 3)",
+        "observacao": "Etapa do pacote sem condição com e sem ela; nenhuma ablação a retira."
+      },
+      {
+        "nome_original": "Direct prompting",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (Seção 4.1, Comparative methods); p. 8 (Tabelas 2 e 3); p. 10 (Tabelas 5 e 6)",
+        "observacao": "Linha de base de referência para a melhoria relativa. Template do prompt não mostrado (nao_informado). Na Tabela 5 é reexecutada com amostragem repetida (temperatura 0,8, até 10 tentativas)."
+      },
+      {
+        "nome_original": "Chain-of-Thought (CoT) prompting",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 6 (descrição); p. 7 (comentário sobre CoT e SCoT contra Direct); p. 8 (Tabela 2)",
+        "observacao": "Comparador; difere de Direct prompting pela instrução zero-shot «Let’s think step by step.». O estudo comenta o contraste com Direct apenas de forma qualitativa («even worse than direct generation in some settings»). Como o template de Direct não é mostrado, a igualdade dos demais ingredientes é presumida pela descrição."
+      },
+      {
+        "nome_original": "SCoT prompting",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6-7 (descrição); p. 8 (Tabela 2)",
+        "observacao": "Raciocínio estruturado por estruturas de programa (sequência, ramificação, laço). O estudo não informa se o prompt reproduzido inclui exemplos; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-planning",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao",
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 2)",
+        "observacao": "Planejamento com demonstrações few-shot seguido de implementação; comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Self-collaboration",
+        "mecanismos": [
+          "instrucao",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "multiagente"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabelas 2 e 3, valores com †)",
+        "observacao": "Papéis analista, codificador e testador. Valores citados do artigo original (†), não reexecutados; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-repair",
+        "mecanismos": [
+          "instrucao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 2); p. 10 (Tabelas 5 e 6)",
+        "observacao": "Modelo de feedback gera explicações textuais dos erros dos testes unitários usadas no reparo; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-debugging",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "exemplos",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "exemplos",
+          "feedback"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 2, Fig. 9); p. 10 (Tabela 6)",
+        "observacao": "Depuração iterativa explicando o código linha a linha, com demonstrações few-shot; mecanismos não isolados."
+      },
+      {
+        "nome_original": "INTERVENOR",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "feedback",
+          "multiagente"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 2, Fig. 9); p. 10 (Tabela 6)",
+        "observacao": "Dois papéis (Code Teacher e Code Learner) com cadeia de reparo baseada no retorno do compilador; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Reflexion",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "feedback"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabelas 2 e 3); p. 10 (Tabela 6)",
+        "observacao": "CoT para gerar os próprios testes e autorreflexões verbais. Na Tabela 2 os valores não têm †, mas faltam colunas por problemas de reprodutibilidade; na Tabela 3 os valores são citados (†). Mecanismos não isolados."
+      },
+      {
+        "nome_original": "LDB",
+        "mecanismos": [
+          "instrucao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 2, †); p. 10 (Tabela 6, †)",
+        "observacao": "Segmenta programas em blocos básicos e acompanha valores de variáveis em execução para reparo iterativo. Valores citados do artigo original (†); mecanismos não isolados."
+      },
+      {
+        "nome_original": "MetaGPT",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao",
+          "multiagente"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (descrição); p. 8 (Tabela 3, †)",
+        "observacao": "Sistema multiagente com cinco papéis e procedimentos operacionais padronizados; só na Tabela 3 (GPT-4), com valores citados do artigo original."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "ClusterPlans (text-embedding-3-large + k-means++)",
+        "natureza": "outro",
+        "descricao": "Vetorização das n = 15 amostras de planos por um modelo de embeddings e agrupamento k-means++ em k = 3 clusters, escolhendo o plano mais próximo de cada centróide. É seleção algorítmica, não alteração do prompt.",
+        "localizador": "PDF p. 3-4 (Seção 3.2, Algoritmo 1, linha 3); p. 7 (Implementation details)"
+      },
+      {
+        "nome_original": "temperatura 0,8 para planos e decodificação gulosa nas demais etapas",
+        "natureza": "decodificacao",
+        "descricao": "Amostragem de núcleo com temperatura 0,8 para gerar planos diversos; temperatura 0 nas outras etapas e nos métodos reproduzidos, salvo indicação.",
+        "localizador": "PDF p. 3 (Seção 3.2); p. 7 (Implementation details)"
+      },
+      {
+        "nome_original": "maximum number of iterations r = 10",
+        "natureza": "orcamento",
+        "descricao": "Limite de até 10 gerações ou refinamentos de código para o PairCoder e os métodos iterativos; analisado de 1 a 10 na Fig. 9.",
+        "localizador": "PDF p. 7 (Implementation details); p. 8 (Fig. 9)"
+      },
+      {
+        "nome_original": "long-term memory module / heuristic strategy",
+        "natureza": "outro",
+        "descricao": "Regra programada que considera o plano atual pouco promissor se o código ou o retorno de execução já ocorreram na memória histórica, disparando nova seleção de plano. É lógica de controle do fluxo, não texto de prompt.",
+        "localizador": "PDF p. 5 (Seção 3.2, Direct next iteration); p. 4 (Algoritmo 1, linhas 6 e 9)"
+      },
+      {
+        "nome_original": "executor de testes públicos (ExecuteTests)",
+        "natureza": "outro",
+        "descricao": "Execução do programa nos testes públicos em ambiente Python 3.9, com limite de 3 segundos por caso; fornece o sinal usado pelo mecanismo de feedback.",
+        "localizador": "PDF p. 5 (Perform code testing); p. 7 (Implementation details)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5-Turbo",
+        "versao": "gpt-3.5-turbo-0613",
+        "observacao": "Navigator e Driver; também nos métodos reproduzidos. Janela de contexto máxima de 16K tokens para todas as abordagens.",
+        "localizador": "PDF p. 7 (Implementation details)"
+      },
+      {
+        "nome": "DeepSeek-Coder-Instruct 33B",
+        "versao": "nao_informado",
+        "observacao": "Informado só o tamanho (33B parâmetros); snapshot não informado.",
+        "localizador": "PDF p. 7 (Implementation details)"
+      },
+      {
+        "nome": "GPT-4",
+        "versao": "gpt-4-0613",
+        "observacao": "Só na Tabela 3 (PairCoder e Direct prompting); os demais valores da Tabela 3 são citados dos artigos originais, com modelo não informado no estudo.",
+        "localizador": "PDF p. 7 (Seção 4.2); p. 8 (Tabela 3)"
+      },
+      {
+        "nome": "text-embedding-3-large",
+        "versao": "nao_informado",
+        "observacao": "Modelo de embeddings para agrupar planos (componente fora do escopo).",
+        "localizador": "PDF p. 7 (Implementation details, nota 2)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "HumanEval (Orig)",
+        "quantidade": "164 problemas",
+        "observacao": "Média de 2,8 testes públicos e 9,6 privados (Tabela 1).",
+        "localizador": "PDF p. 6, Tabela 1"
+      },
+      {
+        "nome": "HumanEval+ (Plus)",
+        "quantidade": "164 problemas",
+        "observacao": "Média de 2,8 testes públicos e 764,1 privados.",
+        "localizador": "PDF p. 6, Tabela 1"
+      },
+      {
+        "nome": "MBPP (Orig)",
+        "quantidade": "500 problemas",
+        "observacao": "Média de 1,0 teste público (primeiro caso privado usado como público) e 3,1 privados.",
+        "localizador": "PDF p. 6, Tabela 1 e Seção 4.1"
+      },
+      {
+        "nome": "MBPP+ (Plus)",
+        "quantidade": "399 problemas",
+        "observacao": "Média de 3,0 testes públicos (os três casos privados originais) e 108,5 privados.",
+        "localizador": "PDF p. 6, Tabela 1 e Seção 4.1"
+      },
+      {
+        "nome": "CodeContest (Valid)",
+        "quantidade": "117 problemas",
+        "observacao": "Média de 1,5 testes públicos e 202,9 privados.",
+        "localizador": "PDF p. 6, Tabela 1"
+      },
+      {
+        "nome": "CodeContest (Test)",
+        "quantidade": "165 problemas",
+        "observacao": "Média de 1,7 testes públicos e 202,1 privados.",
+        "localizador": "PDF p. 6, Tabela 1"
+      },
+      {
+        "nome": "MBPP sanitizado",
+        "quantidade": "nao_informado",
+        "observacao": "Só na Tabela 3 (GPT-4); tamanho não informado no estudo. A relação entre os subconjuntos Orig/Plus de HumanEval e MBPP é descrita como versões estendidas (Plus), sem detalhe de sobreposição além disso.",
+        "localizador": "PDF p. 8, Tabela 3"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "greedy pass@1",
+        "definicao": "Programa correto só se passa todos os testes privados; decodificação gulosa.",
+        "denominador": "Não ligado explicitamente pelo estudo ao número de problemas da Tabela 1; os valores da maioria das células são compatíveis com esses totais (cálculo próprio).",
+        "localizador": "PDF p. 6 (Metrics)"
+      },
+      {
+        "nome": "average number of API calls per problem",
+        "definicao": "Média de chamadas de API por problema com GPT-3.5-Turbo.",
+        "denominador": "nao_informado",
+        "localizador": "PDF p. 9 (Cost analysis); p. 10 (Tabela 6)"
+      },
+      {
+        "nome": "average token consumption per problem (in thousands)",
+        "definicao": "Tokens de entrada e de saída por problema, em milhares.",
+        "denominador": "nao_informado",
+        "localizador": "PDF p. 9 (Cost analysis); p. 10 (Tabela 6)"
+      },
+      {
+        "nome": "proportion of problems where all k plans are attempted",
+        "definicao": "Proporção de problemas em que todos os k planos são tentados.",
+        "denominador": "nao_informado",
+        "localizador": "PDF p. 9 (Fig. 10)"
+      },
+      {
+        "nome": "Pass Tv, Pass Th, RE, WA, TLE (%)",
+        "definicao": "Taxas de aprovação nos testes públicos e privados e tipos de erro nos testes privados.",
+        "denominador": "nao_informado",
+        "localizador": "PDF p. 10 (Tabela 7)"
+      }
+    ],
+    "linguagens": [
+      "Python (ambiente Python 3.9)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Plano inicial falho pode desviar o reparo guiado por feedback, que não resolve o problema de fundo (exemplo motivador com GPT-3.5-Turbo).",
+        "localizador": "PDF p. 2 (Introdução e Fig. 1)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Wrong Answer é o tipo de erro mais comum; em CodeContest-test, 60,00% dos problemas falham nos testes privados por Wrong Answer, 16,36% por Runtime Error e 8,48% por Time Limit Exceeded.",
+        "localizador": "PDF p. 10 (Tabela 7 e Error analysis)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Baixa cobertura dos testes públicos limita o PairCoder: em CodeContest-test só 21,21% passam nos testes públicos.",
+        "localizador": "PDF p. 10 (Error analysis)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Testes autogerados incorretos (Reflexion) levam a autorreflexões baseadas em avaliações falso-negativas, explicando o baixo desempenho desse comparador.",
+        "localizador": "PDF p. 7 (Seção 4.2)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento de dados de avaliação no pré-treinamento do DeepSeek-Coder, lançado depois da coleta de benchmarks como HumanEval; invocado para explicar Direct prompting com DeepSeek-Coder acima do GPT-3.5-Turbo em três colunas. Contaminação não verificada.",
+        "localizador": "PDF p. 7 (Seção 4.2); p. 11 (Seção 4.6)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Exploração de vários planos e refinamento iterativo introduzem sobrecarga computacional; o PairCoder faz mais chamadas de API que a maioria das abordagens (Tabela 6, por exemplo 5,28 chamadas por problema em HumanEval contra 2,43 de Direct prompting).",
+        "localizador": "PDF p. 6 (Complexity analysis); p. 10 (Tabela 6)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à generalização: avaliação com dois LLMs e cinco benchmarks em Python; geração multilíngue fica para trabalho futuro.",
+        "localizador": "PDF p. 11 (Seção 4.6)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça do uso de prompting zero-shot: outras instruções ou demonstrações few-shot poderiam melhorar o desempenho.",
+        "localizador": "PDF p. 11 (Seção 4.6)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Argumento de que um eventual vazamento afetaria igualmente todas as linhas de base, por usarem o mesmo modelo; não há verificação nem condição de controle.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 11 (Seção 4.6)"
+      },
+      {
+        "descricao": "Seleção de cinco benchmarks e de LLMs fechado e aberto para mitigar a ameaça à generalização.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 11 (Seção 4.6)"
+      },
+      {
+        "descricao": "Mesmas descrições de problema e mesmos testes públicos para todas as abordagens; execução em ambiente Python 3.9 consistente.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 7 (Implementation details)"
+      },
+      {
+        "descricao": "Controle de orçamento: técnicas de prompting e Self-repair reexecutadas com até 10 tentativas (amostragem repetida a temperatura 0,8) para igualar o número máximo de tentativas (Tabela 5).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9 (Cost analysis); p. 10 (Tabela 5)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversões: CoT e SCoT ficam abaixo de Direct prompting em algumas condições da Tabela 2 (por exemplo, GPT-3.5-Turbo CodeContest Valid: CoT 5.13 contra Direct 6.84; SCoT MBPP Orig 62.60 contra 66.80; DeepSeek-Coder HumanEval Orig: SCoT 73.17 contra 76.22). Self-planning com DeepSeek-Coder também fica abaixo de Direct em HumanEval Orig (74.39 contra 76.22) e MBPP Orig (65.80 contra 66.40).",
+        "localizador": "PDF p. 8, Tabela 2; p. 7, Seção 4.2"
+      },
+      {
+        "descricao": "Direct prompting com DeepSeek-Coder supera o GPT-3.5-Turbo em HumanEval (76.22 contra 67.68), HumanEval+ (67.78 contra 60.98) e CodeContest-test (6.67 contra 6.06); os autores especulam vazamento de dados, sem verificar.",
+        "localizador": "PDF p. 7 (Seção 4.2); p. 8 (Tabela 2)"
+      },
+      {
+        "descricao": "Linhas de base de origem heterogênea na mesma tabela: Self-collaboration e LDB (†) citados dos artigos originais, sem reexecução, com condições (modelo, orçamento, testes públicos) não descritas no estudo; Reflexion com células ausentes por problemas de reprodutibilidade. Na Tabela 3 (GPT-4), MetaGPT, Reflexion e Self-collaboration são citados (†) e o MBPP é a versão sanitizada.",
+        "localizador": "PDF p. 7 (Implementation details); p. 8 (Tabelas 2 e 3)"
+      },
+      {
+        "descricao": "Orçamentos diferentes entre condições: na Tabela 2 o PairCoder tem até 10 iterações e 15 planos amostrados, enquanto as técnicas de prompting geram sem amostragem repetida. Com até 10 tentativas (Tabela 5), Direct prompting com GPT-3.5-Turbo sobe de 67.68 (Tabela 2) para 75.61 em HumanEval, de 66.80 para 72.80 em MBPP e de 6.06 para 9.09 em CodeContest-test; o PairCoder continua 87.80, 80.60 e 15.15. O mesmo comparador tem valores diferentes entre tabelas por condição distinta.",
+        "localizador": "PDF p. 8 (Tabela 2); p. 9 (Cost analysis); p. 10 (Tabela 5)"
+      },
+      {
+        "descricao": "Aparente inconsistência com os denominadores da Tabela 1 (cálculo próprio): sob decodificação gulosa e uma execução, pass@1 deveria ser múltiplo de 1/164 (HumanEval), 1/500 (MBPP) ou 1/399 (MBPP+). Não são compatíveis com contagem inteira: Tabela 2, DeepSeek-Coder Direct prompting HumanEval+ 67.78, CoT HumanEval Orig 77.27, Self-debugging MBPP+ 71.12; Reflexion 69.57 e 67.76 (GPT-3.5-Turbo) e 81.99 e 74.31 (DeepSeek-Coder); Tabela 4, DeepSeek-Coder w/o MP HumanEval Orig 78.86; Tabela 5, SCoT MBPP 73.94 e Self-planning MBPP 76.36. Outros valores parecem truncados em vez de arredondados (Tabela 4, GPT-3.5 w/o RF CodeContest Test 9.69 ≈ 16/165 = 9.697; Tabela 5, Self-planning CodeContest-test 10.90 ≈ 18/165 = 10.909; Self-repair HumanEval 78.65 ≈ 129/164 = 78.659). O estudo não informa número de execuções nem se houve média, nem o denominador exato de cada célula; o MBPP sanitizado da Tabela 3 não tem tamanho informado.",
+        "localizador": "PDF p. 6 (Tabela 1); p. 8 (Tabela 2); p. 9 (Tabela 4); p. 10 (Tabela 5)"
+      },
+      {
+        "descricao": "A melhoria declarada no resumo (12.00%–162.43%) é variação relativa sobre Direct prompting (linha «Relative improvement» da Tabela 2), não diferença em p.p.; os maiores valores relativos ocorrem onde a linha de base é baixa (CodeContest Valid GPT-3.5-Turbo: 6.84 contra 17.95).",
+        "localizador": "PDF p. 1 (resumo); p. 8 (Tabela 2)"
+      },
+      {
+        "descricao": "Narrativa e prompts divergem quanto a «zero-shot»: a Seção 4.6 descreve o prompting dos experimentos como zero-shot, mas o PlanPrompt inclui exemplos breves (list1[::-1], BFS) declarados como exemplos para guiar a proposta de planos.",
+        "localizador": "PDF p. 3 (Seção 3.2); p. 4 (Fig. 4); p. 11 (Seção 4.6)"
+      },
+      {
+        "descricao": "O texto afirma que LDB tem o maior consumo de tokens entre todas as abordagens (23 mil em HumanEval), mas na Tabela 6 Self-debugging tem 38.40 mil em CodeContest-test, onde LDB não foi relatado; a afirmação só vale para HumanEval.",
+        "localizador": "PDF p. 10 (Tabela 6 e Cost analysis)"
+      },
+      {
+        "descricao": "As proporções de problemas aprovados nos testes privados entre os aprovados nos públicos (91.72%, 86.48%, 71.43%) são calculadas pelos autores como razão entre taxas (87.80/95.73 etc.), o que pressupõe que todo problema aprovado nos testes privados também passa nos públicos; o estudo não informa essa inclusão.",
+        "localizador": "PDF p. 10 (Tabela 7 e Error analysis)"
+      },
+      {
+        "descricao": "Números de iterações por plano (3.8 e 6.7 em HumanEval; 4.5 e 7.4 em CodeContest-test) e ganhos de «around 10» e «over 21» pontos em pass@1 vêm da Fig. 9, sem tabela; não foram extraídos valores das curvas.",
+        "localizador": "PDF p. 8 (Fig. 9 e texto)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ablação de hiperparâmetros (não é prompting): número máximo de iterações r de 1 a 10 (Fig. 9) e número de clusters k de 1 a 5 (Fig. 10); pass@1 se estabiliza após k = 3; só 4.88% (HumanEval) e 14.55% (CodeContest-test) dos problemas tentam mais de três planos.",
+        "localizador": "PDF p. 8-9 (Seção 4.3, Figs. 9 e 10)"
+      },
+      {
+        "descricao": "Testes públicos extraídos por regras manuais das descrições (HumanEval, HumanEval+, CodeContest); para MBPP usa-se o primeiro caso privado e, para MBPP+, os três casos privados originais como testes públicos.",
+        "localizador": "PDF p. 6 (Seção 4.1, Benchmarks)"
+      },
+      {
+        "descricao": "AnalyzePrompt é adaptado ao tipo de retorno (Runtime Error, Wrong Answer, Time Limit Exceeded); só a versão para Wrong Answer é mostrada.",
+        "localizador": "PDF p. 5 (Seção 3.2 e Fig. 6)"
+      },
+      {
+        "descricao": "O tempo de execução não foi medido por ser sensível a flutuação de rede; o custo é medido por chamadas de API e tokens.",
+        "localizador": "PDF p. 9 (Cost analysis)"
+      },
+      {
+        "descricao": "Código-fonte declarado disponível no GitHub (https://github.com/nju-websoft/PairCoder); não acessado nem validado nesta extração.",
+        "localizador": "PDF p. 2 (nota 1)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this paper, we draw on pair programming practices to propose PairCoder, a novel LLM-based framework for code generation.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "PairCoder incorporates two collaborative LLM agents, namely a Navigator agent for high-level planning and a Driver agent for specific implementation.",
+        "localizador": "PDF p. 1, resumo"
+      },
+      {
+        "trecho": "PairCoder integrates two key mechanisms: (i) multi-plan exploration achieved by the Navigator through adjusting diverse solution plans, and (ii) feedback-driven refinement based on execution feedback from the Driver and historical memory.",
+        "localizador": "PDF p. 2, contribuições"
+      },
+      {
+        "trecho": "It stimulates LLMs to explicitly analyze the details of the problem, consider possible valid inputs and edge cases, and explain public test cases.",
+        "localizador": "PDF p. 3, Seção 3.2"
+      },
+      {
+        "trecho": "As shown in Fig. 4, we include brief examples in prompts to guide the proposal and emphasize the functional correctness of the proposed plans.",
+        "localizador": "PDF p. 3, Seção 3.2"
+      },
+      {
+        "trecho": "To obtain diverse solution plans, we set a non-zero temperature for multiple nucleus sampling [15] and ask LLMs to generate multiple plans in each batch [8], which improves sampling efficiency while reducing duplicate plans.",
+        "localizador": "PDF p. 3, Seção 3.2"
+      },
+      {
+        "trecho": "Following the previous studies [21, 52], we also make choices through LLMs, where the prompt template is shown in Fig. 5.",
+        "localizador": "PDF p. 4, Seção 3.2"
+      },
+      {
+        "trecho": "We apply a simple but effective heuristic strategy to determine whether to change the solution plan.",
+        "localizador": "PDF p. 5, Seção 3.2"
+      },
+      {
+        "trecho": "Based on the execution feedback, the Navigator leverages the reasoning ability of LLMs to propose a directive repair strategy (Line 13).",
+        "localizador": "PDF p. 5, Seção 3.2"
+      },
+      {
+        "trecho": "If the Navigator assumes that the current solution plan remains promising, the Driver will attempt to repair the buggy code based on the given repair strategy (Line 14).",
+        "localizador": "PDF p. 5, Seção 3.3"
+      },
+      {
+        "trecho": "Direct prompting [6] takes the original requirements directly as inputs to prompt LLMs for code generation.",
+        "localizador": "PDF p. 6, Seção 4.1"
+      },
+      {
+        "trecho": "We use the classical CoT instruction “Let’s think step by step.” to guide LLMs in zero-shot [24].",
+        "localizador": "PDF p. 6, Seção 4.1"
+      },
+      {
+        "trecho": "In the planning phase, LLMs plan out the solution steps from the intent with few-shot demonstrations.",
+        "localizador": "PDF p. 7, Seção 4.1"
+      },
+      {
+        "trecho": "Self-debugging [7] teaches LLMs to perform iterative rubber duck debugging by explaining the generated code line-by-line with few-shot demonstrations.",
+        "localizador": "PDF p. 7, Seção 4.1"
+      },
+      {
+        "trecho": "For the comparative methods, we reproduce them according to the source code or provided prompts; otherwise, we quote the results directly from their papers [10, 16, 54].",
+        "localizador": "PDF p. 7, Implementation details"
+      },
+      {
+        "trecho": "To ensure a fair comparison, all approaches are given identical problem descriptions and public test cases for code generation.",
+        "localizador": "PDF p. 7, Implementation details"
+      },
+      {
+        "trecho": "“w/o MP” disables the capability of multi-plan exploration, making the Navigator always choose to repair the current code rather than adjust the solution plan in Step 5.",
+        "localizador": "PDF p. 9, Seção 4.4"
+      },
+      {
+        "trecho": "“w/o RF” is the opposite, which disables the feedback-driven refinement process, making the Navigator always choose to attempt another candidate plan.",
+        "localizador": "PDF p. 9, Seção 4.4"
+      },
+      {
+        "trecho": "Second, if the initially generated code follows a flawed plan, the feedback-based repair process is likely to be misguided by the initial incorrect direction, failing to address fundamental issues.",
+        "localizador": "PDF p. 2, Introdução"
+      },
+      {
+        "trecho": "Overall, Wrong Answer is the most common error type, indicating that generating functionally correct programs remains a key challenge for code generation.",
+        "localizador": "PDF p. 10, Error analysis"
+      },
+      {
+        "trecho": "Referring to Table 1, the low coverage of public test cases limits the ability of PairCoder to facilitate code generation.",
+        "localizador": "PDF p. 10, Error analysis"
+      },
+      {
+        "trecho": "The poor performance of Reflexion is likely due to the model generating incorrect test cases, which leads to self-reflections based on false negative evaluations of the code [42].",
+        "localizador": "PDF p. 7, Seção 4.2"
+      },
+      {
+        "trecho": "Another potential threat is data leakage in pre-trained LLMs.",
+        "localizador": "PDF p. 11, Seção 4.6"
+      },
+      {
+        "trecho": "However, any such leakage would affect all baselines equally since they use the same model.",
+        "localizador": "PDF p. 11, Seção 4.6"
+      },
+      {
+        "trecho": "While the multi-plan exploration and iterative refinement introduce additional computational overhead, the superior accuracy of PairCoder in code generation justifies the trade-off in Sect. 4.",
+        "localizador": "PDF p. 6, Complexity analysis"
+      },
+      {
+        "trecho": "Collaborating the Navigator and the Driver, PairCoder requires more API calls than most approaches except Reflexion.",
+        "localizador": "PDF p. 10, Cost analysis"
+      },
+      {
+        "trecho": "The first potential threat relates to the generalizability of our evaluation.",
+        "localizador": "PDF p. 11, Seção 4.6"
+      },
+      {
+        "trecho": "To mitigate this concern, we carefully select five widely used and representative benchmarks and both closed-source and open-source LLMs for our experiments.",
+        "localizador": "PDF p. 11, Seção 4.6"
+      },
+      {
+        "trecho": "Although zero-shot prompting achieves superior accuracy while largely reducing token consumption, we do not rule out the possibility that other instructions or few-shot demonstrations could further improve performance.",
+        "localizador": "PDF p. 11, Seção 4.6"
+      },
+      {
+        "trecho": "This setup ensures that these approaches have the same maximum number of attempts as the iterative approaches in Sect. 4.1.",
+        "localizador": "PDF p. 9, Cost analysis"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "PairCoder",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "decomposicao",
+        "exemplos",
+        "amostragem",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio",
+        "decomposicao",
+        "exemplos",
+        "amostragem",
+        "feedback",
+        "multiagente"
+      ],
+      "comparador": "Direct prompting",
+      "modelo": "GPT-3.5-Turbo (gpt-3.5-turbo-0613)",
+      "benchmark": "HumanEval (Orig)",
+      "metrica": "pass@1 (greedy pass@1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 67.68,
+        "intervencao": 87.8
+      },
+      "denominador": "164 problemas no HumanEval Orig (Tabela 1, # Q); o estudo não liga explicitamente o denominador da pass@1 a esse total.",
+      "condicoes": "PairCoder: até r = 10 iterações; n = 15 planos amostrados a temperatura 0,8 e agrupados em k = 3 clusters (text-embedding-3-large + k-means++); temperatura 0 nas demais etapas; testes públicos usados para feedback; janela de 16K tokens. Direct prompting reproduzido com decodificação gulosa e sem amostragem repetida (amostragem repetida só na Tabela 5, onde Direct chega a 75.61). Ambos com as mesmas descrições e testes públicos. Número de execuções do experimento nao_informado. O ganho é do pacote híbrido (inclui agrupamento por embeddings, regra de troca de plano e orçamento maior), não de um mecanismo isolado. Conferido no PDF p. 8 (Tabela 2, colunas GPT-3.5-Turbo / HumanEval / Orig).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara uma técnica (PairCoder), uma métrica (pass@1) e um comparador (prompting direto). Sem agregado impresso compatível entre benchmarks e modelos, foi usado o primeiro da Tabela 2: GPT-3.5-Turbo, HumanEval Orig.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8, Tabela 2 (GPT-3.5-Turbo, HumanEval, Orig); PDF p. 1, resumo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Extensive experimental results demonstrate the superior accuracy of PairCoder, achieving relative pass@1 improvements of 12.00%–162.43% compared to prompting LLMs directly.",
+          "localizador": "PDF p. 1, resumo"
+        },
+        {
+          "trecho": "Direct prompting 67.68 60.98 66.80 66.42 6.84 6.06 76.22 67.78 66.40 64.41 5.98 6.67",
+          "localizador": "PDF p. 8, Tabela 2, linha Direct prompting; colunas GPT-3.5-Turbo (HumanEval Orig, Plus; MBPP Orig, Plus; CodeContest Valid, Test) e DeepSeek-Coder (idem)"
+        },
+        {
+          "trecho": "PairCoder (ours) 87.80 77.44 80.60 77.69 17.95 15.15 85.37 76.22 78.80 75.69 13.68 14.55",
+          "localizador": "PDF p. 8, Tabela 2, linha PairCoder (ours); mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "multi-plan exploration (MP)",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "decomposicao",
+        "exemplos",
+        "amostragem",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "amostragem"
+      ],
+      "comparador": "PairCoder w/o MP",
+      "modelo": "GPT-3.5-Turbo (gpt-3.5-turbo-0613)",
+      "benchmark": "HumanEval (Orig)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 81.1,
+        "intervencao": 87.8
+      },
+      "denominador": "164 problemas no HumanEval Orig (Tabela 1); o estudo não liga explicitamente o denominador ao total.",
+      "condicoes": "Ablação: «w/o MP» faz o Navigator sempre reparar o código atual em vez de trocar de plano; demais componentes mantidos. Hiperparâmetros da implementação (r = 10, n = 15, k = 3, temperatura 0,8 para planos e 0 nas demais etapas). Número de execuções nao_informado. Conferido no PDF p. 9 (Tabela 4, GPT-3.5-Turbo, HumanEval Orig).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Só há uma técnica focal e uma tarefa; para completar o alvo de três, componente isolado da tabela de ablação, primeiro na ordem da Tabela 4 (MP), primeiro modelo (GPT-3.5-Turbo) e primeira coluna (HumanEval Orig).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9, Tabela 4 (GPT-3.5-Turbo, HumanEval, Orig)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PairCoder 87.80 77.44 80.60 77.69 17.95 15.15",
+          "localizador": "PDF p. 9, Tabela 4, modelo GPT-3.5-Turbo, linha PairCoder; colunas HumanEval Orig, Plus; MBPP Orig, Plus; CodeContest Valid, Test"
+        },
+        {
+          "trecho": "w/o MP 81.10 73.78 76.20 71.68 11.97 10.91",
+          "localizador": "PDF p. 9, Tabela 4, modelo GPT-3.5-Turbo, linha w/o MP; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "feedback-driven refinement (RF)",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "decomposicao",
+        "exemplos",
+        "amostragem",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "PairCoder w/o RF",
+      "modelo": "GPT-3.5-Turbo (gpt-3.5-turbo-0613)",
+      "benchmark": "HumanEval (Orig)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 74.39,
+        "intervencao": 87.8
+      },
+      "denominador": "164 problemas no HumanEval Orig (Tabela 1); o estudo não liga explicitamente o denominador ao total.",
+      "condicoes": "Ablação: «w/o RF» faz o Navigator sempre tentar outro plano candidato, sem estratégia de reparo nem reparo; a execução nos testes públicos continua a disparar a troca de plano. Hiperparâmetros da implementação (r = 10, n = 15, k = 3). Número de execuções nao_informado. Conferido no PDF p. 9 (Tabela 4, GPT-3.5-Turbo, HumanEval Orig).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação (RF), para completar o alvo de três; primeiro modelo e primeira coluna da Tabela 4.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9, Tabela 4 (GPT-3.5-Turbo, HumanEval, Orig)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PairCoder 87.80 77.44 80.60 77.69 17.95 15.15",
+          "localizador": "PDF p. 9, Tabela 4, modelo GPT-3.5-Turbo, linha PairCoder; colunas HumanEval Orig, Plus; MBPP Orig, Plus; CodeContest Valid, Test"
+        },
+        {
+          "trecho": "w/o RF 74.39 68.29 72.20 68.92 8.55 9.69",
+          "localizador": "PDF p. 9, Tabela 4, modelo GPT-3.5-Turbo, linha w/o RF; mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas (acurácia, hiperparâmetros, ablação, custo e erros).",
+      "localizador": "PDF p. 6, Seção 4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Algoritmo, templates de prompt, hiperparâmetros (n, k, r, temperaturas), limite de tempo e ambiente de execução descritos.",
+      "localizador": "PDF p. 3-7 (Seção 3, Algoritmo 1, Figs. 3-8, Implementation details)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Dez linhas de base de prompting e refinamento na Tabela 2 (mais MetaGPT na Tabela 3), a maioria reproduzida com mesmas descrições, testes públicos e limite de iterações, mais controle de orçamento (Tabela 5) e ablações (Tabela 4). Algumas linhas de base são citadas dos artigos originais (†), sob condições não descritas.",
+      "localizador": "PDF p. 6-7 (Comparative methods, Implementation details); p. 8 (Tabelas 2 e 3); p. 9-10 (Tabelas 4 e 5)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@1 gulosa definida e totais de problemas informados (Tabela 1), mas o denominador de cada célula não é ligado explicitamente; vários valores são incompatíveis com contagens inteiras sobre esses totais (cálculo próprio) e o número de execuções não é informado. Valores de PairCoder coincidem entre as Tabelas 2, 4, 5 e 7.",
+      "localizador": "PDF p. 6 (Metrics, Tabela 1); p. 8-10 (Tabelas 2, 4, 5, 7)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças trata generalização, vazamento de dados e uso de zero-shot; não discute não determinismo, número de execuções nem a comparabilidade dos resultados citados de outros artigos.",
+      "localizador": "PDF p. 11, Seção 4.6"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código declarado no GitHub (não verificado), prompts principais mostrados, snapshot do GPT-3.5-Turbo e do GPT-4 e hiperparâmetros informados; faltam o template de Direct prompting, as variantes do AnalyzePrompt para Runtime Error e Time Limit Exceeded, a versão do DeepSeek-Coder e o número de execuções.",
+      "localizador": "PDF p. 2 (nota 1); p. 4-6 (Figs. 3-8); p. 7 (Implementation details)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Reconhece possível vazamento no pré-treinamento do DeepSeek-Coder e argumenta que ele afetaria todas as abordagens igualmente, sem verificação nem controle.",
+      "localizador": "PDF p. 7 (Seção 4.2); p. 11 (Seção 4.6)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-897, incluindo referências).",
+    "paginas_abertas": [
+      "p-04",
+      "p-05",
+      "p-06",
+      "p-07",
+      "p-08",
+      "p-09",
+      "p-10"
+    ]
+  }
+}

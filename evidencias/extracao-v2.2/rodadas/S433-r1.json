@@ -1,0 +1,394 @@
+{
+  "estudo_id": "S433",
+  "texto_fonte": "fontes/textos/lote/S433.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_lida": "Taherkhani, Sepidband, Pham, Wang e Hemmati. Automated Prompt Engineering for Cost-Effective Code Generation Using Evolutionary Algorithm. arXiv:2408.11198v2 [cs.SE], 29 jul. 2025 (manuscrito submetido à ACM, 18 p.). Página do PDF coincide com a página impressa.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "EPiC (Evolutionary Prompt Engineering for Code)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "feedback", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["restricoes", "exemplos", "raciocinio", "feedback", "amostragem", "otimizacao_prompt"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (Introdução, Fig. 2 na p. 3); PDF p. 5-9 (Seção 3, Algoritmos 1 e 2, prompts das p. 7-9); Tabela 2, PDF p. 13",
+        "observacao": "Pacote em duas fases: avaliação inicial (IE), com geração de testes e de código, e engenharia de prompt evolutiva (EPE), com população inicial de prompts reescritos por LLM, avaliação por taxa de testes gerados aprovados (fitness), seleção aleatória ponderada com elitismo e mutação (por sinônimos via embeddings de palavras, padrão, ou por LLM). Mecanismos: instrucao (persona e diretrizes nos prompts de geração e de reescrita); restricoes (tipos de entrada e saída acrescentados à descrição, limites de palavras, formato de saída dos testes); contexto (assinatura e trecho de código da função fornecidos como insumo); exemplos (exemplo add3Numbers no prompt de testes e casos de teste inseridos na descrição); raciocinio (prompt de testes pede raciocínio passo a passo); feedback (seleção e mutação guiadas pela execução dos testes gerados); amostragem (população de prompts e respostas com seleção por fitness); otimizacao_prompt (evolução automática do prompt). O prompt literal do zero-shot não é descrito no estudo; considerou-se que instrucao e contexto estão na base, e que restricoes (tipos de entrada/saída), exemplos, raciocinio, feedback, amostragem e otimizacao_prompt são acrescentados. O contraste com o zero-shot (Tabela 2) isola o pacote, não um mecanismo. Pacote híbrido: inclui parâmetros de decodificação (temperatura 0,6 na reescrita e 0,0 na geração), tamanho de população e validação sintática de testes por AST, fora do escopo."
+      },
+      {
+        "nome_original": "sim_words_as_mutator",
+        "mecanismos": ["otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9-10 (Seção 3.2.2, Algoritmo 2 na p. 6, Fig. 4); Tabela 4, PDF p. 15; Seção 6, PDF p. 16",
+        "observacao": "Operador de mutação padrão do EPiC: substitui palavras não vazias da descrição por palavras relacionadas obtidas por similaridade de cosseno com embeddings word2vec-google-news-300 (Gensim/NLTK), com probabilidade de mutação 0,4 e top_n 10. Na Tabela 4 é comparado a LLM_as_mutator por substituição de operador (linhas 1 e 2, população 5), sem condição sem mutação; por isso não há contrafactual com e sem o componente."
+      },
+      {
+        "nome_original": "LLM_as_mutator",
+        "mecanismos": ["instrucao", "restricoes", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9 (Seção 3.2.2, prompt de mutação); Tabela 4, PDF p. 15; Seção 6, PDF p. 16",
+        "observacao": "Operador de mutação alternativo, inspirado no EvoPrompt: uma LLM reescreve a descrição sob um prompt de mutação (papel de ferramenta de mutação, objetivo de clareza, formato entre #Explanation e #End, limite de 600 palavras). Avaliado só por substituição do operador padrão na ablação (Tabela 4, linha 2), sem condição sem mutação."
+      },
+      {
+        "nome_original": "Zero-shot",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11 (Seção 4.3.2); Tabela 2, PDF p. 13; Tabela 3, PDF p. 14",
+        "observacao": "Linha de base de prompting das Tabelas 2 e 3 e referência do ATSP. O estudo não transcreve o prompt zero-shot; mecanismos atribuídos pela descrição de geração a partir da descrição da função (contexto: assinatura e docstring) e pelo prompt de geração de código apresentado na p. 7, sem confirmação de que é o mesmo prompt (nao_informado)."
+      },
+      {
+        "nome_original": "Reflexion",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Seção 2.2); PDF p. 12 (Seção 4.5); Tabela 3, PDF p. 14",
+        "observacao": "Agente executado pelos autores (max_iters 2, strategy reflexion, pass@k 1, modelo o3-mini), adaptado para o3-mini e para contagem de tokens. Sistema comparador cujos mecanismos não são isolados no estudo; aparece ao lado do zero-shot na Tabela 3, mas o estudo não o analisa como objeto."
+      },
+      {
+        "nome_original": "LATS (Language Agent Tree Search)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "feedback", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Seção 2.2); PDF p. 12 (Seção 4.5); Tabela 3, PDF p. 14",
+        "observacao": "Agente de busca em árvore inspirado em Monte Carlo tree search, com planejamento, ação, raciocínio e feedback externo; executado com max_iters 8, number_of_tests 2, strategy mcts, pass@k 1, o3-mini, com adaptações dos autores. Mecanismos não isolados no estudo."
+      },
+      {
+        "nome_original": "LDB (Large Language Model Debugger)",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4-5 (Seção 2.2); PDF p. 12 (Seção 4.5); Tabela 3, PDF p. 14",
+        "observacao": "Depurador que segmenta o programa em blocos básicos e acompanha valores de variáveis em tempo de execução; executado com pass@k 1, n_proc 1, max_iters 10, strategy ldb, o3-mini. Os autores removeram os programas-semente do Reflexion e trocaram os testes de referência por testes gerados, alterando a configuração original. Mecanismos não isolados no estudo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature (0.0 na geração de código e testes; 0.6 na construção da população inicial)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetro de temperatura da LLM: 0,0 para geração de código e de testes (Tabela 1) e 0,6 para a reescrita dos prompts da população inicial.",
+        "localizador": "Tabela 1 e Seção 4.6, PDF p. 13; Seção 3.2.1, PDF p. 9"
+      },
+      {
+        "nome_original": "population_size",
+        "natureza": "orcamento",
+        "descricao": "Número de prompts por geração (padrão 5; 8 na linha 3 da ablação), que aloca o número de candidatos e de chamadas ao modelo; variado na Tabela 4 sem alteração do conteúdo do prompt.",
+        "localizador": "Tabela 1, PDF p. 13; Tabela 4, PDF p. 15; Seção 6, PDF p. 16"
+      },
+      {
+        "nome_original": "critério de parada (número máximo de iterações ou ausência de melhora no fitness)",
+        "natureza": "orcamento",
+        "descricao": "Critério de parada do laço evolutivo; o valor do número máximo de iterações não é informado.",
+        "localizador": "Seção 3.2, PDF p. 8"
+      },
+      {
+        "nome_original": "validação dos testes gerados por AST",
+        "natureza": "outro",
+        "descricao": "Filtro sintático: um teste gerado é considerado válido se é analisado como AST sintaticamente correta; não é prompting.",
+        "localizador": "Seção 3.1, PDF p. 7"
+      }
+    ],
+    "modelos": [
+      {"nome": "OpenAI o3-mini", "versao": "nao_informado", "uso": "backend na RQ1, na RQ2 (EPiC e baselines) e na ablação"},
+      {"nome": "Anthropic Claude 3.7 Sonnet", "versao": "nao_informado", "uso": "backend na RQ1"},
+      {"nome": "DeepSeek V3", "versao": "nao_informado", "uso": "backend na RQ1"},
+      {"nome": "LLM da construção da população inicial e do LLM_as_mutator", "versao": "nao_informado", "uso": "o texto diz apenas 'the LLM'; a identidade não é declarada explicitamente"},
+      {"nome": "GPT-4o", "versao": "nao_informado", "uso": "apenas no exemplo ilustrativo da Fig. 3 (PDF p. 8-9)"},
+      {"nome": "word2vec-google-news-300 (Gensim)", "versao": "word2vec-google-news-300", "uso": "embeddings de palavras para o sim_words_as_mutator, não é LLM"}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval+", "quantidade": "164 problemas", "localizador": "Seção 4.2, PDF p. 10", "observacao": "O estudo descreve HumanEval+ como coleção de 164 problemas; não liga explicitamente esse número ao denominador do pass@1 nem ao N do ATSP."},
+      {"nome": "MBPP+", "quantidade": "nao_informado", "localizador": "Seção 4.2, PDF p. 10", "observacao": "O texto informa 974 problemas para o MBPP original, não o tamanho do MBPP+ usado."},
+      {"nome": "BigCodeBenchHard", "quantidade": "nao_informado", "localizador": "Seção 4.2, PDF p. 10", "observacao": "Informa 139 bibliotecas em sete domínios e média de 5,6 casos de teste por tarefa; não informa o número de tarefas."}
+    ],
+    "metricas": [
+      {"nome": "pass@k (relatado como pass@1)", "definicao": "probabilidade estimada de ao menos uma das k amostras ser correta, média sobre os problemas (Equação 1)", "localizador": "Seção 4.3.1, PDF p. 11", "observacao": "Número de amostras n por tarefa e número de execuções não informados."},
+      {"nome": "ATSP (Additional Token usage per Solved Problem)", "definicao": "(T_A - T_B) / ((P_A - P_B) x N), com T tokens totais, P pass@1 e N número de problemas; baseline B = zero-shot; menor é melhor", "localizador": "Seção 4.3.2, PDF p. 11", "observacao": "Chamado também de 'Incremental Token Usage per Solved Problem' (p. 15) e 'ITSP' (p. 16); N não informado para MBPP+ e BigCodeBenchHard."},
+      {"nome": "Token usage (thousand tokens)", "localizador": "Tabelas 2 e 3, PDF p. 13-14"},
+      {"nome": "Cost ($)", "localizador": "Tabelas 2 e 3, PDF p. 13-14", "observacao": "Forma de cálculo do custo em dólares não informada."}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "custo",
+        "descricao": "O EPiC eleva o consumo de tokens em relação ao zero-shot (de 2,2x a 8x, Tabela 2); o estudo trata o consumo de tokens e o custo em dólares como custo e os quantifica.",
+        "localizador": "Tabela 2, PDF p. 13; Seção 5.1, PDF p. 14"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Aumentar o tamanho da população acima de um limiar infla o custo computacional e afasta os resultados do ótimo (Tabela 4, linha 3: 2618 mil tokens e ATSP 816).",
+        "localizador": "Seção 6, PDF p. 16; Tabela 4, PDF p. 15"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Algoritmos evolutivos podem ser ineficientes quando a avaliação de fitness é cara (desvantagem geral apresentada na fundamentação, não quantificada).",
+        "localizador": "Seção 2.3, PDF p. 5"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Risco de convergência prematura do algoritmo evolutivo, apresentado como desvantagem geral de EA.",
+        "localizador": "Seção 2.3, PDF p. 5"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "As avaliações intermediárias dependem de testes gerados por LLM, que podem não representar a tarefa e levar a resultados enganosos (código aceito internamente que pode estar incorreto).",
+        "localizador": "Seção 7 (Construct), PDF p. 16"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada: os conjuntos de dados podem não representar tarefas reais e os resultados podem não se estender a LLMs de outros fornecedores; hiperparâmetros do EPiC não foram ajustados.",
+        "localizador": "Seção 7 (External, Internal), PDF p. 16"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Mesmo processo de geração de testes no EPiC e nas baselines (inclusive substituição dos testes de referência do LDB por testes gerados) para comparação justa.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.5, PDF p. 12; Seção 7, PDF p. 16"
+      },
+      {
+        "descricao": "Validação dos testes gerados por análise sintática (AST), como no Reflexion.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.1, PDF p. 7"
+      },
+      {
+        "descricao": "Uso de LLMs de três fornecedores para mitigar a ameaça à generalização.",
+        "avaliada": "nao",
+        "localizador": "Seção 7, PDF p. 16"
+      },
+      {
+        "descricao": "Remoção dos programas-semente do LDB para equiparar as condições das baselines.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.5, PDF p. 12"
+      },
+      {
+        "descricao": "Mutação local por sinônimos (sim_words_as_mutator) para reduzir custo; comparada na ablação com o operador por LLM (Tabela 4, linhas 1 e 2), isto é, contra condição sem essa mitigação, em um só conjunto (BigCodeBenchHard) e um só modelo (o3-mini).",
+        "avaliada": "sim",
+        "localizador": "Seção 3.2.2, PDF p. 9; Tabela 4, PDF p. 15; Seção 6, PDF p. 16"
+      },
+      {
+        "descricao": "Parada antecipada na fase IE quando o código gerado passa em todos os testes gerados, para reduzir custo; efeito não medido separadamente.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.1, PDF p. 5"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O mesmo resultado difere entre tabelas para o3-mini: tokens do zero-shot 170/300/200 mil (Tabela 2) contra 167/298/202 (Tabela 3) em HumanEval+/MBPP+/BigCodeBenchHard; tokens do EPiC 410/1000/1660 (Tabela 2) contra 407/1003/1666 (Tabela 3). Parte pode ser arredondamento, mas 202 contra 200 e 1666 contra 1660 não se explicam por arredondamento comum; aparente inconsistência, sem indicação de qual valor prevalece.",
+        "localizador": "Tabela 2, PDF p. 13; Tabela 3, PDF p. 14"
+      },
+      {
+        "descricao": "Na Tabela 2 o uso de tokens do zero-shot aparece como um único valor por conjunto (170, 300, 200) para os três LLMs; o estudo não esclarece se o valor é o mesmo para cada modelo ou de um modelo só.",
+        "localizador": "Tabela 2, PDF p. 13"
+      },
+      {
+        "descricao": "Os acréscimos impressos na Tabela 2 como '(+6.5%)', '(+9.7%)' etc. correspondem à diferença absoluta entre proporções de pass@1 (pontos percentuais), embora rotulados com '%'; o texto os descreve como aumentos de 'approximately 6%, 10%, and 7%'.",
+        "localizador": "Tabela 2, PDF p. 13; Seção 5.1, PDF p. 13"
+      },
+      {
+        "descricao": "Resumo e introdução falam em melhora de 'up to 6%' em pass@k, enquanto a resposta à RQ1 diz que os ganhos vão de 2% a 10% (Tabela 2: máximo +9.7% com Claude 3.7 no HumanEval+; +6.9% com o3-mini no BigCodeBenchHard). Na Tabela 3 (contra agentes), a maior diferença é 0,42 contra 0,37 (cálculo próprio: 5 p.p.). A base do 'up to 6%' não é especificada.",
+        "localizador": "Resumo, PDF p. 1; Seção 1, PDF p. 3; Seção 5.1, PDF p. 14; Tabelas 2 e 3, PDF p. 13-14"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto afirma que o EPiC supera as baselines em todos os conjuntos e que, no MBPP+, fica 'slightly outperforming' LATS, mas a Tabela 3 traz 0,74 para EPiC e para LATS (empate na precisão impressa).",
+        "localizador": "Seção 5.2, PDF p. 14-15; Tabela 3, PDF p. 14"
+      },
+      {
+        "descricao": "Uso de tokens do LDB no HumanEval+ é 489 mil na Tabela 3 e 490k no texto.",
+        "localizador": "Tabela 3, PDF p. 14; Seção 5.2, PDF p. 15"
+      },
+      {
+        "descricao": "Razões de custo-efetividade divergentes: o resumo diz '2–10 times'; a introdução diz que o EPiC é 'almost 10 times' mais custo-efetivo que LATS; a Seção 5.2 diz '13 times' em relação a LATS no HumanEval+ (ATSP 275 contra 20) e '10 times' em relação a LDB. Não está claro em que conjunto ou agregação se baseia cada razão.",
+        "localizador": "Resumo, PDF p. 1; Seção 1, PDF p. 3; Seção 5.2, PDF p. 15"
+      },
+      {
+        "descricao": "A métrica de custo-efetividade recebe nomes diferentes: 'Additional Token usage per Solved Problem (ATSP)' (Seção 4.3.2), 'Incremental Token Usage per Solved Problem (ATSP)' (Seção 5.2) e 'ITSP (Incremental Token usage per Solved Problem)' (Conclusão). A Tabela 3 não informa a unidade do ATSP; o texto usa 'k' (por exemplo, '20k extra tokens'). N não é informado para MBPP+ e BigCodeBenchHard.",
+        "localizador": "Seção 4.3.2, PDF p. 11; Seção 5.2, PDF p. 15; Seção 8, PDF p. 16; Tabela 3, PDF p. 14"
+      },
+      {
+        "descricao": "Ganhos do EPiC sobre o zero-shot são menores no BigCodeBenchHard para Claude 3.7 (+2.8%) e DeepSeek V3 (+1.8%) do que nos outros conjuntos, com aumento de tokens de 6x a 7x.",
+        "localizador": "Tabela 2, PDF p. 13"
+      },
+      {
+        "descricao": "Inversão na ablação: com população 8, o pass@1 cai para 0,37 (contra 0,42 com população 5) e o ATSP sobe para 816 (contra 141); o operador por LLM também tem pass@1 menor (0,41) e mais tokens (2457 mil) que o operador por sinônimos. Os autores advertem que as observações podem mudar em outros conjuntos ou LLMs; a ablação usa um só conjunto e um só modelo.",
+        "localizador": "Tabela 4, PDF p. 15; Seção 6, PDF p. 16"
+      },
+      {
+        "descricao": "Condições das baselines diferem entre si e da configuração original: limites de iterações distintos (Reflexion 2, LATS 8, LDB 10), adaptação de todas para o3-mini e contagem de tokens, remoção das sementes e troca dos testes do LDB. AgentCoder foi excluído após avaliação inicial por ser 6 vezes mais caro, sem números relatados. A RQ2 usa só o3-mini.",
+        "localizador": "Seção 4.5, PDF p. 12; Seção 4.6, PDF p. 13"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "As comparações do EPiC com Reflexion, LATS e LDB (Tabela 3, mesmo benchmark e métrica, executadas pelos autores) contam como comparador executado, mas não foram extraídas: pela regra de ordem, a primeira tabela com contraste elegível é a Tabela 2 (EPiC contra zero-shot), e outro comparador da mesma técnica e tarefa não é cobertura.",
+        "localizador": "Tabela 3, PDF p. 14"
+      },
+      {
+        "descricao": "Os testes usados no fitness e na parada antecipada são gerados por LLM; a avaliação final usa os testes dos benchmarks (o estudo distingue testes de avaliação interna e testes de avaliação final).",
+        "localizador": "Seção 3.1, PDF p. 6-7; Seção 4.5, PDF p. 12"
+      },
+      {
+        "descricao": "Critério de escolha das baselines: uso de HumanEval ou MBPP, mais de 90% de pass@1 no HumanEval, repositório disponível e custo não desproporcional.",
+        "localizador": "Seção 4.5, PDF p. 12"
+      },
+      {
+        "descricao": "O o3-mini foi escolhido para a RQ2 e a ablação por ter sido considerado o melhor LLM na RQ1.",
+        "localizador": "Seção 4.6, PDF p. 13"
+      },
+      {
+        "descricao": "Pacote de replicação indicado por link no GitHub; não acessado nem validado nesta extração.",
+        "localizador": "Seção 1, PDF p. 3"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "To address this issue, we propose an alternative approach named Evolutionary Prompt Engineering for Code (EPiC), which leverages a lightweight evolutionary algorithm to refine the original prompts into improved versions that generate high-quality code, with minimal interactions with the LLM.", "localizador": "Resumo, PDF p. 1"},
+      {"trecho": "Candidate prompts are selected from the population using a weighted random selection approach and then mutated to form the next generation of prompts.", "localizador": "Seção 1, PDF p. 2"},
+      {"trecho": "The mutation is carried out using two approaches: one utilizes an LLM guided by a prompt that specifies how to perform the mutation, and the other employs vector embeddings of words to find and replace similar words.", "localizador": "Seção 1, PDF p. 2"},
+      {"trecho": "Use step-by-step reasoning to validate each test case separately to ensure that all of them have the correct expected output.", "localizador": "Seção 3.1, prompt de geração de testes, PDF p. 7"},
+      {"trecho": "You are a Python developer who implements the correct code based on the function description provided.", "localizador": "Seção 3.1, prompt de geração de código, PDF p. 7"},
+      {"trecho": "We define a fitness function based on the ratio of test cases passed.", "localizador": "Seção 3.2, PDF p. 7"},
+      {"trecho": "This selection occurs with substitution, allowing the same prompt to be chosen multiple times.", "localizador": "Seção 3.2, PDF p. 7"},
+      {"trecho": "We utilize the LLM to augment multiple prompts based on the initial given prompt.", "localizador": "Seção 3.2.1, PDF p. 8"},
+      {"trecho": "1- Add input and output types of the function to the description.", "localizador": "Seção 3.2.1, prompt de construção da população, PDF p. 8"},
+      {"trecho": "3- Keep the original test cases and add three test cases to the description to cover the edge cases.", "localizador": "Seção 3.2.1, prompt de construção da população, PDF p. 8"},
+      {"trecho": "After generating the elaborate prompt, we add the previously generated test cases (Step 1 in Figure 2) to each prompt.", "localizador": "Seção 3.2.1, PDF p. 9"},
+      {"trecho": "We employ a high-temperature setting (0.6) for the LLM to stimulate creativity in prompt generation.", "localizador": "Seção 3.2.1, PDF p. 9"},
+      {"trecho": "Please change the description by enhancing its clarity and comprehensibility for sophisticated language models.", "localizador": "Seção 3.2.2, prompt do LLM_as_mutator, PDF p. 9"},
+      {"trecho": "A test case is considered valid if it successfully parses into a syntactically correct AST.", "localizador": "Seção 3.1, PDF p. 7"},
+      {"trecho": "For the baseline, we use a zero-shot prompting approach.", "localizador": "Seção 4.3.2, PDF p. 11"},
+      {"trecho": "Reflexion [29] is a reinforcement-based framework in which language agents learn from linguistic feedback.", "localizador": "Seção 2.2, PDF p. 4"},
+      {"trecho": "LATS [39] (Language Agent Tree Search) is a framework that integrates the planning, acting, and reasoning abilities, inspired by Monte Carlo tree search.", "localizador": "Seção 2.2, PDF p. 4"},
+      {"trecho": "We removed these seed files to ensure fairness, as other baselines do not use any seeds (an initial solution) to boost the performance.", "localizador": "Seção 4.5, PDF p. 12"},
+      {"trecho": "After the initial evaluation, AgentCoder [12] was excluded from further analysis as we found that it is 6 times more expensive than the second most expensive alternative.", "localizador": "Seção 4.5, PDF p. 12"},
+      {"trecho": "The results highlight a clear trade-off: EPiC achieves higher functional correctness at the cost of increased token usage.", "localizador": "Seção 5.1, PDF p. 14"},
+      {"trecho": "This suggests that increasing population size beyond a certain threshold can make the results deviate from the optimal solution and unnecessarily inflates computational cost.", "localizador": "Seção 6, PDF p. 16"},
+      {"trecho": "This finding suggests that a simple mutation tool is more cost-effective than an LLM-based tool, although this may not hold for all datasets.", "localizador": "Seção 6, PDF p. 16"},
+      {"trecho": "While EA is effective in navigating complex search spaces, it also has drawbacks, such as potential inefficiency when fitness evaluations are expensive and the risk of premature convergence.", "localizador": "Seção 2.3, PDF p. 5"},
+      {"trecho": "One construct threat we face is that our evaluation metrics rely on LLM-generated test cases for intermediate evaluations which could lead to misleading results if these test cases are not representative of the intended tasks.", "localizador": "Seção 7, PDF p. 16"},
+      {"trecho": "To ensure a fair evaluation, we deliberately use the same test generation process in both the baselines and EPiC.", "localizador": "Seção 7, PDF p. 16"},
+      {"trecho": "One external limitation of this research is that the datasets used (HumanEval+, MBPP+, and BigCodeBench) may not fully represent the diversity of real-world coding tasks, which may limit the generalizability of our findings.", "localizador": "Seção 7, PDF p. 16"},
+      {"trecho": "However, we chose LLMs from three different vendors to mitigate this threat.", "localizador": "Seção 7, PDF p. 16"},
+      {"trecho": "However, we did not fine-tune our hyper-parameters.", "localizador": "Seção 7, PDF p. 16"},
+      {"trecho": "Our evaluation against state-of-the-art (SOTA) LLM-based code generation agents shows that EPiC not only achieves up to 6% improvement in pass@k but is also 2–10 times more cost-effective than the baselines.", "localizador": "Resumo, PDF p. 1"},
+      {"trecho": "Similarly, in MBPP+, EPiC attains a pass@1 of 0.74, slightly outperforming Reflexion (0.72), LATS (0.74), and LDB (0.71).", "localizador": "Seção 5.2, PDF p. 14-15"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "EPiC",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "feedback", "amostragem", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["restricoes", "exemplos", "raciocinio", "feedback", "amostragem", "otimizacao_prompt"],
+      "comparador": "Zero-shot",
+      "modelo": "OpenAI o3-mini (versão nao_informado)",
+      "benchmark": "HumanEval+",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.880, "intervencao": 0.945},
+      "denominador": "nao_informado para a métrica; o estudo descreve o HumanEval+ como coleção de 164 problemas (Seção 4.2, PDF p. 10), sem ligar explicitamente esse número ao denominador do pass@1",
+      "condicoes": "Configuração padrão do EPiC (Tabela 1): mutation_probability 0,4; population_size 5; top_n 10; mutation_alg sim_words_as_mutator; temperatura 0,0 na geração de código e testes; temperatura 0,6 na reescrita da população inicial. Testes internos gerados por LLM. Número máximo de iterações, número de amostras n por tarefa e número de execuções: nao_informado. Tokens (mil): zero-shot 170, EPiC 410 (2,4x); custo EPiC US$ 1,55. O '(+6.5%)' impresso é a diferença absoluta entre as proporções. A Tabela 3 traz para o mesmo par 0,88 e 0,95 (com 167 e 407 mil tokens). Pacote: o contraste não isola um mecanismo. Conferido visualmente na imagem da p. 13.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo e contribuições destacam duas métricas (pass@k e custo-efetividade/ATSP) e três agentes comparadores sem que um prevaleça. A primeira tabela com contraste elegível de prompting é a Tabela 2 (a Tabela 1 é descritiva); primeira métrica pass@1, primeiro modelo o3-mini, primeira linha de base Zero-shot, primeiro conjunto HumanEval+.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, PDF p. 13 (página impressa 13)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "HumanEval+ o3-mini 0.880 170 0.945 (+6.5%) 410 (2.4×) 1.55", "localizador": "Tabela 2, PDF p. 13, linha HumanEval+/o3-mini; colunas Dataset, LLM, Zero-shot (pass@1), Zero-shot Token Usage (thousand tokens), EPiC (pass@1), EPiC Token Usage (thousand tokens), EPiC Cost ($)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "sim_words_as_mutator",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "feedback", "amostragem", "otimizacao_prompt"],
+      "mecanismos_acrescentados": [],
+      "comparador": "LLM_as_mutator (EPiC com operador de mutação por LLM, Tabela 4, linha 2)",
+      "modelo": "OpenAI o3-mini (versão nao_informado)",
+      "benchmark": "BigCodeBenchHard",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.41, "intervencao": 0.42},
+      "denominador": "nao_informado (o número de tarefas do BigCodeBenchHard não é informado)",
+      "condicoes": "Ablação com população 5 nas duas linhas; as duas condições diferem só no operador de mutação (substituição, não remoção: ambas mantêm otimizacao_prompt e as demais categorias do pacote; por isso mecanismos_acrescentados vazio). Tokens (mil): 1666 (sim_words) contra 2457 (LLM_as_mutator); ATSP 141 contra 253. A linha 1 coincide com o EPiC/BigCodeBenchHard da Tabela 3 (0,42; 1666; 141). Número de execuções e de amostras: nao_informado. Um só conjunto e um só modelo. Conferido visualmente na imagem da p. 15.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal (EPiC) e única tarefa (geração) já representadas; componente isolado incluído para completar o alvo, pela tabela de ablação (Tabela 4), na ordem da tabela: linha 1 (operador padrão) como intervenção e linha 2 (operador por LLM) como comparador; a linha 3 varia o tamanho da população (orçamento, fora do escopo). Não há matriz de ingredientes para contrastes pareados; não se completou uma terceira extração.",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, PDF p. 15 (página impressa 15)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "1 sim_words_as_mutator 0.42 1666 141 5", "localizador": "Tabela 4, PDF p. 15, linha 1; colunas Row, Mutator, Pass@1, Token Usage (thousand tokens), Effectiveness (ATSP), Population Size"},
+        {"trecho": "2 LLM_as_mutator 0.41 2457 253 5", "localizador": "Tabela 4, PDF p. 15, linha 2; colunas Row, Mutator, Pass@1, Token Usage (thousand tokens), Effectiveness (ATSP), Population Size"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo (geração de código custo-efetiva por engenharia de prompt evolutiva) e duas questões de pesquisa explícitas, com motivação.",
+      "localizador": "Resumo, PDF p. 1; Seção 4.1, PDF p. 10"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Algoritmos, prompts e configuração padrão são descritos, mas o prompt literal do zero-shot, o número máximo de iterações, o critério de 'ausência de melhora', o número de amostras por tarefa e o número de execuções não são informados; a identidade da LLM usada na reescrita e na mutação não é declarada explicitamente.",
+      "localizador": "Seções 3 e 4.6, PDF p. 5-9 e 13; Seção 4.3.2, PDF p. 11"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há zero-shot e três agentes executados pelos autores com a mesma geração de testes, mas as baselines foram adaptadas (modelo, sementes e testes do LDB), têm limites de iteração distintos, a RQ2 usa só o3-mini e o prompt zero-shot não é descrito.",
+      "localizador": "Seção 4.5, PDF p. 12; Tabelas 2 e 3, PDF p. 13-14"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k e ATSP são definidos formalmente, mas o denominador (número de problemas) não é informado para MBPP+ e BigCodeBenchHard, os valores de tokens diferem entre as Tabelas 2 e 3, a métrica de custo-efetividade recebe três nomes e os acréscimos em p.p. são rotulados como '%'.",
+      "localizador": "Seção 4.3, PDF p. 11; Seção 4.2, PDF p. 10; Tabelas 2 e 3, PDF p. 13-14; Seção 8, PDF p. 16"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há seção de ameaças externas, de construto e internas, mas os autores afirmam sem evidência que as limitações não afetam a validade, e não discutem não determinismo, número de execuções nem contaminação.",
+      "localizador": "Seção 7, PDF p. 16"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código e dados declarados disponíveis em repositório (não acessado), prompts e configurações publicados; faltam versões ou snapshots dos modelos, número máximo de iterações e número de execuções.",
+      "localizador": "Seção 1, PDF p. 3; Seções 3.1, 3.2.1, 3.2.2, 4.5 e Tabela 1, PDF p. 7-13"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, o estudo não discute vazamento dos benchmarks no pré-treinamento dos modelos nem controles para isso.",
+      "localizador": "Texto completo, PDF p. 1-18"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (756 linhas, PDF p. 1-18). Páginas do PDF abertas visualmente: p. 13 (Tabelas 1 e 2), p. 14 (Tabela 3), p. 15 (Tabela 4).",
+    "paginas_abertas": [13, 14, 15]
+  }
+}

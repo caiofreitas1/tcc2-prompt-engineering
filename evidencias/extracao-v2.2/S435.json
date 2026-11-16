@@ -1,0 +1,653 @@
+{
+  "estudo": "S435",
+  "texto_fonte": "fontes/textos/lote/S435.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Zhao, J.; Yang, D.; Zhang, L.; Lian, X.; Yang, Z.; Liu, F. Enhancing Automated Program Repair with Solution Design. ASE '24, 2024. DOI 10.1145/3691620.3695537; versão lida: arXiv:2408.12056v2 (22 set. 2024). O PDF não traz numeração de página impressa; os localizadores usam a página do PDF.",
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "DRCodePilot",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (resumo); p. 3-5 (seções 3.1-3.5, Figura 3 na p. 4); p. 8 (Tabela 3)",
+        "observacao": "Pacote híbrido: prompt de geração do patch inicial com instrução, resumo da issue, código defeituoso, design rationales (DR) extraídos pelo DRMiner e instrução de saída com quatro diretrizes de formato (p. 4); segunda etapa em diálogo usuário-assistente em que o GPT-4 recebe o patch rascunho, patches de referência gerados por CodeT5P-220M ajustado ao projeto e identificadores recomendados por recuperação, com papel de especialista e procedimento 'follow my tips step by step' (p. 5). Inclui componentes fora do escopo (ajuste fino do CodeT5P). O contrafactual da Tabela 3 é o pacote contra os modelos base gerando patches diretamente da função defeituosa; o prompt desses baselines não é descrito além disso, de modo que não é possível dizer se instrução explícita e restrições de formato já estavam no base (por isso `instrucao` e `restricoes` não constam como acrescentados). `contexto` é listado como acrescentado porque DR, resumo da issue, patches de referência e identificadores são ingredientes contextuais novos em relação ao código defeituoso do base. Os patches de referência são descritos pelo estudo como 'exemplars of efficient solutions' (p. 5), mas são candidatos para a mesma issue, não demonstrações resolvidas de outros casos; não foram classificados como `exemplos`. O ganho da Tabela 3 é do pacote e não se atribui a um ingrediente isolado."
+      },
+      {
+        "nome_original": "+DR (inclusion of automatically mined design rationales)",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 1 (resumo); p. 8-9 (seção 4.6, RQ3; Tabela 5 na p. 9)",
+        "observacao": "Aplicação isolada dos DR minerados pelo DRMiner ao prompt de CodeLlama, GPT-3.5 e GPT-4 (RQ3.1), comparada com cada modelo sem DR no subconjunto de 61 issues. O restante do prompt dos modelos base não é descrito (nao_informado); o código defeituoso entra como `contexto`. A variante +DDR (DR anotados manualmente por especialistas, RQ3.2) usa o mesmo ingrediente de prompting com outra fonte de DR e foi tratada como condição da mesma técnica, não como técnica distinta; os resultados de +DDR estão em `heterogeneidade`."
+      },
+      {
+        "nome_original": "Design rationale for initial patch generation (componente do DRCodePilot; ablação DRCodePilot-DR)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7 (seção 4.5); p. 8 (Tabela 4); p. 9 (Tabela 5, linha 'DRCodePilot w/o DR')",
+        "observacao": "A variante DRCodePilot-DR omite os DR do prompt da etapa inicial ('removing Step 1 and changing Step 2 in Fig.3'); o estudo declara que as demais variáveis foram mantidas. A mudança na Etapa 2 não é detalhada além da retirada dos DR."
+      },
+      {
+        "nome_original": "Reference patches as feedback (componente do DRCodePilot; ablação DRCodePilot-PF)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4-5 (seção 3.3, Figura 4); p. 7 (seção 4.5); p. 8 (Tabela 4)",
+        "observacao": "Os patches de referência são gerados por CodeT5P-220M ajustado ao código do projeto (ajuste fino fora do escopo); o fornecimento desses patches ao GPT-4 para reflexão é o ingrediente de prompting. A ablação retira a Etapa 3."
+      },
+      {
+        "nome_original": "Identifier recommendations as feedback (componente do DRCodePilot; ablação DRCodePilot-ID)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 (seção 3.4); p. 7 (seção 4.5); p. 8 (Tabela 4)",
+        "observacao": "Identificadores candidatos (até seis por identificador suspeito) recuperados do arquivo Java defeituoso por CodeBLEU entre trechos e similaridade de cosseno entre vetores de identificadores; a ablação retira a Etapa 4."
+      },
+      {
+        "nome_original": "Expert role and 'follow my tips step by step' chain-of-thought procedure in the final patch prompt",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (seção 3.5); p. 4 (Figura 3, Step 5)",
+        "observacao": "Papel de 'proficient code-fixing expert' e procedimento passo a passo (patch inicial, incorporação do feedback, refinamento) no prompt da Etapa 5; não há condição sem esses ingredientes."
+      },
+      {
+        "nome_original": "Output instruction and four program-repair oriented guidelines",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 (seção 3.2, Figura 3); p. 5 (seção 3.5, 'three distinct output directives')",
+        "observacao": "Diretrizes de formato da saída (pares buggy_snippet/patch, só código, trecho copiado do método original); não isoladas."
+      },
+      {
+        "nome_original": "+AC (incorporation of all developer comments in each issue log)",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8-9 (seção 4.6, RQ3.3; Tabela 5)",
+        "observacao": "Condição de contraste para os DR: todos os comentários dos desenvolvedores no prompt, aplicada a CodeLlama, GPT-3.5, GPT-4 e DRCodePilot no subconjunto de 61 issues, com condição sem comentários na mesma tabela. O restante do prompt dos modelos base não é descrito."
+      },
+      {
+        "nome_original": "Baselines that generate patches directly from buggy functions (CodeShell, CodeLlama, StarCoder2, GPT-3.5, GPT-4)",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6-7 (seção 4.3, Baselines; seção 4.4); p. 8 (Tabela 3)",
+        "observacao": "Prompting direto dos modelos base a partir da função defeituosa; o prompt não é descrito além disso (instruções, formato e eventuais exemplos nao_informado). É a condição de base, sem contrafactual próprio."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Fine-tuned CodeT5P-220M (reference patch generation)",
+        "natureza": "ajuste_fino",
+        "descricao": "CodeT5P-220M ajustado no código de cada projeto com métodos mascarados (<extra_id_0>) e perda de entropia cruzada, para gerar patches de referência que alimentam o prompt do GPT-4.",
+        "localizador": "p. 4-5 (seção 3.3, Figura 4)"
+      },
+      {
+        "nome_original": "DRMiner (Design Rationale Acquisition)",
+        "natureza": "outro",
+        "descricao": "Ferramenta prévia dos autores, replicada para minerar soluções e argumentos dos logs de issues do Jira; combina instruções de prompt com atributos heurísticos. É etapa de pré-processamento que produz o conteúdo dos DR, não uma técnica de prompting para a tarefa de código avaliada no estudo.",
+        "localizador": "p. 3 (seção 3.1)"
+      },
+      {
+        "nome_original": "Masking of code snippets in comments with [code] tags",
+        "natureza": "outro",
+        "descricao": "Pré-processamento dos dados: todo código presente nos comentários das issues foi substituído por [code] para evitar comparações injustas por patches aparecendo nos comentários.",
+        "localizador": "p. 6 (seção 4.2); p. 11 (seção 6.2)"
+      }
+    ],
+    "modelos": [
+      "GPT-4-Turbo no DRCodePilot (snapshot do modelo usado no DRCodePilot: nao_informado; o estudo informa 'gpt-4-1106-preview' apenas para o baseline GPT-4)",
+      "GPT-4 baseline: gpt-4-1106-preview",
+      "GPT-3.5 baseline: gpt-3.5-turbo-1106",
+      "CodeLlama-7B",
+      "StarCoder2-15B",
+      "CodeShell (7B; versão nao_informado)",
+      "CodeT5P-220M ajustado ao projeto (componente fora do escopo)"
+    ],
+    "benchmarks": [
+      "Benchmark próprio de 938 pares issue-patch (Jira + GitHub): Flink 714 amostras e Solr 224 amostras; issues fechadas e PRs mesclados, um arquivo Java modificado por PR, no máximo 22 linhas alteradas (p. 2, p. 6 Tabela 1, p. 7 Tabela 2)",
+      "Subconjunto de 61 issues com comentários extensos, selecionadas aleatoriamente do benchmark, para RQ3 (Tabela 5); distribuição entre Flink e Solr nao_informado; é subconjunto do corpus de 938 (p. 9)",
+      "Análise de falhas: 72 patches (36 full-match: 18 aleatórios de Flink e todos os 18 de Solr; 36 com CodeBLEU abaixo de 0,5) (p. 10)"
+    ],
+    "metricas": [
+      "Full-Match: número (e proporção sobre todas as amostras) de patches idênticos aos patches gold; denominadores 714 (Flink), 224 (Solr) e 61 (Tabela 5)",
+      "CodeBLEU calculado sobre a função reparada inteira",
+      "Performance drop ratio (α−β)/α da ablação (Tabela 4)"
+    ],
+    "linguagens": [
+      "Java"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sem avaliação baseada em execução: Full-Match e CodeBLEU são métricas estáticas; o CodeBLEU sobre a função inteira pode inflar os escores, e a avaliação pode não captar correção funcional. Menos de 1% dos patches seria executável, segundo os autores.",
+        "localizador": "p. 6 (seção 4.2); p. 11 (seção 6.3)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "LLMs podem ter falhas de raciocínio e alucinações de código ao usar DR; o GPT-4 pode errar identificadores precisos do projeto.",
+        "localizador": "p. 1 (resumo); p. 2 (seção 1); p. 7 (seção 4.5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Patches de referência de modelos mais simples podem abalar a confiança do GPT-4 e deslocar correspondências exatas que ele já produziria.",
+        "localizador": "p. 8 (seção 4.5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "DR limitados, ausentes ou sem contexto suficiente (referências a código omitido, links externos, intenção de código não especificada) prejudicam a qualidade dos patches, sobretudo em issues complexas.",
+        "localizador": "p. 10-11 (seção 6.1)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento da solução no prompt quando os comentários das issues contêm o código do patch; controlado pela substituição de código por [code]. Contaminação por pré-treinamento não é discutida pelo estudo.",
+        "localizador": "p. 6 (seção 4.2); p. 11 (seção 6.2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade interna da anotação manual dos DR (possíveis inconsistências ou vieses).",
+        "localizador": "p. 11 (seção 6.2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa e de construto: benchmark próprio, DR só do Jira, issues relativamente simples (até 22 linhas), baselines de propósito geral e sem análise separada de soluções e argumentos.",
+        "localizador": "p. 11 (seções 6.2 e 6.3)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Substituição de todo código dos comentários por tags [code] para evitar comparações injustas.",
+        "avaliada": "nao",
+        "localizador": "p. 6 (seção 4.2); p. 11 (seção 6.2)"
+      },
+      {
+        "descricao": "Anotação manual dos DR por dois anotadores independentes, seguida de discussão com um terceiro participante e voto majoritário.",
+        "avaliada": "nao",
+        "localizador": "p. 9 (seção 4.6); p. 11 (seção 6.2)"
+      },
+      {
+        "descricao": "Recomendação de identificadores como feedback para corrigir identificadores inadequados (resposta ao risco de identificadores imprecisos), avaliada pela ablação DRCodePilot-ID.",
+        "avaliada": "sim",
+        "localizador": "p. 5 (seção 3.4); p. 7 (seção 4.5); p. 8 (Tabela 4)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Número de baselines divergente: a introdução fala em cinco LLMs de código como baselines, enquanto a seção 4.3 diz 'four state-of-the-art large code models' e lista cinco (StarCoder2, CodeLlama, CodeShell, GPT-3.5, GPT-4).",
+        "localizador": "p. 2 (seção 1); p. 6-7 (seção 4.3)"
+      },
+      {
+        "descricao": "Narrativa contradiz a Tabela 5: o texto diz que o GPT-4 com todos os comentários (+AC) tem melhora de doze vezes ('twelfthfold'), mas a tabela traz GPT-4 = 1 e GPT-4+AC = 19 full-match.",
+        "localizador": "p. 9 (seção 4.6, RQ3.3; Tabela 5)"
+      },
+      {
+        "descricao": "Narrativa contradiz a Tabela 5: o texto afirma que modelos com DR superam consistentemente os que usam só os comentários originais em full-match e CodeBLEU, mas a tabela traz empates em full-match (CodeLlama+DR 11 vs +AC 11; GPT-3.5+DR 11 vs +AC 11; GPT-4+DR 19 vs +AC 19) e CodeBLEU menor com DR para CodeLlama (0.75 vs 0.80) e GPT-4 (0.85 vs 0.87); só o DRCodePilot (+DR) supera o +AC nas duas métricas (26/0.88 vs 22/0.86).",
+        "localizador": "p. 9 (seção 4.6; Tabela 5)"
+      },
+      {
+        "descricao": "Narrativa contradiz a Tabela 5: o texto diz que todos os baselines e o DRCodePilot produzem mais full-match com DR anotados (+DDR), mas DRCodePilot+DDR = 26 é igual a DRCodePilot (+DR) = 26.",
+        "localizador": "p. 9 (seção 4.6, RQ3.2; Tabela 5)"
+      },
+      {
+        "descricao": "O texto diz que, sem DR, os três baselines geraram 'one or two' patches exatos; a Tabela 5 traz 1 para CodeLlama, GPT-3.5 e GPT-4.",
+        "localizador": "p. 9 (seção 4.6, RQ3.1; Tabela 5)"
+      },
+      {
+        "descricao": "Inversões de CodeBLEU com DR: GPT-3.5 cai de 0.75 (sem DR) para 0.71 (+DR) e 0.66 (+DDR); GPT-4+DDR (0.84) fica abaixo de GPT-4+DR (0.85). O estudo comenta só a queda do GPT-3.5 com +DDR.",
+        "localizador": "p. 9 (seção 4.6; Tabela 5)"
+      },
+      {
+        "descricao": "Resultado nulo ou inverso na ablação dos patches de referência: DRCodePilot-PF tem o mesmo full-match em Flink (109) e um a mais em Solr (19 vs 18), com quedas pequenas de CodeBLEU (0.783 vs 0.785; 0.800 vs 0.801).",
+        "localizador": "p. 7-8 (seção 4.5; Tabela 4)"
+      },
+      {
+        "descricao": "Ordem dos baselines na narrativa ('GPT-4 leads, followed by GPT-3.5, CodeLlama, StarCoder2, and CodeShell') não coincide com Flink na Tabela 3, em que StarCoder2 tem mais full-match (9) e maior CodeBLEU (0.74) que CodeLlama (8; 0.64); em Solr CodeLlama tem 2 e StarCoder2 0. O critério de ordenação não é informado.",
+        "localizador": "p. 7 (seção 4.4); p. 8 (Tabela 3)"
+      },
+      {
+        "descricao": "Aparente inconsistência de arredondamento na Tabela 4: para Solr, 19 e 17 frente a 18 aparecem como 5.55%; cálculo próprio de 1/18 = 0,0555... daria 5,56% com arredondamento usual. O método de arredondamento não é informado.",
+        "localizador": "p. 8 (Tabela 4)"
+      },
+      {
+        "descricao": "Aparente inconsistência na Tabela 2 (descritiva, não usada nas extrações): Flink, faixa 15 ≤ n < 20, '12 (1.60%)'; cálculo próprio de 12/714 ≈ 1,68%. As contagens somam o total impresso (714 e 224).",
+        "localizador": "p. 7 (Tabela 2)"
+      },
+      {
+        "descricao": "O resumo destaca 4,7 vezes mais full-match que o GPT-4, valor de Flink (109 vs 23); em Solr a razão é 3,6 (18 vs 5). Não há agregado impresso dos dois projetos.",
+        "localizador": "p. 1 (resumo); p. 2 (seção 1); p. 8 (Tabela 3)"
+      },
+      {
+        "descricao": "Condição discrepante entre o corpus completo e o subconjunto de 61 issues com comentários extensos: no subconjunto, GPT-4+DR chega a 19 e DRCodePilot (+DR) a 26 full-match, e DRCodePilot sem DR tem 1, igual ao GPT-4 sem DR; os autores atribuem a diferença pequena entre GPT-4 e DRCodePilot à riqueza dos comentários do subconjunto.",
+        "localizador": "p. 9 (seção 4.6; Tabela 5)"
+      },
+      {
+        "descricao": "O CodeBLEU é calculado sobre a função inteira, e os autores reconhecem que trechos inalterados elevam o escore; as diferenças de CodeBLEU entre condições são pequenas em comparação com as de full-match. Não há execuções repetidas, variância ou teste estatístico relatados.",
+        "localizador": "p. 6 (seção 4.3); p. 7 (seção 4.4); p. 11 (seção 6.3)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo define APR de forma ampla, com issues de correção de bugs, novas funcionalidades e melhorias; os resultados não são separados por tipo de issue.",
+        "localizador": "p. 1 (resumo); p. 3 (seção 3)"
+      },
+      {
+        "descricao": "Esforço manual: 16 participantes (dois professores, sete doutorandos, seis pós-graduandos e um engenheiro de software); cada issue do subconjunto foi anotada por dois deles, com discussão envolvendo um terceiro.",
+        "localizador": "p. 9 (seção 4.6)"
+      },
+      {
+        "descricao": "Escolha do CodeT5P-220M justificada pelos recursos substanciais exigidos para treinar modelos maiores; o estudo não quantifica custo.",
+        "localizador": "p. 4 (seção 3.3)"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura, top-p, tamanho máximo), número de execuções e número de amostras por problema: nao_informado.",
+        "localizador": "texto completo (seções 3 e 4)"
+      },
+      {
+        "descricao": "Exemplo qualitativo (FLINK-23579, Figura 5) em que, sem DR disponível, o patch de referência coincide com a correção humana.",
+        "localizador": "p. 8 (seção 4.5, Figura 5)"
+      },
+      {
+        "descricao": "Os autores informam um link de figshare com dados e código; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 (contribuições, nota 1)"
+      },
+      {
+        "descricao": "Valores da mesma condição coincidem entre tabelas considerando o arredondamento: DRCodePilot 109/0.78/18/0.80 (Tabela 3) e 109/0.785/18/0.801 (Tabela 4).",
+        "localizador": "p. 8 (Tabelas 3 e 4)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Automatic Program Repair (APR) endeavors to autonomously rectify issues within specific projects, which generally encompasses three categories of tasks: bug resolution, new feature development, and feature enhancement.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "To investigate this premise, we introduce DRCodePilot, an approach designed to augment GPT-4-Turbo’s APR capabilities by incorporating DR into the prompt instruction.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "Furthermore, given GPT-4’s constraints in fully grasping the broader project context and occasional shortcomings in generating precise identifiers, we have devised a feedback-based self-reflective framework, in which we prompt GPT-4 to reconsider and refine its outputs by referencing a provided patch and suggested identifiers.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "Moreover, our findings reveal that the standalone application of DR can yield promising increase in the full-match ratio across CodeLlama, GPT-3.5, and GPT-4 within our benchmark suite.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "DRs extracted from issue logs with DRMiner are integrated into our prompt structure.",
+        "localizador": "p. 4 (seção 3.2)"
+      },
+      {
+        "trecho": "To ensure high-quality output, we impose four program-repair oriented guidelines for GPT-4 to adhere to rigorously:",
+        "localizador": "p. 4 (seção 3.2)"
+      },
+      {
+        "trecho": "To tailor it to the coding conventions of the target project, we further fine-tuned it on the project’s codebase.",
+        "localizador": "p. 4 (seção 3.3)"
+      },
+      {
+        "trecho": "Consequently, for each error-prone identifier in the given patch, we provide up to six possible replacement candidates.",
+        "localizador": "p. 5 (seção 3.4)"
+      },
+      {
+        "trecho": "Here, our prompt carefully defines GPT-4’s role as a proficient code-fixing expert.",
+        "localizador": "p. 5 (seção 3.5)"
+      },
+      {
+        "trecho": "Furthermore, it follows a deliberate “follow my tips step by step” chain-of-thought procedure [60] (i.e., creating an initial patch, incorporating feedback, and refining the solution), which facilitates a clear understanding of the troubleshooting progression.",
+        "localizador": "p. 5 (seção 3.5)"
+      },
+      {
+        "trecho": "Within the reference patch area, we supply exemplars of efficient solutions to steer GPT-4 toward compliance with established coding norms and best practices.",
+        "localizador": "p. 5 (seção 3.5)"
+      },
+      {
+        "trecho": "Additionally, to avoid unfair comparisons caused by patches appearing directly in comments, all code snippets in comments were replaced with [code] tags.",
+        "localizador": "p. 6 (seção 4.2)"
+      },
+      {
+        "trecho": "It is also important to highlight that we did not build an execution-based evaluation pipeline for these patches.",
+        "localizador": "p. 6 (seção 4.2)"
+      },
+      {
+        "trecho": "Table 3 showcases the comparative evaluation of our design rationale-driven approach, DRCodePilot, against baselines that generate patches directly from buggy functions.",
+        "localizador": "p. 7 (seção 4.4)"
+      },
+      {
+        "trecho": "All other experimental variables and procedures are kept consistent across the three variants.",
+        "localizador": "p. 7 (seção 4.5)"
+      },
+      {
+        "trecho": "These figures reveal that even an advanced code-focused LLM like GPT-4 can err in generating precise correct identifiers during issue repairs.",
+        "localizador": "p. 7 (seção 4.5)"
+      },
+      {
+        "trecho": "In contrast, reference patches derived from simpler models can erode its confidence, leading to the displacement of exact matches.",
+        "localizador": "p. 8 (seção 4.5)"
+      },
+      {
+        "trecho": "To explore the above sub-questions, we selected three baseline models capable of interactive prompting: CodeLlama, GPT-3.5, and GPT-4.",
+        "localizador": "p. 8 (seção 4.6)"
+      },
+      {
+        "trecho": "Since expert annotations are involving, we randomly selected 61 issues that featured extensive comments from our benchmark.",
+        "localizador": "p. 9 (seção 4.6)"
+      },
+      {
+        "trecho": "CodeLlama and GPT-3.5 demonstrate around an elevenfold increase in full-match patches, while GPT-4 shows a twelfthfold improvement.",
+        "localizador": "p. 9 (seção 4.6)"
+      },
+      {
+        "trecho": "However, upon examining the data for +AC, +DR, or +DDR, it becomes clear that models utilizing design rationales consistently outperform those relying solely on original comments, in terms of both full-match patches and CodeBLEU scores.",
+        "localizador": "p. 9 (seção 4.6)"
+      },
+      {
+        "trecho": "Challenges arise when DR is limited or absent—such as when developers’ discussions go unrecorded (e.g., FLINK-28513)—resulting in subpar DRs that hinder DRCodePilot’s performance.",
+        "localizador": "p. 10 (seção 6.1)"
+      },
+      {
+        "trecho": "To mitigate such risks, we employed standard procedures involving independent annotations followed by collaborative discussions for consensus building, ultimately deciding outcomes through majority vote.",
+        "localizador": "p. 11 (seção 6.2)"
+      },
+      {
+        "trecho": "For instance, CodeBLEU evaluates the entire function rather than focusing on the modified segments, which can result in inflated scores.",
+        "localizador": "p. 11 (seção 6.3)"
+      },
+      {
+        "trecho": "Without this, our current evaluation risks missing important nuances in functional correctness and real-world applicability.",
+        "localizador": "p. 11 (seção 6.3)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "DRCodePilot",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "comparador": "GPT-4 gerando patches diretamente a partir da função defeituosa (baseline)",
+      "modelo": "GPT-4 (DRCodePilot: GPT-4-Turbo, snapshot nao_informado; baseline: gpt-4-1106-preview)",
+      "benchmark": "Benchmark próprio, projeto Flink (714 amostras)",
+      "metrica": "Full-Match (proporção de patches idênticos aos patches gold; 'full-match ratio' no resumo)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 3.22,
+        "intervencao": 15.27
+      },
+      "denominador": "714 amostras (Flink)",
+      "condicoes": "Contagens impressas: GPT-4 23 e DRCodePilot 109 full-match. Pacote híbrido (DR do DRMiner, patches de referência de CodeT5P-220M ajustado ao projeto, recomendação de identificadores, papel e procedimento passo a passo, duas etapas); o ganho é do pacote. O prompt do baseline não é descrito além de gerar patches diretamente da função defeituosa. Sem agregado impresso de Flink e Solr; usado o primeiro conjunto da Tabela 3 (Flink). Solr não selecionado: GPT-4 5 (2.23%) e DRCodePilot 18 (8.03%) em 224. Parâmetros de decodificação e número de execuções: nao_informado. Avaliação estática (sem execução de testes). Conferido no PDF, p. 8, Tabela 3.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo, as contribuições e a conclusão destacam uma técnica (DRCodePilot), uma métrica que prevalece (full-match ratio; CodeBLEU aparece como adicional) e um comparador (GPT-4 usado diretamente). Sem agregado impresso compatível dos dois projetos, usou-se o primeiro na ordem da Tabela 3 (Flink).",
+      "derivacao": "direta",
+      "localizador": "p. 8, Tabela 3 (colunas Flink (Total: 714 samples), Full-Match); p. 1 (resumo)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT-4 23(3.22%) 0.74 5(2.23%) 0.77",
+          "localizador": "p. 8, Tabela 3, linha GPT-4 (colunas Flink Full-Match, Flink CodeBLEU, Solr Full-Match, Solr CodeBLEU)"
+        },
+        {
+          "trecho": "DRCodePilot 109(15.27%) 0.78 18(8.03%) 0.80",
+          "localizador": "p. 8, Tabela 3, linha DRCodePilot (colunas Flink Full-Match, Flink CodeBLEU, Solr Full-Match, Solr CodeBLEU)"
+        },
+        {
+          "trecho": "Our experimental results are impressive: DRCodePilot achieves a full-match ratio that is a remarkable 4.7x higher than when GPT-4 is utilized directly.",
+          "localizador": "p. 1 (resumo)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "+DR (inclusion of automatically mined design rationales)",
+      "mecanismos": [
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "CodeLlama sem design rationale",
+      "modelo": "CodeLlama-7B (versão informada para o baseline na p. 6)",
+      "benchmark": "Subconjunto de 61 issues com comentários extensos do benchmark próprio (Flink e Solr; distribuição por projeto nao_informado)",
+      "metrica": "Full-Match",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 1,
+        "intervencao": 11
+      },
+      "denominador": "61 casos",
+      "condicoes": "DR minerados automaticamente pelo DRMiner, com imperfeições de extração reconhecidas pelos autores. O restante do prompt dos modelos base não é descrito (nao_informado); o código defeituoso entra no prompt. Subconjunto selecionado aleatoriamente entre issues com comentários extensos, exigindo presença de DR, o que pode favorecer a condição com DR. CodeBLEU na mesma tabela: 0.68 (sem DR) e 0.75 (+DR). Parâmetros de decodificação e número de execuções: nao_informado. Conferido no PDF, p. 9, Tabela 5.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (aplicação isolada dos DR, RQ3) ainda não representada. Primeira tabela com o contraste: Tabela 5; primeira métrica: Full-Match; primeiro modelo: CodeLlama; comparador: a condição sem DR do mesmo modelo.",
+      "derivacao": "direta",
+      "localizador": "p. 9, Tabela 5 (colunas Approach, Full-Match, CodeBLEU)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLlama 1 0.68",
+          "localizador": "p. 9, Tabela 5, linha CodeLlama (colunas Full-Match, CodeBLEU)"
+        },
+        {
+          "trecho": "CodeLlama+DR 11 0.75",
+          "localizador": "p. 9, Tabela 5, linha CodeLlama+DR (colunas Full-Match, CodeBLEU)"
+        },
+        {
+          "trecho": "However, when provided with design rationales—even noisy ones—the figures rise to 11 and, impressively, 19 for the more advanced GPT-4 (11x-19x).",
+          "localizador": "p. 9 (seção 4.6, RQ3.1)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Design rationale for initial patch generation (componente do DRCodePilot)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "DRCodePilot-DR (DRCodePilot sem design rationale no prompt da etapa inicial)",
+      "modelo": "GPT-4 (GPT-4-Turbo; snapshot nao_informado)",
+      "benchmark": "Benchmark próprio, projeto Flink (714 amostras)",
+      "metrica": "Full-Match",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 20,
+        "intervencao": 109
+      },
+      "denominador": "714 amostras (Flink; total informado na Tabela 3)",
+      "condicoes": "Ablação: DRCodePilot-DR remove a Etapa 1 e altera a Etapa 2; o estudo declara as demais variáveis mantidas. Taxa de queda impressa: ↓ 81.65%. Os demais componentes (patches de referência de CodeT5P ajustado, identificadores recomendados) permanecem nas duas condições. Parâmetros de decodificação e número de execuções: nao_informado. Conferido no PDF, p. 8, Tabela 4; o valor 109 coincide com a Tabela 3.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: primeiro componente da tabela de ablação (Tabela 4, linha DRCodePilot-DR); primeira métrica (Full-Match) e primeiro conjunto (Flink).",
+      "derivacao": "direta",
+      "localizador": "p. 8, Tabela 4 (colunas Flink Full-Match, Flink CodeBLEU, Solr Full-Match, Solr CodeBLEU); p. 7 (seção 4.5)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "DRCodePilot-DR 20 (↓ 81.65%) 0.713 (↓ 9.17%) 1 (↓ 94.44%) 0.762 (↓ 4.87%)",
+          "localizador": "p. 8, Tabela 4, linha DRCodePilot-DR (colunas Flink Full-Match, Flink CodeBLEU, Solr Full-Match, Solr CodeBLEU)"
+        },
+        {
+          "trecho": "DRCodePilot 109 0.785 18 0.801",
+          "localizador": "p. 8, Tabela 4, linha DRCodePilot (colunas Flink Full-Match, Flink CodeBLEU, Solr Full-Match, Solr CodeBLEU)"
+        },
+        {
+          "trecho": "To accomplish this, we crafted three variants of DRCodePilot for our study: 1) DRCodePilot-DR, which omits design rationale from the prompt during the initial patch creation phase (removing Step 1 and changing Step 2 in Fig.3).",
+          "localizador": "p. 7 (seção 4.5)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e três questões de pesquisa explícitos (comparação com baselines, ablação, efeito dos DR em outros LLMs e da qualidade dos DR).",
+      "localizador": "p. 1-2 (resumo, seção 1); p. 5 (seção 4.1)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, estrutura dos prompts, ablações e construção do benchmark são descritos, mas o prompt dos baselines não é descrito, a alteração da Etapa 2 na ablação DR não é detalhada, e parâmetros de decodificação e número de execuções não são informados.",
+      "localizador": "p. 3-5 (seção 3); p. 6-7 (seções 4.2-4.5)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há baselines executados no mesmo benchmark, ablação por componente e condições sem DR e com todos os comentários; porém os baselines são LLMs de propósito geral com prompting direto não descrito (limitação reconhecida: sem baselines específicos de reparo), e o contraste principal difere em vários ingredientes.",
+      "localizador": "p. 6-7 (seção 4.3); p. 8-9 (Tabelas 3-5); p. 11 (seção 6.3)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Full-Match e CodeBLEU são definidos e os denominadores (714, 224, 61) informados; os valores do DRCodePilot coincidem entre as Tabelas 3 e 4 com arredondamento. Contudo, não há avaliação por execução, o CodeBLEU sobre a função inteira pode inflar escores, não há variância nem teste estatístico, e a narrativa contradiz a Tabela 5 em vários pontos.",
+      "localizador": "p. 6 (seção 4.3); p. 8-9 (Tabelas 3-5); p. 11 (seção 6.3)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seções de ameaças à validade (construto, externa, interna) e limitações (baselines, simplicidade das issues, solução vs. argumento, ausência de avaliação por execução), além de análise de falhas.",
+      "localizador": "p. 10-11 (seções 6.1-6.3)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Os autores informam disponibilizar dados e código (link não acessado nesta extração) e versões dos baselines; faltam o snapshot do GPT-4 usado no DRCodePilot, parâmetros de decodificação, número de execuções e o texto completo dos prompts (a Figura 3 é ilustrativa).",
+      "localizador": "p. 2 (contribuições, nota 1); p. 4 (Figura 3); p. 6-7 (seção 4.3)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo controla o vazamento do patch pelos comentários (substituição de código por [code]), mas não discute possível exposição dos projetos Flink e Solr no pré-treinamento dos modelos.",
+      "localizador": "p. 6 (seção 4.2); p. 11 (seção 6.2)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas_visualmente": [
+      4,
+      6,
+      7,
+      8,
+      9
+    ],
+    "observacao": "Texto extraído lido integralmente (750 linhas, incluindo referências). Abertas as páginas da Figura 3 (p. 4), Tabela 1 (p. 6), Tabela 2 (p. 7), Tabelas 3 e 4 (p. 8) e Tabela 5 (p. 9) para conferir valores e cabeçalhos."
+  }
+}

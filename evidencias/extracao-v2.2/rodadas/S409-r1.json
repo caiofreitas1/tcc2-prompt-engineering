@@ -1,0 +1,172 @@
+{
+  "estudo": "S409",
+  "texto_fonte": "fontes/textos/lote/S409.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "Few-Shot Learning via Retrieval-Augmented Generation (RAG) (1, 2 e 3 shots)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção III (Embedding Generation and Example Retrieval; Few-Shot Learning with Retrieval-Augmented Generation), Fig. 1 (p. 2 do PDF), Fig. 4 (p. 4 do PDF), Table II (p. 6 do PDF); o PDF não tem paginação impressa",
+        "observacao": "O template few-shot (Fig. 4) mantém a mesma mensagem de sistema do zero-shot (persona/diretriz → instrucao) e acrescenta k pares Fortran–C++ recuperados por similaridade de embeddings (ChromaDB; distância l2 ou cosseno) → exemplos e contexto. O contrafactual é o pacote «exemplos recuperados» contra o zero-shot (Fig. 3) com os mesmos modelos e conjuntos (Table I e Table II). Não há condição numérica com exemplos não recuperados (aleatórios) nem sem a seleção por similaridade; a condição «bad RAG setup» (Fig. 5c) só aparece em gráfico de dispersão, para um modelo e um conjunto, sem valores impressos. Portanto o ganho não pode ser atribuído separadamente à seleção por similaridade nem à mera presença de exemplos. O número de shots (1, 2, 3), o modelo de embedding (Nomic-Embed, Starencoder, CodeBERT) e a métrica de recuperação (l2, cosseno) são configurações da mesma técnica; a tabela numérica (Table II) cobre só Nomic-Embed com distância l2. Não é pacote híbrido: todos os componentes alimentam o prompt."
+      },
+      {
+        "nome_original": "Zero-Shot Translation Prompt",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Fig. 3 (p. 4 do PDF); Seção III, p. 4 do PDF; Table I (p. 6 do PDF)",
+        "observacao": "Linha de base: mensagem de sistema com persona e diretriz («You are adept at translating Fortran code into CPP...») seguida da instrução de tradução e do código Fortran. É a condição sem exemplos, sem base identificável da qual derive."
+      },
+      {
+        "nome_original": "bad RAG setup (utilize largest distance metric as retreival)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Fig. 5c e legenda (p. 5 do PDF); Seção IV.2, p. 7 do PDF",
+        "observacao": "Condição de controle one-shot com o exemplo recuperado pela maior distância, mostrada só para Granite-34B Code Instruct no HPC Fortran2CPP em gráfico de dispersão contra o zero-shot. Sem valores numéricos impressos; não foi extraída nem usada como contrafactual numérico da seleção por similaridade."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "StarCoder 15.5B (Starcoder)", "versao": "nao_informado", "observacao": "Modelo de tradução."},
+      {"nome": "Llama3-70B Instruct", "versao": "nao_informado", "observacao": "Modelo de tradução; também usado para extrair o código Fortran executável do Stack-V2 (pré-processamento), p. 3 do PDF."},
+      {"nome": "CodeLlama-34B Instruct", "versao": "nao_informado", "observacao": "Modelo de tradução."},
+      {"nome": "Granite-34B Code Instruct", "versao": "nao_informado", "observacao": "Modelo de tradução; na Table II, bloco Numerical Recipes, aparece como «Granite-34B»."},
+      {"nome": "Mixtral-8x22B (176B)", "versao": "nao_informado", "observacao": "Chamado «Mistral 8x22B» na introdução e na Seção III e «Mixtral-8x22B» no resumo e nas tabelas."},
+      {"nome": "Codestral-22B", "versao": "nao_informado", "observacao": "Modelo de tradução; ausente da lista do resumo."},
+      {"nome": "Phi-3 3.8B", "versao": "nao_informado", "observacao": "Aparece nas tabelas e figuras, mas não na lista de modelos do resumo nem da Seção III."},
+      {"nome": "GPT-3.5 Turbo", "versao": "nao_informado", "observacao": "Snapshot de API não informado; avaliado só no HPC Fortran2CPP nas tabelas."},
+      {"nome": "GPT-4o / GPT-4 Turbo", "versao": "nao_informado", "observacao": "A Table I e a Table II rotulam «GPT-4o»; o texto da p. 5 atribui o mesmo 0.371 a «GPT-4 Turbo»; a Seção III cita «GPT-4o/GPT-4 turbo»; a Fig. 6a rotula «gpt-4-turbo» e a Fig. 6c «gpt4o». Não é possível determinar qual modelo produziu cada resultado."},
+      {"nome": "Nomic-Embed (embedding)", "versao": "nao_informado", "observacao": "Modelo de embedding da recuperação; limite de 8192 tokens segundo o estudo (p. 6 do PDF); resultados numéricos apresentados com ele."},
+      {"nome": "Starencoder (embedding)", "versao": "nao_informado", "observacao": "Modelo de embedding; desempenho declarado equivalente ao Nomic-Embed, sem valores impressos."},
+      {"nome": "CodeBERT (embedding)", "versao": "nao_informado", "observacao": "Modelo de embedding; limite de 512 tokens segundo o estudo; declarado com desempenho inferior, sem tabela."}
+    ],
+    "benchmarks": [
+      {"nome": "Numerical Recipes Dataset", "quantidade": "298 Fortran-C++ pairs", "observacao": "Pares curados pelos autores a partir de Numerical Recipes [20]; estilo padronizado e comentários removidos. O número de consultas avaliadas (denominador das médias de CodeBLEU) e a separação entre consultas e corpus de recuperação não são informados. Localizador: p. 3 do PDF."},
+      {"nome": "HPC Fortran2CPP Dataset", "quantidade": "315 Fortran-C++ pairs", "observacao": "Derivado de Lei et al. [5] (NPB, PolyBench, DataRaceBench; OpenMP Fortran). Denominador das médias e separação entre consultas e corpus de recuperação não informados. Localizador: p. 3 do PDF."},
+      {"nome": "Stack-V2 Dataset (amostra)", "quantidade": "500 Fortran examples", "observacao": "Amostra de arquivos Fortran sem pares C++; usada só em zero-shot para similaridade CodeBLEU par a par entre traduções de modelos (Fig. 7). Não contém contraste de técnicas de prompting. Localizador: p. 3 e p. 7–8 do PDF."}
+    ],
+    "metricas": [
+      {"nome": "CodeBLEU", "observacao": "Métrica principal declarada (p. 4 do PDF); composta por N-gram Match, Weighted N-gram Match, Syntax Match e Dataflow Match em relação à tradução de referência. Relatada como média ± desvio-padrão (Table I) e como delta da média (Table II). O que o desvio-padrão mede (execuções ou problemas) e o denominador não são informados."},
+      {"nome": "Ngram, Weighted Ngram, Syntax Tree, Dataflow", "observacao": "Componentes do CodeBLEU relatados só para o zero-shot (Table I)."},
+      {"nome": "CodeBLEU par a par entre modelos (Stack-V2)", "observacao": "Similaridade entre traduções de pares de modelos, sem referência (Fig. 7); medida de consistência, não de qualidade contra referência."}
+    ],
+    "linguagens": [
+      {"nome": "Fortran", "observacao": "Linguagem de origem; HPC Fortran2CPP contém OpenMP Fortran; versão/padrão nao_informado."},
+      {"nome": "C++ (CPP)", "observacao": "Linguagem de destino; padrão nao_informado."}
+    ],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "O estudo motiva a técnica afirmando que a acurácia e a confiabilidade dos LLMs falham em traduções complexas por falta de compreensão contextual. A avaliação usa só CodeBLEU, sem compilação nem testes, de modo que a correção funcional das traduções não é medida.", "localizador": "Abstract, p. 1 do PDF"},
+      {"categoria": "outro", "descricao": "Sensibilidade do desempenho à configuração da recuperação: alterar a métrica de recuperação muda significativamente o desempenho, e uma recuperação mal configurada (maior distância, Fig. 5c) é apresentada como contraste.", "localizador": "Seção IV.2, p. 7 do PDF; Fig. 5c, p. 5 do PDF"},
+      {"categoria": "outro", "descricao": "Limite de 512 tokens do CodeBERT, diante de códigos Fortran longos, provavelmente prejudicou o desempenho da recuperação com esse embedding.", "localizador": "Seção IV.1, p. 6 do PDF"},
+      {"categoria": "outro", "descricao": "Alta variância do Mixtral-8x22B no Numerical Recipes, interpretada pelo estudo como inconsistência da qualidade de tradução; a fonte não informa se a variância é entre execuções ou entre problemas.", "localizador": "Seção IV.1, p. 5 do PDF; Table I, p. 6 do PDF"},
+      {"categoria": "outro", "descricao": "Modelos com contexto menor (Starcoder) não se beneficiam dos exemplos: o estudo atribui a ausência de melhoria em one-shot ao menor comprimento de contexto.", "localizador": "Seção IV.4, p. 7 do PDF"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Fornecer exemplos de tradução recuperados por similaridade (RAG few-shot) para suprir a falta de contexto do zero-shot; efeito medido contra o zero-shot só em CodeBLEU (Table II).", "avaliada": "sim", "localizador": "Abstract, p. 1 do PDF; Table II, p. 6 do PDF"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "StarCoder 15.5B tem delta 0.000 em 1, 2 e 3 shots nos dois conjuntos (Table II), o que contradiz a afirmação de que o few-shot melhorou consistentemente todos os modelos e embeddings; o estudo atribui ao menor contexto do modelo.", "localizador": "Table II, p. 6 do PDF; Seção IV.2, p. 6 do PDF; Seção IV.4, p. 7 do PDF"},
+      {"descricao": "Narrativa de «melhoria progressiva» de 1 para 3 shots contrasta com a Table II: Granite-34B Code Instruct (HPC) +0.363 (1-shot), +0.278 (2-shot), +0.302 (3-shot); CodeLlama-34B Instruct (HPC) +0.084 (2-shot) e +0.069 (3-shot); Phi-3 3.8B (Numerical Recipes) +0.068, +0.051, +0.044; GPT-4o (HPC) +0.153 em 2 e 3 shots.", "localizador": "Seção IV.2, p. 6 do PDF; Table II, p. 6 do PDF"},
+      {"descricao": "O texto diz que CodeLlama-34B Instruct passou de 0.243 a 0.321 no two-shot; pela Table II o delta de 2-shot é +0.084 (cálculo próprio: 0.327), e 0.321 corresponde a 0.243 + 0.078, o delta de 1-shot (cálculo próprio). Aparente inconsistência entre texto e tabela.", "localizador": "Seção IV.1, p. 6 do PDF; Table II, p. 6 do PDF"},
+      {"descricao": "Para Granite-34B Code Instruct (HPC, Nomic), o texto informa 0.54 em two-shot e 0.54 ± 0.21 em three-shot (o valor de two-shot está impresso como «0.540.27»); pela Table II, 0.237 + 0.278 = 0.515 e 0.237 + 0.302 = 0.539 (cálculos próprios). O valor de two-shot do texto não coincide com a tabela, mesmo considerando arredondamento a duas casas.", "localizador": "Seção IV.2, p. 6 do PDF; Table II, p. 6 do PDF"},
+      {"descricao": "Desvio-padrão divergente para a mesma condição: Table I dá 0.237 ± 0.001 para Granite-34B Code Instruct zero-shot no HPC Fortran2CPP; o texto dá 0.24 ± 0.09. A fonte não informa sobre o que cada desvio-padrão é calculado (execuções ou problemas); aparente inconsistência.", "localizador": "Table I, p. 6 do PDF; Seção IV.2, p. 6 do PDF"},
+      {"descricao": "Rótulo do modelo divergente: Table I/Table II rotulam GPT-4o com 0.371, e o texto atribui 0.371 a GPT-4 Turbo; Fig. 6a usa «gpt-4-turbo» e Fig. 6c «gpt4o».", "localizador": "Table I, p. 6 do PDF; Seção IV.1, p. 5 do PDF; Fig. 6, p. 5 do PDF"},
+      {"descricao": "O texto atribui a Granite-34B Code Instruct com embedding CodeBERT one-shot de 0.6 no HPC Fortran2CPP, o mesmo valor do Nomic-Embed (0.237 + 0.363, cálculo próprio), embora afirme que o CodeBERT teve desempenho consistentemente inferior; não há tabela com resultados do CodeBERT para conferência.", "localizador": "Seção IV.3, p. 7 do PDF; Seção IV.1, p. 6 do PDF"},
+      {"descricao": "A legenda da Table II restringe a tabela ao HPC Fortran2CPP, mas ela contém também o bloco Numerical Recipes.", "localizador": "Table II e legenda, p. 6 do PDF"},
+      {"descricao": "CodeBLEU mede semelhança com a tradução de referência; o próprio estudo atribui o platô dos modelos GPT em few-shot a priorizarem código executável e semanticamente correto em vez de alinhamento com a referência. Ganhos de CodeBLEU não demonstram correção funcional; não há compilação nem testes.", "localizador": "Seção IV.4, p. 7 do PDF"},
+      {"descricao": "A conclusão classifica GPT-3.5/4 e Llama3-70B-Instruct como modelos pré-treinados ou ajustados para código com desempenho superior, enquanto a seção de resultados diz que os GPT se destacam só em zero-shot e quase não se beneficiam dos shots, e que llama3, Codestral, Mixtral, Granite e CodeLlama superam os demais.", "localizador": "Seção V, p. 8 do PDF; Seção IV.4, p. 7 do PDF"},
+      {"descricao": "Numerical Recipes depende de uma biblioteca específica de funções, o que segundo o estudo pode limitar a aplicabilidade geral; os modelos GPT não foram avaliados nesse conjunto (Tables I e II).", "localizador": "Seção III (Dataset Preparation), p. 3 do PDF; Tables I e II, p. 6 do PDF"},
+      {"descricao": "A legenda de cor da Fig. 5c (recuperação pela maior distância) usa escala «1e−7+1», isto é, similaridades próximas de 1, o que parece incompatível com a recuperação do exemplo mais distante; a fonte não explica. Aparente inconsistência, sem valores numéricos para conferir.", "localizador": "Fig. 5c, p. 5 do PDF"},
+      {"descricao": "O estudo não descreve se o par da consulta é excluído do corpus de recuperação (mesmo conjunto usado como fonte de exemplos e como teste), nem o número de consultas avaliadas; isso impede julgar se os exemplos recuperados podem conter a própria resposta. Não se afirma que tenha havido vazamento.", "localizador": "Seção III (Embedding Generation and Example Retrieval; Evaluation and Experimental Setup), p. 3–4 do PDF"},
+      {"descricao": "Resultados com métrica cosseno (Fig. 6a, 6b) e com outros embeddings só aparecem em gráficos ou em prosa; a única tabela de few-shot usa Nomic-Embed com l2.", "localizador": "Fig. 6, p. 5 do PDF; Seção IV.1, p. 6 do PDF"}
+    ],
+    "observacoes": [
+      {"descricao": "Pipeline: banco vetorial ChromaDB com embeddings dos códigos Fortran e as traduções C++ correspondentes; recuperação top-k por similaridade (cosseno ou l2); os pares recuperados são inseridos no template few-shot (Fig. 4).", "localizador": "Fig. 1, p. 2 do PDF; Seção III, p. 3–4 do PDF"},
+      {"descricao": "Experimento com Stack-V2: tradução zero-shot de 500 arquivos Fortran por vários modelos e cálculo de CodeBLEU par a par entre traduções (Fig. 7; maior valor 0.522 entre Codestral e Llama3-70B Instruct). Avalia consistência entre modelos, não técnica de prompting.", "localizador": "Seção IV.5 e Fig. 7, p. 7–8 do PDF"},
+      {"descricao": "Pré-processamento do Stack-V2 com Llama3-70B Instruct para extrair o código Fortran executável; não é intervenção comparada.", "localizador": "Seção III (Dataset Preparation), p. 3 do PDF"},
+      {"descricao": "Número de execuções, parâmetros de decodificação (temperatura, top-p, tamanho máximo) e snapshots das APIs: nao_informado.", "localizador": "Seção III (Evaluation and Experimental Setup), p. 4 do PDF"},
+      {"descricao": "Ajuste fino é mencionado só nos trabalhos relacionados e como alternativa descartada; não é executado.", "localizador": "Abstract, p. 1 do PDF; Seção II, p. 2 do PDF"},
+      {"descricao": "Nenhum pacote de replicação, código ou link de dados é informado.", "localizador": "texto completo"}
+    ],
+    "citacoes": [
+      {"trecho": "By leveraging a repository of existing code translations, we dynamically retrieve the most relevant examples to guide the model in translating new code segments.", "localizador": "Abstract, p. 1 do PDF"},
+      {"trecho": "Extensive experiments on diverse datasets, using open LLM models such as Starcoder, Llama3-70B Instruct, CodeLlama-34B Instruct, Granite-34B Code Instruct, and Mixtral-8x22B, and commercial LLM models such as GPT-3.5 turbo, and GPT-4o demonstrate the superiority of our approach over traditional zero-shot, particularly in translating between Fortran and C++.", "localizador": "Abstract, p. 1 do PDF"},
+      {"trecho": "Despite these advancements, the accuracy and reliability of these models often falter in complex translation tasks due to a lack of contextual understanding.", "localizador": "Abstract, p. 1 do PDF"},
+      {"trecho": "System: You are adept at translating Fortran code into CPP with high accuracy, ensuring that all syntax, semantics, and specific language features are correctly and efficiently converted", "localizador": "Fig. 3 e Fig. 4, p. 4 do PDF"},
+      {"trecho": "For Zero-shot comparisons, we apply the zero-shot translation prompt template (Figure 3) with the Fortran code to be translated.", "localizador": "Seção III, p. 4 do PDF"},
+      {"trecho": "Once the embeddings are generated, the system dynamically retrieves the most similar examples based on cosine similarity or Euclidean distance.", "localizador": "Seção III, p. 3 do PDF"},
+      {"trecho": "The retreived translation pairs are then augmented with the original query and directed to LLM for translation.", "localizador": "Seção III, p. 3 do PDF"},
+      {"trecho": "Each experiment aimed to measure the improvements in translation quality facilitated by the RAG approach using CodeBLEU as the primary evaluation metric.", "localizador": "Seção III (Evaluation and Experimental Setup), p. 4 do PDF"},
+      {"trecho": "Specifically, the comparisons are made for Figure 5a Granite-34B Code Instruct on the Numerical Recipes Dataset, Figure 5b Granite-34B Code Instruct on the HPC Fortran2CPP Dataset, and Figure 5c Granite-34B Code Instruct on the HPC Fortran2CPP Dataset with a poorly configured RAG setup (utilizing the largest distance metric as retrieval).", "localizador": "Seção IV.2, p. 7 do PDF"},
+      {"trecho": "When the utilized retrieval metric is altered, this brings a significant change in performances.", "localizador": "Seção IV.2, p. 7 do PDF"},
+      {"trecho": "Given the longer length of Fortran codes to be translated, the limited token capacity of CodeBERT likely hindered its performance.", "localizador": "Seção IV.1, p. 6 do PDF"},
+      {"trecho": "Mixtral-8x22B exhibited high variance in the Numerical Recipes dataset, especially in CodeBLEU and Ngram scores, suggesting inconsistency in its translation quality.", "localizador": "Seção IV.1, p. 5 do PDF"},
+      {"trecho": "Additionally, Starcoder did not show significant improvement in one-shot settings, likely due to its smaller context length.", "localizador": "Seção IV.4, p. 7 do PDF"},
+      {"trecho": "This plateau in performance can be attributed to GPT models prioritizing the generation of executable and semantically correct code over strict alignment with ground truth translations.", "localizador": "Seção IV.4, p. 7 do PDF"},
+      {"trecho": "One downside of this dataset is that it relies on a specific library of functions, which may limit its general applicability.", "localizador": "Seção III (Dataset Preparation), p. 3 do PDF"},
+      {"trecho": "Few-shot learning consistently enhanced translation performance across all models and embeddings.", "localizador": "Seção IV.2, p. 6 do PDF"},
+      {"trecho": "The progressive improvement from one-shot to three-shot learning configurations was evident, with models like Granite-34B Code Instruct, Llama3-70B Instruct, and Mixtral-8x22B showing substantial gains as shown in Table II.", "localizador": "Seção IV.2, p. 6 do PDF"},
+      {"trecho": "For instance, CodeLlama-34B Instruct achieved a zero-shot CodeBLEU of 0.243 with Nomic-embed, which improved to 0.321 in the two-shot configuration.", "localizador": "Seção IV.1, p. 6 do PDF"},
+      {"trecho": "For instance, Granite-34B Code Instruct with nomic_embed improved from a zero-shot CodeBLEU of 0.24 ± 0.09 to 0.60 ± 0.27 in the one-shot setting, further improving to 0.540.27 and 0.54 ± 0.21 in the two-shot and three-shot settings, respectively.", "localizador": "Seção IV.2, p. 6 do PDF"},
+      {"trecho": "Notably, GPT-4 Turbo and GPT-3.5 Turbo achieved the highest zero-shot CodeBLEU scores of 0.371 and 0.367, respectively, indicating their strong initial performance without additional context.", "localizador": "Seção IV.1, p. 5 do PDF"},
+      {"trecho": "For instance, Granite-34B Code Instruct with CodeBERT embedding achieved a one-shot CodeBLEU of 0.6 on the HPC Fortran2CPP dataset, whereas it scored 0.49 ± 0.20 on the Numerical Recipes dataset.", "localizador": "Seção IV.3, p. 7 do PDF"},
+      {"trecho": "StarCoder 15.5B 0.206 0.000 0.000 0.000", "localizador": "Table II, p. 6 do PDF, bloco HPC Fortran2CPP; colunas Model | Zero-shot | 1-shot | 2-shot | 3-shot (Δ in CodeBLEU scores)"},
+      {"trecho": "Granite-34B Code Instruct 0.237 ± 0.001 0.084 ± 0.001 0.145 ± 0.001 0.171 ± 0.000 0.500 ± 0.002", "localizador": "Table I, p. 6 do PDF, bloco HPC Fortran2CPP; colunas Model | CodeBLEU | Ngram | Weighted Ngram | Syntax Tree | Dataflow"},
+      {"trecho": "Models explicitly pre-trained or fine-tuned for code-related tasks, such as GPT-3.5/4 and Llama3-70B-Instruct, demonstrate superior performance, while models with more general training, like Phi-3 3.8B fall short.", "localizador": "Seção V, p. 8 do PDF"},
+      {"trecho": "This cleaned dataset was subsequently used to compare translation performance across various LLMs in a zero-shot setting.", "localizador": "Seção III (Dataset Preparation), p. 3 do PDF"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "Few-Shot Learning via Retrieval-Augmented Generation (RAG), 1-shot",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "Zero-shot (template da Fig. 3)",
+      "modelo": "CodeLlama-34B Instruct",
+      "benchmark": "HPC Fortran2CPP",
+      "metrica": "CodeBLEU (média; a Table II relata «Delta in Mean CodeBLEU scores»)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.243, "intervencao": null},
+      "denominador": "nao_informado (o conjunto tem 315 pares, mas o estudo não informa quantas consultas entram na média nem como o corpus de recuperação é separado das consultas)",
+      "condicoes": "Embedding Nomic-Embed; recuperação por distância l2; 1 exemplo recuperado (1-shot); Fortran→C++. A Table II imprime o zero-shot (0.243) e o delta de 1-shot (+0.078), não o valor absoluto da condição few-shot; por isso intervencao = null, sem cálculo. Deltas impressos para 2-shot e 3-shot: +0.084 e +0.069. Table I confirma o zero-shot 0.243 ± 0.000 para o mesmo modelo e conjunto. Número de execuções, parâmetros de decodificação e versão do modelo: nao_informado. Nenhum agregado impresso entre modelos ou conjuntos; aplicado o primeiro na ordem da tabela de resultados (primeira linha, primeira coluna de few-shot). Conferido visualmente na p. 6 do PDF.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara uma técnica (abordagem RAG few-shot) superior a um comparador (zero-shot tradicional) e a Seção III declara CodeBLEU como métrica principal. Como o resultado abrange vários modelos, conjuntos e números de shots sem agregado impresso, foi usado o primeiro na ordem das tabelas de resultados: Table I traz só o zero-shot (sem contraste), e a Table II é a primeira com o contraste; primeira linha (HPC Fortran2CPP, CodeLlama-34B Instruct) e primeira coluna (1-shot). Não há outra técnica focal nem outra tarefa; não há tabela de ablação nem matriz de ingredientes para cobertura, e a condição «bad RAG setup» só aparece em gráfico sem valores, por isso há uma única extração.",
+      "derivacao": "direta",
+      "localizador": "Table II, p. 6 do PDF (sem paginação impressa), bloco HPC Fortran2CPP, linha CodeLlama-34B Instruct, colunas Zero-shot e 1-shot; Table I, p. 6 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "CodeLlama-34B Instruct 0.243 +0.078 +0.084 +0.069", "localizador": "Table II, p. 6 do PDF, bloco HPC Fortran2CPP; colunas Model | Zero-shot | 1-shot | 2-shot | 3-shot (Δ in CodeBLEU scores)"},
+        {"trecho": "TABLE II: Delta in Mean CodeBLEU scores between Zero- and Few-Shot prompts using the Nomic-embed Embedding Model with l2 Distance for HPC Fortran2CPP dataset.", "localizador": "Legenda da Table II, p. 6 do PDF"},
+        {"trecho": "CodeLlama-34B Instruct 0.243 ± 0.000 0.090 ± 0.001 0.166 ± 0.001 0.169 ± 0.002 0.490 ± 0.001", "localizador": "Table I, p. 6 do PDF, bloco HPC Fortran2CPP; colunas Model | CodeBLEU | Ngram | Weighted Ngram | Syntax Tree | Dataflow"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: melhorar a tradução Fortran→C++ com few-shot por RAG, comparando com zero-shot, variando shots e embeddings.", "localizador": "Abstract, p. 1 do PDF; Seção I, p. 1–2 do PDF"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Pipeline, templates de prompt, conjuntos e configurações estão descritos (Fig. 1, 3, 4; Seção III), mas faltam o número de consultas avaliadas, a separação entre consultas e corpus de recuperação, o número de execuções e os parâmetros de decodificação.", "localizador": "Seção III, p. 2–4 do PDF"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Zero-shot executado com os mesmos modelos e conjuntos (Table I e Table II). Não há condição com exemplos não recuperados, o que limita a atribuição do ganho à recuperação, mas o comparador da afirmação principal está presente.", "localizador": "Table I e Table II, p. 6 do PDF"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "CodeBLEU é definido e relatado com desvio-padrão, mas é só métrica de semelhança com a referência (sem compilação ou testes); denominadores não informados; o que o desvio-padrão mede não é definido; valores do texto divergem da Table II (CodeLlama two-shot 0.321; Granite two-shot 0.54) e o desvio-padrão do texto diverge da Table I; rótulo GPT-4o/GPT-4 Turbo inconsistente.", "localizador": "Seção III, p. 4 do PDF; Table I e Table II, p. 6 do PDF; Seção IV, p. 5–7 do PDF"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute algumas limitações (dependência do Numerical Recipes de uma biblioteca, limite de tokens do CodeBERT, contexto do Starcoder, desalinhamento entre CodeBLEU e código correto nos GPT, escassez de pares Fortran-C++), sem seção de ameaças nem discussão de validade da métrica, contaminação ou variação entre execuções.", "localizador": "p. 3, 6, 7 e 8 do PDF"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Templates de prompt, conjuntos e modelos são nomeados, mas não há versões ou snapshots dos modelos de API, parâmetros de decodificação, número de execuções, código ou pacote de replicação.", "localizador": "Fig. 3 e Fig. 4, p. 4 do PDF; Seção III, p. 3–4 do PDF"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute vazamento de dados de avaliação no pré-treinamento nem informa se o par da consulta é excluído do corpus de recuperação.", "localizador": "texto completo; Seção III, p. 3–4 do PDF"}
+  ],
+  "leitura": "completa; texto extraído lido inteiro; páginas do PDF abertas visualmente: p-02, p-03, p-04, p-05, p-06, p-07, p-08 (Table I e Table II conferidas na p-06; templates na p-04; Fig. 5 e Fig. 6 na p-05; Fig. 7 na p-07)"
+}

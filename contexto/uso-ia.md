@@ -315,3 +315,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: «Sim, adotar» o Codex como segundo extrator (D104).
 - Executores: subagentes Claude Opus 5.5 (Read e Write), 12 extrações (S325–S365); Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações gravadas de 15 lançadas (S2233–S2131; 5 interrompidas pelo limite da assinatura); Claude Code (Claude Opus 5.5), roteiro, validação e relatório (`evidencias/extracao-v2.2/lote-04.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 5 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S383–S399 e S397–S479); Claude Code (Claude Opus 5.5), validação, 3 correções manuais registradas e relatórios (`lote-04.md`, `lote-05.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.

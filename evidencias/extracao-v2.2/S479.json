@@ -1,0 +1,836 @@
+{
+  "estudo": "S479",
+  "texto_fonte": "fontes/textos/lote/S479.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Zheng, K.; Decugis, J.; Gehring, J.; Cohen, T.; Negrevergne, B.; Synnaeve, G. What Makes Large Language Models Reason in (Multi-Turn) Code Generation? ICLR 2025 (arXiv:2410.08105v3, 7 Apr 2025).",
+    "tarefas": [
+      "geracao"
+    ],
+    "tarefas_observacao": "O estudo avalia geração de código para programação competitiva (CodeContests, TACO). O reparo ocorre apenas sobre o próprio código gerado, dentro de trajetórias multi-turn com feedback de execução; não há benchmark de depuração ou reparo de programas fornecidos. Por isso o reparo foi classificado como mecanismo `feedback` da geração, e não como tarefa `depuracao` (p. 2, p. 4).",
+    "tecnicas": [
+      {
+        "nome_original": "Reasoning prompts (NL → NL), single-turn",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (Seção 3, Figura 3); p. 5 (Seção 4, Single-turn); p. 6 (Tabela 3); p. 26-27 (Apêndice G.1)",
+        "observacao": "Conjunto de 8 prompts de raciocínio (self-reflection, predict IO pairs, write code solution with guidelines, predict problem tag, predict problem difficulty, write natural language solution, write helper function docstring, write intermediate variables and type), respondidos em um passo de inferência anterior à geração do código. Mecanismos do pacote incluem a instrução e a restrição de formato do prompt base (exemplo de prompt na p. 29). Critério aplicado a todas as técnicas: `instrucao` está no prompt base de todas as condições e não é listada como acrescentada; os prompts acrescentados são classificados pela função. «write code solution with guidelines» também traz diretrizes de tempo de execução (`restricoes`). Contrafactual: Tabela 3 compara a linha Baseline com Worst/Best reasoning sem instruction prompt; as linhas Worst/Best são escolhidas post hoc por modelo pelo pass@100 no conjunto de teste e não identificam o prompt."
+      },
+      {
+        "nome_original": "Instruction prompts (NL → Code), single-turn",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes",
+          "raciocinio"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (Seção 3); p. 5 (Seção 4); p. 6 (Tabela 3); p. 7 (Figura 5); p. 27 (Apêndice G.2)",
+        "observacao": "Conjunto de 6 prompts: use helper functions, double check the import, variable, constraints, comment before each line, docstring before each function (estilo e modularidade → `restricoes`), generate weak solution and a second better one e step by step (→ `raciocinio`). O estudo os agrupa em «describe», «modularity» e «solution». Contrafactual na Tabela 3 (Baseline contra Worst/Best instruction), com as mesmas ressalvas de seleção post hoc."
+      },
+      {
+        "nome_original": "CoT (combinação de reasoning e instruction prompts, single-turn; «+ CoT» nas Tabelas 1 e 2; «Best/Worst Combination» na Tabela 3)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "restricoes"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 (contribuição 1); p. 5 (Seção 5.1); p. 6 (Tabelas 1, 2 e 3); p. 7 (Figura 4)",
+        "observacao": "Grade de 63 = (8+1)×(6+1) combinações. O contraste com o base sem CoT isola o pacote reasoning+instruction, não cada prompt. As Tabelas 1 e 2 não identificam qual combinação foi usada por modelo (a legenda da Tabela 1 diz apenas que os prompts são os mesmos entre tamanhos de amostra por modelo): nao_informado."
+      },
+      {
+        "nome_original": "Multi-turn (self-repair com execution feedback; granularidades binary, failed tests, failed & passed tests, LDB feedback)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (Seção 2.1); p. 4 (Seção 3); p. 5 (Seção 4, Multi-turn); p. 6 (Tabelas 1 e 2); p. 8 (Figura 6); p. 22 (Tabela 8); p. 23 (Apêndice E.1)",
+        "observacao": "Até 3 tentativas de código; após cada falha nos testes públicos, o modelo recebe o feedback de execução e o prompt fixo «Give it another try». Padrão nas Tabelas 1 e 2: feedback «failed tests». As quatro granularidades de feedback são tratadas como variantes da mesma técnica (níveis de detalhe do feedback, Tabela 8), sem CoT; LDB é adaptado de Zhong et al. (2024). Contrafactual: single-turn com o mesmo número de amostras de código (k em pass n@k)."
+      },
+      {
+        "nome_original": "Multi-turn CoT",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "restricoes",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 (Seção 4, Multi-turn); p. 6 (Tabelas 1 e 2); p. 8 (Seção 5.2); p. 9 (Tabela 4)",
+        "observacao": "A linha «Multi-turn CoT» da Tabela 1 corresponde a implementações diferentes por família: para Llama 3.0, extensão dos reasoning e instruction prompts single-turn ao multi-turn; para Llama 3.1, CoT-retry (p. 8). A Seção 4 diz que os melhores reasoning prompts são combinados em até 3 passos de raciocínio; o número exato de passos usado na Tabela 1 é nao_informado. Comparação com o base (pacote) e com «+ Multi-turn» (que isola o CoT dentro do multi-turn)."
+      },
+      {
+        "nome_original": "CoT-retry",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback",
+          "raciocinio",
+          "restricoes"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 (Seção 4); p. 6 (Tabela 1, linhas Llama 3.1); p. 8 (Seção 5.2, Figura 7); p. 27-30 (Apêndice G.3 e exemplo)",
+        "observacao": "Proposta do estudo: primeira tentativa sem CoT; se falhar, feedback «failed tests» + «write code solution with guidelines»; se falhar de novo, feedback + «generate a weak solution». Orçamento de inferência adaptativo à dificuldade. O estudo chama esses prompts ora de reasoning prompt (Seção 4; G.1), ora de instruction prompt (G.3). A escolha dos prompts usou resultados da Figura 18 (CodeContests test). Também usada para gerar os dados do RFT (fora do escopo)."
+      },
+      {
+        "nome_original": "Fixme (variante do retry prompt)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 23 (Apêndice E.1, Tabela 9)",
+        "observacao": "Substitui «Give it another try» por «Generate a fixed version of the program to fix the failing test.»; ablação do prompt de retry, sem CoT. Troca de instrução, sem categoria nova."
+      },
+      {
+        "nome_original": "Analyze (Analyze → Retry; Analyze → Fixme)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "feedback",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 23 (Apêndice E.1, Tabela 9)",
+        "observacao": "Acrescenta pedido de análise do feedback de execução antes de nova tentativa; contrastes Analyze → Retry × Retry e Analyze → Fixme × Fixme na Tabela 9."
+      },
+      {
+        "nome_original": "Empilhamento de prompts (+1 reasoning; +1 instruction)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "raciocinio",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8 (Seção 5.2, «Reasoning prompts are not additive»); p. 22 (Tabela 7)",
+        "observacao": "Cada linha da Tabela 7 é acrescentada à anterior (1 reasoning × 1 instruction; +1 reasoning; +1 instruction), em multi-turn; valores das linhas acrescentadas impressos como diferença. Os prompts específicos empilhados não são identificados (nao_informado)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Rejection Sampling Fine-tuning (RFT) de Llama 3.1 70B",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino supervisionado sobre trajetórias corretas geradas com CoT-retry no conjunto de treino do CodeContests, com remoção dos prompts de CoT, deduplicação LSH e descontaminação contra o TACO test. Resultados nas Tabelas 1, 4, 5, 6, 10 e 11 não são efeito de prompting.",
+        "localizador": "p. 5 (Seção 4); p. 8-9 (Seção 5.3); p. 16-17 (Apêndice B)"
+      },
+      {
+        "nome_original": "SFT em CodeContests/train (ablação da mistura de dados)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino nas soluções do conjunto de treino do CodeContests, usado como referência na ablação da Tabela 10.",
+        "localizador": "p. 23-25 (Apêndice E.3, Tabela 10)"
+      },
+      {
+        "nome_original": "Nucleus sampling e temperatura",
+        "natureza": "decodificacao",
+        "descricao": "top-p = 0,95 e temperatura 1,0 (regime de muitas amostras) ou 0,2 (Tabelas 2, 5, 6 e 1@3 da Tabela 8).",
+        "localizador": "p. 5 (Seção 4); p. 6 (legendas das Tabelas 1 e 2); p. 22 (legenda da Tabela 8)"
+      },
+      {
+        "nome_original": "Limite de turnos e orçamento de amostras (pass n@k)",
+        "natureza": "orcamento",
+        "descricao": "Limite de 3 tentativas de código, escolhido como ótimo de computação pela Figura 2; orçamentos k de 3 a 300 amostras.",
+        "localizador": "p. 3 (Seção 2.2, Figura 2); p. 5 (Seção 4)"
+      },
+      {
+        "nome_original": "Seleção de n submissões pelos testes públicos",
+        "natureza": "outro",
+        "descricao": "Procedimento de avaliação de pass n@k (Li et al., 2022): entre k amostras, até n submissões são escolhidas pelo desempenho nos testes públicos; aplicado igualmente a todas as condições, não é técnica do prompt.",
+        "localizador": "p. 3 (Seção 2.2); p. 16 (Apêndice A)"
+      },
+      {
+        "nome_original": "Descontaminação por similaridade de sentenças",
+        "natureza": "outro",
+        "descricao": "Modelo de embedding de sentenças não identificado (limiar 0,8) e execução de soluções para detectar problemas do CodeContests/train sobrepostos ao TACO test; afeta só os dados do RFT.",
+        "localizador": "p. 34 (Apêndice I)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Llama 3.0 8B (Instruct)",
+        "versao": "nao_informado"
+      },
+      {
+        "nome": "Llama 3.0 70B (Instruct)",
+        "versao": "nao_informado"
+      },
+      {
+        "nome": "Llama 3.1 8B (Instruct)",
+        "versao": "nao_informado"
+      },
+      {
+        "nome": "Llama 3.1 70B (Instruct)",
+        "versao": "nao_informado"
+      },
+      {
+        "nome": "Llama 3.1 405B (Instruct)",
+        "versao": "nao_informado",
+        "observacao": "Usado apenas em regime de poucas amostras (Tabela 2), por restrição de computação."
+      },
+      {
+        "nome": "GPT-4o",
+        "versao": "gpt-4o-2024-05-13",
+        "observacao": "Usado apenas em regime de poucas amostras (Tabela 2)."
+      },
+      {
+        "nome": "Llama 3.1 70B RFT",
+        "versao": "modelo ajustado pelos autores, não publicado",
+        "observacao": "Fora do escopo (ajuste fino)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "CodeContests",
+        "quantidade": "13k problemas no treino (13213 no Apêndice B.2); 117 na validação; 165 no teste",
+        "observacao": "Resultados de prompting no conjunto de teste; testes públicos usados para feedback e todos os testes para avaliar a submissão final. Os 500 exemplos do treino foram usados para pré-selecionar mais de 30 prompts (p. 26)."
+      },
+      {
+        "nome": "TACO (test)",
+        "quantidade": "5 níveis de dificuldade com 200 problemas cada",
+        "observacao": "Primeiro caso de teste usado como teste público. O TACO reúne problemas do CodeContests, APPS e outras plataformas; o estudo registra sobreposição entre CodeContests/train e TACO test (Apêndice I) e entre TACO train e test (Apêndice J)."
+      },
+      {
+        "nome": "HumanEval+, MBPP+, LiveCodeBench-v4",
+        "quantidade": "nao_informado",
+        "observacao": "Usados apenas para a generalização do modelo RFT, sem CoT (Tabelas 5 e 6); fora do escopo de prompting."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "pass@k",
+        "observacao": "Usada quando só há resultados single-turn (Tabela 3, Figuras 4, 5, 11-19)."
+      },
+      {
+        "nome": "pass n@k (1@3, 10@30, 33@100, 100@300, 1@1, 10@100)",
+        "observacao": "Métrica principal: k gerações e no máximo n submissões, estimada por bootstrap Monte Carlo com 10000 reamostragens; média sobre todos os problemas do benchmark (denominador: problemas do conjunto, p. ex. 165 no CodeContests test)."
+      },
+      {
+        "nome": "Similarity score entre códigos consecutivos",
+        "observacao": "difflib.SequenceMatcher após normalização via AST (Figuras 6, 8, 20, 21)."
+      },
+      {
+        "nome": "Non-code fraction",
+        "observacao": "Fração de caracteres de texto na resposta (Tabela 11, Figura 22)."
+      }
+    ],
+    "linguagens": [
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Prompts de CoT podem piorar o desempenho quando o modelo não segue as instruções ou propõe plano subótimo, em geral força bruta que não cumpre o limite de tempo; o prompt «weak solution» pode enviesar para força bruta irrecuperável; e o código gerado pode ignorar as variáveis intermediárias definidas no raciocínio.",
+        "localizador": "p. 7 (Seção 5.1); p. 31-33 (Apêndice H)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Multi-turn sozinho traz ganhos modestos e às vezes fica abaixo do single-turn com o mesmo orçamento de amostras, sobretudo em modelos menores.",
+        "localizador": "p. 2 (contribuição 2); p. 7 (Seção 5.2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Feedback de execução mais detalhado induz comportamento exploratório menor (maior similaridade entre códigos consecutivos), o que o estudo associa à menor diversidade dos programas e a quedas de desempenho com orçamentos grandes.",
+        "localizador": "p. 2 (contribuição 2); p. 8 (Seção 5.2, Figura 6)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Soluções multi-turn exigem várias chamadas ao LLM e, portanto, custo maior; pass@k ignora o custo computacional. O estudo controla o número de tentativas de código com pass n@k, mas não quantifica tokens, dinheiro ou tempo das técnicas de prompting (não quantificado); reconhece que uma comparação mais justa consideraria tokens de entrada e saída.",
+        "localizador": "p. 1-2 (Introdução); p. 3 (Seção 2.2); p. 10 (Seção 7)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Sobreposição não nula entre CodeContests/train e TACO test e entre TACO train e TACO test (problemas quase idênticos com URLs diferentes). O estudo não discute contaminação no pré-treinamento dos modelos avaliados.",
+        "localizador": "p. 34 (Apêndice I); p. 36 (Apêndice J)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso de pass n@k em vez de pass@k para comparar single-turn e multi-turn com o mesmo número de amostras de código.",
+        "avaliada": "nao",
+        "localizador": "p. 3 (Seção 2.2)"
+      },
+      {
+        "descricao": "Descontaminação das trajetórias do CodeContests/train contra o TACO test (288 problemas detectados) antes do RFT.",
+        "avaliada": "nao",
+        "localizador": "p. 17 (Apêndice B.2.3); p. 34 (Apêndice I)"
+      },
+      {
+        "descricao": "Pré-seleção dos prompts em pequena escala (pass@10) com 500 exemplos do conjunto de treino do CodeContests, disjunto do teste.",
+        "avaliada": "nao",
+        "localizador": "p. 26 (Apêndice G)"
+      },
+      {
+        "descricao": "Exclusão dos prompts de CoT na comparação de granularidades de feedback, para isolar o efeito do tipo de feedback.",
+        "avaliada": "nao",
+        "localizador": "p. 5 (Seção 4, Multi-turn)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contra a tabela: a legenda da Tabela 1 anuncia «Up to +10% pass n@k with multi-turn CoT», mas a própria tabela imprime +11.2 para Llama 3.0 70B (+ Multi-turn CoT, 33@100: 34.3 contra 23.1). As diferenças impressas são em pontos absolutos, apresentadas como «%».",
+        "localizador": "p. 6 (Tabela 1, legenda e linha Llama 3.0 70B, coluna 33@100)"
+      },
+      {
+        "descricao": "Unidade ambígua no texto: «relatively small gains of 5.0% and 3.3% pass@100» e «degrades the pass@100 of Llama 3.1 70B by up to 5.4%» correspondem a diferenças absolutas da Tabela 3 (cálculo próprio: 17.3−12.3; 26.1−22.8; 48.9−43.5), não a variação relativa.",
+        "localizador": "p. 6-7 (Seção 5.1); p. 6 (Tabela 3)"
+      },
+      {
+        "descricao": "Inversões do multi-turn sem CoT diante do single-turn com o mesmo orçamento: Tabela 1, 1@3, Llama 3.0 8B 2.4 (−0.5) e Llama 3.1 8B 7.0 (−0.7); Tabela 2, GPT-4o 1@3 23.1 contra 27.6 (−4.5).",
+        "localizador": "p. 6 (Tabelas 1 e 2)"
+      },
+      {
+        "descricao": "CoT single-turn piora Llama 3.1 405B: 1@1 25.1 contra 27.8 (−2.7) e 1@3 31.8 contra 32.9 (−1.1).",
+        "localizador": "p. 6 (Tabela 2)"
+      },
+      {
+        "descricao": "Narrativa contra a tabela: o texto diz que CoT-retry «works best across Llama 3.1 models for all sampling sizes and benchmarks», mas na Tabela 1 Llama 3.1 8B + Multi-turn CoT tem 1@3 6.9 (abaixo do base 7.7 e de + Multi-turn 7.0) e 33@100 26.0 (abaixo de + CoT 26.1).",
+        "localizador": "p. 8 (Seção 5.2); p. 6 (Tabela 1, bloco Llama 3.1 8B)"
+      },
+      {
+        "descricao": "O texto afirma que combinar reasoning e instruction dá o melhor desempenho, mas em pass@1 a Best Combination fica abaixo da Best reasoning em Llama 3.0 8B (1.5 contra 1.8), Llama 3.0 70B (5.3 contra 7.0) e Llama 3.1 8B (4.0 contra 4.1), abaixo da Best instruction em Llama 3.1 70B (16.1 contra 16.8) e abaixo do Baseline em Llama 3.0 8B (1.5 contra 1.6) e Llama 3.1 70B (16.1 contra 16.7). As linhas foram escolhidas pelo pass@100; a tabela sublinha resultados piores que o baseline.",
+        "localizador": "p. 5 (Seção 5.1); p. 6 (Tabela 3)"
+      },
+      {
+        "descricao": "Seleção no conjunto de avaliação: as linhas Worst/Best da Tabela 3 são escolhidas «based on pass@100 performance per model» no CodeContests test; a combinação de prompts do CoT-retry foi escolhida com base na Figura 18 (calculada no CodeContests test) e «write code solution with guidelines» foi escolhido empiricamente para CodeContests e TACO, os mesmos benchmarks de avaliação. O estudo só reconhece explicitamente a exposição do teste na estimativa oracular do Apêndice K.",
+        "localizador": "p. 6 (legenda da Tabela 3); p. 21 (legenda da Figura 18); p. 27 (Apêndice G.3); p. 38 (Apêndice K)"
+      },
+      {
+        "descricao": "Aparente inconsistência entre tabelas: pass 33@100 da Tabela 1 maior que pass@100 da Tabela 3 para a mesma condição base (Llama 3.0 8B 12.6 contra 12.3; Llama 3.1 8B 23.8 contra 22.8; Llama 3.1 70B 49.8 contra 48.9) e para Llama 3.1 70B + CoT (54.8) contra Best Combination (54.1). Com as mesmas amostras, pass n@k com n < k não deveria exceder pass@k; a fonte não informa se as duas tabelas usam as mesmas amostras ou a mesma combinação de prompts, e ambos os valores são estimativas (bootstrap).",
+        "localizador": "p. 6 (Tabelas 1 e 3); p. 16 (Apêndice A)"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: com o feedback padrão «failed tests», temperatura 1.0, 200 trajetórias e 3 turnos, Llama 3.1 8B tem 100@300 = 29.5 na Tabela 8, mas 30.4 na Tabela 1 (+ Multi-turn) e na Tabela 9 (Retry). Para Llama 3.1 70B os valores coincidem (56.2).",
+        "localizador": "p. 22 (Tabela 8); p. 6 (Tabela 1); p. 23 (Tabela 9)"
+      },
+      {
+        "descricao": "Descrição divergente da configuração Multi-turn CoT: a Seção 4 diz que os melhores reasoning prompts são combinados em até 3 passos antes do código; a Seção 5.2 diz que um passo é o mais benéfico e que o empilhamento piora (Tabela 7). Para Llama 3.0 70B, a linha «1 reasoning × 1 instruction» da Tabela 7 (11.2 / 40.0) é próxima, mas diferente, de + Multi-turn CoT na Tabela 1 (11.1 / 40.4); a fonte não informa se são a mesma configuração.",
+        "localizador": "p. 5 (Seção 4); p. 8 (Seção 5.2); p. 22 (Tabela 7); p. 6 (Tabela 1)"
+      },
+      {
+        "descricao": "Classificação inconsistente dos prompts do CoT-retry: «write code solution with guidelines» consta como reasoning prompt (G.1) e a Seção 4 fala em «a reasoning prompt», mas G.3 o chama de «instruction prompt». G.3 diz que a primeira tentativa é feita «without any reasoning», mas o prompt do Turn 1 do exemplo menciona «your self-reflection on the problem».",
+        "localizador": "p. 5 (Seção 4); p. 27 (Apêndices G.1 e G.3); p. 29 (exemplo, User Turn 1)"
+      },
+      {
+        "descricao": "Aparente inconsistência no tamanho da grade: o texto fala em 8 reasoning e 6 instruction prompts e 63 = (8+1)×(6+1) combinações, mas o mapa de calor da Figura 11 mostra 7 reasoning prompts mais «NO CoT» (sem «write intermediate variables and type») e 6 instruction prompts mais «no instruction»; a Figura 22 fala em 7 reasoning prompts.",
+        "localizador": "p. 5 (Seção 4); p. 7 (legenda da Figura 4); p. 18 (Figura 11); p. 26 (legenda da Figura 22)"
+      },
+      {
+        "descricao": "Inversão no TACO: para Llama 3.1 70B no nível easy, + Multi-turn CoT tem 100@300 = 59.8 contra 60.2 do base.",
+        "localizador": "p. 9 (Tabela 4)"
+      },
+      {
+        "descricao": "Feedback mais detalhado não melhora: na Tabela 8, LDB tem 1@3 = 26.5 para Llama 3.1 70B, abaixo do single-turn (27.3); para Llama 3.1 8B, todas as granularidades multi-turn têm 1@3 (10.9, 10.9, 10.7, 9.9) abaixo do single-turn (11.9).",
+        "localizador": "p. 22 (Tabela 8)"
+      },
+      {
+        "descricao": "Ablações de prompting com resultado nulo ou negativo: empilhar reasoning/instruction prompts reduz o desempenho (Tabela 7: Llama 3.1 70B −2.0/−3.1 e −4.0/−2.1); prompts Fixme e Analyze reduzem 1@3 e 100@300 de Llama 3.1 8B (Tabela 9: 6.7/29.3, 6.6/30.0, 6.3/27.5 contra 7.0/30.4) e, em Llama 3.1 70B, elevam 1@3 mas reduzem 100@300.",
+        "localizador": "p. 22 (Tabela 7); p. 23 (Tabela 9)"
+      },
+      {
+        "descricao": "Ausência de medida de variabilidade: o bootstrap (10000 reamostragens) é usado para estimar pass n@k, mas não são relatados intervalos de confiança, desvios ou testes estatísticos para as diferenças entre técnicas; o número de trajetórias da Tabela 2 não é informado.",
+        "localizador": "p. 16 (Apêndice A); p. 6 (Tabelas 1 a 3)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Avaliação em regime zero-shot; o enunciado do problema inclui exemplos de entrada e saída do próprio benchmark, que não foram classificados como mecanismo `exemplos`.",
+        "localizador": "p. 5 (Seção 4, Benchmarks); p. 26 (Apêndice G)"
+      },
+      {
+        "descricao": "Os reasoning prompts exigem um passo adicional de inferência, que o estudo não conta como turno adicional por comparar o número de tentativas de código.",
+        "localizador": "p. 5 (Seção 4, Single-turn)"
+      },
+      {
+        "descricao": "Análises comportamentais: similaridade entre códigos consecutivos por tipo de feedback (Figura 6) e antes/depois do RFT (Figura 8); fração de texto não código (Tabela 11) e relação entre tokens de raciocínio e pass@1 (Figura 22), que o estudo diz invalidar a hipótese de que mais tokens não código correlacionam com melhor desempenho.",
+        "localizador": "p. 8-9; p. 25-26 (Apêndice F)"
+      },
+      {
+        "descricao": "Estimativas oraculares de limite superior (seleção post hoc do prompt ou do feedback por problema, Tabelas 12 e 13), que o próprio estudo diz não serem comparáveis aos métodos do texto principal.",
+        "localizador": "p. 38 (Apêndice K)"
+      },
+      {
+        "descricao": "Ablação da normalização do similarity score e da mistura de dados do RFT (não são de prompting).",
+        "localizador": "p. 23-25 (Apêndices E.2 e E.3)"
+      },
+      {
+        "descricao": "Os autores declaram que liberarão o código; o pacote de replicação não foi acessado nem validado nesta extração.",
+        "localizador": "p. 11 (Reproducibility Statement)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "After systematically decomposing reasoning, instruction, and execution feedback prompts, we conduct an extensive grid search on the competitive programming benchmarks CodeContests and TACO for multiple LLM families and sizes (Llama 3.0 and 3.1, 8B, 70B, 405B, and GPT-4o).",
+        "localizador": "p. 1 (Abstract)"
+      },
+      {
+        "trecho": "Finally, we integrate execution feedback from intermediate solutions to allow for code repair.",
+        "localizador": "p. 2 (Introdução)"
+      },
+      {
+        "trecho": "As CoT can intervene at different times in code generation, we categorize reasoning prompts (NL → NL) that elicit understanding of the problem before code generation, and instruction prompts (NL → Code) that guide the code output to enhance readability and modularity.",
+        "localizador": "p. 4 (Seção 3)"
+      },
+      {
+        "trecho": "We thus evaluate several types of feedback, ranging in granularity:",
+        "localizador": "p. 4 (Seção 3)"
+      },
+      {
+        "trecho": "Our grid search comprises 8 reasoning prompts and 6 instruction prompts, detailed in Appendix G.",
+        "localizador": "p. 5 (Seção 4, Single-turn)"
+      },
+      {
+        "trecho": "We also introduce the CoT-retry setup, which allows for adaptive inference budget based on problem difficulty.",
+        "localizador": "p. 5 (Seção 4, Multi-turn)"
+      },
+      {
+        "trecho": "If the first solution fails on more challenging problems, we prompt the LLM with a combination of execution feedback and a reasoning prompt.",
+        "localizador": "p. 5 (Seção 4, Multi-turn)"
+      },
+      {
+        "trecho": "We do not include CoT prompts in this feedback comparison to isolate the effect of different feedback types.",
+        "localizador": "p. 5 (Seção 4, Multi-turn)"
+      },
+      {
+        "trecho": "For Llama 3.0 models, simply extending the single turn reasoning and instruction prompts to the multi-turn setting yields superior performance (reported as \"Multi-turn CoT\" in Table 1).",
+        "localizador": "p. 8 (Seção 5.2)"
+      },
+      {
+        "trecho": "CoT-retry only reasons when the first attempt fails and therefore works best across Llama 3.1 models for all sampling sizes and benchmarks (\"Multi-turn CoT\" in Table 1).",
+        "localizador": "p. 8 (Seção 5.2)"
+      },
+      {
+        "trecho": "If the first code generation is incorrect, we add an instruction prompt, \"write code solution with guidelines,\" to separate problem-solving and code writing.",
+        "localizador": "p. 27 (Apêndice G.3)"
+      },
+      {
+        "trecho": "This prompt is fixed to \"Give it another try\" throughout the whole paper.",
+        "localizador": "p. 23 (Apêndice E.1)"
+      },
+      {
+        "trecho": "CoT makes performance worse if the model fails to follow the instructions or makes the LLM propose a sub-optimal plan.",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "trecho": "Sub-optimal plans are usually brute force approaches to solve the problem which do not fit the time limits constraint (see Appendix H for an example).",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "trecho": "The weak solution prompt, although effective when done correctly as shown by its high performance across models, can bias the model towards a brute force approach that it is unable to recover from as shown below in Example 1 and Example 2.",
+        "localizador": "p. 31 (Apêndice H)"
+      },
+      {
+        "trecho": "The multi-turn setting alone brings modest gains and is sometimes worse than its single-turn counterpart under equal sampling budgets.",
+        "localizador": "p. 2 (contribuição 2)"
+      },
+      {
+        "trecho": "We show that this can be attributed to reduced diversity of generated programs which results in performance drops for large sample budgets.",
+        "localizador": "p. 2 (contribuição 2)"
+      },
+      {
+        "trecho": "In multi-turn settings, solutions are obtained via several generations (i.e., LLM calls) and hence at a higher cost, rendering these two setups not directly comparable (Kapoor et al., 2024).",
+        "localizador": "p. 3 (Seção 2.2)"
+      },
+      {
+        "trecho": "In this study, we opt to measure performance via pass n@k (Li et al., 2022) rather than pass@k for a fair comparison of techniques.",
+        "localizador": "p. 3 (Seção 2.2)"
+      },
+      {
+        "trecho": "Although a maximally fair comparison (at the cost of complexity) should account for total input and output tokens (Olausson et al., 2024) as well as model size (Hassid et al., 2024), we believe pass n@k, which stresses the number of code attempts, constitutes a simple yet superior alternative to pass@k.",
+        "localizador": "p. 10 (Seção 7)"
+      },
+      {
+        "trecho": "We found that there is a non-zero overlapping between CodeContests training set and TACO test set.",
+        "localizador": "p. 34 (Apêndice I)"
+      },
+      {
+        "trecho": "We also find that there are non-zero overlaps between TACO training set and test set.",
+        "localizador": "p. 36 (Apêndice J)"
+      },
+      {
+        "trecho": "To determine this list, we ran experiments at a small scale (pass@10) with over 30 prompts on 500 examples sampled from the CodeContest training set.",
+        "localizador": "p. 26 (Apêndice G)"
+      },
+      {
+        "trecho": "Meta Llama 3.0 and 3.1 series are open-weight, and gpt-4o-2024-05-13 (GPT-4o in the paper) are available through OpenAI API.",
+        "localizador": "p. 11 (Reproducibility Statement)"
+      },
+      {
+        "trecho": "Given the code contest problem and your self-reflection on the problem, your goal is to write a valid Python code with stdio that correctly solves the problem.",
+        "localizador": "p. 29 (Apêndice G.3, exemplo, User Turn 1)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CoT (single-turn; «+ CoT» na Tabela 1)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio",
+        "restricoes"
+      ],
+      "comparador": "Llama 3.0 8B sem variante (single-turn, sem CoT)",
+      "modelo": "Llama 3.0 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass 1@3",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 2.9,
+        "intervencao": 3.4
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "Temperatura 1.0, top-p 0.95; pass n@k calculado a partir de 200 trajetórias, estimado por bootstrap. Combinação específica de reasoning e instruction prompts usada para este modelo: nao_informado (legenda: os prompts são os mesmos entre tamanhos de amostra por modelo). A unidade não é impressa na Tabela 1 (as Tabelas 2 e 4 indicam %). Diferença impressa na tabela: +0.5. Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: resumo e contribuições destacam várias estratégias (CoT single-turn, multi-turn, multi-turn CoT) e vários orçamentos. Primeira tabela com contraste de prompting (Tabela 1), primeira métrica (1@3), primeiro modelo (Llama 3.0 8B), linha de base listada (modelo sem variante) e primeira variante (+ CoT).",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 1 (bloco Llama 3.0 8B, coluna 1@3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Llama 3.0 8B | 2.9 | 8.0 | 12.6 | -",
+          "localizador": "p. 6, Tabela 1, colunas Model / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "+ CoT | 3.4+0.5 | 11.7+3.7 | 17.3+4.7 | -",
+          "localizador": "p. 6, Tabela 1, bloco Llama 3.0 8B, colunas Variants / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "The pass n@k is calculated from 200 trajectories for both single-turn and multi-turn settings.",
+          "localizador": "p. 6, legenda da Tabela 1"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Multi-turn (execution feedback «failed tests»)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "Llama 3.0 8B sem variante (single-turn, sem CoT)",
+      "modelo": "Llama 3.0 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass 1@3",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 2.9,
+        "intervencao": 2.4
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "Até 3 tentativas de código (3 turnos) com feedback «failed tests» e retry prompt «Give it another try»; temperatura 1.0; 200 trajetórias; testes públicos para o feedback e todos os testes para a submissão final. Mesmo número de amostras de código (k = 3) que o single-turn. Diferença impressa: −0.5. Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (multi-turn com feedback de execução); mesma regra de ordem: Tabela 1, 1@3, Llama 3.0 8B, linha de base listada. As granularidades de feedback da Tabela 8 são variantes desta técnica e não recebem extração própria.",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 1 (bloco Llama 3.0 8B, coluna 1@3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Llama 3.0 8B | 2.9 | 8.0 | 12.6 | -",
+          "localizador": "p. 6, Tabela 1, colunas Model / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "+ Multi-turn | 2.4−0.5 | 8.0+0.0 | 12.8+0.2 | 16.7",
+          "localizador": "p. 6, Tabela 1, bloco Llama 3.0 8B, colunas Variants / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "In the multi-turn setting, we use a maximum of 3 code attempts (i.e., 3 turns) with the \"failed tests\" feedback.",
+          "localizador": "p. 6, legenda da Tabela 1"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Multi-turn CoT (Llama 3.0: extensão dos reasoning e instruction prompts single-turn ao multi-turn)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio",
+        "restricoes",
+        "feedback"
+      ],
+      "comparador": "Llama 3.0 8B sem variante (single-turn, sem CoT)",
+      "modelo": "Llama 3.0 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass 1@3",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 2.9,
+        "intervencao": 2.8
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "3 turnos, feedback «failed tests», temperatura 1.0, 200 trajetórias. Para Llama 3.0, a variante estende os reasoning e instruction prompts single-turn ao multi-turn (p. 8); número de passos de raciocínio e prompts exatos: nao_informado (Seção 4 menciona até 3 passos). Diferença impressa em relação ao base: −0.1. O ganho é do pacote (CoT + multi-turn). Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; Tabela 1, 1@3, primeiro modelo (Llama 3.0 8B) e primeira linha de base listada (modelo sem variante).",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 1 (bloco Llama 3.0 8B, coluna 1@3); p. 8 (Seção 5.2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Llama 3.0 8B | 2.9 | 8.0 | 12.6 | -",
+          "localizador": "p. 6, Tabela 1, colunas Model / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "+ Multi-turn CoT | 2.8−0.1 | 9.8+1.8 | 14.9+2.3 | 19.4",
+          "localizador": "p. 6, Tabela 1, bloco Llama 3.0 8B, colunas Variants / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "For Llama 3.0 models, simply extending the single turn reasoning and instruction prompts to the multi-turn setting yields superior performance (reported as \"Multi-turn CoT\" in Table 1).",
+          "localizador": "p. 8 (Seção 5.2)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "CoT-retry («Multi-turn CoT» da Tabela 1 nos modelos Llama 3.1)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback",
+        "raciocinio",
+        "restricoes"
+      ],
+      "comparador": "Llama 3.1 8B sem variante (single-turn, sem CoT)",
+      "modelo": "Llama 3.1 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass 1@3",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 7.7,
+        "intervencao": 6.9
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "A identificação da linha «+ Multi-turn CoT» de Llama 3.1 como CoT-retry vem do texto (p. 8), não da tabela. Primeira tentativa sem CoT; depois feedback «failed tests» + «write code solution with guidelines» e, na terceira, + «generate a weak solution» (p. 27); 3 turnos, temperatura 1.0, 200 trajetórias. Prompts escolhidos com base em resultados do CodeContests test (Figura 18; p. 27). Diferença impressa: −0.8. O ganho ou a perda é do pacote. Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal proposta pelo estudo e ainda não representada; primeira tabela com o contraste (Tabela 1, linhas Llama 3.1, identificadas como CoT-retry no texto), primeira métrica (1@3), primeiro modelo em que a variante é CoT-retry (Llama 3.1 8B) e linha de base listada. (Exceção ao alvo de três para cobrir técnica focal.)",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 1 (bloco Llama 3.1 8B, coluna 1@3); p. 8 (Seção 5.2); p. 27 (Apêndice G.3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Llama 3.1 8B | 7.7 | 18.2 | 23.8 | -",
+          "localizador": "p. 6, Tabela 1, colunas Model / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "+ Multi-turn CoT | 6.9−0.8 | 19.4+1.2 | 26.0+2.2 | 31.5",
+          "localizador": "p. 6, Tabela 1, bloco Llama 3.1 8B, colunas Variants / 1@3 / 10@30 / 33@100 / 100@300"
+        },
+        {
+          "trecho": "CoT-retry only reasons when the first attempt fails and therefore works best across Llama 3.1 models for all sampling sizes and benchmarks (\"Multi-turn CoT\" in Table 1).",
+          "localizador": "p. 8 (Seção 5.2)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Reasoning prompts (single-turn; linha «Worst reasoning»)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio"
+      ],
+      "comparador": "Baseline (single-turn, sem reasoning nem instruction prompt)",
+      "modelo": "Llama 3.0 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 1.6,
+        "intervencao": 1.4
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "Single-turn, temperatura 1.0. A linha «Worst reasoning» é o pior reasoning prompt entre os da grade, escolhido post hoc por modelo pelo pass@100 no conjunto de teste; o prompt correspondente não é identificado na tabela (nao_informado). Número de amostras por problema para a Tabela 3: nao_informado na tabela (a Tabela 12 menciona 200 amostras por problema para a mesma grade). Unidade não impressa (assumida percentual como nas Tabelas 2 e 4). Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (reasoning prompts isolados) ainda não representada; primeira tabela com o contraste (Tabela 3), primeira métrica (pass@1), primeiro modelo (Llama 3.0 8B), linha Baseline como comparador e primeira linha de reasoning pela ordem da tabela (Worst reasoning, antes de Best reasoning). (Exceção ao alvo de três para cobrir técnica focal.)",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 3 (colunas Llama 3.0 8B, pass@1)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Baseline | 1.6 | 12.3 | 3.8 | 23.8 | 3.8 | 22.8 | 16.7 | 48.9",
+          "localizador": "p. 6, Tabela 3, colunas Llama 3.0 8B / Llama 3.0 70B / Llama 3.1 8B / Llama 3.1 70B (pass@1, pass@100 em cada)"
+        },
+        {
+          "trecho": "Worst reasoning | 1.4 | 12.9 | 5.7 | 21.8 | 4.0 | 23.4 | 15.6 | 47.4",
+          "localizador": "p. 6, Tabela 3, mesmas colunas"
+        },
+        {
+          "trecho": "Combining reasoning and instruction works best as compared to each individually for single-turn CodeContests test set (chosen based on pass@100 performance per model).",
+          "localizador": "p. 6, legenda da Tabela 3"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Instruction prompts (single-turn; linha «Worst instruction»)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes",
+        "raciocinio"
+      ],
+      "comparador": "Baseline (single-turn, sem reasoning nem instruction prompt)",
+      "modelo": "Llama 3.0 8B (Instruct)",
+      "benchmark": "CodeContests / Test",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 1.6,
+        "intervencao": 1.4
+      },
+      "denominador": "165 problemas do CodeContests test (média sobre todos os problemas)",
+      "condicoes": "Single-turn, temperatura 1.0. «Worst instruction» é o pior instruction prompt da grade, escolhido post hoc por modelo pelo pass@100 no teste; prompt não identificado (nao_informado), portanto os mecanismos são os do conjunto de instruction prompts. Número de amostras por problema: nao_informado na tabela. Sem intervalos de confiança. Conferido visualmente na p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (instruction prompts isolados) ainda não representada; Tabela 3, pass@1, Llama 3.0 8B, Baseline, primeira linha de instruction pela ordem da tabela (Worst instruction). (Exceção ao alvo de três para cobrir técnica focal.)",
+      "derivacao": "direta",
+      "localizador": "p. 6, Tabela 3 (colunas Llama 3.0 8B, pass@1)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Baseline | 1.6 | 12.3 | 3.8 | 23.8 | 3.8 | 22.8 | 16.7 | 48.9",
+          "localizador": "p. 6, Tabela 3, colunas Llama 3.0 8B / Llama 3.0 70B / Llama 3.1 8B / Llama 3.1 70B (pass@1, pass@100 em cada)"
+        },
+        {
+          "trecho": "Worst instruction | 1.4 | 11.3 | 3.4 | 25.1 | 3.7 | 20.9 | 14.9 | 48.4",
+          "localizador": "p. 6, Tabela 3, mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "extracoes_observacao": "Seis extrações, acima do alvo de três, porque o estudo tem seis técnicas focais de prompting (reasoning prompts, instruction prompts, CoT combinado, multi-turn, multi-turn CoT e CoT-retry); a exceção cobre apenas técnicas focais. Componentes (Fixme, Analyze, empilhamento) não recebem extração porque o alvo já foi excedido.",
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito: investigar os efeitos de estratégias de prompting (reasoning, instruction e execution feedback) em geração de código single e multi-turn, considerando requisitos computacionais.",
+      "localizador": "p. 1 (Abstract); p. 1-2 (Introdução)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Grade de prompts, configuração multi-turn, decodificação e benchmarks são descritos e os prompts estão listados no Apêndice G; porém a combinação de prompts usada nas linhas «+ CoT» e «Multi-turn CoT» por modelo não é identificada, o número de passos de raciocínio do Multi-turn CoT é descrito de forma divergente (Seção 4 × Seção 5.2) e a classificação dos prompts do CoT-retry é inconsistente.",
+      "localizador": "p. 5 (Seção 4); p. 6 (legenda da Tabela 1); p. 8 (Seção 5.2); p. 26-27 (Apêndice G)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Há linha de base executada sem CoT e single-turn com o mesmo orçamento de amostras de código; pass n@k é adotado para equiparar single e multi-turn. Ressalva: as linhas Best/Worst da Tabela 3 são selecionadas post hoc no conjunto de teste.",
+      "localizador": "p. 3 (Seção 2.2); p. 6 (Tabelas 1 a 3)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k e pass n@k são definidos (Apêndice A), com média sobre os problemas do benchmark e número de trajetórias nas Tabelas 1 e 8; porém o número de amostras da Tabela 2 não é informado, a unidade não é impressa nas Tabelas 1 e 3, há valores da mesma condição que divergem entre tabelas (Llama 3.1 8B failed tests 100@300: 29.5 na Tabela 8 × 30.4 nas Tabelas 1 e 9) e pass 33@100 aparentemente maior que pass@100 entre as Tabelas 1 e 3.",
+      "localizador": "p. 3; p. 6 (Tabelas 1-3); p. 16 (Apêndice A); p. 22 (Tabela 8); p. 23 (Tabela 9)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A Seção 7 discute limitações (sem ramificação em árvore, custo em tokens não contabilizado, suposição sobre raciocínio correto no RFT, dependência da família de modelos), mas não trata variabilidade estatística, seleção de prompts no conjunto de teste nem contaminação no pré-treinamento.",
+      "localizador": "p. 10 (Seção 7)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos (exceto o RFT) e benchmarks são públicos, a versão do GPT-4o é informada, os prompts estão listados e hiperparâmetros de decodificação são dados; o código, porém, é apenas prometido («We will release the code»), sem seeds nem identificação das combinações de prompts usadas nas tabelas principais.",
+      "localizador": "p. 11 (Reproducibility Statement); p. 26-27 (Apêndice G)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo detecta e trata sobreposições entre CodeContests/train e TACO test (para o RFT) e relata sobreposição entre TACO train e test, mas não discute possível presença do CodeContests e do TACO no pré-treinamento dos modelos avaliados com prompting.",
+      "localizador": "p. 34 (Apêndice I); p. 36 (Apêndice J)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (linhas 1-2174, incluindo apêndices A-K). Páginas do PDF abertas visualmente: 6 (Tabelas 1, 2 e 3), 8 (Figuras 6 e 7, Seção 5.2), 9 (Tabela 4, Figuras 8 e 9), 18 (Tabelas 5 e 6, Figura 11), 22 (Figura 19, Tabelas 7 e 8), 23 (Apêndice E.1, Tabela 9), 27 (Apêndices G.1-G.3), 28 (exemplo User Turn 1). Páginas do PDF coincidem com as páginas impressas."
+  }
+}
