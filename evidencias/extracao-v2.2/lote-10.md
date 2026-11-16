@@ -12,6 +12,6 @@ S1132, S1133.
   não é apresentado. Fica para o autor avaliar a inclusão, como as S633, S641, S682 e S800.
 - Exceções ao alvo de três, a conferir: S1086 (6), S1024 (5), S1121 (4).
 - Citações: 178 de 555 não achadas pelo verificador aproximado.
-- Consumo: os lotes 7 a 10 levaram a janela de 5 horas a cerca de 85% e o semanal a cerca
-  de 11%.
+- Consumo: depois dos lotes 7 a 10 (80 execuções), janela de 5 horas em 81% e semanal em
+  11%.
 - As fichas não foram conferidas pelo autor.
