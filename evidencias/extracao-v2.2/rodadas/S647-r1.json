@@ -1,0 +1,235 @@
+{
+  "estudo": "S647",
+  "texto_fonte": "fontes/textos/lote/S647.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_lida": "Li, Jiang, Sun, Zhang. Evaluating the Generalizability of LLMs in Automated Program Repair. arXiv:2503.09217v1 [cs.SE], 12 Mar 2025 (versão do PDF lido; sem paginação impressa).",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Two-shot",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-C, Listing 1 e item 1), p. 3 do PDF",
+        "observacao": "Prompt padrão de RQ1 e linha de base de RQ2. Contém o template básico (instrução em comentário '//Provide a fix for the buggy function', marcadores '//Buggy Function' e '//Fixed Function'; instrucao), a função defeituosa inteira como insumo (contexto) e dois pares de código defeituoso/corrigido (um exemplo artificial e um exemplo do mesmo projeto; exemplos). O template básico sem exemplos é descrito, mas não é executado como condição; por isso não há condição sem os exemplos e a técnica não é isolada. Não informado se o exemplo do mesmo projeto vem do conjunto transformado."
+      },
+      {
+        "nome_original": "Two-shotfl",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção III-C, item 2), p. 3 do PDF; Tabela III, p. 4 do PDF",
+        "observacao": "Mantém integralmente o prompt Two-shot e acrescenta apenas a localização perfeita de falhas em nível de linha, anotada manualmente com '/*bug is here*/' (informação externa ao código; contexto). A Tabela III compara com Two-Shot nos mesmos 4 modelos e no DEFECTS4J-TRANS, o que isola esse ingrediente. A localização é 'perfeita' (oráculo), não produzida por ferramenta."
+      },
+      {
+        "nome_original": "Trigger Test",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-C, item 4), p. 3 do PDF; Tabela III, p. 4 do PDF",
+        "observacao": "Substitui os exemplos de reparo pelo teste que dispara a falha e pela mensagem de erro correspondente (contexto). Não classificado como feedback: a informação é fornecida uma única vez, sem ciclo de retorno. O comparador executado (Two-Shot) difere em dois ingredientes (tem exemplos e não tem teste/mensagem); não há condição que acrescente só o teste mantendo os exemplos, nem template básico sem exemplos executado. O contraste com Two-Shot é de substituição, não isola o ingrediente."
+      },
+      {
+        "nome_original": "Bug Report",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-C, item 3), p. 3 do PDF; Tabela III, p. 4 do PDF",
+        "observacao": "Substitui os dois exemplos pelo título e conteúdo do relato de bug, marcados com '//Bug Report Title' e '//Bug Report Content' (contexto). O comparador executado (Two-Shot) difere em dois ingredientes (exemplos presentes, relato ausente); a diferença confunde o acréscimo do relato com a retirada dos exemplos. Não há condição com relato e exemplos, nem template básico sem exemplos executado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "top-p 0.95, temperature 0.8, 200 invocações por bug",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de amostragem e número de gerações por bug, comuns a todas as condições de prompt; os patches candidatos são validados por testes (plausível) e por análise manual (correto). Não é técnica de prompting e não varia entre condições.",
+        "localizador": "Seção III-D, p. 3 do PDF"
+      },
+      {
+        "nome_original": "DEFECTS4J-TRANS (operadores T1–T5)",
+        "natureza": "outro",
+        "descricao": "Transformações de programa que preservam semântica (renomeação de variáveis com StarCoder2-3B, laços, switch, injeção de código morto, dupla negação booleana) aplicadas ao conjunto de avaliação; é condição de benchmark, não intervenção no prompt.",
+        "localizador": "Seção III-B, pp. 2–3 do PDF"
+      },
+      {
+        "nome_original": "Escolha de modelos (6.7B a 34B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre tamanhos de modelo (6.7B e 33B de DeepSeek-Coder-Instruct e OpenCodeInterpreter-DS) usada pelo estudo para discutir efeito de escala; não altera o prompt.",
+        "localizador": "Seção IV-A, p. 3 do PDF"
+      }
+    ],
+    "modelos": [
+      {"nome": "WaveCoder-Ultra", "versao": "6.7B (versão/snapshot nao_informado)", "uso": "RQ1 e RQ2"},
+      {"nome": "DeepSeek-Coder-Instruct", "versao": "6.7B (versão/snapshot nao_informado)", "uso": "RQ1"},
+      {"nome": "OpenCodeInterpreter-DS", "versao": "6.7B (versão/snapshot nao_informado)", "uso": "RQ1 e RQ2"},
+      {"nome": "Magicoder-S-DS", "versao": "6.7B (versão/snapshot nao_informado)", "uso": "RQ1"},
+      {"nome": "Artigenz-Coder-DS", "versao": "6.7B (versão/snapshot nao_informado)", "uso": "RQ1"},
+      {"nome": "DeepSeek-Coder-Instruct-v1.5", "versao": "7B", "uso": "RQ1"},
+      {"nome": "CodeQwen1.5", "versao": "7B", "uso": "RQ1"},
+      {"nome": "StarChat2-v0.1 (grafado 'StartChat2-v0.1' na Tabela I)", "versao": "15B", "uso": "RQ1 e RQ2"},
+      {"nome": "OpenCodeInterpreter-DS", "versao": "33B (versão/snapshot nao_informado)", "uso": "RQ1 e RQ2"},
+      {"nome": "DeepSeek-Coder-Instruct", "versao": "33B (versão/snapshot nao_informado)", "uso": "RQ1"},
+      {"nome": "Speechless-CodeLlama-v2.0", "versao": "34B", "uso": "RQ1"}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J", "versao": "nao_informado", "quantidade": "438 bugs de função única (single-function bugs) usados como base da transformação; não há afirmação explícita de que a avaliação em Defects4J da Tabela II usa exatamente esses 438 bugs", "localizador": "Seção III-B, p. 3 do PDF; Tabela II, p. 3 do PDF"},
+      {"nome": "DEFECTS4J-TRANS", "versao": "construído pelo estudo a partir do Defects4J", "quantidade": "derivado dos 438 bugs de função única; tamanho final não impresso separadamente", "localizador": "Seção III-B, pp. 2–3 do PDF"}
+    ],
+    "metricas": [
+      {"nome": "#Correct Fixes", "definicao": "patch correto se semanticamente equivalente ao patch do desenvolvedor (avaliação manual); o texto chama de 'number of correct patches' e o cabeçalho da tabela de '#Correct Fixes'; denominador não informado explicitamente", "localizador": "Seção III-D, p. 3; Tabelas II e III"},
+      {"nome": "#Plausible Fixes", "definicao": "patch plausível se passa nos casos de teste; denominador não informado explicitamente", "localizador": "Seção III-D, p. 3; Tabelas II e III"},
+      {"nome": "Dec.(%)", "definicao": "queda percentual de Defects4J para DEFECTS4J-TRANS", "localizador": "Tabela II, p. 3"},
+      {"nome": "variação percentual em relação a Two-Shot (+%)", "definicao": "aumento relativo impresso entre parênteses na Tabela III", "localizador": "Tabela III, p. 4"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {"categoria": "contaminacao", "descricao": "Risco de memorização dos conjuntos de dados conhecidos (Defects4J, QuixBugs) pelos LLMs, que motiva RQ1 e a construção do DEFECTS4J-TRANS. O estudo não mede a contaminação diretamente.", "localizador": "Seção I, p. 1 do PDF"},
+      {"categoria": "correcao_funcional", "descricao": "Patches gerados no conjunto transformado tendem a modificar repetidamente o código morto injetado ou os predicados booleanos transformados em vez de corrigir o erro real; queda de patches corretos e plausíveis em todos os 11 modelos no DEFECTS4J-TRANS.", "localizador": "Seção IV-A, p. 3 do PDF; Tabela II"},
+      {"categoria": "outro", "descricao": "Ameaça à validade interna: a revisão manual dos patches plausíveis para identificar os corretos (equivalência semântica com o patch do desenvolvedor).", "localizador": "Seção V, p. 4 do PDF"},
+      {"categoria": "outro", "descricao": "Limitação de generalização dos resultados: poucos métodos avaliados e investigação restrita a Java.", "localizador": "Seção VI, p. 4 do PDF"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Construção do DEFECTS4J-TRANS por transformações semânticas para mitigar memorização; o estudo compara o desempenho em Defects4J e DEFECTS4J-TRANS, mas não mede a contaminação em si.", "avaliada": "nao", "localizador": "Seções II e III-B, p. 2 do PDF"},
+      {"descricao": "Consistência semântica entre DEFECTS4J-TRANS e Defects4J verificada por inspeção manual e pelos scripts de compilação e teste do Defects4J.", "avaliada": "nao", "localizador": "Seção III-B, p. 3 do PDF"},
+      {"descricao": "Análise cuidadosa de cada patch plausível e publicação do conjunto completo de patches corretos e plausíveis.", "avaliada": "nao", "localizador": "Seção V, p. 4 do PDF"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Seleção dos 4 modelos de RQ2: o estudo diz ter escolhido os 4 LLMs de pior generalização em RQ1 (WaveCoder-Ultra-6.7B, StarChat2-v0.1-15B, OpenCodeInterpreter-DS-6.7B e -33B). Ordenação própria da Tabela II: pela coluna Dec.(%) de #Correct Fixes, as quatro maiores quedas são StarChat2 (67.39), OpenCodeInterpreter-DS-33B (57.47), DeepSeek-Coder-Instruct-33B (52.13) e OpenCodeInterpreter-DS-6.7B (51.79), sem WaveCoder-Ultra (47.69); pela coluna de #Plausible Fixes, são StarChat2 (63.82), OpenCodeInterpreter-DS-33B (48.74), WaveCoder-Ultra (45.71) e Magicoder-S-DS (44.17). O critério exato de seleção não é informado.", "localizador": "Seção III-E, p. 3; Tabela II, p. 3 do PDF"},
+      {"descricao": "O resumo afirma, sem ressalva, que o desempenho com informação de reparo 'still falls short of their original results', mas o corpo relata que 2 das 12 configurações (OpenCodeInterpreter-6.7B e WaveCoder-Ultra-6.7B com Bug Report) superaram ligeiramente o resultado original no Defects4J; a introdução usa 'most LLMs'.", "localizador": "Resumo, p. 1; Seção I, p. 1; Seção IV-B, p. 4 do PDF"},
+      {"descricao": "Os valores 'up to 136.67% and 121.82%' do resumo são máximos por modelo em prompts diferentes (StarChat2 com Trigger Test para corretos; StarChat2 com Bug Report para plausíveis), não médias; as médias impressas de aumento vão de 52.34% a 111.72% (corretos) e de 25.89% a 97.77% (plausíveis).", "localizador": "Resumo, p. 1; Tabela III, p. 4 do PDF"},
+      {"descricao": "O estudo usa 'significantly' para a queda em DEFECTS4J-TRANS e para o ganho com informação de reparo, sem teste estatístico relatado.", "localizador": "Resumo e Seção I, p. 1 do PDF"},
+      {"descricao": "A comparação de RQ2 com o 'original Defects4J' confronta condições que diferem em dois fatores (conjunto de dados e prompt: Two-shot em Defects4J versus prompts estendidos em DEFECTS4J-TRANS).", "localizador": "Seção IV-B, p. 4; Tabelas II e III"},
+      {"descricao": "Bug Report e Trigger Test substituem os exemplos do Two-shot; o contraste com Two-Shot mistura retirada de exemplos e acréscimo de informação, de modo que o ganho não é atribuível só ao relato ou ao teste.", "localizador": "Seção III-C, p. 3; Tabela III, p. 4 do PDF"},
+      {"descricao": "A afirmação de que modelos maiores generalizam pior baseia-se em dois pares de modelos (6.7B e 33B de duas famílias); o próprio estudo a apresenta como aparência de correlação.", "localizador": "Seção IV-A, p. 3 do PDF"},
+      {"descricao": "Grafias divergentes dos modelos entre tabelas e texto: 'StartChat2-v0.1' (Tabela I) e 'StarChat2-v0.1' (Tabelas II e III); 'SpeechLess-CodeLlama-v2.0' (Tabela I) e 'Speechless-CodeLlama-v2.0' (Tabela II); 'OpenCodeInterpreter-6.7B' no texto de RQ2 e 'OpenCodeInterpreter-DS-6.7B' na Tabela III.", "localizador": "Tabela I, p. 2; Tabela II, p. 3; Tabela III e Seção IV-B, p. 4 do PDF"},
+      {"descricao": "Conferência própria: os valores de Two-Shot em DEFECTS4J-TRANS coincidem entre a Tabela II (#D4J-T) e a Tabela III para os 4 modelos (34/57, 30/55, 27/51, 37/61); as médias e percentuais das linhas Average das Tabelas II e III conferem com as linhas. Em Dec.(%) da linha Average da Tabela II, 49.48 e 42.90 correspondem à queda das médias, não à média das quedas por modelo (cálculo próprio).", "localizador": "Tabelas II (p. 3) e III (p. 4) do PDF"}
+    ],
+    "observacoes": [
+      {"descricao": "A localização de falhas do Two-shotfl é 'perfeita' e anotada manualmente nas linhas defeituosas (esforço manual e informação de oráculo).", "localizador": "Seção III-C, item 2), p. 3 do PDF"},
+      {"descricao": "O Bug Report omite os exemplos para caber no limite de tamanho de entrada dos LLMs; o estudo atribui o ganho do Bug Report à alta qualidade dos relatos do Defects4J, com substancial esforço humano.", "localizador": "Seção III-C, item 3), p. 3; Seção IV-B, p. 4 do PDF"},
+      {"descricao": "RQ2 avalia apenas 4 modelos 'to optimize time efficiency'; modelos acima de 34B e fechados foram excluídos por restrição de recursos; a injeção de código morto foi limitada 'to save tokens'.", "localizador": "Seções III-A, III-B e III-E, pp. 2–3 do PDF"},
+      {"descricao": "Número de repetições independentes do experimento não informado; as 200 invocações por bug são gerações amostradas dentro de cada condição. Sementes aleatórias não informadas.", "localizador": "Seção III-D, p. 3 do PDF"},
+      {"descricao": "O escore EvalPlus (pass@1) da Tabela I serve só para escolher os modelos; GPT-4-Turbo é citado apenas como referência de escore no leaderboard e não é avaliado.", "localizador": "Seção III-A e Tabela I, p. 2 do PDF"},
+      {"descricao": "Pacote de replicação indicado em Zenodo (records/13901271); não acessado nem validado nesta extração.", "localizador": "Seção I e referência [25], pp. 2 e 5 do PDF"}
+    ],
+    "citacoes": [
+      {"trecho": "Following prior works [10], [14], we provide the entire buggy function as the input to the LLMs, which then generate the complete fixed function.", "localizador": "Seção III-C, p. 3 do PDF"},
+      {"trecho": "Additionally, for evaluating the impact of additional repair-relevant information, we designed three extended prompts, detailed as follows.", "localizador": "Seção III-C, p. 3 do PDF"},
+      {"trecho": "Using the aforementioned template, we provide two pairs of buggy and fixed code examples.", "localizador": "Seção III-C, item 1), p. 3 do PDF"},
+      {"trecho": "This serves as the default prompt in RQ1.", "localizador": "Seção III-C, item 1), p. 3 do PDF"},
+      {"trecho": "This prompt further incorporates perfect line-level fault localization information into the aforementioned Two-shot prompt by manually annotating the buggy lines in the functions with /*bug is here*/.", "localizador": "Seção III-C, item 2), p. 3 do PDF"},
+      {"trecho": "This prompt replaces the two-shot examples with bug report information, and marks the report title and content with “//Bug Report Title” and “//Bug Report Content”.", "localizador": "Seção III-C, item 3), p. 3 do PDF"},
+      {"trecho": "Similarly, this prompt replace the repair examples with the trigger test and the corresponding error message, which are marked with “//Trigger Test” and “//Error Message”, respectively.", "localizador": "Seção III-C, item 4), p. 3 do PDF"},
+      {"trecho": "Following Xia et al. [14], we set top-p to 0.95 and the temperature to 0.8.", "localizador": "Seção III-D, p. 3 do PDF"},
+      {"trecho": "Each LLM was invoked 200 times with the respective prompt for each bug.", "localizador": "Seção III-D, p. 3 do PDF"},
+      {"trecho": "A patch is considered plausible if it passes the test cases and correct if it is semantically equivalent to the developer’s patch.", "localizador": "Seção III-D, p. 3 do PDF"},
+      {"trecho": "Recent works [21]–[24] have highlighted the significant risk of memorization in LLMs when evaluated on these datasets, leading to our first research question (RQ1): How is the generalizability of LLMs?", "localizador": "Seção I, p. 1 do PDF"},
+      {"trecho": "For instance, we observed that many LLM-generated patches tend to repeatedly modify the injected dead code or transformed boolean predicates, rather than addressing the actual errors.", "localizador": "Seção IV-A, p. 3 do PDF"},
+      {"trecho": "Manually reviewing all plausible patches to identify correct patches that are semantically consistent with the developer patches is an internal threat to the validity of our work.", "localizador": "Seção V, p. 4 do PDF"},
+      {"trecho": "Following common APR practice, we perform a careful analysis of each plausible patch and have published our full set of correct and plausible patches at our homepage [25].", "localizador": "Seção V, p. 4 do PDF"},
+      {"trecho": "Semantic consistency between DEFECTS4J-TRANS and the original Defects4J was ensured through manual inspection and by running Defects4J’s compilation and testing scripts.", "localizador": "Seção III-B, p. 3 do PDF"},
+      {"trecho": "The number of LLM-based methods selected in this study is limited, and the investigation was conducted solely on Java programming language.", "localizador": "Seção VI, p. 4 do PDF"},
+      {"trecho": "Based on RQ1, we selected 4 LLMs that exhibited the weakest generalizability in this RQ to optimize time efficiency.", "localizador": "Seção III-E, p. 3 do PDF"},
+      {"trecho": "The other 10 experimental setups still performed below their results on the original dataset.", "localizador": "Seção IV-B, p. 4 do PDF"},
+      {"trecho": "This indicates that prompt engineering alone is insufficient to substantially enhance LLMs’ repair capabilities.", "localizador": "Resumo, p. 1 do PDF"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Two-shotfl",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Two-Shot",
+      "modelo": "WaveCoder-Ultra-6.7B",
+      "benchmark": "DEFECTS4J-TRANS",
+      "metrica": "#Correct Fixes (no texto, 'number of correct patches'; correto = semanticamente equivalente ao patch do desenvolvedor)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 34, "intervencao": 44},
+      "denominador": "nao_informado (o DEFECTS4J-TRANS deriva de 438 bugs de função única, mas a tabela não liga a contagem a esse total)",
+      "condicoes": "top-p 0.95, temperatura 0.8, 200 invocações por bug; localização de falhas perfeita em nível de linha anotada manualmente; repetições independentes do experimento não informadas. A Tabela III imprime também a média dos 4 modelos (32.00 → 48.75), não usada porque a regra de desempate toma o primeiro modelo listado. Conferido visualmente na página 4 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca três tipos de informação de reparo e duas métricas (patches corretos e plausíveis) sem que uma prevaleça. A Tabela II não contém contraste de prompting (só Two-shot em dois conjuntos); a primeira tabela com contraste é a Tabela III: primeira métrica (#Correct Fixes), primeiro modelo (WaveCoder-Ultra-6.7B), linha de base Two-Shot e primeira técnica (Two-Shotfl).",
+      "derivacao": "direta",
+      "localizador": "Tabela III, p. 4 do PDF (sem página impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "WaveCoder-Ultra-6.7B 34 57 44(+29.41%↑) 64(+12.28%↑) 59(+73.53%↑) 94(+64.91%↑) 72(+111.76%↑) 111(+94.74%↑)", "localizador": "Tabela III, p. 4 do PDF; colunas LLM | Two-Shot #Correct Fixes | Two-Shot #Plausible Fixes | Two-Shotfl #Correct Fixes | Two-Shotfl #Plausible Fixes | Trigger Test #Correct Fixes | Trigger Test #Plausible Fixes | Bug Report #Correct Fixes | Bug Report #Plausible Fixes"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Trigger Test",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Two-Shot",
+      "modelo": "WaveCoder-Ultra-6.7B",
+      "benchmark": "DEFECTS4J-TRANS",
+      "metrica": "#Correct Fixes (no texto, 'number of correct patches'; correto = semanticamente equivalente ao patch do desenvolvedor)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 34, "intervencao": 59},
+      "denominador": "nao_informado (o DEFECTS4J-TRANS deriva de 438 bugs de função única, mas a tabela não liga a contagem a esse total)",
+      "condicoes": "top-p 0.95, temperatura 0.8, 200 invocações por bug; o prompt Trigger Test substitui os exemplos do Two-Shot pelo teste disparador e pela mensagem de erro, de modo que o contraste mistura retirada de exemplos e acréscimo de informação; repetições independentes não informadas. Conferido visualmente na página 4 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal de prompting ainda não representada, na ordem das colunas da Tabela III; mesma métrica, primeiro modelo e linha de base Two-Shot.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, p. 4 do PDF (sem página impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "WaveCoder-Ultra-6.7B 34 57 44(+29.41%↑) 64(+12.28%↑) 59(+73.53%↑) 94(+64.91%↑) 72(+111.76%↑) 111(+94.74%↑)", "localizador": "Tabela III, p. 4 do PDF; colunas LLM | Two-Shot #Correct Fixes | Two-Shot #Plausible Fixes | Two-Shotfl #Correct Fixes | Two-Shotfl #Plausible Fixes | Trigger Test #Correct Fixes | Trigger Test #Plausible Fixes | Bug Report #Correct Fixes | Bug Report #Plausible Fixes"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Bug Report",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Two-Shot",
+      "modelo": "WaveCoder-Ultra-6.7B",
+      "benchmark": "DEFECTS4J-TRANS",
+      "metrica": "#Correct Fixes (no texto, 'number of correct patches'; correto = semanticamente equivalente ao patch do desenvolvedor)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 34, "intervencao": 72},
+      "denominador": "nao_informado (o DEFECTS4J-TRANS deriva de 438 bugs de função única, mas a tabela não liga a contagem a esse total)",
+      "condicoes": "top-p 0.95, temperatura 0.8, 200 invocações por bug; o prompt Bug Report substitui os exemplos do Two-Shot pelo título e conteúdo do relato de bug (relatos do Defects4J), de modo que o contraste mistura retirada de exemplos e acréscimo de informação; repetições independentes não informadas. Conferido visualmente na página 4 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Terceira técnica focal de prompting ainda não representada, na ordem das colunas da Tabela III; mesma métrica, primeiro modelo e linha de base Two-Shot.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, p. 4 do PDF (sem página impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "WaveCoder-Ultra-6.7B 34 57 44(+29.41%↑) 64(+12.28%↑) 59(+73.53%↑) 94(+64.91%↑) 72(+111.76%↑) 111(+94.74%↑)", "localizador": "Tabela III, p. 4 do PDF; colunas LLM | Two-Shot #Correct Fixes | Two-Shot #Plausible Fixes | Two-Shotfl #Correct Fixes | Two-Shotfl #Plausible Fixes | Trigger Test #Correct Fixes | Trigger Test #Plausible Fixes | Bug Report #Correct Fixes | Bug Report #Plausible Fixes"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Duas questões de pesquisa explícitas (generalização dos LLMs em APR; efeito da informação relevante ao reparo).", "localizador": "Seção I, p. 1; Seção III-E, p. 3 do PDF"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Prompts, operadores de transformação, parâmetros de decodificação e número de gerações estão descritos; faltam a versão do Defects4J, o procedimento da avaliação manual de correção (quem e quantos avaliadores), a origem exata do exemplo do mesmo projeto no conjunto transformado e um critério de seleção dos 4 modelos de RQ2 que coincida com a Tabela II.", "localizador": "Seções III-B a III-E, pp. 2–3; Seção V, p. 4 do PDF"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Two-Shot é linha de base executada nos mesmos modelos e conjunto em RQ2, e isola o Two-shotfl; porém Bug Report e Trigger Test substituem os exemplos, e o template básico sem exemplos não é executado, o que impede isolar esses ingredientes.", "localizador": "Seção III-C, p. 3; Tabela III, p. 4 do PDF"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Patches plausíveis e corretos são definidos e os valores de Two-Shot em DEFECTS4J-TRANS coincidem entre as Tabelas II e III; mas o denominador das contagens não é ligado explicitamente aos 438 bugs, o texto fala em 'patches' e as tabelas em 'Fixes', e não há teste estatístico apesar do uso de 'significantly'.", "localizador": "Seção III-D, p. 3; Tabelas II e III; Resumo, p. 1 do PDF"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A seção de ameaças trata só da revisão manual dos patches; limitações de escopo (poucos métodos, só Java) aparecem em trabalhos futuros; não discute confusão entre retirada de exemplos e acréscimo de informação, nem a não aleatoriedade da escolha dos modelos de RQ2.", "localizador": "Seções V e VI, p. 4 do PDF"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos abertos, biblioteca HuggingFace, parâmetros de amostragem, hardware e pacote de código, dados e resultados indicado em Zenodo (não acessado nesta extração); faltam versão do Defects4J, sementes e número de repetições independentes.", "localizador": "Seção III-D, p. 3; Seção I e ref. [25] do PDF"},
+    {"criterio": "contaminacao", "julgamento": "atende", "justificativa": "A memorização é a motivação central do estudo, que constrói o DEFECTS4J-TRANS por transformações semânticas e compara o desempenho com o Defects4J original; o estudo não mede a contaminação diretamente nem discute se relatos de bug e testes usados em RQ2 foram transformados.", "localizador": "Seção I, p. 1; Seções II e III-B, p. 2 do PDF"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (corpo e referências). Páginas do PDF abertas visualmente: p-02 (Fig. 1, Tabela I), p-03 (Listing 1, Seções III-C a IV-A, Tabela II) e p-04 (Tabela III, Seções IV-B a VII)."
+  }
+}

@@ -1,0 +1,383 @@
+{
+  "estudo_id": "S634",
+  "texto_fonte": "fontes/textos/lote/S634.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Chen, Hao, Zhang e Fan. Code-as-Symbolic-Planner: Foundation Model-Based Robot Planning via Symbolic Code Generation. arXiv:2503.01700v2 [cs.RO], 7 ago. 2025 (versão do PDF lido).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Code-as-Symbolic-Planner",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+        "mecanismos_acrescentados": ["multiagente", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3, seção IV.A; Fig. 1 e Fig. 2 (PDF p. 2); Tabela I (PDF p. 4); Tabela II (PDF p. 4); Tabela III (PDF p. 6). O PDF não traz página impressa.",
+        "observacao": "Pacote multiagente e multirrodada: o mesmo LLM atua como TaskLLM (gera o código de planejamento, com análise textual em CoT, Fig. 2), SteerLLM (gera instruções de orientação e decide finalizar) e CheckLLM (gera e executa código de verificação); a análise de um script baseado em regras (Symbolic Complexity Checker) também é devolvida ao SteerLLM, o que o dicionário classifica como feedback de analisador. O prompt de entrada inclui o formato de resposta exigido (<Required Answer Format>, Fig. 2), comum a todas as condições, por isso `restricoes` também está nos comparadores. Base identificável: Code Answer, pois o estudo afirma que com uma só rodada o método funciona identicamente ao Code Answer (PDF p. 5); daí os acrescentados multiagente e feedback. O contrafactual (contra Only Question, Code Answer e demais linhas de base, mesmo LLM e mesmas tarefas) é do pacote completo; o ganho não pode ser atribuído a um mecanismo isolado. Máximo de 3 rodadas de reorientação e regeneração."
+      },
+      {
+        "nome_original": "Symbolic Complexity Checker",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3, seção IV.A; Tabela I, coluna «wo Symbolic Complexity Checker» (PDF p. 4); PDF p. 6, «Effects of CheckLLM and Symbolic Complexity Checker».",
+        "observacao": "Script baseado em regras que detecta padrões de iteração, busca, operações numéricas, permutações e combinações e devolve resumo e escore de complexidade ao SteerLLM. Ablação só com GPT-4o (Tabela I): sistema completo contra sistema sem esse componente, demais componentes mantidos. Mecanismos listados são os do pacote completo em que o componente atua."
+      },
+      {
+        "nome_original": "CheckLLM",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3, seção IV.A; Tabela I, coluna «wo CheckLLM» (PDF p. 4); PDF p. 6.",
+        "observacao": "Agente que gera e executa código de verificação da correção do plano e devolve resultado e explicações ao SteerLLM. Ablação só com GPT-4o. Sem o CheckLLM, TaskLLM e SteerLLM continuam interagindo, por isso o acrescentado é apenas feedback."
+      },
+      {
+        "nome_original": "SteerLLM",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.A; Fig. 6 (PDF p. 6); PDF p. 5, «Impacts of Maximum Guidance/Generation Rounds».",
+        "observacao": "Agente que gera as instruções de orientação de cada rodada e decide finalizar. Não há condição que retire só o SteerLLM; a Fig. 6 varia o número máximo de rodadas (1 a 5) e, com 1 rodada, o sistema equivale ao Code Answer, o que retira o laço multirrodada inteiro (contraste do pacote), não só esse componente."
+      },
+      {
+        "nome_original": "Only Question",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.B; Tabelas I, II e III (PDF p. 4 e 6).",
+        "observacao": "Somente a pergunta original (descrição da tarefa, estado do ambiente e formato de resposta exigido, Fig. 2), sem exemplos few-shot; o LLM atua como planejador direto. Linha de base de referência; não é técnica isolada."
+      },
+      {
+        "nome_original": "Code Answer",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.B; Tabelas I, II e III (PDF p. 4 e 6).",
+        "observacao": "Pede ao LLM que analise a pergunta com Chain-of-Thought e depois produza a resposta em código. Em relação ao Only Question difere em dois ingredientes (CoT e instrução de responder em código), por isso não isola nenhum deles; mecanismos não isolados."
+      },
+      {
+        "nome_original": "SayCan",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.B; Tabela I (PDF p. 4).",
+        "observacao": "Sistema comparador: gera iterativamente a próxima subtarefa condicionada às anteriores e escolhe entre os K = 5 candidatos pela combinação da verossimilhança do LLM com a verossimilhança de viabilidade (ranqueamento → amostragem). A pontuação de viabilidade não é prompting (ver componentes_fora_escopo). Avaliado só com GPT-4o; mecanismos não isolados."
+      },
+      {
+        "nome_original": "HMAS-2",
+        "mecanismos": ["instrucao", "restricoes", "decomposicao", "multiagente", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.B; Tabela I (PDF p. 4).",
+        "observacao": "Sistema multiagente para múltiplos robôs, com LLM local por robô que dá feedback a um planejador central e gera uma subtarefa por passo; em tarefas de um robô não há feedback local (então multiagente e feedback só valem nas tarefas multirrobô). Avaliado só com GPT-4o; mecanismos não isolados."
+      },
+      {
+        "nome_original": "OpenAI Code Interpreter",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção IV.B e nota §; Tabela I (PDF p. 4); Fig. 5 (PDF p. 5).",
+        "observacao": "Ferramenta comercial que gera e executa código quando necessário. O estudo não descreve o prompt nem o funcionamento interno (por exemplo, se há iteração com execução), por isso só se registram os ingredientes do prompt de entrada comum; mecanismos internos nao_informado. Avaliado só com GPT-4o; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "ViLD",
+        "natureza": "outro",
+        "descricao": "Modelo de imagem para texto usado nos experimentos 3D simulados e reais (BoxNet) para fornecer caixas delimitadoras e descrições textuais dos objetos; percepção, não prompting.",
+        "localizador": "PDF p. 6, «3D Simulation and Physical Demonstrations»."
+      },
+      {
+        "nome_original": "feasibility likelihood (SayCan)",
+        "natureza": "outro",
+        "descricao": "Verossimilhança de viabilidade de cada ação candidata combinada à verossimilhança do LLM no comparador SayCan; o estudo não detalha como é calculada.",
+        "localizador": "PDF p. 3, seção IV.B."
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "uso": "Tabela I (todas as condições e ablações)"},
+      {"nome": "Claude3-5-Sonnet", "versao": "claude-3-5-sonnet-20241022", "uso": "Tabela II (Code-as-Symbolic-Planner, Only Question, Code Answer); Fig. 6"},
+      {"nome": "Mistral-Large", "versao": "mistral-large-latest", "uso": "Tabela II (Code-as-Symbolic-Planner, Only Question, Code Answer)"},
+      {"nome": "OpenAI Code Interpreter", "versao": "nao_informado", "uso": "comparador da Tabela I e da Fig. 5; modelo subjacente nao_informado"},
+      {"nome": "ViLD", "versao": "nao_informado", "uso": "percepção nos experimentos 3D e reais"},
+      {"nome": "modelo usado na Fig. 5 e na Tabela III", "versao": "nao_informado", "uso": "o estudo não informa qual LLM foi usado nesses resultados"}
+    ],
+    "benchmarks": [
+      {"nome": "BoxNet", "quantidade": "140 amostras de teste", "observacao": "planejamento de tarefas discreto, multirrobô"},
+      {"nome": "Blocksworld", "quantidade": "140 amostras de teste", "observacao": "planejamento de tarefas discreto"},
+      {"nome": "BoxLift", "quantidade": "140 amostras de teste", "observacao": "planejamento de tarefas discreto, multirrobô"},
+      {"nome": "Gridworld", "quantidade": "140 amostras de teste", "observacao": "planejamento de tarefas discreto"},
+      {"nome": "Path-Racecars", "quantidade": "140 amostras de teste", "observacao": "planejamento de movimento contínuo"},
+      {"nome": "Shape Formation", "quantidade": "140 amostras de teste", "observacao": "planejamento de movimento contínuo"},
+      {"nome": "Path-Drones", "quantidade": "140 amostras de teste", "observacao": "planejamento de movimento contínuo"},
+      {"nome": "BoxNet 3D (Pybullet) e robôs reais", "quantidade": "20 tentativas por cenário (Two Robots real, Three Robots 3D, Six Robots 3D)", "observacao": "Tabela III; tarefas originárias de trabalhos anteriores [14], [25], [36]–[39], com ambiente tornado mais difícil pelos autores"}
+    ],
+    "metricas": [
+      {"nome": "Success rate (success)", "definicao": "sucesso de cada tentativa por três critérios: correção sintática, conclusão da tarefa e satisfação das restrições (colisões, limites de tempo, consistência lógica); código que leva mais de 50 s para executar é registrado como falha", "denominador": "o estudo informa 140 amostras por tarefa, mas não liga explicitamente esse número ao denominador de cada célula; a linha Average das Tabelas I e II é média impressa das sete tarefas; Tabela III: média sobre 20 execuções por cenário", "localizador": "PDF p. 3 e p. 5, seção V; Tabelas I–III"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "LLMs produzem versões de código inconsistentes, muitas ineficazes ou sem computação simbólica adequada (código trivial que apenas imprime o plano como texto, propenso a erros).",
+        "localizador": "PDF p. 1, Introdução; PDF p. 3, seção IV.A"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Gerar planejadores por código também traz o risco de introduzir erros.",
+        "localizador": "PDF p. 6, «Limitations and Future Directions»"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Eficiência: em casos muito complexos o código gerado excede o limite de 50 s de execução ou não usa os algoritmos mais eficientes, o que é contado como falha; o estudo trata isso como causa de falha e de código não ótimo, não como custo.",
+        "localizador": "PDF p. 5, «Failure Reasons of Code-as-Symbolic-Planner»; PDF p. 6, «Limitations and Future Directions»"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Formalização: incapacidade do LLM de traduzir problemas de aplicação real em tarefas abstratas de otimização resolvíveis por código; o formato de saída exigido influencia fortemente a taxa de sucesso da codificação.",
+        "localizador": "PDF p. 5, «Failure Reasons of Code-as-Symbolic-Planner»; PDF p. 6, «Limitations and Future Directions»"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Arcabouço multiagente e multirrodada com módulos de autoverificação (CheckLLM e Symbolic Complexity Checker) para superar código ineficaz; comparado com linhas de base sem ele (Tabelas I–III) e com ablações de cada componente (Tabela I, GPT-4o).",
+        "avaliada": "sim",
+        "localizador": "PDF p. 3, seção IV.A; Tabela I (PDF p. 4); PDF p. 6"
+      },
+      {
+        "descricao": "Nos ambientes 3D, quando ocorrem erros de execução por fatores dinâmicos (por exemplo, caixa que escorrega da garra), os três métodos testados são consultados para replanejar os próximos passos; aplicado a todas as condições, sem condição sem replanejamento.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6, «3D Simulation and Physical Demonstrations»"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversões na Tabela I (GPT-4o): em BoxNet, Code Interpreter 76.7% contra Code-Symbo.-P. 74.2%; em BoxLift, Code Interpreter 19.6% (em negrito) contra Code-Symbo.-P. 17.6%. A média (52.3% contra 34.3%) favorece o método proposto.",
+        "localizador": "Tabela I, PDF p. 4"
+      },
+      {
+        "descricao": "Inversão na Tabela II: com Claude3-5-sonnet, em BoxNet, Only Question 67.1% (em negrito) supera Code-Symbo.-P. 52.2%, embora a narrativa afirme desempenho notavelmente melhor que o das linhas de base testadas.",
+        "localizador": "Tabela II, PDF p. 4; texto PDF p. 5, seção VI"
+      },
+      {
+        "descricao": "Variação forte entre modelos na mesma tarefa: Code-Symbo.-P. em BoxLift tem 17.6% com GPT-4o (Tabela I), 86.4% com Claude3-5-sonnet e 5.7% com Mistral-Large (Tabela II). Com Claude, Code Answer obtém 75.7% em BoxLift.",
+        "localizador": "Tabelas I e II, PDF p. 4"
+      },
+      {
+        "descricao": "Unidade das diferenças: o texto diz que a taxa média cai «9.6%» sem CheckLLM e «11.0%» sem o Symbolic Complexity Checker, e que o ganho sobre o Code Interpreter é «18%». Por cálculo próprio com as médias da Tabela I, 52.3−42.7 = 9.6, 52.3−41.3 = 11.0 e 52.3−34.3 = 18.0, o que indica diferenças em pontos percentuais, não variação relativa; o estudo não esclarece a unidade.",
+        "localizador": "PDF p. 5 e p. 6; Tabela I, PDF p. 4"
+      },
+      {
+        "descricao": "O resumo e a introdução afirmam melhora média de 24.1% sobre a melhor linha de base em sete tarefas e três LLMs, mas a melhor linha de base muda por modelo e, com Claude3-5-sonnet e Mistral-Large, só Only Question e Code Answer foram executados (Code Interpreter, SayCan e HMAS-2 só com GPT-4o). Por cálculo próprio, a média das diferenças entre a média de Code-Symbo.-P. e a melhor média de linha de base por modelo (52.3−34.3; 63.9−28.8; 46.0−26.9) dá cerca de 24.1 pontos percentuais; o estudo não mostra esse cálculo.",
+        "localizador": "PDF p. 1 (resumo) e p. 2 (introdução); Tabelas I e II, PDF p. 4"
+      },
+      {
+        "descricao": "Ablações discrepantes entre tarefas (Tabela I, GPT-4o): em Shape Formation, retirar um componente leva de 41.4% a 7.1% (sem Symbolic Complexity Checker) e 10.0% (sem CheckLLM), valores abaixo do Code Answer (11.4%) e próximos do Only Question (8.6%); em BoxNet a queda é pequena (74.2% para 70.0% e 71.4%).",
+        "localizador": "Tabela I, PDF p. 4"
+      },
+      {
+        "descricao": "A Fig. 5 tem legenda com «All Code», condição não definida no texto (que descreve Code Answer); a legenda diz «four studied methods» e o texto fala em «the other three baselines». O LLM usado na Fig. 5 não é informado. No painel BoxLift, em alguns tamanhos as barras do Code Interpreter aparecem acima das do Code-as-Symbolic-Planner, o que contrasta com a afirmação de melhor escalabilidade; valores não estimados a partir das barras.",
+        "localizador": "Fig. 5 e texto «Scalability to Higher Complexity», PDF p. 5"
+      },
+      {
+        "descricao": "Tabela III (BoxNet 3D e real, 20 execuções por cenário) não informa o LLM usado; inclui só Code-Symbo.-P., Only Question e Code Answer.",
+        "localizador": "Tabela III e texto, PDF p. 6"
+      },
+      {
+        "descricao": "A Fig. 6 (Claude3-5-sonnet, BoxLift e Blocksworld, 1 a 5 rodadas) tem rótulos de valor ilegíveis na resolução da imagem; não foi possível comparar seus pontos com a Tabela II (a rodada 1 deveria equivaler ao Code Answer).",
+        "localizador": "Fig. 6, PDF p. 6"
+      },
+      {
+        "descricao": "As médias das Tabelas I e II são médias simples de sete tarefas heterogêneas (discretas e contínuas), sem dispersão, número de execuções nem teste estatístico informados.",
+        "localizador": "Tabelas I e II, PDF p. 4; seção V, PDF p. 3"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Estudo de número máximo de rodadas (Fig. 6, Claude3-5-sonnet, BoxLift e Blocksworld): segundo o texto, o sucesso em geral melhora com mais rodadas e se estabiliza acima de 3; com 1 rodada o método equivale ao Code Answer.",
+        "localizador": "PDF p. 5–6, «Impacts of Maximum Guidance/Generation Rounds»; Fig. 6"
+      },
+      {
+        "descricao": "Os prompts completos e scripts estão, segundo os autores, na página do projeto; não foram acessados nem validados nesta extração.",
+        "localizador": "PDF p. 1 (resumo) e p. 3, seção IV.A"
+      },
+      {
+        "descricao": "Funções de tradução de objetivos e observações para prompts textuais são definidas manualmente pelos autores; todo o estado do ambiente é dado por descrição textual detalhada.",
+        "localizador": "PDF p. 2, seção III; PDF p. 6, «Limitations and Future Directions»"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura etc.) e número de execuções por amostra nas Tabelas I e II: nao_informado.",
+        "localizador": "busca no texto completo"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Unlike prior work that uses code to interface with robot action modules or pre-designed planners, we steer LLMs to generate code as solvers, planners, and checkers for TAMP tasks requiring symbolic computing, while still leveraging textual reasoning to incorporate common sense.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "To address this, we design a multi-agent, multi-round framework with self-checking modules.", "localizador": "PDF p. 3, seção IV.A"},
+      {"trecho": "We prompt the same LLM to act as three agents: TaskLLM, which generates complete planning code; SteerLLM, which provides guidance prompts to TaskLLM and decides when to finalize the plan; and CheckLLM, which produces checking code to evaluate the correctness of TaskLLM’s output.", "localizador": "PDF p. 3, seção IV.A"},
+      {"trecho": "Additionally, we introduce a rule-based Symbolic Complexity Checker to analyze the symbolic computation level in the generated code, with its analysis also fed back to SteerLLM.", "localizador": "PDF p. 3, seção IV.A"},
+      {"trecho": "We set the maximum number of re-guidance and regeneration rounds to 3, after which the final answer is forced to be accepted.", "localizador": "PDF p. 3, seção IV.A"},
+      {"trecho": "CheckLLM generates and executes code that verifies the correctness of the current answer.", "localizador": "PDF p. 3, seção IV.A"},
+      {"trecho": "Solve the following question using your coding skills. Suggest python code (in a python coding block) for the user to execute. You can first output your thinking steps with texts and then the final python code.", "localizador": "Fig. 1, SteerLLM Guidance 1, PDF p. 2"},
+      {"trecho": "[Input Question] <Task Explanation> <Environment State> <Required Answer Format>", "localizador": "Fig. 2, bloco Input Question, PDF p. 2"},
+      {"trecho": "<Textual Analysis with CoT>", "localizador": "Fig. 2, bloco TaskLLM Answer, PDF p. 2"},
+      {"trecho": "Only input the original question.", "localizador": "PDF p. 3, seção IV.B, Only Question"},
+      {"trecho": "Code Answer Prompting LLMs to first analyze the question with Chain-of-Thought (COT) [34] and then output the code answer.", "localizador": "PDF p. 3, seção IV.B"},
+      {"trecho": "The next sub-task is selected from the top K candidates by combining two likelihoods: (1) the LLM-generated likelihood and (2) the feasibility likelihood of each candidate action.", "localizador": "PDF p. 3, seção IV.B, SayCan"},
+      {"trecho": "HMAS-2 [25] is a multi-agent framework designed for multi-robot settings, where each robot is equipped with an LLM to provide local feedback to a central LLM planner.", "localizador": "PDF p. 3, seção IV.B"},
+      {"trecho": "No local feedback is used when applied to single-robot tasks.", "localizador": "PDF p. 3, seção IV.B"},
+      {"trecho": "For each method, the LLM is prompted with a task description without any few-shot examples.", "localizador": "PDF p. 3, seção V"},
+      {"trecho": "However, LLMs often produce inconsistent code versions, many of which are ineffective or lack proper symbolic computation.", "localizador": "PDF p. 1, Introdução"},
+      {"trecho": "Generating planners with coding also risks adding errors.", "localizador": "PDF p. 6, «Limitations and Future Directions»"},
+      {"trecho": "However, in some highly complex cases, the generated code exceeds the 50-second execution time limit, contributing to its performance drop in the most challenging scenarios.", "localizador": "PDF p. 5, «Failure Reasons of Code-as-Symbolic-Planner»"},
+      {"trecho": "Another major bottleneck we identified is the LLM’s inability to translate real-world application problems into abstract optimization or logistical tasks solvable through code, which is also challenging to human experts.", "localizador": "PDF p. 5, «Failure Reasons of Code-as-Symbolic-Planner»"},
+      {"trecho": "Third, We also observe that the required output format for plans strongly influences the coding success rate, underscoring the need to enhance LLMs’ self-formalization capabilities for TAMP problems.", "localizador": "PDF p. 6, «Limitations and Future Directions»"},
+      {"trecho": "When such execution errors occur, we query the three tested methods to re-plan the next steps.", "localizador": "PDF p. 6, «3D Simulation and Physical Demonstrations»"},
+      {"trecho": "Note that with only 1 round, Code-as-Symbolic-Planner functions identically to the Code Answer method.", "localizador": "PDF p. 5, «Impacts of Maximum Guidance/Generation Rounds»"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Code-as-Symbolic-Planner",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+      "mecanismos_acrescentados": ["multiagente", "feedback", "raciocinio"],
+      "comparador": "Only Question",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Média impressa (linha Average) das sete tarefas: BoxNet, Blocksworld, BoxLift, Gridworld, Path-Racecars, Shape Formation, Path-Drones",
+      "metrica": "Success (taxa de sucesso)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 13.9, "intervencao": 52.3},
+      "denominador": "nao_informado para a média; o estudo informa 140 amostras de teste por tarefa sem ligá-las explicitamente ao denominador de cada célula",
+      "condicoes": "Sem exemplos few-shot; máximo de 3 rodadas de reorientação e regeneração para o método; execução de código acima de 50 s conta como falha; número de execuções e parâmetros de decodificação nao_informado. Agregado impresso pelo estudo (média simples das sete tarefas, discretas e contínuas, mesmo modelo, métrica e comparador), sem dispersão. Valores por tarefa (intervenção/Only Question): BoxNet 74.2/27.5; Blocksworld 48.2/0.7; BoxLift 17.6/6.4; Gridworld 63.6/20.0; Path-Racecars 59.3/18.6; Shape Formation 41.4/8.6; Path-Drones 62.1/15.7. Comparação de pacote: a intervenção acrescenta, em relação ao Only Question, CoT, laço multiagente e feedback; o efeito não é atribuível a um ingrediente. conferido_pdf = sim: valores conferidos na imagem da Tabela I (PDF p. 4).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca ganho médio de 24.1% sobre «best baseline methods», sem uma condição comparadora única (a melhor linha de base varia por modelo). Primeira tabela com o contraste (Tabela I), primeira métrica (Success), primeiro modelo (GPT-4o), primeira linha de base de prompting listada (Only Question); usado o agregado impresso compatível (Average).",
+      "derivacao": "direta",
+      "localizador": "Tabela I, linha Average, colunas Code-Symbo.-P. e Only Question, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Average 52.3% 13.9% 30.5% 34.3% 15.8% 20.0% 41.3% 42.7%", "localizador": "Tabela I (Evaluation results on GPT-4o), linha Average; colunas Success | Code-Symbo.-P. | Only Question | Code Answer | Code Interpreter | SayCan | HMAS-2 | wo Symbolic Complexity Checker | wo CheckLLM; PDF p. 4"},
+        {"trecho": "Each task includes 140 test samples with diverse complexities and constraints.", "localizador": "PDF p. 3, seção V"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Symbolic Complexity Checker",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "wo Symbolic Complexity Checker (Code-as-Symbolic-Planner sem o componente)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Média impressa (linha Average) das sete tarefas: BoxNet, Blocksworld, BoxLift, Gridworld, Path-Racecars, Shape Formation, Path-Drones",
+      "metrica": "Success (taxa de sucesso)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 41.3, "intervencao": 52.3},
+      "denominador": "nao_informado para a média; 140 amostras de teste por tarefa informadas sem ligação explícita ao denominador",
+      "condicoes": "Ablação: sistema completo contra sistema sem o Symbolic Complexity Checker, demais componentes mantidos, mesmo modelo e tarefas; máximo de 3 rodadas; limite de 50 s; número de execuções nao_informado. Agregado impresso (média simples das sete tarefas). Valores por tarefa (completo/sem o componente): BoxNet 74.2/70.0; Blocksworld 48.2/41.4; BoxLift 17.6/14.3; Gridworld 63.6/55.0; Path-Racecars 59.3/53.6; Shape Formation 41.4/7.1; Path-Drones 62.1/47.9. O texto relata queda de «11.0%», sem dizer se em p.p. conferido_pdf = sim: valores conferidos na imagem da Tabela I (PDF p. 4).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três; primeiro componente da tabela de ablação (ordem das colunas da Tabela I).",
+      "derivacao": "direta",
+      "localizador": "Tabela I, linha Average, colunas Code-Symbo.-P. e wo Symbolic Complexity Checker, PDF p. 4; texto PDF p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Average 52.3% 13.9% 30.5% 34.3% 15.8% 20.0% 41.3% 42.7%", "localizador": "Tabela I, linha Average; colunas Success | Code-Symbo.-P. | Only Question | Code Answer | Code Interpreter | SayCan | HMAS-2 | wo Symbolic Complexity Checker | wo CheckLLM; PDF p. 4"},
+        {"trecho": "We observe that the average success rate drops by 9.6% without CheckLLM and by 11.0% without the Symbolic Complexity Checker.", "localizador": "PDF p. 6, «Effects of CheckLLM and Symbolic Complexity Checker»"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "CheckLLM",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "multiagente", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "wo CheckLLM (Code-as-Symbolic-Planner sem o componente)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "Média impressa (linha Average) das sete tarefas: BoxNet, Blocksworld, BoxLift, Gridworld, Path-Racecars, Shape Formation, Path-Drones",
+      "metrica": "Success (taxa de sucesso)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 42.7, "intervencao": 52.3},
+      "denominador": "nao_informado para a média; 140 amostras de teste por tarefa informadas sem ligação explícita ao denominador",
+      "condicoes": "Ablação: sistema completo contra sistema sem o CheckLLM, demais componentes mantidos, mesmo modelo e tarefas; máximo de 3 rodadas; limite de 50 s; número de execuções nao_informado. Agregado impresso (média simples das sete tarefas). Valores por tarefa (completo/sem o componente): BoxNet 74.2/71.4; Blocksworld 48.2/39.3; BoxLift 17.6/13.2; Gridworld 63.6/58.6; Path-Racecars 59.3/52.1; Shape Formation 41.4/10.0; Path-Drones 62.1/54.3. O texto relata queda de «9.6%», sem dizer se em p.p. conferido_pdf = sim: valores conferidos na imagem da Tabela I (PDF p. 4).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três; segundo componente da tabela de ablação (ordem das colunas da Tabela I).",
+      "derivacao": "direta",
+      "localizador": "Tabela I, linha Average, colunas Code-Symbo.-P. e wo CheckLLM, PDF p. 4; texto PDF p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Average 52.3% 13.9% 30.5% 34.3% 15.8% 20.0% 41.3% 42.7%", "localizador": "Tabela I, linha Average; colunas Success | Code-Symbo.-P. | Only Question | Code Answer | Code Interpreter | SayCan | HMAS-2 | wo Symbolic Complexity Checker | wo CheckLLM; PDF p. 4"},
+        {"trecho": "We observe that the average success rate drops by 9.6% without CheckLLM and by 11.0% without the Symbolic Complexity Checker.", "localizador": "PDF p. 6, «Effects of CheckLLM and Symbolic Complexity Checker»"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O problema (LLMs não exploram computação simbólica em TAMP) e a proposta (gerar código como planejador e verificador) são declarados com clareza.",
+      "localizador": "PDF p. 1, resumo e Introdução"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Arcabouço, agentes, linhas de base, tarefas, 140 amostras por tarefa, critérios de sucesso, limite de 50 s e máximo de 3 rodadas estão descritos; faltam número de execuções, parâmetros de decodificação e o LLM usado na Fig. 5 e na Tabela III, e os prompts completos ficam só na página externa.",
+      "localizador": "PDF p. 3, seções IV e V; Fig. 5 (p. 5); Tabela III (p. 6)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Cinco linhas de base executadas com o mesmo LLM e as mesmas tarefas (GPT-4o), mais ablações de dois componentes; com Claude e Mistral só duas linhas de base foram executadas.",
+      "localizador": "PDF p. 3, seção IV.B; Tabelas I e II, PDF p. 4"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "A taxa de sucesso é definida por três critérios, mas o denominador de cada célula não é ligado explicitamente às 140 amostras, as médias são simples entre tarefas heterogêneas sem dispersão, as diferenças no texto são dadas em «%» sem indicar p.p. e a legenda da Fig. 5 traz condição («All Code») não definida.",
+      "localizador": "PDF p. 3 e p. 5, seção V; Tabelas I e II (p. 4); Fig. 5 (p. 5); PDF p. 6"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há seção de limitações (código não ótimo, risco de erros, formalização, formato de saída) e análise de falhas, mas não se discutem não determinismo, validade estatística ou contaminação.",
+      "localizador": "PDF p. 5, «Failure Reasons»; PDF p. 6, «Limitations and Future Directions»"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Versões de Claude e Mistral informadas e prompts e scripts declarados na página do projeto (não acessada); versão do GPT-4o, decodificação e número de execuções não informados.",
+      "localizador": "PDF p. 1 (resumo); PDF p. 3, seção IV.A; título da Tabela II, PDF p. 4"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "As tarefas vêm de trabalhos anteriores e o ambiente foi tornado mais difícil, mas o estudo não discute possível presença dos dados no pré-treinamento nem controle de vazamento.",
+      "localizador": "PDF p. 3, seção V; busca no texto completo"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [2, 3, 4, 5, 6],
+    "observacao": "Texto extraído lido por inteiro. Tabelas I e II (p. 4), Fig. 5 (p. 5), Fig. 6 e Tabela III (p. 6), Fig. 1 e Fig. 2 (p. 2) e seções de método (p. 3) conferidas nas imagens. Rótulos de valor da Fig. 6 ilegíveis na resolução da imagem. O PDF não traz numeração impressa de páginas."
+  }
+}

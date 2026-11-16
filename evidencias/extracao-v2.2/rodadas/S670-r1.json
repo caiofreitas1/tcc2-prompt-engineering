@@ -1,0 +1,696 @@
+{
+  "estudo": "S670",
+  "texto_fonte": "fontes/textos/lote/S670.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "AllianceCoder",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seções 6.1–6.4, p. 7–8 do PDF (sem número de página impresso); Figura 3, p. 7; Tabela 4, p. 9",
+        "observacao": "Pacote em três fases: (I) o LLM gera descrições em linguagem natural de todas as APIs do repositório, codificadas em vetores; (II) com exemplos (aprendizado em contexto) e instruções, o LLM decompõe a consulta em passos de implementação, gera descrições de APIs potenciais para cada passo e as expande; (III) cada descrição recupera a API mais similar (cosseno), e as APIs recuperadas são acrescentadas ao contexto do arquivo e à consulta antes da geração. O estudo chama a decomposição de chain-of-thought prompting; registrei `raciocinio` por essa denominação e `decomposicao` pelas etapas encadeadas (passos → descrições → descrições estendidas → recuperação → geração). Pelo texto, os passos de implementação não são incluídos no prompt final de geração, apenas as APIs recuperadas, o contexto e a consulta. Base identificável: ContextLLM (instrucao, contexto), usado como linha de base na Tabela 4; as APIs recuperadas acrescentam conteúdo de categoria `contexto`, já presente na base. Contrafactual de pacote: AllianceCoder contra ContextLLM, RepoCoder e RLCoder (Tabela 4, mesmo benchmark, métrica e LLM). Nenhuma ablação isola a decomposição/chain-of-thought, os exemplos ou a expansão das descrições; o ganho é do pacote. Pacote híbrido: inclui o modelo de embeddings pré-treinado (UniXcoder) para a recuperação, fora do escopo de prompting. Os prompts e exemplos são remetidos a um Apêndice que não consta do PDF (12 páginas, terminando nas referências)."
+      },
+      {
+        "nome_original": "Generate Implementation Steps (Query Processing)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 6.3.1, p. 7 do PDF",
+        "observacao": "Componente da fase de processamento da consulta do AllianceCoder; sem condição sem o componente. Número de exemplos fornecidos não informado (nao_informado)."
+      },
+      {
+        "nome_original": "Generate API Description",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 6.3.2, p. 7 do PDF",
+        "observacao": "Os passos gerados são devolvidos ao LLM com exemplos adicionais para gerar descrições das APIs potenciais de cada passo (etapa encadeada). Sem condição sem o componente."
+      },
+      {
+        "nome_original": "Generate Extended API Description",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 6.3.3, p. 8 do PDF",
+        "observacao": "O LLM expande o conjunto de descrições de APIs para reduzir a omissão de APIs relevantes. Sem condição sem o componente; o efeito não é medido isoladamente."
+      },
+      {
+        "nome_original": "text-to-text retrieval (Generate Repo API Description) vs. AllianceCoder(Code)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 6.2.1, p. 7; Seção 7.3 e Tabela 5, p. 8–9 do PDF",
+        "observacao": "Componente do AllianceCoder em que o LLM gera descrições em linguagem natural das APIs do repositório para a recuperação texto-texto; na variante AllianceCoder(Code) as APIs são codificadas diretamente como código (texto-código), mantidos os demais ingredientes (Tabela 5). O ingrediente atua sobre o índice de recuperação e, por meio dele, sobre quais APIs entram no prompt (categoria `contexto`, também presente na variante sem o ingrediente); por isso não há categoria acrescentada. Classificação como componente de prompting é limítrofe: a geração de descrições é prompting do LLM, mas seu efeito passa pelo recuperador de embeddings."
+      },
+      {
+        "nome_original": "PureLLM",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4",
+        "observacao": "Só a consulta original do usuário (descrição e assinatura da função), sem informação recuperada; linha de base do estudo preliminar. Conteúdo exato do prompt não informado (prompts remetidos a Apêndice ausente do PDF)."
+      },
+      {
+        "nome_original": "ContextLLM (contextual information)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4; Seção 5.1, p. 5",
+        "observacao": "Todo o texto que precede a função-alvo no mesmo arquivo (importações, definições de classes, outras funções). Objeto da investigação do estudo empírico (tipo de informação recuperada). Contrafactual: ContextLLM contra PureLLM na matriz fatorial da Tabela 2, condições que diferem só nesse ingrediente, analisadas pelo estudo (RQ1). Informação considerada perfeita («perfect information»). Também usado como linha de base na Tabela 4 (p. 9)."
+      },
+      {
+        "nome_original": "SimilarLLM (relevant code / similar code)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4; Seção 5.1, p. 5",
+        "observacao": "Cinco trechos de código mais similares recuperados do repositório pelo arcabouço de recuperação do RepoCoder, supondo conhecimento prévio do código-alvo correto (oráculo). Trechos de código do repositório como insumo (`contexto`) e como exemplos de padrões recorrentes (`exemplos`). Contrafactual: SimilarLLM contra PureLLM na Tabela 2, analisado pelo estudo (RQ1)."
+      },
+      {
+        "nome_original": "APILLM (invoked APIs)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4; Seção 5.1, p. 5",
+        "observacao": "Todas as APIs invocadas no código-alvo, supostamente conhecidas (oráculo), fornecidas no prompt. Contrafactual: APILLM contra PureLLM na Tabela 2, analisado pelo estudo (RQ1)."
+      },
+      {
+        "nome_original": "ConSimLLM",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4",
+        "observacao": "Combinação de informação contextual e código similar (condição do desenho fatorial do estudo preliminar). Contra PureLLM é contraste de pacote (dois ingredientes); contra ContextLLM difere só no código similar, contraste discutido pelo estudo na Seção 5.1."
+      },
+      {
+        "nome_original": "ConAPILLM",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4; Seções 5.1–5.2, p. 5–6; Tabela 4, p. 9",
+        "observacao": "Combinação de informação contextual e APIs invocadas (oráculo); objeto da RQ2. Contra PureLLM é pacote de dois ingredientes; contra ContextLLM ou APILLM difere em um ingrediente. Na Tabela 4 aparece abaixo de linha tracejada como condição ideal («ideal condition with API retrieval»), não como abordagem concorrente. A ordem no prompt é: APIs primeiro, depois contexto e consulta (Seção 5.2, p. 5)."
+      },
+      {
+        "nome_original": "SimAPILLM",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4",
+        "observacao": "Combinação de código similar e APIs invocadas (oráculo). Contra PureLLM é pacote de dois ingredientes."
+      },
+      {
+        "nome_original": "ConSimAPILLM",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4, p. 4 do PDF; Tabela 2, p. 4; Seção 5.1, p. 5",
+        "observacao": "Os três tipos de informação (contexto, código similar, APIs invocadas). Contra PureLLM é pacote de três ingredientes; contra ConAPILLM difere só no código similar, contraste discutido pelo estudo na Seção 5.1."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.2, p. 3 do PDF; Tabela 4, p. 9",
+        "observacao": "Sistema comparador: pipeline iterativo de recuperação e geração que recupera código similar do repositório. Seus mecanismos não são isolados neste estudo. Configuração usada (número de iterações, recuperador, janela) não informada; a Tabela 4 rotula as linhas com o LLM (RepoCoderGPT, RepoCoderGemini)."
+      },
+      {
+        "nome_original": "RLCoder",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.2, p. 3 do PDF; Tabela 4, p. 9",
+        "observacao": "Sistema comparador híbrido: recuperador treinado por aprendizado por reforço (fora do escopo de prompting) que recupera conteúdo do repositório para o prompt. Mecanismos não isolados neste estudo; configuração usada não informada."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "UniXcoder (Embedding Model)",
+        "natureza": "outro",
+        "descricao": "Recuperador denso pré-treinado que codifica consultas, código e descrições de APIs em vetores para a recuperação por similaridade de cosseno; escolha do modelo de embeddings, não prompting.",
+        "localizador": "Seção 3.3, p. 4 do PDF; Seções 6.2.1 e 6.4.1, p. 7–8"
+      },
+      {
+        "nome_original": "default temperature setting of 0.7",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,7 em todos os experimentos com GPT-4o Mini e Gemini 1.5 Flash.",
+        "localizador": "Seção 3.5, p. 4 do PDF"
+      },
+      {
+        "nome_original": "top five most similar code snippets / single API with the highest cosine similarity",
+        "natureza": "outro",
+        "descricao": "Parâmetros de recuperação: cinco trechos similares no estudo preliminar; uma única API por descrição gerada no AllianceCoder. Configuram a quantidade recuperada, não o texto do prompt.",
+        "localizador": "Seção 3.5, p. 4 do PDF"
+      },
+      {
+        "nome_original": "reinforcement learning framework (RLCoder retriever)",
+        "natureza": "ajuste_fino",
+        "descricao": "No comparador RLCoder, o recuperador aprende por reforço quais conteúdos recuperar (ajuste de pesos do recuperador).",
+        "localizador": "Seção 3.2, p. 3 do PDF"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o Mini", "versao": "nao_informado (snapshot não informado)", "papel": "LLM gerador em todos os experimentos"},
+      {"nome": "Gemini 1.5 Flash", "versao": "nao_informado (snapshot não informado)", "papel": "LLM gerador em todos os experimentos"},
+      {"nome": "UniXcoder", "versao": "nao_informado", "papel": "modelo de embeddings para recuperação (Seção 3.3, p. 4)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CoderEval",
+        "versao": "nao_informado",
+        "quantidade": "230 tarefas Python e 230 Java descritas (Seção 3.1, p. 3); a Seção 9 (p. 10) afirma que a avaliação foi em Python",
+        "observacao": "O estudo não liga explicitamente o denominador das métricas ao tamanho do subconjunto usado; subconjunto Python inferível só pela Seção 9, sem confirmação do número de tarefas avaliadas. Tabela 3 e Figura 1 grafam «CodeEval»."
+      },
+      {
+        "nome": "RepoExec",
+        "versao": "nao_informado",
+        "quantidade": "nao_informado",
+        "observacao": "O estudo não informa o número de tarefas usadas."
+      }
+    ],
+    "metricas": [
+      {"nome": "Pass@k (k = 1, 3, 5)", "definicao": "taxa de sucesso após gerar código k vezes; um código é bem-sucedido só se passar em todos os testes (Seção 3.4, p. 4); estimador não informado; média de cinco repetições por caso de teste (Seção 9, p. 11)"},
+      {"nome": "CPass / BPass", "definicao": "número de casos aprovados por ContextLLM e por ContextLLM e APILLM, com percentuais (Tabela 3, p. 7)"},
+      {"nome": "Higher / Equal / Lower", "definicao": "percentual de casos em que o AllianceCoder recupera mais, igual ou menos APIs que o necessário (Tabela 6, p. 9)"},
+      {"nome": "Recall / BRecall / CRecall", "definicao": "razões de recall de APIs (Tabela 7, p. 9)"},
+      {"nome": "Prompt Length", "definicao": "comprimento do prompt de entrada em diagramas de caixa (Figura 2, p. 6)"},
+      {"nome": "interseção de respostas corretas", "definicao": "contagens em diagramas de Venn (Figura 1, p. 6)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código similar recuperado que é irrelevante ou funcionalmente diferente pode induzir o LLM a gerar código incorreto, degradando o desempenho.",
+        "localizador": "Seção 5.1, p. 5 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Acrescentar ingenuamente APIs invocadas ao contexto pode fazer falhar casos que passariam com uma única informação, atribuído pelo estudo ao comprimento excessivo da entrada (hipótese apoiada na Figura 2).",
+        "localizador": "Seção 5.2 e Finding 2, p. 5–6 do PDF; Figura 2, p. 6"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Aleatoriedade inerente da geração dos LLMs, que persiste mesmo com cinco testes por caso e temperatura 0,7.",
+        "localizador": "Seção 5.2, p. 5 do PDF; Seção 9, p. 11"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Parte do código dos repositórios dos benchmarks pode ter sido incluída nos dados de pré-treinamento dos LLMs avaliados; o estudo não descreve controle, apenas sugere benchmarks dinâmicos como trabalho futuro.",
+        "localizador": "Seção 9 (External Threats), p. 10–11 do PDF"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Casos-limite como descrições de APIs alucinadas geradas pelo LLM exigem investigação adicional.",
+        "localizador": "Seção 9, p. 11 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A estratégia de recuperação pressupõe que as APIs tenham semântica significativa em linguagem natural e pode ter desempenho inferior em repositórios com APIs mal documentadas ou com nomes crípticos.",
+        "localizador": "Seção 9, p. 11 do PDF"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Aspecto não avaliado: Pass@k não mede legibilidade, manutenibilidade nem aderência às convenções do repositório (limitação de avaliação declarada pelo estudo).",
+        "localizador": "Seção 9 (Internal Threats), p. 10 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Repetição dos experimentos cinco vezes por caso de teste e relato de Pass@k médio, para mitigar a aleatoriedade.",
+        "avaliada": "nao",
+        "localizador": "Seção 9, p. 11 do PDF"
+      },
+      {
+        "descricao": "Na análise da Tabela 3, exclusão dos casos aprovados trivialmente por PureLLM e cinco tentativas por caso.",
+        "avaliada": "nao",
+        "localizador": "Seção 5.3, p. 6 do PDF"
+      },
+      {
+        "descricao": "Geração de descrições em linguagem natural das APIs pelo LLM para reduzir a lacuna semântica entre código e linguagem natural na recuperação; comparada com a recuperação texto-código (AllianceCoder(Code)).",
+        "avaliada": "sim",
+        "localizador": "Seção 6.2.1, p. 7; Seção 7.3 e Tabela 5, p. 8–9; Seção 9, p. 11 do PDF"
+      },
+      {
+        "descricao": "Expansão das descrições de APIs para reduzir o risco de omitir APIs relevantes.",
+        "avaliada": "nao",
+        "localizador": "Seção 6.3.3, p. 8 do PDF"
+      },
+      {
+        "descricao": "Uso de benchmarks com repositórios do mundo real (CoderEval, RepoExec) para mitigar a limitação de generalização a outras linguagens.",
+        "avaliada": "nao",
+        "localizador": "Seção 9, p. 10 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O mesmo valor difere entre tabelas: ConAPIGPT no CoderEval, Pass@5, é 41.47 na Tabela 2 e 41.74 na Tabela 4; os demais valores de ConAPIGPT e de ContextGPT coincidem entre as tabelas.",
+        "localizador": "Tabela 2, p. 4 do PDF; Tabela 4, p. 9"
+      },
+      {
+        "descricao": "Os percentuais entre parênteses da Tabela 4 (por exemplo, 10.7%↑, 20.0%↑) não têm referência declarada. Cálculo próprio: são compatíveis com variação relativa sobre a melhor linha de base não oracular de cada coluna (por exemplo, 34.93 sobre RLCoderGPT 31.55 no RepoExec; 36.52 sobre ContextGPT 30.43 no CoderEval). No CoderEval, a referência seria ContextLLM, condição do próprio estudo, e não as abordagens existentes (RepoCoder, RLCoder), embora o resumo e a conclusão falem em ganho de até 20% sobre abordagens existentes / baselines do estado da arte. Os percentuais são variação relativa, não p.p.",
+        "localizador": "Tabela 4, p. 9 do PDF; Resumo, p. 1; Seção 10, p. 11"
+      },
+      {
+        "descricao": "Narrativa e tabela divergem: o texto afirma aumento de aproximadamente 10–20% em Pass@1, mas a Tabela 4 imprime 7.6%↑ para AllianceCoderGemini no CoderEval; o próprio texto reconhece em seguida que o ganho com Gemini no CoderEval é limitado.",
+        "localizador": "Seção 7.1, p. 8 do PDF; Tabela 4, p. 9"
+      },
+      {
+        "descricao": "Remissão incorreta: a Seção 5.1 diz que a Tabela 3 apresenta os resultados do estudo preliminar, mas esses resultados estão na Tabela 2; a Tabela 3 traz as estatísticas de contenção de APIs da RQ3.",
+        "localizador": "Seção 5.1, p. 5 do PDF; Tabelas 2 e 3, p. 4 e 7"
+      },
+      {
+        "descricao": "O resumo afirma que o código similar recuperado degrada resultados em até 15%, mas não se identificou no texto qual comparação (condição, métrica, benchmark, p.p. ou variação relativa) sustenta esse valor.",
+        "localizador": "Resumo, p. 1 do PDF; Tabela 2, p. 4"
+      },
+      {
+        "descricao": "Resultado misto para código similar: SimilarGPT supera PureGPT em Pass@1 (RepoExec 16.90 vs. 16.62; CoderEval 20.00 vs. 18.26), mas fica abaixo em CoderEval Pass@3 (23.04 vs. 25.22) e Pass@5 (23.48 vs. 26.52); SimilarGemini fica abaixo de PureGemini no CoderEval nas três métricas. Somar código similar a ContextLLM ou a ConAPILLM reduz o Pass@1 no CoderEval em ambos os LLMs.",
+        "localizador": "Tabela 2, p. 4 do PDF; Seção 5.1, p. 5"
+      },
+      {
+        "descricao": "O estudo preliminar usa informação perfeita (oráculo): código similar recuperado supondo conhecimento do código-alvo e APIs invocadas conhecidas a priori. Os resultados de SimilarLLM, APILLM e combinações são limites superiores, não desempenho de recuperação realista; ConAPILLM é usado como condição ideal na Tabela 4.",
+        "localizador": "Seção 4, p. 4 do PDF; Seção 7.2, p. 8"
+      },
+      {
+        "descricao": "O texto qualifica diferenças como significativas («significantly worse», «significantly enhance») sem relatar teste estatístico ou intervalo de confiança.",
+        "localizador": "Resumo, p. 1; Seção 5.1, p. 5 do PDF"
+      },
+      {
+        "descricao": "Definição de Pass@k ambígua: «success rate after generating code k times», com cinco repetições por caso e Pass@k médio; não se informa o estimador nem o número de amostras por repetição.",
+        "localizador": "Seção 3.4, p. 4; Seção 9, p. 11 do PDF"
+      },
+      {
+        "descricao": "Inconsistência de linguagens: o CoderEval é descrito com tarefas Python e Java, mas as ameaças à validade dizem que a avaliação foi em Python; nome do benchmark grafado «CoderEval» e «CodeEval» em partes diferentes.",
+        "localizador": "Seção 3.1, p. 3; Seção 9, p. 10; Tabela 3, p. 7; Figura 1, p. 6 do PDF"
+      },
+      {
+        "descricao": "Contagens pequenas na análise de contenção de APIs (Tabela 3): no CodeEval com Gemini, Fully Contained tem CPass 4 (22.2%) e BPass 2 (50.0%); as conclusões («performance is even doubled», «approximately 50–70%») se apoiam em poucos casos.",
+        "localizador": "Tabela 3, p. 7 do PDF; Seção 5.3, p. 6"
+      },
+      {
+        "descricao": "A explicação da Finding 2 (comprimento excessivo da entrada) e a atribuição de falhas à aleatoriedade são interpretações do estudo, sem experimento que varie o comprimento ou a ordem do prompt.",
+        "localizador": "Seção 5.2, p. 5–6 do PDF; Figura 2, p. 6"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Versão lida: arXiv:2503.20589v1 [cs.SE], 26 mar. 2025, em template ACM com campos de conferência e DOI não preenchidos (Conference acronym ’XX, 2018, Woodstock). O pacote de replicação (link anonymous.4open.science) não foi acessado nem validado.",
+        "localizador": "p. 1 do PDF"
+      },
+      {
+        "descricao": "Os exemplos e prompts do AllianceCoder são remetidos a um Apêndice que não consta do PDF analisado (12 páginas, a última com referências).",
+        "localizador": "Seção 6.1, p. 7; p. 12 do PDF"
+      },
+      {
+        "descricao": "Análises complementares: interseções de respostas corretas entre ConAPI, API e Context (Figura 1), comprimento do prompt (Figura 2), contenção de APIs no contexto (Tabela 3), contagem e recall de APIs recuperadas pelo AllianceCoder (Tabelas 6 e 7). O estudo relata tendência a recuperar mais APIs que o necessário (Higher 74.45% para GPT no RepoExec).",
+        "localizador": "Figuras 1–2, p. 6; Tabela 3, p. 7; Tabelas 6–7, p. 9 do PDF"
+      },
+      {
+        "descricao": "O texto afirma que o ganho em Pass@1 reduz a necessidade de regenerações e melhora a experiência do usuário; isso não foi medido (interpretação a partir de acurácia em benchmark).",
+        "localizador": "Seção 7.1, p. 8 do PDF"
+      },
+      {
+        "descricao": "Os comparadores RepoCoder e RLCoder aparecem na Tabela 4 com rótulos por LLM; o estudo não detalha se foram reexecutados pelos autores nem com que configuração.",
+        "localizador": "Seção 3.2, p. 3; Tabela 4, p. 9 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Based on the preliminary results, we propose AllianceCoder, a novel context-integrated method that employs chain-of-thought prompting to decompose user queries into implementation steps and retrieves APIs via semantic description matching.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Through an empirical study on two benchmarks, we demonstrate that in-context code and potential API information significantly enhance LLM performance, whereas retrieved similar code often introduces noise, degrading results by up to 15%.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Through extensive experiments on CoderEval and RepoExec, AllianceCoder achieves state-of-the-art performance, improving Pass@1 by up to 20% over existing approaches.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "We conduct an empirical study to investigate how different types of retrieved information contribute to LLM performance in repository-level code generation, showing that contextual information and potential APIs play a crucial role in improving performance.",
+        "localizador": "Contribuições, Seção 1, p. 2 do PDF"
+      },
+      {
+        "trecho": "To assess the upper-bound performance of each information type, we assume access to perfect information.",
+        "localizador": "Seção 4, p. 4 do PDF"
+      },
+      {
+        "trecho": "This information type includes all text preceding the target function within the same file, such as library import statements, class definitions, and other implemented functions.",
+        "localizador": "Seção 4, p. 4 do PDF"
+      },
+      {
+        "trecho": "Assuming prior knowledge of the correct target code, we adopt the retrieval framework used in RepoCoder [57], which utilizes a context window to retrieve the top five most relevant code snippets based on vector similarity.",
+        "localizador": "Seção 4, p. 4 do PDF"
+      },
+      {
+        "trecho": "We assume prior knowledge of all APIs invoked within the target code and retrieve them to facilitate repository-level code generation.",
+        "localizador": "Seção 4, p. 4 do PDF"
+      },
+      {
+        "trecho": "To achieve this, we first provide examples and instruct LLMs to decompose the overall code task into a sequence of concrete implementation steps.",
+        "localizador": "Seção 6.3.1, p. 7 do PDF"
+      },
+      {
+        "trecho": "Once these steps are obtained, they are fed back into the LLM along with additional examples and prompts to generate descriptions of the potential APIs used in each step.",
+        "localizador": "Seção 6.3.2, p. 7 do PDF"
+      },
+      {
+        "trecho": "To address this issue, we further guide LLMs to expand the set of potential APIs, ensuring broader coverage and reducing the risk of omitting relevant APIs.",
+        "localizador": "Seção 6.3.3, p. 8 do PDF"
+      },
+      {
+        "trecho": "Finally, all retrieved APIs are appended to the contextual information and the user’s query before being fed into LLMs.",
+        "localizador": "Seção 6.4.2, p. 8 do PDF"
+      },
+      {
+        "trecho": "To examine the impact of this semantic gap on overall performance, we conduct an experiment in which APIs from the repository are directly encoded into representation vectors, followed by retrieval based on these vectors.",
+        "localizador": "Seção 7.3, p. 9 do PDF"
+      },
+      {
+        "trecho": "When LLMs rely on irrelevant or functionally dissimilar code, they are more likely to produce incorrect outputs, ultimately degrading performance rather than enhancing it.",
+        "localizador": "Seção 5.1, p. 5 do PDF"
+      },
+      {
+        "trecho": "Naively appending invoked APIs with contextual information may cause test cases that could pass with a single piece of information to fail due to excessive input length.",
+        "localizador": "Finding 2, p. 6 do PDF"
+      },
+      {
+        "trecho": "Despite testing each case five times, some degree of randomness persists, leading to minor inconsistencies in the results.",
+        "localizador": "Seção 5.2, p. 5 do PDF"
+      },
+      {
+        "trecho": "We mitigated this by repeating experiments five times per test case and reporting averaged Pass@k scores.",
+        "localizador": "Seção 9 (External Threats), p. 11 do PDF"
+      },
+      {
+        "trecho": "Although our datasets are widely used in prior work, some repository code may have been included in the pretraining data of evaluated LLMs.",
+        "localizador": "Seção 9 (External Threats), p. 10–11 do PDF"
+      },
+      {
+        "trecho": "We partially addressed this by using LLM-generated descriptions to bridge semantic gaps, but edge cases (e.g., generated hallucinated descriptions) require further investigation.",
+        "localizador": "Seção 9 (External Threats), p. 11 do PDF"
+      },
+      {
+        "trecho": "This may underperform in repositories with poorly documented or cryptically named APIs.",
+        "localizador": "Seção 9 (External Threats), p. 11 do PDF"
+      },
+      {
+        "trecho": "While Pass@k effectively measures functional correctness, it does not assess code quality aspects such as readability, maintainability, or alignment with repository conventions.",
+        "localizador": "Seção 9 (Internal Threats), p. 10 do PDF"
+      },
+      {
+        "trecho": "To isolate the influence of LLMs’ intrinsic code generation capability, we exclude all test cases that can be trivially passed by PureLLM from our statistical results.",
+        "localizador": "Seção 5.3, p. 6 do PDF"
+      },
+      {
+        "trecho": "In all our experiments, we utilized GPT-4o Mini and Gemini 1.5 Flash with the default temperature setting of 0.7.",
+        "localizador": "Seção 3.5, p. 4 do PDF"
+      },
+      {
+        "trecho": "RLCoder enhances this approach by implementing a novel reinforcement learning framework that enables the retriever to learn useful content without labeled data.",
+        "localizador": "Seção 3.2, p. 3 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "ContextLLM (contextual information)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 29.01},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Estudo preliminar com informação perfeita; contexto = todo o texto que precede a função-alvo no arquivo; PureLLM = só a consulta do usuário. Temperatura 0,7; o estudo declara repetir cinco vezes por caso de teste e relatar Pass@k médio (Seção 9). Prompts exatos não disponíveis (Apêndice ausente do PDF). Conferido no PDF: Tabela 2, p. 4 (imagem p-04).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca o AllianceCoder e Pass@1, mas o comparador é «existing approaches» (vários), e o estudo empírico destaca vários tipos de informação. A primeira tabela com contraste elegível de prompting é a Tabela 2 (a Tabela 1 é descritiva); primeira métrica Pass@1, primeiro modelo GPT, primeiro benchmark RepoExec, primeira linha de base PureGPT e primeira condição listada ContextGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF (sem número impresso), colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "ContextGPT 29.01 34.08 38.59 30.43 36.52 37.83", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SimilarLLM (relevant code / similar code)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 16.90},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Cinco trechos de código mais similares recuperados com conhecimento prévio do código-alvo (oráculo), pelo arcabouço de recuperação do RepoCoder. Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal do estudo empírico ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, linha de base PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "SimilarGPT 16.90 23.38 24.79 20.00 23.04 23.48", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "APILLM (invoked APIs)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 25.63},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Todas as APIs invocadas no código-alvo fornecidas com conhecimento prévio (oráculo). Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal do estudo empírico ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, linha de base PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "APIGPT 25.63 32.39 34.93 25.65 30.43 33.04", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "ConSimLLM",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 22.53},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Contexto do arquivo mais cinco trechos similares (oráculo). Contra PureLLM é contraste de pacote (dois ingredientes); não atribuir o resultado a um único ingrediente. Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Condição focal do desenho fatorial ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, primeira linha de base listada PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "ConSimGPT 22.53 26.48 27.60 14.35 20.43 23.04", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "ConAPILLM",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 37.75},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Contexto do arquivo mais APIs invocadas (oráculo); APIs apresentadas antes do contexto e da consulta. Contra PureLLM é contraste de pacote (dois ingredientes). O mesmo valor (37.75) aparece na Tabela 4. Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Condição focal (objeto da RQ2) ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, primeira linha de base listada PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "ConAPIGPT 37.75 44.51 47.04 36.52 41.30 41.47", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SimAPILLM",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 25.36},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Código similar mais APIs invocadas (oráculo). Contra PureLLM é contraste de pacote (dois ingredientes). Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Condição focal do desenho fatorial ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, primeira linha de base listada PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "SimAPIGPT 25.36 31.55 34.09 22.17 26.52 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "ConSimAPILLM",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "PureLLM",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.62, "intervencao": 29.86},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "Contexto, código similar e APIs invocadas (oráculo). Contra PureLLM é contraste de pacote (três ingredientes). Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 2, p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Condição focal do desenho fatorial ainda não representada; exceção ao alvo de três para cobrir técnica focal. Mesma regra de ordem: Tabela 2, Pass@1, GPT, RepoExec, primeira linha de base listada PureGPT.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 4 do PDF, colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "PureGPT 16.62 19.72 23.66 18.26 25.22 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "ConSimAPIGPT 29.86 38.31 38.87 19.57 23.91 26.52", "localizador": "Tabela 2, p. 4 do PDF; colunas Method | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "AllianceCoder",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao"],
+      "comparador": "RepoCoder",
+      "modelo": "GPT-4o Mini",
+      "benchmark": "RepoExec",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 19.72, "intervencao": 34.93},
+      "denominador": "nao_informado (número de tarefas do RepoExec não informado)",
+      "condicoes": "AllianceCoder recupera uma única API (maior similaridade de cosseno, UniXcoder) por descrição gerada e a acrescenta ao contexto do arquivo e à consulta. RepoCoderGPT é sistema de recuperação de código similar com o mesmo LLM; configuração (iterações, recuperador) e origem da execução não informadas; mecanismos não isolados. Contraste de pacote: não atribuir o ganho à decomposição/chain-of-thought nem a outro ingrediente isolado. O percentual impresso junto a 34.93 (10.7%↑) não se refere ao RepoCoder (referência não declarada; ver heterogeneidade). Temperatura 0,7; cinco repetições por caso com Pass@k médio (Seção 9). Conferido no PDF: Tabela 4, p. 9 (imagem p-09).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal proposta pelo estudo ainda não representada; exceção ao alvo de três para cobrir técnica focal. Primeira tabela com o contraste: Tabela 4; primeira métrica Pass@1, primeiro modelo GPT, primeiro benchmark RepoExec, primeira linha de base de prompting listada RepoCoderGPT (sistema de recuperação sem treino de pesos; RLCoder, listado depois, tem recuperador treinado).",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, p. 9 do PDF (sem número impresso), colunas RepoExec Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "RepoCoderGPT 19.72 23.10 25.91 14.35 17.39 19.13", "localizador": "Tabela 4, p. 9 do PDF; colunas Approach | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"},
+        {"trecho": "AllianceCoderGPT 34.93 (10.7%↑) 40.28 (10.0%↑) 41.97 (8.0%↑) 36.52 (20.0%↑) 40.00 (9.5%↑) 41.30 (9.2%↑)", "localizador": "Tabela 4, p. 9 do PDF; colunas Approach | RepoExec Pass@1, Pass@3, Pass@5 | CoderEval Pass@1, Pass@3, Pass@5"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Questão central explícita (que informação recuperar em geração de código em nível de repositório) e seis RQs formuladas (RQ1–RQ3 no estudo preliminar; RQ4–RQ6 na avaliação do AllianceCoder).",
+      "localizador": "Seção 1, p. 2; Seção 5, p. 4; Seção 7, p. 8 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Fases do AllianceCoder, condições do estudo preliminar, LLMs, temperatura e parâmetros de recuperação são descritos, mas os prompts e exemplos estão num Apêndice ausente do PDF, o número de exemplos não é informado, o tamanho do RepoExec e o subconjunto exato do CoderEval não são informados e a configuração dos comparadores não é descrita.",
+      "localizador": "Seções 3–4, p. 3–4; Seções 6.1–6.4, p. 7–8; p. 12 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linha de base sem informação (PureLLM), desenho fatorial completo no estudo preliminar e comparação do AllianceCoder com ContextLLM, RepoCoder e RLCoder no mesmo benchmark, métrica e LLM; porém a configuração e a origem da execução de RepoCoder e RLCoder não são descritas e nenhuma ablação isola a decomposição/chain-of-thought, que é o núcleo de prompting da proposta.",
+      "localizador": "Tabela 2, p. 4; Seção 3.2, p. 3; Tabelas 4–5, p. 9 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k é métrica funcional baseada em testes, mas sua definição é vaga (estimador e amostras não informados), os denominadores não são informados (tamanho do RepoExec; subconjunto do CoderEval) e o mesmo valor diverge entre tabelas (ConAPIGPT CoderEval Pass@5: 41.47 na Tabela 2 e 41.74 na Tabela 4); os percentuais da Tabela 4 não têm referência declarada.",
+      "localizador": "Seção 3.4, p. 4; Tabela 2, p. 4; Tabela 4, p. 9; Seção 9, p. 11 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute ameaças internas (só Python, dois LLMs, métrica que não mede qualidade) e externas (vazamento de dados, aleatoriedade, generalização da recuperação por descrições).",
+      "localizador": "Seção 9, p. 10–11 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa LLMs (sem snapshot), temperatura, número de trechos/APIs recuperados, modelo de embeddings e um link de pacote de replicação (não acessado nem validado); os prompts e exemplos não estão no PDF e a configuração dos comparadores não é informada.",
+      "localizador": "Resumo, p. 1; Seções 3.3–3.5, p. 4; Seção 6.1, p. 7 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece que o código dos repositórios pode estar no pré-treinamento dos LLMs, mas não aplica controle; menciona benchmarks dinâmicos apenas como trabalho futuro.",
+      "localizador": "Seção 9 (External Threats), p. 10–11 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (748 linhas, incluindo referências). O PDF tem 12 páginas e não contém o Apêndice citado na Seção 6.1. Páginas do PDF abertas visualmente: p. 4 (Tabela 2), p. 6 (Figuras 1–2), p. 7 (Tabela 3, Figura 3), p. 8 (Seções 6.3.3–7.2), p. 9 (Tabelas 4–7), p. 12 (última página, referências); p-13 inexistente.",
+    "paginas_abertas": [4, 6, 7, 8, 9, 12]
+  }
+}

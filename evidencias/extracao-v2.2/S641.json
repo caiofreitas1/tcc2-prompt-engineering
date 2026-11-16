@@ -1,0 +1,309 @@
+{
+  "estudo": "S641",
+  "texto_fonte": "fontes/textos/lote/S641.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "versao_fonte": "arXiv:2503.05852v1 [cs.SE], 7 Mar 2025 (Christakis e Drikakis, 'Evaluating Large Language Models in Code Generation: INFINITE Methodology for Defining the Inference Index')",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "same question to all frameworks (pergunta inicial / primeira tentativa)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6-7 do PDF (impressas 6-7), Seção 5, prompt citado literalmente",
+        "observacao": "Prompt único em linguagem natural, enviado aos três modelos após o upload do arquivo CSV: instrução de escrever código Python para treinar um LSTM (instrucao); especificação de divisão 90/10, variáveis-alvo, métricas de erro a calcular, gráfico e hiperparâmetros (uma camada, 10 unidades, batch 16, ReLU, Adam com taxa 0,001, 10 épocas, timestep 3) (restricoes); arquivo de dados enviado como insumo (contexto; trata-se de dados, não de código ou documentação). Não há variação de prompt nem condição sem este prompt: o prompt é parte do procedimento de avaliação dos modelos, não técnica investigada; o objeto do estudo é o índice InI e a comparação entre modelos. Os hiperparâmetros do prompt vêm do modelo LSTM-H dos autores (Tabela 1, p. 5)."
+      },
+      {
+        "nome_original": "new question (attempt) — perguntas de esclarecimento e de correção de erro",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 7 e 9 do PDF (impressas 7 e 9), Seções 5.1-5.3",
+        "observacao": "Após cada resposta insatisfatória, o usuário (autores) formula nova pergunta: indica o erro de execução e pede correção (OAI1, 2ª e 3ª tentativas, texto do prompt não citado literalmente) ou esclarece que todas as variáveis do CSV devem ser entrada ('Please do as before, but take as input to the model all given features from the csv file.', GPT, OAI1 e OAI3). Feedback humano a partir da execução do código e da inspeção da saída. O estudo descreve só qualitativamente o resultado de cada rodada (código com erro ou com entradas incompletas) e não relata métricas do código das tentativas anteriores; o número de tentativas é usado como medida de consistência do modelo (índice C), não como efeito da técnica. Sem condição comparável sem o refinamento."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "GPT-4o (GPT), OpenAI-o1 pro (OAI1), OpenAI-o3 mini-high (OAI3)",
+        "natureza": "selecao_modelo",
+        "descricao": "Contraste principal do estudo: os três modelos recebem a mesma pergunta inicial e são comparados pelo índice InI e por MAPE e R2. A diferença entre eles é de modelo, não de prompting.",
+        "localizador": "p. 1-2 e 12-13 do PDF (impressas 1-2 e 12-13), resumo, Seção 1, Tabelas 7 e 8"
+      },
+      {
+        "nome_original": "LSTM-H",
+        "natureza": "outro",
+        "descricao": "Modelo LSTM desenvolvido manualmente pelos autores, usado como referência humana para comparar as previsões dos modelos gerados pelos LLMs (Tabelas 4-6). Não é condição de prompting.",
+        "localizador": "p. 5, 10 e 12 do PDF (impressas 5, 10 e 12), Seção 3, Tabelas 1, 4, 5 e 6"
+      },
+      {
+        "nome_original": "INFINITE methodology / Inference Index (InI)",
+        "natureza": "outro",
+        "descricao": "Proposta do estudo: índice de avaliação que combina eficiência (taxa de 'Server Busy' e tempo médio de resposta por consulta), consistência (número de tentativas) e acurácia (MAPE médio). É instrumento de medida, não intervenção de prompting.",
+        "localizador": "p. 2-5 do PDF (impressas 2-5), Seção 2, Equações 1-7"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o (referido como ChatGPT-4o e GPT)", "versao": "nao_informado", "observacao": "snapshot, data de acesso e interface não informados; o texto menciona upload de arquivo CSV e respostas 'Server Busy'"},
+      {"nome": "OpenAI-o1 pro (OAI1)", "versao": "nao_informado"},
+      {"nome": "OpenAI-o3 mini-high (OAI3)", "versao": "nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Tarefa própria: gerar código Python de um modelo LSTM para previsão de temperatura, umidade relativa e velocidade do vento a partir de série temporal de estação meteorológica da Earth Networks (Creta), 6 nov. 2018 a 8 nov. 2019, medições a cada 10 minutos",
+        "quantidade": "1 tarefa de geração de código; conjunto de teste das previsões: 4.821 intervalos de dez minutos (10% finais da série)",
+        "observacao": "O conjunto de teste é o denominador das métricas de previsão (MAPE, R2 etc.), não o número de tarefas de código; a avaliação de código é de uma única tarefa por modelo. Número de repetições da interação por modelo: nao_informado."
+      }
+    ],
+    "metricas": [
+      "Attempts until correct answer (número de perguntas até a resposta satisfatória; base do índice C = 1/(1+m·ln(Q)), m = 1)",
+      "Total queries",
+      "SB responses (respostas 'Server Busy'; índice E_SBR)",
+      "ARTpQ (average response time per query, s; índice E_ART com limiares ART1 = 10 s e ART2 = 30 s)",
+      "Average MAPE (%) (índice A = 1 − MAPE_av/100)",
+      "InI (média ponderada de E, C e A, pesos 1/3)",
+      "MSE, MAE, MB, MAPE (%), MFE (%), MFB (%), R2 score e Pearson r das previsões geradas pelo código (por variável)"
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O código gerado pelo OAI1 falhou na execução duas vezes (sobrescrita de DataFrame Pandas; valores não numéricos na coluna de temperatura mínima), exigindo novas perguntas.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Na primeira tentativa, GPT, OAI1 (após correções) e OAI3 geraram código que usava só as três variáveis-alvo como entrada, em vez de todas as variáveis do arquivo; os autores atribuem isso ao fato de o modelo não ter compreendido a pergunta (o prompt inicial citado não pede explicitamente todas as variáveis como entrada).",
+        "localizador": "p. 7 e 9 do PDF (impressas 7 e 9), Seções 5.1-5.3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Cálculo incorreto de métricas no código gerado: GPT não calculou todas as métricas pedidas e agregou as métricas das três variáveis; MAPE (e MFE no caso do OAI1) de velocidade do vento incorretos por divisão por valor próximo de zero nos códigos de GPT, OAI1 e OAI3.",
+        "localizador": "p. 7 e 9 do PDF (impressas 7 e 9), Seções 5.1-5.3, Tabelas 2 e 3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Risco geral apontado com base na literatura: LLMs podem produzir código que funciona isoladamente mas falha quando incorporado a programas maiores, e não conseguem testar o código em tempo real.",
+        "localizador": "p. 2 do PDF (impressa 2), Seção 1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Necessidade de supervisão humana para garantir a correção do código gerado (apontada com base na literatura, na introdução).",
+        "localizador": "p. 2 do PDF (impressa 2), Seção 1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Vieses nos dados de treinamento e natureza de caixa-preta dos LLMs, que dificultam interpretar as decisões e podem gerar saídas não intencionais (contexto geral da introdução, com base na literatura; não avaliado no estudo).",
+        "localizador": "p. 1-2 do PDF (impressas 1-2), Seção 1"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Novas perguntas indicando o erro de execução ou esclarecendo o requisito de entrada até obter código satisfatório.",
+        "avaliada": "nao",
+        "localizador": "p. 7 e 9 do PDF (impressas 7 e 9), Seções 5.1-5.3"
+      },
+      {
+        "descricao": "Os autores calcularam independentemente MAPE e R2 do modelo gerado pelo GPT e MAPE de velocidade do vento dos modelos gerados por OAI1 e OAI3, porque os cálculos do código gerado estavam incorretos ou agregados (procedimento de controle da avaliação; o método do recálculo não é descrito).",
+        "avaliada": "nao",
+        "localizador": "p. 12 do PDF (impressa 12), Tabelas 5 e 6"
+      },
+      {
+        "descricao": "Comparação visual e por métricas das previsões dos modelos gerados com as observações e com o modelo LSTM-H dos autores.",
+        "avaliada": "nao",
+        "localizador": "p. 8-12 e 14 do PDF (impressas 8-12 e 14), Figuras 3-5, Tabelas 4-6"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "LSTM-H, modelo desenvolvido manualmente pelos autores (referência humana, não condição de prompting), nas mesmas métricas (Tabelas 4-6); além disso, os três modelos são comparados entre si com a mesma pergunta inicial (seleção de modelo). Não há condição de prompting alternativa executada.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Nenhum contraste de técnicas de prompting é executado: todos os modelos recebem a mesma pergunta inicial e perguntas de seguimento conforme as falhas. Ainda assim, o resumo e a conclusão afirmam que a geração assistida pode igualar modelos de especialistas com prompting e refinamento eficazes; a afirmação sobre prompting não é sustentada por contrafactual no estudo.",
+        "localizador": "p. 1 e 15 do PDF (impressas 1 e 15), resumo e Seção 6"
+      },
+      {
+        "descricao": "ARTpQ do GPT impresso como 28.53 s na Tabela 7, enquanto a narrativa relata respostas de 53 s e 'within 3 seconds' (2 consultas); cálculo próprio pela Equação 1 com esses valores dá 28 s. Aparente inconsistência; os tempos da narrativa podem estar arredondados, o que a fonte não informa. Para OAI1 (133, 113, 168, 103 s → 129,25 s) e OAI3 (30, 21 s → 25,5 s), o cálculo próprio coincide com a Tabela 7.",
+        "localizador": "p. 7, 9 e 12 do PDF (impressas 7, 9 e 12), Seções 5.1-5.3, Tabela 7"
+      },
+      {
+        "descricao": "Average MAPE da Tabela 7: cálculo próprio a partir da Tabela 5 dá 11,762 (GPT, impresso 11.76), 12,820 (OAI1, impresso 12.81) e 13,170 (OAI3, impresso 13.16). Do mesmo modo, A do OAI3 impresso 0.86 na Tabela 8, ao passo que 1 − 13.16/100 = 0,8684. Aparente truncamento em vez de arredondamento; a fonte não informa a regra de arredondamento. A ordem dos índices A não muda.",
+        "localizador": "p. 12-13 do PDF (impressas 12-13), Tabelas 5, 7 e 8"
+      },
+      {
+        "descricao": "O Average MAPE de cada modelo é dominado pelo MAPE de velocidade do vento (33,4% a 37,4% contra cerca de 1% para temperatura e umidade), justamente a variável cujo MAPE os autores consideram afetado por divisão por valores próximos de zero; o método usado no recálculo independente da Tabela 5 não é descrito.",
+        "localizador": "p. 7, 9 e 12 do PDF (impressas 7, 9 e 12), Tabelas 2, 3, 5 e 7"
+      },
+      {
+        "descricao": "Valores de métricas de origem heterogênea na mesma tabela: na Tabela 5 e na Tabela 6, as linhas do GPT foram recalculadas pelos autores, e as de OAI1 e OAI3 (exceto o MAPE de vento) vêm das Tabelas 2 e 3, calculadas pelo código gerado. O código do GPT relatou valores agregados (MSE 0.5668, MAE 0.4735, MAPE 1.71×10^13, R2 0.9405, Pearson r 0.9997), não comparáveis aos valores por variável.",
+        "localizador": "p. 7, 9 e 12 do PDF (impressas 7, 9 e 12), Seção 5.1, Tabelas 2, 3, 5 e 6"
+      },
+      {
+        "descricao": "As perguntas de seguimento diferem entre modelos (OAI1 recebeu duas perguntas de correção de erro, além do esclarecimento comum), e o número de tentativas depende do julgamento do usuário sobre o que é resposta satisfatória; o GPT foi considerado satisfatório apesar de não calcular todas as métricas pedidas nem separá-las por variável.",
+        "localizador": "p. 7 e 12 do PDF (impressas 7 e 12), Seções 5.1-5.2"
+      },
+      {
+        "descricao": "A conclusão afirma que a avaliação considerou utilização de memória e usabilidade, aspectos que não são medidos nem relatados no corpo do artigo.",
+        "localizador": "p. 15 do PDF (impressa 15), Seção 6"
+      },
+      {
+        "descricao": "A vantagem do GPT é atribuída pelos autores a ajuste fino por feedback de uma base maior de usuários, explicação não testada no estudo; as diferenças de acurácia são descritas pelos próprios autores como marginais.",
+        "localizador": "p. 12-13 e 16 do PDF (impressas 12-13 e 16), Seções 5 e 6"
+      },
+      {
+        "descricao": "Os limiares ART1 e ART2, o multiplicador m e os pesos do InI são definidos pelo usuário (10 s, 30 s, m = 1, pesos 1/3); os resultados do InI dependem dessas escolhas, e o número de repetições da interação por modelo não é informado.",
+        "localizador": "p. 3-4 do PDF (impressas 3-4), Equações 3, 5 e 7"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo é uma avaliação de modelos (seleção de modelo) com uma única tarefa de geração de código e um procedimento de prompting fixo com refinamento conversacional; não há comparação de técnicas de prompting, por isso não há extração numérica de prompting.",
+        "localizador": "p. 6-13 do PDF (impressas 6-13), Seção 5"
+      },
+      {
+        "descricao": "O esforço do usuário é contabilizado como número de tentativas e consultas (índice de consistência), sem ser chamado de custo; o tempo de resposta e as respostas 'Server Busy' compõem o índice de eficiência.",
+        "localizador": "p. 3-4 do PDF (impressas 3-4), Seção 2"
+      },
+      {
+        "descricao": "Os hiperparâmetros fornecidos no prompt são os ajustes ótimos do modelo LSTM-H dos autores; a comparação com o LSTM-H não avalia o projeto de arquitetura pelos LLMs.",
+        "localizador": "p. 5-7 do PDF (impressas 5-7), Seção 3, Tabela 1 e prompt da Seção 5"
+      },
+      {
+        "descricao": "Os autores declaram que dados, códigos gerados por IA e gráficos estão disponíveis em repositório GitHub; o repositório não foi acessado nesta extração.",
+        "localizador": "p. 16 do PDF (impressa 16), Declarations"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This study introduces a new methodology for an Inference Index (InI), called INFerence INdex In Testing model Effectiveness methodology (INFINITE), aiming to evaluate the performance of Large Language Models (LLMs) in code generation tasks.",
+        "localizador": "p. 1 do PDF (impressa 1), Abstract"
+      },
+      {
+        "trecho": "We began by asking the same question to all frameworks:",
+        "localizador": "p. 6 do PDF (impressa 6), Seção 5"
+      },
+      {
+        "trecho": "Write the code in Python that executes this task, including the appropriate error metrics, such as mean squared error, mean absolute error, mean relative error, mean fractional error, mean fractional bias, mean bias, R2 score and Pearson correlation coefficient.",
+        "localizador": "p. 6-7 do PDF (impressas 6-7), Seção 5, prompt inicial"
+      },
+      {
+        "trecho": "The LSTM has one layer with 10 units, a batch size 16, the activation function is ReLU, and the optimiser is Adam with a learning rate of 0.001, running for 10 epochs.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5, prompt inicial"
+      },
+      {
+        "trecho": "Please do as before, but take as input to the model all given features from the csv file.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.1"
+      },
+      {
+        "trecho": "A new question (second attempt) was posed, indicating the error and requesting that the model correct it.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.2"
+      },
+      {
+        "trecho": "However, an error occurred during execution because the code attempted to overwrite the Pandas DataFrame with all variables and create a Pandas DataFrame of the same name, which included only the three variables: temperature, relative humidity, and wind speed.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.2"
+      },
+      {
+        "trecho": "From the question asked, GPT did not understand that all variables in the file had to be taken as input, so a new question (second attempt) was asked, and this was clarified:",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.1"
+      },
+      {
+        "trecho": "MAPE is erroneous due to division by a minimal number (probably an observed velocity close to 0).",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.1"
+      },
+      {
+        "trecho": "The MAPE and MFE for wind speed are incorrect, likely due to division by a minimal number, close to zero.",
+        "localizador": "p. 9 do PDF (impressa 9), Seção 5.2"
+      },
+      {
+        "trecho": "We also calculated MAPE between the ground truth and wind speed for the OAI1 and OAI3 frameworks, as their calculations were not performed correctly.",
+        "localizador": "p. 12 do PDF (impressa 12), Seção 5.4"
+      },
+      {
+        "trecho": "The absence of context awareness in multi-step programming tasks means that LLMs may produce code that functions in isolation but fails when incorporated into larger programs, often resulting in bugs or errors [18].",
+        "localizador": "p. 2 do PDF (impressa 2), Seção 1"
+      },
+      {
+        "trecho": "While techniques like Chain of Thought (CoT) reasoning offer some improvement in transparency [21, 22, 23], LLMs still face significant hurdles in generating reliable, optimized code, often requiring human oversight to ensure correctness.",
+        "localizador": "p. 2 do PDF (impressa 2), Seção 1"
+      },
+      {
+        "trecho": "GPT  2  2  0  28.53  11.76",
+        "localizador": "p. 12 do PDF (impressa 12), Tabela 7, colunas Attempts until correct answer | Total queries | SB responses | ARTpQ (s) | Average MAPE (%)"
+      },
+      {
+        "trecho": "This time, the model generated a Python code within 3 seconds, considering all variables to predict temperature, relative humidity, and wind speed.",
+        "localizador": "p. 7 do PDF (impressa 7), Seção 5.1"
+      },
+      {
+        "trecho": "The evaluation focused on performance aspects such as inference efficiency, computational time, forecasting accuracy, memory utilization, and usability.",
+        "localizador": "p. 15 do PDF (impressa 15), Seção 6"
+      },
+      {
+        "trecho": "This demonstrates that AI-assisted code generation can yield results comparable to expert-designed implementations, provided that the models are correctly prompted and refined through iterative feedback.",
+        "localizador": "p. 15 do PDF (impressa 15), Seção 6"
+      },
+      {
+        "trecho": "We believe this emergent phenomenon occurs because all OpenAI models are regularly fine-tuned based on user interactions, including instances where users correct mistakes or upvote/downvote responses [58].",
+        "localizador": "p. 12-13 do PDF (impressas 12-13), Seção 5.4"
+      }
+    ]
+  },
+  "extracoes": [],
+  "selecao_motivo_geral": "Nenhuma extração: o estudo não executa contraste de técnicas de prompting. Os contrastes executados são entre modelos (GPT-4o, o1 pro, o3-mini-high) com a mesma pergunta inicial (seleção de modelo, fora do escopo) e entre os modelos gerados e o LSTM-H escrito pelos autores (referência humana). Não há principal declarado de prompting, nem tabela, figura ou trecho em prosa com contraste elegível de prompting; as técnicas de prompting presentes são componentes do procedimento de avaliação, sem técnica focal, logo também não há so_classificadas.",
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (propor o índice InI pela metodologia INFINITE e aplicá-lo a GPT-4o, o1 pro e o3-mini-high na geração de código Python de um LSTM) é declarado no resumo e na introdução.",
+      "localizador": "p. 1-2 do PDF (impressas 1-2), Abstract e Seção 1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O prompt inicial e a pergunta de esclarecimento são citados literalmente e a sequência de tentativas e tempos é narrada por modelo; mas as perguntas de correção enviadas ao OAI1 não são transcritas, e não se informam interface, data das interações, snapshot dos modelos, parâmetros de decodificação, número de repetições nem o critério operacional de resposta satisfatória.",
+      "localizador": "p. 6-9 do PDF (impressas 6-9), Seções 5-5.3"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparação entre três modelos com a mesma pergunta inicial e com um modelo de referência escrito pelos autores (LSTM-H); não há comparador de prompting, e as perguntas de seguimento diferem entre modelos.",
+      "localizador": "p. 6-12 do PDF (impressas 6-12), Seção 5, Tabelas 4-8"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas e índices são definidos por equações e o denominador das métricas de previsão (4.821 intervalos de teste) é informado; contudo, os valores de ARTpQ do GPT não batem com os tempos narrados, as médias de MAPE parecem truncadas, as linhas das Tabelas 5 e 6 têm origens diferentes (cálculo dos autores e do código gerado) e o MAPE de velocidade do vento, dominante na média, é sensível a valores próximos de zero sem descrição do recálculo.",
+      "localizador": "p. 3-5, 7, 9 e 12-13 do PDF (impressas 3-5, 7, 9 e 12-13), Equações 1-7, Tabelas 2-3 e 5-8"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças; o artigo reconhece apenas que os limiares de tempo e o multiplicador m dependem do usuário e do problema e que métricas como MAPE falham com valores próximos de zero; não discute tarefa única, ausência de repetições, não determinismo ou generalização.",
+      "localizador": "p. 3-4, 7 e 9 do PDF (impressas 3-4, 7 e 9), Seções 2 e 5"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Os prompts principais, os hiperparâmetros e a fonte dos dados são informados, e os autores declaram disponibilizar dados e códigos gerados em repositório GitHub (não acessado nesta extração); faltam versões ou snapshots dos modelos, datas, interface e parte dos prompts de seguimento.",
+      "localizador": "p. 5-7 e 16 do PDF (impressas 5-7 e 16), Seções 3-5 e Declarations"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença da tarefa, do conjunto de dados ou de soluções semelhantes no pré-treinamento dos modelos.",
+      "localizador": "texto completo (p. 1-16 do PDF)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [3, 4, 5, 6, 7, 9, 10, 12, 13, 16],
+    "observacao": "Texto extraído lido integralmente (incluindo referências). Na p. 4 do PDF, o texto extraído mostra os pesos do InI como '1', mas a imagem da página mostra '1/3'; adotou-se o valor do PDF, consistente com os valores de InI da Tabela 8. Expoentes (1.71×10^13, 9.5998×10^8, 2.24889×10^5, 2.0214×10^4) conferidos nas imagens das p. 7 e 9."
+  }
+}

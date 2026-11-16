@@ -1,0 +1,437 @@
+{
+  "estudo": "S591",
+  "texto_fonte": "fontes/textos/lote/S591.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "titulo": "Enhancing Code Generation for Low-Resource Languages: No Silver Bullet",
+    "versao_fonte": "arXiv:2501.19085v1 [cs.SE], 31 Jan 2025 (PDF de 10 páginas sem paginação impressa; localizadores usam a posição no arquivo)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Baseline",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção III.C (prompt de RQ1); p. 6, seção IV.A.1 (mesmo prompt em RQ2); p. 8, seção IV.D; p. 10, Listing 3, linhas 22-29",
+        "observacao": "Modelo usado sem alteração ('out of the box') com o prompt de geração formado pela descrição da função (docstring) e pela assinatura. A descrição em linguagem natural foi classificada como instrucao (zero-shot); os exemplos de chamada e saída esperada do docstring (por exemplo, Listing 3, linhas 27-28) foram classificados como exemplos ilustrativos. A assinatura da função faz parte da especificação da tarefa e não foi classificada separadamente como contexto. É a condição de referência das três técnicas de prompting."
+      },
+      {
+        "nome_original": "In-context Learning – Translation Examples",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, seção IV.A.1 e Listing 1; p. 9, Tabela III; p. 10, Listing 3",
+        "observacao": "Técnica apresentada pelos autores como proposta própria ('two prompts we devised', p. 2). Acrescenta ao prompt base dois pares de função Python e sua tradução na linguagem-alvo (R ou Racket), extraídos do conjunto MultiPL-T; os exemplos de código fornecidos como demonstração foram classificados como exemplos e contexto (D102). Contrafactual: mesma linha de modelo e linguagem com e sem os exemplos de tradução (Baseline vs. técnica, Tabela III). Diferença de condição não relacionada a prompting: o tamanho máximo de entrada foi 3.072 tokens para as técnicas de aprendizado em contexto; o valor usado para o Baseline em RQ2 não é declarado (1.024 em RQ1). O Few-shot usa os mesmos exemplos, apresentados como descrição e implementação na linguagem-alvo, o que permite um contraste de formato entre as duas técnicas (p. 7)."
+      },
+      {
+        "nome_original": "In-context Learning – Translation Rules",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6, seção IV.A.2 e Listing 2; p. 9, Tabela III",
+        "observacao": "Técnica apresentada pelos autores como proposta própria. Acrescenta regras de mapeamento Python→linguagem-alvo em linguagem natural (instrucao), cada uma com trechos ilustrativos 'Python: ... / R: ...' (exemplos ilustrativos de código), definidas a partir da documentação oficial das linguagens (contexto, conhecimento externo), e a diretriz 'Employ these rules ... First try to understand the code and then convert it to R.' (instrucao; não classificada como raciocinio porque não pede raciocínio explícito na saída). O contraste com o Baseline isola o pacote completo (regras, trechos e diretriz), não um único mecanismo. Listing 2 mostra só parte das regras ('...'); o prompt completo está apenas no pacote de replicação, não acessado. Mesma ressalva sobre o tamanho máximo de entrada (3.072 tokens nas técnicas de aprendizado em contexto)."
+      },
+      {
+        "nome_original": "In-context Learning – Few-shot Examples",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, seção IV.A.3; p. 7, primeiro parágrafo; p. 9, Tabela III",
+        "observacao": "Técnica da literatura ([5]) incluída entre as abordagens investigadas. Prompt 2-shot: duas descrições de função com implementação correta na linguagem-alvo, espelhando os exemplos do prompt de Translation Examples, sem o código Python. Exemplos de código como demonstração classificados como exemplos e contexto, com o mesmo critério da técnica Translation Examples. Contrafactual com e sem os exemplos (Baseline vs. técnica, Tabela III). O texto não imprime o prompt de Few-shot; está no pacote de replicação, não acessado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Fine-tuning – Code Generation",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino dos modelos DeepSeek Coder e Code Llama com os conjuntos MultiPL-T de Cassano et al. (37.592 funções R e 40.489 Racket), três épocas, avaliando cada época no próprio MultiPL-E e relatando a melhor. Não aplicado ao Copilot. Linhas da Tabela III não entram em extracoes.",
+        "localizador": "p. 7, seções IV.A.4 e IV.B; p. 8, seção IV.C"
+      },
+      {
+        "nome_original": "Pre-training & Fine-tuning – Code Translation and Generation",
+        "natureza": "ajuste_fino",
+        "descricao": "Treinamento adicional de tradução Python→R/Racket (22.796 pares R e 25.390 Racket) com o prompt 'Translate the following Python function to [R/Racket]', seguido do ajuste fino de geração. Altera pesos; o prompt de treinamento não é técnica de prompting na inferência.",
+        "localizador": "p. 7, seção IV.A.5"
+      },
+      {
+        "nome_original": "temperature 0.2",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura fixada em 0,2 em todas as gerações, seguindo Cassano et al. [19].",
+        "localizador": "p. 3, seção III.C; p. 10, seção V"
+      },
+      {
+        "nome_original": "maximum input and output length",
+        "natureza": "decodificacao",
+        "descricao": "Tamanho máximo de entrada e saída de 1.024 tokens em RQ1 para os modelos abertos; 3.072 tokens para as técnicas de aprendizado em contexto e 2.048 para o ajuste fino em RQ2. O valor para o Baseline em RQ2 não é declarado.",
+        "localizador": "p. 4, seção III.C; p. 8, seção IV.C"
+      }
+    ],
+    "baseline": "Baseline: modelo sem alteração com o prompt de geração de RQ1 (descrição da função seguida da assinatura), na mesma linguagem e no mesmo conjunto de 161 programas (Tabela III, linhas brancas).",
+    "modelos": [
+      {"nome": "DeepSeek Coder - Instruct", "versao": "1B (snapshot nao_informado)"},
+      {"nome": "DeepSeek Coder - Instruct", "versao": "7B (snapshot nao_informado)"},
+      {"nome": "DeepSeek Coder - Instruct", "versao": "33B (snapshot nao_informado)"},
+      {"nome": "Code Llama - Instruct", "versao": "7B (snapshot nao_informado)"},
+      {"nome": "Code Llama - Instruct", "versao": "13B (snapshot nao_informado)"},
+      {"nome": "GitHub Copilot", "versao": "nao_informado (o estudo diz que é construído sobre o Codex; tamanho 'Unknown'; data de uso nao_informado)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "MultiPL-E (traduções do HumanEval)",
+        "versao": "nao_informado",
+        "quantidade": "RQ1: 157 programas comuns às seis linguagens (dos 161 traduzidos dos 164 originais); RQ2: 161 programas em R e em Racket",
+        "observacao": "MBPP do MultiPL-E não foi usado. Os subconjuntos de RQ1 (157) e RQ2 (161) se sobrepõem, mas o estudo não lista os programas. Denominador declarado em RQ2: 161 programas × 50 repetições = 8.050 valores de pass@1 por técnica; em RQ1: 157 × 50 = 7.850."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "pass@1",
+        "definicao": "pass@k = 1 se alguma das k gerações passa em todos os testes unitários; pass@1 calculado com n = 50 repetições e média; taxas impressas em percentual nas tabelas",
+        "denominador": "RQ2: 161 programas × 50 repetições = 8.050 valores de pass@1 (p. 8); RQ1: 157 × 50 = 7.850 (p. 4)"
+      },
+      {
+        "nome": "Odds Ratio (McNemar com ajuste de Benjamini-Hochberg)",
+        "definicao": "Teste de McNemar sobre resultados dicotômicos pareados e OR como tamanho de efeito; em RQ2 os 162 testes estão só no pacote de replicação, com alguns OR citados no texto",
+        "denominador": "mesmas distribuições de 8.050 (RQ2) ou 7.850 (RQ1) valores"
+      }
+    ],
+    "linguagens": ["R", "Racket", "Julia (só RQ1)", "Lua (só RQ1)", "Java (só RQ1)", "Python (só RQ1; também linguagem de origem nos prompts de tradução)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Em linguagens de poucos recursos, o código gerado apresenta erros sintáticos por padrões, construções ou APIs de linguagens de muitos recursos, falhas em casos-limite e incompreensão dos requisitos (análise de amostra das gerações do Baseline em RQ1).",
+        "localizador": "p. 4, último parágrafo; p. 5, discussão da Fig. 1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos pequenos podem não aproveitar ou ser prejudicados por prompts complexos de aprendizado em contexto; Translation Rules piorou o Baseline em 2 de 6 modelos em R e 4 de 6 em Racket, e Few-shot piorou o Code Llama 13B em Racket.",
+        "localizador": "p. 8, coluna direita; p. 9, coluna esquerda"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O custo de inferência cresce com o tamanho do prompt, razão pela qual os exemplos foram mantidos concisos; custo não quantificado.",
+        "localizador": "p. 6, seção IV.A.1"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "A métrica pass@k pode ser enviesada pela aleatoriedade das gerações dos modelos.",
+        "localizador": "p. 10, seção V (Construct validity)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A métrica pass@k pode ser enviesada se os programas do benchmark não tiverem testes completos.",
+        "localizador": "p. 10, seção V (Construct validity)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Os prompts das técnicas de aprendizado em contexto têm impacto significativo e podem ter sido subótimos; resultados melhores poderiam ser obtidos com mais ajuste de prompt (ameaça à validade interna).",
+        "localizador": "p. 10, seção V (Internal validity)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada a quatro linguagens de poucos recursos, um produto fechado e duas famílias de modelos abertos (validade externa).",
+        "localizador": "p. 10, seção V (External validity)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "k = 1, temperatura baixa (0,2) e muitas repetições (n = 50; o texto de ameaças diz n ≥ 20), seguindo trabalho anterior, contra o viés da métrica pass@k.",
+        "avaliada": "nao",
+        "localizador": "p. 3, seção III.C; p. 10, seção V"
+      },
+      {
+        "descricao": "Experimentar três técnicas diferentes de aprendizado em contexto para atenuar o risco de prompts subótimos.",
+        "avaliada": "nao",
+        "localizador": "p. 10, seção V (Internal validity)"
+      },
+      {
+        "descricao": "Uso dos mesmos exemplos em Translation Examples e Few-shot para separar o efeito do formato do prompt do efeito do código mostrado.",
+        "avaliada": "nao",
+        "localizador": "p. 7, primeiro parágrafo"
+      },
+      {
+        "descricao": "Teste de McNemar com ajuste de Benjamini-Hochberg para comparações múltiplas e OR como tamanho de efeito.",
+        "avaliada": "nao",
+        "localizador": "p. 4, seção III.D; p. 8, seção IV.C"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os valores do Baseline diferem entre a Tabela I (RQ1, 157 programas) e a Tabela III (RQ2, 161 programas) para o mesmo modelo e linguagem: por exemplo, DeepSeek Coder 1B em R 14.3 (Tabela I) vs. 13.9 (Tabela III); DeepSeek Coder 7B em R 30.4 vs. 29.6 e em Racket 20.9 vs. 20.4; DeepSeek Coder 33B em R 30.9 vs. 30.2 e em Racket 33.1 vs. 32.5; Code Llama 7B em R 14.2 vs. 13.9 e em Racket 11.5 vs. 11.2; Code Llama 13B em R 15.6 vs. 15.2 e em Racket 15.2 vs. 14.8; Copilot em R 32.9 vs. 32.7 e em Racket 24.7 vs. 24.3. A diferença de subconjunto de programas é explicação compatível, mas o estudo não relaciona explicitamente as duas tabelas.",
+        "localizador": "p. 5, Tabela I; p. 9, Tabela III; p. 3, seção III.C; p. 8, seção IV.C"
+      },
+      {
+        "descricao": "Narrativa que contradiz a tabela: a introdução afirma que o DeepSeek Coder 1B não se beneficia do aprendizado em contexto 'despite not worsening its generation capabilities', mas a Tabela III mostra valores abaixo do Baseline para Translation Examples em R (13.8 vs. 13.9) e para Translation Rules em R (13.4 vs. 13.9) e em Racket (6.5 vs. 7.0). A significância desses contrastes não é impressa (testes só no pacote de replicação).",
+        "localizador": "p. 2, coluna esquerda; p. 9, Tabela III"
+      },
+      {
+        "descricao": "A conclusão afirma que o aprendizado em contexto 'always improves performance' e a resposta à RQ2 diz que Translation Examples é 'always boosting performance', mas a Tabela III mostra Translation Rules abaixo do Baseline em 2 de 6 modelos em R e 4 de 6 em Racket (conforme o próprio texto), Few-shot abaixo do Baseline no Code Llama 13B em Racket (13.9 vs. 14.8) e Translation Examples abaixo do Baseline no DeepSeek Coder 1B em R (13.8 vs. 13.9); o corpo do texto restringe a afirmação sobre Translation Examples ao excluir o modelo de 1B.",
+        "localizador": "p. 9, coluna esquerda e quadro Answer to RQ2; p. 10, seção VI; p. 9, Tabela III"
+      },
+      {
+        "descricao": "Sem técnica dominante: a melhor técnica de aprendizado em contexto varia por modelo e linguagem (Few-shot melhor em 4 modelos em R e 3 em Racket; Translation Examples nos demais, segundo o texto), e no modelo de 1B as técnicas de ajuste fino superam todas as de aprendizado em contexto.",
+        "localizador": "p. 8, seção IV.D; p. 9, coluna esquerda; p. 9, Tabela III"
+      },
+      {
+        "descricao": "Condição discrepante entre técnicas e Baseline: o tamanho máximo de entrada foi 3.072 tokens para as técnicas de aprendizado em contexto; o valor para o Baseline em RQ2 não é informado (1.024 tokens em RQ1). A comparação não declara se os limites eram idênticos.",
+        "localizador": "p. 4, seção III.C; p. 8, seção IV.C"
+      },
+      {
+        "descricao": "Em RQ1, o texto afirma que as diferenças entre linguagens de muitos e de poucos recursos são todas significativas, exceto Python vs. Lua no Copilot, mas a Tabela II mostra OR menor que 1 para Java vs. Lua no Code Llama 7B (0.85) e no Copilot (0.72), isto é, inversão a favor de Lua (Tabela I: Code Llama 7B Lua 32.3 vs. Java 30.6; Copilot Lua 61.4 vs. Java 57.2). O texto reconhece essas exceções ao comentar os OR.",
+        "localizador": "p. 4, coluna direita; p. 5, Tabelas I e II"
+      },
+      {
+        "descricao": "O texto expressa diferenças absolutas de pass@1 com '%' (por exemplo, '+8.4% of pass@1 over the baseline' para Few-shot no Copilot em R, Tabela III 41.1 vs. 32.7; '+0.9%' a '+6.3%' para Translation Examples); pelo cálculo próprio a partir da Tabela III, são diferenças em pontos percentuais, não variações relativas.",
+        "localizador": "p. 8, coluna direita; p. 9, coluna esquerda; p. 9, Tabela III"
+      },
+      {
+        "descricao": "Os resultados dos testes estatísticos de RQ2 (162 testes) não estão no artigo; só alguns OR são citados no texto. A significância dos contrastes extraídos (DeepSeek Coder 1B em R) é nao_informado no artigo.",
+        "localizador": "p. 8, seção IV.D"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "As gerações do GitHub Copilot foram obtidas por um programa AppleScript que abre o Visual Studio Code, acessa o arquivo com a função, aciona o Copilot e salva o código, em 50 sessões independentes. O estudo não descreve como os prompts de aprendizado em contexto foram inseridos no arquivo para o Copilot nem controla a temperatura ou o tamanho de contexto do Copilot.",
+        "localizador": "p. 4, seção III.C"
+      },
+      {
+        "descricao": "Nas técnicas de ajuste fino (fora do escopo), cada época foi avaliada no próprio MultiPL-E e só a melhor foi relatada; o DeepSeek Coder 33B piorou em relação ao Baseline após o ajuste fino (OR 1.64 em R e 1.42 em Racket, segundo o texto).",
+        "localizador": "p. 8, seções IV.C e IV.D"
+      },
+      {
+        "descricao": "Listing 3 ilustra qualitativamente um caso (DeepSeek Coder 33B, R) em que o Baseline devolve vetor em vez de lista e Translation Examples corrige a saída; é exemplo selecionado pelos autores como representativo, não medida.",
+        "localizador": "p. 9, coluna direita; p. 10, Listing 3"
+      },
+      {
+        "descricao": "Pacote de replicação citado (https://doi.org/10.5281/zenodo.13128630) com prompts completos, resultados por época e testes estatísticos; não acessado nem validado nesta extração.",
+        "localizador": "p. 6, seção IV.A.2; p. 8, seções IV.C e IV.D; p. 11, referência [27]"
+      },
+      {
+        "descricao": "RQ1 compara linguagens com o mesmo prompt (sem técnica de prompting) e não fornece contraste de prompting; a Tabela I é descritiva para fins desta revisão.",
+        "localizador": "p. 3-5, seção III"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We present an empirical study investigating the effectiveness of several approaches for boosting LLMs’ performance on low-resource languages, namely: (i) a classic fine-tuning, which is however capped in size by the scarcity of training data; (ii) three variants of in-context learning, with prompts crafted to provide the LLM with additional information about the low-resource language (e.g., few-shot examples showcasing features of the targeted language); and (iii) a pre-training objective teaching the model how to translate between high- and low-resource languages.",
+        "localizador": "p. 1, Abstract"
+      },
+      {
+        "trecho": "We experiment with three in-context learning techniques, including few-shot learning [5] as well as two prompts we devised which provide the model with information on how to map a given code in a high-resource language into the same code written in the low-resource language.",
+        "localizador": "p. 2, seção I, coluna esquerda"
+      },
+      {
+        "trecho": "The input prompt used for code generation is composed of the function description and its signature.",
+        "localizador": "p. 4, seção III.C"
+      },
+      {
+        "trecho": "In particular, we provide the model with two examples of translations, considering Python as the high-resource language due to its popularity and succinctness.",
+        "localizador": "p. 6, seção IV.A.1"
+      },
+      {
+        "trecho": "The examples have been extracted from the previously discussed MultiPL-T dataset [2] (Section II).",
+        "localizador": "p. 6, seção IV.A.1"
+      },
+      {
+        "trecho": "This technique aims to instruct the model with a pre-defined set of mapping rules from a high-resource language, i.e., Python, to the target low-resource language, e.g., R.",
+        "localizador": "p. 6, seção IV.A.2"
+      },
+      {
+        "trecho": "The translation rules have been defined by the first author by looking at the official documentation of the involved languages (Python, R, Racket), trying to map the main building blocks of the languages.",
+        "localizador": "p. 6, seção IV.A.2"
+      },
+      {
+        "trecho": "Employ these rules to generate R code, leveraging your Python knowledge. First try to understand the code and then convert it to R.",
+        "localizador": "p. 6, Listing 2"
+      },
+      {
+        "trecho": "In this case, an example (shot) represents a description of a function to implement and a possible correct implementation.",
+        "localizador": "p. 6, seção IV.A.3"
+      },
+      {
+        "trecho": "Using the same examples among the two techniques allows for a better comparison between them.",
+        "localizador": "p. 7, primeiro parágrafo"
+      },
+      {
+        "trecho": "Indeed, the inference cost of the models increases with the increase in size of the prompt.",
+        "localizador": "p. 6, seção IV.A.1"
+      },
+      {
+        "trecho": "The pass@k metric may be subject to bias, e.g., due to the randomness of the models’ generations or if the programs from the benchmark do not include thorough test cases.",
+        "localizador": "p. 10, seção V (Construct validity)"
+      },
+      {
+        "trecho": "To mitigate this threat, we adopted the same strategy as previous work [19], setting k = 1 with a low temperature value for the models’ generations (0.2) and a high number of repetitions (n ≥ 20).",
+        "localizador": "p. 10, seção V (Construct validity)"
+      },
+      {
+        "trecho": "While we may have used suboptimal prompts, we partially alleviated this threat by experimenting with three different in-context learning techniques.",
+        "localizador": "p. 10, seção V (Internal validity)"
+      },
+      {
+        "trecho": "In some cases, we observed syntactical errors in the form of patterns, constructs or APIs not supported by the low-resource language but resembling those of high-resource languages.",
+        "localizador": "p. 4, coluna direita"
+      },
+      {
+        "trecho": "As for the in-context learning-based, it is clear that translation rules is the one performing the worst, worsening the performance of the baseline for 2 out of 6 models in R and 4 out of 6 in Racket.",
+        "localizador": "p. 9, coluna esquerda"
+      },
+      {
+        "trecho": "Essentially, it seems that small models can substantially benefit from the (limited) fine-tuning possible for low-resource languages, while they suffer when it comes to the interpretation of complex prompts such as those used with in-context learning.",
+        "localizador": "p. 8, coluna direita"
+      },
+      {
+        "trecho": "Our findings show that for the smallest model in our study (DeepSeek Coder 1B), a fine-tuning (with/without pre-training) helps in substantially boosting performance, while the model seems to not benefit from in-context learning (despite not worsening its generation capabilities), probably due to its limited ability to interpret complex prompts.",
+        "localizador": "p. 2, coluna esquerda"
+      },
+      {
+        "trecho": "On the other hand, in-context learning remains a safe and cheap bet in all cases (i.e., it always improves performance), especially for larger models (e.g., over 30B parameters).",
+        "localizador": "p. 10, seção VI"
+      },
+      {
+        "trecho": "However, for in-context learning-based techniques, we set it to 3,072 tokens to account for the additional, longer instructions introduced in the prompt (e.g., multiple code generation examples).",
+        "localizador": "p. 8, seção IV.C"
+      },
+      {
+        "trecho": "In addition, note that the fine-tuning-based techniques have only been applied to the models of the DeepSeek Coder and Code Llama families, since it is not possible to fine-tune Copilot.",
+        "localizador": "p. 7, seção IV.B"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-context Learning – Translation Examples",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "Baseline",
+      "modelo": "DeepSeek Coder - Instruct 1B",
+      "benchmark": "MultiPL-E (HumanEval traduzido para R), 161 programas",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 13.9, "intervencao": 13.8},
+      "denominador": "161 programas × 50 repetições = 8.050 valores de pass@1 por técnica (p. 8)",
+      "condicoes": "Linguagem R. Dois exemplos de tradução Python→R extraídos do MultiPL-T, seguidos do prompt de geração (descrição e assinatura). pass@1 médio em n = 50 repetições; temperatura 0,2; tamanho máximo de entrada de 3.072 tokens para a técnica, valor para o Baseline em RQ2 nao_informado. Significância e OR deste contraste não impressos no artigo (só no pacote de replicação, não acessado). conferido_pdf: valores, cabeçalhos (R, Racket) e legenda conferidos na imagem da p. 9 (Tabela III).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo, a resposta à RQ2 e a conclusão destacam várias técnicas (ajuste fino para modelos pequenos, aprendizado em contexto e Translation Examples) sem que uma prevaleça. A Tabela I é descritiva (sem contraste de prompting); a primeira tabela com o contraste é a Tabela III: primeira métrica (pass@1, coluna R), primeiro modelo (DeepSeek Coder 1B), primeira técnica de prompting listada contra o Baseline.",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (sem página impressa), Tabela III, DeepSeek Coder - Instruct 1B, coluna R",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Baseline 13.9 7.0", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Baseline; colunas Technique, R, Racket"},
+        {"trecho": "In-context Learning – Translation Examples 13.8 7.7", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Translation Examples; colunas Technique, R, Racket"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-context Learning – Translation Rules",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "contexto"],
+      "comparador": "Baseline",
+      "modelo": "DeepSeek Coder - Instruct 1B",
+      "benchmark": "MultiPL-E (HumanEval traduzido para R), 161 programas",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 13.9, "intervencao": 13.4},
+      "denominador": "161 programas × 50 repetições = 8.050 valores de pass@1 por técnica (p. 8)",
+      "condicoes": "Linguagem R. Regras de mapeamento Python→R com trechos ilustrativos e diretriz final, seguidas do prompt de geração; contraste de pacote (regras, trechos e diretriz juntos). pass@1 médio em n = 50 repetições; temperatura 0,2; tamanho máximo de entrada de 3.072 tokens para a técnica, valor para o Baseline em RQ2 nao_informado. Significância não impressa no artigo. conferido_pdf: valores conferidos na imagem da p. 9 (Tabela III).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela III, pass@1, coluna R, primeiro modelo).",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (sem página impressa), Tabela III, DeepSeek Coder - Instruct 1B, coluna R",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Baseline 13.9 7.0", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Baseline; colunas Technique, R, Racket"},
+        {"trecho": "In-context Learning – Translation Rules 13.4 6.5", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Translation Rules; colunas Technique, R, Racket"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-context Learning – Few-shot Examples",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "Baseline",
+      "modelo": "DeepSeek Coder - Instruct 1B",
+      "benchmark": "MultiPL-E (HumanEval traduzido para R), 161 programas",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 13.9, "intervencao": 14.1},
+      "denominador": "161 programas × 50 repetições = 8.050 valores de pass@1 por técnica (p. 8)",
+      "condicoes": "Linguagem R. Prompt 2-shot com descrição e implementação em R, usando os mesmos exemplos de Translation Examples sem o código Python. pass@1 médio em n = 50 repetições; temperatura 0,2; tamanho máximo de entrada de 3.072 tokens para a técnica, valor para o Baseline em RQ2 nao_informado. Significância não impressa no artigo. conferido_pdf: valores conferidos na imagem da p. 9 (Tabela III).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela III, pass@1, coluna R, primeiro modelo).",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (sem página impressa), Tabela III, DeepSeek Coder - Instruct 1B, coluna R",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Baseline 13.9 7.0", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Baseline; colunas Technique, R, Racket"},
+        {"trecho": "In-context Learning – Few-shot Examples 14.1 8.4", "localizador": "p. 9, Tabela III, linha DeepSeek Coder - Instruct 1B / Few-shot Examples; colunas Technique, R, Racket"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Duas questões de pesquisa explícitas: RQ1 sobre a diferença de desempenho entre linguagens de muitos e de poucos recursos e RQ2 sobre as técnicas mais adequadas para melhorar a geração em linguagens de poucos recursos.",
+      "localizador": "p. 3, seção III (RQ1); p. 6, seção IV (RQ2)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Técnicas, origem dos exemplos, modelos, temperatura, repetições e treinamento estão descritos, mas os prompts aparecem só parcialmente (Listing 2 com '...'; Few-shot não impresso), o tamanho máximo de entrada do Baseline em RQ2 não é declarado e a forma de entregar os prompts de aprendizado em contexto ao Copilot não é descrita.",
+      "localizador": "p. 4, seção III.C; p. 6-7, seção IV.A; p. 8, seção IV.C"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Baseline executado com o mesmo modelo, linguagem e conjunto de 161 programas para todas as técnicas; Translation Examples e Few-shot usam os mesmos exemplos para comparação controlada. Ressalva: possível diferença no tamanho máximo de entrada não declarada para o Baseline.",
+      "localizador": "p. 7, primeiro parágrafo; p. 8, seções IV.C e IV.D; p. 9, Tabela III"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "atende",
+      "justificativa": "pass@1 definido, com n = 50 e denominadores informados (157 × 50 em RQ1; 161 × 50 em RQ2); teste de McNemar com ajuste de Benjamini-Hochberg e OR. Os valores do Baseline diferem entre Tabela I e Tabela III, de modo compatível com os subconjuntos distintos (157 vs. 161 programas). Os resultados dos testes de RQ2 estão só no pacote de replicação.",
+      "localizador": "p. 3, seção III.C; p. 4, seção III.D; p. 8, seção IV.C; p. 5, Tabela I; p. 9, Tabela III"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças discute validade de construto (viés de pass@k), interna (hiperparâmetros padrão, prompts possivelmente subótimos, número de épocas) e externa (linguagens e modelos).",
+      "localizador": "p. 10, seção V"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Pacote de replicação citado com prompts completos e resultados, e parâmetros de treinamento e geração informados; porém versão e data de uso do GitHub Copilot não são informadas e o processo do Copilot depende de automação de interface. O pacote não foi acessado nesta extração.",
+      "localizador": "p. 4, seção III.C; p. 6, seção IV.A.2; p. 7, seção IV.B; p. 11, referência [27]"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O texto não discute possível presença do HumanEval/MultiPL-E no pré-treinamento dos modelos nem sobreposição entre os exemplos extraídos do MultiPL-T (ou os dados de ajuste fino) e os problemas de teste.",
+      "localizador": "busca no texto completo (p. 1-11)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-03", "p-04", "p-05", "p-06", "p-07", "p-08", "p-09", "p-10"],
+    "observacao": "Texto extraído lido integralmente; valores da Tabela III (extracoes) e das Tabelas I e II (heterogeneidade) conferidos nas imagens das p. 5 e 9; prompts conferidos nas p. 6 e 10."
+  }
+}

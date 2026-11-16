@@ -1,0 +1,364 @@
+{
+  "estudo": "S682",
+  "texto_fonte": "fontes/textos/lote/S682.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2504.04351v1 [cs.SE], 6 Apr 2025 (impresso na margem da p. 1 do PDF)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Manual Prompt",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Fig. 4); p. 7 do PDF (Seção IV-C e IV-E); p. 8 do PDF (Tabela I, linhas «Manual Prompt»)",
+        "observacao": "Prompt base: o template padrão do conjunto CodeAlpaca, com a parte de contexto «Below is an instruction that describes a task. Write a response that appropriately completes the request.», seguida do cabeçalho de instrução (instrução em linguagem natural do conjunto de dados) e do cabeçalho de resposta. É a única condição de prompting em sentido estrito do estudo. As duas outras condições da Tabela I (PT e DDPT) mantêm a parte de instrução, mas alteram a parte de contexto no espaço de embeddings com parâmetros treinados por gradiente, por isso foram registradas em componentes_fora_escopo (embeddings_aprendidos) e não em tecnicas. Não há condição sem o Manual Prompt; ele é a linha de base contra a qual o estudo compara as técnicas de embeddings."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Diffusion-Driven Prompt Tuning (DDPT)",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "Técnica focal do estudo. Um modelo de difusão (backbone transformer com desenho semelhante a U-Net) gera, a partir de ruído gaussiano, um vetor direcional que é somado ao embedding da parte de contexto do prompt; o contexto otimizado é concatenado ao embedding da instrução e enviado ao LLM congelado. Os parâmetros do modelo de difusão são atualizados por descida de gradiente com a perda de geração de código do LLM. O próprio estudo classifica a abordagem como otimização de prompt contínuo (soft prompt). Inclui amostragem com 2000 passos de difusão e aumento de dados que repete a sequência de treino três vezes adicionais por época. Por ser intervenção sobre embeddings treinados, e não prompting em linguagem natural, não entra em tecnicas nem em extracoes.",
+        "localizador": "p. 1 do PDF (resumo; Index Terms: Soft Prompt); p. 2 do PDF (Fig. 1 e introdução); p. 3–5 do PDF (Seção III; Algoritmo 1); p. 7 do PDF (Seção IV-D e IV-E)"
+      },
+      {
+        "nome_original": "PT (prompt tuning [7])",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "Comparador executado na Tabela I: prompt tuning de Lester et al. [7], que acrescenta tokens treináveis ao prompt e os atualiza por gradiente da perda de modelagem de linguagem. Configuração (número de tokens, inicialização, hiperparâmetros) não informada.",
+        "localizador": "p. 1 do PDF (descrição de Prompt Tuning [7]); p. 8 do PDF (Tabela I, linhas «PT»); p. 8–9 do PDF (Seção V-A)"
+      },
+      {
+        "nome_original": "instructcodeT5p-16B (variante ajustada no CodeAlpaca)",
+        "natureza": "ajuste_fino",
+        "descricao": "Um dos quatro modelos avaliados é uma variante ajustada (fine-tuned) da série codeT5p no próprio conjunto CodeAlpaca. O estudo usa esse modelo como referência de «LLM finetuning» ao afirmar que codeT5p-16B com DDPT igualou ou superou o modelo ajustado. O ajuste fino não foi realizado pelo estudo.",
+        "localizador": "p. 7 do PDF (Seção IV-E, RQ1); p. 9 do PDF (Seção V-A)"
+      },
+      {
+        "nome_original": "greedy decoding; 1.2 repetition penalty; no-repeat n-gram setting of 2",
+        "natureza": "decodificacao",
+        "descricao": "Decodificação gulosa em todas as condições; penalidade de repetição de 1,2 e bloqueio de n-gramas repetidos de tamanho 2, aplicados para tratar tokens repetidos observados com o prompt otimizado. Não está claro no texto se os dois ajustes foram aplicados a todas as condições da Tabela I.",
+        "localizador": "p. 7 do PDF (Seção IV-E); p. 8 do PDF (último parágrafo de RQ1); p. 9 do PDF (Seção V-C)"
+      },
+      {
+        "nome_original": "prefix-LM configuration",
+        "natureza": "outro",
+        "descricao": "Contexto e instrução são enviados ao encoder do codeT5p e somente a instrução é enviada ao decoder como decoder start ids, para emular um prefix-LM. É configuração de entrada do modelo encoder-decoder, comum a todas as condições, e não técnica de prompting comparada.",
+        "localizador": "p. 7 do PDF (Seção IV-D)"
+      }
+    ],
+    "modelos": [
+      {"nome": "codeT5p-2B (CodeT5+ [40])", "versao": "nao_informado (apenas tamanho de 2B)"},
+      {"nome": "codeT5p-6B (CodeT5+ [40])", "versao": "nao_informado (apenas tamanho de 6B)"},
+      {"nome": "codeT5p-16B (CodeT5+ [40])", "versao": "nao_informado (apenas tamanho de 16B)"},
+      {"nome": "instructcodeT5p-16B", "versao": "nao_informado; descrito como variante da série codeT5p ajustada no CodeAlpaca"},
+      {"nome": "modelo de difusão do DDPT (backbone transformer em desenho semelhante a U-Net)", "versao": "nao_informado; componente treinado pelo estudo, fora do escopo de prompting"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CodeAlpaca [38] (CodeAlpaca20k)",
+        "quantidade": "20k amostras no conjunto; o estudo usou somente as amostras sem input, 9,761 amostras, para treino e avaliação",
+        "observacao": "Divisão entre treino e avaliação e número de amostras avaliadas por métrica: nao_informado. O denominador das métricas da Tabela I não é ligado às 9,761 amostras. Conjunto multilinguagem."
+      },
+      {
+        "nome": "CoNaLa [39]",
+        "quantidade": "nao_informado",
+        "observacao": "Conjunto de Python coletado do Stack Overflow, filtrado automaticamente e curado manualmente. Tamanho usado, divisão treino/avaliação e denominador das métricas: nao_informado."
+      }
+    ],
+    "metricas": [
+      {"nome": "BLEU-4 (rotulado «BLEU» na Tabela I)", "aplicacao": "CodeAlpaca e CoNaLa", "localizador": "p. 6 do PDF (Seção IV-A); p. 8 do PDF (Tabela I)"},
+      {"nome": "ChrF", "aplicacao": "CodeAlpaca e CoNaLa", "localizador": "p. 6 do PDF; p. 8 do PDF (Tabela I)"},
+      {"nome": "Rouge-L (R-L)", "aplicacao": "CodeAlpaca e CoNaLa", "localizador": "p. 6 do PDF; p. 8 do PDF (Tabela I)"},
+      {"nome": "METEOR (MET)", "aplicacao": "CodeAlpaca e CoNaLa", "localizador": "p. 6 do PDF; p. 8 do PDF (Tabela I)"},
+      {"nome": "CodeBLEU", "aplicacao": "somente CoNaLa", "localizador": "p. 6 do PDF; p. 8 do PDF (Tabela I)"},
+      {"nome": "análise manual qualitativa de correção funcional (RQ2, dois exemplos na Fig. 5)", "aplicacao": "exemplos do CodeAlpaca", "localizador": "p. 8–9 do PDF (RQ2; Fig. 5)"}
+    ],
+    "linguagens": [
+      "Python (CoNaLa)",
+      "múltiplas linguagens no CodeAlpaca, não enumeradas pelo estudo (os exemplos das Fig. 1 e 3 incluem JavaScript, React, MySQL e Python)"
+    ],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Os aspectos de segurança do código gerado não foram examinados; o estudo também aponta que estratégias de decodificação baseadas em probabilidade poderiam introduzir novas vulnerabilidades. Não quantificado.",
+        "localizador": "p. 9 do PDF (Seção V-B)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A correção funcional não foi avaliada com métricas baseadas em execução (por exemplo, Pass@k); as métricas usadas medem similaridade com o código de referência. Na análise manual (Fig. 5), o prompt manual produziu condições de base incorretas na sequência de Fibonacci e código que não atende à funcionalidade pretendida na ordenação de chaves de dicionário.",
+        "localizador": "p. 9–10 do PDF (Seção V-D); p. 8 do PDF (RQ2); p. 9 do PDF (Fig. 5)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Tokens repetidos na saída de código gerada com o prompt otimizado pelo DDPT.",
+        "localizador": "p. 9 do PDF (Seção V-C)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo computacional de treino alto, porque cada atualização do modelo de difusão exige uma passagem de inferência pelo LLM; o estudo usou apenas amostras sem input e apenas a série codeT5p por limitação computacional. Não quantificado (não há tempo de treino, hardware ou consumo informados; só a menção de que gerar os embeddings otimizados levou menos de 30 segundos).",
+        "localizador": "p. 7 do PDF (Seção IV-B; Seção IV-E); p. 9 do PDF (Seção V-A)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Penalidade de repetição de 1,2 e bloqueio de n-gramas repetidos de tamanho 2 para tratar tokens repetidos; o estudo afirma que os ajustes ajudaram, mas não apresenta comparação medida com e sem eles. É também componente de decodificação, fora do escopo de prompting.",
+        "avaliada": "nao",
+        "localizador": "p. 9 do PDF (Seção V-C)"
+      },
+      {
+        "descricao": "LLMs mantidos congelados (sem atualização de gradiente) e decodificação gulosa comum às condições, como controle do procedimento.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção IV-E)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Manual Prompt (template do CodeAlpaca) e PT (prompt tuning [7]), ambos executados pelo estudo nos mesmos modelos, conjuntos e métricas (Tabela I, p. 8 do PDF). Não há contraste entre duas técnicas de prompting: o único contraste executado opõe técnicas de embeddings aprendidos (fora do escopo) ao prompt manual.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão: no CodeAlpaca com instructcodeT5p-16B, DDPT tem R-L 37.39 e MET 38.96, abaixo de Manual Prompt (45.81 e 40.49) e de PT (44.89 e 40.46), embora seja superior em BLEU (21.66) e ChrF (31.54). O estudo reconhece a inversão.",
+        "localizador": "p. 8 do PDF (Tabela I, bloco instructcodeT5p-16B, colunas CodeAlpaca BLEU, ChrF, R-L, MET); p. 7 do PDF (Seção IV-E)"
+      },
+      {
+        "descricao": "Resultados mistos no CoNaLa: com codeT5p-2B, PT supera DDPT em BLEU (8.87 contra 6.73), ChrF (21.39 contra 17.59) e R-L (25.12 contra 17.28); com codeT5p-6B, PT supera DDPT em ChrF (19.24 contra 16.96) e R-L (21.82 contra 18.81).",
+        "localizador": "p. 8 do PDF (Tabela I, blocos codeT5p-2B e codeT5p-6B, colunas CoNaLa); p. 7 do PDF (Seção IV-E)"
+      },
+      {
+        "descricao": "Narrativa que contradiz a tabela: o texto afirma que codeT5p-16B com DDPT «matched or even outperformed» o instructcodeT5p-16B ajustado «across metrics», e a Seção V-A diz que o método igualou o desempenho do ajuste fino. Na Tabela I, codeT5p-16B DDPT fica abaixo de instructcodeT5p-16B Manual Prompt em CodeAlpaca ChrF (26.65 contra 29.64), R-L (29.58 contra 45.81) e MET (32.73 contra 40.49) e em CoNaLa BLEU (14.76 contra 15.44) e R-L (28.62 contra 31.10); fica ainda mais abaixo em relação às linhas PT e DDPT do instructcodeT5p-16B. O texto não identifica com qual condição do modelo ajustado a comparação foi feita.",
+        "localizador": "p. 7 do PDF (Seção IV-E, RQ1); p. 9 do PDF (Seção V-A); p. 8 do PDF (Tabela I, blocos codeT5p-16B e instructcodeT5p-16B)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente da tabela: o texto diz que, no CodeAlpaca, o prompt manual superou o PT em todos os modelos, com codeT5p-2B e instructcodeT5p-16B como únicas exceções. Para instructcodeT5p-16B, a tabela mostra resultado misto, e não exceção completa: PT é maior em BLEU (18.00 contra 16.65) e ChrF (30.02 contra 29.64), mas o Manual Prompt é maior em R-L (45.81 contra 44.89) e MET (40.49 contra 40.46).",
+        "localizador": "p. 7–8 do PDF (Seção IV-E, RQ1); p. 8 do PDF (Tabela I, bloco instructcodeT5p-16B, colunas CodeAlpaca)"
+      },
+      {
+        "descricao": "O texto descreve melhoras «significantly better» em METEOR e CodeBLEU no CoNaLa, mas o estudo não relata teste estatístico, intervalo de confiança, variância nem número de execuções.",
+        "localizador": "p. 7 do PDF (Seção IV-E, RQ1)"
+      },
+      {
+        "descricao": "Procedimento ambíguo: «the optimal results were recorded» após decodificação gulosa, sem dizer sobre quais execuções, sementes ou amostragens de difusão o melhor resultado foi escolhido; número de execuções: nao_informado. A amostragem de difusão é estocástica (termo σt z), o que torna relevante saber quantas amostras foram geradas.",
+        "localizador": "p. 7 do PDF (Seção IV-E); p. 3 do PDF (Equação 2)"
+      },
+      {
+        "descricao": "Resultado prometido e não relatado: o estudo diz explorar uma variante do objetivo de treino (só perda de modelagem de linguagem) e avaliar a diferença de desempenho na seção seguinte, mas a Seção IV não apresenta essa comparação; a Tabela I traz apenas Manual Prompt, PT e DDPT.",
+        "localizador": "p. 5 do PDF (Seção III-C); p. 7–8 do PDF (Seção IV-E; Tabela I)"
+      },
+      {
+        "descricao": "Denominadores ausentes: o número de amostras avaliadas por conjunto e a divisão entre treino e avaliação não são informados; o tamanho do CoNaLa usado não é informado. As 9,761 amostras do CodeAlpaca são descritas como base para treino e avaliação, sem separação declarada.",
+        "localizador": "p. 7 do PDF (Seção IV-B)"
+      },
+      {
+        "descricao": "Possível sobreposição entre dados de ajuste e de avaliação: instructcodeT5p-16B é descrito como ajustado no CodeAlpaca, que também é um dos conjuntos de avaliação; o estudo não discute o efeito disso nos resultados nem como risco de contaminação.",
+        "localizador": "p. 7 do PDF (Seção IV-E, RQ1)"
+      },
+      {
+        "descricao": "RQ2 é respondida por análise manual de dois exemplos (Fibonacci e ordenação de chaves de dicionário), da qual o estudo conclui maior capacidade de gerar código semanticamente correto; não há medida sistemática de correção funcional.",
+        "localizador": "p. 8 do PDF (RQ2); p. 9 do PDF (Fig. 5); p. 9–10 do PDF (Seção V-D)"
+      },
+      {
+        "descricao": "Limitações declaradas do DDPT: só trabalha com prompts de comprimento fixo (a parte de contexto do template), o que impede avaliar o efeito do comprimento do prompt; o caminho de amostragem da difusão é uma caixa-preta sem controle; os embeddings otimizados não são diretamente compreensíveis por humanos e vários tokens compartilham os mesmos vizinhos mais próximos.",
+        "localizador": "p. 10 do PDF (Seção VI-A e VI-B); p. 8 do PDF (RQ3)"
+      },
+      {
+        "descricao": "Abrangência limitada declarada pelo estudo: apenas a série codeT5p (encoder-decoder) e apenas prompt tuning como comparador de otimização de embeddings; outras técnicas (BBT, RLPrompt) e arquiteturas não foram testadas.",
+        "localizador": "p. 8–9 do PDF (Seção V-A)"
+      },
+      {
+        "descricao": "Diferença de rótulo: o texto anuncia BLEU-4, e a Tabela I usa o cabeçalho «BLEU», sem indicar a ordem de n-gramas.",
+        "localizador": "p. 6 do PDF (Seção IV-A); p. 7 do PDF (Seção IV-E); p. 8 do PDF (Tabela I)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Nenhuma extração numérica foi registrada: a técnica focal (DDPT) e o outro comparador (PT) são intervenções de embeddings aprendidos, fora do escopo de prompting; o Manual Prompt é a única condição de prompting e não é comparado com outra técnica de prompting. Os contrastes DDPT × Manual Prompt da Tabela I medem o efeito de um pacote de embeddings treinados, não de prompting.",
+        "localizador": "p. 8 do PDF (Tabela I)"
+      },
+      {
+        "descricao": "Componentes do DDPT descritos pelo estudo: conversão da parte de contexto em embeddings de dimensão 1024; perturbação com ruído gaussiano; projeção para dimensão menor e de volta à dimensão original (inspirada no BBT); soma vetorial ao embedding original; objetivo de treino só com a perda de modelagem de linguagem; amostragem DDPM com 2000 passos; interpretação por vizinhos mais próximos via similaridade de cosseno.",
+        "localizador": "p. 4–5 do PDF (Seção III; Algoritmo 1; Equações 3 e 4); p. 7 do PDF (Seção IV-E)"
+      },
+      {
+        "descricao": "RQ3 (interpretabilidade): visualização t-SNE dos cinco vizinhos mais próximos de cada um dos 19 tokens do contexto otimizado; no CodeAlpaca os vizinhos mais próximos incluíram «editor», «learn», «player», «invaders» e «Andre»; no CoNaLa, «transformations», «Border», «Camera», «Dim» e «lower». É análise descritiva, sem comparador.",
+        "localizador": "p. 8 do PDF (RQ3); p. 10 do PDF (Fig. 6)"
+      },
+      {
+        "descricao": "O estudo imprime o endereço do código (https://github.com/OOGZleo/DDPT); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 do PDF (final da introdução)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Our research investigates the application of diffusion-based techniques for generating optimized prompt embeddings in NL2Code generation tasks instead of performing optimization on the parameters of the prompt.",
+        "localizador": "p. 10 do PDF, Seção VII"
+      },
+      {
+        "trecho": "Using NL2Code (natural-language-to-code) [2] configuration, a code generation model takes natural language instruction as input and outputs code snippets.",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "We develop a diffusion-based generator that transforms random noise into a meaningful direction vector.",
+        "localizador": "p. 2 do PDF, Seção I"
+      },
+      {
+        "trecho": "The diffusion model parameters are updated through gradient descent based on the LLM’s code generation loss.",
+        "localizador": "p. 2 do PDF, Seção I"
+      },
+      {
+        "trecho": "Our approach optimizes continuous prompt, as we believe the discrete prompt optimization is more computationally challenging [8].",
+        "localizador": "p. 3 do PDF, Seção III"
+      },
+      {
+        "trecho": "Prompt Tuning [7] proposed to prepend a fixed number of update-able tokens to the original prompt, these tokens have associated trainable parameters and can be updated by gradient computed from language modeling losses on the downstream objective.",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "In this study, we compare our approach with the prompt tuning study [7] which is representative of the prompt embedding optimization technique, and update the prompt embedding based on gradient descent.",
+        "localizador": "p. 8–9 do PDF, Seção V-A"
+      },
+      {
+        "trecho": "Given the challenges in determining a suitable context structure manually, we have adopted the prompt template used in the CodeAlpaca dataset.",
+        "localizador": "p. 7 do PDF, Seção IV-C"
+      },
+      {
+        "trecho": "Below is an instruction that describes a task. Write a response that appropriately completes the request.",
+        "localizador": "p. 5 do PDF, Fig. 4 (parte de contexto do template)"
+      },
+      {
+        "trecho": "We refer to the context prompt in the original prompt template as the manual prompt and demonstrate the difference in performance between the optimized prompt and the manual prompt in Table I.",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "Note that InstructcodeT5p-16B is a finetuned variant of codeT5p series on the CodeAlpaca dataset.",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "Generated code snippets were produced through greedy decoding, and the optimal results were recorded.",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "The codeAlpaca dataset provided 9,761 such samples, offering a robust foundation for our training and evaluation objectives.",
+        "localizador": "p. 7 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "All metrics are applied to both CoNaLa and CodeAlpaca for evaluation except codeBLEU which is only applied to CoNaLa dataset.",
+        "localizador": "p. 6 do PDF, Seção IV-A"
+      },
+      {
+        "trecho": "While our method showed improvements in code quality and accuracy, we haven’t yet examined the security aspects of the generated code.",
+        "localizador": "p. 9 do PDF, Seção V-B"
+      },
+      {
+        "trecho": "We also need to investigate how different decoding strategies in LLM code generation might affect security, as probability-based token selection could potentially introduce new vulnerabilities.",
+        "localizador": "p. 9 do PDF, Seção V-B"
+      },
+      {
+        "trecho": "In this research, we did not employ execution-based metrics such as Pass@k [43] to evaluate the functional correctness of the generated code.",
+        "localizador": "p. 9 do PDF, Seção V-D"
+      },
+      {
+        "trecho": "To address the issue of repeated tokens that we observed during the experiment, we implemented two fixes: a 1.2 repetition penalty and a no-repeat n-gram setting of 2.",
+        "localizador": "p. 9 do PDF, Seção V-C"
+      },
+      {
+        "trecho": "The computational cost for training with such a large dataset is high, as each diffusion model update required running an inference pass through the language model.",
+        "localizador": "p. 7 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "We notice that Codet5p-16b with our prompt matched or even outperformed finetuned Instructcodet5p-16b’s performance across metrics.",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "In addition, we notice that manual prompts generally performed better than prompt-tuning across all models on CodeAlpaca dataset, with codeT5p-2B and instructcodeT5p-16B being the sole exception.",
+        "localizador": "p. 7–8 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "For the CoNaLa dataset, DDPT showed mixed results with CodeT5p-2B and 6B models but significantly better METEOR and CodeBLEU scores.",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "We explore a training objective variant and evaluate the performance difference in the next section.",
+        "localizador": "p. 5 do PDF, Seção III-C"
+      },
+      {
+        "trecho": "To address RQ2, we conducted a straightforward analysis manually between code generated using the manual prompt template provided by the CodeAlpaca dataset and our optimized prompts, as illustrated in Fig 5.",
+        "localizador": "p. 8 do PDF, Seção IV-E (RQ2)"
+      },
+      {
+        "trecho": "We trained our diffusion model to work with fixed-length prompts by using the context portion of our prompt template.",
+        "localizador": "p. 10 do PDF, Seção VI-A"
+      },
+      {
+        "trecho": "A key limitation of our study is the lack of control over the diffusion sampling process.",
+        "localizador": "p. 10 do PDF, Seção VI-B"
+      },
+      {
+        "trecho": "DDPT 21.66 31.54 37.39 38.96 17.02 32.05 34.30 36.09 17.53",
+        "localizador": "p. 8 do PDF, Tabela I, bloco instructcodeT5p-16B, linha DDPT; colunas CodeAlpaca (BLEU, ChrF, R-L, MET) e CoNaLa (BLEU, ChrF, R-L, MET, CodeBLEU)"
+      },
+      {
+        "trecho": "Manual Prompt 16.65 29.64 45.81 40.49 15.44 24.59 31.10 26.50 13.32",
+        "localizador": "p. 8 do PDF, Tabela I, bloco instructcodeT5p-16B, linha Manual Prompt; colunas CodeAlpaca (BLEU, ChrF, R-L, MET) e CoNaLa (BLEU, ChrF, R-L, MET, CodeBLEU)"
+      },
+      {
+        "trecho": "DDPT 17.14 26.65 29.58 32.73 14.76 28.59 28.62 31.66 14.50",
+        "localizador": "p. 8 do PDF, Tabela I, bloco codeT5p-16B, linha DDPT; colunas CodeAlpaca (BLEU, ChrF, R-L, MET) e CoNaLa (BLEU, ChrF, R-L, MET, CodeBLEU)"
+      }
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara três questões de pesquisa explícitas (RQ1 sobre generalização em tarefas de geração de código, RQ2 sobre qualidade e correção do código, RQ3 sobre interpretabilidade dos embeddings).",
+      "localizador": "p. 6 do PDF, Seção IV-A"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve conjuntos, modelos, template, configuração prefix-LM, decodificação gulosa e passos de difusão, mas não informa divisão entre treino e avaliação, número de amostras avaliadas, hiperparâmetros de treino do modelo de difusão, configuração do PT, nem como os «optimal results» foram escolhidos.",
+      "localizador": "p. 7 do PDF, Seções IV-B a IV-E"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Executa Manual Prompt e PT nos mesmos modelos, conjuntos e métricas da técnica proposta (Tabela I), mas a configuração do PT não é descrita e o próprio estudo reconhece que só compara com uma técnica de otimização de embeddings. Para o escopo de prompting, não há comparação entre técnicas de prompting.",
+      "localizador": "p. 8 do PDF (Tabela I); p. 8–9 do PDF (Seção V-A)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Usa cinco métricas de similaridade definidas e referenciadas (BLEU-4, ChrF, Rouge-L, METEOR, CodeBLEU só no CoNaLa), mas não usa métrica de execução (limitação reconhecida), não informa o denominador de cada métrica, rotula BLEU-4 como «BLEU» na tabela e fala em resultados «significantly better» sem teste estatístico. Os valores aparecem numa única tabela, sem divergência entre tabelas a conferir.",
+      "localizador": "p. 6 do PDF (Seção IV-A); p. 7–8 do PDF (Seção IV-E; Tabela I); p. 9–10 do PDF (Seção V-D)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há seção de ameaças à validade (comparadores e modelos limitados, segurança, decodificação, correção funcional) e seção de limitações (comprimento fixo, falta de controle da amostragem), mas não discute divisão dos dados, possível sobreposição entre o ajuste do instructcodeT5p-16B e a avaliação, nem variabilidade dos resultados.",
+      "localizador": "p. 8–10 do PDF, Seções V e VI"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos e conjuntos públicos são identificados e o endereço do código é impresso (não acessado nesta extração), mas faltam divisão dos dados, hiperparâmetros de treino, configuração do PT, número de execuções e versões ou snapshots dos modelos.",
+      "localizador": "p. 2 do PDF (endereço do código); p. 7 do PDF (Seções IV-B a IV-E)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute contaminação nem descreve separação entre dados de treino do modelo de difusão e de avaliação. Registra apenas que instructcodeT5p-16B foi ajustado no CodeAlpaca, um dos conjuntos avaliados, sem tratar isso como risco.",
+      "localizador": "p. 7 do PDF, Seções IV-B e IV-E"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo e referências). Valores da Tabela I usados em heterogeneidade conferidos visualmente na p. 8 do PDF.",
+    "paginas_abertas": [2, 3, 4, 5, 6, 7, 8, 9, 10]
+  }
+}

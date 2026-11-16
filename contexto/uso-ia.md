@@ -327,3 +327,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — extração em escala, lotes C2 e C3 (16/11/2026)
 - Executores: Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 16 extrações (S2170–S2086); Claude Code (Claude Opus 5.5), roteiro, validação e relatório (`evidencias/extracao-v2.2/lote-C2-C3.md`).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 7 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 execuções (S579–S682), 18 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-07.md`).
+- S667: gravação interrompida por classificador de segurança, sem nova tentativa.
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
