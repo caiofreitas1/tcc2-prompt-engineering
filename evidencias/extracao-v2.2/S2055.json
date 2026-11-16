@@ -1,0 +1,446 @@
+{
+  "estudo": "S2055",
+  "texto_fonte": "fontes/textos/lote/S2055.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "SolGen",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "feedback", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 1 (resumo); p. 2 (Seção 3, Contributions); p. 3-5 (Seção 5, Figura 1, Algoritmo 1)",
+        "observacao": "Framework proposto: Fase 1 (prompt inicial + re-prompting com erros do Remix IDE até compilar) encadeada à Fase 2 (detecção com Slither + masked prompting até não haver vulnerabilidade). Mecanismos do pacote completo: instrucao (papel, instrução, diretrizes de correção), restricoes (especificação SCRS e restrições de segurança), contexto (código gerado fornecido no prompt com máscara), feedback (compilador e analisador estático) e decomposicao (pipeline em duas fases que encadeia geração, compilação e análise). O estudo não avalia o pacote completo contra uma condição sem ele: os resultados são relatados por fase (Tabelas 2-5), comparando a rodada inicial com o estado após cada fase. Remix IDE e Slither são fontes de feedback, não intervenções fora do escopo. O texto descreve uso de «instruction-tuning [30]», mas não há ajuste de pesos (ver observacoes)."
+      },
+      {
+        "nome_original": "single-round prompting",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Seção 5.1 (a)); p. 4 (Figura 2); p. 6 (RQ1); p. 10 (Conclusão, achado i)",
+        "observacao": "Prompt inicial construído a partir de cada SCRS (Figura 2: Role, Instruction, Context com «Step 1 ... Step n» de requisitos). Papel → instrucao; requisitos funcionais e de proteção listados → restricoes (especificação). Os passos listados são requisitos a garantir, não etapas executadas separadamente, por isso não recebem decomposicao. Corresponde à rodada inicial do processo iterativo (código «directly compilable», #RPC = 0)."
+      },
+      {
+        "nome_original": "multi-round prompting",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 3-4 (Seção 5.1 (b)-(c)); p. 5 (Algoritmo 1, linhas 3-6); p. 6-7 (RQ2, Tabelas 2 e 3)",
+        "observacao": "Fase 1 do SolGen, investigada na RQ2: o prompt é refinado com o relatório de erros do Remix IDE (Pr_{i+1} = Pr_i + R) até o código compilar ou o LLM deixar de gerar versão nova (saturação). A comparação disponível é entre a rodada inicial (código diretamente compilável) e o estado final das rodadas, no mesmo conjunto de prompts, sem condição separada nem orçamento fixo de rodadas (#RPC varia de 0 a 10 no Meta AI e de 0 a 17 no ChatGPT). Classificada como componente por ser parte do sistema proposto, embora a RQ2 a investigue explicitamente."
+      },
+      {
+        "nome_original": "masked prompting",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 5 (Seção 5.2 (b)-(c), Figura 3, Algoritmo 1, linhas 10-14); p. 7 (RQ4); p. 8 (Tabelas 4 e 5)",
+        "observacao": "Fase 2 do SolGen, investigada na RQ4 e apresentada como estratégia nova no resumo. O novo prompt traz papel e instrução (instrucao), o código gerado com a função vulnerável substituída pelo token <mask> (contexto: código fornecido como insumo), passos para eliminar a vulnerabilidade, como o padrão checks-effects-interactions (restricoes de segurança e diretrizes), e é reaplicado com base no relatório do Slither até não haver vulnerabilidade (feedback). Em relação ao multi-round prompting de que deriva, acrescenta contexto (código mascarado); o feedback muda de fonte (compilador → analisador estático), mas permanece na mesma categoria. As Tabelas 4 e 5 comparam o estado antes («Vulnerability») e depois («Vulnerability Exist?») do re-prompting mascarado nos mesmos códigos; não há condição de re-prompting sem máscara, portanto o efeito do ingrediente máscara não é isolado do re-prompting repetido com feedback e instruções de correção. Classificada como componente por ser parte do sistema proposto, embora seja o objeto da RQ4 e do título."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature parameter (Llama3)",
+        "natureza": "decodificacao",
+        "descricao": "Variação da temperatura do Llama3 de código aberto em 0.1, 0.7 e 1.2, com 10 prompts, para avaliar compilabilidade e vulnerabilidades (RQ5). Não altera o prompt; os resultados (Tabelas 6-8) não entram em extracoes.",
+        "localizador": "p. 1 (resumo); p. 7-8 (Seção 6.3, RQ5); p. 9-10 (Tabelas 6, 7 e 8)"
+      },
+      {
+        "nome_original": "Comparison between Meta AI and ChatGPT",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre ChatGPT (GPT-4o) e Meta AI (Llama 3.1) com os mesmos prompts e procedimento (RQ1-RQ4); a diferença entre modelos não é efeito de prompting.",
+        "localizador": "p. 6-7 (Seção 6.2); p. 8 (Tabelas 4 e 5)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "ChatGPT (GPT-4o)",
+        "versao": "nao_informado (snapshot e data de uso não informados; acesso por interface de usuário)",
+        "observacao": "O estudo atribui 1,76 trilhão de parâmetros e janela de contexto de 128k tokens; usado nas RQ1-RQ4. Localizador: p. 6 (Selected LLMs)."
+      },
+      {
+        "nome": "Meta AI (Llama 3.1, 405 bilhões de parâmetros)",
+        "versao": "nao_informado (snapshot e data de uso não informados; acesso por interface de usuário; legenda da Tabela 2 grafa «Lama 3.1»)",
+        "observacao": "Usado nas RQ1-RQ4. Localizador: p. 6 (Selected LLMs; legenda da Tabela 2)."
+      },
+      {
+        "nome": "Llama3 (código aberto)",
+        "versao": "nao_informado (tamanho e versão não informados; não confundir com o Llama 3.1 do Meta AI)",
+        "observacao": "Usado apenas no experimento de temperatura (RQ5), executado em servidor com GPU NVIDIA A100 80GB PCIe. Localizador: p. 6 (Seção 6.1); p. 8 (RQ5)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "20 Smart Contract Requirement Specifications (SCRS) / prompts P1-P20 selecionados pelos autores",
+        "versao": "nao_aplicavel",
+        "quantidade": "20 especificações/prompts (casos com vulnerabilidades do «OWASP Smart Contract Top 10»)",
+        "observacao": "Origem e critério de seleção das SCRS não informados. Para a análise de vulnerabilidades, os denominadores são os códigos compiláveis após a Fase 1 (17 no Meta AI, 19 no ChatGPT). Localizador: p. 3 (Seção 5.1 (a)); p. 6 (Seção 6.2); p. 7 (RQ3)."
+      },
+      {
+        "nome": "Subconjunto de 10 prompts para o experimento de temperatura (P1-P7, P18, P19, P20)",
+        "versao": "nao_aplicavel",
+        "quantidade": "10 prompts",
+        "observacao": "Subconjunto dos 20 prompts; critério de escolha dos 10 não informado. Localizador: p. 8 (RQ5); p. 9-10 (Tabelas 6-8)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Compilabilidade (código «directly compilable» e compilável após multi-round prompting)",
+        "definicao": "Número de prompts cujo código compila no Remix IDE; '-' e '*' indicam código inválido (gibberish ou saída irrelevante).",
+        "localizador": "p. 6 (RQ1, RQ2; Tabela 2); p. 7 (Tabela 3)"
+      },
+      {
+        "nome": "#RPC",
+        "definicao": "Número de re-prompts necessários para gerar código compilável.",
+        "localizador": "p. 6 (Seção 6.2; Tabela 2); p. 7 (Tabela 3)"
+      },
+      {
+        "nome": "Vulnerability / #Vul. Func. / Vulnerability Exist?",
+        "definicao": "Presença de vulnerabilidade (reentrância ou «Yes but Not Fatal») e número de funções vulneráveis detectadas pelo Slither (v0.10.0, via SmartBugs) antes do masked prompting, e presença de vulnerabilidade depois dele.",
+        "localizador": "p. 7 (RQ3, RQ4); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "nome": "#Masked Re-prompting",
+        "definicao": "Número de re-prompts mascarados aplicados a cada código compilável.",
+        "localizador": "p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "nome": "Solc Version, #Function, #LOC",
+        "definicao": "Versão do compilador declarada, número de funções e linhas de código do código gerado (descritivas).",
+        "localizador": "p. 6 (Tabela 2); p. 7 (Tabela 3); p. 9-10 (Tabelas 6-8)"
+      }
+    ],
+    "linguagens": ["Solidity"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os LLMs nem sempre geram código compilável na primeira tentativa e, em alguns prompts, produzem saída sem sentido ou irrelevante; o re-prompting satura sem compilar (Meta AI: P3, P8, P9; ChatGPT: P7). A correção funcional do código não é avaliada (só compilabilidade e vulnerabilidades).",
+        "localizador": "p. 6 (Seção 6.2, RQ1, RQ2; Tabela 2); p. 7 (Tabela 3)"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado contém vulnerabilidades (reentrância em 10 de 17 códigos compiláveis do Meta AI e 9 de 19 do ChatGPT); nenhum dos LLMs gera contrato totalmente seguro, mesmo após re-prompting mascarado; vulnerabilidades de baixa severidade permanecem e foram desconsideradas.",
+        "localizador": "p. 7 (RQ3, RQ4); p. 8 (Tabelas 4 e 5); p. 10 (Conclusão)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os dados de treinamento dos modelos não são divulgados, o que impede saber se os problemas testados estavam no treinamento; o estudo não descreve controle.",
+        "localizador": "p. 10-11 (Seção 8, Limitations)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Evolução contínua dos modelos fechados: as respostas refletem o desempenho no período dos experimentos e podem não representar o comportamento futuro (deriva temporal, reprodutibilidade).",
+        "localizador": "p. 11 (Seção 8, Limitations)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de tokens dos LLMs: risco de perda de informação quando código extenso e detalhes de erro são reenviados no re-prompting.",
+        "localizador": "p. 6 (Selected LLMs)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Temperatura alta (1.2) no Llama3 produz resultados mais variáveis e menos precisos, com menos códigos compiláveis e versões de compilador mais dispersas; refere-se a parâmetro de decodificação (fora do escopo de prompting).",
+        "localizador": "p. 8 (RQ5); p. 10 (Seção 6.3)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Multi-round prompting com o relatório de erros do Remix IDE para resolver erros de compilação; o estudo relata apenas a comparação cumulativa entre a rodada inicial e o estado final, sem condição separada.",
+        "avaliada": "nao",
+        "localizador": "p. 3-4 (Seção 5.1); p. 6-7 (RQ2, Tabelas 2 e 3)"
+      },
+      {
+        "descricao": "Masked prompting guiado pelo relatório do Slither para eliminar vulnerabilidades de reentrância; o estudo relata o estado antes e depois nos mesmos códigos, sem condição de comparação sem máscara.",
+        "avaliada": "nao",
+        "localizador": "p. 5 (Seção 5.2); p. 7 (RQ4); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "descricao": "Uso de modelos com janela de contexto de 128k tokens para evitar perda de informação no re-prompting.",
+        "avaliada": "nao",
+        "localizador": "p. 6 (Selected LLMs)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "single-round prompting (rodada inicial do próprio processo iterativo, código diretamente compilável)",
+    "so_classificadas": [
+      {
+        "tecnica": "SolGen",
+        "motivo": "O estudo não imprime resultado do pacote completo (Fases 1 e 2) contra uma condição sem ele; os resultados são relatados por fase (Tabelas 2-5). A extração disponível cobre a Fase 1 (multi-round prompting); a Fase 2 (masked prompting) é componente sem tabela de ablação nem contraste pareado e por isso não entra por cobertura."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Masked prompting com o Meta AI não eliminou a reentrância em nenhum dos 10 códigos que a apresentavam (C2, C4-C6, C14-C17, C19-C20 continuam «Yes, Re-entrancy Vulnerability» após 1 a 3 re-prompts mascarados); com o ChatGPT, só C5 permanece com reentrância após 6 re-prompts. Resultado nulo para um dos dois modelos.",
+        "localizador": "p. 7 (RQ4); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "descricao": "Aparente inconsistência: códigos com #Vul. Func. = 0 aparecem como «Yes but Not Fatal» e recebem re-prompts mascarados (Tabela 4: C12, 0 funções, 3 re-prompts; Tabela 5: C11, C13 e C17, 0 funções, 1 re-prompt cada), enquanto o texto afirma que todo código compilável exibe vulnerabilidades e que o masking incide sobre funções vulneráveis. O estudo não explica como uma vulnerabilidade sem função vulnerável foi mascarada.",
+        "localizador": "p. 5 (Seção 5.2 (b)); p. 7 (RQ3); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "descricao": "O estudo desconsidera vulnerabilidades de baixa severidade e avalia o masked prompting apenas quanto à reentrância; após o processo, todos os códigos do ChatGPT e do Meta AI seguem com «Yes but Not Fatal» ou reentrância, o que contrasta com a descrição do SolGen como gerador de código «non-vulnerable» e com o critério de parada «Vul(C) = ∅» da Seção 5.2. Códigos sem reentrância também receberam re-prompts mascarados (por exemplo, Tabela 4, C1, C7, C10).",
+        "localizador": "p. 5 (Seção 5.2, Algoritmo 1); p. 7 (RQ3, RQ4); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "descricao": "Critério de parada do masked prompting descrito de dois modos: na Seção 5.2, repetição até não haver vulnerabilidade; na RQ4, mascaramento iterativo «until a new and unique version of code is generated when compared to the previous iteration».",
+        "localizador": "p. 5 (Seção 5.2 (c)); p. 7 (RQ4)"
+      },
+      {
+        "descricao": "Comparação de vulnerabilidades entre modelos com denominadores diferentes: 10 de 17 códigos compiláveis (Meta AI) contra 9 de 19 (ChatGPT), e 83 contra 54 funções vulneráveis sem normalização pelo número de códigos ou de funções. O resumo fala em «greater percentage» de código seguro, mas o artigo não imprime percentuais.",
+        "localizador": "p. 1 (resumo); p. 7 (RQ3)"
+      },
+      {
+        "descricao": "Narrativa de temperatura contra os números das tabelas: o resumo e a conclusão afirmam que 0.7 é ótima e que ajustar a temperatura melhora a segurança, mas 0.7 tem o maior número de funções vulneráveis (25, contra 12 em 0.1 e 16 em 1.2); a vantagem de 0.7 é em compilabilidade (6 de 10, contra 4 e 3 de 10). O resumo diz «considerably exceeding» e a conclusão «significantly performs better» sem teste estatístico e com 10 prompts; a Seção 6.3 limita a comparação a 0.1 contra 0.7 («Between the low and medium settings»). Experimento fora do escopo (decodificação).",
+        "localizador": "p. 1 (resumo); p. 8 (RQ5); p. 9-10 (Tabelas 6-8, Seção 6.3, Conclusão)"
+      },
+      {
+        "descricao": "Orçamento de re-prompting não fixado: as rodadas seguem até compilar ou saturar, com #RPC de 0 a 10 no Meta AI e de 0 a 17 no ChatGPT; os resultados comparam a rodada inicial com estados finais obtidos com números diferentes de rodadas por prompt.",
+        "localizador": "p. 4 (Seção 5.1 (c)); p. 6 (RQ2, Tabela 2); p. 7 (Tabela 3)"
+      },
+      {
+        "descricao": "O experimento de temperatura usa outro modelo (Llama3 de código aberto, versão não informada) e um subconjunto de 10 dos 20 prompts, sem informar se houve multi-round prompting; não é comparável às RQ1-RQ4 feitas com Meta AI (Llama 3.1) e ChatGPT.",
+        "localizador": "p. 6 (Seção 6.1); p. 8 (RQ5); p. 9-10 (Tabelas 6-8)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O método menciona «instruction-tuning [30]», mas a referência [30] é o artigo de chain-of-thought prompting e não há ajuste de pesos descrito; o prompt inicial usa papel, instrução e requisitos (Figura 2). Registrado como instrucao/restricoes, não como ajuste fino.",
+        "localizador": "p. 3 (Seção 5); p. 4 (Figura 2); p. 11 (Referência 30)"
+      },
+      {
+        "descricao": "Resultados do masked prompting (componente, sem extração): Meta AI, reentrância em 10 de 17 códigos compiláveis antes e nos mesmos 10 depois; ChatGPT, reentrância em 9 de 19 antes e apenas em C5 depois (contagem por linha da Tabela 5 feita nesta extração, não impressa como total pós-masking).",
+        "localizador": "p. 7 (RQ3, RQ4); p. 8 (Tabelas 4 e 5)"
+      },
+      {
+        "descricao": "Esforço manual: o prompt é desenhado manualmente a partir de recursos on-line (OpenAI Cookbook, PromptBase) e a interação com ChatGPT e Meta AI ocorre por interface de usuário; o código é isolado entre crases triplas e o texto descartado. Os autores concluem que a intervenção humana é necessária para gerar contratos seguros.",
+        "localizador": "p. 3 (Seção 5.1 (a)-(b)); p. 10 (Conclusão)"
+      },
+      {
+        "descricao": "Remix IDE (compilação) e Slither v0.10.0 via SmartBugs (análise estática) são as fontes de feedback do pipeline; o estudo escolheu o Slither por popularidade e manutenção. Logs dos relatórios e artefatos declarados no GitHub (https://github.com/mdtauseefalam/SolGen), não acessados nesta extração.",
+        "localizador": "p. 2 (Seção 3); p. 4-5 (Seção 5.2 (a)); p. 7 (RQ3)"
+      },
+      {
+        "descricao": "Número de execuções por prompt não informado (nao_informado); para ChatGPT e Meta AI não se informam parâmetros de decodificação nem datas das interações.",
+        "localizador": "p. 6 (Seções 6.1 e 6.2)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In consideration of these two viewpoints, this paper examines the utilization of large language models (LLMs) for the automatic generation of Solidity smart contracts based on specified criteria, while simultaneously ensuring the elimination of vulnerabilities through a novel masking strategy.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "To achieve this, we propose SolGen, a framework for generating secure Solidity smart contract code using LLMs.",
+        "localizador": "p. 1 (resumo)"
+      },
+      {
+        "trecho": "SolGen uses closed-source LLMs (e.g. ChatGPT and Meta AI) and static analysis to generate secure Solidity smart contracts through multi-round and masked prompting.",
+        "localizador": "p. 2 (Seção 3, Contributions)"
+      },
+      {
+        "trecho": "RQ2: How multi-round prompting technique effectively resolve the compilation issues of Solidity smart contracts generated by closed-source LLMs (such as Meta AI and ChatGPT)?",
+        "localizador": "p. 2 (Seção 1)"
+      },
+      {
+        "trecho": "RQ4: How masked prompting technique assists in addressing vulnerabilities within Solidity smart contracts code generated by closed-source LLMs (such as Meta AI and ChatGPT)?",
+        "localizador": "p. 2 (Seção 1)"
+      },
+      {
+        "trecho": "This work includes the use of instruction-tuning [30], iterative prompt refinement through feedback [18], and masked prompting [29] techniques for the generation of secure Solidity smart contract code with the absence of vulnerabilities.",
+        "localizador": "p. 3 (Seção 5)"
+      },
+      {
+        "trecho": "Role: You are an excellent Solidity smart contract developer.",
+        "localizador": "p. 4 (Figura 2)"
+      },
+      {
+        "trecho": "This iterative process continues until the LLM under consideration generates a new version of the code snippet when compared to the previous round and all errors in the generated smart contract code are resolved and fixed.",
+        "localizador": "p. 4 (Seção 5.1 (c))"
+      },
+      {
+        "trecho": "A new prompt is constructed by masking the identified vulnerable functions or methods in the smart contract.",
+        "localizador": "p. 5 (Seção 5.2 (b))"
+      },
+      {
+        "trecho": "This new prompt includes the vulnerable source code snippet that was generated by the LLM, which is masked with a special token called <mask>.",
+        "localizador": "p. 5 (Seção 5.2 (b))"
+      },
+      {
+        "trecho": "Additionally, it includes the steps and useful information that are necessary to eliminate the identified vulnerability.",
+        "localizador": "p. 5 (Seção 5.2 (b))"
+      },
+      {
+        "trecho": "The ‘-’ and ‘*’ symbol in Tables 2 through 8 indicates that the LLM failed to generate valid Solidity code and produced either gibberish or irrelevant output.",
+        "localizador": "p. 6 (Seção 6.2)"
+      },
+      {
+        "trecho": "However, it is observed that LLMs do not consistently generate compilable code on the first attempt.",
+        "localizador": "p. 6 (RQ1)"
+      },
+      {
+        "trecho": "Thus, to avoid information loss due to generated large smart contract code in combination with error details during re-prompting is very crucial.",
+        "localizador": "p. 6 (Selected LLMs)"
+      },
+      {
+        "trecho": "Thus, our methodology takes utmost care that there is no information loss during complete cycle of generating compilable, non-vulnerable and secure Solidity smart contract code.",
+        "localizador": "p. 6 (Selected LLMs)"
+      },
+      {
+        "trecho": "Our analysis reveals that all compilable code generated from both Meta AI and ChatGPT exhibits vulnerabilities.",
+        "localizador": "p. 7 (RQ3)"
+      },
+      {
+        "trecho": "However, we focus on significant vulnerabilities, such as reentrancy, and disregard those with very low severity.",
+        "localizador": "p. 7 (RQ3)"
+      },
+      {
+        "trecho": "Table 4 shows that 10 out of 17 compilable Solidity codes have reentrancy vulnerabilities, generated by Meta AI.",
+        "localizador": "p. 7 (RQ3)"
+      },
+      {
+        "trecho": "Similarly, Table 5 shows that 9 out of 19 compilable codes generated by ChatGPT contain the same vulnerability.",
+        "localizador": "p. 7 (RQ3)"
+      },
+      {
+        "trecho": "In total, 83 vulnerable functions are identified in Meta AI’s generated code, compared to 54 vulnerable functions in the code generated by ChatGPT.",
+        "localizador": "p. 7 (RQ3)"
+      },
+      {
+        "trecho": "This approach involves iteratively masking a vulnerable function in the code until a new and unique version of code is generated when compared to the previous iteration.",
+        "localizador": "p. 7 (RQ4)"
+      },
+      {
+        "trecho": "As shown in Table 4, the Meta AI model does not perform well with the masking technique.",
+        "localizador": "p. 7 (RQ4)"
+      },
+      {
+        "trecho": "In most cases, ChatGPT is able to resolve reentrancy vulnerabilities after no more than four iterations.",
+        "localizador": "p. 7 (RQ4)"
+      },
+      {
+        "trecho": "The only exception is compilable code C5, which fails to produce a secure, compilable code even after multiple rounds of masked re-prompting.",
+        "localizador": "p. 7 (RQ4)"
+      },
+      {
+        "trecho": "At a temperature of 0.1, there are 12 vulnerable functions, which increases to 25 at 0.7, and then decreases to 16 at 1.2.",
+        "localizador": "p. 10 (Seção 6.3)"
+      },
+      {
+        "trecho": "Along with this, our findings reveals the importance of adjusting temperature for improving security of generated contracts and thus contributing to the best practices for Ethereum smart contract development.",
+        "localizador": "p. 10 (Seção 7, Conclusão)"
+      },
+      {
+        "trecho": "Therefore, for generating secure smart contract code the human intervention is necessary and important.",
+        "localizador": "p. 10 (Seção 7, Conclusão)"
+      },
+      {
+        "trecho": "Moreover, the datasets used for training these LLMs are not disclosed publicly which makes it difficult to determine the fact that whether the problems we tested were part of the training data used in the model.",
+        "localizador": "p. 10-11 (Seção 8, Limitations)"
+      },
+      {
+        "trecho": "As a result, in this work the responses generated by LLMs are indicative of the models’ performance (i.e., GPT-4o for ChatGPT and Llama 3.1 for Meta AI) during specific time when our experiments were conducted, and hence it may not accurately represent their future behavior or capabilities.",
+        "localizador": "p. 11 (Seção 8, Limitations)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "multi-round prompting",
+      "mecanismos": ["instrucao", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "single-round prompting (rodada inicial, código «directly compilable», #RPC = 0)",
+      "modelo": "Meta AI (Llama 3.1)",
+      "benchmark": "20 SCRS / prompts P1-P20 selecionados pelos autores",
+      "metrica": "Compilable code: número de prompts com código compilável no Remix IDE («directly compilable» na rodada inicial; compilável após multi-round prompting)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 8, "intervencao": 17},
+      "denominador": "20 prompts (o texto imprime 8 de 20 para a rodada inicial; para o estado final imprime 17 códigos compiláveis e 3 prompts sem código compilável: P3, P8 e P9)",
+      "condicoes": "Comparação cumulativa entre a rodada inicial e o estado após o re-prompting com o relatório de erros do Remix IDE, nos mesmos prompts e no mesmo modelo; não é efeito isolado sob orçamento comparável. Re-prompting até compilar ou até o modelo deixar de gerar versão nova (saturação); #RPC por prompt de 0 a 10 (Tabela 2); P3, P8 e P9 saturaram após 7, 5 e 4 rodadas sem compilar. Código isolado entre crases triplas. Número de execuções por prompt: nao_informado; parâmetros de decodificação: nao_informado (interface de usuário). Os valores 8 e 17 estão impressos no texto (RQ1 e RQ3); conferência própria na Tabela 2: 8 linhas com #RPC = 0 e 3 linhas marcadas com '*', compatíveis com os valores impressos. conferido_pdf: Tabela 2 aberta na imagem da p. 6 (resolução baixa, mas valores de #RPC legíveis e iguais aos do texto extraído) e trechos de texto conferidos nas p. 6-7.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca duas técnicas (multi-round prompting e masked prompting, RQ2 e RQ4) e duas métricas (compilabilidade e vulnerabilidades) sem que uma prevaleça. A primeira tabela com contraste elegível de prompting é a Tabela 2 (Meta AI, único modelo da tabela), cuja coluna #RPC distingue código compilável na rodada inicial (#RPC = 0) e após re-prompting; primeira métrica pertinente: compilabilidade. A técnica focal SolGen não tem contraste do pacote completo (ver so_classificadas); o masked prompting é componente sem ablação nem contraste pareado, por isso não há outras extrações.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (Seção 6.2, RQ1 e RQ2; Tabela 2, colunas Prompts e #RPC); p. 7 (RQ3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Tables 2 and 3 shows that out of 20 different unique prompts, the code generated by 8 prompts using Meta AI is directly compilable.",
+          "localizador": "p. 6 (RQ1)"
+        },
+        {
+          "trecho": "However, Meta AI fails to generate compilable code for three specific prompts (P3, P8, and P9), becoming saturate after 7, 5, and 4 rounds, respectively.",
+          "localizador": "p. 6 (RQ2)"
+        },
+        {
+          "trecho": "Table 4 shows that 10 out of 17 compilable Solidity codes have reentrancy vulnerabilities, generated by Meta AI.",
+          "localizador": "p. 7 (RQ3)"
+        },
+        {
+          "trecho": "The results of the experiment conducted by us revealed several key findings: (i) ChatGPT generates more number of syntactically correct Solidity source codes when compared to Meta AI with single-round prompting.",
+          "localizador": "p. 10 (Seção 7, Conclusão)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Cinco questões de pesquisa explícitas (compilabilidade, multi-round prompting, segurança, masked prompting e temperatura) e contribuições listadas.",
+      "localizador": "p. 2 (Seção 1, RQ1-RQ5; Seção 3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As duas fases, o algoritmo e exemplos de prompt estão descritos, mas a origem e o critério de seleção das 20 SCRS e dos 10 prompts do experimento de temperatura não são informados, o número de execuções por prompt não é informado e a interação por interface de usuário não tem datas nem parâmetros relatados.",
+      "localizador": "p. 3-5 (Seção 5, Figuras 2 e 3, Algoritmo 1); p. 6 (Seções 6.1 e 6.2); p. 8 (RQ5)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparação entre a rodada inicial e o estado após multi-round prompting e entre antes e depois do masked prompting, nos mesmos códigos, mas sem condição de controle com orçamento comparável (por exemplo, re-prompting sem máscara) e sem linha de base externa; a comparação entre modelos não isola técnicas de prompting.",
+      "localizador": "p. 6-7 (RQ1-RQ4); p. 8 (Tabelas 4 e 5)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Compilabilidade (Remix IDE) e vulnerabilidades (Slither v0.10.0) são definidas, os denominadores são informados (20 prompts, 17 e 19 códigos compiláveis, 10 prompts) e as contagens do texto coincidem com as linhas das tabelas (conferência própria); porém a correção funcional não é medida, vulnerabilidades de baixa severidade são desconsideradas, há linhas com 0 funções vulneráveis marcadas como vulneráveis e o resumo fala em percentuais não impressos.",
+      "localizador": "p. 1 (resumo); p. 6-7 (RQ1-RQ4); p. 8 (Tabelas 4 e 5)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações trata de modelos fechados, dados de treinamento não divulgados e evolução dos modelos, mas não discute o tamanho da amostra (20 e 10 prompts), a dependência de uma única ferramenta de análise estática, a ausência de repetições nem a exclusão de vulnerabilidades de baixa severidade.",
+      "localizador": "p. 10-11 (Seção 8)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O estudo declara artefatos e logs no GitHub (não acessados nesta extração), informa a versão do Slither e o hardware do Llama3, mas usa modelos fechados por interface sem snapshot nem data, não informa a versão do Llama3, os parâmetros de decodificação dos modelos fechados nem o número de execuções.",
+      "localizador": "p. 2 (Seção 3); p. 6 (Seções 6.1 e 6.2); p. 7 (RQ3); p. 11 (Seção 8)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece que não é possível saber se os problemas testados estavam nos dados de treinamento, mas não descreve controle nem análise do risco.",
+      "localizador": "p. 10-11 (Seção 8)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (734 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [4, 5, 6, 7, 8, 9, 10]
+  }
+}

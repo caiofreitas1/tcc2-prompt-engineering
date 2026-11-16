@@ -1,0 +1,353 @@
+{
+  "estudo": "S1951",
+  "titulo": "An Empirical Comparison of Code Generation Approaches for Ansible",
+  "doi": "10.1145/3643661.3643951",
+  "texto_fonte": "fontes/textos/lote/S1951.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Retrieval-augmented generation (RAG) com UIUC.chat",
+        "mecanismos": ["contexto", "instrucao"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 4 (impressa 4), Seção 4.4 e Tabela 2; PDF p. 5 (impressa 5), RQ5",
+        "observacao": "Pacote RAG implementado com o framework UIUC.chat sobre a API do GPT-4: recuperação de páginas da documentação oficial do Ansible (base vetorial, busca por similaridade semântica com um modelo menor não nomeado) concatenadas à consulta textual, e instrução ao modelo para tratar a documentação como contexto adicional. O contrafactual é o pacote inteiro (UIUC.chat contra GPT-4 sem RAG, Tabela 2); não autoriza atribuir o efeito a um ingrediente isolado. O texto do prompt, o número de documentos recuperados e o modelo do recuperador não são informados. O estudo não diz se a documentação recuperada contém exemplos de código; por isso `exemplos` não foi atribuído. A versão do GPT-4 não é informada e o estudo não declara explicitamente que GPT-4 e UIUC.chat foram avaliados no mesmo conjunto de teste, embora estejam na mesma tabela e nas mesmas métricas."
+      },
+      {
+        "nome_original": "GPT-4 (base model baseline)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 3 (impressa 3), Seção 4.1; PDF p. 4 (impressa 4), Tabela 2",
+        "observacao": "Linha de base do modelo base sem RAG. O prompt usado não é descrito; a formulação do problema é description → task (geração de uma tarefa Ansible a partir de descrição em linguagem natural), o que corresponde a instrução direta (zero-shot). Comparador cujos mecanismos não são isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Warp (fine-tuning de StarCoder-base com LoRA)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino com LoRA das versões 1B e 3B do StarCoder-base em pares name/task de Ansible extraídos do Ansible Galaxy; principal abordagem comparada com RAG, avaliada em RQ1 contra StarCoder-base.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.3, Tabelas 1 e 2"
+      },
+      {
+        "nome_original": "Número de amostras de fine-tuning (13.2k, 6.6k, 3.3k)",
+        "natureza": "ajuste_fino",
+        "descricao": "Variação de 2,5% a 10% do conjunto usado no ajuste fino (RQ2).",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.3; PDF p. 5 (impressa 5), Tabela 3 e RQ2"
+      },
+      {
+        "nome_original": "Context window / sequence length de fine-tuning (512/1024)",
+        "natureza": "ajuste_fino",
+        "descricao": "Comprimento de sequência usado no ajuste fino com LoRA; a inferência usa 8192 tokens para todos os modelos (RQ3).",
+        "localizador": "PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), RQ3"
+      },
+      {
+        "nome_original": "Model size (1B, 3B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre tamanhos do modelo ajustado (RQ4).",
+        "localizador": "PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), RQ4"
+      },
+      {
+        "nome_original": "Uso do GPT-4 em vez do StarCoder como modelo base do RAG",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do modelo gerador do RAG; impede comparar RAG e fine-tuning sobre o mesmo modelo base. RAG com StarCoder é deixado para trabalho futuro.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "nao_informado", "uso": "linha de base sem RAG e modelo gerador do UIUC.chat (camada sobre a API do GPT-4)"},
+      {"nome": "StarCoder-base 1B", "versao": "nao_informado", "uso": "linha de base do fine-tuning e modelo base do Warp 1B"},
+      {"nome": "StarCoder-base 3B", "versao": "nao_informado", "uso": "linha de base do fine-tuning e modelo base do Warp 3B"},
+      {"nome": "Warp 1B e Warp 3B", "versao": "variantes da Tabela 1 (512/1024 de context window; 13.2k, 6.6k e 3.3k amostras)", "uso": "modelos ajustados pelos autores (fora do escopo de prompting)"},
+      {"nome": "modelo menor de similaridade semântica do UIUC.chat", "versao": "nao_informado", "uso": "recuperação na base vetorial; nome nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto próprio de pares name/task de Ansible extraídos do Ansible Galaxy",
+        "quantidade": "132k pares name/task (55 MB), de mais de 34.000 repositórios baixados em outubro de 2023; divisão 90% treino e 10% teste",
+        "observacao": "O número de casos de teste não é impresso (nao_informado); o estudo não liga explicitamente o tamanho do conjunto de teste ao denominador das métricas da Tabela 2, nem declara que GPT-4 e UIUC.chat foram avaliados no mesmo subconjunto de teste que os modelos Warp. Tipo de geração avaliado: description → task.",
+        "localizador": "PDF p. 3 (impressa 3), Seções 4.1 e 4.2; PDF p. 4 (impressa 4), Seções 4.2 e 4.3"
+      },
+      {
+        "nome": "Documentação oficial do Ansible (corpus de recuperação do RAG)",
+        "quantidade": "8,220 páginas (p. 2) / 8000+ páginas (p. 4)",
+        "observacao": "Corpus de recuperação, não conjunto de avaliação.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 4 (impressa 4), Seção 4.4"
+      }
+    ],
+    "metricas": [
+      {"nome": "BLEU", "definicao": "sobreposição de n-gramas entre a saída e o ground truth, com brevity penalty", "denominador": "nao_informado", "localizador": "PDF p. 4 (impressa 4), Seção 5"},
+      {"nome": "CodeBERTScore", "definicao": "similaridade de cosseno entre embeddings da saída e do ground truth", "denominador": "nao_informado", "localizador": "PDF p. 4 (impressa 4), Seção 5"},
+      {"nome": "Ansible Aware", "definicao": "não definida na Seção 5; descrita só na Seção 2 como métrica de Pujar et al. que verifica quão próxima a saída está de sintaxe Ansible válida", "denominador": "nao_informado", "localizador": "PDF p. 3 (impressa 3), Seção 2; PDF p. 4 (impressa 4), Tabela 2"}
+    ],
+    "linguagens": ["Ansible-YAML"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No exemplo ilustrativo, a saída do RAG parece correta mas omite uma condicional e o laço sobre dois serviços; o estudo afirma que omitir detalhes ou ignorar contexto pode gerar código que parece bom mas não funciona.",
+        "localizador": "PDF p. 5 (impressa 5), RQ5; PDF p. 6 (impressa 6), Figura 2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O UIUC.chat frequentemente se apoiava em excesso na documentação e produzia algo equivalente a templates em vez de código funcional, sobretudo quando a geração exige combinar vários módulos ou variáveis externas.",
+        "localizador": "PDF p. 5 (impressa 5), RQ5"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Para o GPT-4 usado no RAG, o processo de inferência e os dados de treinamento não são públicos, de modo que reprodutibilidade e vazamento de dados são preocupação. O estudo não afirma contaminação efetiva.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo computacional do ajuste fino (componente fora do escopo de prompting): processo demorado e caro, 5–24 horas por versão e mais de 100 GPU credits em supercomputador; não quantificado em dinheiro.",
+        "localizador": "PDF p. 3 (impressa 3), Seção 2; PDF p. 4 (impressa 4), Seção 4.3; PDF p. 5 (impressa 5), Seção 6.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade das métricas de avaliação: métricas existentes podem ser frágeis e pouco confiáveis para comparar técnicas de geração entre linguagens.",
+        "localizador": "PDF p. 6 (impressa 6), Seção 6.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Representatividade dos dados: o Ansible Galaxy pode não representar código proprietário não publicado, o que pode enviesar as métricas e limitar a utilidade fora de projetos open-source.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação de validade da comparação RAG versus fine-tuning: dados insuficientes para comparação rigorosa e estudo qualitativo pequeno do RAG.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Normalização da sintaxe com PyYAML e remoção de entradas duplicadas no conjunto de dados.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.2"
+      },
+      {
+        "descricao": "Divisão dos dados em 90% treino e 10% teste (controle de separação para o ajuste fino; não se aplica ao pré-treinamento do GPT-4).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.3"
+      },
+      {
+        "descricao": "No UIUC.chat, busca por similaridade semântica com um modelo menor para fornecer citações que, segundo o estudo, melhoram a acurácia das respostas; não há comparação com e sem esse componente.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.4"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão: na Tabela 2, o UIUC.chat (RAG sobre GPT-4) tem valores menores que o GPT-4 sem RAG nas três métricas (BLEU 0.1568 contra 0.1828; CodeBERT Score 0.7661 contra 0.7758; Ansible Aware 0.2889 contra 0.3346). O texto não discute esses valores; a RQ5 é formulada como «How does the RAG-based approach improve code generation over GPT-4?» e é respondida apenas com um exemplo (Figura 2).",
+        "localizador": "PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), RQ5"
+      },
+      {
+        "descricao": "Narrativa e tabela divergem quanto à natureza da avaliação do RAG: a Seção 5.1 trata a avaliação do RAG como «small qualitative study» com dados insuficientes para comparação rigorosa, mas a Tabela 2 apresenta métricas quantitativas para o UIUC.chat, sem indicar quantos casos foram avaliados nem se o conjunto é o mesmo dos modelos Warp.",
+        "localizador": "PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "descricao": "A Seção 5 declara avaliação dos modelos ajustados com duas métricas (BLEU e CodeBERTScore) e a RQ1 fala em «both metrics», mas as Tabelas 2 e 3 trazem também Ansible Aware, definida apenas na Seção 2 como métrica de trabalho anterior. A legenda da Tabela 2 («Evaluation of fine-tuned Warp models over baseline») também não menciona GPT-4 nem UIUC.chat.",
+        "localizador": "PDF p. 3 (impressa 3), Seção 2; PDF p. 4 (impressa 4), Seção 5, RQ1 e Tabela 2"
+      },
+      {
+        "descricao": "O texto afirma que os modelos ajustados são «significantly better» que o modelo base, mas nenhum teste estatístico, intervalo ou número de execuções é relatado (comparação de fine-tuning, fora do escopo de prompting).",
+        "localizador": "PDF p. 4 (impressa 4), RQ1"
+      },
+      {
+        "descricao": "Aparente inconsistência entre narrativa e Tabela 3 (fine-tuning, fora do escopo): o texto diz que o modelo com 13.2k amostras é «markedly worse than the model with the smallest training set», mas o BLEU do modelo de 13.2k (0.2206) é maior que o do modelo de 3.3k (0.2130); a afirmação só é coerente com CodeBERTScore (0.7859 contra 0.7884) e Ansible Aware (0.4069 contra 0.4113). O valor da linha Warp 1B 6.6k coincide entre as Tabelas 2 e 3 (0.2152; 0.7857; 0.4047).",
+        "localizador": "PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), Tabela 3 e RQ2"
+      },
+      {
+        "descricao": "Diferença de modelo base entre as abordagens comparadas: o RAG usa GPT-4 e o fine-tuning usa StarCoder-base 1B/3B, o que limita a comparação direta entre RAG e fine-tuning.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo avalia apenas o tipo de geração description → task e deixa os outros três tipos de Ansible-YAML Generation para trabalho futuro.",
+        "localizador": "PDF p. 3 (impressa 3), Seção 4.1"
+      },
+      {
+        "descricao": "A Tabela 1 lista uma variante 3B com 3.3k amostras e variantes 1B com context window 512/1024 para 13.2k e 6.6k amostras, mas as Tabelas 2 e 3 não trazem resultados para todas essas combinações (por exemplo, 3B com 3.3k).",
+        "localizador": "PDF p. 4 (impressa 4), Tabelas 1 e 2; PDF p. 5 (impressa 5), Tabela 3"
+      },
+      {
+        "descricao": "O estudo afirma a intenção de publicar o conjunto de dados e a coleção de documentação; não há link de replicação impresso. Parâmetros de decodificação e número de execuções não são informados para nenhum modelo.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 4 (impressa 4), Seção 4.2"
+      },
+      {
+        "descricao": "O estudo apresenta o RAG como barato e fácil de implementar para DSLs com poucos recursos (afirmação de vantagem, sem medição de custo).",
+        "localizador": "PDF p. 5 (impressa 5), Seção 6.1"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Using these datasets, we evaluate two different techniques for generating code with LLMs:",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      },
+      {
+        "trecho": "Retrieval-augmented generation, which involves searching for and packing relevant language documentation in the query’s context to be used during inference time.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução, item (2)"
+      },
+      {
+        "trecho": "When presented with a textual query for generating code, a search is done for documentation about relevant APIs and the results are concatenated with the original textual query as context; this augmented query is presented to the GPT4 model for generating the final code.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      },
+      {
+        "trecho": "We compare the effectiveness of the fine-tuning and RAG approaches for Ansible code generation, and we also include both the base models, StarCoder and GPT-4, as baselines.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      },
+      {
+        "trecho": "We use GPT4 instead of StarCoder for the base model for RAG because GPT4 is a significantly more powerful general-purpose model that is better suited for text analysis and information retrieval.",
+        "localizador": "PDF p. 2 (impressa 2), Introdução"
+      },
+      {
+        "trecho": "While all four types of tasks are required for a complete code generation tool, we choose to focus on the simplest case of description → task, which occurs in practice when generating the first task of a role.",
+        "localizador": "PDF p. 3 (impressa 3), Seção 4.1"
+      },
+      {
+        "trecho": "The latter can be implemented using prompt engineering, where a pre-existing model is instructed to treat the documentation as added context for the user’s prompt.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.4"
+      },
+      {
+        "trecho": "The chat assistant is constructed as a layer on top of the GPT-4 API, using a series of API calls to first search for relevant documents, and then incorporate found material into the final answer.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.4"
+      },
+      {
+        "trecho": "Course material is uploaded to a vector database, which is searched via semantic similarity check using a smaller model to provide citations that improve the accuracy of responses.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.4"
+      },
+      {
+        "trecho": "Playbook content is analyzed using PyYAML to normalize the syntax, and duplicate entries were removed.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.2"
+      },
+      {
+        "trecho": "Data is split into 90% training data and 10% test data.",
+        "localizador": "PDF p. 4 (impressa 4), Seção 4.3"
+      },
+      {
+        "trecho": "In comparison, while the output of the RAG implementation appears correct, it misses key details including a conditional and looping over two services.",
+        "localizador": "PDF p. 5 (impressa 5), RQ5"
+      },
+      {
+        "trecho": "Omitting details from the prompt or ignoring relevant context can lead to code that work that looks good in the abstract but is non-functional in practice.",
+        "localizador": "PDF p. 5 (impressa 5), RQ5"
+      },
+      {
+        "trecho": "In our experiments with UIUC.chat, we found that it was often over-relying on the documentation and providing what amounted to templates, as opposed to actual working code.",
+        "localizador": "PDF p. 5 (impressa 5), RQ5"
+      },
+      {
+        "trecho": "A major limitation in our evaluation of the RAG approach is that we do not have sufficient data to rigorously compare it to fine-tuning.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "trecho": "The full inference process, including the model’s specs and the full data that it was trained on are not public knowledge, so reproducibility and data-leakage are a concern.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "trecho": "This may cause additional bias in our evaluation metrics and limit the potential utility of this tool outside of open-source projects.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+      },
+      {
+        "trecho": "In the process of training and running inference on these models, we used over 100 GPU credits on a super-computing cluster, which is a non-insignificant amount of resources, and potentially more than is available for DSLs with a smaller user base.",
+        "localizador": "PDF p. 5 (impressa 5), Seção 6.1"
+      },
+      {
+        "trecho": "Another concern is whether existing evaluation methods, which can often be brittle and unreliable, can be used effectively in comparing code generation techniques across languages.",
+        "localizador": "PDF p. 6 (impressa 6), Seção 6.1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-augmented generation (RAG) com UIUC.chat",
+      "mecanismos": ["contexto", "instrucao"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "GPT-4 (base model baseline, sem RAG)",
+      "modelo": "GPT-4 (versão nao_informado); a intervenção usa o UIUC.chat como camada sobre a API do GPT-4",
+      "benchmark": "Conjunto próprio de pares name/task de Ansible (Ansible Galaxy), geração description → task",
+      "metrica": "BLEU",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.1828, "intervencao": 0.1568},
+      "denominador": "nao_informado",
+      "condicoes": "Valores da Tabela 2 (linhas GPT-4 e UIUC.chat; coluna Size em branco e Context Window N/A). Número de casos de teste nao_informado (o estudo descreve divisão 90%/10% de 132k pares para o ajuste fino, mas não declara que GPT-4 e UIUC.chat foram avaliados nesse mesmo subconjunto). Versão do GPT-4, prompt da linha de base, texto do prompt do UIUC.chat, número de documentos recuperados, modelo do recuperador, parâmetros de decodificação e número de execuções: nao_informado. Pacote completo (recuperação + instrução + GPT-4) contra GPT-4 sem RAG; o resultado é do pacote. O estudo chama a avaliação do RAG de estudo qualitativo pequeno e diz não ter dados suficientes para comparação rigorosa. conferido_pdf = sim: valores conferidos na imagem da página 4 do PDF (Tabela 2).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e a conclusão destacam a comparação entre fine-tuning e RAG sem identificar uma métrica principal (Tabela 2 traz BLEU, CodeBERT Score e Ansible Aware). A Tabela 1 é descritiva; a Tabela 2 é a primeira com o contraste de prompting (UIUC.chat contra GPT-4); primeira métrica pertinente: BLEU; primeira linha de base de prompting listada: GPT-4. Não há outra técnica focal de prompting, outra tarefa, tabela de ablação de prompting nem contraste pareado para cobertura.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 4 (impressa 4), Tabela 2 (colunas Model, Size, Context Window, BLEU, CodeBERT Score, Ansible Aware)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT-4 | N/A | 0.1828 | 0.7758 | 0.3346",
+          "localizador": "PDF p. 4 (impressa 4), Tabela 2, linha GPT-4 (colunas Model | Context Window | BLEU | CodeBERT Score | Ansible Aware; Size em branco)"
+        },
+        {
+          "trecho": "UIUC.chat | N/A | 0.1568 | 0.7661 | 0.2889",
+          "localizador": "PDF p. 4 (impressa 4), Tabela 2, linha UIUC.chat (colunas Model | Context Window | BLEU | CodeBERT Score | Ansible Aware; Size em branco)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (avaliar fine-tuning e RAG para gerar código Ansible) e cinco questões de pesquisa, incluindo a RQ5 sobre RAG, estão explicitados.",
+      "localizador": "PDF p. 1–2 (impressas 1–2), Resumo e Introdução; PDF p. 4–5 (impressas 4–5), RQ1–RQ5"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção do conjunto de dados e ajuste fino são descritos; o RAG é descrito em alto nível (UIUC.chat, base vetorial, instrução para usar a documentação), mas sem o texto do prompt, número de documentos recuperados, modelo do recuperador, versão do GPT-4, parâmetros de decodificação e tamanho do conjunto avaliado.",
+      "localizador": "PDF p. 3–4 (impressas 3–4), Seções 4.1–4.4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparador executado (GPT-4 sem RAG e StarCoder-base) na mesma tabela e métricas, mas o RAG e o fine-tuning usam modelos base diferentes, a versão do GPT-4 não é informada e os autores reconhecem dados insuficientes para comparação rigorosa do RAG.",
+      "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 4 (impressa 4), Tabela 2; PDF p. 5 (impressa 5), Seção 5.1"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "BLEU e CodeBERTScore são definidas, mas Ansible Aware aparece nas tabelas sem definição na seção de avaliação; nenhuma métrica de correção funcional é usada; o denominador de cada métrica não é informado. Os valores da linha Warp 1B 6.6k coincidem entre as Tabelas 2 e 3.",
+      "localizador": "PDF p. 3 (impressa 3), Seção 2; PDF p. 4 (impressa 4), Seção 5 e Tabela 2; PDF p. 5 (impressa 5), Tabela 3"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A Seção 5.1 discute dados insuficientes para avaliar o RAG, restrição de recursos, representatividade do Ansible Galaxy e opacidade do GPT-4; não discute variabilidade entre execuções nem a inversão do UIUC.chat frente ao GPT-4 na Tabela 2.",
+      "localizador": "PDF p. 5 (impressa 5), Seção 5.1"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Há detalhes de dados, hardware e variantes de ajuste fino, e os autores pretendem publicar os dados, mas não há link de replicação impresso, prompts, versão do GPT-4 nem parâmetros de decodificação; os próprios autores apontam a reprodutibilidade do GPT-4 como preocupação.",
+      "localizador": "PDF p. 2 (impressa 2), Introdução; PDF p. 4 (impressa 4), Seções 4.2–4.4; PDF p. 5 (impressa 5), Seção 5.1"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo menciona vazamento de dados como preocupação para o GPT-4 e descreve remoção de duplicatas e divisão treino/teste para o ajuste fino, mas não controla nem verifica a possível presença dos dados de teste (código público do Ansible Galaxy) no pré-treinamento do GPT-4 e do StarCoder.",
+      "localizador": "PDF p. 4 (impressa 4), Seções 4.2 e 4.3; PDF p. 5 (impressa 5), Seção 5.1"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-04 (Tabelas 1 e 2, Seções 4.3–5)", "p-05 (Tabela 3, RQ2–RQ5, Seção 5.1, Seção 6)", "p-06 (Figura 2, Seção 6.1)"],
+    "observacao": "Texto extraído lido integralmente (6 páginas, incluindo referências)."
+  }
+}

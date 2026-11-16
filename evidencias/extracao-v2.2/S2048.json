@@ -1,0 +1,411 @@
+{
+  "estudo_id": "S2048",
+  "texto_fonte": "fontes/textos/lote/S2048.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Attention-guided Pruning",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Resumo, p. 1 do PDF (p. 438 impressa); Seções 3.3 e 3.4 e Algoritmo 1, p. 3-4 do PDF (p. 440-441); Seções 4.3 e 4.4, p. 5 do PDF (p. 442); Tabelas 2-5, p. 7 do PDF (p. 444)",
+        "observacao": "Poda (compressão) do prompt few-shot: atenção do CodeBERT (janela de 500 tokens) dá o valor de cada token e uma mochila 0-1 escolhe os tokens dentro do limite de entrada do GPT-3.5-turbo (4096 tokens), o que abre espaço para mais exemplos de classes do ClassEval (em média 4 exemplos, segundo a Seção 4.4). O prompt herda do prompt base a persona/instrução ('You are an expert programmer'; 'Below is an instruction...') → instrucao; os exemplos resolvidos de classes (esqueleto + solução) → exemplos e contexto (código fornecido como demonstração); o esqueleto da classe-alvo fornecido como insumo → contexto. A compressão por seleção de tokens foi classificada como 'outro' (compressão do prompt guiada por atenção); não há busca do prompt guiada por desempenho. Em relação ao prompt base (Few-shot Without Pruning), acrescenta a poda ('outro') e aumenta o número de exemplos (de 1 para, em média, 4), o que fica dentro das categorias já presentes. O isolamento por ingrediente vem da ablação 'Random Pruning' (Seção 5.2), que segue a mesma implementação mas remove tokens ao acaso; o estudo não informa explicitamente o número de exemplos na condição de poda aleatória. Contra 'Few-shot Without Pruning' o contraste é de pacote (poda + mais exemplos), sem isolamento de cada parte."
+      },
+      {
+        "nome_original": "Random Pruning",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 5 do PDF (p. 442); Seção 5.2 e Eq. 2, p. 6 do PDF (p. 443); Tabelas 2-5, p. 7 do PDF (p. 444)",
+        "observacao": "Linha de base de ablação, também chamada 'lexical exclusion': cada token é mantido segundo uma Bernoulli com p = L/|C|. Mesma implementação da Figura 2, com poda aleatória. Comparador cujos mecanismos não são isolados: a diferença em relação ao Few-shot Without Pruning envolve poda e número de exemplos ao mesmo tempo (número de exemplos não informado para esta condição)."
+      },
+      {
+        "nome_original": "Few-shot Without Pruning",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 5 do PDF (p. 442); Tabelas 2-5, p. 7 do PDF (p. 444); Figura 3, p. 6 do PDF (p. 443)",
+        "observacao": "Prompt base sem poda com um único exemplo de geração de classe. A Figura 3 rotula a mesma condição (0%, valores 4 e 13 iguais aos da linha Few-shot Without Pruning) como 'Zero-shot Baseline', em contradição com o texto da Seção 4.3 (ver heterogeneidade). Sem base identificável, mecanismos_acrescentados vazio."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {
+        "nome": "GPT-3.5-turbo",
+        "versao": "GPT-3.5-turbo-0613",
+        "papel_no_estudo": "geração de código; janela de contexto de 4096 tokens; temperatura 0",
+        "localizador": "Tabela 1, p. 5 do PDF (p. 442); Seção 4.4, p. 6 do PDF (p. 443)"
+      },
+      {
+        "nome": "CodeBERT",
+        "versao": "nao_informado",
+        "papel_no_estudo": "cálculo dos pesos de atenção usados na poda, 'with default parameters', janela de 500 tokens; não gera código",
+        "localizador": "Seção 4.4, p. 5-6 do PDF (p. 442-443); Seção 3.4, p. 4 do PDF (p. 441)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "ClassEval",
+        "versao": "nao_informado",
+        "quantidade": "100 tarefas de geração de código em nível de classe (todas usadas)",
+        "observacao": "Os exemplos do prompt também vêm do ClassEval, escolhidos ao acaso e sem o código da tarefa-alvo. O número de métodos (denominador das métricas em nível de método) não é informado.",
+        "localizador": "Seção 2.2, p. 2 do PDF (p. 439); Seção 4.4, p. 5 do PDF (p. 442); Seção 3.2, p. 3 do PDF (p. 440)"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@k (k = 1, 3, 5), class-level e method-level, cada uma em 'All Success' e 'Partial Success'",
+        "definicao": "Eq. 1 (estimador de Chen et al.: n amostras, c aprovadas, k escolhidas). Classe correta só se passar todos os testes de método e de classe. All Success: os códigos das duas tentativas passaram em todos os testes (Seção 4.2). Partial Success: na Seção 4.2, uma das duas tentativas passou em todos os testes; na Seção 5.1, 'B' é o Pass@k quando o exemplo gerado satisfaz só um subconjunto dos testes (definições divergentes).",
+        "denominador": "Class-level: corpus de 100 tarefas, sem que o estudo ligue explicitamente o denominador a esse total; method-level: nao_informado. Duas amostras por tarefa (n = 2).",
+        "localizador": "Seção 4.2 e Eq. 1, p. 5 do PDF (p. 442); Seção 5.1, p. 6 do PDF (p. 443)"
+      }
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Poda excessiva destrói semântica e estrutura do prompt e degrada o código gerado: acima de 40% o prompt passa a conter tokens sem sentido (tentativas preliminares não quantificadas), e em 40% o Pass@1 cai para 3,4% (classe) e 10,4% (método), abaixo do prompt sem poda.",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442); Seção 5.1, p. 6 do PDF (p. 443); Tabela 5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo computacional do algoritmo de poda: complexidade de tempo O(N*L_T), dominada pela mochila 0-1, e uso de memória por um vetor bidimensional na programação dinâmica. Não quantificado empiricamente.",
+        "localizador": "Seção 3.4, p. 4-5 do PDF (p. 441-442)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os exemplos do prompt vêm do mesmo benchmark (ClassEval) usado no teste, com risco de incluir o código da tarefa-alvo; o estudo declara que a tarefa-alvo não aparece nos exemplos. O estudo não discute contaminação no pré-treinamento do GPT-3.5.",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Variação das saídas do LLM, tratada pelo estudo com temperatura 0 'for the stability of LLM's output'; o estudo também menciona nucleus sampling nos resultados (ver heterogeneidade).",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seção 5.1, p. 6 do PDF (p. 443)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Exemplos do prompt escolhidos ao acaso no ClassEval sem conter o código da tarefa-alvo.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "descricao": "Temperatura 0 na geração para estabilizar as saídas.",
+        "avaliada": "nao",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Tabela 1, p. 5 do PDF (p. 442)"
+      },
+      {
+        "descricao": "Limitação das porcentagens de poda a 10%-40%, depois de tentativas que indicaram destruição do prompt acima de 40% (tentativas não relatadas quantitativamente).",
+        "avaliada": "nao",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Few-shot Without Pruning (um exemplo, sem poda) e Random Pruning (ablação com poda aleatória), executados pelo estudo com o mesmo modelo e benchmark",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A Figura 3 rotula a condição 0% como 'Zero-shot Baseline', mas a Seção 4.3 descreve a linha de base sem poda como few-shot com um único exemplo; os valores da barra 0% (4 e 13) coincidem com o Pass@1 All Success da linha Few-shot Without Pruning nas Tabelas 2-5.",
+        "localizador": "Figura 3, p. 6 do PDF (p. 443); Seção 4.3, p. 5 do PDF (p. 442); Tabelas 2-5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Configuração de decodificação divergente: Tabela 1 e Seções 3.2/4.4 informam temperatura 0 e a Seção 4.2 'greedy sampling', enquanto a Seção 5.1 diz que as Tabelas 2-5 apresentam resultados 'with nucleus sampling'.",
+        "localizador": "Tabela 1 e Seção 4.2, p. 5 do PDF (p. 442); Seção 3.2, p. 3 do PDF (p. 440); Seção 5.1, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "Aparente inconsistência: o estudo gera 2 amostras por tarefa (n = 2) e relata Pass@3 e Pass@5, mas a Eq. 1 exige k ≤ n; o estudo não explica como Pass@3 e Pass@5 foram calculados com duas amostras.",
+        "localizador": "Seção 4.2 e Eq. 1, p. 5 do PDF (p. 442); Seção 4.4, p. 6 do PDF (p. 443); Tabelas 2-5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Aparente inconsistência (cálculo próprio): com 100 tarefas e 2 amostras por tarefa, o Pass@1 em nível de classe pela Eq. 1 seria múltiplo de 0,5%, mas as tabelas trazem valores como 8,6%, 9,2%, 8,4%, 5,6% e 3,4%. O estudo não informa o estimador efetivamente usado nem se todas as 100 tarefas entram no denominador.",
+        "localizador": "Seções 4.2 e 4.4, p. 5-6 do PDF (p. 442-443); Tabelas 2-5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Definição divergente de 'Partial Success': na Seção 4.2, uma das duas tentativas passou em todos os testes; na Seção 5.1, 'B' é o Pass@k quando o exemplo gerado satisfaz apenas um subconjunto dos testes.",
+        "localizador": "Seção 4.2, p. 5 do PDF (p. 442); Seção 5.1, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "Resumo contradiz o corpo: o resumo diz que podar até 40% dos tokens com quatro exemplos adicionais maximiza o desempenho, mas a Seção 5.2 aponta 20% como a melhor porcentagem e a Seção 5.1 descreve queda acentuada em 40%. Além disso, o resumo fala em 'four additional examples' e a Seção 4.4 em 'averagely supply 4 code generation examples' (adicionais ou totais fica ambíguo); o número de exemplos por porcentagem não é informado.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438); Seção 4.4, p. 5 do PDF (p. 442); Seção 5.1, p. 6 do PDF (p. 443); Seção 5.2, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Os ganhos '4.2%, 10.2%, and 13%' do resumo correspondem (cálculo próprio) às diferenças em pontos percentuais entre Attention-guided e Random Pruning em Pass@1/3/5 All Success de classe na poda de 30% (Tabela 4: 8,4 vs 4,2; 20,4 vs 10,2; 26 vs 13), que são os máximos das faixas da Seção 5.2; as contribuições os apresentam como obtidos 'across different pruning levels' e como '%', sem distinguir p.p. de variação relativa.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438); Contribuições, p. 2 do PDF (p. 439); Seção 5.2, p. 6 do PDF (p. 443); Tabela 4, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Narrativa troca valores da tabela: na p. 444 o texto diz que, com 40%, o desempenho fica em 10,4% para classe e 3,4% para método, mas a Tabela 5, a Figura 3 e a Seção 5.1 dão 3,4% (classe) e 10,4% (método).",
+        "localizador": "Seção 5.2, p. 7 do PDF (p. 444); Seção 5.1 e Figura 3, p. 6 do PDF (p. 443); Tabela 5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Aparente inconsistência (cálculo próprio): o texto diz que, entre 10% e 30%, o Pass@k de classe fica em torno de 8,7% e o de método em torno de 20,1%, com diferença máxima de 0,5% e 1,3%; pelos valores de Pass@1 da Figura 3 (classe 8,6/9,2/8,4; método 20,6/21,4/18,8), a amplitude é 0,8 p.p. e 2,6 p.p. O estudo não define 'max difference' (por exemplo, desvio em relação à média).",
+        "localizador": "Seção 5.1, p. 6 do PDF (p. 443); Figura 3, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "Aparente inconsistência (cálculo próprio): o texto afirma melhora de até 6,5% em Pass@1 de método sobre a poda aleatória, mas a maior diferença nas Tabelas 2-5 é 6,4 p.p. (Tabela 3: 21,4% vs 15,0%); os demais máximos citados (13,6 em Pass@3; 16,4 em Pass@5) coincidem com as tabelas.",
+        "localizador": "Seção 5.2, p. 6 do PDF (p. 443); Tabelas 2-5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "Inversões com 40% de poda: em nível de método, Attention-guided fica abaixo de Random Pruning em todas as células (por exemplo, Pass@1 10,4%/14,9% vs 11,1%/16,0%) e abaixo de Few-shot Without Pruning (Pass@1 10,4% vs 13,0%); em nível de classe, Pass@1 All Success 3,4% fica abaixo de 4% sem poda. A narrativa diz que a estratégia 'remains better or approximate performance than random pruning on method-level generation'.",
+        "localizador": "Tabela 5, p. 7 do PDF (p. 444); Seção 5.2, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "O estudo afirma superioridade 'significantly' (resumo, conclusão) sem relatar teste estatístico, intervalo ou variabilidade; só duas amostras por tarefa.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438); Conclusão, p. 8 do PDF (p. 445); Seção 4.4, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "A linha de base sem poda usa um único exemplo, enquanto as condições com poda trazem em média 4 exemplos; a comparação com Few-shot Without Pruning confunde poda e número de exemplos. A mesma linha Few-shot Without Pruning se repete idêntica nas Tabelas 2-5.",
+        "localizador": "Seções 4.3 e 4.4, p. 5 do PDF (p. 442); Tabelas 2-5, p. 7 do PDF (p. 444)"
+      },
+      {
+        "descricao": "O texto remete ao 'Appenix C' para a construção do prompt e detalhes de implementação, mas o artigo (9 páginas, terminando nas referências) não contém apêndice.",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seções 4.1 e 4.2, p. 5 do PDF (p. 442); p. 9 do PDF (p. 446)"
+      },
+      {
+        "descricao": "Escopo da poda divergente: a Seção 3.2 diz que se podam a parte de instrução e a de exemplos, e a Seção 3.3 diz que a poda é feita na parte de exemplos.",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seção 3.3, p. 4 do PDF (p. 441)"
+      },
+      {
+        "descricao": "Na Tabela 5 a linha Few-shot Without Pruning está toda em negrito, embora Attention-guided Pruning tenha valores maiores em algumas células de classe (Pass@3 Partial 17,4% vs 16,5%; Pass@5 12%/23% vs 10%/20%); leitura própria do destaque tipográfico.",
+        "localizador": "Tabela 5, p. 7 do PDF (p. 444)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Componentes da técnica: tokenização e cálculo de atenção pelo CodeBERT em lotes limitados pelo comprimento de entrada do BERT; mochila 0-1 com atenção como valor e número de tokens como peso, capacidade igual ao limite de entrada do modelo; destokenização e concatenação dos tokens escolhidos.",
+        "localizador": "Seção 3.4 e Algoritmo 1, p. 4 do PDF (p. 441)"
+      },
+      {
+        "descricao": "Para economizar 'training time and costs', cada tarefa foi enviada ao GPT duas vezes; o número de repetições do experimento além dessas duas amostras não é informado.",
+        "localizador": "Seção 4.4, p. 6 do PDF (p. 443)"
+      },
+      {
+        "descricao": "A Figura 4 e a Seção 5.3 ilustram qualitativamente a poda de 20% em duas classes (remoção de '_', 'item', '*'), sem medida quantitativa.",
+        "localizador": "Seção 5.3 e Figura 4, p. 8 do PDF (p. 445)"
+      },
+      {
+        "descricao": "O estudo relaciona ganhos em nível de classe e de método: aumentos de 4,6, 5,2 e 4,4 em classe acompanham aumentos de 7,6, 8,4 e 5,8 em método (diferenças em relação ao Few-shot Without Pruning nas poda de 10%, 20% e 30%, conferidas nas tabelas).",
+        "localizador": "Seção 5.2, p. 7-8 do PDF (p. 444-445)"
+      },
+      {
+        "descricao": "A conclusão aponta como trabalho futuro avaliar outras linguagens e contextos de codificação; não há seção de ameaças à validade.",
+        "localizador": "Conclusão, p. 8 do PDF (p. 445)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We propose an attention-guided pruning strategy that selectively removes less informative code tokens, allowing more representative examples to be included in the prompt and thus providing richer semantic context for LLMs.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438)"
+      },
+      {
+        "trecho": "Experiments on the ClassEval dataset using GPT-3.5 demonstrate that our strategy significantly outperforms random pruning, achieving 4.2%, 10.2%, and 13% higher accuracy in class-level code generation.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438)"
+      },
+      {
+        "trecho": "Further analysis shows that pruning up to 40% of tokens while including four additional examples maximizes LLM performance, enabling more accurate and coherent class-level code generation.",
+        "localizador": "Resumo, p. 1 do PDF (p. 438)"
+      },
+      {
+        "trecho": "Please complete the class ${Class Name} in the subsequent code. ${Class Skeleton}",
+        "localizador": "Seção 3.3, quadro da parte Instruction, p. 3 do PDF (p. 440)"
+      },
+      {
+        "trecho": "#You are an expert programmer. Here are some coding examples, you can learn from these examples:",
+        "localizador": "Seção 3.3, quadro da parte Testing, p. 4 do PDF (p. 441)"
+      },
+      {
+        "trecho": "#Below is an instruction that describes a task. Write a response that appropriately completes the request.",
+        "localizador": "Seção 3.3, quadro da parte Testing, p. 4 do PDF (p. 441)"
+      },
+      {
+        "trecho": "Certainly, these examples do not contain desired code snippet and are chosen randomly.",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440)"
+      },
+      {
+        "trecho": "The second process is to request LLM with temperature of 0 for the stability of LLM's output, namely GPT-3.5-turbo, to generate the code solution snippet for each input processed prompt.",
+        "localizador": "Seção 3.2, p. 3 do PDF (p. 440)"
+      },
+      {
+        "trecho": "The time complexity of attention-guided pruning algorithm is O(N∗L_T), where L_T denotes the target numbers of tokens.",
+        "localizador": "Seção 3.4, p. 4 do PDF (p. 441)"
+      },
+      {
+        "trecho": "Additionally, the 0-1 backpack algorithm demands to handle two-dimensional array when programming dynamically, costing space in memory.",
+        "localizador": "Seção 3.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "The first experiment we conduct, compared with the pruning strategy we propose, is few-shot learning of LLM without pruning.",
+        "localizador": "Seção 4.3, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "Furthermore, the prompt includes only a single code generation example in its examples part.",
+        "localizador": "Seção 4.3, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "The second baseline experiment is conducted for ablation study, named random pruning.",
+        "localizador": "Seção 4.3, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "In our work, we take all 100 class-level code generation tasks in ClassEval into experiments.",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "In addition, the desired code snippet does not emerge in those examples, chosen stochastically, in the prompt.",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "With several tries of pruning tokens from prompt, we find that pruning over 40% tokens can destroy both semantics and structure of prompt and the prompt just contains some meaningless and unrelated tokens.",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "Therefore the the pruning strategy is tested with the set of prune percentages: 10%, 20%, 30%, and 40% which averagely supply 4 code generation examples to the prompt.",
+        "localizador": "Seção 4.4, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "For each method we test, we adopt greedy sampling to generate 2 code samples and evaluate the performance of each method by Pass@k with k = {1, 3, 5}.",
+        "localizador": "Seção 4.2, p. 5 do PDF (p. 442)"
+      },
+      {
+        "trecho": "For the attention-based pruning strategy, we used the CodeBERT model with default parameters to generate specific attention values and set the window length to 500 tokens.",
+        "localizador": "Seção 4.4, p. 5-6 do PDF (p. 442-443)"
+      },
+      {
+        "trecho": "To save on training time and costs, each code generation task requested the GPT model twice.",
+        "localizador": "Seção 4.4, p. 6 do PDF (p. 443)"
+      },
+      {
+        "trecho": "However, the LLM performs inferior when the pruning percentage of input prompt augments to 40% with the only Pass@k of Class-level and Method-level, 3.4% and 10.4% respectively.",
+        "localizador": "Seção 5.1, p. 6 do PDF (p. 443)"
+      },
+      {
+        "trecho": "Taking advantage of the context and focusing on the fine-grained token-level adjustment demonstrates that attention-guided pruning is significantly better than random pruning for both class-level and well-studied method-level code.",
+        "localizador": "Conclusão, p. 8 do PDF (p. 445)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Attention-guided Pruning",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "outro"],
+      "mecanismos_acrescentados": ["outro"],
+      "comparador": "Few-shot Without Pruning",
+      "modelo": "GPT-3.5-turbo-0613",
+      "benchmark": "ClassEval (100 tarefas em nível de classe, Python)",
+      "metrica": "Pass@1, Class-level, All Success (valor 'A' da célula 'A/B'). Definição divergente no estudo: All Success = códigos das duas tentativas passaram em todos os testes (Seção 4.2); 'A' = Pass@k quando cada exemplo gerado passa em todos os testes (Seção 5.1).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 4, "intervencao": 8.6},
+      "denominador": "nao_informado: o corpus tem 100 tarefas de classe, mas o estudo não liga explicitamente o denominador a esse total; 2 amostras por tarefa",
+      "condicoes": "Poda de 10% dos tokens (Tabela 2). Intervenção com, em média, 4 exemplos (Seção 4.4; número exato por porcentagem não informado); comparador com um único exemplo e sem poda. Contraste de pacote (poda + mais exemplos): o ganho não é atribuível só à poda. GPT-3.5-turbo-0613, janela de 4096 tokens, temperatura 0 (Tabela 1), embora a Seção 5.1 diga que as tabelas usam nucleus sampling; 2 amostras por tarefa; número de repetições adicionais nao_informado. A linha Few-shot Without Pruning é idêntica nas Tabelas 2-5 e corresponde à barra 0% da Figura 3, rotulada 'Zero-shot Baseline'. Ver heterogeneidade sobre Pass@k com n = 2 e valores não múltiplos de 0,5%. Conferido no PDF, p. 7 (Tabela 2) e p. 6 (Figura 3, valores 4 e 8.6).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam a comparação com random pruning, mas com três métricas (Pass@1, Pass@3, Pass@5) e várias porcentagens de poda sem que uma prevaleça. A Tabela 1 é descritiva; a primeira tabela com o contraste é a Tabela 2 (10%); primeira métrica pertinente: Pass@1 Class-level All Success; único modelo GPT-3.5-turbo-0613; primeira linha de base de prompting listada: Few-shot Without Pruning.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (p. 444 impressa); Figura 3, p. 6 do PDF (p. 443)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Few-shot Without Pruning 4%/7.0% 9%/16.5% 10%/20% 13.0%/15.9% 29.4%/36.2% 33.0%/41.2%",
+          "localizador": "Tabela 2 (10% Reduction), p. 7 do PDF (p. 444), linha Few-shot Without Pruning; colunas Class-level All Success/Partial Success Pass@1, Pass@3, Pass@5 e Method-level All Success/Partial Success Pass@1, Pass@3, Pass@5"
+        },
+        {
+          "trecho": "Attention-guided Pruning 8.6%/16.7% 21.4%/39.2% 28.6%/47.3% 20.6%/26.5% 48.9%/62.3% 60.1%/74.9%",
+          "localizador": "Tabela 2 (10% Reduction), p. 7 do PDF (p. 444), linha Attention-guided Pruning; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Attention-guided Pruning",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "outro"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Random Pruning",
+      "modelo": "GPT-3.5-turbo-0613",
+      "benchmark": "ClassEval (100 tarefas em nível de classe, Python)",
+      "metrica": "Pass@1, Class-level, All Success (valor 'A' da célula 'A/B'). Definição divergente no estudo: All Success = códigos das duas tentativas passaram em todos os testes (Seção 4.2); 'A' = Pass@k quando cada exemplo gerado passa em todos os testes (Seção 5.1).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 5.6, "intervencao": 8.6},
+      "denominador": "nao_informado: o corpus tem 100 tarefas de classe, mas o estudo não liga explicitamente o denominador a esse total; 2 amostras por tarefa",
+      "condicoes": "Poda de 10% dos tokens (Tabela 2). Ablação: a mesma implementação com seleção de tokens aleatória (Bernoulli, p = L/|C|) em vez da seleção por atenção do CodeBERT com mochila 0-1; ambas as condições estão na categoria 'outro' (compressão do prompt), por isso mecanismos_acrescentados vazio em relação ao comparador; a diferença é o critério de seleção. O número de exemplos na condição Random Pruning não é informado explicitamente. GPT-3.5-turbo-0613, temperatura 0 (Tabela 1), com a menção divergente a nucleus sampling na Seção 5.1; 2 amostras por tarefa. Conferido no PDF, p. 7 (Tabela 2).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente isolado pela tabela de ablação (seleção guiada por atenção vs. poda aleatória, Random Pruning) incluído para completar o alvo de três, pela mesma ordem (Tabela 2, Pass@1 Class-level All Success). Não há outro componente isolado nem contraste pareado elegível (Random Pruning vs. Few-shot Without Pruning difere em poda e número de exemplos).",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (p. 444 impressa); Seções 4.3 e 5.2, p. 5-6 do PDF (p. 442-443)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Random Pruning 5.6%/11.2% 13.5%/27.0% 17%/34% 15.8%/21.0% 38.4%/50.6% 49.0%/63.7%",
+          "localizador": "Tabela 2 (10% Reduction), p. 7 do PDF (p. 444), linha Random Pruning; colunas Class-level All Success/Partial Success Pass@1, Pass@3, Pass@5 e Method-level All Success/Partial Success Pass@1, Pass@3, Pass@5"
+        },
+        {
+          "trecho": "Attention-guided Pruning 8.6%/16.7% 21.4%/39.2% 28.6%/47.3% 20.6%/26.5% 48.9%/62.3% 60.1%/74.9%",
+          "localizador": "Tabela 2 (10% Reduction), p. 7 do PDF (p. 444), linha Attention-guided Pruning; mesmas colunas"
+        },
+        {
+          "trecho": "This experiment is designed to demonstrate whether our proposed strategy is effectual when pruning for this experiment also conduct prompt pruning but with random.",
+          "localizador": "Seção 4.3, p. 5 do PDF (p. 442)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (poda guiada por atenção para incluir mais exemplos no prompt de geração em nível de classe) e as contribuições são declarados com clareza.",
+      "localizador": "Resumo, p. 1 do PDF (p. 438); Introdução e contribuições, p. 1-2 do PDF (p. 438-439)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Modelo do prompt, algoritmo de poda, porcentagens e linhas de base são descritos, mas o Apêndice C citado não existe, o escopo da poda é descrito de forma divergente, o número de exemplos por condição é dado só como média ('averagely supply 4'), e a decodificação é descrita como temperatura 0/greedy e também como nucleus sampling.",
+      "localizador": "Seções 3.2-3.4, p. 3-4 do PDF (p. 440-441); Seções 4.2-4.4, p. 5-6 do PDF (p. 442-443); Seção 5.1, p. 6 do PDF (p. 443)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há ablação adequada (Random Pruning, mesma implementação) e uma linha de base sem poda; porém a linha sem poda usa um exemplo contra cerca de 4 nas condições podadas, é rotulada 'Zero-shot Baseline' na Figura 3, e o número de exemplos na poda aleatória não é informado.",
+      "localizador": "Seção 4.3, p. 5 do PDF (p. 442); Figura 3 e Seção 5.2, p. 6 do PDF (p. 443)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k é definido (Eq. 1) e os valores coincidem entre Figura 3 e Tabelas 2-5, mas Pass@3/Pass@5 são relatados com apenas 2 amostras por tarefa (incompatível com a Eq. 1), 'Partial Success' tem duas definições, o denominador de método não é informado, valores de classe não são compatíveis com 100 tarefas e n = 2 (aparente inconsistência), e há trechos da narrativa que trocam valores das tabelas.",
+      "localizador": "Seção 4.2 e Eq. 1, p. 5 do PDF (p. 442); Seção 5.1 e Figura 3, p. 6 do PDF (p. 443); Tabelas 2-5 e texto, p. 7 do PDF (p. 444)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura completa, o estudo não discute ameaças à validade (modelo único, benchmark único, duas amostras, ausência de teste estatístico); só menciona como trabalho futuro avaliar outras linguagens e contextos.",
+      "localizador": "Conclusão, p. 8 do PDF (p. 445)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa versão do modelo (GPT-3.5-turbo-0613), temperatura, janela de contexto, janela do CodeBERT e o modelo do prompt; não informa versão do CodeBERT, semente ou exemplos sorteados, nem disponibiliza código ou dados, e remete a um apêndice ausente.",
+      "localizador": "Tabela 1, p. 5 do PDF (p. 442); Seção 4.4, p. 5-6 do PDF (p. 442-443); Seção 3.2, p. 3 do PDF (p. 440)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo controla o vazamento da tarefa-alvo nos exemplos do prompt (exemplos sem o código desejado), mas não discute a possível presença do ClassEval no pré-treinamento do GPT-3.5.",
+      "localizador": "Seção 3.2, p. 3 do PDF (p. 440); Seção 4.4, p. 5 do PDF (p. 442)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas_visualmente": [3, 4, 5, 6, 7],
+    "observacao": "Texto extraído lido por inteiro (p. 1-9 do PDF, p. 438-446 impressas). Abertas as imagens das p. 3 (Figura 2, Seção 3.2-3.3), 4 (modelo do prompt, Algoritmo 1), 5 (Tabela 1, Seções 4.2-4.4), 6 (Figura 3, Seções 5.1-5.2) e 7 (Tabelas 2-5)."
+  }
+}

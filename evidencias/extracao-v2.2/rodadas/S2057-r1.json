@@ -1,0 +1,329 @@
+{
+  "estudo": "S2057",
+  "texto_fonte": "fontes/textos/lote/S2057.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot learning (K0(Basic))",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9-10 (impressas 9-10), seção 3.3.1 e Fig. 3; Tabela 2",
+        "observacao": "Prompt base de todo o estudo empírico: descrição da tarefa ('Provide a fix for the buggy function') como instrução e a função defeituosa como insumo (contexto), sem exemplos nem informação auxiliar. É a linha de base das RQ1 e RQ2; não há condição sem ela."
+      },
+      {
+        "nome_original": "few-shot learning mechanism (k-shot setups: K1(PE), K1(CE_BNS), K1(CE_BBS), K1(CE_FIB), K2(PE, PE), K2(CE_BNS, PE), K2(CE_BBS, PE), K2(CE_BNS, CE_BBS), K3(...), K4(...))",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 10-13 (impressas 10-13), seção 3.3.2, Tabela 2, Fig. 4, Tabelas 3 e 4",
+        "observacao": "Objeto da RQ1. Pares de código defeituoso/corrigido inseridos no prompt base: exemplos criados manualmente (CE: binarySearch, bubbleSort, Fibonacci) ou correções históricas do mesmo projeto (PE), selecionadas com a implementação de trabalho anterior [119]. O contraste com K0(Basic) mantém instrução, função defeituosa, modelo e amostragem. Exemplos de código fornecidos como demonstração recebem 'exemplos' e 'contexto' (regra D102). O estudo trata os 13 arranjos como configurações (setups) do mesmo mecanismo, não como técnicas distintas; por isso foram agrupados aqui."
+      },
+      {
+        "nome_original": "auxiliary repair-relevant information (project-specific information PI(BC), PI(EM), PI(TT), PI(ALL); bug report information BR(IT), BR(ID), BR(ALL))",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 11-17 (impressas 11-17), seção 3.3.3, Tabelas 5 e 6, Figs. 8-11",
+        "observacao": "Objeto da RQ2. Comentário da função, teste disparador, mensagem de erro obtida ao executar o teste disparador, título e descrição do relato de defeito, inseridos no prompt zero-shot. A mensagem de erro é insumo de um único passo, sem ciclo de refinamento; por isso foi classificada como 'contexto', não 'feedback'. O contraste com K0(Basic) mantém o restante do prompt e a amostragem. O estudo agrupa sete configurações em duas fontes (informação específica do projeto e relato de defeito); foram tratadas como configurações de um mesmo mecanismo."
+      },
+      {
+        "nome_original": "SRepair (Suggestion Repair; dual-LLM framework com zero-shot CoT)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 18-26 (impressas 18-26), seções 4.1-4.2.5, Figs. 13-15, Tabelas 8-12",
+        "observacao": "Técnica proposta. Etapa 1: modelo de sugestão (GPT-4) recebe função defeituosa com comentário, teste disparador e mensagem de erro, com instrução de analisar a causa raiz e propor sugestões em formato fixo ('Root Cause: ...', 'Suggestion {id}: ...'). Etapa 2: modelo de geração de patch (StarCoder2) recebe causa raiz, sugestão e função defeituosa. Base identificável: prompt PI(ALL) zero-shot. Contrafactual de pacote na Tabela 12: SRepair (272 plausíveis) contra GPT-4 with PI(ALL) (237) e StarCoder2 with PI(ALL) (203), ambos com 10 amostras por bug. Pacote híbrido: inclui escolha de dois modelos diferentes (selecao_modelo) e orçamento de 10 amostras; o ganho do pacote não é efeito isolado de prompting. Contra os sistemas da Tabela 8 (D4C, ChatRepair etc.) a comparação não isola mecanismos. Os dois modelos atuam em sequência unidirecional, sem interação; foi classificado como 'decomposicao', não 'multiagente'."
+      },
+      {
+        "nome_original": "Chain of Thought (CoT) technique (no modelo de sugestão do SRepair)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 18, 25-26 (impressas 18, 25-26), seção 4.1, seção 4.2.5, Tabelas 12 e 13",
+        "observacao": "Ablação 'SRepair w/o CoT' (252 plausíveis) contra SRepair padrão (272), mesmos modelos e 10 amostras. O texto não mostra o prompt da condição sem CoT; não se sabe se o formato de saída fixo é mantido nela."
+      },
+      {
+        "nome_original": "Dual-LLM framework (SRepair)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 25-26 (impressas 25-26), seção 4.2.5, Tabela 12",
+        "observacao": "O estudo atribui ao Dual-LLM o ganho de 6,3% comparando 'SRepair w/o CoT' (GPT-4 sugestão + StarCoder2 patch, 252) com 'GPT-4 with PI(ALL)' (237). As duas condições diferem na etapa de sugestão e também no modelo que gera o patch (StarCoder2 contra GPT-4); com StarCoder2 with PI(ALL) (203) o modelo de patch é o mesmo, mas a etapa acrescenta um segundo modelo (GPT-4). Por isso foi tratado como pacote híbrido (etapa encadeada + seleção de modelo), não como ingrediente isolado de prompting. Mecanismos da condição sem CoT inferidos da descrição; o prompt dela não é mostrado."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2, 5, 22, 28 (impressas 2, 5, 22, 28); Tabelas 8, 9, 10",
+        "observacao": "Sistema comparador cujos mecanismos não são isolados. Classificação baseada só na descrição sumária do artigo ('conversational repair mechanism', informação dos testes que expõem o defeito, 'intensive iterative sampling mechanism'); resultados de Defects4J coletados de artigos anteriores, com GPT-3.5-Turbo e 500 amostras por bug, segundo o texto."
+      },
+      {
+        "nome_original": "D4C",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5, 7, 19, 22 (impressas 5, 7, 19, 22); Tabelas 8 e 10",
+        "observacao": "Sistema comparador cujos mecanismos não são isolados. O artigo o descreve como refinamento da função inteira usando artefatos como testes falhos e documentação; demais mecanismos e backbone não são informados neste artigo. Resultado de Defects4J coletado de artigo anterior [125]."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "nucleus sampling (top p = 0.9, temperature = 0.8)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação usados na geração de patches em todo o estudo.",
+        "localizador": "PDF p. 9 (impressa 9), seção 3.3"
+      },
+      {
+        "nome_original": "200 samples per bug (estudo) / 10 patches per bug (SRepair) / Sample n = 5, 100, 200 (configuração)",
+        "natureza": "orcamento",
+        "descricao": "Número de patches amostrados por bug. O estudo usa 200; o SRepair usa 10 por padrão e é avaliado com 5, 100 e 200 na Tabela 12. Os sistemas comparadores usam orçamentos diferentes (por exemplo, ChatRepair 500, GiantRepair 200).",
+        "localizador": "PDF p. 7, 9, 19, 25-26 (impressas 7, 9, 19, 25-26); Tabela 12"
+      },
+      {
+        "nome_original": "repair suggestion model / patch generation model (GPT-4, StarCoder2, Qwen3, Magicoder, Llama3.1, GPT-3.5-Turbo, GPT-4o)",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha dos LLMs de cada etapa do SRepair (estudo de configuração 'Model Selection' na Tabela 12) e uso de GPT-4o no SWE-bench Lite, sem alterar o prompt.",
+        "localizador": "PDF p. 19-20, 25-26 (impressas 19-20, 25-26); Tabela 12"
+      },
+      {
+        "nome_original": "function-level fault localization technique DepGraph",
+        "natureza": "outro",
+        "descricao": "Localização de falhas em nível de função para os resultados de ponta a ponta (linhas Total_FL da Tabela 8); não é prompting.",
+        "localizador": "PDF p. 20-22 (impressas 20-22), seção 4.2.3, Tabela 8"
+      },
+      {
+        "nome_original": "fault localization and test reproduction (SWE-bench)",
+        "natureza": "outro",
+        "descricao": "No SWE-bench Lite, localização de falhas e reprodução de testes seguindo trabalhos anteriores; os testes reproduzidos substituem os testes disparadores.",
+        "localizador": "PDF p. 20 (impressa 20), seção 4.2.2"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "gpt-4-0613", "observacao": "Sujeito do estudo e modelo de sugestão do SRepair; a seção de custo do SRepair cita o preço de gpt-4-0613."},
+      {"nome": "GPT-3.5-Turbo", "versao": "gpt-3.5-turbo-1106", "observacao": "Sujeito do estudo; também modelo de sugestão em configuração do SRepair (n = 200). A seção de custo cita só 'gpt-3.5-turbo'."},
+      {"nome": "Llama3.1", "versao": "Llama-3.1-8B-Instruct", "observacao": "Sujeito do estudo; modelo de sugestão em configuração do SRepair."},
+      {"nome": "StarCoder2", "versao": "StarCoder2-15B-Instruct-v0.1", "observacao": "Sujeito do estudo e modelo de geração de patch do SRepair; a seção do SRepair não repete a versão e remete às configurações do estudo ('For the rest setups, we follow our study section')."},
+      {"nome": "Magicoder", "versao": "MagicoderS-CL (7B)", "observacao": "Sujeito do estudo; modelo de patch em configuração do SRepair."},
+      {"nome": "Qwen3", "versao": "qwen3-32b", "observacao": "Sujeito do estudo; modelo de patch em configuração do SRepair."},
+      {"nome": "GPT-4o", "versao": "gpt-4o-2024-05-13", "observacao": "Usado pelo SRepair no SWE-bench Lite."},
+      {"nome": "backbone do D4C", "versao": "nao_informado", "observacao": "O artigo não informa o modelo usado pelo D4C."}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J 1.2 e 2.0 (bugs de função única)", "quantidade": "522 single-function bugs (276 single-hunk, 158 single-line), de um total de 835 bugs", "observacao": "Tabela 1, p. 8. A relação entre os subconjuntos SH e SL (se SL está contido em SH) não é descrita: nao_informado. Denominador das contagens de plausible/correct fixes: 522 (informado no texto)."},
+      {"nome": "Defects4J 1.2 e 2.0 (conjunto do SRepair)", "quantidade": "665 bugs: 522 single-function (SF) e 143 multi-function (MF)", "observacao": "Tabela 7, p. 20."},
+      {"nome": "Defects4J-clean", "quantidade": "400 bugs (122 excluídos por presença nos dados de treino do StarCoder2)", "observacao": "Seção 5, p. 27; usado só com StarCoder2."},
+      {"nome": "DebugBench", "quantidade": "590 single-function logic bugs, de 4,253 bugs (Java, C++, Python)", "observacao": "p. 9 e 19; divisão por linguagem dos 590 bugs: nao_informado; resultados por linguagem do SRepair na Tabela 10."},
+      {"nome": "QuixBugs", "quantidade": "40 problemas, em Python e Java", "observacao": "p. 19, Tabela 9."},
+      {"nome": "SWE-bench Lite", "quantidade": "300 instâncias", "observacao": "p. 19, Tabela 11."},
+      {"nome": "ConDefects", "quantidade": "321 bugs Java e 330 bugs Python após remoção de duplicatas", "observacao": "p. 27."},
+      {"nome": "GrowingBugs", "quantidade": "nao_informado", "observacao": "Mencionado na p. 27; resultados só na página do GitHub."}
+    ],
+    "metricas": [
+      {"nome": "Plausible Fixes", "definicao": "número de bugs com patch que passa em todos os testes (testes disparadores e testes relevantes)", "localizador": "PDF p. 9, 12, 15"},
+      {"nome": "Correct Fixes", "definicao": "patches plausíveis semanticamente equivalentes à correção do desenvolvedor, por validação manual de três autores", "localizador": "PDF p. 9, 12, 15-16, 22"},
+      {"nome": "Avg. # Correct / Plausible Fixes", "definicao": "média entre os seis modelos; o texto diz que 200 patches por configuração são amostrados para derivar a média de correct fixes", "localizador": "PDF p. 9, 12, 15"},
+      {"nome": "Coef. of Variation", "definicao": "coeficiente de variação das plausible fixes entre LLMs", "localizador": "PDF p. 12, Tabela 3"},
+      {"nome": "plausible / test-failure / uncompilable patch rate", "definicao": "distribuição dos patches gerados", "localizador": "PDF p. 13, Fig. 6"},
+      {"nome": "CodeBLEU", "definicao": "similaridade entre patch gerado e função defeituosa, como proxy do tamanho da modificação", "localizador": "PDF p. 13-14, Fig. 7"},
+      {"nome": "verified patches", "definicao": "patch que passa em todos os testes do LeetCode (DebugBench)", "localizador": "PDF p. 9, 19"},
+      {"nome": "% Resolved", "definicao": "instância resolvida se o patch passa em todos os testes oficiais (SWE-bench Lite)", "localizador": "PDF p. 19, Tabela 11"},
+      {"nome": "Plausible Fix Ratio", "definicao": "razão entre bugs com correção plausível e o conjunto de bugs", "localizador": "PDF p. 16, Fig. 10"},
+      {"nome": "Avg. API $ / Total Cost per Bug $", "definicao": "custo de tokens de entrada e saída pelo preço oficial ou referenciado", "localizador": "PDF p. 20, 26, Tabelas 12 e 13"},
+      {"nome": "p-value (McNemar's test)", "definicao": "teste sobre resultados pareados por bug", "localizador": "PDF p. 21-22, 25, Tabela 8"}
+    ],
+    "linguagens": ["Java", "Python", "C++"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Patches que passam na suíte de testes podem ser sobreajustados e incorretos (plausível não é correto).", "localizador": "PDF p. 9 (impressa 9), seção 3.2.3"},
+      {"categoria": "correcao_funcional", "descricao": "Few-shot pode gerar mais patches não compiláveis do que zero-shot (Finding 3) e, por efeito de ancoragem, restringir o espaço de busca e desorientar o modelo quando o exemplo não corresponde ao padrão de reparo do bug.", "localizador": "PDF p. 13 e 27 (impressas 13 e 27), Finding 3 e seção 5"},
+      {"categoria": "correcao_funcional", "descricao": "Os LLMs poderiam reconhecer e manipular os testes disparadores para passar nos testes, produzindo patches aparentemente plausíveis.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"categoria": "contaminacao", "descricao": "Possível vazamento de dados se os patches dos desenvolvedores estiverem nos dados de treino; para o StarCoder2, 122 dos 522 bugs foram identificados nos dados de treino.", "localizador": "PDF p. 27-28 (impressas 27-28), seções 5 e 6"},
+      {"categoria": "outro", "descricao": "A qualidade dos relatos de defeito pode variar em cenários reais, com conteúdo inválido, irreproduzível, incompleto ou enganoso; 38 relatos do Defects4J contêm instruções explícitas de correção.", "localizador": "PDF p. 15-16, 26 (impressas 15-16, 26)"},
+      {"categoria": "outro", "descricao": "Nem todos os tipos de informação específica do projeto estão garantidos para todo bug em cenários reais (validade externa).", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"categoria": "outro", "descricao": "Subjetividade da validação manual que distingue patches plausíveis de corretos (validade interna).", "localizador": "PDF p. 9 e 28 (impressas 9 e 28)"},
+      {"categoria": "outro", "descricao": "Disparidade de backbones e de seleção dos sistemas comparados ameaça a justiça da comparação (validade interna).", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"categoria": "outro", "descricao": "Os conjuntos de avaliação podem não generalizar os resultados (validade externa).", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"categoria": "custo", "descricao": "Usar GPT-4 nas duas etapas do SRepair consome em média 4,3× o custo de API da configuração padrão ($0.4128 vs. $0.0966 por bug); replicar o ChatRepair com GPT-4 foi estimado em mais de $6,000 pelo mecanismo de amostragem iterativa.", "localizador": "PDF p. 25-26, 28 (impressas 25-26, 28), Tabelas 12 e 13, seção 6"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Validação manual independente por três autores, com regras de equivalência e consenso por discussão.", "avaliada": "nao", "localizador": "PDF p. 9 (impressa 9), seção 3.2.3"},
+      {"descricao": "Exclusão dos 122 bugs presentes nos dados de treino do StarCoder2 (Defects4J-clean, 400 bugs) e comparação das tendências de plausible fixes do StarCoder2 entre Defects4J e Defects4J-clean (270/195 em PI(ALL), 277/204 em BR(ALL), 146/102 em K2(CE, PE), 187/138 em K0(Basic)). Só para o StarCoder2; procedimento detalhado no GitHub.", "avaliada": "sim", "localizador": "PDF p. 27 (impressa 27), seção 5"},
+      {"descricao": "Avaliação em DebugBench (concebido para mitigar vazamento) e em ConDefects (bugs posteriores ao corte de conhecimento do gpt-4-0613), sem comparação com condição sem a mitigação.", "avaliada": "nao", "localizador": "PDF p. 9 e 27 (impressas 9 e 27)"},
+      {"descricao": "O mecanismo Dual-LLM isola o modelo de geração de patch das informações de teste disparador, contra a manipulação dos testes.", "avaliada": "nao", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"descricao": "Avaliação do SRepair com GPT-3.5-Turbo e 200 amostras para comparar com o ChatRepair (resultado de 162 correct fixes relatado em artigo anterior).", "avaliada": "nao", "localizador": "PDF p. 25-26, 28 (impressas 25-26, 28)"},
+      {"descricao": "Seleção de técnicas de APR com tamanho de amostra igual ou maior que o do estudo.", "avaliada": "nao", "localizador": "PDF p. 7, 28 (impressas 7, 28)"},
+      {"descricao": "Reprodução de testes disparadores a partir de relatos de defeito para obter mensagens de erro quando a informação específica do projeto não existe (SWE-bench).", "avaliada": "nao", "localizador": "PDF p. 20, 28 (impressas 20, 28)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Efeito do few-shot inverte entre modelos: na Tabela 3, GPT-3.5-Turbo passa de 175 (K0(Basic)) para 187 plausible fixes em K2(PE, PE), enquanto Magicoder cai de 199 para 98 em K2(CE_BNS, CE_BBS); em K1(PE), Llama3.1 sobe de 162 para 167 enquanto os demais modelos caem.", "localizador": "PDF p. 12 (impressa 12), Tabela 3; texto p. 12-13"},
+      {"descricao": "Narrativa contra tabela: a introdução fala em impacto 'on the average number of plausible fixes' de +6.9% a -50.8%, mas esses percentuais vêm de valores por modelo (GPT-3.5-Turbo 187 vs. 175; Magicoder 98 vs. 199) da Tabela 3, não das médias.", "localizador": "PDF p. 3 (impressa 3) e p. 12 (Tabela 3)"},
+      {"descricao": "Mesmo valor diferente entre tabelas: Qwen3 em K0(Basic) no DebugBench é 403 na Tabela 4 e 413 na Tabela 6; o texto da RQ1 usa 403 (5.2%, 403 vs. 383).", "localizador": "PDF p. 12 (Tabela 4) e p. 15 (Tabela 6)"},
+      {"descricao": "O texto afirma que a informação específica do projeto melhora o desempenho de todos os modelos, mas na Tabela 5 Magicoder tem 194 plausible fixes em PI(BC) contra 199 em K0(Basic). Também BR(ALL) fica abaixo de BR(ID) para Magicoder (260 vs. 279) e GPT-3.5-Turbo (285 vs. 286).", "localizador": "PDF p. 14-15 (impressas 14-15), Tabela 5"},
+      {"descricao": "Expressões como 'significantly' e 'no significant improvement' nas RQ1 e RQ2 não vêm acompanhadas de teste estatístico; o teste de McNemar é relatado só para o SRepair (Tabela 8 e ablação).", "localizador": "PDF p. 3, 13-15, 21, 25 (impressas 3, 13-15, 21, 25)"},
+      {"descricao": "Na Tabela 8, embora o SRepair tenha o maior total (227), comparadores o superam em projetos: ChatRepair em Chart (15 vs. 13) e Closure (37 vs. 31); D4C em Lang (25 vs. 22) e JacksonDatabind (24 vs. 21); GiantRepair em Closure (34), Gson (6 vs. 2) e JacksonCore (8 vs. 6); 'Others' em Time (5 vs. 4) e JxPath (4 vs. 3).", "localizador": "PDF p. 22 (impressa 22), Tabela 8"},
+      {"descricao": "Condições discrepantes na comparação com sistemas de APR: os resultados dos comparadores foram coletados de artigos anteriores ou reexecutados com configurações originais; o SRepair usa 10 amostras por bug contra 200-500 de vários comparadores e backbone GPT-4 contra GPT-3.5-Turbo do ChatRepair. Os critérios de validação manual dos comparadores não são descritos. O mesmo vale para a comparação PI(ALL) vs. técnicas de APR (214 vs. 171, Fig. 8), que confronta uma média de seis modelos com resultados relatados por outros.", "localizador": "PDF p. 7, 15, 19, 21, 23, 28 (impressas 7, 15, 19, 21, 23, 28)"},
+      {"descricao": "QuixBugs: o SRepair corrige 40/40 em Java e Python, empatado com o ChatRepair (40/40), mas o texto o apresenta como evidência de capacidade superior.", "localizador": "PDF p. 22-23 (impressas 22-23), Tabela 9"},
+      {"descricao": "A ablação usa plausible fixes, não correct fixes, por causa do esforço manual; GPT-4 with PI(ALL) (237) e StarCoder2 with PI(ALL) (203) com 10 amostras diferem dos valores da Tabela 5 (307 e 270) obtidos com 200 amostras, pela diferença de orçamento.", "localizador": "PDF p. 15 (Tabela 5) e p. 25-26 (Tabela 12)"},
+      {"descricao": "O ganho de 6.3% atribuído ao Dual-LLM (252 vs. 237) compara condições que também diferem no modelo de geração de patch (StarCoder2 vs. GPT-4).", "localizador": "PDF p. 25-26 (impressas 25-26), Tabela 12"},
+      {"descricao": "Aparente inconsistência sobre o uso de testes disparadores: a seção 6 diz que o modelo de patch fica isolado da informação de teste disparador (o prompt da Fig. 15b não a contém), mas a seção 4.2.2 diz que, no SWE-bench, os testes reproduzidos são usados nos processos de sugestão e de geração de patch.", "localizador": "PDF p. 20, 21, 28 (impressas 20, 21, 28)"},
+      {"descricao": "Denominadores diferentes: a Fig. 6 relata taxa de patches plausíveis (5.4% em K0(Basic)) sobre o total de patches gerados, enquanto as Tabelas 3 e 5 contam bugs com correção plausível entre 522. A derivação das médias de correct fixes ('randomly sample 200 patches for each setting') não é detalhada, e a Fig. 9 apresenta totais por modelo.", "localizador": "PDF p. 9, 13, 16 (impressas 9, 13, 16)"},
+      {"descricao": "Os valores da Fig. 10 (85.3% vs. 68.4% nos 38 bugs com instruções de correção; 51.9% vs. 51.1% nos 484 restantes) aparecem só no texto; a figura não tem rótulos numéricos.", "localizador": "PDF p. 16 (impressa 16), Fig. 10"},
+      {"descricao": "Na posição da linha p-value da Tabela 8, abaixo das linhas Total_FL, não fica claro a que linha os p-valores se referem; o texto liga o teste aos resultados pareados dos 522 bugs de função única.", "localizador": "PDF p. 21-22 (impressas 21-22), Tabela 8"}
+    ],
+    "observacoes": [
+      {"descricao": "Técnicas baseadas em ajuste fino foram excluídas da comparação da RQ2 por pertencerem a outro paradigma; o D4C foi excluído da RQ2 por usar outra configuração de amostragem.", "localizador": "PDF p. 7 (impressa 7), seção 3.2.1"},
+      {"descricao": "Comparadores da Tabela 8 sem descrição suficiente para classificar mecanismos: GiantRepair (LLM com análise de programa), RepairAgent, Repilot (motor de completamento), AlphaRepair (cloze com CodeBERT) e 'Others' (8 técnicas tradicionais e baseadas em aprendizado agrupadas). No SWE-bench Lite: Agentless, SpecRover e AutoCodeRover, com resultados dos artigos originais. Multi-função: ITER, DEAR e Hercules.", "localizador": "PDF p. 5-7, 20-24 (impressas 5-7, 20-24)"},
+      {"descricao": "Discussão sobre localização de falha em nível de instrução (sfl): incluir a localização real melhora as correct fixes médias (K0(Basic) com sfl 165 vs. 135), com ganho menor quando há informação auxiliar (BR(ALL) 231 vs. 219; PI(ALL) 223 vs. 214). A forma de inserção no prompt e o método de rotulação estão só no GitHub; não foi tratada como técnica.", "localizador": "PDF p. 27 (impressa 27), seção 5"},
+      {"descricao": "Esforço manual: inspeção manual dos patches plausíveis por três autores; a ablação usa plausible fixes por causa desse esforço. Primeiro patch correto é, em média, o 1.84º patch plausível no SRepair.", "localizador": "PDF p. 9, 21, 25 (impressas 9, 21, 25)"},
+      {"descricao": "Escala do estudo: mais de 10 milhões de patches gerados e validados, com mais de 8.000 horas de GPU e 100.000 horas de CPU.", "localizador": "PDF p. 3 (impressa 3)"},
+      {"descricao": "Informação auxiliar ausente: entre os 522 bugs, 10 sem relato e 2 sem comentário; esses campos ficaram vazios.", "localizador": "PDF p. 11 (impressa 11), seção 3.3.3"},
+      {"descricao": "Análises descritivas adicionais: distribuição de status dos patches (Fig. 6), CodeBLEU (Fig. 7), análise manual das dimensões de reparo por fonte de informação (Fig. 11) e estudo de caso JacksonDatabind-108 (Fig. 12).", "localizador": "PDF p. 13-18 (impressas 13-18)"},
+      {"descricao": "Outros resultados do SRepair: 21 bugs multi-função (Fig. 17), 556 no DebugBench (Tabela 10), 101/300 no SWE-bench Lite (Tabela 11), ConDefects (287 vs. 243 Java; 272 vs. 241 Python), 166 vs. 141 na configuração de ponta a ponta com localização de falhas, custo total de $50.4 ($0.222 por correção correta).", "localizador": "PDF p. 21-24, 27 (impressas 21-24, 27)"},
+      {"descricao": "Conferência própria: as somas por projeto da Tabela 8 batem com os subtotais D4J 1.2 e D4J 2.0 e com o total Overall para todas as colunas; as médias da Tabela 3 e da Tabela 5 são compatíveis com as médias dos seis modelos arredondadas; somas da Tabela 1 e da Tabela 7 batem com os totais.", "localizador": "PDF p. 8, 12, 15, 20, 22"},
+      {"descricao": "A página do GitHub com código e resultados é citada; o pacote não foi acessado nem validado nesta extração.", "localizador": "PDF p. 29 (impressa 29), Data Availability"}
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we conduct a comprehensive study of LLM-based function-level APR including investigating the effect of the few-shot learning mechanism and the auxiliary repair-relevant information.", "localizador": "PDF p. 1 (impressa 1), resumo"},
+      {"trecho": "Specifically, we begin with a description of the APR task as ‘Provide a fix for the buggy function’.", "localizador": "PDF p. 9 (impressa 9), seção 3.3.1"},
+      {"trecho": "Notably, we employ the zero-shot learning approach as the default baseline in our study, i.e., adopting no auxiliary repair-relevant information or buggy-fixed code pair examples for prompting.", "localizador": "PDF p. 10 (impressa 10), seção 3.3.1"},
+      {"trecho": "Table 2 presents our k-shot learning setups.", "localizador": "PDF p. 10 (impressa 10), seção 3.3.2"},
+      {"trecho": "For evaluating the impact from the auxiliary repair-relevant information, we form seven different setups.", "localizador": "PDF p. 12 (impressa 12), seção 3.3.3"},
+      {"trecho": "Specifically, for the project-specific information, we form four setups: PI(TT) with the trigger test only, PI(EM) with the error message only, PI(BC) with the buggy function comment only, and PI(ALL) with all such information.", "localizador": "PDF p. 12 (impressa 12), seção 3.3.3"},
+      {"trecho": "In particular, SRepair first adopts a repair suggestion model which employs the Chain of Thought (CoT) technique [114] to generate natural-language repair suggestions.", "localizador": "PDF p. 3 (impressa 3), seção 1"},
+      {"trecho": "SRepair then adopts a patch generation model to auto-generate a patched function with the assistance of the repair suggestions.", "localizador": "PDF p. 3 (impressa 3), seção 1"},
+      {"trecho": "Your output format should be ”Root Cause: {content}” and ”Suggestion {id}: {title}\\n{description}”", "localizador": "PDF p. 21 (impressa 21), Fig. 15(a)"},
+      {"trecho": "Table 12 shows that the CoT technique and the Dual-LLM framework lead to at least 7.9% (272 vs. 252) and 6.3% (252 vs. 237) gains in repair performance, respectively, with both p-values < 0.001 under McNemar’s test [84] on paired bug-level outcomes, indicating that the improvements are statistically significant.", "localizador": "PDF p. 25 (impressa 25), seção 4.2.5"},
+      {"trecho": "Furthermore, to rigorously distinguish correct fixes from overfitting patches that merely pass the test suite [79, 93], we employ a manual validation process based on semantic equivalence to the developer’s ground truth, following prior works [53, 77, 79, 82, 85, 119, 120].", "localizador": "PDF p. 9 (impressa 9), seção 3.2.3"},
+      {"trecho": "Finding 3: Applying the few-shot learning mechanism may generate more uncompilable patches than the zero-shot learning mechanism.", "localizador": "PDF p. 13 (impressa 13)"},
+      {"trecho": "While this anchoring could be beneficial when the provided example closely aligns with the target bug’s repair pattern, it risks narrowing the search space and potentially misguiding the model when there is a mismatch.", "localizador": "PDF p. 27 (impressa 27), seção 5"},
+      {"trecho": "Another threat is the risk of data leakage if the developer patches were included in the original training data.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "An additional threat lies in the trigger tests adopted in SRepair where the LLMs might have recognized the trigger tests and manipulated them to pass all tests, creating seemingly plausible patches.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "While the bug reports associated with dedicated projects like Defects4J are generally of high quality, as reflected by their effectiveness in our evaluation results, their quality may vary substantially in real-world settings [32, 66, 74], and they may contain invalid, irreproducible, incomplete, or even misleading contents.", "localizador": "PDF p. 26 (impressa 26), seção 5"},
+      {"trecho": "An additional threat to external validity is that not all types of project-specific information are guaranteed to be available for every bug in real-world settings.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "One potential threat arises from our manual validation process, which differentiates between plausible patches and those that are semantically correct.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "Furthermore, the disparity in the backbone models used by different techniques poses a threat to the fairness of our comparison.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "The main threat to external validity lies in our evaluation datasets used which may not well generalize our experimental results.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "Moreover, while fully adopting GPT-4 as both the repair suggestion model and the patch generation model can produce 8% (294 vs. 272) more plausible fixes, it consumes an average of 4.3× ($0.4128 vs. $0.0966) API cost compared with the default SRepair setup.", "localizador": "PDF p. 25 (impressa 25), seção 4.2.5"},
+      {"trecho": "Specifically, three authors independently cross-validate each plausible patch guided by a set of established equivalence rules (e.g., regarding control flow refactoring or variable aliasing) [128, 130], ensuring the patch truly resolves the bug.", "localizador": "PDF p. 9 (impressa 9), seção 3.2.3"},
+      {"trecho": "Eventually, we rule out the 122 bugs present in StarCoder2’s training dataset and form Defects4J-clean dataset with the rest 400 bugs, creating a clean, uncontaminated dataset.", "localizador": "PDF p. 27 (impressa 27), seção 5"},
+      {"trecho": "We also perform an evaluation on the newly released dataset ConDefects, a collection of programming contest bugs obtained after the knowledge cut-off date of gpt-4-0613 [25] to alleviate the data leakage concern.", "localizador": "PDF p. 27 (impressa 27), seção 5"},
+      {"trecho": "Our SRepair’s Dual-LLM mechanism effectively mitigates this threat, as the repair suggestion model only suggests bug fixes without trigger test information, keeping the patch generation model isolated from such data.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "To mitigate this threat, we instead evaluated SRepair using the same GPT-3.5-Turbo model under a comparable sampling budget.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "To mitigate this, we carefully selected four recent, well-designed LLM-based APR techniques with sample sizes equal to or larger than those used in our study settings.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "This threat can be partially mitigated in bug-report-driven scenarios by reproducing trigger tests from bug reports and executing them to obtain the corresponding error messages.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+      {"trecho": "Our default setting for patch generation uses the nucleus sampling with top p = 0.9, temperature = 0.8 and 200 samples per bug following prior works [38, 92, 119].", "localizador": "PDF p. 9 (impressa 9), seção 3.3"},
+      {"trecho": "Following the recent SOTA APR technique D4C [125], which enables an efficient patch sampling process for practice, we set the number of patches sampled by SRepair per bug to 10.", "localizador": "PDF p. 19 (impressa 19), seção 4.2.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "few-shot learning mechanism — K1(PE)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "K0(Basic) (zero-shot learning)",
+      "modelo": "GPT-4 (gpt-4-0613)",
+      "benchmark": "Defects4J 1.2 e 2.0 — 522 single-function bugs",
+      "metrica": "Plausible Fixes",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 205, "intervencao": 200},
+      "denominador": "522 single-function bugs (o texto informa as médias 'out of our collected 522 single-function bugs')",
+      "condicoes": "K1(PE): um exemplo de correção histórica do mesmo projeto, selecionado com a implementação de trabalho anterior [119]; demais elementos do prompt iguais a K0(Basic) (Fig. 3). Nucleus sampling top p = 0.9, temperature = 0.8, 200 amostras por bug. Plausible fix = patch que passa em todos os testes (disparadores e relevantes). Número de execuções repetidas do experimento: nao_informado. A Tabela 3 não traz correct fixes por modelo. Valores conferidos na imagem da página 12 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam várias técnicas (zero-shot, few-shot, informação auxiliar, SRepair) e mais de um comparador para o SRepair (D4C e ChatRepair). As Tabelas 1 e 2 são descritivas; a Tabela 3 é a primeira tabela com contraste de prompting. Primeira métrica: Plausible Fixes; primeiro modelo: GPT-4; primeira linha de base de prompting: K0(Basic); primeira condição de few-shot: K1(PE).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 12 (impressa 12), Tabela 3, linhas K0(Basic) e K1(PE), coluna Plausible Fixes / GPT-4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "K0(Basic) 205 197 175 199 187 162 135 / 188 0.0872", "localizador": "PDF p. 12, Tabela 3, linha K0(Basic); colunas Plausible Fixes (GPT-4, Qwen3, GPT-3.5-Turbo, Magicoder, StarCoder2, Llama3.1), Avg. # Correct / Plausible Fixes, Coef. of Variation"},
+        {"trecho": "K1(PE) 200 187 174 157 155 167 120 / 173 0.1013", "localizador": "PDF p. 12, Tabela 3, linha K1(PE); mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "auxiliary repair-relevant information — PI(BC)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "K0(Basic) (zero-shot learning)",
+      "modelo": "GPT-4 (gpt-4-0613)",
+      "benchmark": "Defects4J 1.2 e 2.0 — 522 single-function bugs",
+      "metrica": "Plausible Fixes",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 205, "intervencao": 209},
+      "denominador": "522 single-function bugs",
+      "condicoes": "PI(BC): prompt zero-shot com o comentário da função defeituosa (2 dos 522 bugs sem comentário, campo deixado vazio). Nucleus sampling top p = 0.9, temperature = 0.8, 200 amostras por bug. Número de execuções repetidas: nao_informado. Valores conferidos na imagem da página 15 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal da RQ2 ainda não representada. A Tabela 5 é a primeira tabela com o contraste; primeira métrica: Plausible Fixes; primeiro modelo: GPT-4; linha de base: K0(Basic); primeira condição de informação auxiliar: PI(BC).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 15 (impressa 15), Tabela 5, linhas K0(Basic) e PI(BC), coluna Plausible Fixes / GPT-4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "N.A. K0(Basic) 205 197 175 199 187 162 135 / 188", "localizador": "PDF p. 15, Tabela 5, linha K0(Basic); colunas Sources, Settings, Plausible Fixes (GPT-4, Qwen3, GPT-3.5-Turbo, Magicoder, StarCoder2, Llama3.1), Avg. #Correct / Plausible Fixes"},
+        {"trecho": "PI(BC) 209 202 185 194 197 186 149 / 196", "localizador": "PDF p. 15, Tabela 5, linha PI(BC) (Sources: Project-specific Information); mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "SRepair",
+      "mecanismos": ["instrucao", "contexto", "raciocinio", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "restricoes"],
+      "comparador": "D4C",
+      "modelo": "SRepair: GPT-4 (modelo de sugestão; gpt-4-0613 citado no custo) + StarCoder2 (modelo de patch); D4C: backbone nao_informado",
+      "benchmark": "Defects4J 1.2 e 2.0 — 522 single-function bugs",
+      "metrica": "correct fixes (Single-function correct fix result)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 180, "intervencao": 227},
+      "denominador": "522 single-function bugs ('43.5% of bugs (227/522)')",
+      "condicoes": "Usado o total impresso 'Overall' (soma impressa de D4J 1.2 Total e D4J 2.0 Total, mesma técnica, métrica e comparador). Linhas sem localização de falhas (função defeituosa conhecida); as linhas Total_FL são de ponta a ponta. SRepair com 10 amostras por bug. O resultado do D4C foi coletado de artigo anterior [125]; o artigo não informa o backbone do D4C nem declara explicitamente seu número de amostras (diz que o SRepair segue o D4C ao usar 10). Pacote híbrido: inclui seleção de dois modelos diferentes; o ganho é do pacote, não de um ingrediente de prompting. O teste de McNemar (p = 3.72e-4 na coluna D4C) é ligado no texto aos resultados pareados por bug; a linha p-value aparece abaixo das linhas Total_FL. Valores conferidos na imagem da página 22 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (proposta) ainda não representada. A Tabela 7 é descritiva; a Tabela 8 é a primeira tabela com resultado do SRepair contra comparador no mesmo benchmark e métrica. Primeira métrica: correct fixes; primeira linha de base listada: D4C (sistema de APR baseado em LLM por prompting).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 22 (impressa 22), Tabela 8, linha Overall, colunas SRepair e D4C; texto p. 21",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Overall 227 180 171 164 162 116 110 163", "localizador": "PDF p. 22, Tabela 8, linha Overall; colunas SRepair, D4C, GiantRepair, RepairAgent, ChatRepair, Repilot, AlphaRepair, Others"},
+        {"trecho": "Surprisingly, we find that SRepair outperforms all previous LLM-based APR techniques by at least 26.1% (227 vs. 180).", "localizador": "PDF p. 21 (impressa 21), seção 4.2.4"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Duas questões de pesquisa explícitas (desempenho zero-shot/few-shot e efeito da informação auxiliar) e proposta do SRepair motivada pelos achados.", "localizador": "PDF p. 7 (impressa 7), seção 3.1; p. 18, seção 4"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Prompts (Fig. 3, Fig. 15), arranjos k-shot (Tabela 2), coleta da informação auxiliar, amostragem e hardware descritos; porém detalhes de configuração dos LLMs, prompt da condição sem CoT, procedimento de sfl e de vazamento remetidos ao GitHub.", "localizador": "PDF p. 7, 9-12, 19-21, 25, 27"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "No estudo empírico, K0(Basic) é executado nas mesmas condições das demais configurações. Na avaliação do SRepair, os comparadores têm resultados coletados de artigos anteriores, com backbones e orçamentos de amostragem diferentes (10 vs. 200-500), o que os autores reconhecem como ameaça.", "localizador": "PDF p. 7, 10, 14, 19, 21, 28"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Plausible e correct fixes definidas, com denominador de 522 bugs e validação manual por três autores; porém o mesmo valor diverge entre tabelas (Qwen3 K0(Basic) no DebugBench: 403 na Tabela 4, 413 na Tabela 6), a derivação das médias de correct fixes não é detalhada e a ablação usa só plausible fixes.", "localizador": "PDF p. 9, 12, 15, 25"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção própria com ameaças internas (validação manual, vazamento, manipulação de testes, seleção e backbones dos comparadores), externas e de construto, com mitigações.", "localizador": "PDF p. 28 (impressa 28), seção 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "atende", "justificativa": "Versões dos modelos, parâmetros de amostragem, prompts e hardware informados; código e resultados declarados disponíveis no GitHub (não acessado nem validado nesta extração). Número de execuções repetidas não informado.", "localizador": "PDF p. 7, 9, 19-21, 29"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Risco de vazamento discutido; Defects4J-clean construído para o StarCoder2 (122 bugs excluídos) e avaliações em DebugBench e ConDefects (pós-corte do gpt-4-0613). A verificação direta cobre só o StarCoder2; os demais modelos do estudo em Defects4J não têm checagem equivalente.", "localizador": "PDF p. 9, 27-28 (impressas 9, 27-28)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-1551, incluindo referências). Páginas do PDF abertas visualmente: 9, 10, 12, 15, 16, 21, 22, 26."
+  }
+}

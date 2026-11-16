@@ -1,0 +1,409 @@
+{
+  "estudo": "S1970",
+  "texto_fonte": "fontes/textos/lote/S1970.txt",
+  "prompt_versao": "ex-v2.2",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "CAUS-RAG (Confidence-Aware Adaptive U-Shape); «CAUS U-RAG» na Tabela II",
+        "mecanismos": ["contexto", "outro", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["outro", "otimizacao_prompt"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo); p. 3 do PDF, seção III.A e Fig. 2; p. 4 do PDF, seções III.D–III.F e Algoritmo 1; p. 5 do PDF, seção IV.B e Tabela II (página impressa não exibida)",
+        "observacao": "Pacote que recupera documentação por busca densa (FAISS) e esparsa (BM25), combina os escores (Hybrid Confidence Scoring, Gear 1) e, se o índice PSI do modelo for maior que 1,0, reordena os documentos em forma de U no contexto do prompt (Gear 2). Mecanismos: `contexto` (documentação recuperada fornecida ao gerador); `outro` (posicionamento dos documentos no prompt segundo a confiança, colocando os de maior escore nas extremidades; não cabe nas demais categorias); `otimizacao_prompt` (o PSI, calculado com Exact Match em consultas de calibração, decide automaticamente se o prompt é reordenado). Acrescentados em relação ao Base RAG: `outro` e `otimizacao_prompt`; a recuperação híbrida altera o `contexto`, categoria já presente no Base RAG. O contraste com Base RAG compara o pacote inteiro; o ganho não pode ser atribuído a um único ingrediente. O modelo de prompt (instruções, formato) não é descrito."
+      },
+      {
+        "nome_original": "Hybrid Confidence Scoring (HCS) (Gear 1)",
+        "mecanismos": ["contexto", "outro", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF, seções III.A e III.C, Eq. (2); p. 5 do PDF, seção IV.C e Tabela III",
+        "observacao": "Fusão normalizada (Min–Max) dos escores FAISS e BM25 (α = 0,3; β = 0,7). Modifica a seleção e o ranqueamento da documentação recuperada (`contexto`, já presente no comparador), por isso a lista de acrescentados fica vazia. A passagem de Static U-RAG para CAUS-RAG muda ao mesmo tempo o HCS e o uso do PSI, de modo que não há condição que difira apenas no HCS. A Tabela III varia os pesos α/β dentro do CAUS-RAG (0,9/0,1; 0,5/0,5; 0,3/0,7), mas não traz condição sem o componente (nem só densa nem só BM25); é variação de parâmetro, não contrafactual com e sem."
+      },
+      {
+        "nome_original": "U-Shape Permutation Mapping (Gear 2); condição «Static U-RAG» quando aplicado ao ranking semântico",
+        "mecanismos": ["contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 do PDF, seção III.E, Eq. (4) e Algoritmo 1; p. 5 do PDF, seção IV.B (definição de Static U-RAG) e Tabela II",
+        "observacao": "Reordenação em U dos documentos recuperados (maior confiança nas extremidades, menor no meio). O estudo define a condição Static U-RAG «without hybrid scoring or PSI» para estudar a contribuição de cada componente; Static U-RAG e Base RAG diferem apenas na reordenação, ambos com ranking semântico FAISS (Tabela II). A profundidade k usada nas condições Base RAG e Static U-RAG não é informada (só a do CAUS-RAG, k = 10)."
+      },
+      {
+        "nome_original": "Positional Sensitivity Index (PSI) probing",
+        "mecanismos": ["contexto", "outro", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF, seção III.A; p. 4 do PDF, seção III.D, Eq. (3) e Algoritmo 1 (linhas 13 e 25–26)",
+        "observacao": "Índice calculado uma vez por arquitetura com médias de Exact Match quando o documento correto está no início, no meio e no fim do contexto; Ψ > 1,0 ativa a reordenação, caso contrário mantém a ordem do ranking. Classificado como `otimizacao_prompt` por selecionar automaticamente a disposição do prompt com base em desempenho medido. Os valores de PSI obtidos para Phi-3.5, Mistral e Qwen não são relatados, de modo que não se sabe se a reordenação foi efetivamente aplicada em cada modelo. Não há condição com e sem PSI mantendo os demais componentes."
+      },
+      {
+        "nome_original": "Base RAG",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF, seção IV.B (definição) e Tabela II",
+        "observacao": "Ranqueamento dos trechos recuperados apenas por similaridade semântica com FAISS. Não há condição sem recuperação (sem RAG), portanto o efeito da própria recuperação de documentação não é isolado."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {
+        "nome": "Phi-3.5 (3.8B)",
+        "versao": "nao_informado (variante base ou instruct não informada); rotulado «Phi-3 (3.8B)» na Tabela II",
+        "localizador": "p. 5 do PDF, seção IV.A e Tabela II; p. 6 do PDF, Fig. 3; p. 7 do PDF, Fig. 4"
+      },
+      {
+        "nome": "Mistral-7B-v0.3",
+        "versao": "v0.3 (variante base ou instruct não informada); rotulado «Mistral (7B)» na Tabela II",
+        "localizador": "p. 5 do PDF, seção IV.A e Tabela II"
+      },
+      {
+        "nome": "Qwen-2.5-7B",
+        "versao": "nao_informado (variante base ou instruct não informada); rotulado «Qwen-2.5 (7B)» na Tabela II",
+        "localizador": "p. 5 do PDF, seção IV.A e Tabela II"
+      },
+      {
+        "nome": "nomic-ai/nomic-embed-text-v1 (modelo de embeddings do recuperador, não gerador)",
+        "versao": "v1",
+        "localizador": "p. 5 do PDF, seção IV.A"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "PyTorch API benchmark (construído no estudo; nome próprio não informado)",
+        "quantidade": "52 queries, divididas em três níveis de dificuldade (contagem por nível não informada)",
+        "observacao": "Corpus de recuperação com «over 1,500» trechos de documentação indexados com FAISS. Resultados por nível de dificuldade não são relatados. O denominador é explicitamente 52 queries apenas para a Tabela III («averaged across all 52 queries»); para as Tabelas II e IV o estudo não liga explicitamente o total ao denominador.",
+        "localizador": "p. 5 do PDF, seções IV.A e IV.C"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Exact Match (EM)",
+        "definicao": "Correspondência exata token a token; declarada métrica principal",
+        "localizador": "p. 3 do PDF, seção II.C; p. 5 do PDF, seção IV.A"
+      },
+      {
+        "nome": "Keyword Match (KW); «Keyword Accuracy» na Fig. 3",
+        "definicao": "nao_informado (o estudo não define o cálculo)",
+        "localizador": "p. 5 do PDF, seção IV.A e Tabela II; p. 6 do PDF, Fig. 3"
+      }
+    ],
+    "linguagens": ["Python/PyTorch (o estudo trata da API PyTorch; a linguagem não é nomeada explicitamente)"],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Erros de confabulação: o modelo usa o conhecimento paramétrico em vez do contexto recuperado e produz chamadas de API desatualizadas ou incorretas, sobretudo em consultas complexas (por exemplo, APIs de treinamento distribuído).",
+        "localizador": "p. 6 do PDF, seção V.A; p. 7 do PDF, Tabela V"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros de quase acerto (near-miss): família de função correta com pequenos erros nos argumentos ou no nome (por exemplo, torch.linalg.eigvals em vez de torch.linalg.eig); o estudo afirma que respondem por 60% das falhas de EM restantes, sem informar o denominador.",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação declarada: se a correspondência exata não estiver entre os top-k recuperados, a reordenação não tem efeito.",
+        "localizador": "p. 7 do PDF, seção VI (Limitations)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação declarada: a abordagem pressupõe padrão de atenção em U consistente, o que pode não valer para arquiteturas mais novas.",
+        "localizador": "p. 7 do PDF, seção VI (Limitations)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "O próprio CAUS-RAG é apresentado como mitigação de erros de confabulação, «in 78% of cases compared to Base RAG»; o denominador e o procedimento de contagem não são informados.",
+        "avaliada": "sim",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "descricao": "Pré-computação e cache do interceptor para consultas frequentes, para reduzir a sobrecarga a menos de 5 ms; proposta de implantação, sem medição comparativa.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF, seção III.F"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Base RAG (ranking semântico FAISS) e Static U-RAG (reordenação em U sobre o ranking semântico), executados pelos autores no mesmo benchmark e com os mesmos modelos (Tabela II, p. 5 do PDF).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os valores de Keyword Match da Fig. 3 divergem dos da Tabela II para os mesmos modelos e condições: Phi Base RAG 21.1% (Fig. 3) vs 21.2% (Tabela II); Phi CAUS 76.9% vs 75.0%; Mistral Base RAG 36.5% vs 44.2%; Mistral Static U-RAG 73.1% vs 53.8%; Mistral CAUS 88.5% vs 80.8%; Qwen Base RAG 53.9% vs 73.1%; Qwen Static U-RAG 75.0% vs 78.8%; Qwen CAUS 94.2% vs 90.4%. Só Phi Static U-RAG (25.0%) coincide. O estudo não explica a diferença.",
+        "localizador": "p. 5 do PDF, Tabela II (coluna Keyword Match); p. 6 do PDF, Fig. 3 (rótulos das barras)"
+      },
+      {
+        "descricao": "A narrativa cita a Fig. 3 para o contraste KW vs EM do Qwen em Base RAG «73.1% vs 17.3%», mas a Fig. 3 mostra 53.9% para o KW do Qwen em Base RAG; 73.1% é o valor da Tabela II.",
+        "localizador": "p. 6 do PDF, seção V, segundo parágrafo, e Fig. 3; p. 5 do PDF, Tabela II"
+      },
+      {
+        "descricao": "A mesma configuração (Qwen-2.5-7B, α = 0,3, β = 0,7, k = 10) tem três valores de EM diferentes: 86.5% na Tabela II, 88.5% na Tabela III (linha Sparse-Heavy (Optimal)) e 84.6% na Tabela IV (coluna k = 10). O estudo não explica a divergência (número de execuções e decodificação não informados).",
+        "localizador": "p. 5 do PDF, seção IV.A, Tabela II e Tabela III; p. 6 do PDF, Tabela IV"
+      },
+      {
+        "descricao": "Nome do menor modelo inconsistente: «Phi-3 (3.8B)» na Tabela II e «Phi-3.5 (3.8B)» no texto, no resumo e nas Figs. 3 e 4.",
+        "localizador": "p. 5 do PDF, seção IV.A e Tabela II; p. 6 do PDF, Fig. 3; p. 7 do PDF, Fig. 4"
+      },
+      {
+        "descricao": "A narrativa chama de «large gains» as mudanças de Base RAG para Static U-RAG em Mistral (15.4% para 17.3%) e Qwen (17.3% para 21.2%), enquanto o mesmo trecho qualifica a mudança equivalente em Phi (11.5% para 13.5%) como «only a slight improvement»; a narrativa também afirma que o problema está no posicionamento e não na recuperação, embora os maiores aumentos da Tabela II ocorram na passagem de Static U-RAG para CAUS-RAG, que altera a recuperação (HCS) e acrescenta o PSI.",
+        "localizador": "p. 5 do PDF, seção IV.B e Tabela II"
+      },
+      {
+        "descricao": "O estudo atribui p < 0.01 à melhora de 69.2% (pontos absolutos de EM, Qwen) sem descrever o teste estatístico, a unidade de análise nem o número de execuções; também afirma que a melhora não se deve a variações do conjunto de dados sem análise que o demonstre.",
+        "localizador": "p. 6 do PDF, seção V, último parágrafo"
+      },
+      {
+        "descricao": "Os percentuais da análise de erros (60% das falhas de EM restantes são near-miss; mitigação de confabulação em 78% dos casos) não informam denominador nem procedimento de classificação.",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "descricao": "Os valores de PSI por modelo não são relatados; não se sabe se a reordenação do Gear 2 foi aplicada para cada modelo nem se as 50–100 consultas de calibração do PSI são disjuntas das 52 consultas de teste.",
+        "localizador": "p. 4 do PDF, seção III.D; p. 5 do PDF, seção IV"
+      },
+      {
+        "descricao": "Ao comentar a Tabela III, o texto afirma que o resultado com α = 0,9 (82.7%) mostra a eficácia da disposição em U «without even performing PSI scoring», embora as condições da Tabela III sejam do CAUS-RAG, que inclui o PSI; a afirmação não é sustentada por condição sem PSI.",
+        "localizador": "p. 5 do PDF, seção IV.C e Tabela III"
+      },
+      {
+        "descricao": "A Tabela IV varia de forma não monótona (84.6% a 90.4%), com o menor valor justamente em k = 10, a profundidade usada nos experimentos principais; o texto descreve o desempenho como estável e «not affected». Não há comparação com Base RAG em diferentes k, embora o texto afirme que no RAG padrão aumentar k costuma reduzir o desempenho.",
+        "localizador": "p. 6 do PDF, seção IV.D e Tabela IV"
+      },
+      {
+        "descricao": "Avaliação limitada a um benchmark próprio de 52 consultas da API PyTorch e a três modelos abertos de até 7B; resultados por nível de dificuldade não são relatados; o próprio estudo declara que a avaliação se limita à geração de código.",
+        "localizador": "p. 5 do PDF, seção IV.A; p. 7 do PDF, seção VI (Limitations)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ablação I (Tabela III): pesos α/β do HCS no Qwen-2.5-7B, k = 10, média sobre 52 queries: Dense-Heavy (0.9/0.1) 82.7%, Balanced Fusion (0.5/0.5) 86.5%, Sparse-Heavy (0.3/0.7) 88.5% de EM. É variação de parâmetro do componente, não contrafactual com e sem.",
+        "localizador": "p. 5 do PDF, seção IV.C e Tabela III"
+      },
+      {
+        "descricao": "Ablação II (Tabela IV): profundidade de recuperação k de 3 a 15 no CAUS-RAG com Qwen-2.5-7B; só a condição CAUS-RAG é executada.",
+        "localizador": "p. 6 do PDF, seção IV.D e Tabela IV"
+      },
+      {
+        "descricao": "Sobrecarga descrita pelos autores como «negligible cost»: aumento de latência de cerca de 15–30 ms para k = 10, memória adicional de 2–3 KB, e fase de sondagem do PSI de 5–10 minutos em uma GPU com 50–100 consultas por arquitetura; o procedimento de medição não é descrito e não há condição comparativa. Registrado aqui por ser apresentado como vantagem, não como risco.",
+        "localizador": "p. 4 do PDF, seções III.D e III.F"
+      },
+      {
+        "descricao": "A Tabela I compara qualitativamente o CAUS-RAG com abordagens existentes (Static Context Reordering, Dynamic Retrieval Augmentation, Position-Agnostic Training, Attention Calibration); essas abordagens não são executadas no estudo.",
+        "localizador": "p. 2 do PDF, Tabela I"
+      },
+      {
+        "descricao": "A Tabela V traz dois exemplos ilustrativos de saídas de Base RAG e CAUS-RAG (decomposição em autovalores; inicialização de treinamento distribuído no PyTorch 2.x).",
+        "localizador": "p. 7 do PDF, Tabela V; p. 6 do PDF, seção V.A"
+      },
+      {
+        "descricao": "Não são informados: modelo de prompt (instruções e formato), parâmetros de decodificação, número de execuções, hardware dos experimentos principais e disponibilidade de código ou dados.",
+        "localizador": "texto completo, p. 1–7 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "CAUS-RAG boosts the Exact Match accuracy of Qwen-2.5 from 17.3% to 86.5% and Phi-3.5 from 11.5% to 71.2%.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "In the first step, a hybrid confidence score, based on semantic and syntactic match, is assigned to each retrieved document.",
+        "localizador": "p. 3 do PDF, seção III.A"
+      },
+      {
+        "trecho": "In the second stage, it ranks these documents into a U-shaped prompt structure, placing the chunks with the highest scores in areas where the model pays the most attention.",
+        "localizador": "p. 3 do PDF, seção III.A"
+      },
+      {
+        "trecho": "This reranking is performed only if the PSI probing step detects a U-shaped positional bias in the target model architecture.",
+        "localizador": "p. 3 do PDF, seção III.A"
+      },
+      {
+        "trecho": "The PSI is calculated once per architecture and treated as a model-level constant.",
+        "localizador": "p. 4 do PDF, seção III.D"
+      },
+      {
+        "trecho": "Otherwise, if ΨLLM ≤ 1.0, the documents are simply used in their ranked order without any reordering.",
+        "localizador": "p. 4 do PDF, seção III.D"
+      },
+      {
+        "trecho": "The final sequence X is the reordered context passed to the generator LLM.",
+        "localizador": "p. 4 do PDF, seção III.F"
+      },
+      {
+        "trecho": "The experiments were conducted on a PyTorch API benchmark comprising 52 queries, each requiring exact matches for method names, signatures, and arguments.",
+        "localizador": "p. 5 do PDF, seção IV.A"
+      },
+      {
+        "trecho": "To study the contribution of each component individually, three different architectural methods are defined:",
+        "localizador": "p. 5 do PDF, seção IV.B"
+      },
+      {
+        "trecho": "Static U-RAG: U-shape context rearrangement applied directly to the semantically ranked retrieved documents, without hybrid scoring or PSI.",
+        "localizador": "p. 5 do PDF, seção IV.B, item 2"
+      },
+      {
+        "trecho": "The second type is confabulation errors, where the model relies on its internal parametric knowledge instead of using the retrieved context, leading to outdated or incorrect API calls.",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "trecho": "These contribute to 60% of the remaining EM failures and explain why the gap between KW and EM does not completely vanish.",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "trecho": "CAUS-RAG successfully mitigates confabulation errors in 78% of cases compared to Base RAG.",
+        "localizador": "p. 6 do PDF, seção V.A"
+      },
+      {
+        "trecho": "For deployment, the interceptor can be precomputed and cached for frequently occurring queries, reducing overhead to sub-5 milliseconds.",
+        "localizador": "p. 4 do PDF, seção III.F"
+      },
+      {
+        "trecho": "If an exact match is not present in the top-k results, reranking is meaningless.",
+        "localizador": "p. 7 do PDF, seção VI (Limitations)"
+      },
+      {
+        "trecho": "The approach also assumes a consistent U-shaped attention pattern, which may not be true for newer architectures.",
+        "localizador": "p. 7 do PDF, seção VI (Limitations)"
+      },
+      {
+        "trecho": "Further, the current evaluation is limited to code generation tasks.",
+        "localizador": "p. 7 do PDF, seção VI (Limitations)"
+      },
+      {
+        "trecho": "This, in turn, causes the 69.2% improvement in models like Qwen (p < 0.01), indicating that the improvement is not caused by variations in the dataset but rather due to the combined effect of correct retrieval based on hybrid scoring and their correct placement.",
+        "localizador": "p. 6 do PDF, seção V"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CAUS-RAG («CAUS U-RAG» na Tabela II)",
+      "mecanismos": ["contexto", "outro", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["outro", "otimizacao_prompt"],
+      "comparador": "Base RAG",
+      "modelo": "Phi-3.5 (3.8B) (rotulado «Phi-3 (3.8B)» na Tabela II)",
+      "benchmark": "PyTorch API benchmark (52 queries)",
+      "metrica": "Exact Match",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 11.5, "intervencao": 71.2},
+      "denominador": "nao_informado para a Tabela II (o benchmark tem 52 queries, mas o estudo não liga explicitamente esse total ao denominador da Tabela II)",
+      "condicoes": "CAUS-RAG com α = 0,3, β = 0,7 e k = 10; recuperação densa FAISS com embeddings nomic-ai/nomic-embed-text-v1 sobre mais de 1.500 trechos de documentação; k das condições Base RAG não informado; valor do PSI do modelo não informado; número de execuções, decodificação e modelo de prompt não informados. Ganho do pacote (recuperação híbrida, PSI e reordenação em U), não atribuível a um ingrediente isolado. Não há agregado impresso compatível entre modelos (o texto só informa a média de cerca de 14.7% para Base RAG), por isso se usa o primeiro modelo da Tabela II. Conferido no PDF, p. 5, Tabela II; o resumo cita o mesmo par para Phi-3.5 (11.5% para 71.2%).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo, as contribuições e a conclusão destacam uma técnica (CAUS-RAG), a seção IV.A declara EM a métrica principal, e os valores de partida citados (17.3% para Qwen, 11.5% para Phi-3.5) identificam Base RAG como comparador. Como o resultado abrange três modelos sem agregado impresso compatível, usou-se o primeiro modelo na ordem da Tabela II.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela II (colunas Model, RAG Type, Exact Match, Keyword Match), linhas Phi-3 (3.8B) Base RAG e CAUS U-RAG; p. 1 do PDF, resumo; página impressa não exibida",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Phi-3 (3.8B) Base RAG 11.5% 21.2%",
+          "localizador": "p. 5 do PDF, Tabela II, linha Phi-3 (3.8B) / Base RAG; colunas Model, RAG Type, Exact Match, Keyword Match"
+        },
+        {
+          "trecho": "CAUS U-RAG 71.2% 75.0%",
+          "localizador": "p. 5 do PDF, Tabela II, linha CAUS U-RAG do bloco Phi-3 (3.8B); colunas RAG Type, Exact Match, Keyword Match"
+        },
+        {
+          "trecho": "Performance is measured using Exact Match (EM) [14] and Keyword Match (KW), where EM is the primary evaluation metric.",
+          "localizador": "p. 5 do PDF, seção IV.A"
+        },
+        {
+          "trecho": "For CAUS-RAG, the parameters are set to α = 0.3, β = 0.7, with a retrieval depth of k = 10.",
+          "localizador": "p. 5 do PDF, seção IV.A"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Static U-RAG (U-Shape Permutation Mapping aplicado ao ranking semântico)",
+      "mecanismos": ["contexto", "outro"],
+      "mecanismos_acrescentados": ["outro"],
+      "comparador": "Base RAG",
+      "modelo": "Phi-3.5 (3.8B) (rotulado «Phi-3 (3.8B)» na Tabela II)",
+      "benchmark": "PyTorch API benchmark (52 queries)",
+      "metrica": "Exact Match",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 11.5, "intervencao": 13.5},
+      "denominador": "nao_informado para a Tabela II (o benchmark tem 52 queries, mas o estudo não liga explicitamente esse total ao denominador da Tabela II)",
+      "condicoes": "Static U-RAG e Base RAG usam o mesmo ranking semântico FAISS e diferem apenas na reordenação em U, sem HCS e sem PSI; k, número de execuções, decodificação e modelo de prompt não informados para essas condições. Conferido no PDF, p. 5, Tabela II.",
+      "selecao": "cobertura",
+      "selecao_motivo": "A única técnica focal (CAUS-RAG) e a única tarefa (geração) já estão representadas; para completar o alvo, entra o componente isolado pela condição que o estudo define para estudar a contribuição de cada componente (Static U-RAG contra Base RAG, Tabela II), no primeiro modelo da tabela. O HCS e o PSI não têm condição que difira apenas neles e foram pulados; a Tabela III varia pesos sem condição sem o componente.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela II (colunas Model, RAG Type, Exact Match, Keyword Match), linhas Phi-3 (3.8B) Base RAG e Static U-RAG; seção IV.B (definições); página impressa não exibida",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Phi-3 (3.8B) Base RAG 11.5% 21.2%",
+          "localizador": "p. 5 do PDF, Tabela II, linha Phi-3 (3.8B) / Base RAG; colunas Model, RAG Type, Exact Match, Keyword Match"
+        },
+        {
+          "trecho": "Static U-RAG 13.5% 25.0%",
+          "localizador": "p. 5 do PDF, Tabela II, linha Static U-RAG do bloco Phi-3 (3.8B); colunas RAG Type, Exact Match, Keyword Match"
+        },
+        {
+          "trecho": "Static U-RAG offers only a slight improvement (13.5%), whereas CAUS-RAG boosts it to 71.2%, indicating that both accurate retrieval and optimal placement are necessary for smaller models.",
+          "localizador": "p. 5 do PDF, seção IV.B, coluna direita"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O problema (viés posicional e recuperação lexical imprecisa em RAG para geração de código de API) e as contribuições estão explicitamente enunciados.",
+      "localizador": "p. 1–2 do PDF, introdução e lista de contribuições"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Arquitetura, equações, algoritmo, modelos, embeddings e parâmetros α, β e k do CAUS-RAG são descritos; faltam o modelo de prompt, a decodificação, o número de execuções, os valores de PSI por modelo, o k das condições de comparação e a composição das consultas por nível de dificuldade.",
+      "localizador": "p. 3–5 do PDF, seções III e IV.A"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Base RAG e Static U-RAG são executados no mesmo benchmark e modelos, e Static U-RAG isola a reordenação em U; porém a passagem para CAUS-RAG muda HCS e PSI ao mesmo tempo, não há condição só com BM25 ou só com HCS, e as abordagens existentes da Tabela I não são executadas.",
+      "localizador": "p. 2 do PDF, Tabela I; p. 5 do PDF, seção IV.B e Tabela II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "EM é definida e declarada principal, mas KW não tem definição; o denominador só é explícito para a Tabela III; os valores de KW divergem entre Tabela II e Fig. 3, e o EM da mesma configuração do Qwen difere entre Tabelas II, III e IV (86.5%, 88.5%, 84.6%); o p < 0.01 não tem teste descrito.",
+      "localizador": "p. 5 do PDF, seção IV.A, Tabelas II e III; p. 6 do PDF, Tabela IV, Fig. 3 e seção V"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Há parágrafo de limitações (dependência do top-k, suposição de atenção em U, avaliação restrita à geração de código e a um benchmark PyTorch), mas não se discutem tamanho da amostra, não determinismo, contaminação nem validade da métrica KW.",
+      "localizador": "p. 5 do PDF, seção IV.A; p. 7 do PDF, seção VI (Limitations)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O estudo informa modelos, modelo de embeddings, índice FAISS, pesos e profundidade de recuperação, mas não menciona disponibilidade do benchmark de 52 consultas, do corpus de documentação, do código ou dos prompts, nem decodificação e número de execuções.",
+      "localizador": "p. 4–5 do PDF, seções III.F e IV.A"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença das APIs ou consultas no pré-treinamento dos modelos nem informa se as consultas de calibração do PSI são disjuntas das consultas de teste.",
+      "localizador": "texto completo, p. 1–7 do PDF; p. 4 do PDF, seção III.D"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente. Páginas do PDF abertas visualmente: p-02 (Fig. 1, Tabela I), p-03 (Fig. 2, Eq. 2), p-04 (Eqs. 3–4, Algoritmo 1), p-05 (Tabelas II e III), p-06 (Tabela IV, Fig. 3), p-07 (Fig. 4, Tabela V). Na Fig. 4, o rótulo do ponto Base RAG do Mistral tem leitura insegura na resolução da imagem (pode ser 15.1% ou 15.4%); os demais rótulos da Fig. 4 coincidem com o EM da Tabela II."
+}
