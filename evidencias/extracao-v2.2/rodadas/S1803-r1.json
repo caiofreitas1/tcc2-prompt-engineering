@@ -1,0 +1,240 @@
+{
+  "estudo": "S1803",
+  "texto_fonte": "fontes/textos/lote/S1803.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "Semi-automated, human-in-the-loop workflow (LLM-driven DAG pipeline with iterative refinement)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Resumo e contribuições, PDF p. 1 (impressa 1855); seção IV e Fig. 1, PDF p. 2–3 (impressas 1856–1857); seção VII, PDF p. 5–6 (impressas 1859–1860)",
+        "observacao": "Pacote híbrido proposto pelo estudo: cinco DAGs encadeados (descrição semântica do PL/SQL, segmentação do pacote em CTEs, conversão principal, detecção de discrepâncias e refinamento) → decomposicao; personas ('senior DB architect', 'meticulous code reviewer') e prompts detalhados → instrucao; prompt pack few-shot de 15–20 exemplos e padrões few-shot no DAG-3 → exemplos e contexto (exemplos de código como demonstração); código PL/SQL, pacote, CTEs e descrições fornecidos como insumo → contexto; laço DAG-4 ↔ DAG-5 com relatório de discrepâncias → feedback; estilo da casa, mapeamentos e contratos 'SQL-only' → restricoes. O pacote também inclui componentes fora do escopo (ajuste fino supervisionado nos estágios de emissão na configuração híbrida, revisão e edição humanas entre estágios, decodificação, seleção de modelo). Não há condição executada sem o pipeline (por exemplo, tradução direta em um único prompt, ferramenta de fornecedor ou tradução manual); as configurações comparadas são todas variantes do próprio pipeline."
+      },
+      {
+        "nome_original": "DAG 1: PL/SQL Description Generation",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.A, PDF p. 2 (impressa 1856); seção VII.A.2, PDF p. 5 (impressa 1859)",
+        "observacao": "LLM instruído como 'senior DB architect' → instrucao; código-fonte embutido no prompt → contexto; modo few-shot → exemplos (e contexto); saída estruturada ('Structured description', 'structured bullet points') → restricoes. Sem ablação."
+      },
+      {
+        "nome_original": "DAG 2: Package Parsing and Modular Conversion",
+        "mecanismos": ["decomposicao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.B, PDF p. 2 (impressa 1856); seção VII.B, PDF p. 5 (impressa 1859)",
+        "observacao": "Segmenta o pacote em procedimentos/funções e gera uma CTE por segmento, agregando-as → decomposicao; pacote PL/SQL como insumo → contexto. 'exemplos' vale para a configuração Fully Few-Shot (modelo few-shot em todos os DAGs); na configuração híbrida e no padrão o emissor é modelo SFT (fora do escopo). O prompt deste DAG não é descrito em detalhe. Sem ablação."
+      },
+      {
+        "nome_original": "DAG 3: Core PL/SQL Conversion",
+        "mecanismos": ["contexto", "exemplos", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.C, PDF p. 2–3 (impressas 1856–1857)",
+        "observacao": "Script principal + CTEs do DAG-2 → contexto; 'few-shot patterns' (reescrita cursor→conjunto, datas/exceções, funções de janela) → exemplos e contexto; 'enforce house style and mappings' → restricoes. Produz o rascunho t = 0. Sem ablação."
+      },
+      {
+        "nome_original": "Iterative Refinement Loop (DAG 4: Delta and Gap Detection ↔ DAG 5: Code Refinement)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seções IV.D, IV.E e IV.G, PDF p. 3–4 (impressas 1857–1858); seção VI, PDF p. 4 (impressa 1858); Tabela I, PDF p. 5 (impressa 1859)",
+        "observacao": "DAG-4: LLM instruído como 'meticulous code reviewer' (instrucao), em modo few-shot (exemplos), compara PL/SQL original e BQ-SQL convertido (contexto) e emite relatório de discrepâncias por severidade; DAG-5 recebe o script e a lista de problemas e gera versão refinada (feedback), com o pacote de CTEs (contexto) e regras SQL (restricoes). A condição avaliada (t ≥ 1) herda todo o pipeline anterior (decomposicao, restricoes, exemplos). Parte do sistema proposto, por isso componente. As métricas são relatadas por iteração t = 0…3 dentro do mesmo pipeline, onde t = 0 é o rascunho do DAG-3: contribuição por rodada, sem condição separada sem o laço (por isso cumulativo, avaliada_isoladamente = nao). O texto não informa se houve edição humana entre os estágios nas execuções avaliadas, o que pode confundir a contribuição por rodada."
+      },
+      {
+        "nome_original": "Few-Shot Prompting (prompt pack)",
+        "mecanismos": ["exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção V.B, PDF p. 4 (impressa 1858)",
+        "observacao": "Prompt pack em GCS com 15–20 exemplos curtos de padrões de migração (cursor→conjunto, truncamento de datas, QUALIFY, DECODE/NVL/NVL2, %TYPE/%ROWTYPE, sequências, exceções) → exemplos; exemplos de código como demonstração → também contexto (D102). Usado nos estágios de análise (DAG-1/4) e, na configuração Fully Few-Shot, em todos os DAGs. Não há condição sem os exemplos."
+      },
+      {
+        "nome_original": "Fully Few-Shot configuration",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção VII.B e Tabela I, PDF p. 5 (impressa 1859); Fig. 3, PDF p. 6 (impressa 1860)",
+        "observacao": "Pipeline completo com um único modelo few-shot em todos os cinco DAGs, apresentado como linha de base da configuração Hybrid SFT. A diferença para a configuração híbrida é o ajuste fino supervisionado do emissor (fora do escopo), e o modelo de análise usado na Tabela II não é nomeado; portanto o contraste não isola mecanismo de prompting."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Supervised Fine-Tuning (Gemini 1.0 Pro SFT; Gemini 1.5 Flash SFT) — Hybrid SFT configuration",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino supervisionado dos emissores de código (DAG-2/3/5) com 100 a 800 pares alinhados PL/SQL→BQ-SQL aprovados, divisão por pacote, parada antecipada; usado na configuração Hybrid SFT (Tabela II) e na configuração padrão de referência. A comparação Hybrid SFT × Fully Few-Shot mede o efeito do ajuste fino (pacote híbrido), não de prompting.",
+        "localizador": "Seção V.C, PDF p. 4 (impressa 1858); seção VII.B e VII.D, PDF p. 5–6 (impressas 1859–1860)"
+      },
+      {
+        "nome_original": "Decoding (temperature, stop sequences, maximum output length)",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,0–0,1 e sequências de parada na emissão de código (DAG-2/3/5); temperatura 0,1–0,2, sequências de parada e tamanho máximo de saída limitado na análise (DAG-1/4).",
+        "localizador": "Seções V.B.3 e V.C, PDF p. 4 (impressa 1858); seção VII.A.2, PDF p. 5 (impressa 1859)"
+      },
+      {
+        "nome_original": "LLM selector / choice of Gemini model per DAG",
+        "natureza": "selecao_modelo",
+        "descricao": "Cada DAG expõe um seletor de LLM; a Tabela I compara quatro modelos Gemini com a mesma configuração few-shot (comparação entre modelos, não entre técnicas de prompting).",
+        "localizador": "Seção IV (Composer parameters), PDF p. 2 (impressa 1856); Tabela I, PDF p. 5 (impressa 1859)"
+      },
+      {
+        "nome_original": "Human-in-the-Loop: Intervention and Control",
+        "natureza": "outro",
+        "descricao": "Pausa ao fim de cada DAG para revisão e, se necessário, edição do artefato por engenheiro de dados ou QA antes do estágio seguinte; intervenção humana, não prompting.",
+        "localizador": "Seção IV.F, PDF p. 3 (impressa 1857)"
+      },
+      {
+        "nome_original": "Orchestration on Google Cloud Composer (Apache Airflow) with GCS artifacts and versioning",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de orquestração parametrizada, armazenamento e versionamento dos artefatos e registro da configuração em metadados de execução.",
+        "localizador": "Seção IV, PDF p. 2 (impressa 1856); seção V, PDF p. 4 (impressa 1858)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Gemini 1.0 Pro (few-shot)", "versao": "nao_informado", "observacao": "Linha da Tabela I (Fully Few-Shot); também testado nos estágios de análise. Acesso via Vertex AI."},
+      {"nome": "Gemini 1.5 Pro (few-shot)", "versao": "nao_informado", "observacao": "Linha da Tabela I; padrão dos estágios de análise (DAG-1/4) nas execuções de referência."},
+      {"nome": "Gemini 2.0 Flash (few-shot)", "versao": "nao_informado", "observacao": "Linha da Tabela I."},
+      {"nome": "Gemini 2.5 Pro (few-shot)", "versao": "nao_informado", "observacao": "Linha da Tabela I; usado nos estágios de análise em execuções mais recentes; barra da Fig. 3."},
+      {"nome": "Gemini 1.0 Pro (SFT)", "versao": "nao_informado", "observacao": "Emissor ajustado (fora do escopo); linha da Tabela II."},
+      {"nome": "Gemini 1.5 Flash (SFT)", "versao": "nao_informado", "observacao": "Emissor ajustado alternativo de menor latência (fora do escopo); linha da Tabela II."}
+    ],
+    "benchmarks": [
+      {"nome": "Lote trimestral proprietário de conversões PL/SQL→BQ-SQL", "quantidade": "N = 100 conversões/unidades", "observacao": "Mistura procedimentos, funções e fragmentos grandes de pacotes (laços de cursor, janelas analíticas com QUALIFY, aritmética de datas, exceções, SQL dinâmico). Não divulgado por confidencialidade. O artigo não informa se as mesmas 100 unidades foram usadas em todas as configurações das Tabelas I e II, nem se o lote se sobrepõe aos pares de treino do SFT ou ao prompt pack.", "localizador": "Seção VII e VII.A.1, PDF p. 5 (impressa 1859); seção IX, PDF p. 6 (impressa 1860)"},
+      {"nome": "Pares alinhados para SFT", "quantidade": "entre 100 e 800 pares", "observacao": "Dados de treino do ajuste fino (fora do escopo); quantidade exata não informada.", "localizador": "Seção V.C.2, PDF p. 4 (impressa 1858)"},
+      {"nome": "Prompt pack few-shot", "quantidade": "15–20 exemplos", "observacao": "Exemplos do prompt, não conjunto de avaliação.", "localizador": "Seção V.B.2, PDF p. 4 (impressa 1858)"}
+    ],
+    "metricas": [
+      {"nome": "Discrepancy Severity Burn-Down (DSB)", "descricao": "Fração do backlog ponderado de discrepâncias (B(t) = 3·H + 1·M + 0,25·L, contadas pelo DAG-4) eliminada em relação a t = 0: DSB(t) = (B(0) − B(t))/B(0); por unidade; vale 0 em t = 0 por definição. Tabelas relatam medianas do lote (n = 100).", "localizador": "Seção VI.A, PDF p. 4 (impressa 1858)"},
+      {"nome": "Mapping Coverage (MCov)", "descricao": "Regras de mapeamento corretamente aplicadas / regras relevantes para a unidade, verificadas por detectores estáticos (AST ou padrão); denominador = regras relevantes da unidade.", "localizador": "Seção VI.B, PDF p. 4–5 (impressas 1858–1859)"},
+      {"nome": "Edit Distance to Approval (EDA)", "descricao": "Δ(t)/T: tokens (ou linhas) que diferem do SQL final aprovado pelo revisor, dividido pelo total de tokens do SQL aprovado; menor é melhor.", "localizador": "Seção VI.C, PDF p. 5 (impressa 1859)"},
+      {"nome": "CQI-3", "descricao": "Índice composto 0,35·DSB + 0,35·MCov + 0,30·(1 − EDA); relatado em t = 3 nas Tabelas I e II e por iteração na Fig. 2. O artigo não diz se o índice da tabela é a mediana dos índices por unidade ou o índice calculado sobre as medianas.", "localizador": "Seção VI.D, PDF p. 5 (impressa 1859)"},
+      {"nome": "Regra prática de parada", "descricao": "Sem discrepâncias High; DSB ≥ 0,70, MCov ≥ 0,75, EDA ≤ 0,12 e CQI-3 ≥ 0,80, por unidade. A proporção de unidades que satisfazem a regra não é relatada.", "localizador": "Seção VI.D.3, PDF p. 5 (impressa 1859)"}
+    ],
+    "linguagens": ["Oracle PL/SQL (origem)", "BigQuery SQL (destino)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "As métricas sem execução não garantem correção funcional nem desempenho após a implantação (limitação principal declarada).", "localizador": "Seção VIII, PDF p. 6 (impressa 1860)"},
+      {"categoria": "correcao_funcional", "descricao": "LLMs são imperfeitos em código de domínio específico; a conversão pode introduzir lacunas lógicas, mapeamentos sintáticos incorretos (por exemplo, NVL vs. IFNULL) ou antipadrões, motivo da revisão humana e do DAG-4.", "localizador": "Seções IV.D e IV.F, PDF p. 3 (impressa 1857)"},
+      {"categoria": "correcao_funcional", "descricao": "Lógica de negócio não documentada e dependências do ambiente que os LLMs não conseguem inferir apenas do código-fonte.", "localizador": "Seção VIII, PDF p. 6 (impressa 1860)"},
+      {"categoria": "nao_determinismo", "descricao": "Não determinismo inerente às saídas do LLM, tratado pelo laço iterativo; nos estágios de emissão, motivação para saída determinística via SFT ('Fine-tuning reduces variance'). Não quantificado.", "localizador": "Seção IV.G, PDF p. 4 (impressa 1858); seção V.C.1, PDF p. 4"},
+      {"categoria": "contaminacao", "descricao": "Vazamento entre partições dos dados de treino do SFT, controlado por divisão por pacote; o artigo não informa se o lote de avaliação é disjunto dos pares de treino ou do prompt pack nem discute contaminação no pré-treinamento.", "localizador": "Seção V.C.4, PDF p. 4 (impressa 1858)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Pontos de verificação humanos com revisão e edição dos artefatos ao fim de cada DAG; sem condição comparativa sem revisão.", "avaliada": "nao", "localizador": "Seção IV.F, PDF p. 3 (impressa 1857)"},
+      {"descricao": "Laço iterativo DAG-4 ↔ DAG-5 para reduzir erros e lidar com o não determinismo; métricas relatadas por rodada (t = 0…3) no mesmo pipeline, sem condição separada sem o laço e sem medida do não determinismo (contribuição cumulativa).", "avaliada": "nao", "localizador": "Seção IV.G, PDF p. 4 (impressa 1858); Tabela I, PDF p. 5 (impressa 1859)"},
+      {"descricao": "Divisão dos dados de treino do SFT por pacote para evitar vazamento.", "avaliada": "nao", "localizador": "Seção V.C.4, PDF p. 4 (impressa 1858)"},
+      {"descricao": "SFT dos emissores, temperatura baixa, contratos 'SQL-only' e tokens de parada para obter SQL determinístico e bloquear comentários; a variância não é medida.", "avaliada": "nao", "localizador": "Seções V.C.1 e V.C.4, PDF p. 4 (impressa 1858)"},
+      {"descricao": "Registro em metadados de execução dos caminhos de entrada e saída e do modelo de cada DAG, para auditoria e reprodutibilidade.", "avaliada": "nao", "localizador": "Seção IV.F, PDF p. 3 (impressa 1857); seção VII.A.3, PDF p. 5 (impressa 1859)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {"tecnica": "Semi-automated, human-in-the-loop workflow (LLM-driven DAG pipeline with iterative refinement)", "motivo": "Nenhuma condição sem o pipeline foi executada; os resultados comparam modelos e configurações (few-shot × SFT) do próprio pipeline e rodadas t = 0…3. A única extração numérica refere-se à contribuição cumulativa do laço de refinamento (componente)."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Os 'batch snapshots' da seção VI (DSB: backlog mediano 28,0→18,0→12,0→7,0 e 'Cleared' 0%→35,7%→57,1%→75,0%; MCov t=0 60% → t=3 84%; EDA t=0 38% → t=3 10%) não informam a configuração. Os valores em t = 0 (MCov 60%, EDA 38%) não coincidem com nenhuma linha da Tabela I (MCov t=0: 52%, 62%, 64%, 68%; EDA t=0: 41%, 36%, 33%, 31%). Os valores em t = 3 (75%, 84%, 10%) são próximos da linha Gemini 1.0 Pro (SFT) da Tabela II (76%, 84%, 10%), mas o DSB difere (75,0% × 76%). O artigo não liga os snapshots a uma configuração.", "localizador": "Seção VI.A–C, PDF p. 4–5 (impressas 1858–1859); Tabela I, PDF p. 5; Tabela II, PDF p. 6 (impressa 1860)"},
+      {"descricao": "'Baseline' designa coisas diferentes: na seção VI, 'baseline runs' usam Gemini 1.5 Pro (few-shot) para DAG-1/4 e Gemini 1.0 Pro (SFT) para DAG-2/3/5; na seção VI.D.2, 'baseline' são as medianas do lote semente; na seção VII.B, a configuração Fully Few-Shot (um único modelo few-shot em todos os DAGs) é a linha de base.", "localizador": "Seção VI, PDF p. 4 (impressa 1858); seções VI.D.2 e VII.B, PDF p. 5 (impressa 1859)"},
+      {"descricao": "A Tabela II só relata t = 3 e não nomeia o modelo few-shot de análise usado nas configurações híbridas ('high performing few shot model'); a comparação da Fig. 3 entre configurações híbridas e Fully Few-Shot Gemini 2.5 Pro mistura diferença de emissor (SFT) e de modelo de análise.", "localizador": "Tabela II e Fig. 3, PDF p. 6 (impressa 1860)"},
+      {"descricao": "Inversão em relação à narrativa: a contribuição (iii) fala em benefícios práticos do emissor ajustado e a conclusão chama Gemini 1.0 Pro SFT de 'strong default', mas na Fig. 3 a melhor configuração Fully Few-Shot (Gemini 2.5 Pro, CQI-3 0.86) supera as duas híbridas (0.83 e 0.82); só em relação à Fully Few-Shot com Gemini 1.0 Pro (0.77, Tabela I) a híbrida com o mesmo modelo é maior.", "localizador": "Contribuições, PDF p. 1 (impressa 1855); Tabela I, PDF p. 5; Tabela II, Fig. 3 e seção VIII, PDF p. 6 (impressa 1860)"},
+      {"descricao": "O resumo afirma que 'most units satisfy a practical stop rule', mas o artigo não relata a proporção de unidades que satisfazem a regra; na Tabela I, a mediana do CQI-3 em t = 3 de Gemini 1.0 Pro (few-shot) é 0.77, abaixo do limiar 0.80, e a de DSB é 70%, no limiar.", "localizador": "Resumo, PDF p. 1 (impressa 1855); Tabela I, PDF p. 5 (impressa 1859)"},
+      {"descricao": "Estimador não informado: cálculo próprio aplicando a eq. (5) às medianas da Tabela I reproduz os CQI-3 impressos (por exemplo, Gemini 1.0 Pro: 0,35·0,70 + 0,35·0,76 + 0,30·0,86 ≈ 0,769), e os 'Cleared' do snapshot de DSB coincidem com (28,0 − B)/28,0 sobre o backlog mediano (cálculo próprio: 10/28 ≈ 35,7%). Isso sugere composição sobre medianas, enquanto DSB e CQI-3 são definidos por unidade; o artigo não diz qual estimador usa (aparente ambiguidade, não erro demonstrado).", "localizador": "Seções VI.A e VI.D, PDF p. 4–5 (impressas 1858–1859); Tabela I, PDF p. 5"},
+      {"descricao": "A seção VI.D.2 manda registrar medianas e IQR, mas as Tabelas I e II trazem só medianas, sem IQR, número de execuções ou teste estatístico; a 'clear performance separation' entre modelos não é acompanhada de medida de dispersão.", "localizador": "Seção VI.D.2, Tabela I e notas, PDF p. 5 (impressa 1859); Tabela II, PDF p. 6 (impressa 1860)"},
+      {"descricao": "A Fig. 2 (CQI-3 por iteração) tem eixo vertical a partir de 0,5 e os pontos de t = 0 ficam abaixo do eixo; os valores de CQI-3 em t = 0–2 não são impressos e não foram estimados.", "localizador": "Fig. 2, PDF p. 5 (impressa 1859)"},
+      {"descricao": "A Fig. 1 e a seção IV.E descrevem duas rodadas de refinamento (v1.0 e v2.0) 'with optional additional pass', enquanto os resultados vão até t = 3 (três laços).", "localizador": "Fig. 1 e seção IV.E, PDF p. 3 (impressa 1857); seção VII, PDF p. 5 (impressa 1859)"},
+      {"descricao": "O roteiro da introdução diz que a seção V detalha as métricas e a VI os resultados, mas no corpo as métricas estão na seção VI e os resultados na VII.", "localizador": "Seção I, PDF p. 1 (impressa 1855); seções VI e VII, PDF p. 4–5"},
+      {"descricao": "Todas as métricas são sem execução e calculadas sobre arquivos; o EDA depende do SQL final aprovado pelo revisor, e o DSB depende das discrepâncias detectadas pelo próprio LLM do DAG-4 (avaliador interno ao pipeline).", "localizador": "Seção VI, PDF p. 4–5 (impressas 1858–1859); seção VIII, PDF p. 6"}
+    ],
+    "observacoes": [
+      {"descricao": "Modelagem híbrida: análise (DAG-1/4) em few-shot com modelos de contexto longo; emissão de código (DAG-2/3/5) com Gemini 1.0 Pro SFT por padrão ou Gemini 1.5 Flash SFT (menor latência). A comparação few-shot × SFT (Tabelas I e II, Fig. 3) opõe prompting a ajuste fino e por isso não entra em extracoes.", "localizador": "Seção V.A, PDF p. 4 (impressa 1858); seção VII.B, PDF p. 5 (impressa 1859)"},
+      {"descricao": "A Tabela I compara quatro modelos com a mesma configuração few-shot (comparação entre modelos).", "localizador": "Tabela I, PDF p. 5 (impressa 1859)"},
+      {"descricao": "Esforço humano: EDA é apresentado como estimativa do esforço humano restante; o estudo descreve revisão e edição manuais entre estágios, sem tratá-las como custo nem quantificar horas.", "localizador": "Seção VI.C, PDF p. 5 (impressa 1859); seção IV.F, PDF p. 3 (impressa 1857)"},
+      {"descricao": "Os exemplos de treino do SFT são desidentificados (literais sensíveis removidos); a curadoria sobreamostra modos de falha vistos em pilotos.", "localizador": "Seção V.C.3–4, PDF p. 4 (impressa 1858)"},
+      {"descricao": "Trabalhos futuros (não executados): variante multiagente com papéis de analisador e corretor, testes com execução em sandbox e refinamento automático dos prompts a partir do DAG-4.", "localizador": "Seção VIII, PDF p. 6 (impressa 1860)"},
+      {"descricao": "Interesses concorrentes: autores atuais ou antigos funcionários da Deutsche Telekom e/ou T-Systems; experimentos de 2021–2024 e de 2025 em ambientes internos.", "localizador": "Seção IX, PDF p. 6 (impressa 1860)"},
+      {"descricao": "Parâmetros não informados: número de execuções por configuração, conteúdo dos prompts, versões/snapshots dos modelos, se houve edição humana nas execuções avaliadas e se as unidades são as mesmas entre configurações.", "localizador": "Seções V–VII, PDF p. 4–6"}
+    ],
+    "citacoes": [
+      {"trecho": "Translating Oracle PL/SQL into BigQuery SQL (BQ-SQL) is a persistent obstacle in data-platform migration.", "localizador": "Resumo, PDF p. 1 (impressa 1855)"},
+      {"trecho": "Evaluation on quarterly batches (N=100) with execution-free metrics shows consistent gains across three refinement loops (t = 0…3); most units satisfy a practical stop rule (no High discrepancies; DSB ≥ 0.70, MCov ≥ 0.75, EDA ≤ 0.12, CQI-3 ≥ 0.80).", "localizador": "Resumo, PDF p. 1 (impressa 1855)"},
+      {"trecho": "The main contributions of this paper are: (i) a novel, sequential DAG-based architecture that formalizes the end-to-end code conversion process; (ii) a structured feedback loop for automated discrepancy detection and iterative refinement that demonstrably improves conversion accuracy; and (iii) an empirical comparison across few-shot and SFT configurations of five Gemini family models, showing the practical benefits of a fine-tuned emitter for deterministic SQL.", "localizador": "Seção I, PDF p. 1 (impressa 1855)"},
+      {"trecho": "The LLM, prompted as a senior DB architect, summarizes purpose, I/O, data flow, dependencies, and assumptions.", "localizador": "Seção IV.A, PDF p. 2 (impressa 1856)"},
+      {"trecho": "The content of the source file is embedded in a detailed prompt.", "localizador": "Seção IV.A.2, PDF p. 2 (impressa 1856)"},
+      {"trecho": "Detect FUNCTION / PROCEDURE boundaries; segment the package; for each segment, generate a BigQuery-compatible CTE; aggregate CTEs ([3a])", "localizador": "Seção IV.B.2, PDF p. 2 (impressa 1856)"},
+      {"trecho": "Provide main script + CTEs + few-shot patterns (cursor-to-set rewrites, date/exception handling, window functions); enforce house style and mappings.", "localizador": "Seção IV.C.2, PDF p. 3 (impressa 1857)"},
+      {"trecho": "It performs a comparative analysis by prompting the LLM to act as a meticulous code reviewer.", "localizador": "Seção IV.D, PDF p. 3 (impressa 1857)"},
+      {"trecho": "The LLM is provided with a precise prompt that includes both the script to be corrected and the list of issues to fix.", "localizador": "Seção IV.E.2, PDF p. 3 (impressa 1857)"},
+      {"trecho": "Because LLMs are powerful yet imperfect on domain-specific code, the workflow is semi-automated by design: the model acts as an assistant whose output is always subject to expert review.", "localizador": "Seção IV.F, PDF p. 3 (impressa 1857)"},
+      {"trecho": "A data or QA engineer reviews and, if needed, edits the artifact before triggering the next DAG.", "localizador": "Seção IV.F, PDF p. 3 (impressa 1857)"},
+      {"trecho": "The refined output from DAG 5 (v2.0) can be programmatically fed back as input to DAG 4 for another round of gap detection.", "localizador": "Seção IV.G, PDF p. 4 (impressa 1858)"},
+      {"trecho": "This iterative process handles the inherent non-determinism of LLM outputs and helps the final code meet production quality standards.", "localizador": "Seção IV.G, PDF p. 4 (impressa 1858)"},
+      {"trecho": "We maintain a prompt pack (GCS) with 15–20 short examples that cover the migration patterns encountered most often: cursor-to-set rewrites, date truncation/rounding, analytic windows with QUALIFY, DECODE / NVL / NVL2 mappings, %TYPE/%ROWTYPE, sequence / identity handling, and typical exception branches.", "localizador": "Seção V.B.2, PDF p. 4 (impressa 1858)"},
+      {"trecho": "Fine-tuning reduces variance and lowers edit effort across iterations.", "localizador": "Seção V.C.1, PDF p. 4 (impressa 1858)"},
+      {"trecho": "Packages are split at the package level to avoid leakage.", "localizador": "Seção V.C.4, PDF p. 4 (impressa 1858)"},
+      {"trecho": "Decoding for code emission: temperature 0.0–0.1; “SQL-only” contracts; stop tokens to block commentary.", "localizador": "Seção V.C.4, PDF p. 4 (impressa 1858)"},
+      {"trecho": "Metrics are computed over iterations t = 0, 1, 2, 3, where t = 0 is the first draft from DAG 3, and t ≥ 1 are successive DAG 4 → DAG 5 refinement loops.", "localizador": "Seção VI, PDF p. 4 (impressa 1858)"},
+      {"trecho": "For completeness: baseline runs used Gemini 1.5 Pro (few-shot) for DAG-1 and DAG-4, and Gemini 1.0 Pro (SFT) for DAG-2/3/5; later experiments include Gemini 2.5 Pro (few-shot) for analysis stages.", "localizador": "Seção VI, PDF p. 4 (impressa 1858)"},
+      {"trecho": "The Fully Few-Shot configuration used a single few-shot model for all five DAGs to establish a baseline (results in Table I, Fig. 2).", "localizador": "Seção VII.B, PDF p. 5 (impressa 1859)"},
+      {"trecho": "The Hybrid SFT configuration combined few-shot model for analysis (DAGs 1, 4) with SFT model for code emission (DAGs 2, 3, 5) to measure fine-tuning impact (results in Table II, Fig. 3).", "localizador": "Seção VII.B, PDF p. 5 (impressa 1859)"},
+      {"trecho": "A principal limitation is the reliance on execution-free metrics; while valuable for tracking structural fidelity, they cannot guarantee functional correctness or performance post-deployment.", "localizador": "Seção VIII, PDF p. 6 (impressa 1860)"},
+      {"trecho": "Due to corporate confidentiality, source code, prompts, production logs, and proprietary datasets cannot be released.", "localizador": "Seção IX, PDF p. 6 (impressa 1860)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "Iterative Refinement Loop (DAG 4: Delta and Gap Detection ↔ DAG 5: Code Refinement)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Rascunho inicial do DAG-3 (t = 0), mesma configuração Fully Few-Shot",
+      "modelo": "Gemini 1.0 Pro (few-shot; versão nao_informado)",
+      "benchmark": "Lote trimestral proprietário de conversões PL/SQL→BQ-SQL (n = 100)",
+      "metrica": "DSB cleared (Discrepancy Severity Burn-Down)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0, "intervencao": 70},
+      "denominador": "n = 100 unidades (medianas do lote); por unidade, o DSB é relativo ao backlog ponderado B(0) da própria unidade",
+      "condicoes": "Contraste cumulativo: medianas em t = 0 e t = 3 (após três laços DAG-4 → DAG-5) dentro do mesmo pipeline, sem condição separada sem o laço; o valor de t = 0 é 0% por definição da métrica (DSB(0) = 0), não uma medida independente. Configuração Fully Few-Shot: um único modelo few-shot (Gemini 1.0 Pro) em todos os cinco DAGs; o DAG-4 que conta as discrepâncias usa o mesmo modelo. Temperatura 0,0–0,1 na emissão e 0,1–0,2 na análise (relatadas para o setup geral). Avaliação sem execução de consultas. Número de execuções, IQR, conteúdo dos prompts e ocorrência de edições humanas entre estágios nessas execuções não informados. Não se sabe se o 'n=100' é o mesmo conjunto de unidades das demais linhas e da Tabela II. Valores conferidos na imagem da Tabela I (PDF p. 5): cabeçalho 'DSB cleared ↑', título '(Medians at t=0 and t=3, n=100)'. O ganho é da rodada de refinamento do pacote, não de um mecanismo isolado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam o laço de refinamento, mas com várias métricas (DSB, MCov, EDA, CQI-3) sem que uma prevaleça, e vários modelos e configurações. A primeira tabela com contraste de prompting para tradução é a Tabela I (t = 0 → t = 3); primeira métrica (DSB cleared), primeiro modelo (Gemini 1.0 Pro). A comparação Fully Few-Shot × Hybrid SFT (Tabela II) opõe prompting a ajuste fino e não é elegível. Não há outra técnica focal de prompting com contraste, tabela de ablação nem matriz de ingredientes para cobertura; por isso só uma extração.",
+      "derivacao": "direta",
+      "localizador": "Tabela I, PDF p. 5 (impressa 1859); definição do DSB, seção VI.A, PDF p. 4 (impressa 1858)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Gemini 1.0 Pro | 0% → 70% | 52% → 76% | 41% → 14% | 0.77", "localizador": "Tabela I, PDF p. 5 (impressa 1859), linha 'Gemini 1.0 Pro'; colunas Few-Shot Model | DSB cleared ↑ | MCov ↑ | EDA ↓ | CQI-3 at t=3 ↑"},
+        {"trecho": "Metrics are computed over iterations t = 0, 1, 2, 3, where t = 0 is the first draft from DAG 3, and t ≥ 1 are successive DAG 4 → DAG 5 refinement loops.", "localizador": "Seção VI, PDF p. 4 (impressa 1858)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (migração PL/SQL→BQ-SQL) e contribuições explicitamente declarados no resumo e na introdução.", "localizador": "Resumo e seção I, PDF p. 1 (impressa 1855)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Arquitetura, estágios, entradas/saídas e decodificação descritos; faltam os prompts, a descrição do lote além de categorias gerais, o número de execuções, se houve edição humana nas execuções avaliadas e a configuração dos 'batch snapshots'.", "localizador": "Seções IV–V, PDF p. 2–4; seções VI e VII.A, PDF p. 4–5; seção IX, PDF p. 6"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há configurações comparadas (Fully Few-Shot como linha de base e Hybrid SFT) e o rascunho t = 0, mas nenhuma condição sem o pipeline (tradução direta, ferramenta de fornecedor ou manual), o modelo de análise das configurações híbridas não é nomeado e a Tabela II só traz t = 3.", "localizador": "Seção VII.B, Tabela I, PDF p. 5; Tabela II e Fig. 3, PDF p. 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas por fórmulas e denominadores por unidade (regras relevantes, tokens do SQL aprovado), mas sem execução nem validação contra correção funcional (limitação reconhecida); DSB depende do próprio LLM avaliador; tabelas sem IQR; estimador do CQI-3 ambíguo; os valores dos snapshots da seção VI não coincidem com os das Tabelas I e II e não indicam configuração.", "localizador": "Seção VI, PDF p. 4–5; Tabelas I e II, PDF p. 5–6; seção VIII, PDF p. 6"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Sem seção de ameaças; a conclusão reconhece a dependência de métricas sem execução e os autores declaram interesses concorrentes; não discutem tamanho da amostra, variância, viés do avaliador LLM nem generalização.", "localizador": "Seções VIII e IX, PDF p. 6 (impressa 1860)"},
+    {"criterio": "reprodutibilidade", "julgamento": "nao_atende", "justificativa": "Os autores declaram que código-fonte, prompts, logs e dados proprietários não podem ser divulgados; versões dos modelos não informadas.", "localizador": "Seção IX, PDF p. 6 (impressa 1860)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Há controle de vazamento na divisão dos dados de SFT (por pacote), mas não se informa se o lote de avaliação é disjunto dos pares de treino ou do prompt pack, nem se discute contaminação no pré-treinamento.", "localizador": "Seção V.C.4, PDF p. 4 (impressa 1858)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (6 páginas). Páginas do PDF abertas visualmente: p-03 (Fig. 1), p-04 (snapshot do DSB e definições), p-05 (Tabela I, Fig. 2, snapshots de MCov e EDA) e p-06 (Tabela II, Fig. 3)."
+  }
+}

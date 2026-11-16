@@ -1,0 +1,213 @@
+{
+  "estudo": "S1837",
+  "texto_fonte": "fontes/textos/lote/S1837.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "SemCompress",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo e seção I, PDF p. 1 (impressa 1195); seção III, PDF p. 2–3 (impressas 1196–1197); seção IV.B e IV.C, Tabelas I e II, PDF p. 4 (impressa 1198)",
+        "observacao": "Compressão automática da DocString do prompt de geração (parsing estruturado em quatro unidades semânticas, pontuação de importância de tokens e poda iterativa com verificação de similaridade) → otimizacao_prompt (refinamento automático do próprio prompt). Mecanismos herdados do prompt base (assinatura de função + DocString), segundo a descrição do artigo de que DocStrings carregam posicionamento da função, restrições de entrada/saída, regras de exceção e exemplos: instrucao (requisito em linguagem natural), restricoes (especificação de interface e restrições de entrada/saída) e exemplos (unidade de especificação de exemplos); a compressão pode remover parte desses conteúdos. Contrafactual de pacote: contra a entrada não comprimida apenas no texto, para CodeQwen1.5-7B no HumanEval (Pass@1 77.44 → 79.15), e na Tabela II (eficiência e custo; modelo não identificado). A Tabela I compara com outros métodos de compressão à mesma taxa, não com a entrada não comprimida. Não há ablação dos três módulos; o efeito é do pacote. Usa CodeLlama-7B-Instruct como modelo auxiliar de pontuação; todos os componentes descritos atuam sobre o prompt, por isso não se trata como pacote híbrido."
+      },
+      {
+        "nome_original": "Code-semantic-anchored structured parsing",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B, PDF p. 2 (impressa 1196)",
+        "observacao": "Limpeza de formato (filtragem só com similaridade semântica ≥ 0.999) e decomposição da DocString em quatro unidades (função, interface, comportamento, exemplo) com limites superiores de compressão diferenciados; os valores desses limites não são impressos. Módulo do SemCompress, sem ablação."
+      },
+      {
+        "nome_original": "Dual-weighted token importance quantification",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.C, PDF p. 3 (impressa 1197)",
+        "observacao": "Importância do token = diferença de perplexidade (CodeLlama) × peso de relevância para código (1.2–2.0, vocabulário de palavras-chave) × peso da unidade semântica. Módulo do SemCompress, sem ablação."
+      },
+      {
+        "nome_original": "Dynamic-threshold-constrained iterative compression",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.D, PDF p. 3 (impressa 1197)",
+        "observacao": "Limiar dinâmico τdyn (0.98–0.999) ajustado por comprimento, número de unidades e densidade; verificação dupla (similaridade textual ≥ 0.99 e similaridade de distribuição de geração ≥ τdyn); compressão iterativa de sequências de 1–3 tokens até nenhuma candidata passar. Módulo do SemCompress, sem ablação."
+      },
+      {
+        "nome_original": "Uncompressed (Uncomp.)",
+        "mecanismos": ["instrucao", "restricoes", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.B, PDF p. 4 (impressa 1198); Tabela II, coluna 'Uncomp.', PDF p. 4",
+        "observacao": "Prompt original (assinatura + DocString completa). Não aparece na Tabela I; Pass@1 relatado só no texto para CodeQwen1.5-7B no HumanEval; métricas de eficiência na Tabela II."
+      },
+      {
+        "nome_original": "Random",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.A.3, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4 (impressa 1198)",
+        "observacao": "Poda aleatória de tokens da DocString à mesma taxa de compressão do SemCompress, usada como limite inferior; é modificação do prompt sem busca ou seleção, por isso 'outro' e não otimizacao_prompt. Comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Selective_Context",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.A.3, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4 (impressa 1198)",
+        "observacao": "Compressão genérica que filtra tokens de baixa autoinformação (seleção automática de conteúdo do prompt). Comparador cujos mecanismos não são isolados; não se informa se foi reexecutado pelos autores nem com que configuração."
+      },
+      {
+        "nome_original": "LLMLingua2",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV.A.3, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4 (impressa 1198)",
+        "observacao": "Compressão genérica baseada em destilação de dados (seleção automática de tokens do prompt). Comparador cujos mecanismos não são isolados; configuração não informada."
+      },
+      {
+        "nome_original": "ShortenDoc",
+        "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção II.B, PDF p. 2 (impressa 1196); seção IV.A.3, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4 (impressa 1198)",
+        "observacao": "Compressão de DocString específica para código, com importância de tokens por diferenças de perplexidade e configuração estática; comparador direto. Mecanismos não isolados; configuração não informada."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {"nome": "Seis modelos experimentais", "versao": "nao_informado", "observacao": "A Tabela I traz médias de 'six experimental models'; os seis modelos não são nomeados no artigo, salvo CodeQwen1.5-7B mencionado no texto.", "localizador": "Seção IV.B, PDF p. 3 (impressa 1197)"},
+      {"nome": "CodeQwen1.5-7B", "versao": "nao_informado", "observacao": "Modelo gerador citado no resultado contra a entrada não comprimida no HumanEval; o texto não o liga explicitamente aos seis modelos da Tabela I.", "localizador": "Seção IV.B, PDF p. 4 (impressa 1198)"},
+      {"nome": "CodeLlama-7B-Instruct", "versao": "nao_informado", "observacao": "Modelo base do SemCompress (cálculo de perplexidade para a importância de tokens), não o gerador avaliado; citado como [14], referência que corresponde ao artigo do Llama 2.", "localizador": "Seções III.C e IV.A.4, PDF p. 3 (impressa 1197)"},
+      {"nome": "GPT-4o", "versao": "nao_informado", "observacao": "Usado como base de preço para estimar o custo de API por chamada (Tabela II); o artigo não diz se o GPT-4o foi executado na geração.", "localizador": "Tabela II e seção IV.C, PDF p. 4 (impressa 1198)"}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval", "quantidade": "nao_informado", "observacao": "Taxa de compressão de 30% para todos os métodos na Tabela I. Número de problemas e denominador do Pass@1 não informados.", "localizador": "Seção IV.A.1, PDF p. 3; Tabela I, PDF p. 4"},
+      {"nome": "CodeHarmony", "quantidade": "nao_informado", "observacao": "Taxa de compressão de 25% na Tabela I. Tamanho e versão não informados.", "localizador": "Seção IV.A.1, PDF p. 3; Tabela I, PDF p. 4"},
+      {"nome": "BigCodeBench", "quantidade": "nao_informado", "observacao": "Taxa de compressão de 35% na Tabela I; apresentado como cenário industrial de alta dificuldade. Tamanho, subconjunto e versão não informados.", "localizador": "Seção IV.A.1, PDF p. 3; Tabela I e seção IV.B, PDF p. 4"}
+    ],
+    "metricas": [
+      {"nome": "Pass@1", "descricao": "Proporção de tarefas em que o primeiro código gerado passa em todos os testes; na Tabela I, média de seis modelos, sem símbolo de unidade (a narrativa fala em 'percentage points'). Denominador não informado.", "localizador": "Seção IV.A.2, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4"},
+      {"nome": "Compression Rate (Compression Ratio)", "descricao": "1 − TokenNum(D̃)/TokenNum(D); a seção chama a métrica de 'Compression Rate' e a fórmula de 'Compression Ratio'.", "localizador": "Seção IV.A.2, equação (6), PDF p. 3"},
+      {"nome": "Inference Efficiency Indicators", "descricao": "FLOPs de inferência por amostra (unidade não impressa), latência fim a fim por amostra (s), pico de memória de GPU por amostra (GB), latência de pré-processamento da compressão (s), custo de API GPT-4o por chamada (US$) e taxa de otimização (%).", "localizador": "Seção IV.A.2, PDF p. 3; Tabela II, PDF p. 4"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Métodos genéricos de compressão não identificam unidades críticas para o código (restrições de tipo de parâmetro, regras de exceção) e levam a erros funcionais; segundo pré-experimentos dos autores, Pass@1 cai mais de 15% acima de 10% de compressão (dados do pré-experimento não apresentados; não se diz se a queda é relativa ou em pontos).", "localizador": "Resumo e seção I, PDF p. 1 (impressa 1195)"},
+      {"categoria": "correcao_funcional", "descricao": "Restrições baseadas só em logits podem manter a semântica do texto e ainda assim produzir desvios funcionais no código; o ShortenDoc sofre degradação significativa em cenários industriais de alta dificuldade.", "localizador": "Seção I, PDF p. 1 (impressa 1195); seção II.B, PDF p. 2 (impressa 1196)"},
+      {"categoria": "custo", "descricao": "Redundância nas DocStrings aumenta o comprimento da entrada, o custo computacional de inferência e o custo de API de terceiros; quantificado na Tabela II para a comparação com a entrada não comprimida.", "localizador": "Resumo e seção I, PDF p. 1 (impressa 1195); Tabela II, PDF p. 4 (impressa 1198)"},
+      {"categoria": "custo", "descricao": "Sobrecarga do próprio método: latência de pré-processamento de compressão de 1.72s por amostra e memória de vídeo adicional menor que 0.3GB, que os autores consideram compatíveis com chamadas em tempo real.", "localizador": "Tabela II e seção IV.C, PDF p. 4 (impressa 1198)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Compressão da DocString pelo SemCompress para reduzir custo de inferência e de API, comparada com a entrada não comprimida na Tabela II (FLOPs, latência, memória e custo estimado pelo preço da API GPT-4o).", "avaliada": "sim", "localizador": "Tabela II e seção IV.C, PDF p. 4 (impressa 1198)"},
+      {"descricao": "Verificação dupla (similaridade textual ≥ 0.99 e similaridade de distribuição de geração de código ≥ τdyn) antes de cada compressão, para preservar integridade do texto e alinhamento com a tarefa de geração.", "avaliada": "nao", "localizador": "Seção III.D, PDF p. 3 (impressa 1197)"},
+      {"descricao": "Peso adicional (1.2–2.0) para tokens críticos de código (palavras-chave de tipo, nomes de parâmetros, identificadores de exceção) e limites de compressão por unidade semântica, para proteger semântica central.", "avaliada": "nao", "localizador": "Seções III.B e III.C, PDF p. 2–3 (impressas 1196–1197)"},
+      {"descricao": "Filtragem de formato executada só quando a similaridade semântica do texto após filtragem é ≥ 0.999, para evitar distorção semântica.", "avaliada": "nao", "localizador": "Seção III.B, PDF p. 2 (impressa 1196)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Aparente inconsistência: resumo e conclusão afirmam ganho médio de 3.7 pontos percentuais em Pass@1 sobre as linhas de base, mas a Tabela I não traz esse valor. Cálculos próprios a partir da Tabela I: 'Overall Avg.' do SemCompress (40.64) supera ShortenDoc em 2.14, LLMLingua2 em 7.66 e Selective_Context em 6.84 (diferenças que o próprio texto relata); média dessas três diferenças = 5.55; incluindo Random (13.32) = 7.49; média das diferenças por conjunto contra ShortenDoc = 2.15. Nenhuma corresponde a 3.7; o artigo não diz como o valor foi obtido.", "localizador": "Resumo, PDF p. 1 (impressa 1195); seção V, PDF p. 4 (impressa 1198); Tabela I e seção IV.B, PDF p. 4"},
+      {"descricao": "O resumo diz que a latência fim a fim cai 'up to 21.4%', mas a Tabela II rotula o valor como média ('Avg. E2E Latency/Sample', 21.38%) e o texto da seção IV.C também o apresenta como redução média; o resumo arredonda a redução de FLOPs para 18.7%, contra 18.75% na Tabela II.", "localizador": "Resumo, PDF p. 1 (impressa 1195); Tabela II e seção IV.C, PDF p. 4 (impressa 1198)"},
+      {"descricao": "A linha 'Overall Avg.' da Tabela I é média simples de três benchmarks heterogêneos com taxas de compressão diferentes (25%, 30%, 35%); cálculo próprio confirma que os valores impressos coincidem com essas médias (por exemplo, (59.71 + 57.02 + 5.20)/3 ≈ 40.64). Por ser agregado de benchmarks heterogêneos, não foi usado na extração.", "localizador": "Tabela I, PDF p. 4 (impressa 1198)"},
+      {"descricao": "Os valores da Tabela I são médias de seis modelos não identificados, sem dispersão, número de execuções ou tamanho dos conjuntos; o Pass@1 da entrada não comprimida não aparece na tabela e só é dado no texto para um modelo (CodeQwen1.5-7B, HumanEval: 77.44 contra 79.15), valor muito acima da média de 59.71 da Tabela I para o mesmo conjunto, o que indica forte variação entre modelos não relatada.", "localizador": "Seção IV.B e Tabela I, PDF p. 3–4 (impressas 1197–1198)"},
+      {"descricao": "Desempenho muito baixo de todos os métodos no BigCodeBench a 35% de compressão (Random 0.00; Selective_Context, LLMLingua2 e ShortenDoc 2.00; SemCompress 5.20), sem valor sem compressão para referência; os autores descrevem 'severe performance collapse' dos métodos gerais e do Random.", "localizador": "Tabela I e seção IV.B, PDF p. 4 (impressa 1198)"},
+      {"descricao": "O método é descrito como adaptativo, abandonando taxas fixas de compressão, mas a Tabela I mostra exatamente a mesma taxa (25%, 30% ou 35%) para todos os métodos em cada conjunto; o artigo diz apenas que o Random usa a mesma taxa do SemCompress e não explica como as demais linhas de base foram ajustadas.", "localizador": "Seção III.D e seção IV.A.3, PDF p. 3 (impressa 1197); Tabela I, PDF p. 4 (impressa 1198)"},
+      {"descricao": "O texto diz que a Figura 1 foi omitida por falta de espaço, mas a Figura 1 ('Framework and workflow of SemCompress') aparece impressa na mesma página. A frase sobre limites superiores de compressão por unidade semântica termina em dois-pontos sem a lista ou tabela correspondente, e os hiperparâmetros remetem a esses limites ('consistent with the previous section'), que não são informados.", "localizador": "Seção III e III.B, Fig. 1, PDF p. 2 (impressa 1196); seção IV.A.4, PDF p. 3 (impressa 1197)"},
+      {"descricao": "O custo de API da Tabela II é apresentado tomando o preço do GPT-4o como exemplo; o artigo não diz se as chamadas foram executadas nem qual modelo produziu as métricas de FLOPs, latência e memória da Tabela II.", "localizador": "Tabela II e seção IV.C, PDF p. 4 (impressa 1198)"}
+    ],
+    "observacoes": [
+      {"descricao": "Não há ablação dos três módulos do SemCompress; o ganho não pode ser atribuído a um módulo específico.", "localizador": "Seções III e IV, PDF p. 2–4"},
+      {"descricao": "Ambiente: GPU NVIDIA RTX 3090 24GB, Intel Xeon Gold 6226R, 128GB DDR4, Ubuntu 22.04 LTS, PyTorch 2.3.0, VLLM 0.4.2. Hiperparâmetros: modelo base CodeLlama-7B-Instruct, limiar dinâmico 0.98–0.999, limiar semântico textual 0.99, sequência contínua máxima 3.", "localizador": "Seção IV.A.4, PDF p. 3 (impressa 1197)"},
+      {"descricao": "Parâmetros não informados: identidade dos seis modelos geradores, temperatura e demais parâmetros de decodificação, número de execuções, tamanho dos benchmarks, limites de compressão por unidade, configuração das linhas de base e origem de seus resultados (reexecução ou não).", "localizador": "Seção IV, PDF p. 3–4"},
+      {"descricao": "Os trabalhos relacionados descrevem compressão por ajuste fino (soft prompts, tokens virtuais), não avaliada no estudo.", "localizador": "Seção II.B, PDF p. 2 (impressa 1196)"},
+      {"descricao": "Não há declaração de disponibilidade de código ou dados.", "localizador": "Texto completo, PDF p. 1–5"}
+    ],
+    "citacoes": [
+      {"trecho": "To address these issues, this paper proposes SemCompress, a semantic-aware adaptive DocString compression method, which achieves a dynamic balance between compression efficiency and generation quality through three core modules: code-semantic-anchored structured parsing, dual-weighted token importance quantification, and dynamic-threshold-constrained iterative compression.", "localizador": "Resumo, PDF p. 1 (impressa 1195)"},
+      {"trecho": "Experiments on three mainstream code generation benchmarks—HumanEval, CodeHarmony, and BigCodeBench—show that SemCompress achieves stable compression rates of 25% to 35%, outperforms state-of-the-art baselines by an average of 3.7 percentage points in Pass@1, reduces model inference floating-point operations (FLOPs) by an average of 18.7%, and shortens end-to-end inference latency by up to 21.4%.", "localizador": "Resumo, PDF p. 1 (impressa 1195)"},
+      {"trecho": "Large Language Models (LLMs) have become core tools for industrial code generation, but DocStrings—the primary prompt carriers—often suffer from severe information redundancy, directly increasing model inference computational costs and third-party API expenses.", "localizador": "Resumo, PDF p. 1 (impressa 1195)"},
+      {"trecho": "DocStrings-embedded at function heads—act as the critical bridge between user requirements and code, carrying function positioning, input/output constraints, exception rules, and examples that directly determine generation quality [3], [4].", "localizador": "Seção I, PDF p. 1 (impressa 1195)"},
+      {"trecho": "General-purpose compression methods like LLMLingua2 [8] and Selective_Context [9] work well in NLP but fail in code generation: our pre-experiments show Pass@1 drops >15% above 10% compression, as they only evaluate token importance from text semantics, cannot identify code-critical units (e.g., parameter type constraints, exception rules), and eventually lead to functional errors.", "localizador": "Seção I, PDF p. 1 (impressa 1195)"},
+      {"trecho": "However, it uses static compression settings, lacks robust core code semantic anchoring, and suffers significant performance degradation in high-difficulty industrial scenarios.", "localizador": "Seção II.B, PDF p. 2 (impressa 1196)"},
+      {"trecho": "The overall framework of SemCompress (omitted Figure 1 due to space constraints) takes a code generation prompt containing a function signature and DocString as input, outputs the compressed DocString, and proceeds in three core stages.", "localizador": "Seção III, PDF p. 2 (impressa 1196)"},
+      {"trecho": "To avoid semantic distortion, final filtering is only performed when post-filtering text semantic similarity ≥ 0.999 [13].", "localizador": "Seção III.B, PDF p. 2 (impressa 1196)"},
+      {"trecho": "Construct a code generation keyword vocabulary based on million-level code corpus statistics, and assign an additional weight Impcode(di) (1.2–2.0) to code-critical tokens (type keywords, parameter names, exception identifiers, etc.) to strengthen core semantic protection.", "localizador": "Seção III.C, PDF p. 3 (impressa 1197)"},
+      {"trecho": "Compression is only executed when both text semantic similarity ≥ 0.99 and code generation distribution similarity ≥ τdyn are satisfied, balancing text integrity and code generation task alignment [13].", "localizador": "Seção III.D, PDF p. 3 (impressa 1197)"},
+      {"trecho": "This paper selects three mainstream Python code generation benchmarks (i.e. HumanEval, CodeHarmony, BigCodeBench) covering different difficulties to comprehensively verify the performance of SemCompress.", "localizador": "Seção IV.A.1, PDF p. 3 (impressa 1197)"},
+      {"trecho": "Random: Randomly prune tokens in DocStrings, set the same compression rate as SemCompress, and use it as the lower performance baseline.", "localizador": "Seção IV.A.3, PDF p. 3 (impressa 1197)"},
+      {"trecho": "ShortenDoc [10]: A code-scenario-specific DocString compression method, used as a direct comparison baseline for this paper’s method.", "localizador": "Seção IV.A.3, PDF p. 3 (impressa 1197)"},
+      {"trecho": "The core hyperparameters of SemCompress are set as follows: the base model is CodeLlama-7B-Instruct [14], the dynamic threshold range is 0.98–0.999, the text semantic threshold is 0.99, the maximum continuous compression sequence length is 3, and the compression upper limits of each semantic unit are consistent with the previous section.", "localizador": "Seção IV.A.4, PDF p. 3 (impressa 1197)"},
+      {"trecho": "Table I shows the average Pass@1 and compression rate comparison of different methods on three datasets, and all results are the average performance of six experimental models.", "localizador": "Seção IV.B, PDF p. 3 (impressa 1197)"},
+      {"trecho": "At an average compression rate of 30%, the average Pass@1 of SemCompress reaches 40.64, which is 2.14 percentage points higher than ShortenDoc, 7.66 percentage points higher than LLMLingua2, and 6.84 percentage points higher than Selective_Context, solving the core pain point of existing methods that generation quality drops sharply when compression rates increase.", "localizador": "Seção IV.B, PDF p. 3–4 (impressas 1197–1198)"},
+      {"trecho": "On the HumanEval dataset, the compressed input increases the Pass@1 of CodeQwen1.5-7B from 77.44 (uncompressed) to 79.15, indicating that it filters redundant noise and helps the model focus more on core requirements.", "localizador": "Seção IV.B, PDF p. 4 (impressa 1198)"},
+      {"trecho": "After compression, the average inference FLOPs of the model are reduced by 18.75%, and the end-to-end latency is shortened by 21.38%, while the compression preprocessing latency is only 1.72s, and the additional video memory usage is less than 0.3GB, fully meeting the requirements of industrial real-time calls.", "localizador": "Seção IV.C, PDF p. 4 (impressa 1198)"},
+      {"trecho": "Taking the GPT-4o API pricing as an example, a 30% compression rate can reduce the total cost of a single call by 29.17%, which has extremely high economic value in enterprise-level large-scale call scenarios.", "localizador": "Seção IV.C, PDF p. 4 (impressa 1198)"},
+      {"trecho": "Experiments on three benchmarks show SemCompress achieves 25% to 35% compression, outperforms baselines by 3.7pp in Pass@1, and cuts inference costs and API expenses.", "localizador": "Seção V, PDF p. 4 (impressa 1198)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SemCompress",
+      "mecanismos": ["instrucao", "restricoes", "exemplos", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["otimizacao_prompt"],
+      "comparador": "Random",
+      "modelo": "Média de seis modelos experimentais não identificados (Tabela I não traz linhas por modelo)",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 32.32, "intervencao": 59.71},
+      "denominador": "nao_informado",
+      "condicoes": "Taxa de compressão de 30% para ambas as condições no HumanEval (o Random é configurado com a mesma taxa do SemCompress). Valores são médias de seis modelos não identificados, sem dispersão; número de execuções, temperatura e parâmetros de decodificação não informados; tamanho do HumanEval e denominador do Pass@1 não informados. A Tabela I não imprime símbolo de unidade; a narrativa trata as diferenças em 'percentage points', por isso unidade percentual. Hiperparâmetros do SemCompress: modelo base CodeLlama-7B-Instruct, limiar dinâmico 0.98–0.999, limiar semântico 0.99, sequência contínua máxima 3. O comparador é outro método de compressão (poda aleatória), não a entrada não comprimida; o resultado não mede o efeito da compressão contra o prompt original. Valores conferidos na imagem da Tabela I (PDF p. 4): 32.32 e 59.71, coincidentes com o texto extraído.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca várias métricas (taxa de compressão, Pass@1, FLOPs, latência) e compara com 'state-of-the-art baselines' no plural, sem um comparador único. Primeira tabela com o contraste (Tabela I); primeira métrica pertinente (Pass@1; a taxa de compressão é condição igualada); a tabela só traz a média dos seis modelos; primeira linha de conjunto (HumanEval) e primeira linha de base listada (Random). A linha 'Overall Avg.' não foi usada por agregar benchmarks heterogêneos com taxas de compressão diferentes. Não há outra técnica focal nem outra tarefa a cobrir, e os módulos do SemCompress não têm ablação, por isso há uma única extração.",
+      "derivacao": "direta",
+      "localizador": "Tabela I, linha 'HumanEval', colunas 'Random' e 'Ours', PDF p. 4 (impressa 1198); seção IV.B, PDF p. 3 (impressa 1197)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "HumanEval 30% 32.32 | 30% 44.51 | 30% 42.68 | 30% 57.93 | 30% 59.71", "localizador": "Tabela I, linha 'HumanEval'; colunas Random, Selective_Context, LLMLingua2, ShortenDoc, Ours (taxa de compressão sobre Pass@1 médio), PDF p. 4 (impressa 1198)"},
+        {"trecho": "Table I shows the average Pass@1 and compression rate comparison of different methods on three datasets, and all results are the average performance of six experimental models.", "localizador": "Seção IV.B, PDF p. 3 (impressa 1197)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: propor compressão adaptativa de DocString que equilibre eficiência e qualidade de geração, respondendo a três limitações declaradas do ShortenDoc e de métodos genéricos.", "localizador": "Resumo e seção I, PDF p. 1 (impressa 1195)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "O algoritmo é descrito com fórmulas e hiperparâmetros, mas os seis modelos geradores não são nomeados, os limites de compressão por unidade não são impressos, faltam tamanho dos conjuntos, parâmetros de decodificação e número de execuções, e não se explica como as linhas de base foram ajustadas à mesma taxa.", "localizador": "Seções III.B e IV.A, PDF p. 2–3; seção IV.B, PDF p. 3"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há quatro linhas de base de compressão à mesma taxa de compressão, mas não se informa sua configuração nem se foram reexecutadas; a condição sem compressão não aparece na Tabela I e só é relatada para um modelo no HumanEval.", "localizador": "Seção IV.A.3, PDF p. 3; Tabela I e seção IV.B, PDF p. 4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@1 e taxa de compressão são definidos, mas os denominadores não são informados, FLOPs não têm unidade, o ganho de 3.7 p.p. do resumo e da conclusão não é derivável da Tabela I e o resumo chama de 'up to' a redução de latência que a Tabela II rotula como média.", "localizador": "Seção IV.A.2, PDF p. 3; resumo, PDF p. 1; Tabelas I e II, PDF p. 4"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "O artigo não discute ameaças à validade nem limitações do próprio estudo; a conclusão traz apenas trabalhos futuros.", "localizador": "Seções IV e V, PDF p. 3–4"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Ambiente de hardware e software e hiperparâmetros principais são informados, mas faltam a identidade dos modelos avaliados, os limites por unidade, o vocabulário de palavras-chave e declaração de disponibilidade de código ou dados.", "localizador": "Seções III.C e IV.A.4, PDF p. 3 (impressa 1197)"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo não menciona contaminação de dados de avaliação no pré-treinamento dos modelos, embora use benchmarks públicos.", "localizador": "Texto completo, PDF p. 1–5"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (5 páginas). Páginas do PDF abertas visualmente: p-01 (resumo), p-02 (Figura 1 e seção III.B), p-03 (configuração experimental) e p-04 (Tabelas I e II)."
+  }
+}

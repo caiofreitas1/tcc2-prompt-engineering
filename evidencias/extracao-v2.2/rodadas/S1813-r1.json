@@ -1,0 +1,167 @@
+{
+  "estudo": "S1813",
+  "texto_fonte": "fontes/textos/lote/S1813.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "GameLogLLM (four-stage framework: context extraction, context-aware prompt construction, rule-guided code generation, evidence-linked insight synthesis)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Resumo e contribuições, PDF p. 1 (impressa 526); seção III, PDF p. 2–3 (impressas 527–528); Fig. 1, PDF p. 3",
+        "observacao": "Pacote híbrido proposto pelo estudo. Mecanismos: papel de sistema ('You are a data analyst...') e regras em linguagem natural → instrucao; metadados estruturais e documentação Markdown de domínio inseridos no prompt → contexto; exigência de retornar só código Python executável, sem explicações → restricoes; encadeamento de etapas (extração de contexto, construção do prompt, geração e execução do código, síntese de insights por um segundo LLM a partir das saídas executadas) → decomposicao. Os dois LLMs atuam em sequência (o segundo consome as saídas do primeiro), sem interação descrita; por isso não se atribuiu multiagente. Inclui componentes fora do escopo (validação sintática/semântica/contextual e execução em ambiente controlado). Não há condição executada sem o framework nem com prompting alternativo (por exemplo, 'ad hoc prompting'); a comparação é com a análise de um especialista humano, que serve de referência de correção, não de condição de prompting. Sem base identificável, mecanismos_acrescentados fica vazio."
+      },
+      {
+        "nome_original": "Context-Aware Prompt Engineering (Code Generation Prompt Template)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III.B e quadro 'Code Generation Prompt Template', PDF p. 2 (impressa 527); Fig. 1 (painel 2), PDF p. 3 (impressa 528)",
+        "observacao": "Estágio 2 do framework: papel de sistema e cinco restrições em linguagem natural (responder diretamente à pergunta, escolher métodos adequados, gerar visualizações e resumos estatísticos, código reprodutível e documentado) → instrucao; {structural metadata}, {markdown doc} e {user inquiry} → contexto; 'Return only executable code, without explanations' → restricoes (formato da saída). A Fig. 1 mostra uma versão diferente das regras (quatro itens). Não há ablação nem condição sem o estágio."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Validation (syntactic, semantic, contextual) and execution in a controlled environment",
+        "natureza": "outro",
+        "descricao": "Limpeza, validação em três níveis (importar bibliotecas permitidas, compilar e executar sem erros; lógica compatível com o esquema e a pergunta; saídas coerentes com as restrições experimentais e de domínio) e execução do código gerado. Não se descreve retorno dos erros ao LLM nem regeneração; não é técnica de prompting.",
+        "localizador": "Seção III.C, PDF p. 2–3 (impressas 527–528)"
+      },
+      {
+        "nome_original": "Stage 1: Context Extraction and Preprocessing",
+        "natureza": "outro",
+        "descricao": "Pré-processamento dos logs em CSV e redação/extração de metadados estruturais, semânticos e analíticos a partir de arquivos Markdown de documentação; produz o insumo que entra no prompt (registrado como contexto na técnica). A preparação em si não é prompting e o modo de produzir os arquivos Markdown não é detalhado.",
+        "localizador": "Seção III.A, PDF p. 2 (impressa 527)"
+      },
+      {
+        "nome_original": "Model selection for insight generation",
+        "natureza": "selecao_modelo",
+        "descricao": "Os autores testaram vários LLMs de 7B–14B e selecionaram LLaMA-3.1-8B e Qwen3-14B para avaliação detalhada; o critério de seleção não é informado.",
+        "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-coder-7B", "versao": "nao_informado", "observacao": "LLM de geração de código do estágio 3; snapshot/quantização e parâmetros de decodificação não informados."},
+      {"nome": "LLaMA-3.1-8B", "versao": "nao_informado", "observacao": "Um dos dois modelos de geração de insights (estágio 4) avaliados na Tabela I; tarefa de texto, fora do escopo de código."},
+      {"nome": "Qwen3-14B", "versao": "nao_informado", "observacao": "Um dos dois modelos de geração de insights (estágio 4) avaliados na Tabela I; tarefa de texto, fora do escopo de código."},
+      {"nome": "Ollama (servidor de inferência local)", "versao": "nao_informado", "observacao": "Execução local em Apple M4 Max, macOS, 36 GB de memória unificada."}
+    ],
+    "benchmarks": [
+      {"nome": "Logs de jogo do experimento controlado na Fortress Melbourne (parceria com NBN Co)", "quantidade": "Mais de 100 participantes ('Over 100' / '100+'), 46 estações, cinco condições de latência (0, 50, 100, 150, 200 ms), dois mapas", "observacao": "Conjunto próprio, não público segundo o texto (disponibilidade não informada). O número de consultas/perguntas analíticas avaliadas não é informado; o texto relata 'One example' de saída visual (total de abates por condição de latência para todos os jogadores). Não é benchmark de geração de código.", "localizador": "Seção IV.A, PDF p. 4 (impressa 529); introdução, PDF p. 1 (impressa 526)"}
+    ],
+    "metricas": [
+      {"nome": "absolute difference in reported kill counts (per latency bucket)", "descricao": "Diferença absoluta entre os totais de abates do gráfico gerado pelo GameLogLLM e do gráfico do especialista, por faixa de latência; relatada como ≤2 abates por faixa.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"nome": "relative error", "descricao": "Erro relativo correspondente, relatado como ≤1,3%; fórmula não informada.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"nome": "factual alignment", "descricao": "Proporção de números extraídos do texto de insights que coincidem com as tabelas calculadas dentro de 2% de tolerância; relatada só como 'exceed 90%' para os dois modelos de insights. Número de afirmações (denominador) e valor por modelo não informados. Mede a geração de texto (estágio 4), não o código.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"nome": "Comparação qualitativa com a análise do especialista (Tabela I)", "descricao": "Comparação textual de Key Insights, Patterns and Trends e Business Implications entre os dois LLMs e o especialista; sem métrica numérica além do alinhamento factual.", "localizador": "Tabela I, PDF p. 5 (impressa 530)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "alucinacao", "descricao": "Uso de prompts ad hoc é frágil e propenso a alucinação; logs densos e específicos de domínio, distantes da distribuição de pré-treinamento, levam a alucinação e má compreensão.", "localizador": "Resumo e introdução, PDF p. 1 (impressa 526)"},
+      {"categoria": "custo", "descricao": "Custo computacional (e limites de tokens) impede aplicar LLMs diretamente aos logs completos; não quantificado.", "localizador": "Resumo, PDF p. 1 (impressa 526); seção III, PDF p. 2 (impressa 527)"},
+      {"categoria": "outro", "descricao": "Uso ad hoc de LLMs é difícil de reproduzir (reprodutibilidade); raciocínio em sequências longas pouco confiável e efeito 'lost-in-the-middle' (limites de contexto).", "localizador": "Resumo e introdução, PDF p. 1 (impressa 526)"},
+      {"categoria": "correcao_funcional", "descricao": "Risco implícito de código gerado que não importa bibliotecas permitidas, não compila, não executa ou cuja lógica não corresponde ao esquema e à pergunta, motivo da validação em três níveis.", "localizador": "Seção III.C, PDF p. 3 (impressa 528)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Fornecer metadados estruturais e documentação de domínio no prompt para reduzir alucinação; não há condição sem essa contextualização.", "avaliada": "nao", "localizador": "Seção III, PDF p. 2 (impressa 527); conclusão, PDF p. 4 (impressa 529)"},
+      {"descricao": "Validação sintática, semântica e contextual do código gerado antes de usar as saídas; efeito não medido.", "avaliada": "nao", "localizador": "Seção III.C, PDF p. 3 (impressa 528)"},
+      {"descricao": "Restrição de saída a código executável, sem explicações, e separação entre computação determinística e interpretação por um segundo LLM; efeito não medido contra condição sem a restrição.", "avaliada": "nao", "localizador": "Seção III.B, PDF p. 2; seção III.E, PDF p. 3–4"},
+      {"descricao": "Execução local via Ollama, sem APIs externas, apresentada como favorável à privacidade e à reprodutibilidade; não avaliada.", "avaliada": "nao", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"}
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa contradiz a Tabela I: o texto afirma que ambos os modelos produzem interpretações coerentes com a análise do especialista, mas o Qwen3-14B diz que a latência tem influência mínima (r = 0.08) e recomenda investir em treinamento e mapas em vez de reduzir latência, enquanto o especialista descreve queda consistente dose-resposta.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529); Tabela I, PDF p. 5 (impressa 530)"},
+      {"descricao": "O mesmo valor difere entre fontes: os dois modelos de insights citam 2956.5 abates a 0 ms e 1743 (ou 1743.0) a 200 ms, enquanto o especialista relata 2,858 a 0 ms e 1,697 a 200 ms. Ainda assim o texto afirma alinhamento factual superior a 90% e, para o código, diferença de ≤2 abates por faixa entre gráfico gerado e do especialista. O artigo não diz se as tabelas entregues aos modelos de insights eram as mesmas da comparação da Fig. 2; aparente inconsistência.", "localizador": "Tabela I, PDF p. 5 (impressa 530); seção IV.B, PDF p. 4 (impressa 529)"},
+      {"descricao": "Contagem total não inteira (2956.5) e ajustes ad hoc nos insights: os dois modelos 'halving the 0 ms value (2956.5 → 1478.25)' para corrigir 'possible overcounting', sem explicação do estudo sobre a origem da sobrecontagem.", "localizador": "Tabela I, PDF p. 5 (impressa 530)"},
+      {"descricao": "LLaMA-3.1-8B afirma ausência de diferença significativa entre 150 e 200 ms ('plateau effect'), enquanto o especialista descreve queda monotônica (1,909 a 150 ms; 1,697 a 200 ms).", "localizador": "Tabela I, PDF p. 5 (impressa 530)"},
+      {"descricao": "O texto diz que os gráficos têm 'identical trends and values', mas no mesmo período relata diferença de até 2 abates por faixa (≤1.3% de erro relativo); a legenda da Fig. 2 diz 'matching trends and values'. A Fig. 2 não imprime os valores por faixa, de modo que a diferença não pode ser conferida no PDF.", "localizador": "Seção IV.B e Fig. 2, PDF p. 4 (impressa 529)"},
+      {"descricao": "Faixa de tamanho dos modelos inconsistente: resumo e conclusão falam em modelos locais de 7B–14B; os resultados dizem que 'both stages run on locally hosted 8B–14B models', mas o modelo de geração de código declarado é o Qwen2.5-coder-7B.", "localizador": "Resumo, PDF p. 1; seção III.C, PDF p. 2 (impressa 527); seção IV.B e conclusão, PDF p. 4 (impressa 529)"},
+      {"descricao": "As regras do prompt de geração de código diferem entre o quadro (cinco restrições, incluindo 'Ensure reproducible, documented code') e a Fig. 1 (quatro regras: analisar, criar visualizações 'when helpful', imprimir achados, gerar só código executável); não se diz qual versão foi usada.", "localizador": "Quadro 'Code Generation Prompt Template', PDF p. 2 (impressa 527); Fig. 1, PDF p. 3 (impressa 528)"},
+      {"descricao": "Avaliação da geração de código baseada em um único exemplo relatado (total de abates por latência); número de consultas avaliadas, número de execuções e taxa de sucesso da validação não informados. O alinhamento factual é dado só como '>90%' para os dois modelos, sem denominador nem valor por modelo; a referência é ora 'computed tables', ora 'expert-verified tables'.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"descricao": "Afirmações sem medição: o framework 'reduces hallucination' e 'reduces analyst effort and cost'; o estudo não executa condição com prompting ad hoc nem mede esforço, custo ou alucinação.", "localizador": "Seção III.E, PDF p. 3 (impressa 528); conclusão, PDF p. 4 (impressa 529)"}
+    ],
+    "observacoes": [
+      {"descricao": "O estágio 4 usa um segundo prompt ('Insight Generation Prompt Template': papel de analista de negócios e saída em três seções) para gerar texto narrativo a partir das saídas executadas; é prompting para tarefa de texto (table-to-text), fora do escopo de código, por isso não entra em tecnicas nem em extracoes. A Tabela I e o alinhamento factual avaliam esse estágio.", "localizador": "Seção III.D e quadro 'Insight Generation Prompt Template', PDF p. 3 (impressa 528); Tabela I, PDF p. 5 (impressa 530)"},
+      {"descricao": "A Fig. 1 mostra ícones de vários provedores de LLM nos estágios 3 e 4, mas o texto só declara Qwen2.5-coder-7B (código) e LLaMA-3.1-8B e Qwen3-14B (insights); não se infere uso de outros modelos.", "localizador": "Fig. 1, PDF p. 3 (impressa 528)"},
+      {"descricao": "Parâmetros não informados: temperatura e demais parâmetros de decodificação, número de execuções, número de consultas avaliadas, conteúdo dos arquivos Markdown, critério de seleção dos modelos de insights e disponibilidade de dados e código.", "localizador": "Seções III e IV, PDF p. 2–4"},
+      {"descricao": "O conjunto de dados teve aprovação ética (UTS ETH24-9309) e foi patrocinado pela NBN Co, empresa à qual pertencem dois autores.", "localizador": "Seção IV.A e afiliações, PDF p. 1 e p. 4"}
+    ],
+    "citacoes": [
+      {"trecho": "Ad hoc prompt-based use of LLMs is brittle, difficult to reproduce, and prone to hallucination.", "localizador": "Resumo, PDF p. 1 (impressa 526)"},
+      {"trecho": "Game analytics depends on high-volume gameplay telemetry, but Large Language Models (LLMs) cannot directly operate on full logs due to token limits, schema variability, and compute cost.", "localizador": "Resumo, PDF p. 1 (impressa 526)"},
+      {"trecho": "In evaluation on induced-latency gameplay data, GameLogLLM reproduces expert quantitative analysis and produces domain-relevant narrative insights using locally hosted 7B–14B parameter LLMs, without external APIs, supporting reproducible and privacy-preserving analytics.", "localizador": "Resumo, PDF p. 1 (impressa 526)"},
+      {"trecho": "LLMs exhibit the “lost-in-the-middle” effect [5], and dense, domain-specific logs deviate from pretraining distributions, often leading to hallucination and poor comprehension.", "localizador": "Introdução, PDF p. 1 (impressa 526)"},
+      {"trecho": "This motivates a code-centric framework for game analytics, where LLMs generate validated Python scripts to operate on structured data.", "localizador": "Introdução, PDF p. 1 (impressa 526)"},
+      {"trecho": "Stage 2 transforms the metadata produced in Stage 1 into a structured prompt that defines both the LLM’s role and its operational boundaries.", "localizador": "Seção III.B, PDF p. 2 (impressa 527)"},
+      {"trecho": "Instead of generic instructions, the template explicitly incorporates three inputs: the dataset description ({structural_metadata}), the domain knowledge from the Markdown file ({markdown_documentation}), and the user’s question ({user_inquiry}).", "localizador": "Seção III.B, PDF p. 2 (impressa 527)"},
+      {"trecho": "5) Return only executable code, without explanations.", "localizador": "Quadro 'Code Generation Prompt Template', item Constraints, PDF p. 2 (impressa 527)"},
+      {"trecho": "The output of Stage 2 is thus a fully context-aware, inquiry-constrained prompt.", "localizador": "Seção III.B, PDF p. 2 (impressa 527)"},
+      {"trecho": "The LLM (Qwen2.5-coder-7B) generates Python code which is then cleaned, validated, and executed in a controlled environment.", "localizador": "Seção III.C, PDF p. 2 (impressa 527)"},
+      {"trecho": "Syntactic validation: the generated code must import permitted libraries, compile, and run without errors.", "localizador": "Seção III.C, PDF p. 3 (impressa 528)"},
+      {"trecho": "A second LLM is therefore introduced, operating at a higher interpretive level.", "localizador": "Seção III.D, PDF p. 3 (impressa 528)"},
+      {"trecho": "Unlike ad hoc prompting or conventional tooling, the framework enforces controlled prompt construction, rule-guided code generation, and evidence-linked insight synthesis.", "localizador": "Seção III.E, PDF p. 3 (impressa 528)"},
+      {"trecho": "This reduces analyst effort and cost while preserving reproducibility.", "localizador": "Seção III.E, PDF p. 3 (impressa 528)"},
+      {"trecho": "Over 100 participants used 46 gaming workstations with automated latency manipulation across five conditions (0ms, 50ms, 100ms, 150ms, 200ms) using kernel-level traffic control.", "localizador": "Seção IV.A, PDF p. 4 (impressa 529)"},
+      {"trecho": "One example of visual analytic outputs for total kill counts across latency conditions for all players are shown in Fig. 2.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "The two plots exhibit identical trends and values: : across all latency buckets (0 – 200 ms), the absolute difference in reported kill counts is ≤2 kills per bucket (≤1.3% relative error).", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "We tested several 7B-14B LLMs and selected two models for detailed evaluation: LLaMA-3.1-8B and Qwen3-14B.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "The results, summarized in Table I, show that both models produce interpretations that are consistent with the expert analysis.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "Using the expert-verified tables as reference, both models exceed 90% factual alignment.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "Finally, both stages run on locally hosted 8B–14B models served via Ollama, without external API calls.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+      {"trecho": "By grounding the LLM in dataset metadata and domain knowledge, the framework reduces hallucination, supports reproducible analysis, and cleanly separates deterministic computation from interpretive reasoning.", "localizador": "Conclusão, PDF p. 4 (impressa 529)"},
+      {"trecho": "Latency shows minimal influence on kill counts (r = 0.08), with a gradual decline as latency increases.", "localizador": "Tabela I, linha Key Insights, coluna Qwen3-14B, PDF p. 5 (impressa 530)"},
+      {"trecho": "The total kill counts decrease significantly as latency increases, with a notable drop from 2956.5 at 0ms to 1743.0 at 200ms (40% reduction).", "localizador": "Tabela I, linha Key Insights, coluna LLaMA-3.1-8B, PDF p. 5 (impressa 530)"},
+      {"trecho": "Total kills decreased from 2,858 at 0 ms to 2,446 at 50 ms (14% reduction), 2,088 at 100 ms (27% reduction), 1,909 at 150 ms (33% reduction), and 1,697 at 200 ms (41% reduction).", "localizador": "Tabela I, linha Key Insights, coluna Human Expert Analysis, PDF p. 5 (impressa 530)"},
+      {"trecho": "After halving the 0 ms value (2956.5 → 1478.25) to correct possible overcounting, the overall trend remains unchanged.", "localizador": "Tabela I, linha Key Insights, coluna Qwen3-14B, PDF p. 5 (impressa 530)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "GameLogLLM (four-stage framework: context extraction, context-aware prompt construction, rule-guided code generation, evidence-linked insight synthesis)",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "decomposicao"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "Qwen2.5-coder-7B (versão nao_informado), servido localmente via Ollama",
+      "benchmark": "Logs de jogo do experimento controlado na Fortress Melbourne; consulta: total de abates por condição de latência para todos os jogadores (um exemplo relatado)",
+      "metrica": "absolute difference in reported kill counts (per latency bucket), em relação ao gráfico do especialista humano feito com código escrito manualmente",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": null, "intervencao": 2},
+      "denominador": "5 faixas de latência (0–200 ms; cinco condições descritas em IV.A); um único exemplo de consulta relatado",
+      "condicoes": "Extração descritiva: o estudo não executa condição de prompting alternativa; o gráfico do especialista é referência de correção, não comparador, e o resultado não é efeito da técnica. O valor impresso é limite superior ('≤2 kills per bucket'), acompanhado de '≤1.3% relative error' (fórmula não informada). Valores por faixa não impressos: a Fig. 2 (PDF p. 4) não traz rótulos numéricos e os eixos da Fig. 2(a) são pouco legíveis, por isso a diferença por faixa não pôde ser conferida na figura; o limite foi conferido no texto da página (imagem p-04). Os totais do especialista (2,858; 2,446; 2,088; 1,909; 1,697) constam da Tabela I. Número de consultas, número de execuções, temperatura e taxa de sucesso da validação não informados. O texto de resultados menciona modelos de 8B–14B para 'both stages', em conflito com o Qwen2.5-coder-7B declarado na seção III.C.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo não destaca uma métrica. Sem comparador executado, a extração é descritiva. A Tabela I avalia a geração de insights textuais (fora do escopo de código) e não contém resultado de geração de código; a primeira figura com resultado de geração de código é a Fig. 2, sem valores impressos; o valor vem da prosa que descreve a Fig. 2 (seção IV.B), primeira métrica relatada.",
+      "derivacao": "direta",
+      "localizador": "Seção IV.B e Fig. 2, PDF p. 4 (impressa 529); Tabela I, PDF p. 5 (impressa 530)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "The two plots exhibit identical trends and values: : across all latency buckets (0 – 200 ms), the absolute difference in reported kill counts is ≤2 kills per bucket (≤1.3% relative error).", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"},
+        {"trecho": "This indicates that the LLM-generated code (Fig. 2(a) is able to reproduce the expert’s analysis (Fig. 2(b)) faithfully.", "localizador": "Seção IV.B, PDF p. 4 (impressa 529)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (limites de tokens, custo, alucinação na análise direta de logs) e proposta (framework de geração de código guiada por contexto) explícitos, com contribuições listadas.", "localizador": "Resumo e introdução, PDF p. 1 (impressa 526)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Estágios e template de prompt descritos, mas faltam número de consultas avaliadas, número de execuções, parâmetros de decodificação, conteúdo dos arquivos Markdown, critério de seleção dos modelos e qual versão das regras do prompt (quadro ou Fig. 1) foi usada.", "localizador": "Seção III, PDF p. 2–3; seção IV.B, PDF p. 4"},
+    {"criterio": "comparador", "julgamento": "nao_atende", "justificativa": "Não há condição executada sem o framework nem com prompting alternativo, embora o estudo afirme vantagens sobre o 'ad hoc prompting' e redução de alucinação; a análise do especialista serve só de referência de correção.", "localizador": "Seção III.E, PDF p. 3; seção IV.B e conclusão, PDF p. 4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Diferença absoluta, erro relativo e alinhamento factual (tolerância de 2%) são descritos, mas só como limites ('≤2', '≤1.3%', '>90%'), sem denominadores do alinhamento nem valores por modelo; a avaliação do código usa um exemplo; valores da mesma grandeza divergem entre os insights (2956.5 a 0 ms) e o especialista (2,858).", "localizador": "Seção IV.B, PDF p. 4; Tabela I, PDF p. 5"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "O artigo não discute ameaças à validade nem limitações da avaliação; menciona apenas trabalhos futuros.", "localizador": "Seções IV e V, PDF p. 4–5"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Template de prompt, modelos, hardware e servidor de inferência informados, mas sem versões/snapshots, parâmetros de decodificação, disponibilidade de dados ou código e conteúdo das documentações Markdown.", "localizador": "Seção III.B–C, PDF p. 2; seção IV.B, PDF p. 4"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo não discute vazamento de dados de avaliação no prompt ou no pré-treinamento.", "localizador": "Texto completo, PDF p. 1–5"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (5 páginas, impressas 526–530). Páginas do PDF abertas visualmente: p-02 (quadro do prompt de geração de código), p-03 (Fig. 1 e quadro do prompt de insights), p-04 (resultados e Fig. 2) e p-05 (Tabela I). A Fig. 2 não imprime valores por faixa."
+  }
+}
