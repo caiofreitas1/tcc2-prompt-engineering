@@ -27,3 +27,11 @@ assinatura do Codex antes de gravar; ficam para o próximo lote do Codex.
 - Estudos extraídos fora do piloto: 67 de 296 (57 pelo Opus, 10 pelo Codex).
 - Consumo do Opus: semanal de 83% para 92% com os dois lotes e a orquestração.
 - As fichas não foram conferidas pelo autor.
+
+## Complemento do lote 4 — Claude Opus 5.5 (16/11/2026)
+
+S383, S391, S393, S398 e S399, com o restante do limite semanal; S397 (51 páginas) adiada. As
+cinco saídas passam no validador. O subagente da S391 parou no limite de 5 horas depois de
+gravar a saída (JSON completo, validado). S398 sem comparação: compara modelos entre
+benchmarks numa única condição zero-shot; fica para o autor avaliar a inclusão, como S261 e
+S320. Citações: 56 de 143 não achadas pelo verificador aproximado.
