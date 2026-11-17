@@ -1,0 +1,356 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot (Baseline)",
+        "mecanismos": ["instrucao", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 3), seção III-C, item a); p. 2-3, seção III-A e III-B",
+        "observacao": "Linha de base de prompting: prompt do LLMSecEval com o template de docstring (campos Input Prompt, Intention e Functionality → restricoes) e system prompt genérico de papel (→ instrucao), sem orientação de segurança nem exemplos. Herda do pipeline CodeEnhancer Stage 1 o laço iterativo com relatórios do Bandit/Pylint e com o motivo do veredito do juiz GPT-4o-mini reenviado ao gerador (→ feedback; gerador e juiz são papéis distintos que interagem → multiagente). Comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Few-shot (Example-Driven Security)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["exemplos", "contexto", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 (impressa 3), seção III-C, item b); resultados na Tabela II e Tabela IV, PDF p. 4; ameaça em PDF p. 6, seção IV-F",
+        "observacao": "Cinco exemplos de código seguro prefixados ao prompt (CWE-78, CWE-89, CWE-502, CWE-434, CWE-22) → exemplos e, por serem código fornecido como demonstração, contexto. O system prompt muda para papel orientado a segurança («secure code generation assistant»), ingrediente ausente no Zero-shot, que não tem orientação explícita de segurança → instrucao acrescentada. Mantém o template de docstring e o laço SAST/juiz. O contrafactual é o pacote (exemplos + diretiva de segurança no system prompt) contra o Zero-shot; os próprios autores declaram a variável composta e que a ablação isolada do system prompt é trabalho futuro, logo o efeito não pode ser atribuído só aos exemplos. Não é pacote híbrido quanto à técnica: o laço comum às três condições é mantido constante."
+      },
+      {
+        "nome_original": "Chain-of-Thought (Reasoning-Driven Security)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["raciocinio", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 (impressa 3), seção III-C, item c); resultados na Tabela II e Tabela IV, PDF p. 4; análise em PDF p. 5, seção IV-E-4",
+        "observacao": "Instrução para um processo de raciocínio de segurança em quatro passos antes do código (identificar entradas externas, enumerar riscos CWE, especificar mitigações, gerar código), no mesmo turno → raciocinio (não há subtarefas executadas em etapas separadas). System prompt muda para «security-aware code generation assistant» (diretiva de segurança ausente no Zero-shot → instrucao acrescentada). Mantém o template de docstring e o laço SAST/juiz. Contrafactual de pacote contra o Zero-shot; o estudo não separa o efeito dos passos de raciocínio do efeito do system prompt (variável composta reconhecida em IV-F)."
+      },
+      {
+        "nome_original": "CodeEnhancer Stage 1 (generate-validate-refine loop) com LLM-Judge desacoplado",
+        "mecanismos": ["restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2-3 (impressas 2-3), seções III-A e III-B",
+        "observacao": "Pipeline comum às 15 combinações: geração com template de docstring estruturado (restricoes), validação com Bandit e Pylint gerando relatórios de feedback, refinamento pelo LLM até 5 iterações, e, após passar no SAST, julgamento de correção funcional pelo GPT-4o-mini com retorno do motivo ao gerador (feedback; papéis gerador/juiz → multiagente). Não há condição sem o laço; Bandit@0 (antes do laço) e Resolution Rate (após o laço) são métricas distintas, não um contrafactual. A troca do juiz (próprio gerador vs GPT-4o-mini) é escolha de modelo e está em componentes_fora_escopo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Decoupled LLM-Judge (GPT-4o-mini como juiz externo)",
+        "natureza": "selecao_modelo",
+        "descricao": "Substitui o próprio modelo gerador (Self-Judge) por outro modelo como juiz de correção funcional, mantendo o mecanismo de julgamento e retorno. A comparação relatada (fase intermediária Self-Judge: Llama 3.1 8B 15,6% e DeepSeek-Coder 6.7B 20,0%, com 15 prompts) usa amostra diferente da do experimento principal (81 prompts); o próprio estudo atribui parte da queda à variância da amostra pequena.",
+        "localizador": "PDF p. 2 (impressa 2), seção II-D; PDF p. 3, seção III-B; PDF p. 4, seção IV-E-1"
+      },
+      {
+        "nome_original": "Substituição do GPT-4o por cinco LLMs abertos locais via Ollama",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre cinco modelos (dois especializados em código e três de propósito geral) sem alterar o prompt; as médias por modelo (Tabela III) são efeito de modelo, não de prompting.",
+        "localizador": "PDF p. 2-3, seção III-A; Tabela I e seção IV-B, PDF p. 3; Tabela III, PDF p. 4"
+      },
+      {
+        "nome_original": "temperature = 0, max tokens = 2048, num_ctx = 8192",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação e de janela de contexto mantidos fixos em todas as condições (não comparados). O estudo associa o limite de 2048 tokens de saída a truncamentos nas execuções CoT.",
+        "localizador": "PDF p. 3, seção IV-A; PDF p. 5, seção IV-E-4"
+      },
+      {
+        "nome_original": "Pesos quantizados em 4 bits (Ollama)",
+        "natureza": "outro",
+        "descricao": "Condição de implantação dos modelos locais, não comparada; o estudo a lista como ameaça à validade (variações de comportamento em relação a pesos de 16 bits).",
+        "localizador": "PDF p. 7 (impressa 7), seção IV-F, Quantization Effects"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen 2.5 Coder 7B", "versao": "7B; tag/snapshot do Ollama nao_informado; quantização em 4 bits", "papel_no_estudo": "gerador e reparador local"},
+      {"nome": "DeepSeek-Coder 6.7B", "versao": "6.7B; tag/snapshot nao_informado; quantização em 4 bits", "papel_no_estudo": "gerador e reparador local"},
+      {"nome": "Llama 3.1 8B", "versao": "8B; tag/snapshot nao_informado; quantização em 4 bits", "papel_no_estudo": "gerador e reparador local"},
+      {"nome": "Gemma 2 9B", "versao": "9B; tag/snapshot nao_informado; quantização em 4 bits", "papel_no_estudo": "gerador e reparador local"},
+      {"nome": "Mistral 7B", "versao": "7B; tag/snapshot nao_informado; quantização em 4 bits", "papel_no_estudo": "gerador e reparador local"},
+      {"nome": "GPT-4o-mini", "versao": "nao_informado (snapshot não informado)", "papel_no_estudo": "juiz externo de correção funcional (saída JSON estruturada)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "LLMSecEval (Tony et al., MSR 2023)",
+        "quantidade": "81 prompts únicos em Python (de 150 prompts do benchmark; 67 prompts em C excluídos), cobrindo 12 categorias CWE; 1.215 cenários = 5 modelos × 3 estratégias × 81 prompts",
+        "observacao": "O estudo diz que amostragem estratificada foi usada para remover duplicatas preservando a cobertura de CWE, sem informar quantas duplicatas foram removidas. A fase intermediária (Self-Judge) usou 15 prompts; a relação desse subconjunto com os 81 é nao_informado. Na análise few-shot, os prompts são divididos em CWEs vistas e não vistas nos exemplos; o tamanho de cada subconjunto não é informado no texto e a legenda da Figura 3b não é legível na imagem.",
+        "localizador": "PDF p. 2, seção II-E; PDF p. 3, seções III-D e IV-C; Tabela II, PDF p. 4; Figura 3b, PDF p. 5"
+      }
+    ],
+    "metricas": [
+      {"nome": "Bandit@0 (%)", "definicao": "percentual de arquivos gerados inicialmente com pelo menos um achado do Bandit (taxa de vulnerabilidade inicial)", "denominador": "81 prompts por combinação modelo × estratégia segundo a legenda da Tabela II; não declarado separadamente por célula", "localizador": "PDF p. 3, seção III-D; Tabela II, PDF p. 4"},
+      {"nome": "Resolution Rate / Resolved (%)", "definicao": "percentual de arquivos que passam em todas as verificações SAST e do juiz em até 5 iterações", "denominador": "81 prompts por combinação segundo a legenda da Tabela II", "localizador": "PDF p. 3, seção III-D; Tabela II, PDF p. 4"},
+      {"nome": "Unresolved Rate / Unresolved (%)", "definicao": "percentual de arquivos que ainda falham após 5 iterações", "denominador": "81 prompts por combinação segundo a legenda da Tabela II", "localizador": "PDF p. 3, seção III-D; Tabela II, PDF p. 4"},
+      {"nome": "Average Iterations / Avg Iter.", "definicao": "média de iterações de reparo necessárias para a resolução (arquivos resolvidos)", "denominador": "arquivos resolvidos de cada combinação (número absoluto não informado)", "localizador": "PDF p. 3, seção III-D; Tabela II, PDF p. 4"},
+      {"nome": "Distribuição de vereditos do juiz (Correct vs. Incorrect)", "definicao": "contagem de vereditos do GPT-4o-mini por modelo", "denominador": "nao_informado", "localizador": "Figura 5b, PDF p. 6"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado por LLM reproduz padrões inseguros e introduz vulnerabilidades do CWE Top 25 (injeção de comando, SQL, path traversal); CWE-78 e CWE-502 geram achados do Bandit em todos os modelos e estratégias.",
+        "localizador": "PDF p. 1, seção I; PDF p. 5, seção IV-E-5"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Correção aceita pelo juiz pode permanecer em nível intermediário de segurança (hash SHA-256 sem sal em vez de bcrypt) no estudo de caso CWE-200.",
+        "localizador": "PDF p. 6, seção IV-E-7-b, Listagens 2 e 3"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Bandit e Pylint não verificam vulnerabilidades semânticas profundas nem falhas de lógica de negócio; falhas que escapam às regras estáticas ficam a cargo do juiz LLM (risco de vulnerabilidades não detectadas).",
+        "localizador": "PDF p. 7, seção IV-F, SAST Coverage"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Mistral 7B recebeu mais vereditos Incorrect em todas as estratégias, gerando código funcionalmente incompleto mesmo quando passa no SAST.",
+        "localizador": "PDF p. 5, seção IV-E-6; Figura 5b, PDF p. 6"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com CoT, o raciocínio verboso esgota a janela de contexto ou o orçamento de saída em modelos de 7B–9B; 9 cenários CoT terminaram em SyntaxError por truncamento (casos em Mistral 7B, CWE-22, e Llama 3.1 8B, CWE-798).",
+        "localizador": "PDF p. 5, seção IV-E-4; PDF p. 6, Listagem 1"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Vazamento entre exemplos few-shot e prompts de teste: se os cinco exemplos cobrem as mesmas CWEs dos prompts de teste, ganhos aparentes podem refletir memorização. O estudo não discute contaminação do benchmark no pré-treinamento.",
+        "localizador": "PDF p. 4-5, seção IV-E-3"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O juiz LLM tem estocasticidade inerente e pode classificar mal a correção funcional ou ter falhas semânticas sutis.",
+        "localizador": "PDF p. 7, seção IV-F, LLM-as-a-Judge Reliability"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Viés de autoavaliação quando o mesmo modelo gera e julga o código (divergência do laço Self-Judge), apresentado como limitação de sistemas de reparo iterativo anteriores.",
+        "localizador": "PDF p. 2, seção II-D; PDF p. 6, seção IV-E-7-b"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Desacoplar o juiz do gerador usando GPT-4o-mini como avaliador externo. O estudo compara com a fase intermediária Self-Judge, mas em amostra diferente (15 prompts) e reconhece variância estatística alta nessa fase; a comparação não é em condições comparáveis.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 2, seção II-D; PDF p. 4, seção IV-E-1; PDF p. 7, seção V, item 1"
+      },
+      {
+        "descricao": "Laço de reparo iterativo com Bandit, Pylint e juiz, até 5 iterações; Bandit@0 (antes) e Resolution Rate (depois) são métricas diferentes e não há condição sem o laço.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 2-3, seções III-A e III-B"
+      },
+      {
+        "descricao": "Desagregação do desempenho few-shot em CWEs vistas e não vistas nos exemplos para examinar vazamento/memorização; é análise de subconjuntos, sem condição sem a mitigação.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4-5, seção IV-E-3; Figura 3b, PDF p. 5"
+      },
+      {
+        "descricao": "Temperatura 0 e limites de contexto idênticos para todos os modelos e estratégias (procedimento de controle).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3, seção IV-A"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão por modelo na resolução: Few-shot tem a maior média (Tabela IV: 73,3% vs. Zero-shot 71,8% e CoT 66,7%), mas DeepSeek-Coder 6.7B (Zero-shot 80,2; Few-shot 75,3; CoT 76,5) e Mistral 7B (Zero-shot 64,2; Few-shot 58,0; CoT 45,7) têm o melhor resultado em Zero-shot (Tabela II). O resumo descreve como «substantial gains» o Few-shot em Qwen 2.5 Coder, cuja diferença na Tabela II é 82,7 vs. 80,2 (2,5 p.p., cálculo próprio).",
+        "localizador": "Tabela II e Tabela IV, PDF p. 4; resumo, PDF p. 1"
+      },
+      {
+        "descricao": "Narrativa vs. tabela sobre CoT: o resumo afirma que CoT degrada o desempenho de modelos menores de propósito geral, mas na Tabela II Llama 3.1 8B (propósito geral) tem Resolved 77,8 com CoT vs. 70,4 com Zero-shot; já os modelos especializados em código também caem com CoT (Qwen 77,8 vs. 80,2; DeepSeek 76,5 vs. 80,2).",
+        "localizador": "Resumo, PDF p. 1; Tabela II, PDF p. 4; seção IV-E-4, PDF p. 5"
+      },
+      {
+        "descricao": "Inversão por modelo em Bandit@0: CoT tem a menor média (42,0%, Tabela IV), mas em Mistral 7B CoT tem 60,5 vs. 59,3 do Zero-shot; Few-shot reduz Bandit@0 em Qwen (54,3 vs. 63,0) e Mistral (33,3 vs. 59,3), mas aumenta em DeepSeek-Coder (64,2 vs. 45,7), Llama 3.1 (40,7 vs. 37,0) e Gemma 2 (40,7 vs. 34,6). As extrações usam apenas Qwen 2.5 Coder 7B.",
+        "localizador": "Tabela II e Tabela IV, PDF p. 4"
+      },
+      {
+        "descricao": "A explicação da degradação do CoT (competição pela janela de contexto e truncamento) é apoiada por 9 cenários com SyntaxError e dois casos qualitativos; não há ablação que teste o mecanismo. A redução de vulnerabilidade inicial não se traduziu em maior resolução final.",
+        "localizador": "PDF p. 5, seção IV-E-4; PDF p. 6, Listagem 1"
+      },
+      {
+        "descricao": "Variável composta reconhecida pelos autores: cada estratégia combina sua mecânica estrutural (exemplos, passos de CoT) com um system prompt diferente; a seção III-C remete a discussão da ablação isolada à seção IV-F, que apenas registra a ablação como trabalho futuro (nenhuma ablação foi executada).",
+        "localizador": "PDF p. 3, seção III-C; PDF p. 6, seção IV-F, Prompt Component Ablation"
+      },
+      {
+        "descricao": "A afirmação de que os exemplos few-shot «generalize without data leakage» se apoia na comparação entre CWEs vistas e não vistas dentro da condição Few-shot (texto cita Qwen 84,4% vs. 80,6% e Llama 82,2% vs. 75,0%); o tamanho dos subconjuntos não é informado e a legenda e o eixo da Figura 3b não são legíveis na imagem, de modo que os valores dos demais modelos não foram conferidos. A análise não trata contaminação no pré-treinamento.",
+        "localizador": "PDF p. 4-5, seção IV-E-3; Figura 3b, PDF p. 5; PDF p. 7, seção V, item 4"
+      },
+      {
+        "descricao": "Comparação Self-Judge vs. juiz desacoplado usa amostras diferentes (15 prompts na fase intermediária vs. 81 no experimento principal); o próprio estudo atribui a queda em parte à variância da amostra pequena, mas apresenta o contraste como validação empírica.",
+        "localizador": "PDF p. 2, seção II-D; PDF p. 4, seção IV-E-1"
+      },
+      {
+        "descricao": "Inconsistência descritiva: a seção IV-B diz que os modelos abrangem «three distinct vendor families (Alibaba, Meta/DeepSeek, Google)», enquanto a Tabela I lista cinco famílias (Alibaba, DeepSeek, Meta, Google, Mistral).",
+        "localizador": "Tabela I e seção IV-B, PDF p. 3"
+      },
+      {
+        "descricao": "Llama 3.1 8B é descrito como o melhor em «security rate (fewest initial Bandit flags)» pelo gráfico radar, mas na Tabela III Llama 3.1 8B e Gemma 2 9B têm a mesma média de Bandit@0 (35,0%).",
+        "localizador": "PDF p. 5, seção IV-E-5; Tabela III, PDF p. 4"
+      },
+      {
+        "descricao": "Contagem do corpus: o LLMSecEval tem 150 prompts; o estudo usa 81 prompts em Python e exclui 67 em C (81 + 67 = 148, cálculo próprio); a diferença não é explicada além da menção à remoção de duplicatas por amostragem estratificada. O texto também diz 12 categorias CWE no recorte, contra 18 no benchmark completo.",
+        "localizador": "PDF p. 2, seção II-E; PDF p. 3, seção IV-C"
+      },
+      {
+        "descricao": "Resultado de outro artigo citado para contraste, não comparador executado: CodeEnhancer com GPT-4o descrito como «eliminated 82.8% of vulnerabilities» (p. 1) e como «82.8% vulnerability resolution» (p. 2), com outro modelo e possivelmente outra definição de métrica.",
+        "localizador": "PDF p. 1, seção I; PDF p. 2, seção II-C"
+      },
+      {
+        "descricao": "Conferência própria: as médias das Tabelas III e IV coincidem, após arredondamento, com as médias aritméticas das linhas da Tabela II, e Unresolved = 100 − Resolved em todas as linhas; os percentuais de Resolved são compatíveis com contagens inteiras sobre 81 prompts (cálculo próprio). Não foi encontrada divergência numérica entre tabelas.",
+        "localizador": "Tabelas II, III e IV, PDF p. 4"
+      },
+      {
+        "descricao": "Número de execuções por cenário não informado (temperatura 0 descrita como determinística); não há medidas de variabilidade nem testes estatísticos para as diferenças entre estratégias. Versão do Ollama informada só como «v0.x».",
+        "localizador": "PDF p. 3, seção IV-A; Tabelas II-IV, PDF p. 4"
+      }
+    ],
+    "observacoes": [
+      {
+        "nota": "As estratégias de prompting são aplicadas só na etapa inicial de geração; o reparo iterativo guiado por SAST e juiz faz parte do pipeline de geração comum a todas as condições, e o estudo não avalia uma tarefa de reparo de programas separada (por isso tarefas = geracao).",
+        "localizador": "PDF p. 3, seção III-C; PDF p. 2-3, seção III-A"
+      },
+      {
+        "nota": "Custo de API do juiz GPT-4o-mini relatado como US$ 0,34 para os 1.215 cenários; geração e reparo locais descritos como sem custo. Apresentado como vantagem, não como risco.",
+        "localizador": "PDF p. 1, seção I; PDF p. 3, seção IV-A"
+      },
+      {
+        "nota": "Ferramentas SAST: Bandit v1.8.3 e Pylint v3.3.7. Ameaças listadas: ablação de componentes do prompt, confiabilidade do juiz LLM, cobertura do SAST, quantização e escopo do conjunto de dados (só Python, 12 CWEs).",
+        "localizador": "PDF p. 3, seção IV-A; PDF p. 6-7, seção IV-F"
+      },
+      {
+        "nota": "Nenhum pacote de replicação, repositório ou conjunto de prompts completos é indicado; os links impressos referem-se apenas às ferramentas Bandit, Pylint e CodeQL e ao DOI do CodeEnhancer.",
+        "localizador": "PDF p. 7-8, Referências"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "This paper presents a systematic comparative study built on the CodeEnhancer framework, evaluating five open-source LLMs—Qwen 2.5 Coder 7B, DeepSeek-Coder 6.7B, Llama 3.1 8B, Gemma 2 9B, and Mistral 7B—across three prompt engineering strategies (Zero-shot, Few-shot, and Chain-of-Thought) using 81 Python prompts drawn from the LLMSecEval benchmark, yielding 1,215 experimental scenarios in total.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "We evaluate three distinct prompt engineering strategies applied at the initial generation step.", "localizador": "PDF p. 3, seção III-C"},
+      {"trecho": "The model receives the LLMSecEval natural language prompt with the docstring template but no explicit security guidance or examples.", "localizador": "PDF p. 3, seção III-C, item a)"},
+      {"trecho": "Five secure code examples are prepended to the prompt, covering CWE-78, CWE-89, CWE-502, CWE-434, and CWE-22.", "localizador": "PDF p. 3, seção III-C, item b)"},
+      {"trecho": "The model is instructed to execute a four-step security reasoning process before writing code: (1) identify external inputs, (2) enumerate associated CWE risks, (3) specify mitigations, and (4) generate code.", "localizador": "PDF p. 3, seção III-C, item c)"},
+      {"trecho": "The original Stage 1 pipeline consists of: (1) structured code generation using a prompt template that enforces an embedded docstring with Input Prompt, Intention, and Functionality fields; (2) iterative validation using Bandit (security) and Pylint (syntax) to detect issues and generate structured feedback reports; and (3) LLM-driven code refinement based on the feedback, repeated up to a maximum of 5 iterations.", "localizador": "PDF p. 2, seção III-A"},
+      {"trecho": "If the verdict is Incorrect, the reason is forwarded to the local generator model for a functional fix, and the file re-enters the SAST loop.", "localizador": "PDF p. 3, seção III-B"},
+      {"trecho": "While this reflects realistic deployment profiles, it introduces a compound variable where improvements in Few-shot may stem from both the in-context demonstrations and the reinforced system directive.", "localizador": "PDF p. 6, seção IV-F"},
+      {"trecho": "Empirical studies confirm that LLM-produced code frequently replicates insecure patterns from training data, introducing vulnerabilities listed in the MITRE Common Weakness Enumeration (CWE) Top 25 [5], [7]—such as command injection (CWE-78), SQL injection (CWE-89), and path traversal (CWE-22).", "localizador": "PDF p. 1, seção I"},
+      {"trecho": "Mistral 7B triggered the most Incorrect verdicts across all strategies, indicating a tendency to generate functionally incomplete code even when SAST checks pass.", "localizador": "PDF p. 5, seção IV-E-6"},
+      {"trecho": "Empirically, we identified 9 scenarios in our CoT runs that ended in SyntaxError due to context or token limit truncation.", "localizador": "PDF p. 5, seção IV-E-4"},
+      {"trecho": "A key concern with few-shot prompting is data leakage: if the five examples cover the same CWEs as the test prompts, apparent improvements may reflect memorization rather than generalization.", "localizador": "PDF p. 4, seção IV-E-3"},
+      {"trecho": "Figure 3 disaggregates few-shot performance into seen CWEs (those covered by examples) and unseen CWEs (those not in the examples).", "localizador": "PDF p. 4-5, seção IV-E-3"},
+      {"trecho": "Although decoupling the evaluator via GPT-4o-mini successfully circumvents self-assessment divergence [19], relying on an LLM evaluator carries inherent stochasticity.", "localizador": "PDF p. 7, seção IV-F"},
+      {"trecho": "Bandit and Pylint detect static rule violations and syntax errors, but cannot verify deep semantic vulnerabilities or business logic flaws.", "localizador": "PDF p. 7, seção IV-F"},
+      {"trecho": "While SHA-256 resolves the immediate plaintext exposure, it represents an intermediate security level compared to salted hashing functions (e.g., bcrypt), highlighting both the repair capability and the nuanced boundary of LLM-as-a-Judge evaluations.", "localizador": "PDF p. 6, seção IV-E-7-b"},
+      {"trecho": "Our mid-phase results validate this decision empirically: under the self-assessment framework (Self-Judge), Llama 3.1 8B achieved a low 15.6% resolution rate, and DeepSeek-Coder 6.7B scored only 20.0%.", "localizador": "PDF p. 2, seção II-D"},
+      {"trecho": "All models used temperature = 0 (deterministic), max tokens = 2048, and context window (num_ctx) = 8192 to ensure identical context limits across all models and prompt strategies.", "localizador": "PDF p. 3, seção IV-A"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Few-shot (Example-Driven Security)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["exemplos", "contexto", "instrucao"],
+      "comparador": "Zero-shot (Baseline)",
+      "modelo": "Qwen 2.5 Coder 7B (local via Ollama, pesos quantizados em 4 bits)",
+      "benchmark": "LLMSecEval — 81 prompts em Python",
+      "metrica": "Bandit@0 (%)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 63.0, "intervencao": 54.3},
+      "denominador": "81 prompts por combinação modelo × estratégia, conforme a legenda da Tabela II (5 models × 3 strategies × 81 prompts = 1,215 scenarios); o texto não declara o denominador de cada célula separadamente",
+      "condicoes": "Bandit@0 é medido nos arquivos gerados inicialmente, antes do laço de reparo; temperature = 0, max tokens = 2048, num_ctx = 8192; Bandit v1.8.3. Few-shot: cinco exemplos de código seguro (CWE-78, CWE-89, CWE-502, CWE-434, CWE-22) e system prompt «secure code generation assistant»; Zero-shot: system prompt «code generation assistant», sem orientação de segurança nem exemplos. O contraste é de pacote (exemplos + diretiva de segurança), não isola os exemplos. Número de execuções por cenário nao_informado; sem medida de variabilidade. Há agregado impresso entre os cinco modelos na Tabela IV (Avg B@0: Zero-shot 47,9; Few-shot 46,6), não usado porque a seleção seguiu a ordem da Tabela II e o agregado cobre modelos heterogêneos; o sentido do efeito varia por modelo (ver heterogeneidade). conferido_pdf = sim: valores, cabeçalhos e legenda conferidos visualmente na Tabela II, PDF p. 4.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e a conclusão destacam duas técnicas (Few-shot e CoT) sem que uma prevaleça e a seção III-D define quatro métricas. A primeira tabela com o contraste de prompting é a Tabela II (a Tabela I é descritiva); dentro dela, a primeira métrica pertinente é Bandit@0 (%), o primeiro modelo é Qwen 2.5 Coder 7B, a linha de base de prompting é Zero-shot e a primeira técnica listada é Few-shot.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 4 (impressa 4), colunas Model | Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter., bloco Qwen 2.5 Coder 7B; definição da métrica em PDF p. 3, seção III-D",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Zero-shot 63.0 80.2 19.8 2.31", "localizador": "Tabela II, PDF p. 4, linha Qwen 2.5 Coder 7B / Zero-shot, colunas Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter."},
+        {"trecho": "Few-shot 54.3 82.7 17.3 2.38", "localizador": "Tabela II, PDF p. 4, linha Qwen 2.5 Coder 7B / Few-shot, colunas Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter."},
+        {"trecho": "Bandit@0: Percentage of initially generated files containing at least one Bandit finding (initial vulnerability rate).", "localizador": "PDF p. 3, seção III-D"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Thought (Reasoning-Driven Security)",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["raciocinio", "instrucao"],
+      "comparador": "Zero-shot (Baseline)",
+      "modelo": "Qwen 2.5 Coder 7B (local via Ollama, pesos quantizados em 4 bits)",
+      "benchmark": "LLMSecEval — 81 prompts em Python",
+      "metrica": "Bandit@0 (%)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 63.0, "intervencao": 55.6},
+      "denominador": "81 prompts por combinação modelo × estratégia, conforme a legenda da Tabela II; o texto não declara o denominador de cada célula separadamente",
+      "condicoes": "Bandit@0 medido nos arquivos gerados inicialmente, antes do laço de reparo; temperature = 0, max tokens = 2048, num_ctx = 8192; Bandit v1.8.3. CoT: quatro passos de raciocínio de segurança antes do código e system prompt «security-aware code generation assistant»; Zero-shot: system prompt genérico sem orientação de segurança. Contraste de pacote (raciocínio + diretiva de segurança). Número de execuções nao_informado; sem medida de variabilidade. Agregado da Tabela IV (Avg B@0: Zero-shot 47,9; Chain-of-Thought 42,0) não usado pelo mesmo motivo da extração anterior. Na mesma tabela, o CoT tem Resolved menor que o Zero-shot para Qwen (77,8 vs. 80,2), métrica não extraída aqui. conferido_pdf = sim: valores conferidos visualmente na Tabela II, PDF p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da segunda técnica focal de prompting (Chain-of-Thought), ainda não representada, pela mesma regra de ordem: Tabela II, Bandit@0 (%), Qwen 2.5 Coder 7B, comparador Zero-shot. Não há tabela de ablação nem matriz de ingredientes com pares que difiram em um só componente (as estratégias mudam também o system prompt), por isso não há terceira extração.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 4 (impressa 4), colunas Model | Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter., bloco Qwen 2.5 Coder 7B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Zero-shot 63.0 80.2 19.8 2.31", "localizador": "Tabela II, PDF p. 4, linha Qwen 2.5 Coder 7B / Zero-shot, colunas Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter."},
+        {"trecho": "CoT 55.6 77.8 22.2 2.41", "localizador": "Tabela II, PDF p. 4, linha Qwen 2.5 Coder 7B / CoT, colunas Strategy | Bandit@0 (%) | Resolved (%) | Unresolved (%) | Avg Iter."}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara três extensões do CodeEnhancer: modelos abertos locais, comparação sistemática de Zero-shot, Few-shot e CoT, e juiz externo desacoplado.",
+      "localizador": "PDF p. 1, resumo e seção I"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve o pipeline, os system prompts, as CWEs dos exemplos few-shot, os passos do CoT e os parâmetros de execução, mas não apresenta os templates completos nem o conteúdo dos exemplos, não detalha a amostragem estratificada usada para remover duplicatas e não informa o número de execuções por cenário.",
+      "localizador": "PDF p. 2-3, seções III-A a III-C e IV-A a IV-C"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linha de base Zero-shot executada nas mesmas condições (modelos, prompts, parâmetros e laço), mas cada estratégia altera também o system prompt, criando variável composta reconhecida pelos autores; a comparação Self-Judge vs. juiz externo usa amostras diferentes.",
+      "localizador": "PDF p. 3, seção III-C; PDF p. 6, seção IV-F; PDF p. 2, seção II-D"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As quatro métricas são definidas, o denominador de 81 prompts por combinação é dado pela legenda da Tabela II e os valores coincidem entre as Tabelas II, III e IV (conferência própria); porém a Resolution Rate depende de um juiz LLM sem validação relatada, não há medida de variabilidade nem teste estatístico e os tamanhos dos subconjuntos vistos/não vistos não são informados.",
+      "localizador": "PDF p. 3, seção III-D; Tabelas II-IV, PDF p. 4; Figura 3b, PDF p. 5"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças discute a ablação dos componentes do prompt, a confiabilidade do juiz LLM, a cobertura do SAST, a quantização e o escopo do conjunto de dados.",
+      "localizador": "PDF p. 6-7, seção IV-F"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa temperatura, limite de tokens, janela de contexto, versões do Bandit e do Pylint e o endpoint local, mas a versão do Ollama é «v0.x», as tags/quantização exatas e o snapshot do GPT-4o-mini não são informados, e não há pacote de replicação nem prompts completos.",
+      "localizador": "PDF p. 3, seção IV-A; PDF p. 7, seção IV-F; Referências, PDF p. 7-8"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Trata o vazamento entre exemplos few-shot e prompts de teste por meio da desagregação em CWEs vistas e não vistas, mas não discute contaminação do LLMSecEval no pré-treinamento dos modelos.",
+      "localizador": "PDF p. 4-5, seção IV-E-3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "motivo": "Texto extraído lido integralmente.",
+    "paginas_abertas_visualmente": [1, 2, 3, 4, 5, 6, 7],
+    "observacao": "Tabelas II, III e IV (PDF p. 4) conferidas visualmente; Figuras 1, 2, 3, 4 e 5 inspecionadas, mas rótulos de eixos e legendas não são legíveis nas imagens, por isso nenhum valor foi lido delas. PDF p. 8 (continuação das referências) não aberta visualmente."
+  }
+}

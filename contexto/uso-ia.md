@@ -395,3 +395,6 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T09 — cenários e exame (17/11/2026, D111)
 - Executor: Claude Code (Claude Opus 5.5). Ajuste dos cenários para a v2 a pedido do autor, congelamento com SHA-256, exame da tabela de apoio v1 com conferência dos estudos nas fichas e proposta de julgamento; formulário publicado (`scripts/gerar_formulario_exame.py`).
 - Julgamento final pendente do autor; as propostas não são revisão humana.
+
+## T07 — extração de S1610 e S1617 (17/11/2026, D113)
+- Executores: subagentes Claude Opus 5.5 (Read e Write), ex-v2.2 congelada, imagens a 110 dpi; validador sem erros; fichas finais idênticas às saídas brutas; manifesto acrescido. Claude Code reimportou as fichas, recalculou as contagens e atualizou o texto e as afirmações A103 e A104 (rascunho).
