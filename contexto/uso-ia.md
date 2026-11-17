@@ -425,3 +425,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - D121: Claude Code registrou a confirmação das correções de unidade, a manutenção de S314 e S373, a decisão de tornar o repositório público (texto da metodologia) e descartou a seção local do Codex, a pedido do autor.
 - D122: Claude Code (Claude Opus 5.5) leu os textos completos de seis revisões e de Sallou et al., reescreveu os trabalhos relacionados, a comparação na discussão e o trecho da rubrica, e acrescentou as afirmações A119–A124 (rascunho).
 - D123: Claude Code leu Dybå e Dingsøyr (PDF obtido pelo autor) e registrou na metodologia a correspondência dos critérios com a rubrica (A125, rascunho).
+- D124: o autor conferiu S1935 e as 120 afirmações; Claude Code (Claude Opus 5.5) aplicou as correções, registrou os julgamentos e revisou visualmente as 31 páginas do PDF.

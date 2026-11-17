@@ -14,3 +14,12 @@ A conferência é do autor; nada aqui é revisão humana até que os julgamentos
 - Depois da conferência: as afirmações sustentadas passam a `sustentada` com revisor e data.
   O verificador exige, para isso, que as extrações citadas tenham status `conferido_original`,
   o que depende também dos metadados conferidos; essa dependência será tratada ao importar.
+
+## Resultado (D124)
+
+- O autor julgou as 120 afirmações em 17/11/2026: 89 sustentadas, 30 a corrigir e 1 não verificável (A84).
+  Julgamentos em `julgamentos-autor.json`.
+- As correções de 29 afirmações e a reformulação de A84 foram aplicadas no texto e em `dados/afirmacoes.csv`.
+  A nota de A106 repete a de A77 e não foi aplicada; aguarda o autor.
+- O estado das afirmações continua `rascunho`, com revisor e data nas sustentadas, porque `sustentada` exige
+  extrações `conferido_original`, que dependem de metadados conferidos.

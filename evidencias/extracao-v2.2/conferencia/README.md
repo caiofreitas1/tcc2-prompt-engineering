@@ -65,3 +65,5 @@ seção «Resultado» abaixo (D116, D117).
 - S1935, que entrou depois (substitui S1721), não foi conferido.
 - Correções em 5 estudos (S6, S77, S650, S1743, S2090), 15 de 564 blocos; aplicadas às fichas
   finais e registradas em `../correcoes-manuais.jsonl` (decisão D116).
+- S1935 conferido no formulário (D124), com correções em 3 blocos; a amostra está completa (67 de 67), com 18 de
+  571 blocos corrigidos.

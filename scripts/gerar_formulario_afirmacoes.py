@@ -29,7 +29,7 @@ LOCAL = {'hou2024slr': 'fontes/artigos/relacionados/2308.10620.pdf (arXiv v6)',
 
 def limpar(t):
     for a, b in [(r'\%', '%'), (r'\#', '#'), (r'\&', '&'), ('~', ' '), ('$\\rightarrow$', '→'), ('$\\to$', '→'),
-                 ('\\kappa', 'κ'), ('\\mu', 'μ'), ('\\times', '×'), ('\\chi', 'χ'), ('\\Delta', 'Δ'), ('\\to', '→'), ('``', '“'), ("''", '”'), ('--', '–')]:
+                 ('\\kappa', 'κ'), ('\\mu', 'μ'), ('\\times', '×'), ('\\chi', 'χ'), ('\\Delta', 'Δ'), ('\\to', '→'), ('\\pm', '±'), ('``', '“'), ("''", '”'), ('--', '–')]:
         t = t.replace(a, b)
     t = re.sub(r'\\(?:textit|textbf|emph|texttt|text)\{([^{}]*)\}', r'\1', t)
     t = re.sub(r'\\(?:ref|label|cite)\{[^{}]*\}', '[ref]', t)
