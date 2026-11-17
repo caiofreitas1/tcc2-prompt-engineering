@@ -24,7 +24,7 @@ def main():
               f'Os {len(est)} estudos do corpus definitivo, pelo identificador usado no texto. Título e identificador vêm '
               r'dos registros das bases; ano e autoria não foram conferidos para esta lista.'
               + (r' Estudos marcados com $\dagger$ ainda não têm ficha de extração.' if any(r['id'] not in fichas for r in est) else ''),
-              r'{\scriptsize', r'\begin{description}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}']
+              r'{\scriptsize\raggedright', r'\begin{description}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}']
     for r in est:
         marca = '' if r['id'] in fichas else r'$^\dagger$'
         linhas.append(rf'\item[{r["id"]}{marca}] {tex(r["titulo"])}. \texttt{{{tex(r["identificador"])}}}.')
