@@ -418,3 +418,6 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 ## T09 — julgamento do exame (17/11/2026, D118)
 - O julgamento é do autor (formulário). Claude Code (Claude Opus 5.5) exportou os julgamentos, comparou-os com a proposta e redigiu a seção do exame, a discussão e a conclusão a partir deles.
+
+## T09 — tabela de apoio v2 e proposta para as hipóteses (17/11/2026, D119)
+- Executor: Claude Code (Claude Opus 5.5), a partir das revisões decididas pelo autor no exame. As linhas da v2 reorganizam a v1 e o exame, com métricas conferidas em `dados/extracoes.jsonl`; os IDs citados foram verificados por script. A proposta para as hipóteses é de IA e aguarda o julgamento do autor.
