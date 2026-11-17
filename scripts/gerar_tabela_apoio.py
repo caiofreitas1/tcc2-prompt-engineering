@@ -21,7 +21,9 @@ def esc(t):
 
 
 def tabela(linhas, legenda, rotulo):
-    out = [r'\begin{table*}[!t]', r'\caption{' + legenda + r'}\label{' + rotulo + '}', r'\centering', r'\scriptsize',
+    # [!tp]: a parte pode ocupar uma página só de tabelas; entrelinha reduzida para caber na altura do texto.
+    out = [r'\begin{table*}[!tp]', r'\caption{' + legenda + r'}\label{' + rotulo + '}', r'\centering',
+           r'\fontsize{6.6}{7.4}\selectfont', r'\renewcommand{\arraystretch}{0.95}',
            r'\setlength{\tabcolsep}{2.5pt}', r'\renewcommand*{\rr}{\raggedright\hspace{0pt}}',
            r'\begin{tabular}{p{0.55cm}p{2.0cm}p{2.4cm}p{1.9cm}p{5.6cm}p{1.6cm}p{3.1cm}}', r'\hline',
            r'\rr\textbf{ID} & \rr\textbf{Agrupamento} & \rr\textbf{Condição e verificação} & \rr\textbf{Resultado medido} & '
