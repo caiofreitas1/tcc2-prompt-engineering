@@ -377,3 +377,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — D107: adjudicação, confirmações e contrafactuais dos comparadores (17/11/2026)
 - Executores: Claude Code (Claude Opus 5.5), registro da adjudicação do autor, recálculo dos fluxos, verificação dos 82 trechos do reexame e reavaliação dos contrafactuais de S6, S216, S724, S1415 e S1977 com conferência nas imagens das páginas (`evidencias/extracao-v2.2/contrafactuais-comparadores-2026-11-17.md`).
 - Revisão humana: adjudicação de inclusão e confirmação das correções de S62, S479 e S552 pelo autor; a reavaliação dos contrafactuais é proposta, sem alteração das fichas.
+
+## T07 — D108: contrafactual dos comparadores (17/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), aplicação em S6, S216, S724, S1415 e S1977 e das propostas validadas; subagentes Claude Opus 5.5 limitados a Read e Write, revisão dirigida de 431 comparadores em 113 estudos, com conferência das tabelas nas imagens (`evidencias/extracao-v2.2/d108-revisao-comparadores.md`).
+- Regra decidida pelo autor («Sim, aplicar»); aplicação de IA, não conferida pelo autor.

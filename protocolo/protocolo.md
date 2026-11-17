@@ -337,6 +337,16 @@ prompt ex-v2.2 congelado não muda; os rótulos novos entram nas fichas finais c
 manuais registradas, sem alterar as saídas brutas. É alteração posterior aos dados, motivada
 por quatro estudos (S654, S958, S1234, S1711) que o vocabulário anterior não representava.
 
+**Contrafactual dos sistemas comparadores, 17/11/2026 (D108):** um comparador recebe
+`avaliada_isoladamente` = `sim` e `tipo_contrafactual` = `pacote` quando o estudo traz, na
+mesma tabela ou figura, a condição de base sem ele, com o mesmo modelo, benchmark ou amostra e
+métrica, e o comparador tem resultado próprio. É avaliação do pacote, sem isolamento de
+ingredientes. Fica `nao` / `nenhum` a própria condição de base e o comparador sem condição de
+base comparável. A regra do prompt congelado («sistemas comparadores cujos mecanismos não são
+isolados recebem `nao`») passa a ser lida como ausência de `ingrediente` ou
+`contraste_pareado`, não de `pacote`. As fichas finais são ajustadas por revisão dirigida, com
+cada mudança registrada como correção manual; as saídas brutas não mudam.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios
