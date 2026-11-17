@@ -1,0 +1,221 @@
+\subsection{QP3: taxonomia e tabela de apoio}\label{sec:qp3}
+
+Esta subseção reúne a contribuição prática do trabalho: uma taxonomia das técnicas
+extraídas e a versão 1 de uma tabela de apoio à escolha. Ambas se baseiam em 302 fichas
+e 753 comparações extraídas por IA, ainda em conferência humana (Seção~\ref{sec:conferencia}). As contagens vêm de
+\texttt{scripts/sintetizar.py}, e as linhas da tabela, das sínteses parciais.
+
+\subsubsection{Taxonomia}
+
+A taxonomia é multirrótulo: um estudo pode ter mais de uma tarefa, e uma técnica, mais
+de um mecanismo. As fichas registram cinco dimensões:
+\begin{itemize}
+  \item \textit{Tarefa}: geração (222 estudos), depuração (59), tradução (25) e
+    refatoração (19); 21 estudos têm mais de uma tarefa.
+  \item \textit{Mecanismo}: onze rótulos (instrução, contexto, restrições, exemplos,
+    decomposição, raciocínio, feedback, amostragem, multiagente, otimização de prompt e
+    outro). A ficha separa o pacote completo, com todos os mecanismos presentes no prompt
+    da técnica, dos mecanismos que a técnica acrescenta ao prompt base; a
+    Tabela~\ref{tab:mecanismos} conta só os acrescentados.
+  \item \textit{Papel}: focal, quando a técnica é objeto do estudo, ou comparador, quando
+    serve de base ou de alternativa a outra técnica.
+  \item \textit{Tipo de contrafactual}: pacote (técnica inteira contra a condição sem
+    ela), ingrediente (um componente isolado), contraste pareado, cumulativo (rodadas
+    sucessivas, sem condição paralela) ou nenhum. Entre as técnicas focais, há 347 de
+    pacote, 204 de ingrediente, 3 de contraste pareado, 13 cumulativas e 101 sem
+    contrafactual (unidade: técnica). Contando também os componentes das técnicas, 180 dos
+    302 estudos têm ao menos um ingrediente isolado ou contraste pareado.
+  \item \textit{Condições}: fatores de que os resultados dependem, segundo as sínteses.
+\end{itemize}
+
+As sínteses apontam como condições recorrentes:
+\begin{itemize}
+  \item executor, testes ou compilador disponíveis, de que dependem o feedback e a
+    seleção de candidatos;
+  \item número de chamadas e de candidatos, raramente igualado entre as condições;
+  \item porte e família do modelo, com inversões de sinal dentro do mesmo estudo;
+  \item nível da tarefa: função, classe ou repositório;
+  \item informação oráculo, como localização perfeita do defeito ou APIs e soluções
+    tiradas da referência;
+  \item componentes fora do escopo de prompting (ajuste fino, recuperadores treinados,
+    seleção de modelo), registrados em 274 de 302 estudos;
+  \item métrica (similaridade textual, testes ou scanners) e domínio, como hardware e
+    linguagens de domínio, em geral com conjuntos próprios.
+\end{itemize}
+
+\subsubsection{Tabela de apoio à escolha (versão 1)}
+
+A Tabela~\ref{tab:apoio} consolida as linhas das sínteses parciais em 22, uma por
+agrupamento e tarefa: 11 de geração, 6 de depuração, 3 de tradução e 2 de refatoração.
+Nove linhas registram evidência dividida, contrária ou insuficiente; nelas, a orientação
+é não recomendar a técnica como padrão. A força é descritiva, sem nota. Os achados a
+seguir sustentam as linhas centrais.
+
+No feedback de execução em geração, o orçamento importa.
+% AFIRMACAO: A91
+Com o número de tentativas igualado, as variantes multiturno com feedback ficaram em
+2,4\% e 2,8\% de pass 1@3, contra 2,9\% sem iteração (Llama 3.0 8B), e em 6,9\% contra
+7,7\% (Llama 3.1 8B); o SEIDR resolveu em média 11,5 problemas do PSB2, contra 12,2 da
+amostragem sem reparo (S479-C2; S479-C3; S479-C4; S645-C1).
+% AFIRMACAO: A92
+Sem essa igualação, cinco comparações que isolam o laço e têm valores
+absolutos registraram valor maior com ele, e retirar a verificação iterativa do CG-CG
+reduziu o Pass@1 de 80,3\% para 70,1\% (S878-C1; S1047-C3; S1053-C3; S1077-C1;
+S1086-C6; S1977-C2).
+% AFIRMACAO: A93
+Nos sistemas multiagente, o ganho vem acompanhado de mais chamadas: MapCoder e
+LLMDebugger obtiveram 64,02\% e 67,07\% de pass@1, contra 39,63\% do zero-shot, com 8,1
+e 3,4 chamadas em média, contra 1,0 (S1747-C3; S1747-C4).
+
+% AFIRMACAO: A94
+A instrução de raciocínio acrescentada ao prompt de geração teve resultado dividido: em
+12 comparações de 12 estudos, 5 registram melhora e 7, piora (S124-C2; S207-C1; S309-C2;
+S319-C1; S491-C3; S508-C1; S560-C2; S569-C1; S1024-C4; S1121-C1; S1229-C2; S1606-C4).
+% AFIRMACAO: A95
+A autocorreção sem execução, com Qwen2.5-1.5B, ficou abaixo do Simple-prompting: 38,2\%
+(Self-Refine) e 38,8\% (SETS), contra 44,6\% de Accuracy@t2 (S759-C1; S759-C3).
+% AFIRMACAO: A96
+Nas instruções de segurança, 13 variantes sem iteração elevaram as amostras vulneráveis
+do GPT-3.5-turbo de 5,74\% para valores entre 5,99\% e 7,82\% (S604-C1 a S604-C10;
+S604-C13 a S604-C15), enquanto, com GPT-3, as variantes instrucionais reduziram as
+fraquezas contadas pelo Bandit de 78 para valores entre 47 e 72 (S397-C2 a S397-C6).
+Como modelo, métrica e conjunto diferem, os dois estudos não formam contraste direto.
+% AFIRMACAO: A97
+A informação oráculo produz os maiores ganhos, sem representar uso real: as APIs tiradas
+da referência elevaram o Pass@1 do GPT-4o Mini no RepoExec de 16,62\% para 37,75\%
+(S670-C5), e a solução oficial elevou o pass@1 do DeepSeek-Coder-V2 no MuPA de 11,84 para
+38,79, enquanto as pistas autogeradas ficaram entre 11,92 e 13,21 (S2145-C1; S2145-C3;
+S2145-C5; S2145-C6).
+
+% AFIRMACAO: A98
+No reparo, o raciocínio explícito piorou o resultado em 5 de 6 comparações de 5
+estudos; a exceção, o CoT few-shot do ThinkRepair, também muda a seleção de exemplos
+(S275-C2; S354-C2; S1429-C1; S1429-C2; S1598-C2; S412-C2).
+% AFIRMACAO: A99
+Informação diagnóstica estrutural ou volumosa também piorou: com Qwen2.5-Coder:7B no
+QuixBugs, PDG e arquivo de testes reduziram a taxa de reparo de 62,5\% para 55\% e
+57,5\%, e, no Defects4J v1.2, prompts com stack trace localizaram 32 e 41 bugs, contra 47
+sem ele (S1674-C3; S1674-C4; S1678-C1; S1678-C2).
+% AFIRMACAO: A100
+Três comparações de reparo com exemplos fixos não registraram melhora: o
+overall\_score caiu de 0,783 para 0,643, os patches plausíveis caíram de 205 para 200, e
+as falhas corrigidas ficaram em 11 contra 11 (S1598-C1; S2057-C1; S1565-C4).
+
+% AFIRMACAO: A101
+Na tradução, explicar antes de traduzir reduziu o pass@1 de Python para JavaScript com
+GPT-3.5 de 85,5\% para 84,8\%, 84,3\% e 83,2\%, e as abordagens em duas etapas reduziram
+a taxa de sucesso no CodeNet de 28,6\% para valores entre 2,6\% e 11,2\% (S193-C1;
+S193-C2; S193-C3; S836-C2; S836-C3; S836-C5; S836-C6).
+% AFIRMACAO: A102
+Na refatoração, especificar o tipo de refatoração elevou o recall do GPT-4 de 15,6\% para
+52,2\%, e o pacote TerraMod elevou o Pass@1 do Mistral-Large de 4\% para 76\%, ambos a
+partir de linhas de base baixas (S511-C2; S2122-C1).
+
+\begin{table*}[!t]
+\centering
+\caption{Tabela de apoio à escolha de técnicas de prompting (versão 1)}
+\label{tab:apoio}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\newcommand*{\rr}{\raggedright\hspace{0pt}}
+\begin{tabular}{p{0.75cm}p{2.2cm}p{2.3cm}p{5.3cm}p{1.9cm}p{3.5cm}}
+\hline
+\rr\textbf{Tarefa} & \rr\textbf{Agrupamento} & \rr\textbf{Condição de uso} &
+\rr\textbf{O que a evidência indica} & \rr\textbf{Força} & \rr\textbf{Ressalvas}\tabularnewline
+\hline
+\rr Ger. & \rr Feedback de execução em laço & \rr Executor, testes ou compilador; base de chamada única &
+\rr Favorável: valor maior com o laço, em pacote e isolado (S150-C1; S1977-C2); sem ganho com orçamento igualado (S479-C2; S645-C1) &
+\rr aprox. 37 (pac. aprox. 21; ingr. aprox. 15) & \rr Chamadas não igualadas na maioria; outros ingredientes no pacote\tabularnewline
+\rr Ger. & \rr Autocrítica sem execução & \rr O próprio modelo critica e reescreve &
+\rr Dividida: menos fraquezas com RCI (S397-C1; S604-C11); piora com modelo de 1,5B (S759-C1); ganho pequeno com GPT-5 (S1204-C2). Não recomendar como padrão &
+\rr 6 (ingr. 1) & \rr Scanners não demonstram segurança; nulo estatístico em S397\tabularnewline
+\rr Ger. & \rr Multiagente com papéis & \rr Testador, revisor ou avaliador; mais chamadas &
+\rr Favorável ao pacote: ganhos contra base direta (S344-C1; S2131-C1) e em ablações (S448-C3); piora em S492-C1 &
+\rr aprox. 29 (pac. aprox. 29; ablação aprox. 11) & \rr Arranjo isolado contra agente único só em S530; chamadas não igualadas; ajuste fino de agentes\tabularnewline
+\rr Ger. & \rr Amostragem e seleção & \rr Vários candidatos; testes ou modelo de valor &
+\rr Favorável em ablações de seleção (S416-C2; S724-C2; S1034-C2); piora com amostragem simples (S399-C3) &
+\rr aprox. 17 (ingr. aprox. 9) & \rr Seleção pelo oráculo de avaliação (S399); componentes treinados (S1034, S1592)\tabularnewline
+\rr Ger. & \rr Instrução de raciocínio (CoT) & \rr O mesmo modelo gera o raciocínio &
+\rr Dividida: 5 melhoras e 7 pioras em 12 comparações (S319-C1; S1229-C2; S569-C1; S1121-C1). Não recomendar como padrão &
+\rr 12 (ingr. 11; pac. 1) & \rr Nulo não significativo (S560); teto de tokens (S1606); inversões entre modelos\tabularnewline
+\rr Ger. & \rr Planejamento ou decomposição antes do código & \rr Duas ou mais etapas; nível de função &
+\rr Favorável ao pacote (S1-C1) e em ablações (S1133-C3); pioras com etapa gerada por modelo pequeno (S216-C2) e com geração de conhecimento (S2075-C2) &
+\rr aprox. 20 (pac. aprox. 16; ingr. aprox. 10) & \rr Mais chamadas; custo não medido; em classe Java, a geração holística superou a decomposta (S365)\tabularnewline
+\rr Ger. & \rr Contexto recuperado (API, arquivo, repositório) & \rr Repositório ou documentação acessível &
+\rr Favorável ao pacote e em ablações (S357-C1; S852-C2); nulos e inversões (S806-C1; S1951-C1) &
+\rr aprox. 45 (ingr. aprox. 20) & \rr Contexto oráculo é limite superior (S670, S2145); mais tokens; recuperadores treinados\tabularnewline
+\rr Ger. & \rr Exemplos em contexto & \rr Demonstrações fixas, aleatórias ou recuperadas &
+\rr Diferenças pequenas e de sinal variável quando só se acrescentam exemplos (S432-C1; S591-C1); maiores com seleção treinada (S170-C1); piora com amostras defeituosas (S2075-C1) &
+\rr aprox. 24 (ingr. aprox. 14) & \rr Inversões por modelo e temperatura; componentes fora do escopo\tabularnewline
+\rr Ger. & \rr Especificação, testes e formato no prompt & \rr Testes, pré e pós-condições ou regras de formato &
+\rr Favorável em parte: testes no prompt (S1747-C1; S1086-C5) e pré e pós-condições (S1812-C1); piora com Zero-Verbosity (S1606-C3) &
+\rr aprox. 25 (ingr. aprox. 9) & \rr S1812 não significativo e agregado; testes expostos também avaliam (S1613)\tabularnewline
+\rr Ger. & \rr Instruções e restrições de segurança & \rr Prefixos, persona, CWE ou diretrizes &
+\rr Dividida: piora (S604-C1; S1195-C4) e melhora (S397-C2; S1607-C1), em métricas distintas. Não recomendar como medida isolada &
+\rr 7 (pac. e ingr.) & \rr Benchmark e scanner não demonstram segurança; Pass@1 pode cair\tabularnewline
+\rr Ger. & \rr Formulação, língua, compressão e otimização automática & \rr Redação, língua natural, poda ou busca do prompt &
+\rr Insuficiente: reformulações pioram ou não mudam (S2162-C1; S323-C2); língua fora do inglês piora (S495-C1); poda guiada melhora (S1644-C1). Não recomendar sem teste local &
+\rr aprox. 20 (ingr. aprox. 8) & \rr Um modelo ou um estudo por variante; otimização em poucos estudos (S433, S650)\tabularnewline
+\hline
+\rr Dep. & \rr Feedback de execução em laço & \rr Testes, depurador ou contraexemplo &
+\rr Favorável na maioria (S62-C2; S412-C3; S2135-C1); empate com modelo de 1B (S114-C2) &
+\rr 13 (pac. 8; ingr. 4) & \rr Chamadas não igualadas; dicas do gabarito (S65); queda em Codeforces (S2164)\tabularnewline
+\rr Dep. & \rr Informação diagnóstica no prompt & \rr Mensagem, teste falho, relato, traço ou localização &
+\rr Favorável com relato ou mensagem do defeito (S647-C3; S1565-C2); pioras com PDG ou stack trace (S1674-C3; S1678-C1) &
+\rr 20 (ingr. em ao menos 8) & \rr Localização perfeita (oráculo); patches plausíveis sem validação; varia com o tipo de bug\tabularnewline
+\rr Dep. & \rr Contexto e ingredientes recuperados & \rr Repositório, histórico ou base de padrões &
+\rr Favorável ao pacote e em ablações (S275-C1; S435-C3; S2046-C2); injetar todo o contexto de uma vez piora (S821-C2) &
+\rr 15 (ingr. 7) & \rr Orçamentos desiguais; localização perfeita; modelos diferentes entre condições\tabularnewline
+\rr Dep. & \rr Exemplos & \rr Fixos, históricos ou selecionados &
+\rr Dividida: melhora com seleção ou dois exemplos (S25-C2; S53-C1); piora ou empate com exemplos fixos ou de referência (S552-C3; S1598-C1). Não recomendar exemplos fixos &
+\rr 8 (ingr. em ao menos 4) & \rr Inversão entre modelos (S2057); tabelas divergentes (S25)\tabularnewline
+\rr Dep. & \rr Raciocínio explícito & \rr CoT, ReAct ou explicação do erro &
+\rr Contrária: piora em 5 de 6 comparações (S275-C2; S354-C2; S1429-C1; S1598-C2). Não recomendar &
+\rr 5 (ingr. 3; pac. 2) & \rr A melhora (S412-C2) inclui seleção de exemplos; modelo pequeno e domínio quântico\tabularnewline
+\rr Dep. & \rr Decomposição, planejamento e agentes & \rr Vários estágios, ferramentas ou debate &
+\rr Favorável ao pacote (S810-C1; S699-C1) e em ablações (S810-C2; S1304-C3) &
+\rr 12 (pac. 12; ablação em 4) & \rr Chamadas e backbones diferentes; inversões em subtotais (S303, S1304)\tabularnewline
+\hline
+\rr Trad. & \rr Reparo com feedback & \rr Testes ou compilador disponíveis &
+\rr Favorável na maioria (S732-C1; S1132-C1); queda (S2051-C1); nulo no teto (S919-C3) &
+\rr 11 (pac. 9; ingr. 2) & \rr Em S329, os testes no prompt acompanham a maior parte da diferença; custo não medido\tabularnewline
+\rr Trad. & \rr Exemplos & \rr k exemplos; seleção estrutural ou recuperada &
+\rr Dividida: melhora pequena (S674-C1; S1032-C1) ou piora (S964-C1). Não recomendar como padrão &
+\rr 6 (ingr. 3; pac. 3) & \rr BLEU e CodeBLEU; efeito não cresce com k (S409)\tabularnewline
+\rr Trad. & \rr Explicação e duas etapas & \rr Explicar ou representar antes de traduzir &
+\rr Contrária: piora (S193-C1; S836-C2; S836-C3); o one-shot com raciocínio melhora (S836-C1). Não recomendar &
+\rr 2 (ingr. 1; pac. 1) & \rr S836-C1 confunde exemplo e raciocínio; um modelo por estudo\tabularnewline
+\hline
+\rr Ref. & \rr Especificação, conhecimento de domínio e exemplos & \rr Tipo de refatoração, esquema ou changelog; linha de base baixa &
+\rr Favorável: tipo especificado ou conhecimento de API (S511-C2; S2122-C1) e exemplos (S202-C1; S1822-C1) &
+\rr 11 (ingr. 6) & \rr Conjuntos próprios na maioria; efeitos colaterais (CrystalBLEU, runtime)\tabularnewline
+\rr Ref. & \rr Feedback, iteração e raciocínio & \rr Testes, compilação ou detector; CoT &
+\rr Insuficiente: melhoras (S1054-C1; S2183-C1); compilação maior sem o feedback (S1685-C3); CoT com ganho pequeno (S4-C1). Não recomendar &
+\rr 7 (pac. ou ingr. em 6) & \rr Comparadores com vários ingredientes; S739 sem linha de base\tabularnewline
+\hline
+\end{tabular}
+\par\vspace{2pt}
+\parbox{\textwidth}{\scriptsize Ger.: geração; Dep.: depuração; Trad.: tradução; Ref.:
+refatoração. Força: estudos nas sínteses parciais e, entre parênteses, quantos têm
+contrafactual de pacote (pac.) ou de ingrediente (ingr.); «aprox.» indica soma de
+sínteses que podem contar o mesmo estudo. Os IDs são exemplos representativos, com até
+quatro comparações por linha. «Favorável» resume a direção das comparações extraídas,
+sem estimar efeito. Extração por IA, em conferência humana.}
+\end{table*}
+
+\subsubsection{Como ler a tabela e o que ela não faz}
+
+A tabela se lê por linha: dadas a tarefa e a condição de uso, ela resume a direção das
+comparações extraídas, a força com que foram obtidas e as ressalvas que impedem
+generalizar. «Favorável» indica que a maioria das comparações do agrupamento registrou
+melhora na métrica de cada estudo, e não que a técnica funcionará em outro projeto.
+Quando a linha é favorável ao pacote, o ganho não se atribui a um mecanismo único. A
+tabela não ranqueia técnicas: benchmarks, métricas e modelos diferem entre as linhas, e
+nenhuma média foi calculada. Também não mede eficácia em uso real, pois benchmarks não
+demonstram produtividade, segurança nem redução de custo. A proporção de melhoras entre
+as 753 comparações (476 melhoras, 138 pioras, 26 iguais, 94 sem direção e 19
+descritivas) reflete a escolha da comparação principal pelos autores e o viés de
+publicação, e não estima efeito. Agrupamentos com um único estudo, como a otimização de
+prompt e os requisitos de segurança na tradução (S650, S951), ficaram fora da tabela e
+contam como evidência insuficiente. Por fim, a tabela reflete extração por IA ainda em
+conferência humana: contagens e direções podem mudar.

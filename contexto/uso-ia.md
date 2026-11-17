@@ -385,3 +385,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — D109: preparação da conferência humana (17/11/2026)
 - Executor: Claude Code (Claude Opus 5.5). Sorteio da amostra de 61 estudos (`scripts/sortear_conferencia.py`, semente 20261117) e geração e publicação do formulário (`scripts/gerar_formulario_conferencia.py`, artifact privado com a coleção `extracao_v22_autor`), em `evidencias/extracao-v2.2/conferencia/`.
 - A verificação aproximada das citações (`scripts/verificar_citacoes_aprox.py`) só orienta a leitura; a conferência é do autor no PDF e ainda não começou.
+
+## T08–T11 — síntese e redação da versão da banca (17/11/2026, D110)
+- Executores: Claude Code (Claude Opus 5.5), com importação das fichas (`scripts/importar_fichas.py`), contagens por script (`scripts/sintetizar.py`, `evidencias/sinteses/`), integração e revisão do texto; 13 subagentes Claude Opus 5.5 (Read e Write) redigiram sínteses parciais sobre extratos das fichas, e 5 subagentes redigiram as subseções de resultados em LaTeX a partir delas.
+- Checagem automática: todos os IDs de comparação e de estudo citados existem; as frases não foram conferidas no original. Correções de Claude Code nas subseções: contagens de contrafactual por script, retirada de referências às partes internas da síntese e da tabela de mecanismos duplicada.
+- As 97 afirmações novas (A6–A102) entram em `dados/afirmacoes.csv` como rascunho, sem revisor. Nada aqui é revisão humana.
+- Cenários v1 (`evidencias/sinteses/cenarios-v1.md`) e tabela de apoio v1 (`evidencias/sinteses/tabela-apoio-v1.csv`) aguardam o autor.
