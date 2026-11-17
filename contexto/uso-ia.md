@@ -368,3 +368,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — extração em escala, lote 16 (16/11/2026)
 - Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 4 extrações (S2059–S2085), 3 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-16.md`, com a situação do corpus ao fim da extração).
 - Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — D106: contrato, fichas retidas e reexame de elegibilidade (16/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), ampliação do contrato, validadores e testes, 7 correções manuais registradas em 5 fichas e situação da extração (`evidencias/extracao-v2.2/situacao-2026-11-16.md`); subagentes Claude Opus 5.5 limitados a Read e Write, reexame de elegibilidade de 8 estudos nos textos primários (`evidencias/extracao-v2.2/reexame-elegibilidade-2026-11-16.md`).
+- Encaminhamentos decididos pelo autor (D106), depois de parecer do Codex trazido por ele. O reexame é recomendação de IA; a inclusão fica para adjudicação do autor.
+- Revisão humana: o autor confirmou as correções de S724, S810, S1415 e S1977 como consistência de registros, sem conferência integral das fichas.

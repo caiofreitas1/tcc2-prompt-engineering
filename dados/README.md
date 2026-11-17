@@ -67,7 +67,10 @@ Só a decisão humana `incluir` no texto completo coloca um estudo no corpus def
 Campos obrigatórios: id, estudo_id, tarefa, tecnica, modelo, benchmark, metrica,
 unidade, comparador, resultado, localizador, fonte, status, revisao_humana.
 `resultado`: objeto com baseline e intervencao numéricos ou null se não reportados;
-`unidade`: percentual, proporcao, contagem, tempo ou qualitativo; não misturar escalas.
+`unidade`: percentual, proporcao, contagem, tempo, energia, temperatura, qualitativo ou
+nao_informado (D106); não misturar escalas. Em energia e temperatura, e quando a métrica
+não tem unidade definida, a unidade literal (ex.: mWh, °C) ou o nome original da métrica
+ficam em `metrica` ou `condicoes`.
 `status`: nao_conferido, conferido_original ou fonte_indisponivel.
 `revisao_humana`: pendente ou confirmada, com revisor e data_revisao quando confirmada.
 `fonte`: caminho relativo ao texto primário, igual ao registro do estudo.
@@ -105,8 +108,11 @@ Com ex-v2.1 (D101), a ficha acrescenta `componentes_fora_escopo`
 (`{nome_original, natureza, localizador}`, natureza `ajuste_fino`, `embeddings_aprendidos`,
 `decodificacao`, `orcamento`, `selecao_modelo` ou `outro`) e `observacoes`;
 `avaliada_isoladamente` aceita só `sim` ou `nao`; `qualidade` é uma lista de sete objetos.
-As extrações acrescentam `sentido` (`maior_melhor` ou `menor_melhor`), `denominador` e
-`conferido_pdf` (`sim` ou `nao`).
+As extrações acrescentam `sentido` (`maior_melhor` ou `menor_melhor`; com D106, também
+`nao_informado` quando o artigo não diz se valor maior ou menor é melhor), `denominador` e
+`conferido_pdf` (`sim` ou `nao`). Resultado com `sentido` = `nao_informado` não recebe
+classificação automática de melhora ou piora (`variacao` em
+`scripts/validar_ficha_extracao.py` devolve vazio).
 
 Com ex-v2.2 (D102):
 - **Técnicas:** acrescentam `mecanismos_acrescentados`, contido em `mecanismos`, que

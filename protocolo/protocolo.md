@@ -329,6 +329,14 @@ crescente; cada estudo tem um único extrator. A calibração nos 10 estudos do 
 reproduziu 18 de 21 comparações de referência. O modelo extrator é relatado por estudo, e
 a amostra de conferência inclui estudos dos dois extratores.
 
+**Vocabulário de unidade e sentido, 16/11/2026 (D106):** `unidade` passa a aceitar
+`energia`, `temperatura` e `nao_informado`, e `sentido` passa a aceitar `nao_informado`, com
+a unidade literal ou o nome original da métrica preservados em `metrica` ou `condicoes`.
+Resultado sem sentido definido não recebe classificação automática de melhora ou piora. O
+prompt ex-v2.2 congelado não muda; os rótulos novos entram nas fichas finais como correções
+manuais registradas, sem alterar as saídas brutas. É alteração posterior aos dados, motivada
+por quatro estudos (S654, S958, S1234, S1711) que o vocabulário anterior não representava.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios

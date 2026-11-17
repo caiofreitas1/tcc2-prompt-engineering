@@ -15,13 +15,7 @@ S2075, S2085 (do antigo lote C4 do Codex, D105).
 - Citações: 55 de 117 não achadas pelo verificador aproximado.
 - As fichas não foram conferidas pelo autor.
 
-## Situação do corpus ao fim da extração
+## Situação do corpus
 
-306 estudos no corpus definitivo: 10 fichas do piloto e 289 fichas finais em
-`evidencias/extracao-v2.2/`. Sete sem ficha final, todos para decisão do autor:
-- S1610: decisão de I4 pendente, não extraído.
-- S667: gravação interrompida por classificador de segurança (jailbreak para código
-  malicioso), sem saída bruta.
-- S654, S958, S1711: `unidade` fora do vocabulário (métrica não definida; mWh; °C).
-- S1234: `sentido` não informado pelo artigo (número de linhas).
-- S2085: rótulo da técnica focal (acima).
+Atualizada depois de D106 em `situacao-2026-11-16.md` (S2085 virou ficha final por correção
+registrada; restam S1610 e S667 sem ficha).

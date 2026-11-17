@@ -19,8 +19,11 @@ NATUREZA = {'ajuste_fino', 'embeddings_aprendidos', 'decodificacao', 'orcamento'
             'selecao_modelo', 'outro'}
 RISCOS = {'correcao_funcional', 'seguranca', 'alucinacao', 'contaminacao',
           'nao_determinismo', 'custo', 'manutenibilidade', 'outro'}
-SENTIDO = {'maior_melhor', 'menor_melhor'}
-UNIDADE = {'percentual', 'proporcao', 'contagem', 'tempo', 'qualitativo'}
+# D106: `nao_informado` quando o artigo não define a métrica ou o sentido; `energia` e
+# `temperatura` para grandezas físicas, com a unidade literal mantida em `metrica`.
+SENTIDO = {'maior_melhor', 'menor_melhor', 'nao_informado'}
+UNIDADE = {'percentual', 'proporcao', 'contagem', 'tempo', 'energia', 'temperatura',
+           'qualitativo', 'nao_informado'}
 SELECAO = {'principal_declarado', 'desempate_ordem', 'cobertura'}
 DERIVACAO = {'direta', 'contraste_pareado'}
 CRITERIOS = ['objetivo', 'procedimento', 'comparador', 'metricas', 'ameacas',
@@ -105,6 +108,24 @@ def validar(d):
     for x in q:
         enum(f'qualidade.{x.get("criterio")}', x.get('julgamento'), JULGAMENTOS)
     return erros
+
+
+def variacao(e):
+    """Classifica uma comparação como melhora, piora ou igual (D106).
+
+    Devolve None quando falta valor numérico ou quando o sentido não é maior_melhor nem
+    menor_melhor: resultado com sentido `nao_informado` não recebe classificação
+    automática de melhora ou piora.
+    """
+    res = e.get('resultado') or {}
+    b, i = res.get('baseline'), res.get('intervencao')
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in (b, i)):
+        return None
+    sinal = {'maior_melhor': 1, 'menor_melhor': -1}.get(e.get('sentido'))
+    if sinal is None:
+        return None
+    d = (i - b) * sinal
+    return 'melhora' if d > 0 else 'piora' if d < 0 else 'igual'
 
 
 def main(caminhos):

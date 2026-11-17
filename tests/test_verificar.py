@@ -56,6 +56,13 @@ class ScientificDataChecks(unittest.TestCase):
             writer=csv.DictWriter(f,fieldnames=fields);writer.writeheader();writer.writerows(rows)
         self.extraction(status='conferido_original')
         self.assertEqual([],module.verify(self.root)[0])
+    def test_units_added_by_d106_are_accepted(self):
+        for unit in ('energia','temperatura','nao_informado'):
+            self.extraction(unidade=unit)
+            self.assertFalse(any('unidade inválida' in x for x in module.verify(self.root)[0]),unit)
+    def test_free_text_unit_is_rejected(self):
+        self.extraction(unidade='mWh')
+        self.assertTrue(any('unidade inválida' in x for x in module.verify(self.root)[0]))
     def test_invalid_percent_is_rejected(self):
         self.extraction(resultado={'baseline':0,'intervencao':120})
         self.assertTrue(any('percentual fora' in x for x in module.verify(self.root)[0]))
