@@ -20,6 +20,7 @@ A conferência é do autor; nada aqui é revisão humana até que os julgamentos
 - O autor julgou as 120 afirmações em 17/11/2026: 89 sustentadas, 30 a corrigir e 1 não verificável (A84).
   Julgamentos em `julgamentos-autor.json`.
 - As correções de 29 afirmações e a reformulação de A84 foram aplicadas no texto e em `dados/afirmacoes.csv`.
-  A nota de A106 repete a de A77 e não foi aplicada; aguarda o autor.
+  Em A106, a nota gravada no formulário repetia a de A77; o autor informou a nota correta em conversa (terceiro
+  denominador de S1880, 206), já aplicada, e ela está em `julgamentos-autor.json`.
 - O estado das afirmações continua `rascunho`, com revisor e data nas sustentadas, porque `sustentada` exige
   extrações `conferido_original`, que dependem de metadados conferidos.
