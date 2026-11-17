@@ -21,3 +21,11 @@ S1926, S1929, S1931 e S1935.
   Qwen2.5-Coder-7B-Instruct), que o texto extraído não traz.
 - As fichas não foram conferidas pelo autor. Seis estudos entram no complemento da amostra
   de conferência (S1682, S1721, S1735, S1869, S1875 e S1926).
+
+## S667 (Codex, 17/11/2026)
+
+Extraído pelo Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), depois que a gravação pelo
+Opus foi interrompida por filtro de segurança. Uma comparação: CodeJailbreaker contra EMP
+no RMCBench (texto para código, 182 prompts) com DeepSeek-V3, taxa de sucesso do ataque de
+61,54% para 93,41%. «Melhora» aqui é no sentido da métrica do estudo (sucesso do ataque),
+relevante para a QP2. Ficha não conferida pelo autor.
