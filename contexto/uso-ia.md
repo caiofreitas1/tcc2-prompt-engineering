@@ -391,3 +391,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Checagem automática: todos os IDs de comparação e de estudo citados existem; as frases não foram conferidas no original. Correções de Claude Code nas subseções: contagens de contrafactual por script, retirada de referências às partes internas da síntese e da tabela de mecanismos duplicada.
 - As 97 afirmações novas (A6–A102) entram em `dados/afirmacoes.csv` como rascunho, sem revisor. Nada aqui é revisão humana.
 - Cenários v1 (`evidencias/sinteses/cenarios-v1.md`) e tabela de apoio v1 (`evidencias/sinteses/tabela-apoio-v1.csv`) aguardam o autor.
+
+## T09 — cenários e exame (17/11/2026, D111)
+- Executor: Claude Code (Claude Opus 5.5). Ajuste dos cenários para a v2 a pedido do autor, congelamento com SHA-256, exame da tabela de apoio v1 com conferência dos estudos nas fichas e proposta de julgamento; formulário publicado (`scripts/gerar_formulario_exame.py`).
+- Julgamento final pendente do autor; as propostas não são revisão humana.

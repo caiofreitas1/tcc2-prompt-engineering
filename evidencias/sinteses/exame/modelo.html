@@ -1,0 +1,103 @@
+<title>Exame dos Cenários</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: um cenário por vez em coluna de leitura; grade dos oito cenários fixa no topo; barra de salvar no rodapé. */
+:root{--bg:#f5f6f8;--surface:#fff;--ink:#1c2230;--muted:#5b6475;--line:#d8dce4;--accent:#2f5d9e;--accent-ink:#fff;--ok:#2f7a55;--ok-soft:#e1f0e8;--mid:#9a6a12;--mid-soft:#f7ecd6;--bad:#a23b2e;--bad-soft:#f6e1dd;
+--f-ui:system-ui,-apple-system,"Segoe UI",sans-serif;--f-mono:ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#13161c;--surface:#1b1f27;--ink:#e5e8ee;--muted:#9aa3b2;--line:#2e3440;--accent:#7aa5e0;--accent-ink:#0f131a;--ok:#6cc59a;--ok-soft:#1d3a2c;--mid:#e0b25a;--mid-soft:#3a2f1a;--bad:#ec8a7a;--bad-soft:#3d2420;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#13161c;--surface:#1b1f27;--ink:#e5e8ee;--muted:#9aa3b2;--line:#2e3440;--accent:#7aa5e0;--accent-ink:#0f131a;--ok:#6cc59a;--ok-soft:#1d3a2c;--mid:#e0b25a;--mid-soft:#3a2f1a;--bad:#ec8a7a;--bad-soft:#3d2420;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.55;margin:0;padding-block:0 140px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:50rem;margin:0 auto;min-width:0}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:12px 0 10px;border-bottom:1px solid var(--line);z-index:5}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.meta{color:var(--muted);font-size:13px}.status{margin-left:auto;font-size:12px;color:var(--muted)}.status.err{color:var(--bad)}
+.grade{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer;min-height:40px}
+button:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+.grade button{font-family:var(--f-mono);font-size:13px;min-height:34px;padding:4px 10px}
+.grade button.feito{background:var(--ok-soft);border-color:var(--ok)}.grade button.atual{outline:2px solid var(--ink)}
+h1{font-size:1.2rem;line-height:1.3;margin:16px 0 6px;text-wrap:balance}
+details.guia,section.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px;min-width:0}
+details.guia summary{cursor:pointer;font-weight:600}
+.exame p{margin:8px 0}.exame ul,.exame ol{margin:4px 0;padding-left:1.3em}.exame li{margin:3px 0}
+code{font-family:var(--f-mono);font-size:.9em}
+.tab{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.crit{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.crit .nome{font-weight:600}
+.prop{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.juizo{display:flex;gap:6px;flex-wrap:wrap}
+.juizo button[aria-pressed="true"].atende{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+.juizo button[aria-pressed="true"].parcial{background:var(--mid);color:var(--surface);border-color:var(--mid)}
+.juizo button[aria-pressed="true"].nao_atende{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+label.campo{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+textarea{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:6px 8px;width:100%;min-height:38px;margin-top:4px;resize:vertical}
+.fim{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.fim .wrap{display:flex;gap:10px;align-items:center}
+.salvar{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700;flex:1}
+</style>
+<header><div class="wrap">
+  <div class="row"><b>Exame da tabela de apoio v1</b><span class="meta" id="prog"></span><span class="status" id="status">Conectando…</span></div>
+  <div class="grade" id="grade"></div>
+</div></header>
+<main class="wrap">
+  <details class="guia"><summary>Como julgar (abra antes de começar)</summary><div class="exame" id="intro"></div>
+    <p>Em cada cenário, leia o exame e marque o seu julgamento nos três critérios. A proposta de Claude Code aparece acima de cada critério e já preenche a justificativa, que você pode reescrever. O julgamento só conta quando você marca um botão e salva. No último cartão, decida sobre as revisões sugeridas para a tabela.</p></details>
+  <div id="corpo"></div>
+</main>
+<div class="fim"><div class="wrap">
+  <button id="ant" type="button" aria-label="Cenário anterior">←</button>
+  <button class="salvar" id="salvar" type="button">Salvar julgamento</button>
+  <button id="prox" type="button" aria-label="Próximo cenário">→</button>
+</div></div>
+<script>
+const D = /*DADOS*/{};
+const COL='exame_cenarios_autor';
+const CRIT=[['C','Clareza','A tabela leva a uma orientação sem interpretação extra'],['J','Justificativa nas fontes','A orientação aponta estudos e comparações do corpus'],['O','Orientação concreta','Diz o que fazer, em que condição e com que limite, inclusive não recomendar']];
+const ITENS=[...D.cenarios.map(c=>c.id),'GERAL'];
+const st={i:0,dec:{},db:null,cur:{}};
+const $=id=>document.getElementById(id);
+const el=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;};
+function setStatus(t,err){const s=$('status');s.textContent=t;s.classList.toggle('err',!!err);}
+function rasc(id){try{return JSON.parse(localStorage.getItem('exame-'+id)||'null');}catch(e){return null;}}
+function gravar(){try{localStorage.setItem('exame-'+ITENS[st.i],JSON.stringify(st.cur));}catch(e){}}
+function apagar(id){try{localStorage.removeItem('exame-'+id);}catch(e){}}
+function area(rotulo,id,valor,on){const l=el('label','campo',rotulo);l.htmlFor=id;const t=el('textarea');t.id=id;t.value=valor||'';t.oninput=()=>{on(t.value);gravar();};l.appendChild(t);return l;}
+function render(){const id=ITENS[st.i],c=$('corpo');c.textContent='';const salvo=st.dec[id];st.cur=JSON.parse(JSON.stringify(rasc(id)||salvo||{}));
+  if(id==='GERAL'){c.append(el('h1',null,'Síntese e revisões da tabela'));const s=el('section','card');const d=el('div','exame');d.innerHTML=D.sintese;s.appendChild(d);c.appendChild(s);
+    const f=el('section','card');f.appendChild(el('h2',null,'Sua decisão'));const j=el('div','juizo');
+    [['aplicar','Aplicar as revisões na v2'],['parcial','Aplicar em parte'],['nao','Manter a v1']].forEach(([v,t])=>{const b=el('button',v==='nao'?'nao_atende':v==='parcial'?'parcial':'atende',t);b.type='button';b.setAttribute('aria-pressed',st.cur.revisoes===v);b.onclick=()=>{st.cur.revisoes=v;gravar();render();};j.appendChild(b);});
+    f.append(j,area('Observações gerais, revisões a aplicar ou a rejeitar','geral-obs',st.cur.obs,v=>st.cur.obs=v));c.appendChild(f);}
+  else{const cen=D.cenarios[st.i];c.append(el('div','meta','Cenário '+(st.i+1)+' de '+D.cenarios.length+(salvo?' · julgado':'')),el('h1',null,cen.titulo));
+    const s=el('section','card');const d=el('div','exame');d.innerHTML=cen.html;s.appendChild(d);c.appendChild(s);
+    const f=el('section','card');f.appendChild(el('h2',null,'Seu julgamento'));
+    st.cur.crit=st.cur.crit||{};
+    CRIT.forEach(([k,nome,desc])=>{const p=cen.proposta[k]||{};const v=st.cur.crit[k]||(st.cur.crit[k]={just:p.just||''});const w=el('div','crit');
+      w.append(el('div','nome',nome),el('div','meta',desc),el('div','prop','Proposta: '+(p.j||'—').replace('_',' ')+'. '+(p.just||'')));
+      const j=el('div','juizo');[['atende','Atende'],['parcial','Parcial'],['nao_atende','Não atende']].forEach(([val,t])=>{const b=el('button',val,t);b.type='button';b.setAttribute('aria-pressed',v.j===val);b.onclick=()=>{v.j=val;gravar();j.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));};j.appendChild(b);});
+      w.append(j,area('Justificativa','just-'+cen.id+k,v.just,x=>v.just=x),area('Ambiguidades','amb-'+cen.id+k,v.amb,x=>v.amb=x));f.appendChild(w);});
+    f.appendChild(area('A orientação derivada está correta? Ajustes ou discordâncias','orient-'+cen.id,st.cur.orientacao,x=>st.cur.orientacao=x));c.appendChild(f);}
+  $('ant').disabled=st.i===0;$('prox').disabled=st.i===ITENS.length-1;grade();window.scrollTo({top:0});}
+function grade(){const g=$('grade');g.textContent='';ITENS.forEach((id,k)=>{const b=el('button',(st.dec[id]?'feito':'')+(k===st.i?' atual':''),id==='GERAL'?'Síntese':id);b.type='button';b.onclick=()=>{st.i=k;render();};g.appendChild(b);});
+  $('prog').textContent=ITENS.filter(i=>st.dec[i]).length+' de '+ITENS.length+' salvos';}
+$('ant').onclick=()=>{st.i--;render();};$('prox').onclick=()=>{st.i++;render();};
+$('salvar').onclick=async()=>{const id=ITENS[st.i];
+  if(id==='GERAL'){if(!st.cur.revisoes){setStatus('Escolha uma decisão sobre as revisões.',true);return;}}
+  else{const falta=CRIT.filter(([k])=>!(st.cur.crit&&st.cur.crit[k]&&st.cur.crit[k].j)).map(([k,n])=>n);if(falta.length){setStatus('Marque o julgamento em: '+falta.join(', '),true);return;}
+    const sem=CRIT.filter(([k])=>!(st.cur.crit[k].just||'').trim()).map(([k,n])=>n);if(sem.length){setStatus('Escreva a justificativa em: '+sem.join(', '),true);return;}}
+  if(!st.db){setStatus('Conectando ao armazenamento…');await conectar();}
+  if(!st.db){setStatus('Armazenamento indisponível ('+st.motivo+'). O rascunho ficou neste navegador.',true);return;}
+  const doc={item:id,...st.cur,salvo_em:new Date().toISOString()};
+  setStatus('Salvando…');try{await st.db.collection(COL).doc(id).set(doc);st.dec[id]=doc;apagar(id);setStatus('Salvo');if(st.i<ITENS.length-1)st.i++;render();}catch(e){setStatus('Não salvou ('+(e&&e.code||'erro')+'). Tente de novo.',true);}};
+$('intro').innerHTML=D.intro;render();st.motivo='ainda conectando';
+async function conectar(){const c=window.claude;if(!c||typeof c.use!=='function'){st.motivo='página aberta fora do claude.ai';return;}
+  let db=null;try{db=await c.use('db');}catch(e){st.motivo='erro '+(e&&e.code||'desconhecido');return;}
+  if(!db){st.motivo='sem acesso; confira se está na sua conta';return;}
+  await new Promise(res=>{let pronto=false;db.collection(COL).onSnapshot(s=>{st.dec={};s.docs.forEach(d=>{st.dec[d.id]=d.data();});
+    if(!st.db){st.db=db;pronto=true;const k=ITENS.findIndex(i=>!st.dec[i]);st.i=k<0?0:k;render();setStatus('Pronto');res();}else grade();},e=>{st.motivo='erro '+(e&&e.code||'na leitura');if(!pronto)res();});
+    setTimeout(()=>{if(!pronto){st.motivo='o armazenamento não respondeu';res();}},10000);});}
+(async()=>{await conectar();if(!st.db)setStatus('Armazenamento indisponível ('+st.motivo+'). Você pode julgar: o rascunho fica neste navegador.',true);})();
+</script>
