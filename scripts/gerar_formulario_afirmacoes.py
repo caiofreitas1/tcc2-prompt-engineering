@@ -23,7 +23,8 @@ LOCAL = {'hou2024slr': 'fontes/artigos/relacionados/2308.10620.pdf (arXiv v6)',
          'sahoo2024survey': 'fontes/artigos/relacionados/2402.07927v2.pdf',
          'yang2025aprsurvey': 'fontes/artigos/relacionados/2506.23749.pdf (arXiv v3)',
          'masthanali2026energy': 'fontes/artigos/relacionados/2603.00989.pdf (arXiv v4)',
-         'sallou2024breaking': 'fontes/artigos/relacionados/2312.08055.pdf (arXiv v2)'}
+         'sallou2024breaking': 'fontes/artigos/relacionados/2312.08055.pdf (arXiv v2)',
+         'dyba2008agile': 'fontes/artigos/relacionados/dyba2008.pdf (versão da editora, seção 3.5 e Tabela 3)'}
 
 
 def limpar(t):
