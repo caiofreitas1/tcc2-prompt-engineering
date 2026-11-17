@@ -421,3 +421,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 ## T09 — tabela de apoio v2 e proposta para as hipóteses (17/11/2026, D119)
 - Executor: Claude Code (Claude Opus 5.5), a partir das revisões decididas pelo autor no exame. As linhas da v2 reorganizam a v1 e o exame, com métricas conferidas em `dados/extracoes.jsonl`; os IDs citados foram verificados por script. A proposta para as hipóteses é de IA e aguarda o julgamento do autor.
+- D120: o autor confirmou a proposta para as hipóteses; Claude Code registrou o julgamento no texto.

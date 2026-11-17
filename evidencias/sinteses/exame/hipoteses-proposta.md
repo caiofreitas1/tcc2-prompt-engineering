@@ -1,4 +1,4 @@
-# Proposta de julgamento das hipóteses (D119)
+# Julgamento das hipóteses (proposta D119; confirmação do autor D120)
 
 Redigida por Claude Code (Claude Opus 5.5) em 17/11/2026, a partir do julgamento do autor nos critérios e das
 correções à orientação derivada (D118). O autor pediu que cada hipótese seja julgada em separado, admitindo
@@ -16,3 +16,5 @@ confirmação parcial ou resultado inconclusivo. Esta é uma proposta; o julgame
 | H-R2: evidência possivelmente insuficiente para escala de repositório e desempenho | confirmada | Suporte indireto de um estudo em Terraform; escala e desempenho sem evidência. |
 
 Nenhuma hipótese ficou inconclusiva na proposta. Total: 6 confirmadas e 2 confirmadas em parte.
+
+**Julgamento do autor (17/11/2026):** proposta confirmada sem alterações («Sim, confirmar»). H-G1 e H-T1 confirmadas em parte; as demais, confirmadas.
