@@ -7,7 +7,7 @@ A conferência é do autor; nada aqui é revisão humana até que os julgamentos
   coleção `afirmacoes_autor`: `sustentada`, `corrigir` ou `nao_verificavel`, com nota e o
   SHA-256 do texto registrado em `dados/afirmacoes.csv`.
 - Gerado por `python3 scripts/gerar_formulario_afirmacoes.py` a partir de `modelo.html`.
-- Itens: as 113 afirmações marcadas no LaTeX (`% AFIRMACAO: A<n>`), cada uma com o trecho em
+- Itens: as 119 afirmações (113 na primeira versão; A119–A124, sobre outras revisões e a rubrica, entraram em D122, com o PDF local de cada referência) marcadas no LaTeX (`% AFIRMACAO: A<n>`), cada uma com o trecho em
   que aparece (14 aparecem também na discussão), o texto registrado e as comparações que a
   sustentam, com valores, localizador, citações literais e o PDF local do estudo.
 - Fora do formulário: A1–A5, afirmações do piloto que não aparecem mais no texto.

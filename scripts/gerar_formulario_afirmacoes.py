@@ -17,6 +17,13 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 SAIDA = RAIZ / 'evidencias/afirmacoes/conferencia/formulario.html'
 MODELO = RAIZ / 'evidencias/afirmacoes/conferencia/modelo.html'
+# Afirmações sobre outras revisões: a evidência é a referência, com o PDF local lido (D122).
+LOCAL = {'hou2024slr': 'fontes/artigos/relacionados/2308.10620.pdf (arXiv v6)',
+         'fan2023survey': 'fontes/artigos/relacionados/2310.03533v4.pdf',
+         'sahoo2024survey': 'fontes/artigos/relacionados/2402.07927v2.pdf',
+         'yang2025aprsurvey': 'fontes/artigos/relacionados/2506.23749.pdf (arXiv v3)',
+         'masthanali2026energy': 'fontes/artigos/relacionados/2603.00989.pdf (arXiv v4)',
+         'sallou2024breaking': 'fontes/artigos/relacionados/2312.08055.pdf (arXiv v2)'}
 
 
 def limpar(t):
@@ -105,7 +112,8 @@ def main():
                          'revisao_humana': e.get('revisao_humana'), 'conferencia': e.get('conferencia'),
                          'citacoes': [{'trecho': c.get('trecho', ''), 'localizador': c.get('localizador', '')}
                                       for c in (e.get('citacoes') or [])][:6]})
-        itens.append({'id': a['id'], 'texto': a['texto'], 'destino': a['destino'], 'trechos': tr[a['id']],
+        refs = [{'bibkey': k, 'local': LOCAL.get(k, '')} for k in filter(None, (a.get('bibkey') or '').split(';'))]
+        itens.append({'id': a['id'], 'texto': a['texto'], 'destino': a['destino'], 'trechos': tr[a['id']], 'refs': refs,
                       'sha256_texto': hashlib.sha256(a['texto'].encode('utf-8')).hexdigest(), 'evidencias': evid})
     itens.sort(key=lambda x: (x['trechos'][0]['arquivo'], x['trechos'][0]['linha']))
     dados = json.dumps(itens, ensure_ascii=False).replace('</', '<\\/')

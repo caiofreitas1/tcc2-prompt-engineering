@@ -423,3 +423,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executor: Claude Code (Claude Opus 5.5), a partir das revisões decididas pelo autor no exame. As linhas da v2 reorganizam a v1 e o exame, com métricas conferidas em `dados/extracoes.jsonl`; os IDs citados foram verificados por script. A proposta para as hipóteses é de IA e aguarda o julgamento do autor.
 - D120: o autor confirmou a proposta para as hipóteses; Claude Code registrou o julgamento no texto.
 - D121: Claude Code registrou a confirmação das correções de unidade, a manutenção de S314 e S373, a decisão de tornar o repositório público (texto da metodologia) e descartou a seção local do Codex, a pedido do autor.
+- D122: Claude Code (Claude Opus 5.5) leu os textos completos de seis revisões e de Sallou et al., reescreveu os trabalhos relacionados, a comparação na discussão e o trecho da rubrica, e acrescentou as afirmações A119–A124 (rascunho).
