@@ -411,3 +411,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 ## T07 — correções da conferência humana (17/11/2026, D116)
 - Os julgamentos são do autor (formulário, 10 estudos gravados). Claude Code (Claude Opus 5.5) aplicou as 43 alterações de campo nas fichas finais, com registro em `correcoes-manuais.jsonl`, reimportou e recalculou as contagens. A reformatação de S1743 pela gravação mudou só a disposição do JSON.
+- D117: a pedido do autor, Claude Code registrou como corretos, pela declaração do autor, os 56 estudos da amostra sem julgamento gravado, exportou os 10 julgamentos do formulário, propagou a revisão humana para `dados/` (importador) e redigiu a seção sobre o estado da conferência. A declaração é do autor; a redação e as contagens são de IA.

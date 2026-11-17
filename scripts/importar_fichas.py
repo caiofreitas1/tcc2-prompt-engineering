@@ -5,7 +5,10 @@ As fichas finais estão em evidencias/extracao-v2.2/ (corpus) e evidencias/pilot
 regrava as linhas geradas e preserva as extrações anteriores do contrato 1 (E1, E2).
 
 As extrações entram com status nao_conferido e revisao_humana pendente: são extrações por IA,
-ainda não conferidas pelo autor. A conferência (D109, D110) atualiza esses campos depois.
+ainda não conferidas pelo autor. Os estudos da amostra conferidos pelo autor (D116, D117; registro em
+evidencias/extracao-v2.2/conferencia/julgamentos-autor.jsonl) recebem revisao_humana = confirmada, com
+revisor, data e a origem do registro (formulário ou declaração do autor). O status continua
+nao_conferido: conferido_original exige também metadados conferidos, ainda pendentes.
 
 Uso: python3 scripts/importar_fichas.py
 """
@@ -41,6 +44,14 @@ def main():
     antigas = [l for l in (RAIZ / 'dados/extracoes.jsonl').read_text(encoding='utf-8').splitlines()
                if l.strip() and not GERADO.match(json.loads(l).get('id', ''))]
     novas, linhas_q, linhas_f = [], [], []
+    jul = RAIZ / 'evidencias/extracao-v2.2/conferencia/julgamentos-autor.jsonl'
+    conf = {}
+    if jul.exists():
+        for l in jul.read_text(encoding='utf-8').splitlines():
+            j = json.loads(l)
+            conf[j['estudo_id']] = {'revisao_humana': 'confirmada', 'revisor': 'Caio César de Freitas',
+                                    'data_revisao': (j.get('salvo_em') or j.get('data'))[:10],
+                                    'conferencia': j['origem']}
     for sid, origem, d, executor, modelo, sha, data, arq in fichas():
         if estudos.get(sid, {}).get('corpus') != 'definitivo':
             continue
@@ -50,13 +61,14 @@ def main():
         base = {'executor': executor, 'modelo_executor': modelo, 'natureza': 'ia', 'data': data,
                 'prompt_versao': 'ex-v2.2', 'prompt_sha256': sha, 'ficha_origem': arq}
         linhas_f.append(json.dumps({'estudo_id': sid, 'origem': origem, **f, 'texto_fonte': texto,
-                                    'leitura': d.get('leitura'), **base, 'revisao_humana': 'pendente'}, ensure_ascii=False))
+                                    'leitura': d.get('leitura'), **base, 'revisao_humana': 'pendente',
+                                    **conf.get(sid, {})}, ensure_ascii=False))
         for k, e in enumerate(d['extracoes'], 1):
             ext = {'id': f'{sid}-C{k}', 'estudo_id': sid, 'contrato': 2, **e,
                    'resultado': e.get('resultado') or {'baseline': None, 'intervencao': None},
                    'fonte': fonte, 'texto_fonte': texto, 'riscos': f.get('riscos', []),
                    'mitigacoes': f.get('mitigacoes', []), 'status': 'nao_conferido',
-                   'revisao_humana': 'pendente', **base}
+                   'revisao_humana': 'pendente', **base, **conf.get(sid, {})}
             novas.append(json.dumps(ext, ensure_ascii=False))
         for q in d['qualidade']:
             linhas_q.append({'estudo_id': sid, 'criterio': q['criterio'], 'julgamento': q['julgamento'],

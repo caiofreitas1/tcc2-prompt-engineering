@@ -1,7 +1,7 @@
 # Conferência humana das fichas ex-v2.2 (protocolo, seção 7; D109)
 
-Preparada por Claude Code (Claude Opus 5.5) em 17/11/2026. A conferência é do autor e
-ainda não começou; nada aqui é revisão humana.
+Preparada por Claude Code (Claude Opus 5.5) em 17/11/2026. A conferência é do autor; ver a
+seção «Resultado» abaixo (D116, D117).
 
 ## Amostra (`amostra.csv`)
 
@@ -55,3 +55,13 @@ ainda não começou; nada aqui é revisão humana.
 - Marcação das citações no texto extraído: 441 contíguas, 791 intercaladas, 385 aproximadas
   (`scripts/verificar_citacoes_aprox.py`) e 193 não achadas, 37 delas na S1608. Não achada
   não quer dizer inexistente; a conferência é feita no PDF.
+
+## Resultado (D116, D117)
+
+- O autor conferiu 66 dos 67 estudos em 17/11/2026 (cerca de 6 h, segundo o autor). Em 10, o
+  julgamento de cada bloco está gravado no formulário; nos outros 56, o autor declarou que
+  todos os blocos estavam corretos, sem gravá-los. Registro de ambos em
+  `julgamentos-autor.jsonl`, com a origem de cada um.
+- S1935, que entrou depois (substitui S1721), não foi conferido.
+- Correções em 5 estudos (S6, S77, S650, S1743, S2090), 15 de 564 blocos; aplicadas às fichas
+  finais e registradas em `../correcoes-manuais.jsonl` (decisão D116).
