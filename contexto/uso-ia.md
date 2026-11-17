@@ -398,3 +398,8 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 ## T07 — extração de S1610 e S1617 (17/11/2026, D113)
 - Executores: subagentes Claude Opus 5.5 (Read e Write), ex-v2.2 congelada, imagens a 110 dpi; validador sem erros; fichas finais idênticas às saídas brutas; manifesto acrescido. Claude Code reimportou as fichas, recalculou as contagens e atualizou o texto e as afirmações A103 e A104 (rascunho).
+
+## T06–T07 — última leva da etapa 3 e extração dos 29 estudos (17/11/2026, D114)
+- Executores: Claude Code (Claude Opus 5.5), conferência dos selos de D100, importação das 36 decisões cegas do autor e dos selos das IAs (`scripts/importar_texto_completo.py`), recomendação sobre S1778 (aceita pelo autor), consulta de datas na Crossref, complemento da amostra (`scripts/sortear_conferencia.py --complemento`), republicação do formulário de conferência, reimportação, contagens e atualização do texto; 29 subagentes Claude Opus 5.5 (Read e Write), um por estudo, com a ex-v2.2 congelada e imagens a 110 dpi.
+- A recomendação inicial sobre S1778 dizia que o modelo do COM não era identificado; o extrator achou os modelos na Fig. 2. O motivo registrado foi corrigido antes do commit, e a decisão do autor não muda.
+- Validador sem erros nas 29 saídas brutas; uma correção de unidade em S1883 (registro em `correcoes-manuais.jsonl`, confirmação do autor pendente). Afirmações A105–A117 em rascunho; A45 e A46 atualizadas. Nada aqui é revisão humana.

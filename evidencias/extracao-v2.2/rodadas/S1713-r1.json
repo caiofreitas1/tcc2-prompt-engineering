@@ -1,0 +1,269 @@
+{
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "with ctr. examples (VERT) / few-shot counter examples",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": ["feedback", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 5 (impressa 1457), Fig. 4 e Sec. III-E; PDF p. 8 (impressa 1460), Tabela II",
+        "observacao": "Modo completo do VERT com Claude-2: prompt da Fig. 4 (código original, instrução 'Safe Rust refactoring', restrições de nome, argumentos, tipos de retorno e compilação isolada), re-prompting com mensagens do rustc e com contraexemplos de verificações anteriores, regeneração até 20 vezes até passar na verificação (seleção pelo verificador, registrada como amostragem). O estudo chama o uso de contraexemplos de 'few-shot learning', mas os contraexemplos são entradas que causaram falha, não exemplos resolvidos; por isso foram classificados como feedback, não como exemplos. O contrafactual contra o Single-shot (Baseline) do mesmo Claude-2 (Tabela II) é de pacote híbrido: inclui reparo por regras manuais sobre o código (fora do escopo) além dos ingredientes de prompting. Os acrescentados são relativos ao Single-shot (Baseline)."
+      },
+      {
+        "nome_original": "Few-shot",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": ["feedback", "amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 3 (impressa 1455), Sec. III-A; PDF p. 7 (impressa 1459), Sec. IV-B; PDF p. 8 (impressa 1460), Tabela II",
+        "observacao": "Modo intermediário do VERT: se a verificação falha, o LLM é instruído a regenerar repetidamente (até 20 vezes), aplicando a cada iteração o reparo da Sec. III-A (re-prompting com mensagem de erro do rustc, primeira metade da Fig. 4, mais regras manuais). O estudo o descreve como 'prompt repeatedly with repair but without feedback'; 'without feedback' refere-se aos contraexemplos, mas a inclusão da mensagem do rustc no prompt deste modo é inferida das Sec. III-A e IV-A-2, não afirmada explicitamente para o modo. Contra o Single-shot (Baseline) é pacote híbrido (regeneração, re-prompting com erros do compilador e reparo por regras fora do escopo)."
+      },
+      {
+        "nome_original": "few-shot counter examples (contraexemplos de verificações anteriores no prompt)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5 (impressa 1457), Sec. III-E e Fig. 4 linhas 7-8; PDF p. 8 (impressa 1460), Tabela II",
+        "observacao": "Ingrediente que distingue 'with ctr. examples (VERT)' de 'Few-shot' na Tabela II, com o mesmo modelo (Claude-2), benchmark e limite de tentativas: os contraexemplos de verificações falhas entram no prompt (Fig. 4, linha 8). Acrescenta feedback de verificação (PBT/BMC) ao feedback de compilador já presente no Few-shot."
+      },
+      {
+        "nome_original": "Single-shot (Baseline)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 5 (impressa 1457), Fig. 4 linhas 1-4; PDF p. 8 (impressa 1460), Tabela II",
+        "observacao": "Uma única geração com o prompt da Fig. 4 sem erros nem contraexemplos (linhas 1-4), seguida de verificação sem regeneração. Prompt base do estudo; seus ingredientes não são isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "rustc error guided program repair (regras manuais)",
+        "natureza": "outro",
+        "descricao": "Reparo automático por regras que usa a localização e a linha 'help:' da mensagem do rustc para editar o código (por exemplo, trocar num por &num ou x por mut x), sem alterar o prompt. Faz parte dos modos Few-shot e VERT e não é isolado do re-prompting.",
+        "localizador": "PDF p. 5 (impressa 1457), Sec. III-F, Fig. 5; PDF p. 6 (impressa 1458), Fig. 6"
+      },
+      {
+        "nome_original": "Trusted Translation Pipeline: rWasm (oráculo)",
+        "natureza": "outro",
+        "descricao": "Compilação do programa-fonte para Wasm e tradução por regras para Rust (rWasm), usada como oráculo de referência; não é prompting.",
+        "localizador": "PDF p. 3 (impressa 1455), Sec. III-B"
+      },
+      {
+        "nome_original": "Equivalence Harness Generation e Equivalence Checking (PBT e BMC com bolero/kani)",
+        "natureza": "outro",
+        "descricao": "Geração automática de harness de equivalência e verificação por property-based testing e bounded model checking; serve como fonte dos contraexemplos e como métrica.",
+        "localizador": "PDF p. 3 (impressa 1455), Sec. III-C e III-D; PDF p. 5 (impressa 1457), Sec. III-D"
+      },
+      {
+        "nome_original": "Cleaning phase",
+        "natureza": "outro",
+        "descricao": "Separação do programa-fonte em funções antes dos dois caminhos do pipeline.",
+        "localizador": "PDF p. 3 (impressa 1455), Sec. III; PDF p. 4 (impressa 1456), Fig. 2"
+      },
+      {
+        "nome_original": "re-prompt the LLM up to 20 times; 120 seconds limit",
+        "natureza": "orcamento",
+        "descricao": "Limite de até 20 re-prompts nos modos few-shot e limite de 120 s para PBT e para BMC.",
+        "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 7 (impressa 1459), Sec. IV-B"
+      },
+      {
+        "nome_original": "Escolha do LLM (TransCoder-IR, CodeLlama-2, StarCoder, Claude-2)",
+        "natureza": "selecao_modelo",
+        "descricao": "A Tabela I compara LLMs diferentes, cada um em um único modo (TransCoder-IR em single-shot sem prompt; CodeLlama-2 e StarCoder em few-shot; Claude-2 em VERT); o contraste é de modelo e modo ao mesmo tempo, não de prompting isolado.",
+        "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-1; PDF p. 8 (impressa 1460), Tabela I"
+      }
+    ],
+    "modelos": [
+      {"nome": "Anthropic Claude-2", "versao": "nao_informado (snapshot não informado; descrito com cerca de 130 bilhões de parâmetros)", "observacao": "Único modelo avaliado nos três modos de prompting (Tabela II)."},
+      {"nome": "CodeLlama-2 13B", "versao": "nao_informado", "observacao": "Avaliado só em Few-shot (Tabela I)."},
+      {"nome": "StarCoder 15.5B", "versao": "nao_informado", "observacao": "Avaliado só em Few-shot (Tabela I); a lista de contribuições o descreve 'with fine-tuning', sem ajuste fino descrito no método."},
+      {"nome": "TransCoder-IR", "versao": "nao_informado", "observacao": "Linha de base declarada; não recebe prompt ('no prompt is taken'); só single-shot."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto de benchmarks do TransCoder-IR (soluções de programação competitiva)",
+        "quantidade": "Original: 852 C++, 698 C e 343 Go; após filtragem: 569 C++, 506 C e 341 Go (PDF p. 6, impressa 1458). Tabelas I e II usam C++ (569), C (520) e Go (341).",
+        "observacao": "O total em C nas tabelas (520) difere do total após filtragem (506); o estudo não explica se os 14 programas de ponteiros entram nos 520. A introdução fala em 1,394 tarefas e a lista de contribuições em 305 programas Go (PDF p. 2, impressa 1454). Ver heterogeneidade."
+      },
+      {
+        "nome": "14 programas C com manipulação de ponteiros (de trabalhos anteriores: CROWN, Laertes, C2Rust)",
+        "quantidade": "14",
+        "observacao": "Selecionados em repositórios criados ou modificados após junho de 2022; pares de entrada e saída rotulados manualmente; usados na RQ2 (Tabela IV, PDF p. 10, impressa 1462)."
+      }
+    ],
+    "metricas": [
+      {"nome": "Compiled", "definicao": "Número de transpilações que compilaram.", "denominador": "Número de programas por linguagem no cabeçalho da linha (569, 520, 341)."},
+      {"nome": "PBT", "definicao": "Número de programas que passaram em Property-Based Testing e compilação; sem contraexemplo em 120 s conta como sucesso.", "denominador": "Número de programas por linguagem no cabeçalho da linha."},
+      {"nome": "BMC", "definicao": "Número que passou em Bounded Model Checking dentre os que passaram em PBT; sucesso exige equivalência verificada em 120 s.", "denominador": "Legenda da Tabela I diz 'of those that passed PBT'; o texto relata BMC como percentual de todas as entradas."},
+      {"nome": "Tempo médio por componente (s)", "definicao": "Tabela III.", "denominador": "nao_informado"},
+      {"nome": "Linhas de código (LoC) após rustfmt e avisos do Clippy por função", "definicao": "Idiomaticidade na RQ2.", "denominador": "14 programas C de ponteiros"},
+      {"nome": "Teste de Wilcoxon signed-rank", "definicao": "p-valores de 1×10^-5 a 4×10^-5 para PBT e BMC entre VERT e baseline.", "denominador": "nao_informado"}
+    ],
+    "linguagens": ["C++ (origem)", "C (origem)", "Go (origem)", "Rust (destino)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "LLMs produzem código sutilmente incorreto, sem garantia de equivalência de entrada e saída com o original.", "localizador": "PDF p. 1 (impressa 1453), Sec. I"},
+      {"categoria": "correcao_funcional", "descricao": "A verificação não é exaustiva: BMC limitado pode deixar passar divergências além do limite de desenrolamento de laços, e divergências que exijam vetores maiores que os encontrados na chamada de exemplo não são detectadas; uma tradução incorreta poderia passar.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1; PDF p. 3 (impressa 1455), Sec. III-C"},
+      {"categoria": "alucinacao", "descricao": "O estudo apresenta a verificação de equivalência como meio de o usuário verificar que a tradução do LLM está livre de alucinações.", "localizador": "PDF p. 2 (impressa 1454), contribuições"},
+      {"categoria": "contaminacao", "descricao": "Potencial contaminação dos dados de treinamento: os conjuntos de avaliação podem estar nos dados de treino dos LLMs.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-4; PDF p. 6 (impressa 1458), Sec. IV-A-3"},
+      {"categoria": "seguranca", "descricao": "LLMs podem gerar programas com defeitos e vulneráveis (trabalhos citados), e abordagens baseadas em LLM sem garantias formais removem os benefícios de segurança do Rust.", "localizador": "PDF p. 10 (impressa 1462), Sec. VI-a e Sec. VII"},
+      {"categoria": "nao_determinismo", "descricao": "A qualidade do PBT depende das entradas geradas e, portanto, da semente usada para gerar entradas aleatórias.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1"},
+      {"categoria": "custo", "descricao": "O estudo trata tempo de execução como custo: verificação com níveis crescentes de confiança e custo computacional; BMC usa em média 52 s e PBT 25 s por programa; timeout do kani é a principal razão das taxas menores de BMC. Custo monetário do Claude-2 informado só por mil tokens (US$ 0,0465); custo total em tokens não quantificado.", "localizador": "PDF p. 3 (impressa 1455), Sec. III-D; PDF p. 6 (impressa 1458), Sec. IV-A-1; PDF p. 7-8 (impressas 1459-1460), Tabela III"},
+      {"categoria": "outro", "descricao": "Base de computação confiável (TCB) grande: o usuário precisa confiar em Kani, CBMC, compilador Wasm da linguagem de origem, rWasm, compilador Rust e dependências.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-2"},
+      {"categoria": "outro", "descricao": "Validade externa: programas de programação competitiva são mais simples que bases reais; o VERT traduz programas isolados, e tem dificuldade à medida que os programas crescem e têm mais variáveis de ponteiro.", "localizador": "PDF p. 9-10 (impressas 1461-1462), Sec. V-3 e V-4; PDF p. 9 (impressa 1461), RQ2"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Seleção de benchmarks e soluções Rust escritos e rotulados após junho de 2022 (data de corte de treino declarada dos LLMs) para mitigar contaminação.", "avaliada": "nao", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-3; PDF p. 9 (impressa 1461), Sec. V-4"},
+      {"descricao": "Verificação de equivalência da saída do LLM contra o oráculo rWasm por PBT e BMC antes de aceitar a transpilação.", "avaliada": "nao", "localizador": "PDF p. 3 (impressa 1455), Sec. III-C e III-D"},
+      {"descricao": "Re-prompting com contraexemplos de verificações falhas para corrigir defeitos sutis; comparado com o modo Few-shot sem contraexemplos.", "avaliada": "sim", "localizador": "PDF p. 5 (impressa 1457), Sec. III-E; PDF p. 8 (impressa 1460), Tabela II"},
+      {"descricao": "Trabalho posterior (Takashima) verificou manualmente com Verus 3 de 5 benchmarks que atingiram timeout na RQ2.", "avaliada": "nao", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Tamanho do corpus divergente entre seções: introdução fala em 1,394 tarefas e as contribuições em 569 C++, 520 C e 305 Go (soma 1.394, cálculo próprio); a Sec. IV-A-3 relata 569 C++, 506 C e 341 Go após filtragem e, adiante, 'In total' 569 C++, 520 C e 341 Go, valores usados nos cabeçalhos das Tabelas I e II (soma 1.430, cálculo próprio). Não se sabe qual conjunto Go (305 ou 341) é o denominador dos percentuais da introdução.", "localizador": "PDF p. 2 (impressa 1454), Sec. I e contribuições; PDF p. 6-7 (impressas 1458-1459), Sec. IV-A-3"},
+      {"descricao": "Resultado agregado do VERT com Claude-2 diverge entre introdução e resultados: introdução relata BMC para 42% e testes diferenciais para 54% dos programas, e depois 'verified transpilation for 40%'; a Sec. IV-C relata PBT para 49% e BMC para 40%.", "localizador": "PDF p. 2 (impressa 1454), Sec. I; PDF p. 7 (impressa 1459), Sec. IV-C"},
+      {"descricao": "Percentuais por linguagem do texto versus Tabela I/II: o texto dá PBT de 56% para Go e BMC de 46% para Go, e o resumo da RQ1 dá 47% para BMC em Go. Cálculo próprio com 195/341 = 57,2% e 159/341 = 46,6%. Aparente inconsistência no PBT de Go e divergência interna 46% versus 47% no BMC de Go; a fonte não informa regra de arredondamento.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-C; PDF p. 9 (impressa 1461), RQ1 Summary; PDF p. 8 (impressa 1460), Tabelas I e II"},
+      {"descricao": "Resumo da RQ1 diz que o VERT com Claude-2 passa BMC para '40% more programs for C++, 37% for C, and 47% for Go as compared to baseline', mas esses valores coincidem com as taxas absolutas de BMC do próprio VERT, não com uma diferença em relação à linha de base; a linha de base referida (TransCoder-IR ou Single-shot) não é explicitada.", "localizador": "PDF p. 9 (impressa 1461), RQ1 Summary"},
+      {"descricao": "Narrativa de Few-shot versus Single-shot com Claude-2 ('43% more PBT checks for C++, 46% more for C, and 43% more for Go'; '6% more BMC checks for C++, 4% more for C, and 12% more for Go') não especifica se são p.p. ou variação relativa. Cálculo próprio em p.p. com os denominadores das tabelas: PBT 41,7 (C++), 28,1 (C), 38,4 (Go); BMC 6,2 (C++), 4,4 (C), 10,6 (Go). Os valores de PBT para C e de Go não são reproduzidos com os denominadores das tabelas (aparente inconsistência; com 305 programas Go os valores de Go seriam compatíveis, cálculo próprio, mas o estudo não liga um ao outro).", "localizador": "PDF p. 8 (impressa 1460), texto e Tabela II"},
+      {"descricao": "O texto da ablação diz que a Tabela I mostra todos os LLMs 'in the three prompting modes', mas a Tabela I traz um único modo por LLM; os três modos aparecem só na Tabela II, e só para Claude-2.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-C-1; PDF p. 8 (impressa 1460), Tabelas I e II"},
+      {"descricao": "A legenda da Tabela I define BMC como o número que passou BMC 'of those that passed PBT', enquanto o texto relata BMC como percentual de todas as entradas; o denominador do BMC fica ambíguo na definição, embora as contagens sejam absolutas.", "localizador": "PDF p. 8 (impressa 1460), legenda da Tabela I; PDF p. 7 (impressa 1459), Sec. IV-C"},
+      {"descricao": "Os modos não são aplicados igualmente aos modelos: CodeLlama-2 e StarCoder só em Few-shot e TransCoder-IR só em single-shot sem prompt; a comparação entre LLMs da Tabela I mistura modelo e modo.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 8 (impressa 1460), Tabela I"},
+      {"descricao": "Na RQ2 o modo usado é descrito como 'VERT few-shot + repair with Claude-2', sem dizer se inclui contraexemplos; os resultados da Tabela IV não podem ser ligados com segurança a um dos modos da Tabela II.", "localizador": "PDF p. 9 (impressa 1461), RQ2"},
+      {"descricao": "Teste de Wilcoxon relatado para PBT e BMC entre 'VERT and baseline', sem identificar a linha de base nem o pareamento; o texto menciona 'Wilcoxon rank test' e 'Wilcoxon signed-rank test'. Não se aplica à métrica Compiled nem, explicitamente, ao contraste com o Single-shot do Claude-2.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-C"},
+      {"descricao": "Afirmação de que o Claude-2 produz programas que passam PBT a 'roughly 1/4 the rate of VERT'; na Tabela II o Single-shot tem 55, 49 e 26 programas em PBT contra 295, 209 e 195 do VERT (cálculo próprio: razões de cerca de 1/5,4, 1/4,3 e 1/7,5), o que não corresponde uniformemente a 1/4.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-C; PDF p. 8 (impressa 1460), Tabela II"},
+      {"descricao": "A lista de contribuições descreve a avaliação do StarCoder 'with fine-tuning', mas o método não descreve ajuste fino feito pelos autores.", "localizador": "PDF p. 2 (impressa 1454), contribuições; PDF p. 6 (impressa 1458), Sec. IV-A-1"},
+      {"descricao": "RQ2: VERT produz transpilações que passam PBT para 7 dos 14 programas C de ponteiros e BMC para 2; quatro não compilam e o desempenho cai com programas maiores e mais variáveis de ponteiro (resultado limitado).", "localizador": "PDF p. 9 (impressa 1461), RQ2; PDF p. 10 (impressa 1462), Tabela IV"}
+    ],
+    "observacoes": [
+      {"descricao": "TransCoder-IR é a linha de base declarada do estudo, mas não recebe prompt; não é técnica de prompting e não entra em extracoes.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-1"},
+      {"descricao": "Os pares de entrada e saída dos 14 programas C de ponteiros foram rotulados manualmente pelos autores (esforço manual).", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-3"},
+      {"descricao": "Tempos médios por componente (Tabela III): Claude 30 s, CodeLlama-2 43 s, StarCoder 45 s, TransCoder-IR 8 s, PBT 25 s, BMC 52 s; média de 15 tentativas até compilar, excluindo falhas.", "localizador": "PDF p. 8 (impressa 1460), Tabela III e texto"},
+      {"descricao": "Idiomaticidade (RQ2): saída do CROWN mais de 5x maior e do rWasm mais de 10x maior em LoC; Clippy produz 10.9 avisos por função para CROWN, 372 para rWasm e 0 para VERT. O estudo infere idiomaticidade de LoC e avisos; não é comparação de prompting.", "localizador": "PDF p. 9 (impressa 1461), RQ2"},
+      {"descricao": "Hardware: Ubuntu 22, 32 processadores Intel Xeon 2.30 GHz, 240 GB RAM, 4 Tesla V100. Número de execuções e parâmetros de decodificação (temperatura etc.) nao_informado.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-B"},
+      {"descricao": "Link do Zenodo para dados e ferramenta impresso; não acessado nem validado.", "localizador": "PDF p. 2 (impressa 1454), nota 1"}
+    ],
+    "citacoes": [
+      {"trecho": "With the equivalence checking harness built, we must now drive the harness and check that the equivalence property holds for all inputs.", "localizador": "PDF p. 3 (impressa 1455), Sec. III-D"},
+      {"trecho": "We evaluate VERT on 1,394 transpilation tasks with source languages in C++, C, and Go curated from prior work [39], [52].", "localizador": "PDF p. 2 (impressa 1454), Sec. I"},
+      {"trecho": "Safe Rust refactoring of above code in {language}.", "localizador": "PDF p. 5 (impressa 1457), Fig. 4, linha 2"},
+      {"trecho": "Use the same function name, same argument and return types.", "localizador": "PDF p. 5 (impressa 1457), Fig. 4, linha 3"},
+      {"trecho": "Make sure the output program can compile as a stand alone program.", "localizador": "PDF p. 5 (impressa 1457), Fig. 4, linha 4"},
+      {"trecho": "Ensure that the output avoids the above error message: {error_msg}.", "localizador": "PDF p. 5 (impressa 1457), Fig. 4, linha 6"},
+      {"trecho": "Test that outputs from inputs {counter_examples} are equivalent to source program.", "localizador": "PDF p. 5 (impressa 1457), Fig. 4, linha 8"},
+      {"trecho": "We automatically repair these typing errors by re-prompting the LLM to fix it.", "localizador": "PDF p. 3 (impressa 1455), Sec. III-A"},
+      {"trecho": "We collect the error messages and counter examples from prior failed checks as part of the prompt.", "localizador": "PDF p. 5 (impressa 1457), Sec. III-E"},
+      {"trecho": "Single-shot means that VERT uses the LLM once to create a single candidate transpilation, and then proceeds directly to verification.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2"},
+      {"trecho": "Few-shot means that, if verification fails, then VERT will prompt the LLM to regenerate the transpilation repeatedly.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2"},
+      {"trecho": "In each iteration, we apply the syntactic repair described in Section III-A to the output of the LLM.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2"},
+      {"trecho": "Finally, few-shot counter examples means that we use counter examples produced by previous failed verification attempts as part of the LLM’s few-shot learning, as described in Section III-E.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2"},
+      {"trecho": "We re-prompt the LLM up to 20 times for few-shot modes.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2"},
+      {"trecho": "Using this suggestion line, we replace x by mut x, and observe that the program compiles.", "localizador": "PDF p. 5 (impressa 1457), Sec. III-F"},
+      {"trecho": "Since TransCoder-IR’s input is the original code alone and no prompt is taken, we do not perform error-guided few-shot prompting.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-1"},
+      {"trecho": "Language models are notorious for outputting subtly incorrect code [48].", "localizador": "PDF p. 1 (impressa 1453), Sec. I"},
+      {"trecho": "We use Wasm generated from original input as a reference model and perform equivalence checking by automatically injecting test harnesses, allowing the user to verify that the LLM translation is free of hallucinations.", "localizador": "PDF p. 2 (impressa 1454), contribuições"},
+      {"trecho": "Bounded verification may miss bugs or divergences in LLM and rWasm-generated programs if they occur beyond the loop unwinding bound.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1"},
+      {"trecho": "As a limitation, any divergences that require larger vectors than encountered will be missed.", "localizador": "PDF p. 3 (impressa 1455), Sec. III-C"},
+      {"trecho": "The quality of PBT depends heavily on the inputs generated, and thus the seed used to generate the random inputs.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1"},
+      {"trecho": "Using LLMs as part of our tool exhibits the potential for training data contamination (i.e. our evaluation datasets could be included in the LLM training data).", "localizador": "PDF p. 9 (impressa 1461), Sec. V-4"},
+      {"trecho": "To mitigate this threat, we select and evaluate our tool on Rust solutions written and labeled after June 2022.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-4"},
+      {"trecho": "However, recent work shows that LLMs can generate buggy and vulnerable programs [9], [13], [32].", "localizador": "PDF p. 10 (impressa 1462), Sec. VI-a"},
+      {"trecho": "ML-based approaches (i.e., LLMs) cannot provide formal guarantees, thus removing the security benefits of Rust.", "localizador": "PDF p. 10 (impressa 1462), Sec. VII"},
+      {"trecho": "VERT provides two equivalence checking techniques with increasing levels of confidence and compute cost.", "localizador": "PDF p. 3 (impressa 1455), Sec. III-D"},
+      {"trecho": "Kani verification timeout is the main reason for lower BMC pass rates.", "localizador": "PDF p. 7 (impressa 1459), Sec. IV-C"},
+      {"trecho": "We note that VERT has a large TCB compared to traditional formal verification frameworks like Coq [17] or Isabelle/HOL [30].", "localizador": "PDF p. 9 (impressa 1461), Sec. V-2"},
+      {"trecho": "Takashima [40] extended our work to manually verify 3 out of 5 benchmarks that timed out in our RQ2 using Verus [25], an auto-active verifier.", "localizador": "PDF p. 9 (impressa 1461), Sec. V-1"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "with ctr. examples (VERT)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+      "mecanismos_acrescentados": ["feedback", "amostragem"],
+      "comparador": "Single-shot (Baseline)",
+      "modelo": "Claude-2 130B (snapshot nao_informado)",
+      "benchmark": "Benchmarks do TransCoder-IR, C++ (569)",
+      "metrica": "Compiled",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 240, "intervencao": 539},
+      "denominador": "569 programas C++ (número no cabeçalho da linha da Tabela II)",
+      "condicoes": "Mesmo modelo (Claude-2) e mesmo conjunto C++. VERT: até 20 re-prompts com mensagens do rustc e contraexemplos de verificações anteriores, mais reparo por regras manuais (fora do escopo); Single-shot: uma geração sem regeneração. Pacote híbrido: o ganho é do pacote, não de um ingrediente. Contagens absolutas. Número de execuções e parâmetros de decodificação nao_informado. O teste de Wilcoxon é relatado só para PBT e BMC contra uma linha de base não identificada e não se estende a esta métrica. Conferido no PDF, p. 8 (Tabela II).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca duas métricas (PBT e BMC; a introdução também cita BMC e testes diferenciais) e duas linhas de base (TransCoder-IR declarada como baseline e 'Claude-2 alone'). A Tabela I não contém contraste de prompting (um modo por LLM); a primeira tabela com o contraste é a Tabela II. Primeira métrica (Compiled), único modelo (Claude-2), primeira linha de base de prompting listada (Single-shot (Baseline)) e primeira linguagem (C++).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 1460), Tabela II, colunas LLM, Source Lang, Technique, Compiled",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "C++ (569) | Single-shot (Baseline) | 240 | 55 | 6", "localizador": "PDF p. 8 (impressa 1460), Tabela II, colunas Source Lang, Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"},
+        {"trecho": "with ctr. examples (VERT) | 539 | 295 | 233", "localizador": "PDF p. 8 (impressa 1460), Tabela II, bloco C++ (569), colunas Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Few-shot",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+      "mecanismos_acrescentados": ["feedback", "amostragem"],
+      "comparador": "Single-shot (Baseline)",
+      "modelo": "Claude-2 130B (snapshot nao_informado)",
+      "benchmark": "Benchmarks do TransCoder-IR, C++ (569)",
+      "metrica": "Compiled",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 240, "intervencao": 539},
+      "denominador": "569 programas C++ (número no cabeçalho da linha da Tabela II)",
+      "condicoes": "Mesmo modelo e conjunto. Few-shot: regeneração até 20 vezes após falha na verificação, com o reparo da Sec. III-A (re-prompting com erros do rustc e regras manuais, estas fora do escopo), sem contraexemplos. Componente isolado como pacote híbrido contra o Single-shot. Número de execuções e decodificação nao_informado. Conferido no PDF, p. 8 (Tabela II).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente isolado incluído para completar o alvo de três, primeiro componente na ordem da tabela de ablação (Tabela II: Few-shot antes de with ctr. examples), mesma métrica, modelo, linha de base e linguagem da primeira extração.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 1460), Tabela II, colunas LLM, Source Lang, Technique, Compiled",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "C++ (569) | Single-shot (Baseline) | 240 | 55 | 6", "localizador": "PDF p. 8 (impressa 1460), Tabela II, colunas Source Lang, Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"},
+        {"trecho": "Few-shot | 539 | 292 | 41", "localizador": "PDF p. 8 (impressa 1460), Tabela II, bloco C++ (569), colunas Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "few-shot counter examples (contraexemplos no prompt)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Few-shot",
+      "modelo": "Claude-2 130B (snapshot nao_informado)",
+      "benchmark": "Benchmarks do TransCoder-IR, C++ (569)",
+      "metrica": "Compiled",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 539, "intervencao": 539},
+      "denominador": "569 programas C++ (número no cabeçalho da linha da Tabela II)",
+      "condicoes": "Mesmo modelo, conjunto e limite de 20 re-prompts; as condições diferem na inclusão dos contraexemplos de verificações falhas no prompt (linha 'with ctr. examples (VERT)' contra 'Few-shot'). Número de execuções e decodificação nao_informado. Conferido no PDF, p. 8 (Tabela II).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente na ordem da tabela de ablação (Tabela II), incluído para completar o alvo de três; mesma métrica, modelo e linguagem; comparador é a condição sem o ingrediente (Few-shot).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 1460), Tabela II, colunas LLM, Source Lang, Technique, Compiled",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Few-shot | 539 | 292 | 41", "localizador": "PDF p. 8 (impressa 1460), Tabela II, bloco C++ (569), colunas Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"},
+        {"trecho": "with ctr. examples (VERT) | 539 | 295 | 233", "localizador": "PDF p. 8 (impressa 1460), Tabela II, bloco C++ (569), colunas Technique, Compiled, PBT, BMC (LLM: Claude-2 130B)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Duas questões de pesquisa explícitas (RQ1 sobre desempenho e ablação; RQ2 sobre Rust seguro e idiomático).", "localizador": "PDF p. 5-6 (impressas 1457-1458), Sec. IV"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Modos de prompting, template de prompt (Fig. 4), limite de 20 re-prompts e de 120 s, e seleção de benchmarks descritos; mas o conteúdo exato do prompt no modo Few-shot (presença das mensagens do rustc) fica implícito, o modo usado na RQ2 ('few-shot + repair') é ambíguo, e número de execuções e parâmetros de decodificação não são informados.", "localizador": "PDF p. 3, 5, 6, 9 (impressas 1455, 1457, 1458, 1461)"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Para o Claude-2, os três modos (Single-shot, Few-shot e VERT) são executados no mesmo benchmark e modelo (Tabela II), além da linha de base TransCoder-IR; a comparação entre LLMs da Tabela I mistura modelo e modo, o que é registrado em heterogeneidade.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-2; PDF p. 8 (impressa 1460), Tabelas I e II"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Compiled, PBT e BMC definidos com limite de tempo e denominadores nos cabeçalhos das tabelas, mas a legenda da Tabela I define BMC sobre os que passaram PBT enquanto o texto o relata sobre todas as entradas; percentuais divergem entre introdução, resultados e resumo da RQ1 (42%/40%, 54%/49%, 46%/47%), e o corpus Go varia entre 305 e 341.", "localizador": "PDF p. 2, 7, 8, 9 (impressas 1454, 1459, 1460, 1461)"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de limitações discute limites da verificação de equivalência, TCB, escala além de programas isolados, validade interna (contaminação) e externa (programas competitivos versus bases reais).", "localizador": "PDF p. 9-10 (impressas 1461-1462), Sec. V"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Template de prompt, limites, hardware e link de dados e ferramenta (Zenodo, não acessado) informados; versão/snapshot do Claude-2, parâmetros de decodificação e número de execuções não informados.", "localizador": "PDF p. 2 (impressa 1454), nota 1; PDF p. 5 (impressa 1457), Fig. 4; PDF p. 7 (impressa 1459), Sec. IV-B"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo discute contaminação e escolhe dados posteriores a junho de 2022, mas para os benchmarks do TransCoder-IR a justificativa se apoia na data de publicação das saídas Rust do TransCoder-IR, sem discutir se os programas-fonte competitivos estavam nos dados de treino; afirma que o resultado não é afetado sem medir.", "localizador": "PDF p. 6 (impressa 1458), Sec. IV-A-3; PDF p. 9-10 (impressas 1461-1462), Sec. V-4"}
+  ],
+  "leitura": "completa; texto extraído lido inteiro (11 páginas). Páginas do PDF abertas visualmente: 1, 2, 5, 6, 7, 8, 9, 10."
+}

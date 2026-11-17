@@ -1,0 +1,163 @@
+{
+  "ficha": {
+    "estudo": "S1935",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "multi-step prompting method (\"Multi Prompt\" na Tabela IV)",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C Prompting Methods; p. 3 do PDF (p. 646 impressa), Fig. 2; p. 6 do PDF (p. 649 impressa), seção IV.C e Tabela IV",
+        "observacao": "Quatro etapas encadeadas: (1) gerar só o HTML a partir da captura de tela; (2) gerar o CSS a partir da captura e do HTML da etapa 1; (3) inferir informações de interação a partir da captura e do prompt; (4) gerar o JavaScript a partir da captura, do HTML e da interação inferida. Cada etapa recebe instrução em linguagem natural (instrucao) e as saídas intermediárias alimentam as etapas seguintes (decomposicao). O contrafactual é o pacote completo de quatro etapas contra o direct prompting (geração única de HTML, CSS e JavaScript), na Tabela IV, para três modelos; não há ablação das etapas, de modo que o ganho não pode ser atribuído a uma etapa específica (por exemplo, à etapa de inferência de interação). O pacote é só de prompting, mas o WebCoder-8B foi ajustado com amostras de instrução que reproduzem as quatro etapas (p. 3 do PDF), o que é componente fora do escopo e pode favorecer o formato multi-step nesse modelo. O texto não informa o conteúdo completo dos prompts; a Fig. 2 mostra só trechos truncados."
+      },
+      {
+        "nome_original": "direct prompting (\"traditional direct prompting methods\"; bloco \"Direct\" na Tabela IV)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C; p. 6 do PDF (p. 649 impressa), Tabela IV",
+        "observacao": "Linha de base em que o modelo gera todo o HTML, CSS e JavaScript numa única tentativa após receber a entrada completa. O texto do prompt direto não é informado (nao_informado). Comparador, sem isolamento próprio."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Multi-Stage Fine-Tuning (Stage 1: modality alignment; Stage 2: instruction fine-tuning)",
+        "natureza": "ajuste_fino",
+        "descricao": "Estágio 1 treina apenas as learnable queries e as camadas de cross-attention, com perdas ITC, ITM e ITG, mantendo congelados o codificador visual e o QLLaMA; estágio 2 ajusta o modelo inteiro (InternViT, MLP e LLM) com o conjunto de ajuste por instrução. Origem do WebCoder-8B a partir do InternVL2.5-8B.",
+        "localizador": "p. 3 do PDF (p. 646 impressa), seção III.B e Fig. 1; p. 4 do PDF (p. 647 impressa), Stage1 e Stage 2"
+      },
+      {
+        "nome_original": "MixLoRA",
+        "natureza": "ajuste_fino",
+        "descricao": "Variante de LoRA com mistura condicional de decomposições de baixo posto, usada no estágio 2 para lidar com múltiplas tarefas de treino.",
+        "localizador": "p. 4 do PDF (p. 647 impressa), Stage 2, eq. (6); p. 5 do PDF (p. 648 impressa), continuação"
+      },
+      {
+        "nome_original": "Modality Alignment Dataset e Instruction Fine-Tuning Dataset (com GPT-4o-based filtering method)",
+        "natureza": "outro",
+        "descricao": "Construção e curadoria dos dados de treino: cerca de 200 mil amostras de WebSight v0.1 e v0.2 filtradas por GPT-4o (retidas 180k com escore acima de 8.5); 20k URLs do C4 rastreadas com Selenium e Playwright, filtradas por GPT-4o; JS de sites de animação e JS adicional gerado por GPT-4o, totalizando 10000 amostras; cada conjunto dividido em quatro amostras de instrução. Usa prompts ao GPT-4o, mas para curadoria de dados de treino, não como técnica de prompting para a tarefa de geração avaliada.",
+        "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A"
+      }
+    ],
+    "modelos": [
+      {"nome": "InternVL2.5-8B (\"InternVL 2.5\")", "versao": "8B; snapshot nao_informado", "uso": "modelo base do WebCoder-8B e modelo avaliado nas Tabelas I e IV; descrito como InternViT-6B com QLLaMA baseado em LLaMA-7B", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.B; p. 4 do PDF (p. 647 impressa), Tabela I; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"nome": "WebCoder-8B", "versao": "modelo dos autores ajustado a partir do InternVL2.5-8B; nao_informado além disso", "uso": "modelo proposto; Tabelas I a IV", "localizador": "p. 2 do PDF (p. 645 impressa), contribuições; p. 4 a 6 do PDF, Tabelas I a IV"},
+      {"nome": "Design2Code-18B", "versao": "nao_informado", "uso": "comparador nas Tabelas I e III e modelo avaliado sob direct e multi-step prompting na Tabela IV", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"nome": "GPT-4V", "versao": "nao_informado", "uso": "comparador fechado na Tabela I; também avaliador (\"GPT-4 Vision API\") no WCGB", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I; p. 5 do PDF (p. 648 impressa), seção IV.A.2"},
+      {"nome": "Gemini Pro Vision", "versao": "nao_informado", "uso": "comparador fechado na Tabela I", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I"},
+      {"nome": "Llama3-8B", "versao": "nao_informado", "uso": "comparador nas Tabelas I, II e III; na Tabela I, modelo e dados oriundos da referência [27]", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I e nota a; p. 5 do PDF (p. 648 impressa), Tabelas II e III"},
+      {"nome": "WebSight-VLM-8B", "versao": "nao_informado", "uso": "comparador na Tabela I", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I"},
+      {"nome": "CrystalChat-7B", "versao": "nao_informado", "uso": "comparador nas Tabelas I, II e III; na Tabela I, modelo e dados oriundos da referência [27]", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I; p. 5 do PDF (p. 648 impressa), Tabelas II e III"},
+      {"nome": "Vicuna1.5-7B", "versao": "1.5; snapshot nao_informado", "uso": "comparador nas Tabelas II e III", "localizador": "p. 5 do PDF (p. 648 impressa), Tabelas II e III"},
+      {"nome": "CrystalCoder-7B", "versao": "nao_informado", "uso": "comparador nas Tabelas II e III", "localizador": "p. 5 do PDF (p. 648 impressa), Tabelas II e III"},
+      {"nome": "GPT-4o", "versao": "nao_informado", "uso": "filtragem dos dados de treino, geração de descrições de efeitos dinâmicos e de JS adicional; segundo o artigo, os pares do WUB foram gerados com a API do GPT-4o", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A; p. 6 do PDF (p. 649 impressa), seção IV.B"}
+    ],
+    "benchmarks": [
+      {"nome": "Design2Code Benchmark [23]", "quantidade": "nao_informado", "observacao": "Único benchmark do contraste direct versus multi-step (Tabela IV). O artigo não informa o número de páginas avaliadas nem o denominador das métricas.", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A.1; p. 6 do PDF (p. 649 impressa), seção IV.C"},
+      {"nome": "Webpage Code Generation Benchmark (WCGB) [27]", "quantidade": "nao_informado", "observacao": "Avaliação por GPT-4V sobre a página renderizada com Selenium WebDriver; 10 indicadores em quatro categorias, escala de 0 a 10. Só uma condição por modelo (Tabela II).", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A.2; p. 6 do PDF (p. 649 impressa), continuação"},
+      {"nome": "Webpage Understanding Benchmark (WUB) [27]", "quantidade": "5,990 pares pergunta-resposta gerados a partir de 1,198 capturas de tela (como impresso)", "observacao": "Tarefa de compreensão de páginas (respostas sim/não), fora das tarefas do escopo; não entra em extracoes.", "localizador": "p. 6 do PDF (p. 649 impressa), seção IV.B; p. 5 do PDF (p. 648 impressa), Tabela III"}
+    ],
+    "metricas": [
+      {"nome": "Block-Match (\"alignment of visual elements\"), Text, Position, Color (Low-level Element Matching)", "benchmark": "Design2Code", "denominador": "nao_informado", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A.1"},
+      {"nome": "CLIP (High-level Visual Similarity, similaridade de embeddings CLIP)", "benchmark": "Design2Code", "denominador": "nao_informado", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A.1"},
+      {"nome": "VSA, CAD, TCC, UII e Overall (escala de 0 a 10, julgamento por GPT-4V)", "benchmark": "WCGB", "denominador": "nao_informado", "localizador": "p. 6 do PDF (p. 649 impressa), lista de categorias; p. 5 do PDF (p. 648 impressa), Tabela II"},
+      {"nome": "WUB Accuracy (%)", "benchmark": "WUB", "denominador": "5,990 pares (como impresso; o artigo não liga explicitamente o denominador da tabela a esse total)", "localizador": "p. 6 do PDF (p. 649 impressa), seção IV.B; p. 5 do PDF (p. 648 impressa), Tabela III"}
+    ],
+    "linguagens": ["HTML", "CSS", "JavaScript"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "No direct prompting, elementos irrelevantes da página (anúncios, imagens de fundo, decoração) podem ser incluídos indevidamente e afetar a acurácia do código gerado.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"categoria": "correcao_funcional", "descricao": "MLLMs abertos tendem a não compreender a estrutura das páginas e a mapear incorretamente elementos semânticos (botões, formulários), limitando a usabilidade do código gerado.", "localizador": "p. 1 do PDF (p. 644 impressa), Introdução"},
+      {"categoria": "outro", "descricao": "Privacidade: páginas usadas como dados de treino podem conter informações privadas ou sensíveis (não é risco de segurança do código gerado).", "localizador": "p. 3 do PDF (p. 646 impressa), Privacy Statement"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Multi-step prompting, que gera primeiro só o HTML para evitar interferência de informação desnecessária. Comparado com direct prompting na Tabela IV, mas com métricas de similaridade do Design2Code, não com uma medida específica de inclusão de elementos irrelevantes.", "avaliada": "sim", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"descricao": "Filtragem por GPT-4o, guiada por prompts, de páginas com informações privadas ou sensíveis nos dados de treino; efeito não medido.", "avaliada": "nao", "localizador": "p. 3 do PDF (p. 646 impressa), Privacy Statement"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "direct prompting (Tabela IV), para Design2Code-18B, InternVL2.5-8B e WebCoder-8B no Design2Code Benchmark",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "A Tabela I mistura condições de prompting sem indicá-lo: a linha do WebCoder-8B (80.2, 92.6, 75.2, 75.8, 87.0) coincide com a linha Multi Prompt do WebCoder-8B na Tabela IV, enquanto a linha do Design2Code-18B (78.5, 96.4, 74.3, 67.0, 85.8) coincide com a linha Direct da Tabela IV. A narrativa da Tabela I atribui o resultado à estratégia de treino («fully demonstrating the effectiveness of our training strategy»), embora o valor do WebCoder-8B ali seja o do pacote ajuste fino + multi-step prompting.", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I; p. 5 do PDF (p. 648 impressa), seção IV.A.1; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"descricao": "O InternVL2.5-8B tem na Tabela I valores (72.1, 90.7, 72.3, 67.8, 85.0) diferentes tanto da condição Direct (68.4, 87.9, 69.3, 69.5, 84.7) quanto da Multi Prompt (76.8, 90.9, 70.7, 67.3, 85.6) da Tabela IV, no mesmo benchmark e nas mesmas métricas; o artigo não explica a condição da Tabela I.", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"descricao": "Inversão: com multi-step prompting, o InternVL2.5-8B cai em Color de 69.5 para 67.3, com diferença impressa (-2.2). A narrativa reconhece melhora «across most evaluation metrics», não em todas.", "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV e seção IV.C"},
+      {"descricao": "A narrativa destaca melhora «particularly excelling in the Block Match, Text, and CLIP metrics», mas as diferenças impressas em Text (+0.5, +3.0, +0.2) e CLIP (+0.6, +0.9, +0.7) não são maiores que as de Position (+0.7, +1.4, +3.6) para os três modelos (comparação própria entre valores impressos).", "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV e seção IV.C"},
+      {"descricao": "Na Tabela IV, a diferença do WebCoder-8B em Color aparece na camada de texto como «(3.2)», sem sinal, ao contrário das demais; a resolução da imagem da página não permite confirmar o sinal. O valor 75.8 contra 72.6 é legível.", "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV, linha Multi Prompt WebCoder-8B, coluna Color"},
+      {"descricao": "A narrativa da Tabela II atribui ao multi-step prompting «significant effects in dynamic code generation», mas o WCGB não tem condição de direct prompting; a Tabela II compara modelos diferentes (valores dos demais modelos oriundos do Web2Code [27]). Não há contrafactual de prompting para essa afirmação.", "localizador": "p. 6 do PDF (p. 649 impressa), parágrafo sobre a Tabela II; p. 5 do PDF (p. 648 impressa), Tabela II"},
+      {"descricao": "O resumo afirma que a abordagem «mitigates errors in the generated code», mas o artigo não relata métrica de erros, compilação ou execução; as métricas do Design2Code e do WCGB são de similaridade visual ou julgamento por GPT-4V.", "localizador": "p. 1 do PDF (p. 644 impressa), Resumo; p. 5 e 6 do PDF (p. 648 e 649 impressas), seção IV"},
+      {"descricao": "O WebCoder-8B foi ajustado com amostras de instrução que reproduzem as quatro etapas do multi-step prompting (HTML; CSS a partir do HTML; descrição de efeitos dinâmicos; JS), de modo que o direct prompting pode estar fora do formato de treino desse modelo; o artigo não discute esse efeito no contraste da Tabela IV.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"descricao": "Origem dos valores dos comparadores: a nota a da Tabela I marca só Llama3-8B e CrystalChat-7B como oriundos da referência [27]; a origem dos valores de GPT-4V, Gemini Pro Vision, Design2Code-18B e WebSight-VLM-8B, e dos valores Direct da Tabela IV, não é informada.", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I e nota a; p. 6 do PDF (p. 649 impressa), Tabela IV"},
+      {"descricao": "Número de execuções, parâmetros de decodificação, variância e testes estatísticos não são informados para nenhuma tabela; diferenças de 0.2 a 0.7 pontos (Design2Code-18B na Tabela IV) não têm medida de incerteza.", "localizador": "p. 5 e 6 do PDF (p. 648 e 649 impressas), seção IV"},
+      {"descricao": "Aparente inconsistência na descrição do modelo base: o InternVL 2.5 usado é descrito como InternViT-6B combinado com QLLaMA baseado em LLaMA-7B, enquanto o modelo é designado InternVL2.5-8B; o artigo não reconcilia a designação com os componentes descritos.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.B; p. 4 do PDF (p. 647 impressa), Stage1"}
+    ],
+    "observacoes": [
+      {"descricao": "Dados de treino: WebSight v0.1 e v0.2 (proporção 3:7) e páginas obtidas de URLs do C4; o artigo menciona que o codificador visual do InternVL2.5-8B usou uma pequena parte dos dados WebSight no pré-treinamento, mas não discute sobreposição entre dados de treino e conjuntos de teste.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A; p. 4 do PDF (p. 647 impressa), Stage1"},
+      {"descricao": "Motivação da filtragem: páginas do WebSight v0.2 muito complexas, com código longo, que tornam o treino instável; pop-ups que ocultam conteúdo; limiar de escore 8.5 (o texto não diz o que ocorre com escore exatamente igual a 8.5).", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A"},
+      {"descricao": "Tabela III (WUB) avalia compreensão de páginas, não geração de código; fora do escopo das extrações.", "localizador": "p. 5 do PDF (p. 648 impressa), Tabela III; p. 6 do PDF (p. 649 impressa), seção IV.B"},
+      {"descricao": "Não há ablação dos estágios de ajuste fino nem do MixLoRA; o efeito do ajuste fino não é isolado em nenhuma tabela.", "localizador": "p. 4 a 6 do PDF (p. 647 a 649 impressas)"},
+      {"descricao": "A conclusão repete literalmente a primeira frase («Our research proposes an innovative multi-stage fine-tuning method for automating Web UI code generation tasks.»).", "localizador": "p. 6 do PDF (p. 649 impressa), V. Conclusion"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper presents an innovative multimodal approach that integrates multi-stage fine-tuning and multi-step prompting strategies to generate Web front-end code (HTML, CSS, JavaScript).", "localizador": "p. 1 do PDF (p. 644 impressa), Resumo"},
+      {"trecho": "To further control and optimize the model’s output, we propose a multi-step prompting method.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "In traditional direct prompting methods, the model typically generates the entire HTML, CSS, and JavaScript code for the webpage in a single attempt after receiving the full input.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "When the model processes these images, it may mistakenly include these irrelevant pieces of information, which may impact the accuracy of code generation.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "The model generates only HTML code to prevent unnecessary information from interfering with the generation process, thereby accurately restoring the webpage’s structure.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "In the second step, we input the webpage screenshot and HTML code generated in the first step into the model.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "In the third step, we input the webpage screenshot and prompt together into the model, enabling the model to infer potential interactive elements of the webpage.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "Finally, we input the webpage screenshot, HTML code, and inferred interactive information into the model, allowing it to generate JavaScript code based on the webpage screenshot, HTML structure, and inferred interaction, thereby enabling the interactive functionality of the webpage.", "localizador": "p. 5 do PDF (p. 648 impressa), seção III.C"},
+      {"trecho": "To validate the effectiveness of the multi-step prompting method we proposed, we conducted additional comparative experiments on the Design2Code Benchmark.", "localizador": "p. 6 do PDF (p. 649 impressa), seção IV.C"},
+      {"trecho": "Each set of HTML, CSS, JS, and webpage screenshots was divided into four separate instruction samples:", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A"},
+      {"trecho": "During the data filtering process, we used prompts to instruct GPT-4o to specifically filter out webpages containing private or sensitive information, ensuring that private information is not misused.", "localizador": "p. 3 do PDF (p. 646 impressa), Privacy Statement"},
+      {"trecho": "Second, due to insufficient training data, these models often fail to correctly map semantic elements (such as buttons, forms, etc.) when generating code, resulting in limited usability of the generated code.", "localizador": "p. 1 do PDF (p. 644 impressa), Introdução"},
+      {"trecho": "This suggests that our model performs better in generating dynamic code, and the multi-step prompting approach has achieved significant effects in dynamic code generation.", "localizador": "p. 6 do PDF (p. 649 impressa), parágrafo sobre a Tabela II"},
+      {"trecho": "After adopting the multi-step prompting method, all models showed varying degrees of improvement across most evaluation metrics compared to direct prompting, particularly excelling in the Block Match, Text, and CLIP metrics.", "localizador": "p. 6 do PDF (p. 649 impressa), seção IV.C"},
+      {"trecho": "In conclusion, the experimental results validate the superiority of our method in both detail and overall visual similarity, fully demonstrating the effectiveness of our training strategy.", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A.1"},
+      {"trecho": "Since the visual encoder of InternVL2.5-8B has undergone extensive pre-training and utilized a small portion of WebSight data during training, we did not perform additional pre-training for the visual model separately.", "localizador": "p. 4 do PDF (p. 647 impressa), Stage1"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "multi-step prompting method (\"Multi Prompt\")",
+      "mecanismos": ["instrucao", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "direct prompting (\"Direct\")",
+      "modelo": "Design2Code-18B (versão nao_informado)",
+      "benchmark": "Design2Code Benchmark",
+      "metrica": "Block Match (Block-Match, \"alignment of visual elements\")",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 78.5, "intervencao": 78.9},
+      "denominador": "nao_informado",
+      "condicoes": "Valores impressos na Tabela IV; diferença impressa (+0.4). O artigo não declara a unidade nem a escala de Block Match: os valores estão numa escala de 0 a 100 e são tratados como «points» na narrativa; o rótulo percentual é aproximação. Número de páginas do benchmark, denominador, número de execuções, parâmetros de decodificação e texto dos prompts: nao_informado. O artigo não descreve como as quatro etapas (incluindo a de JavaScript) foram aplicadas ao Design2Code-18B. Os valores Direct do Design2Code-18B coincidem com a linha desse modelo na Tabela I, e a origem deles (execução própria ou relato anterior) não é informada. Sem medida de incerteza. conferido_pdf: valores, cabeçalhos e título da Tabela IV conferidos na imagem da p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo, contribuições e conclusão destacam o multi-step prompting sem uma métrica principal, e a Tabela IV traz cinco métricas e três modelos sem que um prevaleça. As Tabelas I, II e III não contêm o contraste de prompting (uma condição por modelo). A primeira tabela com o contraste é a Tabela IV; nela, a primeira métrica é Block Match, o primeiro modelo é Design2Code-18B e a linha de base de prompting é Direct. Não há outra técnica focal de prompting, outra tarefa do escopo, ablação de componentes de prompting nem contraste pareado, por isso há uma única extração.",
+      "derivacao": "direta",
+      "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV, coluna Block Match, linhas Direct e Multi Prompt do Design2Code-18B; seção IV.C",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Design2Code-18B 78.5 96.4 74.3 67.0 85.8", "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV (Comparison of Results Between Direct Prompting and Multi-Step Prompting), bloco Direct; colunas Models | Block Match | Text | Position | Color | CLIP"},
+        {"trecho": "Design2Code-18B 78.9(+0.4) 96.9(+0.5) 75.0(+0.7) 67.5(+0.5) 86.4(+0.6)", "localizador": "p. 6 do PDF (p. 649 impressa), Tabela IV, bloco Multi Prompt; colunas Models | Block Match | Text | Position | Color | CLIP"},
+        {"trecho": "To validate the effectiveness of the multi-step prompting method we proposed, we conducted additional comparative experiments on the Design2Code Benchmark.", "localizador": "p. 6 do PDF (p. 649 impressa), seção IV.C"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "O problema (geração de código front-end a partir de capturas de tela de UI web) e as contribuições (conjuntos de dados, ajuste fino em múltiplos estágios, multi-step prompting, geração de interações) são explicitados.", "localizador": "p. 1 do PDF (p. 644 impressa), Resumo e Introdução; p. 2 do PDF (p. 645 impressa), contribuições"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "As etapas do multi-step prompting, a construção dos dados e os estágios de treino são descritos, mas faltam o texto completo dos prompts (a Fig. 2 mostra trechos truncados), o prompt direto, hiperparâmetros de treino, parâmetros de decodificação, número de execuções e o modo de aplicação das quatro etapas a Design2Code-18B e InternVL2.5-8B.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A e Fig. 2; p. 4 do PDF (p. 647 impressa); p. 5 do PDF (p. 648 impressa), seção III.C; p. 6 do PDF (p. 649 impressa), seção IV.C"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparador executado (direct prompting) no mesmo benchmark e métricas para três modelos, mas o prompt direto não é descrito, a origem dos valores Direct do Design2Code-18B não é informada, o WebCoder-8B foi treinado no formato das quatro etapas e a Tabela I compara modelos em condições de prompting diferentes sem indicá-lo; parte dos comparadores das Tabelas I e II vem da referência [27].", "localizador": "p. 4 do PDF (p. 647 impressa), Tabela I e nota a; p. 6 do PDF (p. 649 impressa), Tabela IV e parágrafo sobre a Tabela II; p. 3 do PDF (p. 646 impressa), seção III.A"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "As métricas do Design2Code, do WCGB (0 a 10, julgamento por GPT-4V) e do WUB são nomeadas e descritas, mas o número de páginas avaliadas e o denominador das métricas de geração não são informados, a escala de Block Match, Text, Position, Color e CLIP não é declarada, e os valores do InternVL2.5-8B na Tabela I não coincidem com nenhuma condição da Tabela IV.", "localizador": "p. 5 do PDF (p. 648 impressa), seção IV.A; p. 6 do PDF (p. 649 impressa), categorias do WCGB e Tabela IV; p. 4 do PDF (p. 647 impressa), Tabela I"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "Após leitura do texto completo, não há discussão de ameaças à validade ou limitações do próprio estudo (por exemplo, uso de GPT-4V como avaliador, ausência de repetições ou origem dos valores dos comparadores).", "localizador": "texto completo, p. 1 a 7 do PDF (p. 644 a 650 impressas)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "São informados o modelo base, as fontes e tamanhos dos dados (180k, 20k, 10000), os componentes treinados em cada estágio e as perdas; não são informados hiperparâmetros, prompts completos, decodificação, sementes nem disponibilidade de código, dados ou pesos.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A e III.B; p. 4 do PDF (p. 647 impressa), Stage1 e Stage 2"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo menciona que o codificador visual do InternVL2.5-8B usou parte dos dados WebSight e que o treino usa WebSight e páginas do C4, mas não discute sobreposição entre dados de treino e os conjuntos de teste (Design2Code, WCGB, WUB) nem o pré-treinamento dos modelos comparados.", "localizador": "p. 3 do PDF (p. 646 impressa), seção III.A; p. 4 do PDF (p. 647 impressa), Stage1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (p. 1 a 7 do PDF, p. 644 a 650 impressas). Páginas do PDF abertas visualmente: p. 3 (Fig. 1, Fig. 2, seção III.A), p. 4 (Tabela I), p. 5 (Tabelas II e III, seção III.C) e p. 6 (Tabela IV, seções IV.B, IV.C e V)."
+  }
+}

@@ -1,0 +1,354 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "baseline",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A2; PDF p. 4 (impressa 371), Tabela I",
+        "observacao": "Prompt base de instrução direta: «Generate secure Python code for the following: <coding task>». O requisito «secure» foi classificado como restrição de segurança em linguagem natural. A tarefa (trecho de código incompleto com docstring) é o próprio enunciado e está em todas as condições; não foi classificada como contexto adicional. Condição de referência, sem contrafactual próprio."
+      },
+      {
+        "nome_original": "Recursive Criticism and Improvement (RCI)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A2 e Fig. 2; PDF p. 4 (impressa 371), Tabela I; PDF p. 7 (impressa 374), Tabela II",
+        "observacao": "Três passos (gerar, revisar procurando problemas de segurança, melhorar com base na crítica), com duas iterações do laço crítica-melhoria. O passo 1 é idêntico ao prompt baseline, de modo que a Tabela II contém a condição com e sem o laço de autocrítica (baseline vs. RCI) nos mesmos modelos e tarefas. É o comparador da RQ1 (técnica de referência da literatura, adotada de [7] e [2]); o isolamento é do pacote de autocrítica com duas iterações, não de um passo individual."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A2; PDF p. 4 (impressa 371), Tabela I; PDF p. 5-6 (impressas 372-373), Seção III-C e Fig. 4; PDF p. 7 (impressa 374), Tabela II",
+        "observacao": "O prompt baseline recebe, anexadas, as 10 diretrizes de codificação segura mais similares (pares precondição-diretriz) recuperadas da base SecGuide (320 entradas derivadas de CWE/MITRE e recomendações do CodeQL) por similaridade de cosseno entre embeddings (text-embedding-3-small, ChromaDB). O acréscimo é um bloco único que combina conhecimento externo recuperado (contexto) e regras de segurança a seguir (restricoes; essa categoria já estava presente no baseline, em forma mais fraca, pelo termo «secure»). As diretrizes não são exemplos resolvidos. Baseline e RAG diferem apenas nesse bloco (Tabela I), mas o contrafactual é do pacote recuperação + diretrizes; não autoriza atribuir o ganho a um só mecanismo."
+      },
+      {
+        "nome_original": "RCI+RAG",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A2; PDF p. 4 (impressa 371), Tabela I; PDF p. 7 (impressa 374), Tabela II; PDF p. 8-9 (impressas 375-376), Seção IV-C",
+        "observacao": "Objeto da RQ2: as diretrizes recuperadas são anexadas só ao prompt inicial do RCI; os passos de revisão e melhoria são os mesmos do RCI. Acréscimos calculados em relação ao RCI, de que deriva (contexto e restricoes do bloco de diretrizes); em relação ao RAG, acrescenta feedback. A Tabela II contém RCI e RCI+RAG (diferem só no bloco de diretrizes) e RAG e RCI+RAG (diferem só no laço de autocrítica), mas o estudo trata a combinação como pacote."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature 0.0 e top_p 0.1",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação fixados em todos os modelos e abordagens para reprodutibilidade; não variados como fator.",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A3"
+      },
+      {
+        "nome_original": "escolha de GPT-4, Gemini e DeepSeek-Coder",
+        "natureza": "selecao_modelo",
+        "descricao": "Três LLMs usados como condições de modelo, cruzados com as quatro abordagens; a variação de modelo não altera o prompt.",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A3"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "gpt-4-1106-preview", "observacao": "acesso por API entre dezembro de 2024 e janeiro de 2025"},
+      {"nome": "Gemini", "versao": "gemini-1.5-flash", "observacao": "acesso por API entre dezembro de 2024 e janeiro de 2025; snapshot além do nome não informado"},
+      {"nome": "DeepSeek-Coder", "versao": "DeepSeek-V2.5", "observacao": "descrito como versão que combina DeepSeek-V2-Chat e DeepSeek-Coder-V2-Instruct; acesso por API entre dezembro de 2024 e janeiro de 2025"},
+      {"nome": "text-embedding-3-small (OpenAI)", "versao": "nao_informado", "observacao": "modelo de embeddings usado só na recuperação do RAG (1.536 dimensões), não na geração de código"}
+    ],
+    "benchmarks": [
+      {"nome": "SecurityEval", "quantidade": "121 tarefas, 69 categorias de fraqueza", "observacao": "tarefas em Python na forma de trecho de código incompleto com docstring"},
+      {"nome": "SALLM", "quantidade": "100 tarefas, 45 categorias de fraqueza", "observacao": "inclui casos de teste, não usados; validade avaliada manualmente"},
+      {"nome": "SecurityEval + SALLM combinados", "quantidade": "221 tarefas", "observacao": "corpus do experimento principal (Tabela II); os denominadores das métricas de segurança são os códigos válidos de cada condição (# Valid Code), não as 221 tarefas"},
+      {"nome": "LLMSecEval", "quantidade": "150 tarefas", "observacao": "experimento de pequena escala só com GPT-4 e descrições em linguagem natural (Tabela VI, Seção V-B); baseline e RCI regenerados"},
+      {"nome": "SecGuide (base de conhecimento, não benchmark)", "quantidade": "320 diretrizes, 29 categorias de fraqueza (250 de MITRE, 70 de CodeQL)", "observacao": "curada pelos autores; usada pela recuperação do RAG"}
+    ],
+    "metricas": [
+      {"nome": "# Valid Code", "definicao": "número de trechos compiláveis, alinhados à tarefa e completos (py_compile + verificação manual por um autor)", "denominador": "221 tarefas por modelo e abordagem (150 no LLMSecEval)"},
+      {"nome": "Avg. LOC", "definicao": "média de linhas de código, apresentada como contexto", "denominador": "nao_informado"},
+      {"nome": "# Vuln. Code (Bandit; CodeQL)", "definicao": "número de trechos de código com fraquezas", "denominador": "códigos válidos da condição (todos os códigos válidos passaram pela análise de segurança)"},
+      {"nome": "Count (Bandit; CodeQL)", "definicao": "contagem total de fraquezas (avisos)", "denominador": "nao_aplicavel"},
+      {"nome": "Rate (Bandit; CodeQL)", "definicao": "número médio de fraquezas por arquivo", "denominador": "nao_informado explicitamente; ver heterogeneidade sobre a razão Count/# Valid Code"},
+      {"nome": "Density (Bandit; CodeQL)", "definicao": "número médio de fraquezas por LOC", "denominador": "nao_informado"},
+      {"nome": "Avg. Time", "definicao": "tempo médio para gerar o código final", "denominador": "por tarefa"},
+      {"nome": "Avg. # Tokens", "definicao": "média de tokens consumidos por tarefa até a resposta final", "denominador": "por tarefa"},
+      {"nome": "relevância das diretrizes recuperadas (target-CWE e code-functionality)", "definicao": "análise manual por um autor (Tabela V)", "denominador": "221 tarefas; 84 tarefas com CWE-alvo na SecGuide"},
+      {"nome": "similaridade Dolos", "definicao": "similaridade de AST entre código gerado e implementação insegura do conjunto de dados (teste de contaminação)", "denominador": "nao_informado"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado por LLM com vulnerabilidades (cibersegurança); é o problema central do estudo, medido por Bandit e CodeQL.",
+        "localizador": "PDF p. 1 (impressa 368), Resumo e Seção I"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "O RAG aumentou levemente as fraquezas CWE-78 e CWE-502 nos três modelos (no contexto da comparação com RCI) e houve mais CWE-311 com RAG em GPT-4 e Gemini; fraquezas fora da SecGuide (CWE-311, 327, 74, 295, 693) não são cobertas pelas diretrizes.",
+        "localizador": "PDF p. 7 (impressa 374), Seção IV-B1 e IV-B2; PDF p. 8 (impressa 375), Tabela III"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O RCI depende da capacidade do modelo de identificar falhas de segurança, limitada pelos dados de treinamento e pela suscetibilidade a alucinações.",
+        "localizador": "PDF p. 1 (impressa 368), Resumo e Seção I"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "RCI e RCI+RAG geraram menos códigos válidos; o refinamento iterativo pode fazer o código se desviar da tarefa inicial ou ficar incompleto.",
+        "localizador": "PDF p. 7 (impressa 374), Seção IV-B3; PDF p. 9 (impressa 376), Seção IV-C3"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Risco de contaminação direta porque o SecurityEval foi publicado dois anos antes do estudo e os modelos são de código fechado; o estudo não afirma contaminação efetiva e relata teste com Dolos.",
+        "localizador": "PDF p. 10 (impressa 377), Seção V-C"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "RCI consome mais tempo e tokens que RAG (Tabela IV); RCI+RAG acrescenta tempo e tokens em relação ao RCI; integrar diretrizes em cada passo do RCI elevaria o custo de geração (não quantificado para essa alternativa).",
+        "localizador": "PDF p. 8 (impressa 375), Tabela IV e Seção IV-B3; PDF p. 9 (impressa 376), Seção IV-C2 e IV-C3"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "As respostas dos LLMs não foram avaliadas quanto à aleatoriedade; gerar e avaliar várias respostas não foi viável por causa da validação manual.",
+        "localizador": "PDF p. 11 (impressa 378), Seção VI"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Viés de avaliação: a validade do código e a relevância das diretrizes foram analisadas manualmente por um único autor (o estudo afirma ter seguido critérios definidos).",
+        "localizador": "PDF p. 10-11 (impressas 377-378), Seção VI"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Incorporação de diretrizes de codificação segura recuperadas (RAG), isoladamente e combinada ao RCI, para reduzir fraquezas de segurança; comparada com baseline e RCI na Tabela II.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 7 (impressa 374), Tabela II"
+      },
+      {
+        "descricao": "Temperatura 0.0 e top_p 0.1 em todos os modelos, e uso de dois conjuntos de dados com 221 tarefas, para reduzir flutuações por aleatoriedade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A3; PDF p. 11 (impressa 378), Seção VI"
+      },
+      {
+        "descricao": "Uso de duas ferramentas de análise estática (Bandit e CodeQL), analisadas separadamente, para aumentar a confiabilidade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 371), Seção III-A5"
+      },
+      {
+        "descricao": "Recomendações do CodeQL usadas como fonte de diretrizes são independentes das regras de detecção; uso de uma segunda ferramenta.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 371), Seção III-B1"
+      },
+      {
+        "descricao": "Teste básico de contaminação com Dolos (similaridade média entre 0,05 e 0,18, abaixo do limiar de 0,5 citado) e acesso só por API para afastar contaminação indireta.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 10 (impressa 377), Seção V-C"
+      },
+      {
+        "descricao": "Validação manual seguindo critérios definidos em [2] para reduzir viés humano.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3-4 (impressas 370-371), Seção III-A4; PDF p. 11 (impressa 378), Seção VI"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão entre ferramentas na RQ1: no Bandit, RAG tem menor Rate que RCI nos três modelos (GPT-4 0.408 vs 0.511; Gemini 0.611 vs 0.858; DeepSeek-Coder 0.484 vs 0.554), mas no CodeQL RCI tem menor Rate que RAG (GPT-4 0.251 vs 0.309; Gemini 0.394 vs 0.485; DeepSeek-Coder 0.239 vs 0.390). O estudo conclui que as duas abordagens são «largely comparable».",
+        "localizador": "PDF p. 7 (impressa 374), Tabela II; PDF p. 8 (impressa 375), quadro RQ1 Answer"
+      },
+      {
+        "descricao": "Narrativa vs. tabela: o texto afirma que RCI+RAG produziu o menor número médio de fraquezas nos três LLMs e melhorou a segurança «across all models» em relação a RCI e RAG no Bandit, mas na Tabela II, para Gemini/Bandit, o Rate de RCI+RAG (0.614) é maior que o de RAG (0.611, em negrito); a Count de RCI+RAG (122) é menor que a de RAG (128). No CodeQL/Gemini, a Density de RCI (0.006, em negrito) é menor que a de RCI+RAG (0.010).",
+        "localizador": "PDF p. 6 (impressa 373), Seção IV-A; PDF p. 8 (impressa 375), Seção IV-C1; PDF p. 7 (impressa 374), Tabela II"
+      },
+      {
+        "descricao": "O mesmo valor difere entre texto e tabela: o tempo médio de RCI+RAG é 70.17s na Tabela IV e «70.12 seconds» no texto.",
+        "localizador": "PDF p. 8 (impressa 375), Tabela IV; PDF p. 9 (impressa 376), Seção IV-C3"
+      },
+      {
+        "descricao": "Aparente inconsistência na Tabela V/texto: 53 de 84 tarefas são apresentadas como 63.01%; cálculo próprio 53/84 ≈ 63,10%.",
+        "localizador": "PDF p. 9 (impressa 376), Tabela V e Seção V-A"
+      },
+      {
+        "descricao": "Aparente inconsistência na razão de tokens: o texto diz que RCI consumiu «twenty-two times more tokens» (resumo de contribuições: 1/22); com as médias da Tabela IV (9,561.31 vs 453.10), cálculo próprio ≈ 21,1 vezes. O estudo não informa se a razão foi calculada sobre médias ou por tarefa. RAG «five times faster»: cálculo próprio 61.05/11.31 ≈ 5,4.",
+        "localizador": "PDF p. 8 (impressa 375), Tabela IV e texto; PDF p. 1 (impressa 368), Seção I"
+      },
+      {
+        "descricao": "Aparente inconsistência no denominador de Rate («average number of weaknesses per file»): o denominador não é declarado; a razão Count/# Valid Code (cálculo próprio) não reproduz alguns valores impressos, por exemplo GPT-4 baseline Bandit 189/214 ≈ 0,883 vs 0.895 impresso, CodeQL 155/214 ≈ 0,724 vs 0.732, Gemini baseline Bandit 203/213 ≈ 0,953 vs 0.970; para DeepSeek-Coder baseline (134/219 ≈ 0,612 vs 0.613) a razão é próxima. Falta informar o número de arquivos usado no cálculo.",
+        "localizador": "PDF p. 6 (impressa 373), Seção IV-A; PDF p. 7 (impressa 374), Tabela II"
+      },
+      {
+        "descricao": "As métricas de segurança são calculadas só sobre código válido, cujo número varia por condição (por exemplo, GPT-4: 214 baseline, 202 RCI, 217 RAG, 206 RCI+RAG); contagens de trechos vulneráveis e fraquezas comparam denominadores diferentes, e o código inválido descartado não entra na análise de segurança.",
+        "localizador": "PDF p. 4 (impressa 371), Seção III-A5; PDF p. 7 (impressa 374), Tabela II"
+      },
+      {
+        "descricao": "Resultado divergente no LLMSecEval (GPT-4, tarefas só em linguagem natural): RCI teve o melhor desempenho (Bandit Rate 0.106; CodeQL Rate 0.170), RCI+RAG ficou pior que RCI no CodeQL (Rate 0.244, Count 35 vs 24) e que RAG no CodeQL (Rate 0.232); o estudo sugere que o formato da tarefa pode influenciar a eficácia das diretrizes e pede mais pesquisa.",
+        "localizador": "PDF p. 10 (impressa 377), Tabela VI e Seção V-B"
+      },
+      {
+        "descricao": "Efeitos por CWE variam por modelo: RCI+RAG reduziu CWE-22 em relação ao RCI nos três modelos, mas teve mais ocorrências que RAG no Gemini (22 vs 15, CodeQL); em CWE-327 RCI+RAG melhora sobre RAG no Gemini, mas piora em relação ao RCI.",
+        "localizador": "PDF p. 8 (impressa 375), Tabela III; PDF p. 8-9 (impressas 375-376), Seção IV-C"
+      },
+      {
+        "descricao": "Uma única geração por tarefa e condição, sem avaliação de aleatoriedade; LLMSecEval só com GPT-4 e com baseline e RCI regenerados em relação ao estudo anterior.",
+        "localizador": "PDF p. 11 (impressa 378), Seção VI; PDF p. 9 (impressa 376), Seção V-B"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Construção da SecGuide por dois autores (codificação aberta, granularização, precondições, deduplicação), com cerca de 100 horas de esforço; consenso total, sem cálculo de concordância entre avaliadores.",
+        "localizador": "PDF p. 4-5 (impressas 371-372), Seção III-B"
+      },
+      {
+        "descricao": "Validação manual de 2.652 arquivos de código levou cerca de 70 horas; casos de teste do SALLM não foram usados porque o código modificado tornava os testes não executáveis sem adaptação manual (1.200 arquivos); o SecurityEval não tem testes.",
+        "localizador": "PDF p. 4 (impressa 371), Seção III-A4; PDF p. 10 (impressa 377), Seção VI"
+      },
+      {
+        "descricao": "Pós-processamento: o código entre delimitadores ```Python e ``` foi extraído das respostas e salvo como arquivos .py.",
+        "localizador": "PDF p. 3 (impressa 370), Seção III-A3"
+      },
+      {
+        "descricao": "Análise de relevância das diretrizes (Tabela V): 84 de 221 tarefas com CWE-alvo na SecGuide; 53 com diretriz para o CWE-alvo; média de 3.61 diretrizes sobre o CWE-alvo e 6.61 sobre a funcionalidade; 217 tarefas com diretrizes relevantes à funcionalidade. No LLMSecEval, 3.72 e 6.18 de 10.",
+        "localizador": "PDF p. 9 (impressa 376), Tabela V; PDF p. 10 (impressa 377), Seção V-B"
+      },
+      {
+        "descricao": "Proposta não avaliada: integrar diretrizes em cada passo do RCI e ampliar a SecGuide com listas de bibliotecas perigosas; aumentar o número de iterações do RCI também não foi avaliado.",
+        "localizador": "PDF p. 7 (impressa 374), Seção IV-B1; PDF p. 9 (impressa 376), Seção IV-C2; PDF p. 11 (impressa 378), Seção VII"
+      },
+      {
+        "descricao": "Pacote de replicação citado (figshare) não foi acessado nesta extração.",
+        "localizador": "PDF p. 6 (impressa 373), Seção IV; PDF p. 12 (impressa 379), referência [35]"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In this work, we investigate the effect of incorporating secure coding guidelines, relevant to a given coding task, on the security of code generated by LLMs.", "localizador": "PDF p. 1 (impressa 368), Seção I"},
+      {"trecho": "Here, the LLM was prompted to generate secure Python code for a given task without any additional security-related information.", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "Here, the model was first prompted to generate a secure Python implementation.", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "Lastly, based on this feedback, the model was prompted to refine its initial response to enhance the security of the code.", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "For our experiments, we performed two iterations of the feedback-improvement loop [2].", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "Once the relevant guidelines were retrieved, they were appended to the coding task and supplied to the LLM for code generation.", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "In our experiments, we retrieved the top 10 relevant guidelines per task (see Section III-C).", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "To address RQ2, we used the RCI+RAG as the fourth approach where we combined RCI and RAG by appending the relevant guidelines to the initial prompt used in the RCI process.", "localizador": "PDF p. 3 (impressa 370), Seção III-A2"},
+      {"trecho": "To ensure maximum reproducibility, we set the temperature to 0.0 [2] and the top_p to 0.1 [2] across all models.", "localizador": "PDF p. 3 (impressa 370), Seção III-A3"},
+      {"trecho": "However, RCI relies on the model’s ability to identify security flaws, which is constrained by its training data and susceptibility to hallucinations.", "localizador": "PDF p. 1 (impressa 368), Resumo"},
+      {"trecho": "However, for CWE-78 (‘OS Command Injection’) and CWE-502 (‘Deserialization of Untrusted Data’), RAG resulted in a slight increase in detected weaknesses across all three models.", "localizador": "PDF p. 7 (impressa 374), Seção IV-B1"},
+      {"trecho": "This problem may stem from RCI’s iterative three-step process (with two iterations in our setup), where the model refines its response at each step, potentially causing the code to drift from the initial task, compared to RAG’s direct single-step prompting.", "localizador": "PDF p. 7 (impressa 374), Seção IV-B3"},
+      {"trecho": "Similar to RCI, RCI+RAG also resulted in fewer valid code snippets with respect to baseline and RAG.", "localizador": "PDF p. 9 (impressa 376), Seção IV-C3"},
+      {"trecho": "However, the potential for direct contamination existed due to the publication of the SecurityEval dataset two years prior to this study.", "localizador": "PDF p. 10 (impressa 377), Seção V-C"},
+      {"trecho": "We conducted a basic contamination test on the results of the main experiment using the Dolos toolkit [41] to quantify the impact of any potential leakage.", "localizador": "PDF p. 10 (impressa 377), Seção V-C"},
+      {"trecho": "As this study exclusively utilized API access, indirect contamination was not a concern.", "localizador": "PDF p. 10 (impressa 377), Seção V-C"},
+      {"trecho": "Additionally, RCI consumed, on average, twenty-two times more tokens per task due to its iterative and multi-step prompting process.", "localizador": "PDF p. 8 (impressa 375), Seção IV-B3"},
+      {"trecho": "Integrating security guidelines at each step of RCI could address this issue, though at the risk of increased generation cost.", "localizador": "PDF p. 9 (impressa 376), Seção IV-C2"},
+      {"trecho": "We also acknowledge that the responses generated by the LLMs were not evaluated for randomness.", "localizador": "PDF p. 11 (impressa 378), Seção VI"},
+      {"trecho": "The manual analysis of code validity and guideline relevancy was performed by a single author.", "localizador": "PDF p. 10 (impressa 377), Seção VI"},
+      {"trecho": "We used two tools for our analysis to increase the reliability of the findings gathered from the results.", "localizador": "PDF p. 4 (impressa 371), Seção III-A5"},
+      {"trecho": "Therefore, using CodeQL recommendations as a source for security guidelines does not provide any unintended advantage when the CodeQL tool is used to validate the generated code.", "localizador": "PDF p. 4 (impressa 371), Seção III-B1"},
+      {"trecho": "Additionally, as shown in Table IV, this approach took an average of 70.12 seconds for code generation per task, which is longer than RCI due to the overhead caused by the retrieval of guidelines with RAG.", "localizador": "PDF p. 9 (impressa 376), Seção IV-C3"},
+      {"trecho": "For those 84 tasks, the retrieval process retrieved guidelines addressing the target CWE for 53 tasks (63.01%).", "localizador": "PDF p. 9 (impressa 376), Seção V-A"},
+      {"trecho": "The analysis results from Bandit and CodeQL indicate that RCI+RAG produced the lowest average number of weaknesses in code generated by all three LLMs.", "localizador": "PDF p. 6 (impressa 373), Seção IV-A"},
+      {"trecho": "Even though RAG notably reduced security weaknesses compared to baseline, RCI delivered the best performance in contrast to the results obtained for tasks in the form of incomplete code snippets.", "localizador": "PDF p. 10 (impressa 377), Seção V-B"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG)",
+      "mecanismos": ["instrucao", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "baseline",
+      "modelo": "GPT-4 (gpt-4-1106-preview)",
+      "benchmark": "SecurityEval + SALLM combinados (221 tarefas)",
+      "metrica": "Security Weaknesses - Bandit: # Vuln. Code (número de trechos de código com fraquezas)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 123, "intervencao": 61},
+      "denominador": "códigos válidos analisados: 214 (baseline) e 217 (RAG), de 221 tarefas; denominadores diferem entre as condições",
+      "condicoes": "Temperatura 0.0 e top_p 0.1; RAG com as 10 diretrizes mais similares recuperadas da SecGuide (text-embedding-3-small, ChromaDB) anexadas ao prompt baseline; análise de segurança só sobre código válido (compilável, alinhado à tarefa e completo, verificado manualmente por um autor). Número de execuções não declarado numericamente; o estudo informa que gerar e avaliar várias respostas aleatórias não foi viável. Acesso por API entre dezembro de 2024 e janeiro de 2025. Ganho do pacote recuperação + diretrizes, não de um mecanismo isolado. Conferido visualmente na Tabela II (PDF p. 7).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as conclusões destacam duas técnicas (RAG e RCI+RAG), dois comparadores (baseline e RCI) e várias métricas de segurança (Bandit e CodeQL; número de trechos, contagem, taxa, densidade) sem que uma prevaleça. A Tabela I é descritiva (templates); a primeira tabela com o contraste é a Tabela II. As RQs definem a comparação em termos de fraquezas de segurança; # Valid Code é etapa de filtragem e Avg. LOC é contexto, de modo que a primeira métrica pertinente é Bandit # Vuln. Code; primeiro modelo GPT-4; primeira linha de base de prompting listada: baseline. Técnica focal RAG (RQ1).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, colunas # Valid Code e Security Weaknesses - Bandit / # Vuln. Code",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline 214 19.36 123 189 0.895 0.050 108 155 0.732 0.039", "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, linha baseline; colunas Approach, # Valid Code, Avg. LOC, Bandit (# Vuln. Code, Count, Rate, Density), CodeQL (# Vuln. Code, Count, Rate, Density)"},
+        {"trecho": "RAG 217 26.30 61 89 0.408 0.017 50 67 0.309 0.011", "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, linha RAG; mesmas colunas"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "RCI+RAG",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "baseline",
+      "modelo": "GPT-4 (gpt-4-1106-preview)",
+      "benchmark": "SecurityEval + SALLM combinados (221 tarefas)",
+      "metrica": "Security Weaknesses - Bandit: # Vuln. Code (número de trechos de código com fraquezas)",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 123, "intervencao": 42},
+      "denominador": "códigos válidos analisados: 214 (baseline) e 206 (RCI+RAG), de 221 tarefas; denominadores diferem entre as condições",
+      "condicoes": "Temperatura 0.0 e top_p 0.1; RCI com três passos e duas iterações do laço crítica-melhoria, com as 10 diretrizes recuperadas anexadas só ao prompt inicial; análise de segurança só sobre código válido (RCI+RAG gerou menos código válido que baseline). Número de execuções não declarado numericamente. O comparador baseline difere de RCI+RAG em dois ingredientes (diretrizes e laço de autocrítica): o resultado é do pacote combinado, não do acréscimo de diretrizes ao RCI (contraste RCI vs RCI+RAG, também na Tabela II, não selecionado pela regra de ordem). Conferido visualmente na Tabela II (PDF p. 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da segunda técnica focal (RCI+RAG, RQ2), pela mesma regra de ordem: Tabela II, primeira métrica pertinente (Bandit # Vuln. Code), primeiro modelo (GPT-4), primeira linha de base de prompting listada (baseline). Não há componentes de prompting com papel componente nem tabela de ablação; total de duas comparações.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, colunas # Valid Code e Security Weaknesses - Bandit / # Vuln. Code",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "baseline 214 19.36 123 189 0.895 0.050 108 155 0.732 0.039", "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, linha baseline; colunas Approach, # Valid Code, Avg. LOC, Bandit (# Vuln. Code, Count, Rate, Density), CodeQL (# Vuln. Code, Count, Rate, Density)"},
+        {"trecho": "RCI+RAG 206 43.58 42 69 0.339 0.007 31 39 0.184 0.003", "localizador": "PDF p. 7 (impressa 374), Tabela II, bloco GPT-4, linha RCI+RAG; mesmas colunas"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo declarado (impacto de diretrizes de codificação segura específicas da tarefa no prompt sobre a segurança do código) e duas RQs explícitas (RAG vs RCI; RCI+RAG).",
+      "localizador": "PDF p. 2 (impressa 369), Seção III"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Templates dos quatro prompts (Tabela I), número de iterações do RCI, número de diretrizes recuperadas, método de recuperação, construção da SecGuide, modelos, período de acesso, parâmetros de decodificação, critérios de validade e ferramentas de análise descritos.",
+      "localizador": "PDF p. 3-6 (impressas 370-373), Seções III-A a III-C, Tabela I, Fig. 1-4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Baseline e RCI executados nos mesmos modelos, tarefas e configuração que RAG e RCI+RAG; a Tabela I mostra que as condições diferem em ingredientes identificáveis.",
+      "localizador": "PDF p. 4 (impressa 371), Tabela I; PDF p. 7 (impressa 374), Tabela II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas (trechos vulneráveis, contagem, taxa, densidade, validade, tempo, tokens), mas o denominador de Rate não é explícito e a razão Count/# Valid Code não reproduz alguns valores impressos; as métricas de segurança usam denominadores diferentes por condição (só código válido); há divergências entre texto e tabela (70.12 vs 70.17 s; 63.01% para 53/84). Ferramentas estáticas sem verificação de falsos positivos relatada.",
+      "localizador": "PDF p. 6 (impressa 373), Seção IV-A; PDF p. 7-9 (impressas 374-376), Tabelas II, IV e V"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças discute validação manual por um único autor, não uso dos testes do SALLM, ausência de avaliação de aleatoriedade; seção própria sobre contaminação; diferenças entre Bandit e CodeQL discutidas.",
+      "localizador": "PDF p. 10-11 (impressas 377-378), Seções V-C e VI; PDF p. 6 (impressa 373), Seção IV-B"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts, versões dos modelos (gpt-4-1106-preview, gemini-1.5-flash, DeepSeek-V2.5), temperatura e top_p, e pacote de replicação com scripts, código gerado e resultados informados (não acessado nesta extração); porém uma única geração por condição, sem avaliação de aleatoriedade, e validade dependente de julgamento manual de um autor.",
+      "localizador": "PDF p. 3 (impressa 370), Seção III-A3; PDF p. 6 (impressa 373), Seção IV; PDF p. 11 (impressa 378), Seção VI"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "atende",
+      "justificativa": "Risco de contaminação direta discutido (SecurityEval publicado dois anos antes), contaminação indireta afastada pelo uso de API, e teste com Dolos relatado com similaridades médias de 0.18, 0.07, 0.13 e 0.05.",
+      "localizador": "PDF p. 10 (impressa 377), Seção V-C"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente (748 linhas). Páginas do PDF abertas visualmente: p-03, p-04, p-06, p-07, p-08, p-09, p-10."
+}

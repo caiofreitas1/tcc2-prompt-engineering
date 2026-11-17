@@ -1,0 +1,174 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "re-designed prompt (HumanEval: additional sentence at the front of each question)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III, p. 3 do PDF (p. 1889 impressa); Tabela I, p. 3; contribuições, p. 2 (p. 1888)",
+        "observacao": "Formulação usada no estudo preliminar com HumanEval: uma frase de instrução antes de cada questão. O único contraste é com a acurácia de 48,1% «reported by OpenAI [24]», número de outro documento, não condição executada no estudo; por isso não há contrafactual e mecanismos_acrescentados fica vazio (sem prompt base executado). A formulação difere do prompt usado no APPS."
+      },
+      {
+        "nome_original": "well-designed prompt / re-designed prompt (APPS, Round-1: «Act as a python developer...»)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção V-A, First Phase, p. 5 do PDF (p. 1891 impressa); Tabela IV, p. 6 (p. 1892)",
+        "observacao": "Persona e descrição da tarefa (instrucao); formato estrito, call-based, sem comentários e assinatura da função [starter_code_str] (restricoes). Os exemplos de entrada e saída fazem parte do enunciado do problema APPS, não são exemplos acrescentados pelo prompt. Na Tabela IV o resultado é contrastado com GPT-Neo (ajustado no APPS) e CodeRL, modelos diferentes cujos valores, segundo o texto, vêm de trabalhos anteriores; o modelo e o treinamento mudam junto com o prompt, logo não há condição com e sem o prompt reprojetado no mesmo modelo. Sistemas comparadores (GPT-Neo, CodeRL) não têm mecanismos de prompting isolados."
+      },
+      {
+        "nome_original": "Iteration/Optimization (Round-5 = Optimize 4 times), com prompt padronizado que fornece os testes não aprovados",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "feedback", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa), Fig. 2; Tabela VI, p. 6 (p. 1892)",
+        "observacao": "Pacote: prompt de reparo com persona e pedido de modificação (instrucao), questão e última solução fornecidas como insumo (contexto), entradas e saídas dos testes não aprovados (feedback), quatro iterações adicionais e seleção, entre as cinco soluções (incluindo a primeira), da que passa mais testes (amostragem). restricoes vem do prompt base do Round-1, cuja solução integra o conjunto de candidatas; o prompt de reparo impresso não repete as restrições de formato. O contrafactual é Round-1 (mesmas soluções parcialmente aprovadas antes das iterações), no mesmo modelo. O resultado é do pacote; não pode ser atribuído só ao feedback nem só à seleção. Aplicado apenas às soluções parcialmente aprovadas."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature = 0; top_p = 1",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de amostragem fixados para resultados estáveis; não há comparação com outros valores.",
+        "localizador": "Seção IV-B, Model Selection, p. 4 do PDF (p. 1890 impressa); Seção III, p. 3"
+      },
+      {
+        "nome_original": "Data Cleaning",
+        "natureza": "outro",
+        "descricao": "Pós-processamento que remove notas em linguagem natural (Markdown, cabeçalhos como «Solution:») das respostas antes dos testes; não altera o prompt.",
+        "localizador": "Seção V-A, Data Cleaning, p. 5 do PDF (p. 1891 impressa)"
+      }
+    ],
+    "modelos": [
+      {"nome": "ChatGPT / GPT-3.5 (variante «text-davinci-003»)", "versao": "text-davinci-003", "observacao": "O estudo chama o modelo de ChatGPT e informa a variante text-davinci-003; data de acesso à API nao_informado. Limite de 4.096 tokens."},
+      {"nome": "GPT-Neo", "versao": "nao_informado", "observacao": "Linha de base da Tabela IV e da Tabela V (Top-5); o estudo diz que foi ajustado no APPS; tamanho e origem exata dos valores nao_informado (o texto se refere a resultados do estado da arte [27])."},
+      {"nome": "CodeRL", "versao": "nao_informado", "observacao": "Linha de base da Tabela IV (só strict accuracy); o texto indica que os valores vêm do artigo original («they did not give the detailed pass ratio of test cases in their research»)."}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval", "quantidade": "164 questões (média de 7,7 casos de teste por questão)", "observacao": "Estudo preliminar; Tabela I: 5 sem resposta, 51 falhas, 108 aprovadas."},
+      {"nome": "APPS (dados de teste)", "quantidade": "5.000 problemas no conjunto de teste; 4.485 usados após remover 515 que excedem o limite de tokens (Introductory 966, Interview 2.668, Competition 851; 95.583 casos de teste)", "observacao": "Denominador da métrica da Tabela VI (número de soluções parcialmente aprovadas por nível e por rodada) nao_informado. Para RQ-2 e RQ-3: 659 soluções que passaram todos os testes (Round-5), 146 sem ground truth, 513 escores de similaridade; 88.014 soluções ground truth e 68.448 funções ground truth; 34 funções geradas. O denominador dos baselines GPT-Neo e CodeRL (5.000 ou 4.485 problemas) nao_informado."}
+    ],
+    "metricas": [
+      {"nome": "accuracy rate / Strict Accuracy", "definicao": "proporção de soluções que passam todos os casos de teste", "localizador": "Seção IV-C, p. 4 do PDF (p. 1890 impressa)"},
+      {"nome": "pass ratio / Test Case Average", "definicao": "percentual de casos de teste aprovados; o estudo diz «also known as pass@1 [8]», nome que diverge da definição dada (percentual de casos de teste)", "localizador": "Seção IV-C, p. 4; Tabela IV, p. 6"},
+      {"nome": "Average passing rate for solutions that pass partial test cases", "definicao": "taxa média de testes aprovados entre soluções parcialmente aprovadas, por nível e rodada", "localizador": "Tabela VI, p. 6 do PDF (p. 1892 impressa)"},
+      {"nome": "similaridade textual (função similarity do pacote text2vec), média e máxima por problema", "definicao": "similaridade entre soluções corretas geradas e soluções ground truth", "localizador": "Seção IV-C, p. 4; Tabelas VII e VIII, p. 8"},
+      {"nome": "complexidade ciclomática, linhas por função e linhas por arquivo", "definicao": "indicadores de código limpo", "localizador": "Seção V-C, p. 9 do PDF (p. 1895 impressa)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Muitas soluções geradas falham ou passam só parte dos testes; o estudo considera a taxa de sucesso ainda subótima.", "localizador": "Seção V-A, p. 5 do PDF (p. 1891 impressa); Seção VI, p. 10 (p. 1896)"},
+      {"categoria": "contaminacao", "descricao": "Os dados de treinamento do ChatGPT podem já incluir os problemas avaliados. O estudo não afirma contaminação efetiva.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"categoria": "nao_determinismo", "descricao": "Resultados gerados aleatoriamente podem ser difíceis de otimizar; mitigado com parâmetros fixos.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"categoria": "custo", "descricao": "Custo em tokens de reenviar a questão a cada vez e custo proibitivo de repetir a geração para soluções que falham em todos os testes; GPT-4 descrito como caro. Custo não quantificado.", "localizador": "Seção V-A, Second Phase, p. 5 (p. 1891); Seção VII, p. 10 (p. 1896)"},
+      {"categoria": "outro", "descricao": "Limite de 4.096 tokens: 515 questões do APPS não puderam ser processadas e foram removidas.", "localizador": "Seção IV-B, Dataset Selection, p. 4 do PDF (p. 1890 impressa)"},
+      {"categoria": "outro", "descricao": "Descumprimento do formato pedido: mesmo com pedido de código Python puro, as respostas contêm notas em linguagem natural (Markdown e outras), que causariam erros nos testes.", "localizador": "Seção V-A, Data Cleaning, p. 5 do PDF (p. 1891 impressa)"},
+      {"categoria": "outro", "descricao": "Reuso ou cópia de código existente: o estudo interpreta a alta similaridade com o ground truth como cópia de código, sem chamá-la de contaminação.", "localizador": "Resumo, p. 1 (p. 1887); Seção V-B, p. 8 (p. 1894)"},
+      {"categoria": "outro", "descricao": "Ameaça à validade interna: similaridade textual pode não refletir a consistência do código.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Fixação de temperature em 0 (e top_p em 1) para resultados estáveis e efeitos consistentes por problema.", "avaliada": "nao", "localizador": "Seção IV-B, p. 4 (p. 1890); Seção VII, p. 10 (p. 1896)"},
+      {"descricao": "Estudo preliminar com HumanEval apresentado como forma de explorar o possível viés de dados de treinamento; não há comparação que meça o efeito dessa medida sobre a contaminação.", "avaliada": "nao", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"descricao": "Limpeza das respostas (remoção de Markdown e cabeçalhos) antes dos testes.", "avaliada": "nao", "localizador": "Seção V-A, Data Cleaning, p. 5 (p. 1891)"},
+      {"descricao": "Análise de casos para reduzir erros de julgamento subjetivo na similaridade.", "avaliada": "nao", "localizador": "Seção VII, p. 10 (p. 1896)"},
+      {"descricao": "Regenerar apenas as soluções parcialmente aprovadas, por causa do custo em tokens.", "avaliada": "nao", "localizador": "Seção VII, p. 10 (p. 1896); Seção V-A, p. 5 (p. 1891)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {"tecnica": "re-designed prompt (HumanEval: additional sentence at the front of each question)", "motivo": "Sem linha de base de prompting executada: o contraste 65,6% contra 48,1% usa número relatado pela OpenAI [24], de outro documento, não condição executada no estudo. Como o estudo tem comparador executado para outra técnica (Round-1 contra Round-5), não cabe extração descritiva."},
+      {"tecnica": "well-designed prompt / re-designed prompt (APPS, Round-1)", "motivo": "As Tabelas IV e V comparam GPT-3.5 com GPT-Neo (ajustado no APPS) e CodeRL, que são modelos com treinamento distinto, não linhas de base de prompting; não há condição do mesmo modelo sem o prompt reprojetado. Como o estudo tem comparador executado para outra técnica, a técnica vai para so_classificadas."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Tabela I imprime Pass = 108 de Count = 164 e Pass ratio = 65,6%. Cálculo próprio: 108/164 = 65,9% (arredondado a uma casa). Aparente inconsistência; o estudo não informa se o denominador exclui algum caso.", "localizador": "Tabela I, p. 3 do PDF (p. 1889 impressa)"},
+      {"descricao": "O ganho declarado do prompt reprojetado (48,1% para 65,6%) compara o resultado executado com número relatado pela OpenAI [24] (referência intitulada «Gpt-4 technical report»), que o estudo diz ser do mesmo modelo; não é comparador executado, e prompt, data e protocolo de avaliação do número externo não são informados.", "localizador": "Seção III, p. 3 (p. 1889); contribuições, p. 2 (p. 1888); referência [24], p. 11"},
+      {"descricao": "Resumo e introdução falam em 5.000 problemas («We collect ChatGPT’s outputs on 5,000 code competition problems»), mas o corpo usa 4.485 após remover 515 por limite de tokens; os 25,4% do resumo correspondem à média da Tabela IV sobre o conjunto reduzido.", "localizador": "Resumo, p. 1 (p. 1887); Seção IV-B e Tabela III, p. 4 (p. 1890); Tabela IV, p. 6"},
+      {"descricao": "Narrativa do resumo contradiz o corpo: o resumo diz que o modelo prefere copiar código quando enfrenta problemas mais difíceis, enquanto a Tabela VIII (similaridade média 79,5% Introductory, 72,1% Interview, 65,3% Competition) e a resposta à RQ-2 dizem que reutiliza mais código nos problemas mais simples.", "localizador": "Resumo, p. 1 (p. 1887); Tabela VIII e Answers to RQ-2, p. 8 (p. 1894)"},
+      {"descricao": "Tabela V imprime para GPT-3.5 Round-5, nível introductory, Test Case Average 25,7% e Strict Accuracy 14,7%, valores menores que os de Round-1 no mesmo nível na Tabela IV (37,6% e 30,1%), embora Round-5 seja posterior às iterações. O texto diz que em Round-5 «we consider partially passed problems, representing the lower bound»; o denominador de cada tabela não é informado e não é possível escolher um valor como verdadeiro.", "localizador": "Tabela IV e Tabela V, p. 6 do PDF (p. 1892 impressa)"},
+      {"descricao": "Tabela VI: a taxa média de testes aprovados das soluções parciais cai de Round-1 para Round-5 em Introductory (39,9% para 38,3%) e Interview (32,5% para 32,1%) e sobe em Competition (34,7% para 35,0%). Como Round-5 seleciona, entre cinco soluções que incluem a primeira, a que passa mais testes, a queda só é compatível se o conjunto de soluções parciais mudar entre rodadas (por exemplo, saída das que passaram a ser aprovadas); o estudo não informa o número de soluções em cada rodada. Aparente inconsistência ou mudança de denominador não declarada.", "localizador": "Tabela VI, p. 6 do PDF (p. 1892 impressa); Seção V-A, Second Phase, p. 5"},
+      {"descricao": "Na Tabela IV, GPT-3.5 (zero-shot com prompt reprojetado) é contrastado com GPT-Neo, ajustado no APPS, e CodeRL; modelo, treinamento e prompt mudam juntos, os valores dos baselines parecem vir dos trabalhos originais e o estudo não informa se cobrem os mesmos 4.485 problemas. GPT-Neo Top-5 (Tabela V) também difere em número de amostras.", "localizador": "Tabela IV, Tabela V e texto, p. 5 a 6 do PDF (p. 1891 a 1892 impressas)"},
+      {"descricao": "O prompt descrito para o formato de entrada padrão (standard input) pede «please use the call-based format to write the code», contradizendo a distinção entre os dois formatos; o estudo não comenta.", "localizador": "Seção V-A, First Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"descricao": "A seção de método define pass ratio como percentual de casos de teste aprovados e o chama de pass@1, métrica que, na referência citada [8], é definida no nível do problema; o estudo não resolve a divergência.", "localizador": "Seção IV-C, p. 4 do PDF (p. 1890 impressa)"},
+      {"descricao": "A Seção V-C anuncia «four aspects» e lista três (tamanho de função, tamanho de arquivo e comprimento de linha); a Seção IV-C seleciona só dois indicadores e não há resultado relatado para comprimento de linha.", "localizador": "Seção IV-C, p. 5 (p. 1891); Seção V-C, p. 9 (p. 1895)"},
+      {"descricao": "O estudo chama de «percentage improved» diferenças em pontos percentuais entre GPT-3.5 Round-5 e GPT-Neo Top-5 (14,7%-5,5%=9,2%; 25,7%-19,9%=5,8%) e conclui que problemas com mais testes são mais difíceis de reparar sem apresentar dados por número de testes.", "localizador": "Seção V-A, p. 6 do PDF (p. 1892 impressa)"},
+      {"descricao": "O estudo não informa se as entradas e saídas fornecidas no prompt de reparo e usadas na seleção do Round-5 são distintas dos testes usados na avaliação; soluções que falham em todos os testes não são iteradas.", "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa)"}
+    ],
+    "observacoes": [
+      {"descricao": "O estudo preliminar (HumanEval) e o experimento principal (APPS) usam prompts diferentes, embora o estudo trate o prompt do APPS como aplicação do prompt «well-designed» aquecido no HumanEval.", "localizador": "Resumo, p. 1; Seção III, p. 3; Seção V-A, p. 5"},
+      {"descricao": "RQ-2 (similaridade com ground truth) e RQ-3 (código limpo) descrevem soluções corretas de Round-5 e as comparam com soluções humanas do APPS; não são contrastes de prompting.", "localizador": "Seções V-B e V-C, p. 7 a 9 (p. 1893 a 1895)"},
+      {"descricao": "Análise manual de casos (problemas 1506, 4895, 4066 e 1701) ilustra reparos e similaridades; é qualitativa.", "localizador": "Figs. 3, 4, 6 e 7, p. 6 a 8"},
+      {"descricao": "Pacote de replicação citado (Zenodo, referência [10]); não acessado nem validado nesta extração.", "localizador": "Seção I, p. 2 (p. 1888); referência [10], p. 11"},
+      {"descricao": "Número de execuções por condição nao_informado; o estudo informa temperatura 0, mas não diz se repetiu as chamadas.", "localizador": "Seções III e IV-B, p. 3 a 4"}
+    ],
+    "citacoes": [
+      {"trecho": "In this study, we conduct the first large empirical study to investigate the zero-shot learning ability of ChatGPT for solving competition programming problems.", "localizador": "Resumo, p. 1 do PDF (p. 1887 impressa)"},
+      {"trecho": "To make ChatGPT understand the given questions better and generate code solutions in batches, we optimize the prompt design and invoke ChatGPT’s API to automatically generate code solutions by asking it with an additional sentence at the front of each question: “Please generate the Python solution code for the following question.”", "localizador": "Seção III, p. 3 do PDF (p. 1889 impressa)"},
+      {"trecho": "The results show that ChatGPT achieves an accuracy rate of 65.6%, significantly surpassing the 48.1% accuracy reported by OpenAI [24] for the same model.", "localizador": "Seção III, p. 3 do PDF (p. 1889 impressa)"},
+      {"trecho": "Act as a python developer. You will be given a problem, which contains an overview of the problem, a description of the input and output, and some examples of input and output.", "localizador": "Seção V-A, First Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "In addition, the format you respond to is very strict, and please use the call-based format to write the code without comments.", "localizador": "Seção V-A, First Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "The function should be defined as [starter_code_str].", "localizador": "Seção V-A, First Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "I asked you to act as a Python developer to help us solve the following question before: [QUESTION]. The solution you gave us before is: [LAST_SOLUTION]. However, the code can not pass all testing inputs and outputs, which are: [INPUT_OUTPUT]. Please modify your solution code to ensure it can pass all testing inputs and outputs.", "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "Consequently, for each partially-passed solution, we perform four additional iterations and select the solution that achieves the highest number of successful test cases among the five generated solutions (including the first partially-passed solution), designating it as the final solution (Round-5).", "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "It should be noted that GPT-Neo and CodeRL did not redesign the prompt during the verification test.", "localizador": "Seção V-A, p. 5 a 6 do PDF (p. 1891 a 1892 impressas)"},
+      {"trecho": "However, many code solutions either cannot pass the corresponding test cases or partially pass them.", "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "Given this circumstance, repeating the generation process would result in significantly low efficiency and prohibitively high costs.", "localizador": "Seção V-A, Second Phase, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "Another potential threat to external validity lies in the training data of ChatGPT, which might already include the problems under investigation.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "To address this concern, we conduct a preliminary study using HumanEval to explore this potential bias.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "Moreover, due to the high token cost of re-throwing the question to ChatGPT each time, we choose only to regenerate codes for incomplete pass solutions.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "Randomly generated results can be challenging to optimize effectively.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "To address this concern, we mitigate the threat by fixing the parameters, ensuring consistent effects for each problem.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "In our experiment, we set it as 0 to ensure stable and controllable output results.", "localizador": "Seção IV-B, Model Selection, p. 4 do PDF (p. 1890 impressa)"},
+      {"trecho": "A total of 515 questions in APPS test data cannot be successfully processed by ChatGPT due to this token limitation.", "localizador": "Seção IV-B, Dataset Selection, p. 4 do PDF (p. 1890 impressa)"},
+      {"trecho": "In the experiment, we observe that even though we request the GPT-3.5 API to generate pure Python code without any redundant parts, the generated code solutions still contain a mixture of natural language notes (e.g., markdowns and others).", "localizador": "Seção V-A, Data Cleaning, p. 5 do PDF (p. 1891 impressa)"},
+      {"trecho": "Moreover, we investigate the solutions generated by LLMs and the existing solutions, we find that it prefers to directly copy the code instead of re-write when facing more difficult problems.", "localizador": "Resumo, p. 1 do PDF (p. 1887 impressa)"},
+      {"trecho": "We observed that on simpler problems, ChatGPT tends to reuse more existing code, while on more complicated problems, it prefers to create new solutions from scratch.", "localizador": "Answers to RQ-2, p. 8 do PDF (p. 1894 impressa)"},
+      {"trecho": "Since text similarity alone may not fully reflect code consistency, we perform case analysis to reduce subjective judgment errors.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+      {"trecho": "The pass ratio, also known as pass@1 [8], measures the percentage of test cases passed by the generated solutions.", "localizador": "Seção IV-C, p. 4 do PDF (p. 1890 impressa)"},
+      {"trecho": "It is worth mentioning that for GPT-3.5 Round-5, we consider partially passed problems, representing the lower bound of GPT-3.5’s results.", "localizador": "Seção V-A, p. 6 do PDF (p. 1892 impressa)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iteration/Optimization (Round-5 = Optimize 4 times), com prompt padronizado que fornece os testes não aprovados",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "feedback", "amostragem"],
+      "comparador": "Round-1 (solução de geração única com o prompt reprojetado, antes das iterações)",
+      "modelo": "GPT-3.5 text-davinci-003 (chamado ChatGPT no estudo)",
+      "benchmark": "APPS, dados de teste (4.485 problemas após exclusão por limite de tokens), nível Introductory, apenas soluções parcialmente aprovadas",
+      "metrica": "Average passing rate for solutions that pass partial test cases (no texto: «average test pass rate for partially-passed solutions»)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 39.9, "intervencao": 38.3},
+      "denominador": "nao_informado (o estudo não informa quantas soluções parcialmente aprovadas entram em cada rodada no nível Introductory; o nível tem 966 problemas usados, mas esse não é o denominador declarado da métrica)",
+      "condicoes": "temperature 0 e top_p 1; Round-5 = quatro iterações adicionais com o prompt de reparo e seleção, entre cinco soluções (incluindo a primeira), da que passa mais casos de teste; só soluções parcialmente aprovadas são iteradas (as que falham em todos os testes não são); número de execuções nao_informado; não informado se os testes do feedback são distintos dos de avaliação. Ganho ou perda é do pacote (feedback, contexto e seleção), não de um ingrediente. Não há agregado impresso por rodada compatível (o texto cita apenas «approximately 35%» como média geral). Os valores das demais colunas (Interview 32,5% e 32,1%; Competition 34,7% e 35,0%) não foram extraídos como comparações. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca várias técnicas (prompt reprojetado, reparo com testes falhos) e duas métricas (accuracy rate e pass ratio) sem que uma prevaleça, e o ganho principal do prompt (48,1% para 65,6%) usa número externo. Pela ordem das tabelas: a Tabela I traz só uma condição; as Tabelas IV e V comparam GPT-3.5 com outros modelos (GPT-Neo ajustado, CodeRL), não com linhas de base de prompting; a Tabela VI é a primeira com contraste de prompting no mesmo modelo (Round-1 contra Round-5). Única métrica e único modelo da tabela; primeira coluna (Introductory). Não há outra técnica focal com contraste de prompting nem outra tarefa do escopo para cobertura, nem tabela de ablação ou matriz de ingredientes.",
+      "derivacao": "direta",
+      "localizador": "Tabela VI, p. 6 do PDF (p. 1892 impressa), linhas Round-1 e Round-5, coluna Introductory; procedimento na Seção V-A, Second Phase, e Fig. 2, p. 5 (p. 1891)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Round-1 39.9% 32.5% 34.7%", "localizador": "Tabela VI («Average passing rate for solutions that pass partial test cases»), colunas Introductory, Interview, Competition, p. 6 do PDF (p. 1892 impressa)"},
+        {"trecho": "Round-5 38.3% 32.1% 35.0%", "localizador": "Tabela VI («Average passing rate for solutions that pass partial test cases»), colunas Introductory, Interview, Competition, p. 6 do PDF (p. 1892 impressa)"},
+        {"trecho": "However, the average test pass rates for the introductory and interview levels slightly decreased from Round-1 to Round-5, suggesting that in the subsequent iterations, GPT-3.5 either fully understands the problem and provides accurate responses, or it still generates imprecise answers that do not significantly increase the number of test cases passed.", "localizador": "Seção V-A, p. 6 do PDF (p. 1892 impressa)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Três questões de pesquisa explícitas (acurácia em problemas de competição, similaridade com ground truth, limpeza do código).", "localizador": "Seção IV-A, p. 4 do PDF (p. 1890 impressa)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Prompts, fases, critério de seleção do Round-5, parâmetros e filtragem do conjunto estão descritos; faltam o número de soluções parciais por rodada, a relação entre testes do feedback e testes de avaliação, a origem explícita dos valores dos baselines e o motivo do prompt de entrada padrão pedir formato call-based.", "localizador": "Seções IV-B e V-A, p. 4 a 6 (p. 1890 a 1892)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "O reparo iterativo tem comparador executado no mesmo modelo (Round-1); o prompt reprojetado é comparado apenas com número externo (48,1%) e com modelos distintos (GPT-Neo ajustado, CodeRL) cujos valores parecem vir de trabalhos anteriores, possivelmente com outro denominador.", "localizador": "Seção III, p. 3; Tabelas IV a VI, p. 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Accuracy rate e pass ratio são definidos, mas pass ratio é chamado de pass@1 em divergência com a definição; os denominadores das Tabelas V e VI não são informados; Round-5 introductory na Tabela V é menor que Round-1 na Tabela IV; Tabela I imprime 65,6% para 108 de 164 (aparente inconsistência).", "localizador": "Seção IV-C, p. 4; Tabela I, p. 3; Tabelas IV a VI, p. 6"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Há seção de ameaças (modelo, dados de treinamento, custo, parâmetros, similaridade textual), mas não discute a ambiguidade dos denominadores do Round-5, a comparação com modelos de outros estudos nem o uso de testes no feedback.", "localizador": "Seção VII, p. 10 do PDF (p. 1896 impressa)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelo e variante (text-davinci-003), temperatura, top_p e prompts estão impressos e há pacote de replicação citado (não acessado); faltam data das chamadas, número de execuções e contagens por rodada.", "localizador": "Seção IV-B, p. 4; Seção V-A, p. 5; referência [10], p. 11"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo reconhece que os problemas podem estar nos dados de treinamento e observa alta similaridade com soluções existentes (similaridade máxima de 100% em 9 problemas Interview e 22 Introductory), mas a medida citada (estudo preliminar com HumanEval) não controla o risco.", "localizador": "Seção VII, p. 10; Seção V-B e Tabela VIII, p. 8"}
+  ],
+  "leitura": "completa: texto extraído lido integralmente (699 linhas). Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04, p-05, p-06, p-07, p-08, p-09, p-10 (p-11 e p-12 contêm só referências e não foram abertas)."
+}

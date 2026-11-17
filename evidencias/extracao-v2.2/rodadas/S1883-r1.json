@@ -1,0 +1,243 @@
+{
+  "ficha": {
+    "estudo": "S1883",
+    "titulo": "DiCE: Distributed Code generation and Execution",
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Synthia",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt", "amostragem", "multiagente"],
+        "mecanismos_acrescentados": ["otimizacao_prompt", "amostragem", "multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. PDF 4-6 (impressas 11-13), Seção IV-A, Figs. 5 e 6; Seção V-A",
+        "observacao": "Ferramenta baseada em LLM apresentada como contribuição (p. PDF 2, impressa 9). Condição avaliada: o 'Distributed code generator' (GPT-4o no experimento, nota 8, p. PDF 7) com o prompt de sistema final obtido na fase de treinamento, recebendo o código serial e a consulta do usuário (contexto), orientado a usar asyncio para execução paralela (instrucao) e a seguir a semântica de programa específica com chamadas 'hermod.call' aos serviços do Hermod (restricoes); na inferência, o 'Synthia Checker' (outro LLM) compara código serial e distribuído e, em caso de falha, outra versão é gerada até passar (amostragem com seleção por verificador; papéis distintos que interagem: multiagente). O conteúdo do prompt de sistema final e do prompt semente não é publicado; instrucao e restricoes se apoiam na descrição da orientação dada ao LLM. O artigo não confirma explicitamente que o Synthia Checker foi usado na execução das 100 consultas. mecanismos_acrescentados em relação ao 'basic seed prompt' com geração única, que não foi executado como condição. Nenhuma condição sem Synthia, com o prompt semente ou com prompt manual foi executada; o speed-up é do pacote Synthia + Hermod + cluster (pacote híbrido)."
+      },
+      {
+        "nome_original": "training phase in Synthia (Distributed code generator, Output verifier, Prompt generator)",
+        "mecanismos": ["otimizacao_prompt", "multiagente"],
+        "mecanismos_acrescentados": ["otimizacao_prompt", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. PDF 4-5 (impressas 11-12), Seção IV-A, Fig. 5; p. PDF 6 (impressa 13), Seção V-A",
+        "observacao": "Parte do sistema proposto que gera automaticamente o prompt de sistema: parte de um prompt semente, o Output verifier compara as saídas do código serial e do distribuído e, quando não coincidem, o Prompt generator revisa o prompt a partir do prompt atual, do código incorreto e das saídas das execuções. O retorno de execução é usado para refinar o prompt (otimizacao_prompt), não o código. Os três papéis usam GPT-4o. Não há condição com o prompt semente nem com prompt manual para comparação. Número de exemplos de treinamento e de iterações: nao_informado."
+      },
+      {
+        "nome_original": "Synthia Checker",
+        "mecanismos": ["amostragem", "multiagente"],
+        "mecanismos_acrescentados": ["amostragem", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. PDF 5 (impressa 12), Seção IV-A, Fig. 6",
+        "observacao": "LLM de verificação na inferência: compara o código serial (com a consulta) e o código distribuído sugerido; em falha, outra versão é gerada e comparada até passar. O artigo não informa se o veredito é devolvido ao gerador como retorno, nem o modelo usado pelo Checker, nem o número de regenerações. Sem condição sem o Checker."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Hermod (Runtime)",
+        "natureza": "outro",
+        "descricao": "Runtime implementado como operador Kubernetes (em Go) que expõe funções como serviços, mantém uma fila por função e distribui as requisições entre cópias (pods); executa o código distribuído no cluster. Não é prompting; o speed-up relatado (Fig. 11, 'Speed-up achieved by Hermod') depende dele.",
+        "localizador": "p. PDF 5-6 (impressas 12-13), Seção IV-B, Figs. 7 e 8"
+      },
+      {
+        "nome_original": "distributed cluster with 2 nodes, 4 nodes, and 8 nodes",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de execução (Kubernetes, máquinas com GPUs NVIDIA RTX 3090) cujo tamanho varia entre as condições Dice-2, Dice-4 e Dice-8; recurso de hardware, não prompting.",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B, nota 9"
+      },
+      {
+        "nome_original": "2 different LLM options: OpenAI's Assistant (GPT-4o) and Anthropic's Claude-3.5-Sonnet",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do modelo para a inferência do Synthia com o mesmo prompt de sistema; só GPT-4o é usado na geração dos códigos do experimento quantitativo (nota 8).",
+        "localizador": "p. PDF 6 (impressa 13), Seção V-A; p. PDF 7 (impressa 14), nota 8"
+      },
+      {
+        "nome_original": "“mobius” and “rihanna-plus”",
+        "natureza": "outro",
+        "descricao": "Modelos de IA proprietários servidos pelo Hermod por trás das APIs find e simple_query; componentes de execução, não prompting.",
+        "localizador": "p. PDF 7 (impressa 14), nota 7"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o (OpenAI Assistant API)", "versao": "nao_informado", "uso": "Distributed code generator, Output verifier e Prompt generator na fase de treinamento; geração dos códigos distribuídos do experimento (nota 8); geração dos códigos seriais com o prompt do ViperGPT (Seção III)", "localizador": "p. PDF 3 (impressa 10); p. PDF 6 (impressa 13), Seção V-A; p. PDF 7 (impressa 14), nota 8"},
+      {"nome": "Claude-3.5-Sonnet (Anthropic)", "versao": "nao_informado", "uso": "Opção de inferência do Synthia com o mesmo prompt de sistema; só avaliação qualitativa, sem resultados quantitativos", "localizador": "p. PDF 6 (impressa 13), Seção V-A; p. PDF 5 (impressa 12), nota 3"},
+      {"nome": "modelo do Synthia Checker", "versao": "nao_informado", "uso": "Verificação na inferência; o artigo não identifica o modelo", "localizador": "p. PDF 5 (impressa 12)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "GQA",
+        "versao": "nao_informado",
+        "subconjunto": "user queries do arquivo challenge_balanced_questions.json; os 100 códigos seriais gerados pelo ViperGPT com maior tempo de execução ('top 100 longest running serial codes')",
+        "quantidade": 100,
+        "observacao": "Amostra selecionada pelos tempos de execução mais longos, não aleatória. Os exemplos usados na fase de treinamento ('several example serial codes') não têm quantidade informada (nao_informado) e a sobreposição com as 100 consultas de avaliação é nao_informado.",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B; p. PDF 4 (impressa 11)"
+      }
+    ],
+    "metricas": [
+      {"nome": "speed-up (average speedup; box plot na Fig. 11)", "definicao": "nao_informado (fórmula não apresentada; relativo à execução do código serial, cujos tempos não são relatados)", "denominador": "nao_informado explicitamente; o experimento usa 100 consultas", "localizador": "p. PDF 7 (impressa 14), Fig. 11 e Seção V-B"},
+      {"nome": "efficiency (average efficiency; Fig. 12)", "definicao": "nao_informado", "denominador": "nao_informado explicitamente; o experimento usa 100 consultas", "localizador": "p. PDF 7 (impressa 14), Fig. 12 e Seção V-B"},
+      {"nome": "correspondência entre a saída do código distribuído e a do código serial (verificação manual)", "definicao": "verificação manual da igualdade das saídas", "denominador": "100 example user queries", "localizador": "p. PDF 7 (impressa 14), Seção V-B"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "Linguagem dos códigos seriais e distribuídos (biblioteca asyncio e ImagePatch). C++ (implementação do Synthia) e Go (Hermod) são linguagens de implementação do sistema, não da tarefa.", "localizador": "p. PDF 4 (impressa 11); p. PDF 5 (impressa 12), nota 3"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O prompt de sistema pode não produzir código distribuído sintaticamente correto, com a mesma saída do código serial e mais rápido; na inferência, sem dados de referência e sem executar o código serial, a verificação depende de um LLM que faz 'basic checks'.",
+        "localizador": "p. PDF 4 (impressa 11), Seção IV-A; p. PDF 5 (impressa 12)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sensibilidade dos LLMs a variações do prompt, apresentada pelo estudo como motivação para gerar o prompt de sistema automaticamente.",
+        "localizador": "p. PDF 4 (impressa 11), Seção IV-A"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Output verifier e Prompt generator na fase de treinamento: o prompt é revisado até que o código distribuído gere a mesma saída do serial e execute mais rápido.", "avaliada": "nao", "localizador": "p. PDF 4-5 (impressas 11-12), Fig. 5"},
+      {"descricao": "Synthia Checker na inferência: código distribuído só é aceito depois de passar na comparação com o código serial; caso contrário, nova versão é gerada.", "avaliada": "nao", "localizador": "p. PDF 5 (impressa 12), Fig. 6"},
+      {"descricao": "Verificação manual de que a saída do código distribuído coincide com a do código serial nas 100 consultas.", "avaliada": "nao", "localizador": "p. PDF 7 (impressa 14), Seção V-B"}
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente inconsistência entre speed-up e efficiency para 8 nós (cálculo próprio): 3.7/8 = 0,4625, enquanto a efficiency impressa é 0.48 (texto e rótulo da Fig. 12); para 2 nós (2/2 = 1) e 4 nós (2.95/4 ≈ 0,74) os valores impressos coincidem com speed-up/nós. O artigo não define a efficiency nem informa o arredondamento do speed-up ou o estimador usado, de modo que não é possível decidir qual valor está correto.",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B e Fig. 12; p. PDF 1 (impressa 8), resumo"
+      },
+      {
+        "descricao": "A Fig. 11 é um box plot sem médias impressas; as médias de speed-up (2X, 2.95X, 3.7X) constam só no texto e no resumo e não podem ser conferidas na figura. Os tempos de execução do código serial (referência do speed-up) e a máquina em que ele foi executado não são relatados.",
+        "localizador": "p. PDF 7 (impressa 14), Fig. 11 e Seção V-B"
+      },
+      {
+        "descricao": "A efficiency cai com o tamanho do cluster (1, 0.74 e 0.48); os autores atribuem a queda ao número insuficiente de oportunidades de paralelismo para ocupar clusters maiores e dizem continuar a investigação.",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B"
+      },
+      {
+        "descricao": "A narrativa afirma que GPT-4o e 'Clauder-3.5-Sonnet' geram 'syntactically correct and performant serial code', quando o contexto trata do código distribuído; a afirmação sobre Claude-3.5-Sonnet não tem resultado quantitativo, e o experimento de speed-up usa só GPT-4o (nota 8).",
+        "localizador": "p. PDF 6-7 (impressas 13-14), Seção V-A; p. PDF 7 (impressa 14), nota 8"
+      },
+      {
+        "descricao": "As figuras atribuem o speed-up e a efficiency ao Hermod ('achieved by Hermod'), enquanto o resumo e a conclusão os apresentam como resultado do DiCE; o resultado é do pacote Synthia + Hermod + cluster, sem condição que isole o prompting.",
+        "localizador": "p. PDF 7 (impressa 14), Figs. 11 e 12; p. PDF 8 (impressa 15), Seção VI"
+      },
+      {
+        "descricao": "A amostra de avaliação são os 100 códigos seriais de maior tempo de execução, selecionados entre os gerados pelo ViperGPT; não há comparação com o prompt semente, prompt manual ou ferramentas de paralelização citadas (HPC-Coder, AUTOPARLLM), nem número de execuções ou teste estatístico informados.",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B; p. PDF 2 (impressa 9), Seção II"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Classificação da tarefa: transformação de código serial Python em código distribuído Python com o mesmo resultado, visando desempenho; registrada como refatoracao. O código serial é gerado antes, com o prompt do ViperGPT usado como prompt de sistema do OpenAI Assistant (GPT-4o); essa geração é insumo, não condição avaliada, e supõe-se correta pelo estudo.",
+        "localizador": "p. PDF 3 (impressa 10), Seção III; p. PDF 4 (impressa 11), Seção IV"
+      },
+      {
+        "descricao": "O conteúdo do prompt semente e do prompt de sistema final não é apresentado; o número de exemplos de treinamento, de iterações de revisão e de regenerações do Synthia Checker não é informado.",
+        "localizador": "p. PDF 4-6 (impressas 11-13)"
+      },
+      {
+        "descricao": "Uma ferramenta com interface gráfica permite escolher GPT-4o ou Claude-3.5-Sonnet, gerar e executar o código e ver o speed-up; é demonstração, sem resultados adicionais.",
+        "localizador": "p. PDF 7-8 (impressas 14-15), Seção V-C, Fig. 13"
+      },
+      {
+        "descricao": "A conferência de correção das 100 consultas foi feita manualmente pelos autores (esforço manual descrito pelo estudo).",
+        "localizador": "p. PDF 7 (impressa 14), Seção V-B"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "We propose a novel system called DiCE, which takes serial code as input and automatically generates distributed version of the code and efficiently executes it on a distributed setup.", "localizador": "p. PDF 1 (impressa 8), resumo"},
+      {"trecho": "Since LLMs are quite sensitive to prompts, rather than us manually writing the prompt, we include a training phase in Synthia to automatically generate a system prompt, which will guide the LLM to generate syntactically correct and performant parallel code for the given input serial code (while ensuring that the output from the parallel code is the same as the output from the serial code).", "localizador": "p. PDF 4 (impressa 11), Seção IV-A"},
+      {"trecho": "We start with a basic seed prompt and iteratively revise the prompt automatically until we are able to generate syntactically correct and performant parallel code versions for each of the serial codes.", "localizador": "p. PDF 4 (impressa 11), Seção IV-A"},
+      {"trecho": "Revision occurs whenever the current system prompt is unable to generate syntactically correct and performant parallel/distributed code.", "localizador": "p. PDF 4 (impressa 11), Seção IV-A"},
+      {"trecho": "Input to this LLM includes the current system prompt, incorrect distributed code, and output from the serial and distributed code execution.", "localizador": "p. PDF 5 (impressa 12), Seção IV-A"},
+      {"trecho": "The serial code generated by the visual program synthesis tools is written in Python language, hence we guide the LLM to leverage libraries within Python language for parallel execution.", "localizador": "p. PDF 4 (impressa 11), Seção IV-A"},
+      {"trecho": "Synthia uses specific program semantics while generating the distributed code in order to make it easy to run on a distributed setup.", "localizador": "p. PDF 4 (impressa 11), Seção IV"},
+      {"trecho": "This LLM generates distributed code (based on the current system prompt) for the input serial code and user query.", "localizador": "p. PDF 4 (impressa 11), Seção IV-A"},
+      {"trecho": "Since we do not have any ground truth data and cannot run the serial code, we devise another LLM to perform some basic checks during inference.", "localizador": "p. PDF 5 (impressa 12), Seção IV-A"},
+      {"trecho": "If not (fail), then another version of distributed code is generated and compared.", "localizador": "p. PDF 5 (impressa 12), Seção IV-A"},
+      {"trecho": "We use the same system prompt for both these options.", "localizador": "p. PDF 6 (impressa 13), Seção V-A"},
+      {"trecho": "We manually verify that the output from the distributed code matches the output from serial code for all the 100 example user queries.", "localizador": "p. PDF 7 (impressa 14), Seção V-B"},
+      {"trecho": "Specifically, we pick the top 100 longest running serial codes generated by ViperGPT corresponding to user queries from “challenge_balanced_questions.json” file from the GQA dataset [3].", "localizador": "p. PDF 7 (impressa 14), Seção V-B"},
+      {"trecho": "“mobius” and “rihanna-plus” are proprietary AI models being used behind “find” and “simple_query” APIs, respectively.", "localizador": "p. PDF 7 (impressa 14), nota 7"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Synthia",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt", "amostragem", "multiagente"],
+      "mecanismos_acrescentados": ["otimizacao_prompt", "amostragem", "multiagente"],
+      "comparador": null,
+      "modelo": "GPT-4o (OpenAI Assistant API; snapshot nao_informado)",
+      "benchmark": "GQA — 100 códigos seriais gerados pelo ViperGPT com maior tempo de execução (challenge_balanced_questions.json)",
+      "metrica": "average speedup (eixo 'Speed-up' da Fig. 11; definição não apresentada)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": 2},
+      "denominador": "nao_informado explicitamente; o experimento usa 100 consultas (100 example user queries)",
+      "condicoes": "Extração descritiva (sem comparador executado); não é efeito do prompting. Condição Dice-2 (execução com DiCE em cluster de 2 nós, GPUs NVIDIA RTX 3090); impresso como '2X'; unidade 'proporcao' usada para a razão de speed-up. Demais condições, não selecionadas: Dice-4 = 2.95X e Dice-8 = 3.7X; efficiency média 1, 0.74 e 0.48. O speed-up é relativo à execução do código serial, cujos tempos e máquina não são relatados, e é resultado do pacote híbrido Synthia (prompting) + Hermod (runtime) + cluster. Código distribuído gerado com GPT-4o (nota 8) e o prompt de sistema final da fase de treinamento; uso do Synthia Checker na geração dessas 100 versões não confirmado explicitamente. Número de execuções: nao_informado. Saídas verificadas manualmente nas 100 consultas. conferido_pdf = sim: a Fig. 11 (p. PDF 7) foi aberta e é box plot sem médias impressas; o valor 2X foi conferido no texto da Seção V-B na imagem da p. PDF 7 e coincide com o resumo (p. PDF 1); não foi estimado pela figura.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem comparador executado; o estudo destaca uma técnica (Synthia/DiCE), mas duas métricas (speed-up e efficiency) e três tamanhos de cluster no resumo, sem que uma prevaleça. Não há tabelas; a primeira figura de resultados é a Fig. 11 (speed-up); primeiro e único modelo do experimento: GPT-4o; primeira condição: Dice-2. Não há outra técnica focal nem outra tarefa do escopo para cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. PDF 7 (impressa 14), Seção V-B e Fig. 11; p. PDF 1 (impressa 8), resumo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "We observe an average speedup of 2X, 2.95X, and 3.7X, and an average efficiency of 1, 0.74 and 0.48 for 2 nodes, 4 nodes, and 8 nodes clusters, respectively.", "localizador": "p. PDF 7 (impressa 14), Seção V-B"},
+        {"trecho": "In these figures “Dice-2”, “Dice-4” and “Dice-8” denote execution with DiCE on 2 nodes, 4 nodes and 8 nodes cluster, respectively.", "localizador": "p. PDF 7 (impressa 14), Seção V-B"},
+        {"trecho": "We use GPT-4o while generating the distributed code.", "localizador": "p. PDF 7 (impressa 14), nota 8"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo é explícito: gerar automaticamente versões distribuídas de programas visuais seriais e executá-las com eficiência num cluster, mantendo a correção; as contribuições são listadas.",
+      "localizador": "p. PDF 1-2 (impressas 8-9), resumo e Seção I"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve as fases de treinamento e inferência do Synthia, os modelos e a seleção das 100 consultas, mas não apresenta o prompt semente nem o final, nem o número de exemplos de treinamento, iterações, regenerações do Checker ou execuções, nem confirma o uso do Checker no experimento.",
+      "localizador": "p. PDF 4-7 (impressas 11-14), Seções IV-A e V"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "O speed-up é relativo à execução do código serial, mas os tempos seriais não são relatados e não há condição de prompting comparadora (prompt semente, prompt manual) nem comparação com ferramentas citadas (HPC-Coder, AUTOPARLLM).",
+      "localizador": "p. PDF 7 (impressa 14), Seção V-B; p. PDF 2 (impressa 9), Seção II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Speed-up e efficiency são nomeados e relatados por tamanho de cluster, mas sem definição formal nem denominador explícito; a Fig. 11 não imprime as médias; há aparente inconsistência entre 3.7X e 0.48 para 8 nós; a correção é verificada manualmente sem métrica de taxa de sucesso do Synthia.",
+      "localizador": "p. PDF 7 (impressa 14), Figs. 11 e 12 e Seção V-B"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há discussão de ameaças à validade; o estudo comenta só a queda de eficiência em clusters maiores e a limitação do SDK do Hermod a Python, sem tratar a seleção da amostra, o não determinismo ou a generalização.",
+      "localizador": "p. PDF 7 (impressa 14), Seção V-B; p. PDF 5 (impressa 12), nota 4"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "nao_atende",
+      "justificativa": "Os modelos de IA por trás das APIs são proprietários (mobius, rihanna-plus), o prompt de sistema final e o semente não são publicados e não há pacote de código ou dados do DiCE indicado; só o prompt do ViperGPT tem link.",
+      "localizador": "p. PDF 7 (impressa 14), nota 7; p. PDF 3 (impressa 10), Seção III; p. PDF 4-6 (impressas 11-13)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute sobreposição entre os exemplos de treinamento do prompt e as 100 consultas de avaliação nem a presença do GQA ou do código do ViperGPT no pré-treinamento dos modelos.",
+      "localizador": "p. PDF 4 (impressa 11), Seção IV-A; p. PDF 7 (impressa 14), Seção V-B"
+    }
+  ],
+  "leitura": {
+    "texto": "completa",
+    "paginas_pdf_abertas_visualmente": [1, 4, 5, 6, 7],
+    "observacao": "Texto extraído lido integralmente (páginas impressas 8-15). Conferidos visualmente: resumo (p. 1), Figs. 4-6 e descrição do Synthia (pp. 4-5), Seção V-A e Figs. 9-10 (p. 6), Figs. 11-12, Seção V-B e notas 7-9 (p. 7)."
+  }
+}

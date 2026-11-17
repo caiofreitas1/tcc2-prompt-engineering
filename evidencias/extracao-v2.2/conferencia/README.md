@@ -27,7 +27,16 @@ ainda não começou; nada aqui é revisão humana.
 - Desvio: o protocolo manda priorizar os estudos que sustentam afirmações, mas a síntese
   ainda não existe. Por decisão do autor, a conferência vem antes dela. Na redação, cada
   afirmação continua conferida no original (T12), mesmo quando o estudo não estiver na amostra.
-- Reproduzir: `python3 scripts/sortear_conferencia.py --gravar`.
+- Complemento (D114, 17/11/2026): com o corpus em 334 estudos, o tamanho passou a
+  `max(10, teto(0,20 × 334))` = 67. Os 61 já sorteados ficaram fixos, e os 6 que faltavam
+  saíram do mesmo método (semente 20261117, ordenação por extrator, correção vigente,
+  tarefas e chave aleatória) sobre as 31 fichas fora do quadro original
+  (`quadro-original.txt`): S1682, S1721, S1735, S1869, S1875 e S1926. No formulário, os 6
+  vêm depois dos 61, para não mudar a posição dos estudos já em conferência; os dados dos
+  61 ficaram idênticos.
+- Reproduzir: o sorteio original se reproduz com as correções manuais vigentes no commit
+  adeb97b (D110 registrou depois correções em S2056 e S2059, o que muda a ordenação); o
+  complemento, com `python3 scripts/sortear_conferencia.py --complemento --gravar`.
 
 ## Formulário (`formulario.html`)
 

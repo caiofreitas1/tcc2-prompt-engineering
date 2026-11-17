@@ -11,6 +11,8 @@ from verificar_citacoes_piloto import norm, toks, verif
 from verificar_citacoes_aprox import indice, aprox, blocos, compacto
 
 am = list(csv.DictReader(open(R / 'evidencias/extracao-v2.2/conferencia/amostra.csv', encoding='utf-8')))
+# O complemento (D114) vai para o fim, para não mudar a posição dos 61 já em conferência.
+am.sort(key=lambda a: a['motivo'].startswith('complemento'))
 es = {r['id']: r for r in csv.DictReader(open(R / 'dados/estudos.csv', encoding='utf-8'))}
 man = {r['estudo_id']: r for r in csv.DictReader(open(R / 'evidencias/extracao-v2.2/rodadas/manifesto.csv', encoding='utf-8'))}
 cor = {}
