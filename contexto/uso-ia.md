@@ -373,3 +373,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Executores: Claude Code (Claude Opus 5.5), ampliação do contrato, validadores e testes, 7 correções manuais registradas em 5 fichas e situação da extração (`evidencias/extracao-v2.2/situacao-2026-11-16.md`); subagentes Claude Opus 5.5 limitados a Read e Write, reexame de elegibilidade de 8 estudos nos textos primários (`evidencias/extracao-v2.2/reexame-elegibilidade-2026-11-16.md`).
 - Encaminhamentos decididos pelo autor (D106), depois de parecer do Codex trazido por ele. O reexame é recomendação de IA; a inclusão fica para adjudicação do autor.
 - Revisão humana: o autor confirmou as correções de S724, S810, S1415 e S1977 como consistência de registros, sem conferência integral das fichas.
+
+## T07 — D107: adjudicação, confirmações e contrafactuais dos comparadores (17/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), registro da adjudicação do autor, recálculo dos fluxos, verificação dos 82 trechos do reexame e reavaliação dos contrafactuais de S6, S216, S724, S1415 e S1977 com conferência nas imagens das páginas (`evidencias/extracao-v2.2/contrafactuais-comparadores-2026-11-17.md`).
+- Revisão humana: adjudicação de inclusão e confirmação das correções de S62, S479 e S552 pelo autor; a reavaliação dos contrafactuais é proposta, sem alteração das fichas.
