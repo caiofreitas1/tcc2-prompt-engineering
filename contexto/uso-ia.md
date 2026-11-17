@@ -381,3 +381,7 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 ## T07 — D108: contrafactual dos comparadores (17/11/2026)
 - Executores: Claude Code (Claude Opus 5.5), aplicação em S6, S216, S724, S1415 e S1977 e das propostas validadas; subagentes Claude Opus 5.5 limitados a Read e Write, revisão dirigida de 431 comparadores em 113 estudos, com conferência das tabelas nas imagens (`evidencias/extracao-v2.2/d108-revisao-comparadores.md`).
 - Regra decidida pelo autor («Sim, aplicar»); aplicação de IA, não conferida pelo autor.
+
+## T07 — D109: preparação da conferência humana (17/11/2026)
+- Executor: Claude Code (Claude Opus 5.5). Sorteio da amostra de 61 estudos (`scripts/sortear_conferencia.py`, semente 20261117) e geração e publicação do formulário (`scripts/gerar_formulario_conferencia.py`, artifact privado com a coleção `extracao_v22_autor`), em `evidencias/extracao-v2.2/conferencia/`.
+- A verificação aproximada das citações (`scripts/verificar_citacoes_aprox.py`) só orienta a leitura; a conferência é do autor no PDF e ainda não começou.
