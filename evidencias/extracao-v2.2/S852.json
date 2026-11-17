@@ -1,0 +1,754 @@
+{
+  "estudo": "S852",
+  "texto_fonte": "fontes/textos/lote/S852.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Liu, Zhang, Liu, Wang, Wei, Yang, Zhang, Li, Shi. RepoScope: Leveraging Call Chain-Aware Multi-View Context for Repository-Level Code Generation. ICSE '26 (DOI 10.1145/3744916.3773211); versão lida: arXiv:2507.14791v2 [cs.SE], 2 nov. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF (13 páginas).",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "RepoScope (call chain-aware multi-view context)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "outro"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1, Resumo; p. 2, Introdução e Contribuições; pp. 4-6, Seção 3 e Box 1; p. 8, Tabela 2",
+        "observacao": "Pacote RAG de consulta única: instrução de tarefa ('You need to implement the function...', Box 1 → instrucao) mais quatro visões de contexto recuperadas do repositório por análise estática e similaridade (fragmentos similares, chamadores, cadeias de chamada previstas, funções similares → contexto) e serialização que preserva a hierarquia estrutural das entidades no prompt (formatação estrutural do contexto de entrada, sem categoria própria no dicionário → outro). Funções e fragmentos similares do repositório são código do repositório fornecido como insumo, não exemplos resolvidos da tarefa; por isso não se atribui exemplos. Em relação a Direct (sem recuperação, só contexto local), acrescenta o contexto recuperado e a serialização estrutural; Direct já contém contexto local, mas o contexto do repositório é ingrediente novo. Contra Direct é contrafactual de pacote; contra os demais baselines (DRACO, RLCoder etc.) as condições diferem em vários ingredientes. A alocação de tokens entre visões e a recuperação por embeddings (bge-small-en-v1.5) e K-means fazem parte do pacote; ver componentes_fora_escopo. O ganho é do pacote, não de um mecanismo isolado."
+      },
+      {
+        "nome_original": "Direct",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7, Seção 4.2; p. 8, Tabela 2",
+        "observacao": "Geração 'solely based on the local context without incorporating any retrieval'; média de 97 (CoderEval) e 90 (DevEval) tokens de entrada. O conteúdo exato do contexto local não é descrito (por analogia com o fim do Box 1, provavelmente importações e assinatura com docstring; não confirmado). Prompt base sem recuperação."
+      },
+      {
+        "nome_original": "SimpleRAG",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7, Seção 4.2; p. 8, Tabela 2",
+        "observacao": "Recupera um conjunto fixo de trechos similares e os anexa ao prompt para geração em uma consulta. Template não reproduzido. Baseline sem isolamento de mecanismo. [D108, correção registrada] Pacote avaliado contra Direct (Tabela 2, p. 8; GPT-4o mini, CoderEval (Python), Pass@1: base 20,29 × comparador 39,13), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7, Seção 4.2; p. 8, Tabela 2",
+        "observacao": "Pipeline iterativo de recuperação e geração (a geração anterior serve à nova recuperação; várias consultas ao LLM). Não é retorno de testes ou erros, por isso não se atribui feedback. Método originalmente de completação de código adaptado; tokens somados entre rodadas (7661/7613), sem alinhamento de tamanho de prompt. [D108, correção registrada] Pacote avaliado contra Direct (Tabela 2, p. 8; GPT-4o mini, CoderEval (Python), Pass@1: base 20,29 × comparador 37,68), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "DRACO",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7, Seção 4.2; p. 8, Tabela 2",
+        "observacao": "Recuperação guiada por análise de fluxo de dados que integra conhecimento estrutural ao prompt. Melhor baseline em 5 das 8 combinações da Tabela 2. Mecanismos não isolados. [D108, correção registrada] Pacote avaliado contra Direct (Tabela 2, p. 8; GPT-4o mini, CoderEval (Python), Pass@1: base 20,29 × comparador 40,10), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "CodeAgent",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7, Seção 4.2; p. 8, Tabela 2; p. 11, Seção 7",
+        "observacao": "Framework baseado em agente com ferramentas de programação externas, interação em várias rodadas; o estudo não descreve o prompt nem as estratégias de agente usadas (nao_informado), por isso só se atribuem instrucao e contexto. Mecanismos não isolados. [D108, correção registrada] Pacote avaliado contra Direct (Tabela 2, p. 8; GPT-4o mini, CoderEval (Python), Pass@1: base 20,29 × comparador 27,54), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "RLCoder",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7, Seções 4.2 e 4.4; p. 8, Tabela 2",
+        "observacao": "Pacote híbrido: recuperador UnixCoder ajustado por aprendizado por reforço (fora do escopo, ajuste_fino) que seleciona o contexto do prompt. Mecanismos não isolados. [D108, correção registrada] Pacote avaliado contra Direct (Tabela 2, p. 8; GPT-4o mini, CoderEval (Python), Pass@1: base 20,29 × comparador 38,16), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "Callers context (ablação 'w/o Ca')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, Seção 3.4; p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Ablação que retira a visão de funções chamadoras; o tamanho médio do prompt cai de 3679 para 3281 tokens, portanto a condição sem o componente também usa menos tokens."
+      },
+      {
+        "nome_original": "Call chains context (ablação 'w/o CC')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "pp. 4-5, Seção 3.3; p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Ablação que retira a visão de cadeias de chamada previstas (o estudo apresenta a predição de cadeias como sua novidade central, mas é parte do sistema → componente). Prompt cai para 3245 tokens."
+      },
+      {
+        "nome_original": "Similar functions context (ablação 'w/o SF')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, Seção 3.4; p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Ablação da visão de funções similares; prompt cai para 2797 tokens."
+      },
+      {
+        "nome_original": "Similar code fragments context (ablação 'w/o SCF')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, Seção 3.4; p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Ablação da visão de fragmentos de código similares (janela deslizante); prompt cai para 2542 tokens."
+      },
+      {
+        "nome_original": "Weighted entity scoring (ablação 'w/o WES')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, Seção 3.3 passo (2); p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Estratégia de ranqueamento da recuperação de cadeias de chamada; a variante pontua entidades só por similaridade. Muda qual contexto entra no prompt, não acrescenta categoria (acrescentados vazio)."
+      },
+      {
+        "nome_original": "Depth-first search (ablação 'w/o DFS')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, Seção 3.3 passo (3); p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Estratégia de recuperação; a variante usa só as entidades importadas diretamente."
+      },
+      {
+        "nome_original": "Call chain extension (ablação 'w/o CCE')",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, Seção 3.3 passo (4); p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Estratégia de recuperação que estende as cadeias com construtores, tipos de parâmetro/retorno e classes contêineres; a variante desativa a extensão."
+      },
+      {
+        "nome_original": "Structure-preserving serialization (ablação 'w/o SS')",
+        "mecanismos": [
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "outro"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, Seção 3.4; p. 8, Seção 5.2; p. 9, Tabela 3",
+        "observacao": "Formatação do contexto que reconstrói a hierarquia estrutural (árvore por relação Contains, percurso em pré-ordem, indentação e deduplicação); a variante exporta as entidades da cadeia em sequência. Classificado como outro (organização estrutural do contexto de entrada; não é restrição de formato de saída). Prompt sobe para 3728 tokens na variante."
+      },
+      {
+        "nome_original": "RepoScope* + RLCoder / RepoScope* + RepoCoder (integração, RQ4)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9, Seção 5.4 e Tabela 5",
+        "observacao": "Condições de integração, não propostas como técnicas próprias: substituem o contexto de fragmentos similares de RepoScope* (RepoScope sem funções similares e com mais fragmentos) pelo código recuperado por RLCoder ou RepoCoder. O contraste é de substituição da fonte de um ingrediente (contexto), não de presença/ausência; +RLCoder inclui recuperador ajustado (híbrido) e +RepoCoder usa várias consultas e cerca do dobro de tokens (7927 vs. 3962). DeepSeek-V3, CoderEval."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature parameter set to 0",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0 (decodificação gulosa, declarada determinística) e demais parâmetros de decodificação no padrão, em todos os métodos.",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "nome_original": "two-stage iterative prompt construction strategy",
+        "natureza": "orcamento",
+        "descricao": "Alocação do orçamento de tokens do prompt (ℓ = 4096) entre as quatro visões: pré-alocação uniforme e realocação por ordem de prioridade fixa. Determina quanto de cada contexto entra no prompt; não é isolada em experimento relatado (apenas 'preliminary experiments').",
+        "localizador": "p. 6, Seção 3.4; p. 7, Seção 4.4"
+      },
+      {
+        "nome_original": "bge-small-en-v1.5 embedding model; K-means clustering; RSSG via Pytype e Tree-sitter",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de recuperação por análise estática, embeddings e agrupamento usada para selecionar o contexto do prompt (o efeito no prompt é contado como contexto). O estudo diz que modelos de embedding diferentes não tiveram impacto significativo em experimentos preliminares, sem dados.",
+        "localizador": "p. 4, Seção 3.2; p. 5, Seção 3.3; p. 7, Seção 4.4"
+      },
+      {
+        "nome_original": "RLCoder retriever (fine-tuned UnixCoder)",
+        "natureza": "ajuste_fino",
+        "descricao": "Recuperador do baseline RLCoder ajustado por aprendizado por reforço com feedback de perplexidade (UnixCoder, 126M parâmetros).",
+        "localizador": "p. 7, Seções 4.2 e 4.4"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-4o mini",
+        "versao": "gpt-4o-mini-2024-07-18",
+        "localizador": "p. 7, Seção 4.2 e nota de rodapé 3"
+      },
+      {
+        "nome": "Claude-3.5-Haiku",
+        "versao": "claude-3-5-haiku-20241022",
+        "localizador": "p. 7, Seção 4.2 e nota de rodapé 4"
+      },
+      {
+        "nome": "Qwen3-235B-A22B",
+        "versao": "nao_informado",
+        "localizador": "p. 7, Seção 4.2 e nota de rodapé 5",
+        "observacao": "Informado apenas o uso do modo 'non-thinking'."
+      },
+      {
+        "nome": "DeepSeek-V3",
+        "versao": "DeepSeek-V3-0324",
+        "localizador": "p. 7, Seção 4.2 e nota de rodapé 6"
+      },
+      {
+        "nome": "bge-small-en-v1.5 (embedder)",
+        "versao": "nao_informado",
+        "localizador": "p. 7, Seção 4.4 e nota de rodapé 10",
+        "observacao": "Modelo de embedding (33.4M parâmetros) de todos os métodos, exceto RLCoder; não gera código."
+      },
+      {
+        "nome": "UnixCoder ajustado (recuperador do RLCoder)",
+        "versao": "nao_informado",
+        "localizador": "p. 7, Seção 4.4 e nota de rodapé 9",
+        "observacao": "126M parâmetros; versão ajustada própria do RLCoder."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "CoderEval (subconjunto Python)",
+        "quantidade": "207 amostras",
+        "localizador": "p. 7, Seção 4.3",
+        "observacao": "CoderEval tem 460 tarefas (metade Python, metade Java); amostras com file_path incorreto foram excluídas, restando 207. Lista de exclusões no pacote de replicação (não acessado)."
+      },
+      {
+        "nome": "DevEval",
+        "quantidade": "1,742 amostras (de 1,825, 117 repositórios)",
+        "localizador": "p. 7, Seção 4.3",
+        "observacao": "Excluídas amostras cujas soluções de referência falham nos testes e com lineno incorreto."
+      },
+      {
+        "nome": "RepoEval (subconjunto API-level)",
+        "quantidade": "1,600 amostras",
+        "localizador": "p. 7, Seção 4.3; p. 9, Seção 5.3 e Tabela 4",
+        "observacao": "Usado só na RQ3 (generalização), com DeepSeek-V3."
+      },
+      {
+        "nome": "CoderEval (subconjunto Java)",
+        "quantidade": "229 tarefas (após excluir um caso defeituoso)",
+        "localizador": "p. 10, Seção 6.2",
+        "observacao": "Experimento preliminar só com GPT-4o-mini, relatado em prosa, sem tabela."
+      },
+      {
+        "nome": "Subconjunto dos 30% de tarefas mais dissimilares (CoderEval e DevEval)",
+        "quantidade": "nao_informado",
+        "localizador": "pp. 10-11, Seção 6.2",
+        "observacao": "Resultado só em prosa (ganho relativo de 17.97% sobre DRACO), sem tabela nem contagem de tarefas."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "pass@1 (pass@k com k = 1)",
+        "denominador": "nao_informado explicitamente; corpus de 207 (CoderEval) e 1,742 (DevEval) amostras",
+        "localizador": "p. 7, Seções 4.3 e 4.4; p. 8, Tabela 2",
+        "observacao": "O estudo não liga explicitamente o denominador ao corpus; por cálculo próprio, os valores impressos são compatíveis com frações de 207 e 1,742 (por exemplo, 20.29 ≈ 42/207). Número de amostras n por tarefa não informado; temperatura 0."
+      },
+      {
+        "nome": "EM (Exact Match)",
+        "denominador": "nao_informado explicitamente; subconjunto API-level de 1,600 amostras",
+        "localizador": "p. 7, Seção 4.3; p. 9, Tabela 4"
+      },
+      {
+        "nome": "ES (Edit Similarity)",
+        "denominador": "nao_informado explicitamente; subconjunto API-level de 1,600 amostras",
+        "localizador": "p. 7, Seção 4.3; p. 9, Tabela 4"
+      },
+      {
+        "nome": "Avg. # Token (tamanho médio do prompt de entrada)",
+        "denominador": "nao_aplicavel",
+        "localizador": "p. 8, Tabela 2; p. 9, Tabelas 3-5",
+        "observacao": "Para RepoCoder e CodeAgent, soma das rodadas de diálogo."
+      },
+      {
+        "nome": "F1 dos callees previstos",
+        "denominador": "nao_informado",
+        "localizador": "p. 9, Seção 5.2",
+        "observacao": "0.603 vs. 0.4352 de um baseline por similaridade; modelo/benchmark e base de cálculo não detalhados."
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "localizador": "p. 7, Seção 4.3; p. 10, Seção 6.2"
+      },
+      {
+        "nome": "Java",
+        "localizador": "p. 10, Seção 6.2",
+        "observacao": "Apenas experimento preliminar (CoderEval Java, GPT-4o-mini)."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Contexto impreciso recuperado por similaridade pode levar o LLM a alucinar métodos inexistentes (get_parser_names, get_option_names) e produzir solução incorreta; ilustrado por um exemplo motivador.",
+        "localizador": "p. 3, Seção 2.1 e Figura 1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Excesso de contexto irrelevante (por exemplo, oito métodos não usados trazidos por DRACO) pode obscurecer o código relevante e prejudicar o foco do LLM; omissão de contexto crítico pode gerar código em conflito com o conhecimento do repositório (constantes, APIs). Evidência de caso único.",
+        "localizador": "p. 2, Introdução; p. 10, Seção 6.1 e Figura 4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação do próprio método: a predição de cadeias de chamada pode degradar quando a função-alvo não tem funções similares (repositórios pequenos), quando funções similares não têm chamadas semelhantes ou quando as chamadas são esparsas; o estudo reconhece que a taxa de erro da predição ainda pode parecer alta em termos absolutos.",
+        "localizador": "p. 9, Seção 5.2; p. 10, Seção 6.2"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Abordagens com treinamento supervisionado extenso ou pipelines de agentes com várias consultas ao LLM têm custo computacional/temporal substancial; refere-se aos métodos comparados. O estudo relata apenas o tamanho médio do prompt em tokens; custo monetário e latência não quantificados.",
+        "localizador": "p. 2, Introdução; p. 11, Seção 7"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "pass@1 como única métrica de avaliação deixa de fora atributos como legibilidade e manutenibilidade (limitação de avaliação, não risco medido).",
+        "localizador": "p. 10, Seção 6.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça interna: hiperparâmetros escolhidos por busca em grade em um pequeno subconjunto de dados, sem indicação de que o subconjunto seja disjunto dos conjuntos de avaliação; avaliação restrita a quatro LLMs por orçamento e a Python.",
+        "localizador": "p. 10, Seção 6.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Ajuste de parâmetros dos baselines para manter o tamanho médio do prompt aproximadamente no mesmo nível (exceto RepoCoder e CodeAgent, para os quais se alinhou o prompt da rodada final); procedimento de controle, sem comparação com e sem ele.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "descricao": "Temperatura 0 para saídas determinísticas; sem condição de comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "descricao": "Mesmo modelo de embedding (bge-small-en-v1.5) para todos os métodos, exceto RLCoder.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "descricao": "Exclusão de amostras defeituosas dos benchmarks (file_path incorreto; soluções de referência que falham; lineno incorreto).",
+        "avaliada": "nao",
+        "localizador": "p. 7, Seção 4.3"
+      },
+      {
+        "descricao": "Para a limitação de funções sem similares, verificação no subconjunto dos 30% de tarefas mais dissimilares (ganho relativo de 17.97% sobre DRACO contra 14.67% em todas as tarefas); é análise de subgrupo, não comparação com e sem mitigação.",
+        "avaliada": "nao",
+        "localizador": "pp. 10-11, Seção 6.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os percentuais junto aos valores (por exemplo, '36.35%', '17.15%') são variações relativas sobre o melhor baseline, não p.p.; por cálculo próprio, 41.56/30.48 = 1.3635 (DevEval, Claude-3.5-Haiku). O melhor baseline muda por condição (DRACO, RLCoder ou RepoCoder), de modo que o 'up to 36.35%' do resumo é o máximo entre oito comparações com comparadores diferentes.",
+        "localizador": "p. 1, Resumo; p. 8, Tabela 2 e legenda"
+      },
+      {
+        "descricao": "O teste estatístico é descrito como comparação com 'the best baseline DRACO across all backbone LLMs and benchmarks', mas na Tabela 2 DRACO é o melhor baseline (sublinhado) em todas as quatro colunas do DevEval e em só uma do CoderEval (GPT-4o mini); nas outras três o melhor é RLCoder (Claude-3.5-Haiku) ou RepoCoder (Qwen3, DeepSeek-V3). O tipo de teste, a unidade de pareamento e o tamanho da amostra não são informados ('A two-tailed test yields p = 2.11 × 10−9').",
+        "localizador": "p. 8, Tabela 2 e Seção 5.1"
+      },
+      {
+        "descricao": "Inversão: o baseline baseado em agente CodeAgent, com o segundo maior número médio de tokens (5884/5649), fica abaixo de SimpleRAG em todas as oito combinações da Tabela 2 (por exemplo, CoderEval GPT-4o mini: 27.54 vs. 39.13).",
+        "localizador": "p. 8, Tabela 2 e Seção 5.1"
+      },
+      {
+        "descricao": "Resultado nulo na ablação: 'w/o CCE' com Claude-3.5-Haiku tem 55.07, igual a RepoScope completo (↓ 0.00%), embora a resposta à RQ2 afirme que cada componente e estratégia contribui positivamente. As ablações de visões também reduzem o prompt (por exemplo, w/o SCF: 2542 vs. 3679 tokens), de modo que perda de desempenho e redução de contexto se confundem.",
+        "localizador": "p. 9, Tabela 3 e Resposta à RQ2"
+      },
+      {
+        "descricao": "Comparação de tamanho de prompt não controlada para RepoCoder e CodeAgent (7661/7613 e 5884/5649 tokens somados entre rodadas, contra 3679 de RepoScope) e para a integração +RepoCoder (7927 vs. 3962 de RepoScope*).",
+        "localizador": "p. 7, Seção 4.4; p. 8, Tabela 2 e nota 1; p. 9, Tabela 5"
+      },
+      {
+        "descricao": "Na RQ4, a referência é RepoScope* (53.14, sem funções similares), não RepoScope completo; as integrações (+RLCoder 54.11; +RepoCoder 56.04) ficam abaixo do RepoScope completo na mesma condição (DeepSeek-V3, CoderEval: 59.42 nas Tabelas 2 e 3). A frase sobre 'further performance improvements' refere-se à variante reduzida.",
+        "localizador": "p. 9, Tabela 5 e Seção 5.4; p. 8, Tabela 2; p. 9, Tabela 3"
+      },
+      {
+        "descricao": "Resultados só em prosa, sem tabela: Java (RepoScope 58.95% vs. RLCoder 57.64%, GPT-4o-mini, 229 tarefas) e subconjunto dos 30% de tarefas mais dissimilares (ganho relativo de 17.97% sobre DRACO, contra '14.67% improvement in all tasks'). O 14.67% não aparece em tabela e não se informa como foi agregado entre modelos e benchmarks.",
+        "localizador": "pp. 10-11, Seção 6.2"
+      },
+      {
+        "descricao": "O tamanho médio do prompt de RepoScope é o mesmo (3679) no CoderEval e no DevEval, enquanto os demais métodos variam entre os dois conjuntos; o estudo não comenta (aparente coincidência ou valor configurado, não esclarecido).",
+        "localizador": "p. 8, Tabela 2; p. 9, Tabela 3"
+      },
+      {
+        "descricao": "Baselines RepoCoder, DRACO e RLCoder são métodos de completação de código adaptados para geração de funções, com parâmetros ajustados pelos autores para alinhar tokens; os ajustes não são detalhados.",
+        "localizador": "p. 7, Seções 4.2 e 4.4"
+      },
+      {
+        "descricao": "Hiperparâmetros (tamanho de cluster, pesos, comprimento de cadeia, número de itens, alocação de tokens e ordem de prioridade) foram fixados por experimentos preliminares/busca em grade em um pequeno subconjunto de dados não identificado.",
+        "localizador": "p. 6, Seção 3.4; p. 7, Seção 4.4; p. 10, Seção 6.2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Os percentuais da Tabela 3 são quedas relativas a RepoScope; conferidos por cálculo próprio (por exemplo, (55.07 − 52.66)/55.07 ≈ 4.38%). Valores de RepoScope com Claude-3.5-Haiku e DeepSeek-V3 no CoderEval coincidem entre as Tabelas 2 e 3 (55.07 e 59.42).",
+        "localizador": "p. 8, Tabela 2; p. 9, Tabela 3"
+      },
+      {
+        "descricao": "A Tabela 1 é comparação qualitativa de características dos métodos (ranqueamento, visões, sem treinamento, consulta única), não resultado experimental.",
+        "localizador": "p. 2, Tabela 1"
+      },
+      {
+        "descricao": "A avaliação da qualidade das cadeias (F1 0.603 vs. 0.4352, '38.56%') compara a estratégia de predição com baseline por similaridade 'under the same average number of predicted callees'; é avaliação de recuperação, não de geração.",
+        "localizador": "p. 9, Seção 5.2"
+      },
+      {
+        "descricao": "RQ3 (RepoEval API-level, DeepSeek-V3) adapta a predição de cadeias com um termo de 'sequence value'; é geração/completação de chamadas de API. Não extraída por ser a mesma técnica e tarefa (não é cobertura).",
+        "localizador": "p. 9, Seção 5.3 e Tabela 4"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (github.com/Lorien1128/RepoScope), com pseudocódigo do DFS, algoritmo de serialização e lista de exclusões; não acessado nem validado nesta extração.",
+        "localizador": "p. 1, Resumo; pp. 5-7"
+      },
+      {
+        "descricao": "O prompt completo só é mostrado como exemplo com omissões (Box 1); a ordem das visões no prompt é fragmentos similares, chamadores, cadeias de chamada e funções similares.",
+        "localizador": "p. 6, Box 1 e Seção 3.4"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Evaluation on widely-used repository-level code generation benchmarks (CoderEval and DevEval) demonstrates that RepoScope outperforms state-of-the-art methods, achieving up to a 36.35% relative improvement in pass@1 scores.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "RepoScope constructs a Repository Structural Semantic Graph (RSSG) and retrieves a comprehensive four-view context, integrating both structural and similarity-based contexts.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "Additionally, we present a structure-preserving serialization algorithm for prompt construction, ensuring the coherence of the context for the LLM.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "When supplied with this inaccurate context, LLMs may hallucinate non-existent methods (e.g., get_parser_names and get_option_names), leading to incorrect solution.",
+        "localizador": "p. 3, Seção 2.1"
+      },
+      {
+        "trecho": "In terms of efficiency, approaches that depend on extensive supervised training [34, 41] or on agent-based pipelines with multiple LLM queries [30, 45] incur substantial computational/temporal cost, and often struggle to adapt across diverse repositories.",
+        "localizador": "p. 2, Introdução"
+      },
+      {
+        "trecho": "Together, these form a four-view context representation.",
+        "localizador": "p. 4, Seção 3.1"
+      },
+      {
+        "trecho": "To achieve this, we propose a two-stage iterative prompt construction strategy.",
+        "localizador": "p. 6, Seção 3.4"
+      },
+      {
+        "trecho": "You need to implement the function located at the end of the instruction based on relevant repository information.",
+        "localizador": "p. 6, Box 1"
+      },
+      {
+        "trecho": "Direct refers to generating code solely based on the local context without incorporating any retrieval.",
+        "localizador": "p. 7, Seção 4.2"
+      },
+      {
+        "trecho": "SimpleRAG retrieves a fixed set of similar code snippets based on similarity and directly appends them to the prompt for one-shot generation.",
+        "localizador": "p. 7, Seção 4.2"
+      },
+      {
+        "trecho": "Except for the temperature parameter, which is set to 0, all other decoding parameters are kept at their default values.",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "trecho": "To minimize the impact of prompt token length—a extraneous variable—on the results and allow us to focus on the quality and accuracy of the prompt, we adjusted parameters in baselines during evaluation to make sure their average prompt token lengths were approximately at the same level.",
+        "localizador": "p. 7, Seção 4.4"
+      },
+      {
+        "trecho": "We individually remove (1) the callers (w/o Ca), (2) the call chains (w/o CC), (3) the similar functions (w/o SF), and (4) the similar code fragments (w/o SCF), and then assess the impact on code generation performance.",
+        "localizador": "p. 8, Seção 5.2"
+      },
+      {
+        "trecho": "However, it lacks a filtering mechanism for the retrieved code elements, leading to excessive irrelevant code being included in the context.",
+        "localizador": "p. 10, Seção 6.1"
+      },
+      {
+        "trecho": "We performed a small-range grid search over RepoScope’s hyperparameters on a small subset of data, selecting the coefficients based on the best performance observed.",
+        "localizador": "p. 10, Seção 6.2"
+      },
+      {
+        "trecho": "Besides, the current use of pass@1 as the sole evaluation metric limits a comprehensive assessment of code quality, overlooking important attributes such as readability and maintainability.",
+        "localizador": "p. 10, Seção 6.2"
+      },
+      {
+        "trecho": "While this assumption holds in most cases, the prediction performance may degrade if the target function lacks similar counterparts (e.g., for small-scale repository), if similar functions do not exhibit similar calling behaviors, or if the calling behaviors are sparse.",
+        "localizador": "p. 10, Seção 6.2"
+      },
+      {
+        "trecho": "Specifically, since both RLCoder and RepoCoder focus on similarity-based full-text retrieval, we replaced the similar code fragment context in RepoScope with the code retrieved by these two methods.",
+        "localizador": "p. 9, Seção 5.4"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "RepoScope",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "outro"
+      ],
+      "comparador": "Direct",
+      "modelo": "GPT-4o mini (gpt-4o-mini-2024-07-18)",
+      "benchmark": "CoderEval (subconjunto Python, 207 amostras)",
+      "metrica": "Pass@1 (Tabela 2 'Pass@1 scores across datasets and backbone models')",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 20.29,
+        "intervencao": 44.93
+      },
+      "denominador": "nao_informado explicitamente; corpus de 207 amostras (por cálculo próprio, os valores são compatíveis com esse denominador)",
+      "condicoes": "Temperatura 0, k = 1; número de execuções nao_informado. Avg. # Token: Direct 97, RepoScope 3679 (prompt máximo ℓ = 4096; Kchain = Kcaller = Ksim_function = Ksim_fragment = 5). O percentual '↑ 12.04%' impresso ao lado de 44.93 é relativo ao melhor baseline (DRACO, 40.10), não a Direct. Conferido no PDF, p. 8, Tabela 2 (cabeçalhos Dataset, Method, Backbone Model, Avg. # Token). Ganho do pacote RepoScope (recuperação de quatro visões + serialização), não de um mecanismo isolado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo destaca RepoScope e pass@1, mas o comparador é 'state-of-the-art methods'/'best-performing baseline', que muda por condição (DRACO, RLCoder, RepoCoder) e exigiria desempate. Primeira tabela com o contraste (Tabela 2), primeiro conjunto (CoderEval), primeira métrica (pass@1), primeiro modelo listado (GPT-4o mini) e primeira linha de base de prompting listada (Direct).",
+      "derivacao": "direta",
+      "localizador": "p. 8 (PDF; sem paginação impressa), Tabela 2, bloco CoderEval, linhas Direct e RepoScope, coluna GPT-4o mini",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Direct 20.29 26.09 23.19 28.02 97",
+          "localizador": "p. 8, Tabela 2, bloco CoderEval, linha Direct; colunas GPT-4o mini, Claude-3.5-Haiku, Qwen3-235B-A22B, DeepSeek-V3, Avg. # Token"
+        },
+        {
+          "trecho": "RepoScope 44.93 ↑ 12.04% 55.07 ↑ 11.75% 49.28 ↑ 10.89% 59.42 ↑ 17.15% 3679",
+          "localizador": "p. 8, Tabela 2, bloco CoderEval, linha RepoScope; colunas GPT-4o mini, Claude-3.5-Haiku, Qwen3-235B-A22B, DeepSeek-V3, Avg. # Token"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Callers context (RepoScope completo vs. 'w/o Ca')",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "w/o Ca",
+      "modelo": "Claude-3.5-Haiku (claude-3-5-haiku-20241022)",
+      "benchmark": "CoderEval (subconjunto Python, 207 amostras)",
+      "metrica": "Pass@1 (Tabela 3 'Ablation study results on CoderEval')",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 52.66,
+        "intervencao": 55.07
+      },
+      "denominador": "nao_informado explicitamente; corpus de 207 amostras",
+      "condicoes": "Ablação que retira a visão de chamadores; Avg. # Token cai de 3679 para 3281 (↓ 10.82%), logo a condição sem o componente também tem prompt menor. Temperatura 0; número de execuções nao_informado. O '↓ 4.38%' impresso é queda relativa. Conferido no PDF, p. 9, Tabela 3 (cabeçalhos Method, Model: Claude-3.5-Haiku, DeepSeek-V3, Avg. # Token).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componente isolado para completar o alvo de três: primeiro da tabela de ablação (Tabela 3, w/o Ca), primeiro modelo (Claude-3.5-Haiku).",
+      "derivacao": "direta",
+      "localizador": "p. 9 (PDF), Tabela 3, linhas RepoScope e w/o Ca, coluna Claude-3.5-Haiku",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "RepoScope 55.07 59.42 3679",
+          "localizador": "p. 9, Tabela 3, linha RepoScope; colunas Claude-3.5-Haiku, DeepSeek-V3, Avg. # Token"
+        },
+        {
+          "trecho": "w/o Ca 52.66 ↓ 4.38% 55.56 ↓ 6.50% 3281 ↓ 10.82%",
+          "localizador": "p. 9, Tabela 3, linha w/o Ca; colunas Claude-3.5-Haiku, DeepSeek-V3, Avg. # Token"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Call chains context (RepoScope completo vs. 'w/o CC')",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "w/o CC",
+      "modelo": "Claude-3.5-Haiku (claude-3-5-haiku-20241022)",
+      "benchmark": "CoderEval (subconjunto Python, 207 amostras)",
+      "metrica": "Pass@1 (Tabela 3 'Ablation study results on CoderEval')",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 51.2,
+        "intervencao": 55.07
+      },
+      "denominador": "nao_informado explicitamente; corpus de 207 amostras",
+      "condicoes": "Ablação que retira a visão de cadeias de chamada previstas; Avg. # Token cai de 3679 para 3245 (↓ 11.80%). Temperatura 0; número de execuções nao_informado. O '↓ 7.03%' impresso é queda relativa. Conferido no PDF, p. 9, Tabela 3.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação, na ordem da Tabela 3 (w/o CC), para completar o alvo de três; primeiro modelo (Claude-3.5-Haiku).",
+      "derivacao": "direta",
+      "localizador": "p. 9 (PDF), Tabela 3, linhas RepoScope e w/o CC, coluna Claude-3.5-Haiku",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "RepoScope 55.07 59.42 3679",
+          "localizador": "p. 9, Tabela 3, linha RepoScope; colunas Claude-3.5-Haiku, DeepSeek-V3, Avg. # Token"
+        },
+        {
+          "trecho": "w/o CC 51.20 ↓ 7.03% 55.07 ↓ 7.32% 3245 ↓ 11.80%",
+          "localizador": "p. 9, Tabela 3, linha w/o CC; colunas Claude-3.5-Haiku, DeepSeek-V3, Avg. # Token"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Resumo e contribuições definem a proposta (RepoScope) e quatro questões de pesquisa (desempenho, ablação, generalização, integração) organizam a avaliação.",
+      "localizador": "p. 1, Resumo; p. 2, Contribuições; p. 6, Seção 4.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "RSSG, predição de cadeias, serialização e alocação de tokens são descritos com fórmulas e hiperparâmetros, mas o prompt só aparece como exemplo com omissões, a ordem de prioridade da realocação não é informada, os algoritmos de DFS e serialização estão só no pacote de replicação e os ajustes feitos nos baselines não são detalhados.",
+      "localizador": "pp. 4-7, Seções 3 e 4.4; p. 6, Box 1"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Seis baselines (Direct, SimpleRAG, RepoCoder, DRACO, CodeAgent, RLCoder) executados com os mesmos quatro LLMs, mesmo embedder (exceto RLCoder) e tamanho de prompt alinhado; ablação de sete componentes. Ressalvas: RepoCoder e CodeAgent sem controle de tokens e baselines de completação adaptados sem detalhamento.",
+      "localizador": "p. 7, Seções 4.2 e 4.4; p. 8, Tabela 2; p. 9, Tabela 3"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@1, EM e ES são citados com referência e os percentuais são rotulados como relativos; os valores de RepoScope coincidem entre as Tabelas 2 e 3. Porém o denominador não é ligado explicitamente ao corpus, o teste estatístico não é identificado e é descrito contra DRACO como melhor baseline em todas as condições, o que a Tabela 2 não confirma, e resultados (Java, subconjunto dissimilar, 14.67%) aparecem só em prosa; o próprio estudo reconhece pass@1 como métrica única.",
+      "localizador": "p. 7, Seções 4.3 e 4.4; p. 8, Tabela 2 e Seção 5.1; pp. 10-11, Seção 6.2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute ameaças internas (hiperparâmetros, seleção de LLMs, métrica única) e externas (só Python, dependência de funções similares), com experimentos adicionais de Java e de tarefas dissimilares.",
+      "localizador": "pp. 10-11, Seção 6.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "atende",
+      "justificativa": "Informa snapshots de três dos quatro LLMs (Qwen3 só com modo 'non-thinking'), temperatura, embedder, hiperparâmetros e tamanho máximo do prompt, e indica pacote de replicação com algoritmos e exclusões (não acessado nem validado nesta extração).",
+      "localizador": "p. 1, Resumo; p. 7, Seções 4.3-4.4 e notas 3-10"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos repositórios de CoderEval, DevEval e RepoEval no pré-treinamento dos LLMs, nem se o subconjunto usado na busca de hiperparâmetros é disjunto dos dados de avaliação.",
+      "localizador": "texto completo; p. 10, Seção 6.2"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [
+      "p-06",
+      "p-07",
+      "p-08",
+      "p-09",
+      "p-10",
+      "p-11"
+    ],
+    "observacao": "Texto extraído lido integralmente (850 linhas, incluindo referências). Tabelas 2, 3, 4 e 5 conferidas nas imagens das pp. 8-9; Box 1 (p. 6), detalhes de implementação e notas de modelos (p. 7) e números citados em prosa na Seção 6.2 (pp. 10-11) conferidos visualmente."
+  }
+}

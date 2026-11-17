@@ -1,0 +1,616 @@
+{
+  "estudo": "S193",
+  "texto_fonte": "fontes/textos/lote/S193.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "direct (Standard Translation, baseline), zero-shot",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "§2.1, p. 1 do PDF; Fig. 1 (esquerda), p. 2 do PDF; Tabela 1, linha direct(0), p. 3 do PDF (o PDF não traz numeração impressa)",
+        "observacao": "Linha de base de tradução direta: instrução em linguagem natural e programa Python fornecido no prompt (contexto). O programa-alvo é condicionado também à assinatura traduzida, presente em todas as condições (p. 2). Comparador, sem isolamento de mecanismos próprios."
+      },
+      {
+        "nome_original": "direct (four-shot)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx C.1, p. 15–16 do PDF; Apx F, p. 29–30 do PDF; Tabela 1, linha direct(4), p. 3 do PDF",
+        "observacao": "Prompt four-shot com persona («helpful and faithful compiler») e quatro pares Python–Java curados (Apx F). Em relação ao direct zero-shot da Fig. 1, difere em exemplos e na persona; o contraste direct(0) × direct(4) não isola um único ingrediente e o estudo o usa como comparador do cenário few-shot."
+      },
+      {
+        "nome_original": "exp (Explain-then-Translate)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "§2.1, p. 1 do PDF; Fig. 1 (direita), p. 2 do PDF; Tabela 1, p. 3 do PDF; Tabela 2, p. 5 do PDF; Tabela 4 (no-exp), p. 7 do PDF",
+        "observacao": "O modelo explica o programa-fonte em poucas frases antes de traduzir (explicação antes do código → raciocinio). Contrafactual: direct × exp no mesmo número de shots e com o mesmo programa e assinatura (Tabela 1); a ablação no-exp (explicação vazia, Tabela 4) também contrasta com exp. Na condição four-shot (Apx C.2), o pacote inclui ainda persona e exemplos com explicações curadas (exemplos), presentes também no direct(4) em forma de pares sem explicação. Nos experimentos Python-to-X, as explicações são geradas em Python-Java e reutilizadas, após remoção programática de informação específica do alvo."
+      },
+      {
+        "nome_original": "exp-lbl",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "§2.1, p. 1 do PDF; Apx C.3; Tabela 1, p. 3 do PDF; Tabela 2, p. 5 do PDF",
+        "observacao": "Explicação linha a linha antes da tradução; variante que o estudo apresenta como formulação própria e avalia em linhas separadas, por isso registrada como técnica distinta (D102). Contrafactual direct × exp-lbl no mesmo número de shots (Tabela 1). Na condição four-shot inclui persona e exemplos com explicações linha a linha."
+      },
+      {
+        "nome_original": "exp-lbl-d",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "§2.1, p. 1–2 do PDF; Apx C.4, p. 24 do PDF; Apx F, p. 30 do PDF; Tabela 1, p. 3 do PDF",
+        "observacao": "Explicação linha a linha com detalhamento: linhas complexas são quebradas em fragmentos explicados e depois resumidos. O estudo descreve isso como decompor fragmentos da linha, mas a quebra ocorre dentro da própria explicação, sem subtarefas executadas em etapas; por isso foi classificada como raciocinio estruturado e não como decomposicao. Contrafactual direct × exp-lbl-d (Tabela 1)."
+      },
+      {
+        "nome_original": "Explanation Selection with Heuristics (re-ranking heuristics: len, line-e, line, frag, logprob)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "§3.4, p. 5–6 do PDF; Tabela 3, p. 5 do PDF; Tabela 1, linhas exp*(4) e exp-lbl-d*(4), p. 3 do PDF; Apx G.3 e Tabela 10, p. 31 e 33; Apx L, p. 40–41 (aprox.)",
+        "observacao": "Amostram-se 20 explicações e um programa por explicação; uma heurística (comprimento, linhas explicadas, número de linhas, fragmentos de código entre crases, ou logprob tipo coder-reviewer calculado com CodeGen2) escolhe a explicação. Contrafactual: seleção aleatória entre as mesmas explicações (random, média de 100 repetições), Tabela 3. Nas linhas de Tabela 1 (exp*(4), exp-lbl-d*(4)) a tradução é four-shot, logo o pacote inclui também exemplos. O estudo trata a seleção como objeto de investigação (§3.4 e Conclusão); registrada como focal. A pontuação por GPT-3.5 (Apx K) não superou o aleatório e não tem tabela."
+      },
+      {
+        "nome_original": "one-shot fixed / retrieve (quality gold, unk, bad)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "§3.8 e Tabela 5, p. 8 do PDF",
+        "observacao": "Um exemplo fixo ou recuperado por BM25 (retrieve: recuperação de exemplo resolvido → exemplos; o programa-fonte já é contexto), com programa-alvo correto (gold), não verificado (unk) ou incorreto (bad). Usado como comparador de exp; a Tabela 5 traz também direct, mas o prompt completo do one-shot não é apresentado, de modo que não se pode afirmar que a única diferença seja o exemplo. Os subconjuntos de retrieve têm números de problemas diferentes (158–161; bad: 138/80/132/154)."
+      },
+      {
+        "nome_original": "Pivot language",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF; Tabelas 15 e 16, Apx J.1",
+        "observacao": "Tradução para uma linguagem pivô e depois para o alvo (etapas encadeadas → decomposicao). Relatado com pass@1 (n=1) para Python-Java; as Tabelas 15–16 comparam subconjuntos com pivô correto/incorreto, sem condição direct no mesmo subconjunto e no mesmo n. Alternativa de «explicação», não técnica focal."
+      },
+      {
+        "nome_original": "Pseudocode",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF",
+        "observacao": "Pseudocódigo intermediário (decomposicao) com formato imposto por \\begin{algorithm} e stop token (restricoes). Apenas pass@1 = 0.861 (n=1), Python-Java, sem direct no mesmo n."
+      },
+      {
+        "nome_original": "CoT (Apx J)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF",
+        "observacao": "Decompõe o programa em subcomponentes, traduz cada um e combina (subtarefas executadas → decomposicao). Apenas pass@1 = 0.734 (n=1), Python-Java."
+      },
+      {
+        "nome_original": "Steps",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF",
+        "observacao": "Lista ordenada de passos em linguagem natural (planejamento, seguindo Jiang et al., 2023 → decomposicao). Apenas pass@1 = 0.824 (n=1), Python-Java."
+      },
+      {
+        "nome_original": "Summary",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF",
+        "observacao": "Resumo livre do que o programa faz antes da tradução. Apenas pass@1 = 0.854 (n=1), Python-Java."
+      },
+      {
+        "nome_original": "Gold summary",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Apx J, p. 38 do PDF",
+        "observacao": "Docstring humana do HumanEval fornecida com o programa (conhecimento externo → contexto, categoria já presente na base por causa do programa-fonte; por isso nenhuma categoria acrescentada). Apenas pass@1 = 0.813 (n=1), Python-Java."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Sampling (n = 20, t = 0.2, top-p = 0.95)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de amostragem usados para estimar pass@1; seguem Cassano et al. (2022).",
+        "localizador": "§2.3, p. 3 do PDF"
+      },
+      {
+        "nome_original": "Language-specific stop tokens",
+        "natureza": "decodificacao",
+        "descricao": "Stop tokens modificados por linguagem (limite de 4 na API) e \\n# como sequência de parada das explicações.",
+        "localizador": "§2.1, p. 2 do PDF; Apx E, p. 27–29 do PDF"
+      },
+      {
+        "nome_original": "Post-processing (truncate_after_function_ends, truncate_after_additional_stops)",
+        "natureza": "outro",
+        "descricao": "Truncamento programático das completions após o fim da função; pós-processamento, não prompting.",
+        "localizador": "Apx E, p. 27 do PDF"
+      },
+      {
+        "nome_original": "select (selective explanation by oracle difficulty)",
+        "natureza": "outro",
+        "descricao": "Roteamento por problema entre direct e exp usando o pass@1 do direct como oráculo de dificuldade (limiar 0.9); depende de execução prévia com testes e o estudo o considera impraticável na inferência.",
+        "localizador": "§3.5, p. 6–7 do PDF; Apx I e Tabela 14, p. 38–39 do PDF"
+      },
+      {
+        "nome_original": "Models of 4 different sizes (GPT-3.5, CodeGen2-1B, CodeGen2-16B, Llama2CodeInstruct-34B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre modelos como condição experimental; inclui CodeGen2-1B usando explicações geradas pelo GPT-3.5. Não altera o prompt em si.",
+        "localizador": "§2.4, p. 3; §3.3, p. 5; Apx G.9/H, Tabelas 12–13, p. 35–37 do PDF"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5", "versao": "gpt3.5-turbo-0301 (§2.4, p. 3); Apx D (p. 27) registra gpt-3.5-turbo-3010 — divergência no próprio estudo", "observacao": "Modelo principal; acesso pelo endpoint de completion do Azure, março–junho de 2023."},
+      {"nome": "CodeGen2-1B", "versao": "nao_informado"},
+      {"nome": "CodeGen2-16B", "versao": "nao_informado"},
+      {"nome": "Llama2CodeInstruct-34B", "versao": "nao_informado"},
+      {"nome": "CodeGen2-12B", "versao": "nao_informado", "observacao": "Usado só para calcular logprobs da heurística coder-reviewer (Apx L); §3.4 diz apenas «CodeGen2»."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "MultiPL-C2C (adaptação code-to-code do MultiPL-E)",
+        "versao": "nao_informado",
+        "quantidade": "19 linguagens; programas Python canônicos no prompt, sem descrição em linguagem natural. Problemas por direção não aparecem na Tabela 1; a coluna «total» da Tabela 14 (sem definição explícita) varia de 116 a 161 (161 em py-js, 158 em py-java); a Tabela 5 imprime 158 (jv) e 161 (php, pl, rkt).",
+        "observacao": "O MultiPL-E é descrito como construído a partir de HumanEval e MBPP (nota 3, p. 2); os exemplos citados são do HumanEval. Python-to-X: 18 direções; X-to-X: 16 pares (Tabela 2), dois deles (py-js, py-d) também presentes em Python-to-X. O denominador de cada métrica na Tabela 1 não é ligado explicitamente ao tamanho do corpus."
+      },
+      {
+        "nome": "TransCoder eval+test (C++ → Python), original e corrigido",
+        "versao": "original e versão corrigida pelos autores",
+        "quantidade": "567/566 programas (legenda da Tabela 6)",
+        "observacao": "Avaliação de apêndice (Apx A–B, Tabela 6, p. 12–15), com pass@1 (n=1); os autores não o usam como avaliação formal. Os números de Codex e self-debug na Tabela 6 vêm de outros trabalhos."
+      }
+    ],
+    "metricas": [
+      {"nome": "pass@1", "definicao": "Estimador pass@k sobre problemas com n = 20, t = 0.2, top-p = 0.95 nos resultados principais (§2.3, p. 3)"},
+      {"nome": "pass@1 (n=1)", "definicao": "Estimativa com uma geração: heurísticas (Tabela 3, Tabela 17), TransCoder (Tabela 6) e Apx J"},
+      {"nome": "pass@10 (n=20)", "definicao": "Tabela 11; o estudo observa que o ideal seria n=200 e t=0.8"},
+      {"nome": "Error@1 por tipo (semantic/syntactic; Type, Undeclared, Assertion, Runtime, Other Syntax, Unhelpful)", "definicao": "Classificação por casamento de strings em stderr/stdout, mesma fórmula do pass@1 (Apx G.4, Fig. 5)"},
+      {"nome": "p-valores de testes t pareados", "definicao": "Unicaudal para heurísticas (nota 10, p. 6); bicaudal no Apx G.1–G.2"}
+    ],
+    "linguagens": ["Python", "JavaScript", "Java", "C++", "TypeScript", "PHP", "Ruby", "C#", "Go", "Perl", "R", "Rust", "Scala", "Swift", "Bash", "Lua", "Racket", "Julia", "D"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A explicação melhora problemas difíceis, mas pode piorar problemas fáceis (avaliado por pass@1 do direct como aproximação de dificuldade).",
+        "localizador": "§3.5, p. 6 do PDF; Fig. 4; Apx I, p. 38"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Explicações de programas em linguagens de baixo recurso: mais detalhe pode introduzir erros que se propagam para a tradução.",
+        "localizador": "§3.2, p. 4–5 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Explicação incorreta (exp-lbl inverte o critério de ordenação) leva a tradução errada; explicações enganosas e convincentes (ret-exp) deterioram o desempenho.",
+        "localizador": "Apx E.19, p. 29 do PDF; §3.6.1 e Tabela 4, p. 7 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Exemplos one-shot recuperados com programa-alvo incorreto e etapas intermediárias em linguagem de programação com erro reduzem o desempenho mais do que explicações imperfeitas em linguagem natural.",
+        "localizador": "§3.8 e Tabela 5, p. 8 do PDF; Apx J.1, Tabela 16"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O estudo menciona a possibilidade de a explicação alucinar a semântica do programa a partir dos nomes de variáveis; com código ofuscado, a explicação dependeria mais da sintaxe.",
+        "localizador": "§3.7, p. 8 do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O conjunto TransCoder provavelmente consta dos corpora de treino dos GPTs (o modelo regurgita programas a partir da assinatura); é uma das razões para não avaliá-lo formalmente. O estudo não discute contaminação do MultiPL-C2C/HumanEval.",
+        "localizador": "Apx A, p. 13 do PDF"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Aproximar a dificuldade por tradução direta (estratégia select) exige mais computação que gerar uma explicação; não quantificado.",
+        "localizador": "Apx I, p. 38 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: não se sabe se os programas do MultiPL-E representam alvos reais de tradução, nem se as conclusões valem para modelos mais fortes como GPT-4; explicações pouco úteis no cenário few-shot.",
+        "localizador": "Limitations, p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Qualidade dos benchmarks: mais de 25% dos exemplos de CodeXGLUE/TransCoder examinados têm erros em programas-gabarito ou testes inadequados.",
+        "localizador": "Nota 5, p. 3 do PDF; Apx A, p. 12–13"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Não foi possível distinguir manualmente explicações boas de ruins; a diferença pode decorrer de ruído estilístico ou do acaso.",
+        "localizador": "§3.4, p. 6 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Reutilizar as mesmas explicações (geradas em Python-Java) em todas as direções Python-to-X e remover por regras programáticas a informação específica do alvo; o efeito da remoção é comparado (Tabela 7) e explicações específicas do alvo são comparadas às independentes (Tabelas 8–9).",
+        "avaliada": "sim",
+        "localizador": "§2.1, p. 2 do PDF; Apx G.1–G.2, Tabelas 7–9, p. 31–32 do PDF"
+      },
+      {
+        "descricao": "Explicar só problemas difíceis (select), comparado com direct e exp; usa oráculo de dificuldade e é declarado impraticável na inferência.",
+        "avaliada": "sim",
+        "localizador": "Apx I, Tabela 14, p. 38–39 do PDF"
+      },
+      {
+        "descricao": "Correção de testes, programas-fonte e gabaritos do TransCoder (C++→Python), com resultados no conjunto original e no corrigido (Tabela 6).",
+        "avaliada": "sim",
+        "localizador": "Apx A–B, p. 12–14 do PDF"
+      },
+      {
+        "descricao": "Não avaliar formalmente no TransCoder, por provável vazamento para o treino e por erros nos dados, e usar o MultiPL-E.",
+        "avaliada": "nao",
+        "localizador": "Nota 5, p. 3; Apx A, p. 13 do PDF"
+      },
+      {
+        "descricao": "Baseline random das heurísticas repetido 100 vezes para obter média e variância; p-valores por teste t pareado.",
+        "avaliada": "nao",
+        "localizador": "§3.4, notas 9 e 10, p. 6 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa × tabela: a Introdução afirma melhora consistente em zero-shot nas 18 direções Python-to-X, mas na Tabela 1, em js, direct(0) = 85.5 supera exp(0) = 84.8, exp-lbl(0) = 84.3 e exp-lbl-d(0) = 83.2; em rb, exp(0) = direct(0) = 78.3.",
+        "localizador": "Introdução, p. 1 do PDF; Tabela 1, p. 3 do PDF"
+      },
+      {
+        "descricao": "Snapshot do GPT-3.5 divergente: «gpt3.5-turbo-0301» em §2.4 (e no eixo da Fig. 8) e «gpt-3.5-turbo-3010» no Apx D.",
+        "localizador": "§2.4, p. 3; Apx D, p. 27; Fig. 8, p. 37 do PDF"
+      },
+      {
+        "descricao": "Inversões no few-shot: exp(4) fica abaixo de direct(4) em várias linguagens (por exemplo, cpp 77.8 × 84.3; jv 82.1 × 85); o estudo reconhece ganho médio de só 1.1% no four-shot e que exp é o pior tipo nesse cenário.",
+        "localizador": "Tabela 1, p. 3; §3.1, p. 4 do PDF"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: a Tabela 9 imprime exp (java) four-shot em php = 76.4, e a Tabela 1 imprime exp(4) php = 81.7; as outras 17 colunas coincidem (conferência própria). Coincidentemente, 76.4 é o valor de php em exp (tgt-specific) na Tabela 8. A fonte não explica a divergência.",
+        "localizador": "Tabela 1, p. 3; Tabelas 8–9, p. 32 do PDF"
+      },
+      {
+        "descricao": "Tabela 14 × Tabela 1 para Python-to-X: py-sh direct = 47.9 (Tabela 1: sh direct(0) = 51.3) e py-rs exp = 74 (Tabela 1: rs exp(0) = 74.8); as demais linhas py-* coincidem (conferência própria).",
+        "localizador": "Tabela 1, p. 3; Tabela 14, p. 39 do PDF"
+      },
+      {
+        "descricao": "py-js e py-d têm valores diferentes nas Tabelas 1 e 2 (py-js exp zero-shot 84.8 × 85.7; exp four-shot 87.3 × 86.1; py-d exp zero-shot 44.4 × 42.7; four-shot 45.9 × 48.5). A Tabela 2 não reutiliza explicações e usa explicações zero-shot no four-shot (§3.2); os valores da Tabela 2 coincidem com exp (tgt-specific) da Tabela 8 e exp (zero-shot) da Tabela 9 (correspondência própria). As condições diferem; nenhum valor foi tomado como verdadeiro.",
+        "localizador": "Tabela 1, p. 3; §3.2, p. 4; Tabela 2, p. 5; Tabelas 8–9, p. 32 do PDF"
+      },
+      {
+        "descricao": "Número de direções: o estudo fala em 36 direções (Introdução; Apx I; «35/36»), mas apresenta 18 Python-to-X e 16 pares na Tabela 2, dos quais py-js e py-d repetem Python-to-X; a Tabela 14, com os «36» resultados, tem 33 linhas (contagem própria) e inclui sh-java, ausente da Tabela 2. Aparente inconsistência.",
+        "localizador": "Introdução, p. 1; §3.5, p. 7; Apx I, p. 38; Tabela 2, p. 5; Tabela 14, p. 39 do PDF"
+      },
+      {
+        "descricao": "§3.4 afirma que logprob melhora exp sobre random em 2.54 pontos absolutos; a Tabela 3 imprime random 83.0 ± 1.5 e logprob 85.4 (diferença de 2.4 em cálculo próprio; mesmo com arredondamento a uma casa, a diferença máxima seria 2.50). Aparente inconsistência; o texto diz «with simulation», sem detalhar o estimador.",
+        "localizador": "§3.4, p. 6; Tabela 3, p. 5 do PDF"
+      },
+      {
+        "descricao": "Rótulo «exp-lbl-simp» usado em §3.4 sem definição; a heurística frag foi validada em exp-lbl-d na Tabela 3.",
+        "localizador": "§3.4, p. 6 do PDF"
+      },
+      {
+        "descricao": "Ganho médio do exp selecionado por logprob: 1.7% em 15/18 direções (§3.4, comparador não explicitado) × média de 0.73% (desvio padrão 1.8%) contra exp (zero-shot) no Apx G.3. Os comparadores parecem diferir; a fonte não liga os dois números.",
+        "localizador": "§3.4, p. 6; Apx G.3, p. 31 do PDF"
+      },
+      {
+        "descricao": "§3.8 afirma que exp supera retrieve-unk por 0.5–2.0%, mas na Tabela 5 a diferença em rkt é 41.3 − 38.3 = 3.0 (cálculo próprio).",
+        "localizador": "§3.8 e Tabela 5, p. 8 do PDF"
+      },
+      {
+        "descricao": "Apx G.7 diz que exp vence «na maioria das direções (9/19)», embora a Tabela 11 tenha 18 linguagens-alvo.",
+        "localizador": "Apx G.7, p. 35 do PDF"
+      },
+      {
+        "descricao": "Apx G.9/H atribui o resultado do CodeGen2-16B (baseline superior em 10/18 direções) às «Tabelas 1 e 2», que trazem só GPT-3.5; os resultados de modelos abertos estão nas Tabelas 12–13. Aparente referência trocada. O CodeGen2-16B é também o único modelo sem melhora consistente (§3.3).",
+        "localizador": "Apx G.9/H, p. 35; §3.3, p. 5 do PDF"
+      },
+      {
+        "descricao": "Tabela 13: a linha cpp-py do CodeGen2-16B tem só três valores (38, 57.2, 55.1) para quatro colunas; falta a célula exp-lbl-d.",
+        "localizador": "Tabela 13, p. 37 do PDF"
+      },
+      {
+        "descricao": "CodeGen2-1B py-js exp: 15.4 na Tabela 12 e 14.9 na Tabela 13. A Tabela 13 (X-to-X) pode não reutilizar explicações, mas o estudo não o diz para modelos abertos.",
+        "localizador": "Tabelas 12–13, p. 36–37 do PDF"
+      },
+      {
+        "descricao": "Melhorias relativas no apêndice («300%+», «400%+») não definem a base: com a Tabela 13, CodeGen2-1B lua-py passa de 1.9 a 6 (razão ≈ 3.2; aumento ≈ 216%, cálculo próprio); com a Tabela 12, py-js passa de 4.6 (direct) a 19.3 com explicações do ChatGPT (razão ≈ 4.2; aumento ≈ 320%). Ambiguidade entre razão e variação relativa.",
+        "localizador": "Apx G.9/H, p. 35 e 37; Tabelas 12–13, p. 36–37 do PDF"
+      },
+      {
+        "descricao": "Estimadores diferentes: os resultados principais usam pass@1 com n=20; as heurísticas (Tabela 3) são estimadas com n=1 num «train set» não definido; Apx J (pivot, pseudocode, CoT, steps, summary, gold summary) e TransCoder (Tabela 6) usam n=1. A afirmação de que explicações autogeradas superam docstrings humanas (§3.1) apoia-se em summary 0.854 × gold summary 0.813 com n=1.",
+        "localizador": "§2.3, p. 3; §3.1, p. 3; §3.4, p. 6; Tabela 3, p. 5; Apx J, p. 38; Tabela 6, p. 14 do PDF"
+      },
+      {
+        "descricao": "TransCoder (Tabela 6): exp fica abaixo de direct em no-sig (69.1 × 80.8 no original; 77 × 90 no corrigido) e em typed-sig (80.2 × 80.6; 90.6 × 90.8); o estudo atribui isso a assinaturas incorretas e ao pequeno número de ensaios.",
+        "localizador": "Apx B, Tabela 6, p. 14–15 do PDF"
+      },
+      {
+        "descricao": "Retrieve-bad (Tabela 5) usa subconjuntos menores e diferentes por linguagem (138/80/132/154 problemas), possivelmente mais difíceis, segundo a nota 11.",
+        "localizador": "Tabela 5 e nota 11, p. 8 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ablações da explicação (Tabela 4; jv, php, sw, rkt; ganho sobre o baseline): swap-s, obf-exp, del-s, del-w, rand-exp, ret-exp e no-exp, para exp e exp-lbl. No-exp (explicação vazia) produz quedas como −54.1 (php, exp). Não entram em extracoes porque o alvo de três já foi atingido por técnicas focais.",
+        "localizador": "§3.6.1 e Tabela 4, p. 7 do PDF"
+      },
+      {
+        "descricao": "Ofuscação de nomes no programa-fonte (Tabela 18, Apx N) testa robustez a variações do insumo; não é técnica de prompting.",
+        "localizador": "§3.7, p. 8; Apx N, Tabela 18"
+      },
+      {
+        "descricao": "Esforço manual: as explicações dos exemplos few-shot foram geradas pelo modelo e depois modificadas pelos autores para corrigi-las e ajustar a estrutura; os exemplos few-shot foram escolhidos em parte arbitrariamente, depois de análise de erros na direção de desenvolvimento Python→Java.",
+        "localizador": "Apx F, p. 29–30 do PDF"
+      },
+      {
+        "descricao": "Explicações geradas pelo GPT-3.5 usadas pelo CodeGen2-1B superam as autogeradas em 12 de 18 direções (Fig. 3, Tabela 12).",
+        "localizador": "§3.3, p. 5; Tabela 12, p. 36 do PDF"
+      },
+      {
+        "descricao": "Outras análises: pass@10 (Tabela 11), tipos de erro e conversão de status (Fig. 5–6), comprimento do programa (Fig. 7), correlação NL-to-code × tradução com números de code-davinci-002 de Cassano et al. (Fig. 8, números de outro artigo, não executados aqui), amostragem alternativa 4×5 (Tabela 17) e comprimento das etapas intermediárias (Tabela 19).",
+        "localizador": "Apx G.4–G.8, M, P, p. 32–37 e seguintes"
+      },
+      {
+        "descricao": "Recursos computacionais: 21–84 h de consultas para as Tabelas 1 e 2 com GPT-3.5; 72–144 GPU-dias para o CodeGen2-1B. O estudo não trata isso como custo da técnica.",
+        "localizador": "Apx D, p. 27 do PDF"
+      },
+      {
+        "descricao": "O repositório e os dados são declarados como liberados (link do GitHub); o pacote não foi acessado nem validado.",
+        "localizador": "Resumo e nota 1, p. 1 do PDF"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In this paper we are interested in whether a self-generated natural language explanation z can be used to improve this translation process.", "localizador": "§2, p. 1 do PDF"},
+      {"trecho": "Across three types of explanations and 19 programming languages constructed from the MultiPL-E dataset (Cassano et al., 2022), we find the explanations to be particularly effective in the zero-shot case, improving performance by 12% on average.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "We find that Explain-then-Translate improves zero-shot performance consistently in 18 Python-to-X translation directions, but much less so in the few-shot setting.", "localizador": "Introdução, p. 1 do PDF"},
+      {"trecho": "We analyze our results in 36 different translation directions over different types of explanations.", "localizador": "Introdução, p. 1 do PDF"},
+      {"trecho": "exp: We ask the model to explain the source program in a few sentences (Fig 1, right).", "localizador": "§2.1, p. 1 do PDF"},
+      {"trecho": "exp-lbl: We ask the model to explain the source program line by line.", "localizador": "§2.1, p. 1 do PDF"},
+      {"trecho": "exp-lbl-d: We ask the model to explain the source program line by line in additional detail.", "localizador": "§2.1, p. 1 do PDF"},
+      {"trecho": "In particular if an individual line is complicated, we ask it to break it down, explain individual fragment of the line, and then summarize the purpose for the entire line.", "localizador": "§2.1, p. 1–2 do PDF"},
+      {"trecho": "Please translate the following Python code to R?", "localizador": "Fig. 1 (direct), p. 2 do PDF"},
+      {"trecho": "Can you explain what this Python program does with a couple of sentences? The goal with the explanation, is so that a reader can easily rewrite the program in R.", "localizador": "Fig. 1 (exp), p. 2 do PDF"},
+      {"trecho": "When generating explanations, we treat the token sequence \\n# as a stopping sequence in order to prevent models from generating target translations (since we condition target program with translated signatures in addition to explanations).", "localizador": "§2.1, p. 2 do PDF"},
+      {"trecho": "In order to control for inconsistencies caused by the target-language-specific explanations, we re-use the same explanations (from Python-Java) for all Python-to-X translation experiments (Section 3.1).", "localizador": "§2.1, p. 2 do PDF"},
+      {"trecho": "Before reusing, we also remove any target specific information with programmatic rules so it can be reused across experiments.", "localizador": "§2.1, p. 2 do PDF"},
+      {"trecho": "We prioritize precision and calculate pass@1 with n = 20, t = 0.2, and top-p= 0.95 following Cassano et al. (2022).", "localizador": "§2.3, p. 3 do PDF"},
+      {"trecho": "We main report the results from GPT-3.5 (gpt3.5-turbo-0301) in the main paper unless otherwise specified, and defer the results from open source models (CodeGen2-1B, CodeGen2-16B, and Llama2CodeInstruct-34B (Nijkamp et al., 2023; Rozière et al., 2023)) to the appendix.", "localizador": "§2.4, p. 3 do PDF"},
+      {"trecho": "All completion queries are made to GPT-3.5 (gpt-3.5-turbo-3010) between March - June 2023.", "localizador": "Apx D, p. 27 do PDF"},
+      {"trecho": "You are a helpful and faithful compiler that transpiles Python code to Java code.", "localizador": "Apx C.1, p. 15 do PDF"},
+      {"trecho": "You are an helpful AI assistant who understands all programming languages and can translate between them at ease.", "localizador": "Apx C.2, p. 16 do PDF"},
+      {"trecho": "Providing explanations improves relative performance by 11.5% on average across 18 target languages.", "localizador": "§3.1, p. 3 do PDF"},
+      {"trecho": "In the four-shot setting, the average improvement is much less at 1.1%, although some language pairs observe as much as a 10.1% improvement.", "localizador": "§3.1, p. 4 do PDF"},
+      {"trecho": "The most abstract explanation (exp) performs the worst (best in only 3 out of 18 directions) in the few-shot setting.", "localizador": "§3.1, p. 4 do PDF"},
+      {"trecho": "Since source languages are different, we do not re-use explanations.", "localizador": "§3.2, p. 4 do PDF"},
+      {"trecho": "In the four-shot explanation, we use zero-shot generated explanations (3.1).", "localizador": "§3.2, p. 4 do PDF"},
+      {"trecho": "We speculate that LLMs generally struggle to understand and explain lower-resource PLs; more details may introduce more errors which may compound into the translation phase.", "localizador": "§3.2, p. 4–5 do PDF"},
+      {"trecho": "CodeGen2-16B is the only model that does not improve consistently with explanations.", "localizador": "§3.3, p. 5 do PDF"},
+      {"trecho": "For each explanation type, we generate 20 explanations and 1 program from each explanation (train set).", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "We use zero-shot explanations for exp (see Sec 3.1) and four-shot for exp-lbl and exp-lbl-d.", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "With exp, logprob improves upon random by absolute 2.54% (p = 0.055), and frag improves explain-lbl-d upon random baseline by absolute 2.2% (p = 0.033) with simulation.", "localizador": "§3.4, p. 6 do PDF (omitida apenas a chamada da nota 10, sobrescrita após «(p = 0.055),»)"},
+      {"trecho": "Both improvements can be reproduced with pass@1, so we include these heuristically selected explanations as two additional rows in Table 1.", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "With logprob selected exp, we improve or match performance in 15/18 directions, with an average improvement of 1.7% (p < 0.001).", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "With frag selected exp-lbl-simp, we improve or match performance in 13/18 directions, averaging 0.48% (p = 0.022).", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "Repeated 100 times to obtain mean and variance.", "localizador": "Nota 9, p. 6 do PDF"},
+      {"trecho": "Qualitatively, we could not distinguish a good explanation from a bad one manually (Apx L.3 and L.4), suggesting that the distinction between “good” and “bad” explanations may be hidden due to stylistic noise (wording, spacing, etc.), or potentially due to chance.", "localizador": "§3.4, p. 6 do PDF"},
+      {"trecho": "Through Fig 4, we discovered that explanation improves difficult problems (left of x-axis), but could hurt easy problems (right of x-axis).", "localizador": "§3.5, p. 6 do PDF"},
+      {"trecho": "We found selective explanation to improve performance over direct and exp in 35/36 directions.", "localizador": "§3.5, p. 7 do PDF"},
+      {"trecho": "We replace the explanation with another program’s explanation randomly (rand-exp), or through retrieval (ret-exp, details in Apx O), or with an empty string (no-exp) to verify if explanations need to be correct/relevant.", "localizador": "§3.6.1, p. 7 do PDF"},
+      {"trecho": "Lastly, when models receive completely irrelevant explanations (rand-exp), they are able to recover performance to some extent; but if the explanations are convincingly misleading (ret-exp) performance deterioates.", "localizador": "§3.6.1, p. 7 do PDF"},
+      {"trecho": "This is potentially due to the fact that explanations become more reliant on actual syntax of the program, rather than hallucinating on the program semantics from surface variable names.", "localizador": "§3.7, p. 8 do PDF"},
+      {"trecho": "In Table 5, we observe that when the retrieved one-shot is paired with a wrong target program, the decrease in performance is much more significant than in the fixed-shot setting.", "localizador": "§3.8, p. 8 do PDF"},
+      {"trecho": "However, on average, self-generated unverified explanations (exp) still outperform one-shot in all directions (fixed-unk by 0.7-4.5%; retrieve-unk by 0.5-2.0%), indicating that NL generations often have higher quality than programs and can serve as a better medium for intermediate reasoning step.", "localizador": "§3.8, p. 8 do PDF"},
+      {"trecho": "retrieval-bad (Table 5) should be taken lightly since the subset of problems evaluated for bad also likely contains harder problems.", "localizador": "Nota 11, p. 8 do PDF"},
+      {"trecho": "The result indicates mistakes in intermediate PL steps corrupt translation performance more than imperfect NL explanations.", "localizador": "§3.8, p. 8 do PDF"},
+      {"trecho": "With simple heuristics, we have also demonstrated the potential to improve explanation quality and consequently translation quality.", "localizador": "Conclusão, p. 9 do PDF"},
+      {"trecho": "First, while we focus on the (adapted) MultiPL-E benchmark due to its widespread use, it is unclear whether programs in this benchmark are representative of programs that are targets for code-to-code translation.", "localizador": "Limitations, p. 9 do PDF"},
+      {"trecho": "Second, while we saw our conclusions to largely hold across GPT-3.5 and other open-source models, it is unclear whether they will hold for more powerful LLMs such as GPT-4.", "localizador": "Limitations, p. 9 do PDF"},
+      {"trecho": "We also considered into CodeXGLUE (Lu et al., 2021) and TransCoder (Lachaux et al., 2020) for the unit tests evaluations, but initial studies suggested a significant number of examples (more than 25%) contain mistakes in gold programs or inadequate unit tests (see Apx A, B).", "localizador": "Nota 5, p. 3 do PDF"},
+      {"trecho": "One of the other reasons that we do not formally evaluate our methods on TransCoder dataset is because that the TransCoder dataset is very likely to have been included in GPTs’ training corpora.", "localizador": "Apx A, p. 13 do PDF"},
+      {"trecho": "Entries under our work are pass@1(n=1).", "localizador": "Legenda da Tabela 6, p. 14 do PDF"},
+      {"trecho": "This led to the wrong translation where the negative sign is ignored.", "localizador": "Apx E.19, p. 29 do PDF"},
+      {"trecho": "Once we select the few-shot programs, we simply use the model to generate zero-shot explanations, and modify for correctness and structural preferences (e.g. code lines followed by explanations with exp-lbl).", "localizador": "Apx F, p. 30 do PDF"},
+      {"trecho": "Second and third few-shot examples were selected quite arbitrarily.", "localizador": "Apx F, p. 30 do PDF"},
+      {"trecho": "Here, we compare the pass@1 before and after removing such information for all explanation types.", "localizador": "Apx G.1, p. 31 do PDF"},
+      {"trecho": "There is still a mean improvement of 0.73% with standard deviation of 1.8%.", "localizador": "Apx G.3, p. 31 do PDF"},
+      {"trecho": "In the top 4 rows of Table 11, we can see exp outperforms the rest in the most directions (9/19).", "localizador": "Apx G.7, p. 35 do PDF"},
+      {"trecho": "CodeGen2-16B shows weaker results, with baseline outperforming in 10/18 directions in Table 1 and 2.", "localizador": "Apx G.9/H, p. 35 do PDF"},
+      {"trecho": "We repeat this for all 36 translation directions in Python-to-X and X-to-X and present full results in Table 14.", "localizador": "Apx I, p. 38 do PDF"},
+      {"trecho": "Having to approximate hardness through direct translation requires more computation than generating a single explanation.", "localizador": "Apx I, p. 38 do PDF"},
+      {"trecho": "This is however still impractical for inference during test time.", "localizador": "Apx I, p. 38 do PDF"},
+      {"trecho": "Pivot language: Instead of generating target program language directly, we also asked the program to translate to a pivot language and then translate to the target language.", "localizador": "Apx J, p. 38 do PDF"},
+      {"trecho": "To ensure the format of the pseudocode, we prompt with \\\\begin{algorithm} and use \\\\end{algorithm} as stop token.", "localizador": "Apx J, p. 38 do PDF"},
+      {"trecho": "In Chain-of-thought (CoT) prompting, we break down the the input program space and translate each sub-components before combining all results together as a whole.", "localizador": "Apx J, p. 38 do PDF"},
+      {"trecho": "Steps: ordered list of natural language steps describing major steps of the program following work by Jiang et al. (2023).", "localizador": "Apx J, p. 38 do PDF (item de lista)"},
+      {"trecho": "Summary: free-form natural language sentences summary of what the program does.", "localizador": "Apx J, p. 38 do PDF (item de lista)"},
+      {"trecho": "We use the original human written docstring instructions (from HumanEval) as gold summaries for the program and ask the model to translate given the program and summary.", "localizador": "Apx J, p. 38 do PDF"},
+      {"trecho": "Pass@1 for direct, exp, and select trails, where select picks only hard problems with direct pass@1 less than 0.9 to explain.", "localizador": "Legenda da Tabela 14, p. 39 do PDF"},
+      {"trecho": "We release our dataset, code, and canonical solutions in all 19 languages.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "exp(4) 87.3 77.8 82.1 88.4 81.7 80.4 83.3 51.4 73.2 55.6 73 73.7 67.1 73.1 67.9 44.7 69.4 45.9", "localizador": "Tabela 1, p. 3 do PDF, linha exp(4); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"},
+      {"trecho": "exp (java) 87.3 77.8 82.1 88.4 76.4 80.4 83.3 51.4 73.2 55.6 73.0 73.7 67.1 73.1 67.9 44.7 69.4 45.9", "localizador": "Tabela 9, p. 32 do PDF, linha exp (java); colunas trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"},
+      {"trecho": "py-sh 115 158 47.9 55.4 55.8 0.4", "localizador": "Tabela 14, p. 39 do PDF; colunas direction, # exp, total, direct, exp, select, δ"},
+      {"trecho": "py-rs 58 156 70.6 74 74.8 0.8", "localizador": "Tabela 14, p. 39 do PDF; colunas direction, # exp, total, direct, exp, select, δ"},
+      {"trecho": "py-js 36 161 85.5 84.8 86.1 0.6", "localizador": "Tabela 14, p. 39 do PDF; colunas direction, # exp, total, direct, exp, select, δ"},
+      {"trecho": "D-D py - js 85.5 85.7 84.3 83.2 86.6 86.1 87.6 87.8", "localizador": "Tabela 2, p. 5 do PDF, linha High-to-High; colunas Type, src-tgt, 0 shot (direct, exp, exp-lbl, exp-lbl-d), 4 shot (direct, exp, exp-lbl, exp-lbl-d)"},
+      {"trecho": "retrieve unk 81.9 76.5 67.2 38.3", "localizador": "Tabela 5, p. 8 do PDF; colunas (condição), quality, jv, php, pl, rkt"},
+      {"trecho": "exp - 82.9 77 68.2 41.3", "localizador": "Tabela 5, p. 8 do PDF; colunas (condição), quality, jv, php, pl, rkt"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "exp",
+      "mecanismos": ["instrucao", "contexto", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "direct(0) (tradução direta, zero-shot)",
+      "modelo": "GPT-3.5 (gpt3.5-turbo-0301 segundo §2.4; o Apx D registra gpt-3.5-turbo-3010)",
+      "benchmark": "MultiPL-C2C, Python → JavaScript (js)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 85.5, "intervencao": 84.8},
+      "denominador": "nao_informado na Tabela 1; a coluna «total» da Tabela 14 imprime 161 para py-js, sem definição explícita nem ligação declarada à Tabela 1",
+      "condicoes": "Zero-shot; pass@1 estimado com n = 20 gerações por problema, t = 0.2, top-p = 0.95 (§2.3). Explicações geradas na direção Python-Java e reutilizadas, com remoção programática de informação específica do alvo; programa-alvo condicionado também à assinatura traduzida. Número de execuções independentes: nao_informado (n = 20 é parâmetro do estimador). Sem intervalo de confiança nem teste para esta célula. Conferido no PDF: Tabela 1, p. 3, valores 85.5 (direct(0), sublinhado) e 84.8 (exp(0)) na coluna js.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca três tipos de explicação sem que um prevaleça, e os 12% (11.5% no corpo) são melhora relativa média, sem técnica e comparador únicos. Primeira tabela com o contraste elegível: Tabela 1 (a Fig. 1 é só exemplo). Métrica única (pass@1); único modelo da tabela (GPT-3.5); primeira linha de base listada: direct(0); primeira técnica no mesmo cenário de shots: exp(0). Sem agregado impresso compatível na Tabela 1, usou-se a primeira coluna, js.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 3 do PDF (sem numeração impressa), linhas direct(0) e exp(0), coluna js",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "direct(0) 85.5 76.6 76 78.9 68.4 78.3 79.2 42.4 58.3 40.4 70.6 63.7 64.4 51.3 56.2 31.3 61.6 42", "localizador": "Tabela 1, p. 3 do PDF, linha direct(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"},
+        {"trecho": "exp(0) 84.8 82.1 82.9 85.1 77 78.3 83.6 45.7 68.2 46.9 74.8 74.7 70.5 55.4 60 41.3 70.5 44.4", "localizador": "Tabela 1, p. 3 do PDF, linha exp(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "exp-lbl",
+      "mecanismos": ["instrucao", "contexto", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "direct(0) (tradução direta, zero-shot)",
+      "modelo": "GPT-3.5 (gpt3.5-turbo-0301 segundo §2.4; o Apx D registra gpt-3.5-turbo-3010)",
+      "benchmark": "MultiPL-C2C, Python → JavaScript (js)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 85.5, "intervencao": 84.3},
+      "denominador": "nao_informado na Tabela 1; a coluna «total» da Tabela 14 imprime 161 para py-js, sem definição explícita",
+      "condicoes": "Zero-shot; n = 20, t = 0.2, top-p = 0.95; explicações linha a linha geradas em Python-Java e reutilizadas após remoção de informação específica do alvo. Número de execuções: nao_informado. Conferido no PDF: Tabela 1, p. 3, coluna js, 85.5 (direct(0)) e 84.3 (exp-lbl(0)).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada: o estudo apresenta exp-lbl como formulação própria, em linha separada. Mesma regra de ordem: Tabela 1, pass@1, GPT-3.5, primeira linha de base direct(0), primeira coluna js.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 3 do PDF, linhas direct(0) e exp-lbl(0), coluna js",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "direct(0) 85.5 76.6 76 78.9 68.4 78.3 79.2 42.4 58.3 40.4 70.6 63.7 64.4 51.3 56.2 31.3 61.6 42", "localizador": "Tabela 1, p. 3 do PDF, linha direct(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"},
+        {"trecho": "exp-lbl(0) 84.3 80.3 82.5 84.7 77.5 80 83.8 45.6 65.3 48 76 74.5 75.1 56.8 61.5 39 69.2 44.4", "localizador": "Tabela 1, p. 3 do PDF, linha exp-lbl(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "exp-lbl-d",
+      "mecanismos": ["instrucao", "contexto", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "direct(0) (tradução direta, zero-shot)",
+      "modelo": "GPT-3.5 (gpt3.5-turbo-0301 segundo §2.4; o Apx D registra gpt-3.5-turbo-3010)",
+      "benchmark": "MultiPL-C2C, Python → JavaScript (js)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 85.5, "intervencao": 83.2},
+      "denominador": "nao_informado na Tabela 1; a coluna «total» da Tabela 14 imprime 161 para py-js, sem definição explícita",
+      "condicoes": "Zero-shot; n = 20, t = 0.2, top-p = 0.95; explicações linha a linha detalhadas geradas em Python-Java e reutilizadas após remoção de informação específica do alvo. Número de execuções: nao_informado. Conferido no PDF: Tabela 1, p. 3, coluna js, 85.5 (direct(0)) e 83.2 (exp-lbl-d(0)).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada: exp-lbl-d é formulação própria, avaliada em linha separada. Mesma regra de ordem: Tabela 1, pass@1, GPT-3.5, primeira linha de base direct(0), primeira coluna js.",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 3 do PDF, linhas direct(0) e exp-lbl-d(0), coluna js",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "direct(0) 85.5 76.6 76 78.9 68.4 78.3 79.2 42.4 58.3 40.4 70.6 63.7 64.4 51.3 56.2 31.3 61.6 42", "localizador": "Tabela 1, p. 3 do PDF, linha direct(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"},
+        {"trecho": "exp-lbl-d(0) 83.2 79.1 84 85.2 77.6 82.7 82.7 45.8 62.9 45.5 76.2 73.8 74.8 56.4 59.5 36.1 68.9 43", "localizador": "Tabela 1, p. 3 do PDF, linha exp-lbl-d(0); colunas Trial, js, cpp, jv, ts, php, rb, cs, go, pl, r, rs, sc, sw, sh, lua, rkt, jl, d"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Explanation Selection with Heuristics — heurística len (comprimento da explicação, em caracteres, excluindo código)",
+      "mecanismos": ["instrucao", "contexto", "raciocinio", "amostragem"],
+      "mecanismos_acrescentados": ["amostragem"],
+      "comparador": "random (uma explicação escolhida ao acaso entre as 20 amostradas; média de 100 repetições)",
+      "modelo": "GPT-3.5 (explicações e programas); a heurística len não usa outro modelo",
+      "benchmark": "MultiPL-C2C, Python → Java (py-jv), «train set» não definido no estudo",
+      "metrica": "pass@1 (n=1), desempenho estimado das heurísticas",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 83.0, "intervencao": 84.2},
+      "denominador": "nao_informado",
+      "condicoes": "Tipo de explicação exp, com explicações zero-shot (§3.4); 20 explicações e 1 programa por explicação; desempenho estimado pela média das taxas de acerto das explicações escolhidas (argmax) por problema. O baseline é impresso como 83.0 ± 1.5 (100 repetições; a nota 9 fala em média e variância, sem dizer se ± é desvio padrão ou variância). Número de shots no passo de tradução da Tabela 3: nao_informado (as linhas heurísticas da Tabela 1 são four-shot). A validação com pass@1 (n = 20) foi feita só para a melhor heurística (logprob, 85.4), não para len. Sem teste estatístico para len. Conferido no PDF: Tabela 3, p. 5, linha exp py-jv, colunas random e len.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Exceção ao alvo de três para cobrir técnica focal ainda não representada (seleção heurística de explicações, §3.4, retomada na Conclusão). Primeira tabela com o contraste elegível: Tabela 3. A Tabela 1 traz exp*(4) e exp-lbl-d*(4), mas sem condição comparável de seleção aleatória, porque exp(4) usa explicações four-shot (§3.4; Apx G.3). Primeira linha (exp, py-jv), métrica impressa nas colunas de heurística (pass@1, n=1), primeira linha de base (random) e primeira heurística listada (len).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 5 do PDF (sem numeração impressa), linha exp py-jv, colunas random e len; procedimento em §3.4, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "exp py-jv 83.0 ± 1.5 84.2 84.8 84.2 81.0 85.4 93.7 85.4", "localizador": "Tabela 3, p. 5 do PDF, linha exp; colunas Exp Type, src-tgt, random, len, line-e, line, frag, logprob, oracle, pass@1"},
+        {"trecho": "We estimate heuristics performance (pass@1, n=1) and validate the best method by generating 20 programs and calculate pass@1 (n = 20).", "localizador": "Legenda da Tabela 3, p. 5 do PDF"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "A pergunta é explícita: saber se uma explicação autogerada em linguagem natural melhora a tradução de código, em várias linguagens e níveis de recurso.",
+      "localizador": "Introdução e §2, p. 1 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Os prompts completos (four-shot) estão no Apx C, e a construção do MultiPL-C2C, a métrica, os parâmetros e o pós-processamento estão descritos (§2, Apx E). Porém o «train set» das heurísticas não é definido, os prompts zero-shot completos aparecem só no exemplo da Fig. 1, o prompt one-shot (Tabela 5) não é mostrado, e parte dos exemplos few-shot foi escolhida arbitrariamente e editada à mão.",
+      "localizador": "§2, p. 1–3; §3.4, p. 6; Apx C, p. 15–24; Apx F, p. 29–30 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Linha de base direct executada no mesmo benchmark, métrica e cenário de shots (zero e four-shot), além de ablações (no-exp, rand-exp, ret-exp), comparadores one-shot e baseline random para as heurísticas.",
+      "localizador": "Tabelas 1–5, p. 3–8 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "O pass@1 é definido (n = 20, t = 0.2, top-p = 0.95), mas várias análises usam n = 1; os denominadores por linguagem não aparecem na Tabela 1 (só na coluna «total» da Tabela 14, sem definição); e a mesma métrica tem valores diferentes entre tabelas (php em exp four-shot: 81.7 na Tabela 1 × 76.4 na Tabela 9; py-sh e py-rs nas Tabelas 1 × 14).",
+      "localizador": "§2.3, p. 3; Tabelas 1, 3, 9, 14, p. 3, 5, 32, 39 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção Limitations discute a representatividade do benchmark, a generalização para GPT-4 e a pouca utilidade no few-shot; há cautelas sobre subconjuntos (nota 11) e acaso (§3.4). Faltam teste estatístico ou variabilidade para os resultados principais da Tabela 1 e a discussão do ajuste dos exemplos few-shot feito na direção Python→Java, que também é avaliada.",
+      "localizador": "Limitations, p. 9; §3.4, p. 6; nota 11, p. 8; Apx F, p. 30 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts, parâmetros de decodificação, stop tokens e código de truncamento são informados, e há link para código e dados (não acessado). O snapshot do modelo principal é informado de forma divergente (0301 × 3010), e não se informam versões dos modelos abertos nem o número de execuções independentes.",
+      "localizador": "§2.3–2.4, p. 3; Apx C–E, p. 15–29; Apx D, p. 27; nota 1, p. 1 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo trata o provável vazamento do TransCoder para o treino dos GPTs e o usa como razão para não avaliá-lo formalmente, mas não discute contaminação do MultiPL-C2C/HumanEval, benchmark principal. Também não informa se os programas HumanEval usados como exemplos few-shot (humaneval_107, 126, 1, 88) foram excluídos da avaliação.",
+      "localizador": "Apx A, p. 13; Apx F, p. 30 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1–2608). O PDF não traz numeração impressa; os localizadores usam a posição da página no arquivo.",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15, 16, 17, 24, 27, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39]
+  }
+}

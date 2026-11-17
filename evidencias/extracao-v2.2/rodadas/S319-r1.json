@@ -1,0 +1,248 @@
+{
+  "estudo": "S319",
+  "texto_fonte": "fontes/textos/lote/S319.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "LCP (Logical Comment Prompt)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 4), Seção 3.3 e Seção 4.1 (parágrafo LCP); p. 5, Tabela 2 (prompt) e Tabela 3 (linhas SFT e \\wLCP); p. 6, Tabela 5; p. 7, Tabela 7",
+        "observacao": "Estratégia de prompting proposta pelo estudo e investigada também isoladamente (linhas \\wLCP na Tabela 3, Tabela 4 e estudo de robustez da Seção 5.1/Tabela 7), além de ser o componente de inferência do MANGO; por isso classificada como focal. O prompt LCP (Tabela 2) mantém a instrução padrão e acrescenta ao prefixo da resposta 'with comments to explain the logic:', pedindo comentários que explicam a lógica do código como etapas intermediárias; classificado como raciocinio (explicação intercalada ao código), sem decomposição em etapas executadas separadamente. Contrafactual: \\wLCP contra SFT no mesmo modelo com ajuste fino padrão e mesma decodificação (Tabela 3; também Tabela 5 para WizardCoder-7B). O contraste MANGO contra \\wLCP isola o treinamento contrastivo, que está fora do escopo. Na Tabela 7, 'LCP' designa um grupo de 15 prompts (sementes Comment1-3 da Tabela 11 e paráfrases geradas por GPT-4), não apenas o prompt da Tabela 2."
+      },
+      {
+        "nome_original": "CoT (Chain-of-Thought), zero-shot-CoT, prompt \"CoT-pre1\"",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4, Seção 4.1 (parágrafo CoT); p. 5, Tabela 3 (linhas SFT e \\wCoT); p. 6, Tabela 4; p. 7, Tabela 7 (grupo CoT-Pre); p. 11, Tabela 11",
+        "observacao": "Linha de base de prompting executada sobre os modelos com ajuste fino padrão; \\wCoT contra SFT na Tabela 3 constitui condição com e sem a instrução de raciocínio passo a passo, mesmo modelo e decodificação. O estudo não detalha onde o texto 'CoT-pre1' é inserido em relação ao template padrão. Na Tabela 7, o grupo CoT-Pre reúne 15 prompts (sementes CoT-pre1 a CoT-pre3 e paráfrases). Ver heterogeneidade sobre a correspondência entre os valores \\wCoT da Tabela 3 e as linhas da Tabela 9."
+      },
+      {
+        "nome_original": "CoT-No-Position (CoT livre, sem restrição de posição)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Seção 5.1; p. 7, Tabela 7 (grupo CoT-No-Position) e Tabela 9 (CoT1 = CoT-No-Position1); p. 11, Tabela 11",
+        "observacao": "Variante de CoT criada para a análise de robustez (15 prompts: sementes CoT-No-Position1, 6 e 11 e paráfrases). A Tabela 7 não traz condição sem a técnica (só médias e desvios dos três grupos de prompts); na Tabela 9 o contraste SFT contra L_cl varia o treinamento, não o prompt. Mecanismos acrescentados registrados em relação ao prompt padrão, do qual o estudo não a compara diretamente."
+      },
+      {
+        "nome_original": "Standard (prompt padrão de instrução; condição SFT)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 4.1 (parágrafo SFT); p. 5, Tabela 2 (linha Standard) e Tabela 3 (linhas SFT)",
+        "observacao": "Template de instrução do WizardCoder ('Create a Python script for this problem:' e prefixo de resposta), usado no modelo com ajuste fino supervisionado padrão; é a linha de base comum de LCP e CoT."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Comment contrastive learning (perda contrastiva L_cl, margem m)",
+        "natureza": "ajuste_fino",
+        "descricao": "Treinamento com perda contrastiva entre código com comentários (y_pos) e o mesmo código sem comentários (y_neg, obtido removendo comentários com pygments), somada à entropia cruzada (L = L_lm + L_cl), margem m = 0,1. É o componente de treinamento do MANGO; MANGO (L_cl + LCP) é pacote híbrido e seu ganho sobre SFT não é efeito isolado de prompting.",
+        "localizador": "p. 3-4, Seção 3.2, Equações 2 e 3; p. 4, Seção 4.1 (parágrafos de treino e MANGO)"
+      },
+      {
+        "nome_original": "SFT (Supervised Fine-Tuning) em CodeM-Python",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino supervisionado padrão dos backbones em codem-python (9600 exemplos Python), 3 épocas (111 passos), batch 256, warmup 15, DeepSpeed Stage 1; base comum de todas as condições de prompting avaliadas.",
+        "localizador": "p. 4, Seção 4.1"
+      },
+      {
+        "nome_original": "Decoding Settings",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura T = 0,8, top_p = 0,95, n = 10 amostras por problema; na Tabela 4, Pass@1 com busca gulosa e Pass@5/10 com amostragem T = 0,8.",
+        "localizador": "p. 4, Seção 4.1 (Decoding Settings); p. 6, legenda da Tabela 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "StarCoder-7B", "versao": "nao_informado", "observacao": "Backbone ajustado pelos autores com SFT em CodeM-Python; o estudo informa só nome e tamanho."},
+      {"nome": "WizardCoder-3B", "versao": "nao_informado", "observacao": "Backbone ajustado pelos autores com SFT; também usado na análise preliminar de perda."},
+      {"nome": "WizardCoder-7B", "versao": "nao_informado", "observacao": "Backbone ajustado pelos autores com SFT; usado também nas ablações e análises (Tabelas 5, 6, 8, 9)."},
+      {"nome": "GPT-4", "versao": "nao_informado", "observacao": "Usado para gerar quatro variantes parafraseadas de cada prompt semente (Seção 5.1); não é modelo avaliado. A linha GPT-4 da Tabela 4 é resultado de outro trabalho (asterisco)."},
+      {"nome": "CodeLLaMA-7B", "versao": "nao_informado", "observacao": "Só na Tabela 4, com valor de Pass@1 retirado de outro trabalho (asterisco); não executado pelos autores."}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval", "quantidade": "164 problemas em Python; 7,7 testes unitários por problema em média", "observacao": "O estudo não liga explicitamente o tamanho do corpus ao denominador de Pass@k; Pass@k é calculado com n = 10 amostras e expectativa sobre os problemas (Eq. 4)."},
+      {"nome": "MBPP (test set)", "quantidade": "500 problemas em Python; 3 casos de teste automatizados por problema", "observacao": "Mesma ressalva sobre denominador."},
+      {"nome": "CodeM-Python (codem-python)", "quantidade": "9600 exemplos Python", "observacao": "Dados de treino (destilados de GPT-4 com Evol-instruct), não benchmark de avaliação; o conjunto CodeM foi usado como dados de avaliação da perda na análise preliminar (Seção 2)."}
+    ],
+    "metricas": [
+      {"nome": "Pass@k (k = 1, 5, 10)", "definicao": "Estimador de Chen et al. (2021) com n = 10 amostras por problema (Eq. 4); Pass@1 da Tabela 4 em busca gulosa", "localizador": "p. 4, Seção 4.1 (Decoding Settings) e Seção 4.2, Eq. 4"},
+      {"nome": "Average cross-entropy loss (token-level)", "definicao": "Perda média por estilo de código (CoT-pre, CoT-post, Comment) na análise preliminar", "localizador": "p. 3, Seção 2, Tabela 1"},
+      {"nome": "#avg. code line / #avg. comment line; MCL (mean comment lines)", "definicao": "Contagem média de linhas de código e de comentário do código gerado", "localizador": "p. 7, Tabelas 8 e 9"},
+      {"nome": "Distribuição de erros: VE, AWA, PWA, overall", "definicao": "Taxas de falha por categoria no HumanEval; unidade e denominador não informados", "localizador": "p. 8, Seção 5.4, Tabela 10"},
+      {"nome": "Avg e StDEV de Pass@k entre 15 prompts por grupo", "definicao": "Média e desvio-padrão entre prompts parafraseados; estimador do desvio não informado", "localizador": "p. 7, Tabela 7"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O prompting CoT zero-shot reduziu a taxa de aprovação dos modelos pequenos e médios em relação ao prompt padrão, com queda mais acentuada no modelo de 3B; no estudo de caso, os passos de CoT reinterpretados de forma ambígua levaram a código que falha.",
+        "localizador": "p. 2 (Introdução); p. 5, Seção 4.3; p. 10, Apêndice B"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Variabilidade do desempenho conforme a formulação do prompt, que o estudo chama de aleatoriedade do modelo em resposta a estilos de prompt; os grupos de CoT apresentam desvio-padrão maior que o grupo LCP entre paráfrases. Trata-se de sensibilidade à formulação, não de variação entre execuções repetidas.",
+        "localizador": "p. 6, Seção 5.1; p. 7, Tabela 7"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo aponta que a eficácia das estratégias de decomposição existentes depende de LLMs avançados como GPT-4, em particular de chamadas de API, o que limita sua aplicabilidade prática; não quantificado.",
+        "localizador": "p. 1, Abstract"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Reformulação dos prompts em 15 versões por categoria (3 sementes manuais e 4 paráfrases geradas por GPT-4 para cada) para mitigar a aleatoriedade do modelo em resposta a estilos de prompt, com relato de média e desvio-padrão.",
+        "avaliada": "nao",
+        "localizador": "p. 6, Seção 5.1; p. 7, Tabela 7"
+      },
+      {
+        "descricao": "Verificação da implementação do SFT padrão contra o Pass@1 guloso relatado para CodeM-Python, com margem de erro declarada inferior a 1%.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 4.1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversões do LCP frente ao SFT na Tabela 3, apesar da narrativa de melhoria consistente: no MBPP, Pass@1 de StarCoder-7B (41.11 contra 42.79), WizardCoder-3B (34.79 contra 35.98) e WizardCoder-7B (41.96 contra 42.73) e Pass@5 de WizardCoder-3B (51.23 contra 51.51) ficam abaixo do SFT. A narrativa afirma que o LCP contribui consistentemente para melhorar o desempenho.",
+        "localizador": "p. 5, Tabela 3 (colunas MBPP); p. 5-6, Seção 4.3"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela quanto ao CoT: o texto afirma queda de desempenho com CoT 'em todas as instâncias', mas na Tabela 3 WizardCoder-7B \\wCOT tem HumanEval Pass@10 75.20 contra 74.59 do SFT.",
+        "localizador": "p. 5, Tabela 3 (bloco WizardCoder-7B, HumanEval Pass@10) e Seção 4.3"
+      },
+      {
+        "descricao": "Na Tabela 4 (WizardCoder-3B, HumanEval), w/ LCP supera a linha de base só em Pass@1 (36.59 contra 34.80*); em Pass@5 (51.57 contra 51.72) e Pass@10 (59.15 contra 59.75) fica abaixo. O Pass@1 da linha de base (34.80*) vem de outros trabalhos, com decodificação gulosa, e não foi executado pelos autores; a tabela não diz se w/ CoT e w/ LCP são aplicados ao backbone original ou ao modelo com SFT.",
+        "localizador": "p. 6, Tabela 4 e legenda"
+      },
+      {
+        "descricao": "O mesmo par modelo-métrica-condição aparece com valores diferentes entre tabelas: WizardCoder-3B HumanEval Pass@5/Pass@10 com amostragem T = 0,8 é 56.07/63.82 para \\wLCP e 41.09/51.83 para \\wCoT na Tabela 3, mas 51.57/59.15 (w/ LCP) e 40.05/48.78 (w/ CoT) na Tabela 4; a linha de base também difere (51.43/58.12 na Tabela 3 contra 51.72/59.75 na Tabela 4). O estudo não explica se o backbone difere entre as tabelas.",
+        "localizador": "p. 5, Tabela 3; p. 6, Tabela 4"
+      },
+      {
+        "descricao": "A Seção 4.1 declara que a condição CoT usa o prompt CoT-pre1, e a Seção 5.3 mapeia CoT2 = CoT-pre1 e CoT3 = CoT-pre2. Porém os valores de WizardCoder-3B \\wCoT na Tabela 3 (17.28/41.09/51.83) coincidem com a linha CoT3 SFT da Tabela 9 (CoT-pre2), não com CoT2 SFT (17.91/44.05/53.86); para WizardCoder-7B, \\wCOT na Tabela 3 (42.50/68.68/75.20) não coincide com nenhuma linha SFT da Tabela 9. A Tabela 9 não informa o benchmark; comparação feita pelo extrator.",
+        "localizador": "p. 4, Seção 4.1; p. 5, Tabela 3; p. 7, Seção 5.3 e Tabela 9"
+      },
+      {
+        "descricao": "Aparente inconsistência entre prosa e Tabela 9: a prosa diz que CoT1, CoT2 e CoT3 representam, respectivamente, médias de 0, 2 e 3 linhas de comentário no WizardCoder-7B, mas a coluna MCL (SFT) traz 2.70 (CoT1), 1.86 (CoT2) e 0.38 (CoT3), ordem inversa nos extremos.",
+        "localizador": "p. 7, Seção 5.3 e Tabela 9 (bloco WizardCoder-7B, coluna MCL)"
+      },
+      {
+        "descricao": "A Introdução e a Seção 4.3 relatam ganho do MANGO de 4.17 pontos em Pass@10 no MBPP para WizardCoder-7B; pela Tabela 3 (MANGO 67.87, SFT 62.33), a diferença calculada pelo extrator é 5.54. O ganho de 7.52 em HumanEval para StarCoder-7B e os de 3.87 (3B) e 4.07 (7B) coincidem com a tabela. Refere-se ao pacote híbrido MANGO, não ao LCP isolado.",
+        "localizador": "p. 2, Introdução; p. 5, Seção 4.3 e Tabela 3"
+      },
+      {
+        "descricao": "Narrativa contradiz a Tabela 10: o texto diz que os componentes da ablação também apresentam taxas de erro menores nos três tipos, mas w/ L_cl tem AWA 10.69 contra 10.24 do SFT. Na linha w/ LCP, VE+AWA+PWA = 24.18 (cálculo do extrator) contra overall 24.19, compatível com arredondamento. A Tabela 10 não informa modelo, unidade nem denominador.",
+        "localizador": "p. 8, Seção 5.4 e Tabela 10"
+      },
+      {
+        "descricao": "A Tabela 7 (robustez LCP contra CoT) não informa modelo, benchmark nem condição de treino; o estimador do desvio-padrão não é informado. O grupo LCP da Tabela 7 (sementes Comment1-3 e paráfrases) não é o mesmo prompt LCP da Tabela 2.",
+        "localizador": "p. 6, Seção 5.1; p. 7, Tabela 7; p. 11, Tabela 11"
+      },
+      {
+        "descricao": "Os experimentos principais não informam número de execuções repetidas nem dispersão; cada condição usa n = 10 amostras por problema, parâmetro do estimador Pass@k.",
+        "localizador": "p. 4, Seção 4.1 (Decoding Settings); p. 5, Tabela 3"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "MANGO = treinamento contrastivo de comentários (L_cl) + LCP na inferência. A ablação (Tabela 5, WizardCoder-7B, HumanEval) traz SFT, w/LCP, w/L_cl e MANGO; o contraste w/L_cl contra SFT e MANGO contra w/LCP isola treinamento, fora do escopo.",
+        "localizador": "p. 4, Seção 4.1; p. 6, Seção 4.4 e Tabela 5"
+      },
+      {
+        "descricao": "Análise preliminar (Tabela 1) compara a perda de entropia cruzada de três estilos de código (CoT-pre, CoT-post, Comment) em dados do CodeM; mede dificuldade de estilos de dados, não condições de prompting executadas.",
+        "localizador": "p. 3, Seção 2, Tabela 1"
+      },
+      {
+        "descricao": "Tabela 6 avalia a sensibilidade do MANGO à margem m (0,03 a 0,15), hiperparâmetro de treino, fora do escopo de prompting.",
+        "localizador": "p. 6, Seção 4.5, Tabela 6"
+      },
+      {
+        "descricao": "Tabela 8 (WizardCoder-7B, setting SFT): o LCP aumenta linhas de código (20.92 contra 15.56) e de comentário (3.29 contra 1.36) em relação ao prompt original; o CoT reduz ambas (11.68 e 0.38).",
+        "localizador": "p. 7, Seção 5.2, Tabela 8"
+      },
+      {
+        "descricao": "A Seção 4.1 remete o prompt CoT-pre1 ao 'Appendix 5.1 Table 11', mas a Tabela 11 está no Apêndice A; o código é declarado público no GitHub no resumo, enquanto a nota de rodapé 1 diz que será liberado após a publicação. O pacote não foi acessado.",
+        "localizador": "p. 1, Abstract; p. 2, nota de rodapé 1; p. 4, Seção 4.1"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Code generation aims to understand the problem description and generate corresponding code snippets, where existing works generally decompose such complex tasks into intermediate steps by prompting strategies, such as Chain-of-Thought and its variants.", "localizador": "p. 1, Abstract"},
+      {"trecho": "We use the logical comment prompting strategy to guide the model to generate comments explaining the code logic in the decoding stage.", "localizador": "p. 4, Seção 3.3"},
+      {"trecho": "This setting uses the LCP strategy to guide standardly fine-tuned models generating codes with comments.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "As another baseline, this setting uses zero-shot-CoT (Kojima et al., 2022) on the standardly fine-tuned models, and the detailed prompt is the “CoT-pre1” appended in the Appendix 5.1 Table 11.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "We construct the standard instruction template in WizardCoder (Luo et al., 2023) for the CodeM-Python dataset, and the training objection is cross entropy.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "During the inference stage, the logical comment prompt (LCP) strategy will be used.", "localizador": "p. 4, Seção 4.1 (parágrafo MANGO)"},
+      {"trecho": "To accommodate the task of guiding the model to generate annotations, we adopt a contrastive learning approach to encourage the model to emphasize code comments more during the fine-tuning process.", "localizador": "p. 3, Seção 3.2"},
+      {"trecho": "Furthermore, for a more nuanced analysis, we segregate CoT into two categories: the first involves specifying the chain of thought text before generating the final code, representing the most typical and universal form; and the second is a freestyle CoT devoid of position-constraining guidance.", "localizador": "p. 6, Seção 5.1"},
+      {"trecho": "Secondly, comparing the pass rates of the backbones in the CoT settings, we observe a decline in model performance in all instances, with a more pronounced gap evident in the smaller 3B model.", "localizador": "p. 5, Seção 4.3"},
+      {"trecho": "The final generated code fails due to the generated ambiguous reinterpreted bullet points, and there is a large gap between the code implementation and the problem description.", "localizador": "p. 10, Apêndice B"},
+      {"trecho": "We rephrase the prompt into several versions to mitigate the model’s randomness in response to different prompt styles.", "localizador": "p. 6, Seção 5.1"},
+      {"trecho": "The result in Table 7 demonstrated that the LCP prompting strategy yields a considerably higher average performance and a lower standard deviation.", "localizador": "p. 6, Seção 5.1"},
+      {"trecho": "While these studies have achieved some success, their effectiveness is highly dependent on the capabilities of advanced Large Language Models (LLMs) such as GPT-4, particularly in terms of API calls, which significantly limits their practical applicability.", "localizador": "p. 1, Abstract"},
+      {"trecho": "Our standard supervised fine-tuning implementation results have an error margin within 1% the Pass@1 result in the greedy search strategy in CodeM-Python (Zan et al., 2023), which indicates that our experiment setting leads to consistent results compared with the existing work.", "localizador": "p. 4, Seção 4.1"},
+      {"trecho": "In contrast, LCP prompting consistently contributes to the enhancement of model performance, demonstrating its stability and effectiveness.", "localizador": "p. 5-6, Seção 4.3"},
+      {"trecho": "Furthermore, the ablation components also show lower error rates in three types, indicating that MANGO has reduced the code error rate across various degrees of comprehension error.", "localizador": "p. 8, Seção 5.4"},
+      {"trecho": "In the case of WizardCoder-7B, there is a 4.17 percentage points enhancement in the Pass@10 outcome for the MBPP test set.", "localizador": "p. 5, Seção 4.3"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "LCP (Logical Comment Prompt)",
+      "mecanismos": ["instrucao", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "SFT (prompt padrão de instrução, Tabela 2 'Standard', no mesmo modelo com ajuste fino supervisionado padrão)",
+      "modelo": "StarCoder-7B (após SFT em CodeM-Python pelos autores; versão nao_informado)",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 35.93, "intervencao": 39.17},
+      "denominador": "nao_informado explicitamente; HumanEval contém 164 problemas e Pass@k é estimado com n = 10 amostras por problema (Eq. 4), mas o estudo não liga o tamanho do corpus ao denominador",
+      "condicoes": "Zero-shot; temperatura T = 0,8, top_p = 0,95, n = 10 amostras por problema; mesmo modelo SFT (3 épocas em codem-python) nas duas condições, que diferem só no prefixo de resposta do prompt (Tabela 2). Número de execuções repetidas nao_informado; sem dispersão relatada. Conferido no PDF, p. 5, Tabela 3. O LCP fica abaixo do SFT em várias células do MBPP (ver heterogeneidade); a extração não representa os demais modelos, métricas e benchmarks.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca duas propostas (MANGO, pacote híbrido, e LCP), dois comparadores (SFT e CoT) e três métricas (Pass@1/5/10) sem que uma prevaleça. A Tabela 1 é descritiva (perda por estilo de dados) e a Tabela 2 só apresenta os prompts; a Tabela 3 é a primeira com o contraste de prompting elegível. Nela, primeira métrica (HumanEval Pass@1), primeiro modelo (StarCoder-7B) e primeira linha de base de prompting (SFT, prompt padrão), com a técnica focal LCP como intervenção. Não há outra técnica focal de prompting nem outra tarefa a cobrir; o componente LCP da ablação (Tabela 5) já está representado e não há matriz de ingredientes para contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "p. 5 (impressa 5), Tabela 3, bloco StarCoder-7B, linhas SFT e \\wLCP, coluna HumanEval Pass@1; prompts na Tabela 2, p. 5; configuração na p. 4, Seção 4.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SFT 35.93 55.69 63.01 42.79 56.41 61.13", "localizador": "p. 5, Tabela 3, bloco StarCoder-7B; colunas: setting, HumanEval Pass@1, Pass@5, Pass@10, MBPP Pass@1, Pass@5, Pass@10"},
+        {"trecho": "\\wLCP 39.17 61.91 70.12 41.11 57.68 63.27", "localizador": "p. 5, Tabela 3, bloco StarCoder-7B; colunas: setting, HumanEval Pass@1, Pass@5, Pass@10, MBPP Pass@1, Pass@5, Pass@10"},
+        {"trecho": "We generate n = 10 samples and calculate Pass@k, where k = 1, 5, 10.", "localizador": "p. 4, Seção 4.1 (Decoding Settings)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Hipótese e objetivo explícitos: usar comentários como pivô lógico para melhorar a geração de código em modelos de 3B a 7B, com contribuições enumeradas.", "localizador": "p. 1, Abstract; p. 2, Introdução (contribuições)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Treino, decodificação e prompts são descritos (Seções 4.1-4.2, Tabelas 2 e 11), mas o prompt CoT efetivamente usado na Tabela 3 é incerto frente à Tabela 9, e as Tabelas 7, 9 e 10 não informam modelo ou benchmark de forma completa; número de execuções não informado.", "localizador": "p. 4, Seção 4.1; p. 5, Tabelas 2-3; p. 7, Tabelas 7 e 9; p. 8, Tabela 10"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Linhas de base executadas no mesmo modelo SFT e mesma decodificação (prompt padrão e zero-shot CoT) nos experimentos principais; ressalva: na Tabela 4 o Pass@1 da linha de base vem de outros trabalhos.", "localizador": "p. 4, Seção 4.1; p. 5, Tabela 3; p. 6, Tabela 4"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@k é definido com fórmula e n = 10, e os tamanhos dos benchmarks são informados, mas o denominador não é ligado explicitamente ao corpus, a mesma métrica e condição diverge entre Tabelas 3, 4 e 9, e a Tabela 10 não informa unidade nem denominador.", "localizador": "p. 4, Eq. 4; p. 5, Tabela 3; p. 6, Tabela 4; p. 7, Tabela 9; p. 8, Tabela 10"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há discussão de ameaças à validade ou limitações; o estudo trata parcialmente a sensibilidade ao prompt com 15 paráfrases por grupo e a sensibilidade à margem, sem discutir número de execuções, generalização ou contaminação.", "localizador": "p. 6, Seções 4.5 e 5.1; p. 7, Tabela 7"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Hiperparâmetros de treino, decodificação e textos dos prompts são informados e há link de código (não acessado nem validado); faltam versões exatas dos checkpoints, sementes, número de execuções e a configuração da Tabela 7.", "localizador": "p. 1, Abstract; p. 4, Seção 4.1; p. 5, Tabela 2; p. 11, Tabela 11"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute sobreposição entre os dados de treino (CodeM-Python, destilado de GPT-4) ou o pré-treinamento e os benchmarks HumanEval e MBPP.", "localizador": "texto completo; p. 4, Seção 4.1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 4, 5, 6, 7, 8, 11],
+    "observacao": "Texto extraído lido integralmente (p. 1-11). Valores da extração conferidos na Tabela 3 (p. 5); números citados em heterogeneidade conferidos nas Tabelas 3 (p. 5), 4, 5 e 6 (p. 6), 7, 8 e 9 (p. 7) e 10 (p. 8); prompts na Tabela 2 (p. 5) e Tabela 11 (p. 11). Páginas impressas coincidem com as páginas do PDF."
+  }
+}

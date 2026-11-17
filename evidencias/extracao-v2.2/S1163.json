@@ -1,0 +1,249 @@
+{
+  "estudo": "S1163",
+  "texto_fonte": "fontes/textos/lote/S1163.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "PARACODEX",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "raciocinio", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["decomposicao", "raciocinio", "restricoes", "feedback", "multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 (Introdução); p. 4-5, seções 3.1-3.4; p. 12-17, Apêndices A-B; p. 17-18, Apêndice C (variante CUDA→OpenMP)",
+        "observacao": "Fluxo agêntico com prompting em múltiplas etapas (análise com taxonomia de laços e analysis.md; offload com plano de dados data_plan.md; ajuste guiado por perfilamento com optimization_plan.md) e agente de verificação de correção entre etapas, comparado com o agente Codex zero-shot de prompt único, mesmo modelo e mesmo harness (p. 4, seção 3.1; p. 6). O contrafactual é do pacote inteiro: o ganho não pode ser atribuído a uma etapa ou mecanismo isolado. Pacote híbrido: inclui o cabeçalho de instrumentação gate.h, a política automática de reversão em caso de regressão de mais de 10% e a escalada de modelo no NAS FT (esta aplicada também ao baseline), que não são prompting (ver componentes_fora_escopo). Há duas versões do fluxo: pipeline de quatro etapas com prompts mais curtos no HeCBench e pipeline consolidado de três etapas com prompts mais longos no NAS e no Rodinia (p. 12-13, Apêndice A); o estudo não diz qual versão foi usada no ParEval e descreve apenas 'minimal prompt adjustment' para CUDA→OpenMP (p. 9). As versões não são comparadas entre si nas mesmas linhas de resultado, por isso foram tratadas como adaptações do mesmo pacote. Multiagente: o estudo descreve um 'correctness-gate agent' / 'supervisor agent' que repara o código entre etapas (p. 5, p. 14); não detalha se é outra instância do modelo."
+      },
+      {
+        "nome_original": "zero-shot Codex baseline (zero-shot Codex CLI agent, single prompt)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção 3.1; p. 6, seção 4.1; p. 16-17, Apêndice B.6",
+        "observacao": "Prompt único com cinco itens de tarefa (traduzir para OpenMP com offload para GPU, aplicar pragmas, otimizar preservando funcionalidade, garantir compilação e execução, entregar o código em {kernel_dir}) e o código de entrada. O agente tem acesso às mesmas ferramentas (compilador, profiler, harness de testes), mas sem orientação sobre quando ou como usá-las; o estudo diz que ele 'may compile and test the code' (p. 17), de modo que algum retorno de execução espontâneo não está excluído, mas não é induzido pelo prompt. Comparador sem isolamento de mecanismos."
+      },
+      {
+        "nome_original": "Analysis Phase (Stage 1: loop classification and data characterization; analysis.md)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção 3.2, item 1; p. 5, seção 3.4, item 1; p. 12, Apêndice A.3; p. 13-14, Apêndice B.1",
+        "observacao": "Produz análise estruturada de hotspots com taxonomia de laços (Types A-G), prioridades (CRITICAL/IMPORTANT/SECONDARY/AVOID) e riscos, antes de qualquer modificação de código ('externalizes reasoning before coding'). Mecanismos acrescentados em relação ao prompt do baseline. Sem ablação."
+      },
+      {
+        "nome_original": "Translation Phase / GPU offloading + data strategy (Stage 2; data_plan.md)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes", "feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção 3.2, item 2; p. 5, seção 3.4, item 2; p. 12-13, Apêndice A.3; p. 14-15, Apêndices B.2-B.3",
+        "observacao": "Escolha de estratégia de dados por regras (A: target data; B: nowait/depend; C: omp_target_alloc/is_device_ptr), plano de dados escrito antes de modificar o código, mapeamento de cada classe de laço para conjunto restrito de construções OpenMP e verificação contra a saída serial registrada. No HeCBench esta etapa corresponde a 'initial GPU offload with basic correctness validation' (p. 12). Sem ablação."
+      },
+      {
+        "nome_original": "Optimization Phase / Performance tuning: profile-guided optimization (Stage 3; optimization_plan.md)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes", "feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 4-5, seção 3.2, item 3; p. 5, seção 3.4, item 3; p. 13, Apêndice A.3; p. 15-16, Apêndice B.4; p. 7-8, Figuras 5 (direita) e 6 (inferior direita)",
+        "observacao": "Usa perfis do Nsight Systems, metadados do sistema e resumo de ações anteriores; proíbe mudar a estratégia de dados; inclui critério de saída antecipada (5%) e reversão em regressão (>10%). No HeCBench, dividida em duas etapas estreitas (concorrência; memória/localidade) (p. 12). Só há contribuição por fase ('Initial Translation' vs 'Targeted Optimizations') no NAS anonimizado Class D e no NAS Class C (Figuras 5 e 6), sem condição de PARACODEX sem esta etapa; contrafactual cumulativo."
+      },
+      {
+        "nome_original": "Correctness gating (correctness-gate agent / supervisor agent)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["restricoes", "feedback", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, seção 3.2, item 4; p. 13, Apêndice A.4; p. 15, Apêndice B.3",
+        "observacao": "Agente invocado entre as etapas que instrumenta o código com gate.h, compila e executa contra a referência serial e repara até que 'make check-correctness' passe; o prompt proíbe fallback só em CPU e mudanças de desempenho nessa fase. A instrumentação gate.h e o harness Makefile são ferramentas (ver componentes_fora_escopo). Sem ablação."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Model Selection and Escalation (gpt-5.1-codex-max for NAS FT)",
+        "natureza": "selecao_modelo",
+        "descricao": "Para o kernel NAS FT, que falhou com o modelo base, os autores trocaram para gpt-5.1-codex-max tanto no PARACODEX quanto no baseline.",
+        "localizador": "p. 5, seção 4.1; p. 18, Apêndice D.1"
+      },
+      {
+        "nome_original": "lowest reasoning effort",
+        "natureza": "outro",
+        "descricao": "Configuração de esforço de raciocínio do modelo ('almost all experiments'), sem alteração do prompt; o estudo não especifica quais experimentos fogem dessa configuração.",
+        "localizador": "p. 6, seção 4.2 (Token Budget and Reproducibility)"
+      },
+      {
+        "nome_original": "gate.h instrumentation header and Makefile-based harness",
+        "natureza": "outro",
+        "descricao": "Ferramental de verificação: cabeçalho que calcula checksums e normas em pontos do programa e harness Makefile escrito manualmente para compilar e validar contra o código serial.",
+        "localizador": "p. 5, seção 3.2, item 4; p. 5, seção 3.3"
+      },
+      {
+        "nome_original": "revert-on-regression policy",
+        "natureza": "outro",
+        "descricao": "Reversão automática de mudanças que pioram o tempo de GPU em mais de 10%; o texto da seção 3.2 a descreve como automática do pipeline, enquanto o Apêndice B.4 a associa ao prompt de ajuste. Registrada aqui como possível componente não-prompting do pacote.",
+        "localizador": "p. 4-5, seção 3.2, item 3; p. 15, Apêndice B.4"
+      },
+      {
+        "nome_original": "Codex CLI non-interactive automation mode",
+        "natureza": "outro",
+        "descricao": "Modo de execução não interativo do Codex CLI usado por PARACODEX e baseline, com contexto completo e saídas de ferramentas em cada turno; o estudo lhe atribui o alto consumo de tokens.",
+        "localizador": "p. 18, Apêndice D.1"
+      },
+      {
+        "nome_original": "bypass mitigation harness constraints",
+        "natureza": "outro",
+        "descricao": "Restrições do harness (alocação mínima de memória no dispositivo e número de lançamentos de kernel > 10) testadas de forma preliminar para evitar o bypass do offload.",
+        "localizador": "p. 19, Apêndice D.2 (Mitigation Strategies)"
+      }
+    ],
+    "modelos": [
+      {"nome": "gpt-5.1-codex-mini", "versao": "nao_informado (sem snapshot)", "uso": "modelo principal de PARACODEX e do baseline em todos os kernels; 'lowest reasoning effort' em quase todos os experimentos (p. 5; p. 6; p. 18). Na p. 6 aparece grafado 'gpt-codex-5.1-mini'."},
+      {"nome": "gpt-5.1-codex-max", "versao": "nao_informado", "uso": "escalada só no kernel NAS FT, para PARACODEX e baseline (p. 5; p. 18)"},
+      {"nome": "Codex CLI agent", "versao": "nao_informado", "uso": "agente de base de PARACODEX e do baseline (p. 4; p. 18)"},
+      {"nome": "gemini-1.5, gpt-4o-mini, o4-mini, llama-3.3, qwen2-32b (colunas Non-agentic e Top-down da Figura 2)", "versao": "nao_informado", "uso": "aparecem apenas na Figura 2 (p. 6); o estudo não informa quem executou essas condições nem com qual prompt; não usados como comparador nesta ficha"}
+    ],
+    "benchmarks": [
+      {"nome": "HeCBench", "quantidade": "23 kernels tentados (10 analisados no LASSI + 13 do conjunto ParaTrans usado no UniPar); 21 válidos após excluir pathfinder e particlefilter por bypass", "localizador": "p. 5, Tabela 1; p. 6, seções 4.1-4.2"},
+      {"nome": "Rodinia", "quantidade": "7 tentados; 6 válidos (srad excluído por referência só em CPU)", "localizador": "p. 5, Tabela 1; p. 6, seção 4.2"},
+      {"nome": "NAS Parallel Benchmarks (Class C)", "quantidade": "6 tentados; 4 válidos (BT e LU excluídos por complexidade multiarquivo); CG, EP, FT, MG na Figura 4", "localizador": "p. 5, Tabela 1; p. 6, seção 4.2; p. 7, Figura 4"},
+      {"nome": "ParEval (CUDA→OpenMP)", "quantidade": "4 kernels (nanoXOR, microXORH, microXOR, XSBench); número de tentativas por kernel nao_informado", "localizador": "p. 5, Tabela 1; p. 6, Figura 2; p. 19, Apêndice E.1"},
+      {"nome": "Rodinia anonimizado e NAS anonimizado (Class D)", "quantidade": "Rodinia: kernels nw e lud ('representative kernels'); NAS Class D: CG e EP", "localizador": "p. 7, seção 4.4; p. 8, Figura 5"},
+      {"nome": "Subconjuntos para comparação com trabalhos anteriores", "quantidade": "13 kernels HeCBench do UniPar (Figura 7); subconjunto LASSI: o texto fala em dez kernels HeCBench, a Figura 8 mostra nove rótulos", "localizador": "p. 20, Apêndices F.1-F.2, Figuras 7-8"}
+    ],
+    "metricas": [
+      {"nome": "Compilation success rate e validation success rate (ParEval), regimes code-only e overall", "denominador": "nao_informado (número de tentativas por kernel não informado)", "localizador": "p. 6, Figura 2; p. 19, Apêndice E.1"},
+      {"nome": "Valid GPU (compila, passa correção e tem execução substancial no dispositivo) e Improved (reduz tempo de GPU entre kernels válidos)", "denominador": "kernels tentados / kernels válidos por suíte (Tabela 1)", "localizador": "p. 5, Tabela 1"},
+      {"nome": "GPU time (soma do tempo de kernels CUDA e de transferências de memória no Nsight Systems, sem overhead de API; média de três execuções de perfilamento)", "denominador": "nao_aplicavel", "localizador": "p. 5, seção 4.1"},
+      {"nome": "Speedup relative to reference T_ref/T_pc (média geométrica e mediana por suíte)", "denominador": "21 kernels válidos no HeCBench para PARACODEX; para o baseline, o conjunto sobre o qual a média foi calculada não é informado (o baseline falhou em 2 kernels HeCBench e no NAS FT)", "localizador": "p. 6, seção 4.1; p. 7, seção 4.3; p. 19, Apêndices E.2-E.4"},
+      {"nome": "Ratio (reference time / translated kernel run time), métrica do LASSI", "denominador": "subconjunto LASSI do HeCBench", "localizador": "p. 20, Apêndice F.2, Figura 8"},
+      {"nome": "Validation rate no subconjunto UniPar", "denominador": "13 kernels", "localizador": "p. 20, Apêndice F.1, Figura 7"},
+      {"nome": "Tokens por kernel; contagem de passos de raciocínio por categoria", "denominador": "tokens: 4 kernels NAS; passos: kernel NAS EP", "localizador": "p. 6; p. 18, Apêndice D.1; p. 8, Figura 6"}
+    ],
+    "linguagens": [
+      {"nome": "código serial de CPU (linguagem de origem não nomeada explicitamente; compilação com nvc++ do NVIDIA HPC SDK 25.7)", "localizador": "p. 1, Resumo; p. 5, seção 4.1"},
+      {"nome": "OpenMP target offload (GPU)", "localizador": "p. 1-2"},
+      {"nome": "CUDA (origem no ParEval)", "localizador": "p. 2; p. 17-18, Apêndice C"}
+    ],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "A validação pelo agente de correção com macros de checksum e normas pode não detectar problemas sutis de estabilidade numérica ou condições de corrida não determinísticas que não aparecem na saída.", "localizador": "p. 9, seção 6"},
+      {"categoria": "outro", "descricao": "Bypass do offload para GPU: código que compila, passa nas verificações de correção, mas executa a computação principal na CPU, violando a intenção de paralelização e podendo inflar comparações de desempenho. Ocorreu em 2 kernels HeCBench com PARACODEX (pathfinder, particlefilter) e no pathfinder com o baseline. Denominadores diferentes no texto: 2/23 kernels HeCBench (p. 6, p. 18) e 2/36 kernels (p. 9).", "localizador": "p. 6, seção 4.2; p. 9, seção 6; p. 18, Apêndice D.2"},
+      {"categoria": "outro", "descricao": "Avaliação limitada a uma GPU de consumo (RTX 4060) sem clocks travados, com variação térmica que pode afetar a precisão das medições.", "localizador": "p. 9, seção 6"},
+      {"categoria": "outro", "descricao": "Significância estatística dos speedups, sobretudo dos ganhos modestos (NAS 1,08×), não validada; os autores pedem amostras maiores.", "localizador": "p. 9, seção 6"},
+      {"categoria": "custo", "descricao": "Consumo de tokens tratado pelo estudo como custo: PARACODEX média de 837.701 tokens por kernel (1,11× o baseline, 755.417), medido nos kernels NAS; o estudo o atribui à priorização da reprodutibilidade sobre a eficiência.", "localizador": "p. 6, seção 4.2; p. 18, Apêndice D.1"},
+      {"categoria": "contaminacao", "descricao": "O estudo examina se o desempenho depende de padrões memorizados de identificadores, avaliando variantes anonimizadas de Rodinia e NAS. Não afirma contaminação efetiva nem discute exposição dos benchmarks ou das implementações de referência no pré-treinamento.", "localizador": "p. 7, seção 4.4"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Exclusão dos kernels com bypass das estatísticas de tempo de GPU, com relato explícito da ocorrência.", "avaliada": "nao", "localizador": "p. 6, seção 4.2; p. 18, Apêndice D.2"},
+      {"descricao": "Teste preliminar de restrições no harness (alocação mínima de memória no dispositivo e mais de 10 lançamentos de kernel): recupera o offload no pathfinder, mas o particlefilter exige reestruturação algorítmica. Comparação qualitativa com a execução sem as restrições, sem protocolo nem números relatados.", "avaliada": "sim", "localizador": "p. 19, Apêndice D.2"},
+      {"descricao": "Avaliação de variantes anonimizadas (nomes substituídos por tokens sintéticos e ordem de funções aleatorizada) para examinar dependência de memorização; a comparação com as versões originais é narrativa ('largely unchanged') e o NAS anonimizado usa Class D, enquanto o NAS original usa Class C.", "avaliada": "nao", "localizador": "p. 7, seção 4.4; p. 8, Figura 5"},
+      {"descricao": "Gate de correção entre etapas contra a saída serial de referência; só configurações aprovadas entram nos relatórios de desempenho.", "avaliada": "nao", "localizador": "p. 5, seção 3.2, item 4; p. 15, Apêndice B.3"},
+      {"descricao": "Três execuções de perfilamento por configuração, com relato da média.", "avaliada": "nao", "localizador": "p. 5, seção 4.1"},
+      {"descricao": "Mesmo harness, verificações de correção, ferramentas de perfilamento e ambiente GPU/compilador para PARACODEX e baseline; mesma escalada de modelo no NAS FT para ambos 'to maintain fairness'.", "avaliada": "nao", "localizador": "p. 6, seção 4.1; p. 18, Apêndice D.1"},
+      {"descricao": "Execução sem acesso à internet e sem busca na web em qualquer etapa.", "avaliada": "nao", "localizador": "p. 5, seção 4.1"},
+      {"descricao": "Na comparação com o LASSI, tempos de referência medidos no mesmo hardware dos kernels traduzidos para reduzir viés de hardware.", "avaliada": "nao", "localizador": "p. 20, Apêndice F.2"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Speedup no Rodinia: o resumo informa média geométrica de 5× e o corpo do texto 5,1× (p. 2, p. 7, p. 19). Diferença possivelmente de arredondamento no resumo; não verificada.", "localizador": "p. 1, Resumo; p. 2, Introdução; p. 7, seção 4.3; p. 19, Apêndice E.3"},
+      {"descricao": "Narrativa contradiz os valores impressos: a legenda da Figura 3 diz que PARACODEX tem maiores ganhos em média geométrica e em mediana no HeCBench, mas o Apêndice E.2 informa mediana de 1,59× para PARACODEX e 1,74× para o baseline (médias geométricas 3× e 2,4×). O conjunto de kernels sobre o qual a estatística do baseline foi calculada não é informado (o baseline compilou 19/21).", "localizador": "p. 7, Figura 3 (legenda) e seção 4.3; p. 19, Apêndice E.2"},
+      {"descricao": "A média geométrica do baseline no HeCBench (2,4×) é qualificada como 'only' na seção 4.3 e como 'comparable' no Apêndice E.2.", "localizador": "p. 7, seção 4.3; p. 19, Apêndice E.2"},
+      {"descricao": "Interpretação do consumo de tokens contraditória: a seção 4.2 diz que o custo vem do ambiente verificado por ferramentas 'rather than the multi-stage logic itself', enquanto o Apêndice D.1 diz que a razão de 1,11× 'reflects PARACODEX's multi-stage workflow'. Os valores por kernel mostram o baseline acima de PARACODEX no EP (1.379.682 vs 967.774). Os números de tokens referem-se só a 4 kernels NAS; o Apêndice A.2 afirma que o pipeline de quatro etapas do HeCBench teve custo de tokens maior, sem quantificar.", "localizador": "p. 6, seção 4.2; p. 18, Apêndice D.1; p. 12, Apêndice A.2"},
+      {"descricao": "A Tabela 1 indica Rodinia com 7 tentados e 6 válidos (srad excluído), mas o Apêndice E.3 afirma que PARACODEX 'successfully translates all Rodinia kernels'.", "localizador": "p. 5, Tabela 1; p. 6, seção 4.2; p. 19, Apêndice E.3"},
+      {"descricao": "A legenda da Figura 4 informa tempo do Rodinia em ms, enquanto o eixo do gráfico do Rodinia está rotulado 'Time (µs log10)'. A legenda da Figura 3 fala em tempo 'relative to the HeCBench references', mas o eixo mostra tempo absoluto em µs.", "localizador": "p. 7, Figuras 3 e 4"},
+      {"descricao": "Narrativa e valor: o Apêndice E.2 diz que kernels limitados por banda 'improve modestly' e dá como exemplo geodesic com 1,00×, valor que não indica melhora.", "localizador": "p. 19, Apêndice E.2"},
+      {"descricao": "Versões diferentes do fluxo entre suítes: pipeline de quatro etapas com prompts mais curtos no HeCBench e pipeline de três etapas com prompts mais longos no NAS e no Rodinia; não se informa qual foi usado no ParEval. A seção 3.2 fala em 'three-stage workflow' e lista quatro itens. No Apêndice A.3 a numeração das etapas é inconsistente (a descrição da Stage 2 diz 'Stage 1 couples correctness'; a da Stage 3 diz 'Stage 2 consolidates'). Os resultados por suíte, portanto, não vêm do mesmo pacote de prompts.", "localizador": "p. 4, seção 3.2; p. 12-13, Apêndices A.2-A.4; p. 9, seção 5 (RQ4)"},
+      {"descricao": "A Figura 2 mostra colunas 'Non-agentic' e 'Top-down' com outros modelos (gemini-1.5, gpt-4o-mini, o4-mini, llama-3.3, qwen2-32b); o texto diz apenas que o layout 'mirrors the original ParEval presentation' e não informa quem executou essas condições, com qual prompt ou número de tentativas. Não foram usadas como comparador.", "localizador": "p. 6, Figura 2 e legenda; p. 19, Apêndice E.1"},
+      {"descricao": "Resultado quase nulo no ParEval: no regime code-only, a compilação do baseline e de PARACODEX é 1 em nanoXOR, microXOR e XSBench; só microXORH difere (0,8 vs 1). A legenda diz que PARACODEX 'matches or slightly exceeds the baseline', enquanto o resumo afirma que PARACODEX supera o baseline 'on all suites'. O número de tentativas que forma cada taxa não é informado.", "localizador": "p. 1, Resumo; p. 6, Figura 2"},
+      {"descricao": "A seção 4.2 grafa o modelo como 'gpt-codex-5.1-mini' e diz que 'almost all experiments' usaram o menor esforço de raciocínio, sem identificar as exceções; a seção 4.1 usa 'gpt-5.1-codex-mini' e a nota de rodapé 3 aponta para a página do gpt-5.1-codex.", "localizador": "p. 4, nota 3; p. 5, seção 4.1; p. 6, seção 4.2"},
+      {"descricao": "Subconjunto LASSI: o Apêndice F.2 (e a seção 4.1) fala em dez kernels HeCBench analisados no LASSI, mas a Figura 8 apresenta nove rótulos de kernel; a diferença não é explicada. Os valores de Jacobi são cortados em 6,0 na figura (reais: 489,6 PARACODEX e 326,1 baseline). As comparações com UniPar e LASSI usam números de outros artigos, com outra tarefa (LASSI: CUDA→OpenMP) e outro hardware; o próprio estudo diz que a comparação 'is not strictly direct'.", "localizador": "p. 6, seção 4.1; p. 20, Apêndices F.1-F.2, Figuras 7-8"},
+      {"descricao": "Aparente divergência entre figuras do NAS Class C: na Figura 4 (direita) as barras de CG ficam abaixo da linha de grade de 10 s, enquanto na Figura 6 (inferior direita), também rotulada NAS Class C, as barras de CG ficam acima da linha de 10; o Apêndice B.5 cita tempo de 2,04 s para CG após a otimização. Os valores não foram estimados pelas barras; o estudo não explica se as figuras usam medições ou configurações diferentes.", "localizador": "p. 7, Figura 4; p. 8, Figura 6; p. 16, Apêndice B.5"},
+      {"descricao": "Sem testes estatísticos nem medida de dispersão: os tempos são médias de três execuções; os autores reconhecem que a significância dos speedups não foi validada.", "localizador": "p. 5, seção 4.1; p. 9, seção 6"}
+    ],
+    "observacoes": [
+      {"descricao": "O estudo chama a conversão de código serial para OpenMP com offload para GPU de 'translation' e a de CUDA para OpenMP de 'migration'; ambas foram classificadas como tradução. A otimização de desempenho é parte do fluxo de tradução e não é avaliada como tarefa separada de refatoração.", "localizador": "p. 2, Introdução; p. 1, Resumo"},
+      {"descricao": "Comparações de PARACODEX com as implementações de referência OpenMP (speedup T_ref/T_pc) não são contrastes de prompting: a referência é código fornecido pelo benchmark.", "localizador": "p. 6, seção 4.1"},
+      {"descricao": "Análise comportamental qualitativa de traços de raciocínio do kernel EP (contagem de passos por categoria) entre baseline e PARACODEX; não é métrica de código.", "localizador": "p. 7-8, seção 4.5, Figura 6"},
+      {"descricao": "Exemplo de código NAS MG (Apêndice G): GPU time de 7152 ms no baseline e 4569 ms em PARACODEX (1,57×), um único kernel ilustrativo.", "localizador": "p. 20-21, Apêndice G"},
+      {"descricao": "O estudo informa que os templates completos de prompt estão no repositório do projeto; o repositório não foi acessado nem validado nesta extração.", "localizador": "p. 1, nota 1; p. 18, Apêndice D.1"},
+      {"descricao": "Hardware e ferramentas: NVIDIA RTX 4060 Laptop GPU (8 GB), CPU i9-13905H, NVIDIA HPC SDK 25.7 (nvc++), Nsight Systems v2024.5.", "localizador": "p. 5, seção 4.1"}
+    ],
+    "citacoes": [
+      {"trecho": "We evaluate translation from serial CPU kernels to OpenMP GPU offload kernels on HeCBench, Rodinia, and NAS.", "localizador": "p. 1, Resumo"},
+      {"trecho": "We also evaluate CUDA→OpenMP offload translation on ParEval, where PARACODEX maintains high compilation and validation rates in code-only and end-to-end settings.", "localizador": "p. 1, Resumo"},
+      {"trecho": "PARACODEX uses multi-stage prompting that structures the model’s reasoning across analysis, translation, and optimization.", "localizador": "p. 5, seção 3.4"},
+      {"trecho": "Each stage is driven by a specific template that constrains the output space while retaining domain flexibility.", "localizador": "p. 5, seção 3.4"},
+      {"trecho": "Using the structured analysis, the prompt maps each loop class to a restricted set of valid OpenMP constructs (App. B.2), minimizing mapping errors like omitted reductions.", "localizador": "p. 5, seção 3.4, item 2"},
+      {"trecho": "This setup keeps the underlying model fixed and isolates the impact of workflow scaffolding.", "localizador": "p. 4, seção 3.1"},
+      {"trecho": "For comparison, the baseline system uses a single unstructured prompt that combines all objectives into one request.", "localizador": "p. 16, Apêndice B.6"},
+      {"trecho": "The baseline agent has access to the same tools (compiler, profiler, test harness) as PARACODEX but receives no explicit guidance on when or how to use them.", "localizador": "p. 17, Apêndice B.6"},
+      {"trecho": "Between each stage, a correctness-gate agent is invoked.", "localizador": "p. 5, seção 3.2, item 4"},
+      {"trecho": "The prompt forbids CPU-only fallback and performance changes during this phase — its sole objective is numerical correctness.", "localizador": "p. 15, Apêndice B.3"},
+      {"trecho": "The prompt explicitly forbids changing the data strategy at this stage to avoid confounding performance gains from data-lifetime restructuring with kernel-level optimizations.", "localizador": "p. 15, Apêndice B.4"},
+      {"trecho": "Each prompt is parameterized with profiler output, system metadata, and summaries of prior actions, enabling measurement-driven iteration under a fixed hardware/software stack.", "localizador": "p. 12, Apêndice A.3"},
+      {"trecho": "Correctness validation relies on a correctness-gate agent that instruments code with gate macros (checksums and norms at key program points) which may still miss subtle numerical stability issues or non-deterministic race conditions that do not manifest in output differences.", "localizador": "p. 9, seção 6"},
+      {"trecho": "The GPU-offload bypass cases (2/36 kernels) represent a failure mode where the agent generates CPU-fallback code that satisfies surface requirements but violates parallelization intent; future work should enforce device-execution constraints as hard requirements.", "localizador": "p. 9, seção 6"},
+      {"trecho": "Evaluation is limited to a single consumer-grade GPU (RTX 4060) without locked clocks, introducing thermal variance that may affect measurement precision.", "localizador": "p. 9, seção 6"},
+      {"trecho": "Statistical significance of speedups, particularly for modest gains (e.g., NAS 1.08×), should be validated with larger sample sizes in future studies.", "localizador": "p. 9, seção 6"},
+      {"trecho": "This cost reflects a deliberate prioritization of reproducibility over efficiency.", "localizador": "p. 6, seção 4.2"},
+      {"trecho": "To assess whether PARACODEX depends on memorized identifier patterns, we evaluate anonymized variants of Rodinia and NAS, where all variable and function names are replaced with synthetic tokens and function order is randomized.", "localizador": "p. 7, seção 4.4"},
+      {"trecho": "We therefore exclude bypass kernels from GPU-time statistics, while reporting their occurrence explicitly.", "localizador": "p. 18, Apêndice D.2"},
+      {"trecho": "Preliminary testing with minimum device memory allocation and kernel launch count (> 10) constraints recovers GPU offload for pathfinder but requires algorithmic restructuring for particlefilter.", "localizador": "p. 19, Apêndice D.2"},
+      {"trecho": "We perform three profiling runs per configuration and report the mean.", "localizador": "p. 5, seção 4.1"},
+      {"trecho": "For the NAS FT kernel, we escalated to gpt-5.1-codex-max for both PARACODEX and baseline to maintain fairness.", "localizador": "p. 18, Apêndice D.1"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "PARACODEX",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "raciocinio", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["decomposicao", "raciocinio", "restricoes", "feedback", "multiagente"],
+      "comparador": "zero-shot Codex baseline (agente Codex CLI com prompt único, mesmo modelo e mesmo harness)",
+      "modelo": "gpt-5.1-codex-mini (rótulo das colunas Baseline e ParaCodex na Figura 2, coerente com a seção 4.1)",
+      "benchmark": "ParEval (CUDA→OpenMP), kernel nanoXOR, regime code-only",
+      "metrica": "Compilation success rate (heatmap azul, barra de cor rotulada 'build')",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 1, "intervencao": 1},
+      "denominador": "nao_informado (o estudo não informa quantas tentativas formam cada taxa; o texto fala apenas em 'all trials')",
+      "condicoes": "Regime code-only: ambiente de build fixo. Ambos com gpt-5.1-codex-mini, mesmo harness, ferramentas e ambiente GPU/compilador. Não se informa qual versão do pipeline PARACODEX (três ou quatro etapas) foi usada no ParEval; o estudo menciona 'minimal prompt adjustment' para CUDA→OpenMP. Número de tentativas e de execuções: nao_informado. O resultado é do pacote PARACODEX, não de um mecanismo isolado. Conferido visualmente na Figura 2 (p. 6); a imagem tem baixa resolução, mas a sequência de células da linha nanoXOR (code-only, compilação) no texto extraído (… 1 1 nas colunas Baseline e ParaCodex) coincide com a leitura da figura.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca várias métricas (kernels válidos, kernels melhorados, speedup em média geométrica por suíte) e várias suítes, e o speedup é relativo às referências OpenMP, não ao comparador de prompting. A Tabela 1 traz só PARACODEX e a Tabela 2 é descritiva, sem contraste. A primeira figura com o contraste elegível é a Figura 2. Primeira métrica: compilação (azul, à esquerda); primeiro e único modelo comum às duas condições: gpt-5.1-codex-mini. As colunas Non-agentic e Top-down usam outros modelos e não têm origem informada, por isso são condições incompatíveis como comparador de prompting com o mesmo modelo; o primeiro comparador compatível é o baseline Codex. Primeiro bloco: code-only; primeira linha: nanoXOR. Não há agregado impresso do baseline para a Figura 2. Não há cobertura adicional: há uma só técnica focal e uma só tarefa (traducao); as Figuras 3-4 (serial→OpenMP) são outros benchmarks e condições da mesma técnica e tarefa; não há tabela de ablação nem matriz de ingredientes; a etapa de perfilamento só tem contribuição cumulativa.",
+      "derivacao": "direta",
+      "localizador": "p. 6, Figura 2 (heatmap de compilação, bloco Code-only, linha nanoXOR, colunas Baseline e ParaCodex)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Compilation (blue) and validation (green) success rates are shown for both the baseline Codex model and PARACODEX under the ParEval protocol.", "localizador": "p. 6, Figura 2, legenda"},
+        {"trecho": "1", "localizador": "p. 6, Figura 2, heatmap de compilação ('build'), bloco Code-only, linha nanoXOR, coluna Baseline (gpt-5.1-codex-mini)"},
+        {"trecho": "1", "localizador": "p. 6, Figura 2, heatmap de compilação ('build'), bloco Code-only, linha nanoXOR, coluna ParaCodex (gpt-5.1-codex-mini)"},
+        {"trecho": "Kernels are scored under (i) a fixed build environment (code-only) and (ii) a setting where the system must also construct the build flow (overall).", "localizador": "p. 6, Figura 2, legenda"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Questão-chave e quatro questões de pesquisa explícitas (viabilidade, especialização, desempenho, generalização) e contribuições delimitadas.", "localizador": "p. 2-3, Introdução (Key Question, RQ1-RQ4, Contributions)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Etapas, artefatos, ferramentas, hardware e critérios de exclusão estão descritos com detalhe nos apêndices, e o template do baseline é impresso; porém as suítes usam versões diferentes do pipeline (quatro etapas no HeCBench, três no NAS/Rodinia), a versão usada no ParEval não é informada, os prompts completos de PARACODEX não estão no artigo e o número de tentativas no ParEval não é informado.", "localizador": "p. 4-5, seção 3; p. 12-17, Apêndices A-B; p. 6, Figura 2"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Baseline zero-shot com o mesmo modelo, harness e ferramentas, adequado para isolar o pacote; mas as estatísticas do baseline são calculadas sobre conjuntos de kernels não especificados (falhas em 2 HeCBench e no NAS FT), e a Figura 2 mistura colunas de outros sistemas sem origem informada.", "localizador": "p. 4, seção 3.1; p. 6; p. 7, seção 4.3; p. 19, Apêndice E.2"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "O tempo de GPU e o speedup são definidos com precisão, mas o denominador das taxas de compilação e validação do ParEval não é informado; há divergências entre resumo e corpo (5× vs 5,1×), unidade da legenda da Figura 4 diferente do eixo e narrativa da Figura 3 contraditória com as medianas do Apêndice E.2.", "localizador": "p. 5, seção 4.1; p. 1; p. 7, Figuras 3-4; p. 19"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A seção de limitações discute hardware único sem clocks travados, limites do gate de correção, bypass e falta de significância estatística; não discute exposição dos benchmarks no pré-treinamento além do teste de anonimização nem o efeito de usar versões diferentes do pipeline por suíte.", "localizador": "p. 9, seção 6; p. 7, seção 4.4"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa repositório, modelos, esforço de raciocínio, hardware, versões de SDK e profiler, execução sem internet e tokens; mas não informa snapshot dos modelos, não identifica os experimentos fora do 'lowest reasoning effort', não informa o número de tentativas no ParEval e os prompts completos estão só no repositório (não verificado).", "localizador": "p. 1, nota 1; p. 5, seção 4.1; p. 6, seção 4.2; p. 18, Apêndice D.1"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Avalia variantes anonimizadas de Rodinia e NAS para examinar dependência de identificadores memorizados, mas só em alguns kernels, com NAS em classe de entrada diferente (Class D) e sem anonimização de HeCBench e ParEval; não discute exposição das implementações de referência no pré-treinamento.", "localizador": "p. 7, seção 4.4; p. 8, Figura 5"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-1145, incluindo referências e apêndices até o Apêndice G.2).",
+    "paginas_pdf_abertas": [5, 6, 7, 8, 9, 16, 18, 19, 20]
+  }
+}

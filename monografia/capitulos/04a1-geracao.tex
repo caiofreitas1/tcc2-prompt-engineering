@@ -1,0 +1,199 @@
+\subsubsection{Geração de código}
+
+A geração de código é tarefa de 247 estudos. As sínteses parciais, feitas antes das últimas inclusões e exclusões,
+cobriram 222 estudos, dos quais 221 seguem no corpus (S433 foi agrupado depois a S2053), divididos pela técnica focal em três grupos que não se sobrepõem:
+\begin{itemize}
+\item 92 estudos cuja técnica acrescenta \textit{feedback}, arranjo multiagente ou amostragem de candidatos;
+\item 52 com raciocínio ou decomposição, sem esses mecanismos;
+\item 78 apenas com instrução, exemplos, contexto, restrições ou otimização do prompt.
+\end{itemize}
+
+Os agrupamentos a seguir atravessam os grupos, e um estudo pode aparecer em mais de um. As contagens somam as sínteses parciais de cada grupo; como cada síntese delimitou o agrupamento à sua maneira, as somas são aproximadas e vêm marcadas como «nas sínteses parciais». As fichas foram extraídas por IA e conferidas pelo autor numa amostra de 67 estudos, e as afirmações, uma a uma no original (Seção~\ref{sec:conferencia}); a qualidade também foi julgada por IA. As comparações foram escolhidas por regra (resultado principal declarado, primeira tabela ou cobertura), e muitas técnicas são propostas dos próprios autores; a proporção de melhoras, portanto, não estima a eficácia geral de uma técnica.
+
+\paragraph{Autorreparo e \textit{feedback} de execução}
+Avaliam-se laços em que mensagens do compilador, testes falhos, saídas do interpretador ou alertas de analisadores voltam ao prompt para regenerar o código. Nas sínteses parciais, cerca de 37 estudos entram aqui. A maior parte dos contrastes é de pacote; o laço é isolado como ingrediente numa minoria (entre outros, S150, S479, S645, S878, S1047, S1086, S1898 e S1977), e S917, S1833, S2055 e S2163 são cumulativos.
+
+% AFIRMACAO: A61
+Contra um prompt de chamada única, os pacotes de reparo elevaram o Pass@1 de 73,78\% para 90,24\% no HumanEval com gpt-3.5-turbo-0613 ($\mu$FiX; S150-C1) e de 8,73\% para 28,0\% na divisão Class Runnable do CoderEval-Python (CoCoGen; S302-C1), e a retirada da fase de \textit{feedback} do $\mu$FiX deixou o valor em 85,37\% (S150-C2).
+% AFIRMACAO: A62
+Em cinco comparações de ingrediente com valores absolutos, o desfecho com o laço foi mais favorável, no sentido de cada métrica, em métricas que não se agregam: erros de execução de 9 para 6 (S878-C1), HMean \textit{accuracy} de 12,9\% para 18,3\% (S1047-C3), acurácia de 61,7\% para 65,0\% (S1053-C3), Pass@1 da solução final, após tentativas com \textit{feedback}, de 0,90 para 0,94 sobre modelo ajustado (S1077-C1) e acurácia de 19,6\% para 22,6\% (S1086-C6).
+% AFIRMACAO: A63
+Nas condições extraídas dos dois estudos que igualam o orçamento de tentativas ou de programas, não houve ganho: no CodeContests, com pass 1@3, as variantes multiturno com \textit{feedback} ficaram em 2,4\% e 2,8\% contra 2,9\% com Llama 3.0 8B e em 6,9\% contra 7,7\% com Llama 3.1 8B (S479-C2 a S479-C4), embora S479 registre ganhos com outros modelos e orçamentos; e, no PSB2-Python com GPT-3.5, corte de 10 programas e seleção por torneio, o SEIDR resolveu em média 11,5 problemas, contra 12,2 da amostragem sem reparo e 12,0 da busca só de reparo (S645-C1, S645-C2).
+% AFIRMACAO: A64
+Com Llama 3.2 3B, a condição com o teste dado e testes gerados no prompt (TDD Combined) rendeu acurácia maior (48,2\%) que o laço de interpretador isolado (22,6\%) e que o interpretador com o teste dado (42,2\%), contra 19,6\% da base; as condições diferem também nos testes (S1086-C5, S1086-C6, S1086-C1).
+% AFIRMACAO: A65
+Num dos poucos contrastes que isolam a fonte do \textit{feedback}, com 10 requisitos, o relatório estático estruturado e a autorrevisão genérica produziram, cada um, 27 saídas válidas em 30 (S1763-C3).
+
+O laço depende de testes, executor ou compilador disponíveis. Fora de S479 e S645, nenhuma comparação iguala o número de chamadas; uma leitura possível é que parte dos ganhos de pacote acompanhe o acréscimo de chamadas, o que os estudos não isolam. No esclarecimento de requisitos, o usuário simulado vê os testes de referência, condição oráculo (S2140-C2).
+
+\paragraph{Autocrítica e revisão sem execução}
+Avalia-se a crítica da saída pelo próprio modelo, ou por relatório externo que não executa o código, seguida de reescrita, muitas vezes dirigida a viés, segurança ou tratamento de exceções. Nas sínteses parciais, são 9 estudos (S114, S140, S149, S397, S604, S759, S834, S842 e S1204), quase todos com contraste de pacote.
+
+% AFIRMACAO: A66
+Com PaLM-2-CodeChat-bison, as cinco estratégias de mitigação de viés sem \textit{feedback} elevaram o CBS (menor é melhor) de 17,96\% para valores entre 23,05\% e 33,83\%, e as cinco com relatório de testes de viés o reduziram para valores entre 3,89\% e 6,29\% (S140-C1 a S140-C10).
+% AFIRMACAO: A67
+A autocrítica RCI reduziu a densidade de fraquezas apontadas pelo Bandit de 0,103 para 0,029 por linha de código com GPT-3 text-davinci-002 (S397-C1) e a proporção de amostras vulneráveis de 5,74\% para 4,5\% com GPT-3.5-turbo (S604-C11), mas, em S397, o teste de Kruskal-Wallis sobre a densidade não foi significativo para GPT-3 (p = 0,334) nem para GPT-3.5 (p = 0,160) (S397-C1).
+% AFIRMACAO: A68
+Com o modelo pequeno Qwen2.5-1.5B, Self-Refine (38,2\%) e SETS (38,8\%) tiveram Accuracy@t2 menor que a correção simples (44,6\%) (S759-C1, S759-C3), enquanto, em modelos maiores, os ganhos registrados são pequenos, como o CodeBLEU de 0,732 para 0,743 com Gemini-2.0 (S842-C5) e a completude de 92,9\% para 96,0\% com GPT-5 (S1204-C2).
+
+S140 usa um único modelo, e seus autores admitem que parte da redução pode vir só da mudança do prompt. A dependência do porte é hipótese desta revisão, não teste. Analisadores estáticos e juízes LLM não demonstram segurança em uso real.
+
+\paragraph{Sistemas multiagente}
+Avaliam-se encadeamentos de agentes com papéis (analista, planejador, testador, revisor) e arranjos em que um modelo externo critica ou implementa. Nas sínteses parciais, são cerca de 29 estudos, todos avaliados como pacote, com ablações de componentes em cerca de dez. Nenhuma comparação com valores contrasta multiagente e agente único com o mesmo número de chamadas.
+
+% AFIRMACAO: A69
+Os pacotes elevaram o Pass@1 de 48,1\% para 80,5\% (MapCoder; S344-C1), de 67,68\% para 87,8\% (PairCoder; S448-C1) e de 57,3\% para 74,4\% (Self-collaboration; S2131-C1), e, em S1747, o MapCoder passou de 39,63\% para 64,02\% com Llama3.1 8B usando em média 8,1 chamadas contra 1,0 da base (S1747-C3).
+% AFIRMACAO: A70
+Em S344, S448, S530 e S634, as oito ablações que retiram um componente registraram valor menor que o do sistema completo, cada uma num único modelo e \textit{benchmark} (S344-C2, S344-C3, S448-C2, S448-C3, S530-C2, S530-C3, S634-C2, S634-C3).
+% AFIRMACAO: A71
+Há também resultados contrários e nulos: com CodeLlama 34B, o Agents4PLC compilou 31,3\% contra 68,8\% do LLM4PLC (S492-C1); substituir o módulo de codificação progressiva do Spec2RTL-Agent manteve 3 de 3 documentos corretos (S795-C3); e, com Qwen2.5-1.5B, o External-Refine guiado por GPT-4.1 ficou em 41,8\% contra 44,6\% (S759-C2).
+
+Como prompting e orquestração variam juntos, o ganho não se atribui ao mecanismo multiagente. Com modelo externo mais forte (S759-C4, S1204-C3), o efeito se confunde com a seleção de modelo. Há ajuste fino de agentes em S1815, S1828 e S2170, e a única ablação do arranjo multiagente (S530-C3) usa \textit{benchmark} próprio.
+
+\paragraph{Amostragem e seleção de candidatos}
+Avalia-se a geração de várias candidatas com escolha por testes, ranqueamento, modelo de valor ou busca em árvore. Nas sínteses parciais, são cerca de 17 estudos, com ingrediente isolado em parte deles (S301, S399, S416, S448, S582, S645, S724 e S1034).
+
+% AFIRMACAO: A72
+Em pacotes, o VRank elevou o Pass@1 de 48,8\% para 58,1\% no VerilogEval-Human com GPT-4o-mini (S582-C1) e o SPECFIX, de 87,8\% para 92,0\% no HumanEval+ com DeepSeek-V3 (S724-C1); na ablação deste, retirar a entropia semântica ou a consistência com exemplos levou o valor a 90,55\% e 89,95\%, contra 91,99\% do sistema completo (S724-C2, S724-C3).
+% AFIRMACAO: A73
+Entre os contrários e nulos, a amostragem com $k = 5$ baixou a criatividade convergente de 2,52 para 2,02 com GPT-3.5 (S399-C3), e a retirada do CoT adaptativo do SEER mudou o pass@1 de 82,0\% ($\pm$1,1) para 81,0\% ($\pm$0,9), diferença de 1,0 p.p. (S1034-C3).
+
+Em S399, a seleção usa o próprio oráculo de avaliação, indisponível sem testes de referência. O SEER inclui modelo de valor treinado, e o TIPCODER, proponente ajustado por SFT e RL; nesses casos (S1034, S1592), o contraste não mede só prompting.
+
+\paragraph{Instrução de raciocínio}
+Avalia-se a instrução para raciocinar passo a passo antes do código, ou a inserção de uma cadeia de raciocínio, sobre um prompt que, fora isso, fica igual. Nas sínteses parciais, são cerca de 14 estudos, a maioria com contraste de ingrediente.
+
+% AFIRMACAO: A74
+No grupo com raciocínio ou decomposição, as 8 comparações, em 8 estudos, que acrescentam a instrução de raciocínio dividem-se em 4 melhoras e 4 pioras (S124-C2, S207-C1, S309-C2, S319-C1, S491-C3, S508-C1, S560-C2, S569-C1), contagem descritiva que não demonstra o efeito do ingrediente: S207 é um exemplo preliminar com condições incompletas, e S319 usa um modelo previamente ajustado; e S560 relata ausência de efeito significativo do CoT na correção nos três modelos avaliados (S560-C2).
+% AFIRMACAO: A75
+No grupo com \textit{feedback}, multiagente ou amostragem, o CoT reduziu o pass@1 de 18,24\% para 14,86\% com Qwen2.5-Coder-7B no BigCodeBench (S1121-C1), de 70,87\% para 61,11\% sobre o prompt EAS com DeepSeek-R1-Distill-Qwen-14B (S1024-C4) e a correção média de 0,53 para 0,49 com Llama-3.1-8B, sob um limite de 512 \textit{tokens} gerados que o estudo associa ao truncamento (S1606-C4), e a elevou de 81,0\% para 87,68\% com DeepSeek-V3 num \textit{benchmark} customizado (S1229-C2).
+% AFIRMACAO: A76
+Quando a cadeia veio de outro modelo, o pass@1 do Qwen2.5-Coder-7B no BigCodeBench subiu de 18,24\% para 28,38\% com o raciocínio do DeepSeek-R1 (S1121-C4), contraste que não separa o raciocínio do modelo que o produziu.
+
+Comparações de uma célula (um modelo e um \textit{benchmark}) em \textit{benchmarks} distintos não separam o papel do modelo, do domínio e do teto de geração. S207-C1 tem $n = 1$, e S309-C2 mede robustez, não correção.
+
+\paragraph{Planejamento e decomposição}
+Avalia-se a geração de plano, pseudocódigo, especificação ou testes intermediários antes do código, num prompt estruturado ou em chamadas encadeadas. Nas sínteses parciais, são cerca de 22 estudos, a maioria com contraste de pacote, além de três estudos de pistas de solução (S892, S1679 e S2145).
+
+% AFIRMACAO: A77
+No grupo com raciocínio ou decomposição, 9 contrastes de pacote em geração, de 8 estudos, registram 7 melhoras e 2 pioras (S1-C1, S6-C1, S77-C1, S216-C1, S216-C2, S295-C2, S491-C1, S654-C1, S845-C1); entre as melhoras estão o Self-planning, de 48,1\% para 60,3\% de Pass@1 no HumanEval com code-davinci-002 contra o prompt direto (S1-C1), e o SCoT, de 53,29\% para 60,64\% contra o CoT (S77-C1).
+% AFIRMACAO: A78
+As duas pioras ocorreram quando a etapa intermediária veio de um modelo pequeno: a CoT gerada pelo próprio CodeGen 350M baixou o resultado no HumanEval de 14,63\% para 12,8\%, enquanto a de um modelo separado e ajustado o elevou para 20,73\% (S216-C2, S216-C1), e a função auxiliar gerada pelo Incoder 1B mudou o pass@1 de 0,0373 para 0,0364, contra 0,2028 com a função escrita por humanos, condição oráculo (S295-C2, S295-C3).
+% AFIRMACAO: A79
+Decompor também piorou resultados: com WizardCoder-15B, a geração holística de uma classe Java teve Completion@1 de 98,0\%, contra 74,0\% na síntese independente por método e 70,0\% na incremental, métrica que não mede correção (S365-C1, S365-C3), e o Knowledge Generation Prompting reduziu o pass@1 do GPT-3.5 Turbo no ChemEval de 45,0\% para 39,79\%, em contradição com a narrativa do estudo (S2075-C2).
+% AFIRMACAO: A80
+Nos dois estudos de pistas de solução com números, os maiores ganhos vieram de informação externa ao modelo avaliado: com DeepSeek-Coder-V2 no MuPA, as pistas autogeradas levaram o pass@1 (escala 0--100) de 11,84 para 13,21, 12,18 e 11,92, e a solução oficial fornecida, para 38,79 (S2145-C1, S2145-C3, S2145-C5, S2145-C6); com Deepseek-coder 33B, os casos de teste aprovados passaram de 269 para 299 com as dicas oficiais e para 801 com dicas reescritas pelo GPT-4o (S1679-C1, S1679-C2).
+
+Os ganhos de pacote não se atribuem à decomposição, e nenhuma comparação mede custo, embora várias técnicas usem mais de uma chamada. Os valores de «até 25,4\%» de S1 e «até 13,79\%» de S77 são variações relativas máximas, não p.p. As pistas de referência medem o aproveitamento de conhecimento fornecido, não a capacidade de produzi-lo.
+
+\paragraph{Exemplos e sua seleção}
+Avaliam-se a presença, a quantidade, a seleção e o formato de demonstrações ou de casos de teste no prompt. Nas sínteses parciais, cerca de 14 estudos do grupo só com instrução, exemplos, contexto ou restrições têm exemplos como técnica focal. Pacotes com seleção treinada ou exploração simbólica (S170-C1, S195-C1, S500-C1) incluem componentes fora do escopo de prompting.
+
+% AFIRMACAO: A81
+Quando apenas se acrescentam exemplos, sem recuperação treinada, as diferenças registradas são pequenas: Pass@1 de 0,229 para 0,237 (proporção) no VHDL-Eval (S361-C1), de 59,0\% para 62,8\% no VerilogEval com GPT-4o (S432-C1) e, em R com DeepSeek Coder 1B, de 13,9\% para 14,1\% com \textit{few-shot} e para 13,8\% com exemplos de tradução (S591-C3, S591-C1).
+% AFIRMACAO: A82
+Os exemplos também pioraram resultados: exemplos de CVT reduziram o pass@1 funcional de 80,81\% para 70,87\% (S1024-C2), amostras de código com erros o derrubaram de 45,0\% para 15,62\% com GPT-3.5 Turbo (S2075-C1), e o \textit{few-shot} elevou a taxa de inacessibilidade do GPT-4o de 0,326 para 0,469 (S2113-C2).
+
+O sinal varia com modelo, temperatura e tarefa (S432, S1707, S2090). Em S902-C2, o conteúdo recuperado recebeu nomes extraídos da solução de referência, condição oráculo, e em S1613-C1 metade dos testes de avaliação foi exposta no prompt.
+
+\paragraph{Contexto recuperado e de repositório}
+Avalia-se o acréscimo de documentação de API, código do arquivo ou do repositório, dependências, tipos, dados ou regras de domínio. Nas sínteses parciais, são cerca de 17 estudos do grupo só com instrução, exemplos, contexto ou restrições e 8 do grupo com raciocínio ou decomposição que combinam recuperação e decomposição. Predominam contrastes de pacote; as ablações de S360 e S852 isolam componentes dentro de sistemas completos.
+
+% AFIRMACAO: A83
+Com contexto de arquivo ou de repositório, o Pass@1 passou de 17,4\% para 53,04\% no DevEval com gpt-4 (S357-C1) e de 20,29\% para 44,93\% com o RepoScope, que usou em média 3679 \textit{tokens} de prompt contra 97 da base (S852-C1).
+% AFIRMACAO: A84
+No grupo com raciocínio ou decomposição, parte das comparações de contexto usa informação oráculo, e algumas combinam tipos de contexto, como o contexto do arquivo somado às APIs invocadas, que elevou o Pass@1 do GPT-4o Mini no RepoExec de 16,62\% para 37,75\% (S213-C2, S213-C3, S213-C5, S295-C3, S670-C2, S670-C5, S670-C6, S670-C7).
+% AFIRMACAO: A85
+Há inversões e nulos: a recuperação reduziu a acurácia de Claude 3.7 no QHackBench de 31,0\% para 0,0\% (S806-C1), o RAG sobre a documentação do Ansible baixou o BLEU do GPT-4 de 0,1828 para 0,1568 (S1951-C1), a QA API isolada reduziu a acurácia de execução de 59,6\% para 57,4\% (S176-C3) e o InCoder-6B ficou em 0 de Pass@1 em Java com e sem contexto (S137-C1 a S137-C3).
+
+O resultado parece depender do recuperador e da qualidade do que se recupera (S273, S547, S1195). As condições oráculo de S120 e S556 dão limite superior, não condição realista, e há recuperadores treinados em S120, S170 e S852.
+
+\paragraph{Instrução, restrições e persona}
+Avaliam-se especificação, pré e pós-condições, restrições de segurança ou acessibilidade, regras de estilo, persona, redação e língua da instrução. Nas sínteses parciais, cerca de 17 estudos do grupo só com instrução, exemplos, contexto ou restrições tratam de instrução e restrições, e 9 de formulação e língua, com contrastes também nos outros grupos.
+
+% AFIRMACAO: A86
+Em dois estudos, mudanças só de redação pioraram o resultado, e a persona não ajudou: corrigir problemas de qualidade dos prompts do HumanEval Java reduziu o pass@1 do CodeGen-2.5-7B-multi de 0,219 para 0,15 (S323-C2), cinco de seis frases instrucionais elevaram as soluções incorretas do Codex de 45 para valores entre 59 e 74 em 120, e a sexta as reduziu para 44 (S2162-C1 a S2162-C6), e a persona mudou o Pass@1 do GPT-4o de 47,5\% para 47,4\% (S560-C3).
+% AFIRMACAO: A87
+Restrições dirigidas a requisitos não funcionais tiveram direção variável: o prompt estruturado de segurança reduziu o RPE do GPT 4o de 0,42 para 0,13 (S1607-C1), mas, com GPT-3.5-turbo, 13 variantes instrucionais sem iteração elevaram a proporção de amostras vulneráveis de 5,74\% para valores entre 5,99\% e 7,82\% (S604-C1 a S604-C10, S604-C13 a S604-C15), as diretrizes OWASP reduziram o Pass@1 de 16,19\% para 9,52\% (S1195-C4) e a instrução WCAG elevou a inacessibilidade de 0,326 para 0,433 (S2113-C1).
+% AFIRMACAO: A88
+A língua da instrução também alterou o resultado: com StarCoder 3B no X-HumanEval-X, a autotradução da instrução chinesa para o inglês reduziu o pass@1 de 18,29\% para 1,83\%, enquanto a tradução externa o elevou para 20,12\% e 21,95\% (S2141-C1 a S2141-C3), e, com Claude3.5, o prompt em árabe obteve Pass@1 de 0,831 contra 0,938 em inglês (S495-C1).
+
+Scanners aplicados a \textit{benchmarks} não demonstram segurança em produção. O ganho de pré e pós-condições em S1812-C1 é agregado sobre seis modelos e, segundo a ficha, não significativo. Em S739, o objetivo da instrução muda a contagem de vulnerabilidades ao longo de dez iterações, mas sem condição sem iteração.
+
+\paragraph{Otimização automática do prompt}
+Avaliam-se a busca iterativa ou evolutiva sobre o prompt, a compressão ou poda e a seleção automática entre estilos. As sínteses parciais registram otimização em S650 e S2053, compressão ou poda em S499, S1644, S1837 e S2048 e seleção em pacotes híbridos em S570, S1853 e S1924.
+
+% AFIRMACAO: A89
+Com GPT-3.5, o Prochemy elevou o Pass@1 de 72,6\% para 76,2\% no HumanEval e de 60,5\% para 73,0\% na tradução Java$\rightarrow$Python do CodeNet (S650-C1, S650-C2), e o EPiC elevou o pass@1 do o3-mini no HumanEval+ de 0,88 para 0,941 (proporção; S2053-C1), embora as fichas registrem empate do CoT com e sem Prochemy no LiveCodeBench e o EPiC abaixo do LATS e do LDB no MBPP+ (S650; S2053).
+% AFIRMACAO: A90
+A compressão da docstring reduziu o Pass@1 do DeepSeekCoder-1.3B no HumanEval de 63,42\% para 54,88\%, 53,05\% e 57,93\%, conforme o método (S499-C1 a S499-C3), enquanto a poda guiada de exemplos, no ClassEval com GPT-3.5-turbo-0613, elevou o Pass@1 de 3,8\% para 9,5\% e de 4\% para 8,6\% contra o \textit{few-shot} sem poda (S1644-C1, S2048-C1).
+
+No ClassEval, os valores absolutos ficam abaixo de 10\%, e em S2048-C1 a intervenção usa mais exemplos que o comparador. A economia de \textit{tokens} de S499 não equivale a redução de custo medida. Os pacotes híbridos incluem seleção de modelo ou de \textit{solver}, e S1853 mede o tempo de busca; nenhum desses ganhos se atribui à seleção de prompt.
+
+\paragraph{Estudos extraídos depois das sínteses parciais}
+S1610 e S1617, incluídos depois da decisão do autor sobre a data de I4, S667, extraído depois, e os 23 estudos de
+geração incluídos na conferência da última leva da etapa 3 não estão nas contagens dos agrupamentos acima.
+% AFIRMACAO: A103
+Em S1610, com Qwen 2.5 Coder 7B e 81 prompts, a proporção de arquivos gerados com ao menos um alerta do Bandit caiu
+de 63,0\% no \textit{zero-shot} para 54,3\% com \textit{few-shot} e para 55,6\% com CoT. Nas duas condições, o contraste também
+acrescenta uma diretiva de segurança, e por isso é de pacote (S1610-C1; S1610-C2).
+% AFIRMACAO: A104
+Em S1617, com GPT-5, Gemini 2.5 Pro e DeepSeek V3.2 no HumanEval-XL, o Pass@1 agregado foi de 0,858 com prompts em inglês e de 0,844 com prompts em espanhol (S1617-C1).
+
+Entre os estudos da última leva, os de segurança repetem a divisão das instruções de segurança.
+% AFIRMACAO: A105
+Em S1655, com Gemini 2.0 Flash no LLMSecEval, o Bandit apontou 61 fraquezas no código do prompt de base. A
+instrução simples de segurança, o CoT \textit{zero-shot} e o RCI ficaram entre 58 e 60, e o prompt de segurança
+abrangente e a persona subiram para 66 e 65 (S1655-C1 a S1655-C5).
+% AFIRMACAO: A106
+Em S1880, com GPT-4 em 221 tarefas do SecurityEval e do SALLM, os trechos com fraqueza apontada pelo Bandit caíram de
+123 para 61 com RAG e para 42 com RCI e RAG. Os códigos válidos analisados diferem entre as condições (214, 217 e 206)
+(S1880-C1; S1880-C2).
+% AFIRMACAO: A118
+Em S667, o prompting é o próprio ataque: com DeepSeek-V3 no RMCBench, o CodeJailbreaker elevou a taxa de sucesso
+de pedidos de código malicioso de 61,54\% para 93,41\% em relação ao pedido explicitamente malicioso (S667-C1).
+
+% AFIRMACAO: A107
+Em S1847, com CodeGemma, na categoria App Features, a média percentual de código vulnerável entre execuções subiu
+de 23,78\% para 26,19\% com a definição de papel e caiu para 19,93\% com o prompt orientado à segurança (S1847-C1;
+S1847-C2).
+
+% AFIRMACAO: A108
+Laços com execução e depuração tiveram ganhos grandes no HumanEval. Em S1684, com GPT-4o, o Pass@1 foi de 85,98\%
+para 92,07\%, acima de cada estágio isolado (87,80\% e 89,63\%). Em S1871, com DeepSeek-Chat, foi de 73,17\% para
+92,68\%, e as ablações no APPS atribuem 2,0 e 1,33 p.p. ao grafo de políticas e aos testes aumentados (S1684-C1 a
+S1684-C3; S1871-C1 a S1871-C3).
+% AFIRMACAO: A109
+Em S1778, o sistema de quatro agentes elevou o Pass@1 no HumanEval de 76,92\% para 84,97\% em relação à saída
+inicial do próprio sistema. O agente verificador executa os casos de teste do \textit{benchmark}, o que aproxima a
+condição da informação oráculo (S1778-C1).
+% AFIRMACAO: A110
+Em sentido contrário, em S1738, com text-davinci-003 no nível introdutório do APPS, quatro rodadas adicionais de
+otimização com os testes que falharam baixaram a taxa média de aprovação das soluções inicialmente parciais de
+39,9\% na primeira rodada para 38,3\% na quinta (S1738-C1).
+
+% AFIRMACAO: A111
+O contexto recuperado ou estrutural teve resultados desiguais. Em S1735, com Qwen2.5-32B no IaC-Eval, o RAG em grafo
+de duas camadas elevou o Pass@1 de 10,4\% para 45,5\% em relação ao RAG simples. Em S1931, com GPT-3.5-Turbo no
+DevEval, o \textit{exact match} foi de 0,33\% para 4,39\%. Em S1926, com DeepSeek Coder 6.7B no EvoCodeBenchPlus,
+o contexto obtido por GNN mudou o Pass@1 de 26,65\% para 27,60\% (S1735-C1; S1931-C1; S1926-C1).
+% AFIRMACAO: A112
+Em S1748, com GPT-4o, três exemplos elevaram o AST Match de 0,0761 para 0,2087 na geração de especificações CSP\#.
+Em S1929, com DeepSeek-Coder-1.3B no CodeContests, o \textit{self-planning} baixou o Pass@1 de 0,1 para 0. Em
+S1935, o prompting em várias etapas mudou o Block Match de 78,5 para 78,9 (S1748-C1; S1929-C1; S1935-C1).
+
+Os demais estudos novos de geração comparam o sistema proposto com outros modelos ou abordagens, combinam prompting
+com ajuste fino ou não mostram diferença (S1636, S1682, S1688, S1702, S1754 e S1888). S1624, S1809 e S1875 só têm
+resultados descritivos, e S1886 compara dois modelos com o mesmo prompt, sem comparação de prompting.
+
+\paragraph{Lacunas}
+As sínteses parciais deixam lacunas que limitam os achados de geração:
+\begin{itemize}
+\item \textbf{Isolamento com orçamento igual.} Só S479 e S645 igualam o orçamento do laço de \textit{feedback}; nenhuma comparação contrasta multiagente e agente único com as mesmas chamadas, nem separa raciocínio de decomposição no mesmo pacote.
+\item \textbf{Custo e uso real.} Nenhuma comparação mede custo ou tempo de forma pareada, e os \textit{benchmarks} não sustentam conclusões sobre produtividade, segurança ou redução de custo.
+\item \textbf{Informação oráculo.} Condições com informação da solução de referência (S120, S295-C3, S399-C3, S556, S670, S892, S902-C2, S1613-C1, S1708, S2140-C2, S2145-C6) indicam limites superiores.
+\item \textbf{Modelos e domínios.} Modelos pequenos (por exemplo, S114, S479, S759 e S1977) e linguagens de hardware ou de domínio aparecem em poucos estudos, com conjuntos próprios.
+\item \textbf{Comparações de uma célula.} Cada comparação cobre um modelo e um \textit{benchmark}; as inversões entre modelos ficam só como heterogeneidade.
+\item \textbf{Qualidade e conferência.} A contaminação foi julgada «atende» em 9 dos 222 estudos das sínteses parciais (S247, S323, S397, S398, S560, S782, S902, S2054 e S2123), e as fichas só foram conferidas pelo
+autor por amostra (Seção~\ref{sec:conferencia}). S433 e S2053, que descrevem o EPiC, eram versões do mesmo trabalho e foram agrupados por X1.
+\end{itemize}

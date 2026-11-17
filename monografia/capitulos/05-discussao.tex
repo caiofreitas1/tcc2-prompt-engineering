@@ -1,9 +1,101 @@
 \section{Discussão}
-\pendencia{Interpretar resultados, divergências e condições de uso sem extrapolar os dados.}
+Esta seção interpreta os resultados da Seção~\ref{sec:resultados}. As interpretações são deste trabalho e
+dependem de fichas extraídas por IA e conferidas pelo autor só numa amostra.
+
+\subsection{O que os resultados indicam}
+\textit{A evidência é sobretudo de pacotes.} A maior parte das técnicas focais foi avaliada como sistema completo
+contra uma linha de base, e o ganho de um pacote não informa qual mecanismo o produziu. As ablações de componentes
+existem em 191 estudos, mas isolam ingredientes dentro do sistema de cada estudo, em geral com poucos modelos e
+\textit{benchmarks}. Por isso, a taxonomia por mecanismo descreve o que se avalia com mais segurança do que o
+quanto cada mecanismo contribui.
+
+\textit{O orçamento de chamadas é um fator de confusão recorrente.} Os pacotes iterativos, multiagente e de
+amostragem usam mais chamadas e mais \textit{tokens} que as linhas de base. Nas condições extraídas dos dois estudos que igualam o
+orçamento de tentativas, o laço de \textit{feedback} não superou a amostragem sem reparo (S479-C2; S645-C1).
+% AFIRMACAO: A63
+Uma leitura possível é que parte dos ganhos atribuídos à iteração acompanhe o aumento de tentativas. Essa
+hipótese não foi testada aqui e merece estudos que igualem o orçamento.
+% AFIRMACAO: A69
+
+\textit{O porte do modelo e a origem do conteúdo intermediário condicionam o sinal.} A instrução de raciocínio
+teve resultado dividido quando acrescentada ao prompt, com ausência de efeito significativo em um estudo e quedas com modelos
+pequenos ou com limite de geração (S560-C2; S1121-C1; S1606-C4).
+% AFIRMACAO: A74
+% AFIRMACAO: A75
+Quando o raciocínio ou o plano veio de outro modelo, mais forte ou ajustado, o resultado melhorou. Nesse caso, o
+efeito se confunde com a escolha do modelo (S1121-C4; S216-C1). A autocorreção sem execução também piorou com um
+modelo de 1,5B (S759-C1).
+% AFIRMACAO: A68
+No reparo, o raciocínio explícito piorou em quase todas as comparações extraídas.
+
+\textit{Informação externa verificável aparece em boa parte dos resultados favoráveis.} Muitos dos contrastes
+favoráveis vêm de condições que trazem informação nova ao modelo: testes, execução, contexto do repositório e
+localização do defeito, sob as condições de cada estudo. Como modelos, métricas e \textit{benchmarks} diferem, isso
+não estabelece que essa informação supere as instruções em geral. Parte deles, porém, usa informação oráculo, tirada da solução de referência, e indica um limite
+superior, e não uso realista (S670-C5).
+% AFIRMACAO: A84
+Mudanças só de redação, persona ou língua da instrução tiveram efeitos pequenos, nulos ou negativos. Mais
+contexto também não é sempre melhor: houve quedas com recuperação inadequada (S806-C1) e com contexto volumoso
+no reparo.
+% AFIRMACAO: A85
+
+\textit{Requisitos não funcionais trazem trocas.} Instruções de segurança reduziram vulnerabilidades em alguns
+estudos e reduziram a correção funcional em outros (S1195-C4). A medição dessas trocas é rara, e os
+\textit{scanners} usados não demonstram segurança em uso real.
+% AFIRMACAO: A87
+
+\textit{Tradução e refatoração têm pouca evidência.} Na tradução, o \textit{feedback} de compilação e de testes
+aparece favorável em pacotes, mas a ablação de um estudo atribui a maior parte da diferença aos testes no prompt
+(S329-C2; S329-C3).
+% AFIRMACAO: A27
+Explicar antes de traduzir não melhorou o resultado (S193-C1).
+% AFIRMACAO: A30
+Na refatoração, especificar o tipo de transformação ou fornecer conhecimento da API trouxe os maiores ganhos, a partir de linhas de base baixas e em poucos estudos (S511-C2; S2122-C1).
+% AFIRMACAO: A37
+
+\subsection{Implicações para a escolha de técnicas}
+A tabela de apoio (Tabela~\ref{tab:apoio}) orienta por condições, e não por técnicas vencedoras. Ela sugere três
+perguntas para quem escolhe uma técnica:
+\begin{itemize}
+  \item há testes, executor ou compilador para fornecer \textit{feedback}?
+  \item qual o orçamento de chamadas e de \textit{tokens}?
+  \item o modelo é pequeno ou grande?
+\end{itemize}
+Onde a evidência é dividida, como na instrução de raciocínio, na autocrítica sem execução, nos exemplos fixos de
+reparo e nas instruções de segurança, a orientação é testar localmente antes de adotar, e não recomendar a técnica
+como padrão. No exame em oito cenários (Seção~\ref{sec:exame}), a tabela levou
+a um roteiro executável só quando a condição do cenário coincidia com a dos estudos, e a versão 2,
+revisada depois do exame, declara a evidência insuficiente e o resultado medido. O exame verifica clareza, justificativa e concretude,
+mas não eficácia.
+
+\subsection{Comparação com outras revisões}\label{sec:comparacao}
+As revisões gerais de LLMs em engenharia de software descrevem quais técnicas de prompting os estudos usam, mas não
+o que cada uma acrescenta ao prompt nem em que condição funciona. Hou et al.~\cite{hou2024slr} contam a frequência
+das técnicas em estudos até janeiro de 2024. Este trabalho cobre só quatro tarefas, inclui estudos até 2026 e
+registra, por comparação, o tipo de contrafactual, a direção e as condições. Isso explica a principal diferença de
+leitura: a maior parte da evidência é de pacotes contra linhas de base, o que uma contagem de uso não mostra.
+
+Dois pontos convergem com revisões próximas.
+O papel da informação externa verificável, como testes, execução e contexto do repositório, nos resultados
+favoráveis deste corpus é coerente com a ênfase de Fan et al.~\cite{fan2023survey} nas técnicas híbridas, que
+combinam engenharia de software tradicional e LLMs.
+% AFIRMACAO: A120
+A dependência da localização perfeita do defeito, registrada aqui nas linhas de depuração, também aparece em Yang
+et al.~\cite{yang2025aprsurvey}, que registram essa suposição para cada sistema de reparo, porque ela torna os
+resultados pouco comparáveis entre artigos.
+% AFIRMACAO: A122
+Na eficiência energética, Masthan Ali et al.~\cite{masthanali2026energy} não encontraram uma estratégia de prompting
+que melhore o resultado de forma consistente, o que se assemelha aos resultados divididos das instruções e da
+autocrítica sem execução deste trabalho.
+% AFIRMACAO: A123
+
+As revisões de técnicas de prompting, como a de Sahoo et al.~\cite{sahoo2024survey}, organizam as técnicas por área
+e resumem os resultados relatados por seus autores, sem cruzá-los com as condições de avaliação. A tabela de apoio
+deste trabalho tenta preencher esse espaço para as quatro tarefas, com a ressalva de que a busca não foi desenhada
+para localizar revisões e, por isso, não se afirma que a combinação seja inédita.
 
 \subsection{Ameaças à validade}\label{sec:ameacas}
-As ameaças abaixo decorrem do método executado até 08/11/2026. As que dependem do conteúdo dos estudos, como a
-heterogeneidade dos resultados, serão retomadas depois da extração.
+As ameaças abaixo decorrem do método executado até 17/11/2026.
 
 \textit{Cobertura da busca.} A busca usou três bases e uma única expressão, aplicada a título e resumo. A expressão
 não recuperou dois dos seis estudos do conjunto de referência (S3 e S5), porque título e resumo não combinam os
@@ -18,16 +110,16 @@ nomeiam a tarefa no título, e não toda a literatura sobre o tema. O corte da e
 só no arXiv, o que tende a sub-representar os trabalhos mais recentes, ainda sem publicação revisada.
 
 \textit{Acesso aos textos.} O protocolo começou restrito ao acesso aberto e passou a aceitar o acesso institucional
-da UFMG depois da triagem por título e resumo. Estudos fora dos dois tipos de acesso não são lidos, e a etapa 3,
-quase toda do IEEE Xplore, ainda não foi lida. Até que seja, o corpus tende a favorecer estudos publicados em
-acesso aberto e na ACM.
+da UFMG depois da triagem por título e resumo. Estudos fora dos dois tipos de acesso não são lidos. A etapa 3,
+quase toda do IEEE Xplore, foi lida pelos modelos e conferida pelo autor nos 111 estudos. Estudos do IEEE Xplore
+sem acesso institucional e os só do arXiv (etapa 2) continuam fora do corpus desta versão.
 
 \textit{Seleção assistida por IA.} A triagem foi feita por dois modelos do mesmo fornecedor (Claude Opus 5.5 e Claude
 Sonnet 5.5), que podem errar da mesma forma. Por isso, a concordância entre eles ($\kappa = 0{,}726$ no título e
-resumo e $\kappa = 0{,}793$ no texto completo) não indica acerto. A comparação com o autor mostra divergências
-relevantes: no texto completo, com as decisões do autor anteriores às revisões de S314 e S373, $\kappa = 0{,}633$
-com IA-A e $0{,}527$ com IA-B. Das 29 exclusões consensuais no
-texto completo, o autor incluiu 4, e, no título e resumo, 7 das 92. Como o autor conferiu todas as exclusões
+resumo e $\kappa = 0{,}745$ nos 419 estudos do texto completo) não indica acerto. A comparação com o autor mostra
+divergências relevantes: no texto completo, com a primeira decisão do autor, $\kappa = 0{,}641$ com IA-A e
+$0{,}548$ com IA-B. Das 60 exclusões consensuais no
+texto completo, o autor incluiu 5, e, no título e resumo, 7 das 92. Como o autor conferiu todas as exclusões
 consensuais nas duas fases, esses estudos não se perderam. A medida, porém, mostra que a exclusão por dois
 modelos não dispensa a conferência humana. Há um único revisor humano, e não dupla triagem humana
 independente.
@@ -37,23 +129,52 @@ X4 para estudos em que o prompting é só linha de base foi formulado durante a 
 diante dos dados e podem refletir os casos que os motivaram. O limite de X4 depende de julgar se um resultado de prompting é
 analisado como achado ou serve só de referência, e esse julgamento pode variar entre leitores; com um único
 revisor humano, essa variação não foi medida. O limite foi aplicado a S314 e S373 com base nos motivos já
-registrados, sem nova leitura. Cinco estudos continuam em dúvida e ficam fora do corpus até a decisão do
-autor.
+registrados, sem nova leitura. Dos nove estudos em dúvida, oito foram excluídos depois, e um (S1617) foi incluído pela
+regra da data do evento.
 
 \textit{Leitura pelo texto extraído.} Os modelos leram o texto extraído dos PDFs, sem figuras e com tabelas às vezes
 desordenadas, voltando ao PDF apenas em caso de dúvida. Em três estudos, um dos modelos leu só parte do texto, e
-em sete textos longos não se verificou se a leitura foi completa. O autor leu todos os 256 estudos, o que reduz,
+em sete textos longos não se verificou se a leitura foi completa. O autor leu todos os 419 estudos conferidos, o que reduz,
 mas não elimina, o efeito dessas falhas na seleção.
 
-\textit{Extração e síntese.} A extração será feita por IA, e o autor conferirá 20\% das extrações, escolhidas por
-sustentarem afirmações, o que não estima uma taxa geral de erro. Os estudos usam modelos, \textit{benchmarks} e
-métricas diferentes. Por isso, a síntese não calculará médias nem ranqueará técnicas entre estudos incompatíveis.
-Resultados em \textit{benchmarks} não demonstram, por si, ganhos de produtividade, segurança ou custo, e podem ser
-afetados por contaminação dos dados de treinamento, que a rubrica de qualidade registra quando o estudo informa.
+\textit{Extração e síntese.} A extração foi feita por IA, com um único extrator por estudo. Dois modelos
+atuaram nas 332 fichas: o Claude Opus 5.5 em 295 estudos e o Codex em 27, mais as 10 fichas do piloto,
+extraídas pelo Opus. A calibração no piloto
+mostrou erros de leitura de valores e de seleção de comparações, e não estima a taxa de erro em estudos novos. O autor conferiu os 67
+estudos da amostra depois da síntese e corrigiu 18 de 571 blocos (3,2\%), mas 56 desses estudos têm só a
+declaração de que estavam corretos, sem registro por bloco. A taxa vale para os blocos julgados; fora da amostra, as fichas seguem
+como extração por IA. A síntese por agrupamento foi redigida em primeira
+versão por subagentes, sobre extratos das fichas. A checagem automática confirmou que os identificadores
+citados existem, mas não que cada frase reflita o estudo. O autor conferiu cada afirmação
+no original e marcou 30 das 120 para correção. O limite de três comparações por estudo, escolhidas sem olhar o efeito, reduz a escolha seletiva na
+extração, mas deixa de fora resultados que os autores relatam em outras tabelas. A heterogeneidade registrada em
+busca dirigida compensa só em parte essa perda. Os estudos usam modelos, \textit{benchmarks} e métricas
+diferentes, e por isso a síntese não calcula médias nem ranqueia técnicas. Resultados em \textit{benchmarks} não
+demonstram, por si, ganhos de produtividade, segurança ou custo. Eles podem ser afetados por contaminação dos
+dados de treinamento, que 187 dos 332 estudos com ficha não tratam.
 
-\textit{Validação da contribuição prática.} A taxonomia e a tabela de apoio serão examinadas em oito cenários, sem
-usuários externos nem experimento. Esse exame verifica clareza, justificativa nas fontes e orientação concreta, mas
+\textit{Validação da contribuição prática.} A taxonomia e a tabela de apoio foram examinadas em oito cenários
+sintéticos, com julgamento do autor, sem usuários externos nem experimento. Esse exame verifica clareza, justificativa nas fontes e orientação concreta, mas
 não mede a eficácia das técnicas nem a utilidade da tabela para desenvolvedores.
 
 \subsection{Impactos sociais, econômicos e ambientais}
-\pendencia{Separar impactos medidos nos estudos de benefícios ou riscos apenas sugeridos.}
+Os estudos do corpus medem desempenho em \textit{benchmarks} e, em poucos casos, custo ou energia. A evidência sobre
+o desempenho de desenvolvedores é escassa: S62 mede tempo e acerto de 20 participantes numa tarefa delimitada de
+revisão de \textit{patches}, com e sem explicações, sem diferença significativa no tempo (seção 5.4). Esses
+resultados não permitem concluir ganhos gerais de produtividade, e por isso este trabalho não afirma ganhos
+econômicos.
+
+Entre os impactos medidos, as técnicas de várias etapas multiplicam chamadas e \textit{tokens}. O MapCoder, por
+exemplo, usou em média 16,7 chamadas e 21,25 mil \textit{tokens}, contra uma chamada e 0,64 mil \textit{tokens} do
+prompt direto (S344).
+% AFIRMACAO: A57
+Esse custo também tem dimensão ambiental, já que o reparo consumiu de 5 a 15 vezes a energia da passagem única em
+um estudo (S1415). Também foram medidos riscos para a segurança do código, como as vulnerabilidades introduzidas
+ou preservadas na tradução (S951) e as acumuladas em iterações de melhoria (S739).
+% AFIRMACAO: A50
+
+Os efeitos sobre quem usa as técnicas quase não aparecem nas fichas. Uma exceção é o relato de participantes que
+aceitaram sem escrutínio o raciocínio de \textit{patches} incorretos (S62).
+% AFIRMACAO: A60
+Esse tipo de efeito pede mais estudos com usuários; os poucos presentes no corpus, como o de S62, cobrem tarefas
+delimitadas.

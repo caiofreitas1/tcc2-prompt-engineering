@@ -1,0 +1,736 @@
+{
+  "estudo": "S412",
+  "texto_fonte": "fontes/textos/lote/S412.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Yin, X.; Ni, C.; Wang, S.; Li, Z.; Zeng, L.; Yang, X. ThinkRepair: Self-Directed Automated Program Repair. ISSTA '24, 2024. DOI 10.1145/3650212.3680359. Versão lida: arXiv:2407.20898v1 (30 Jul 2024), 13 páginas.",
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "ThinkRepair",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (Abstract); p. 3-5 do PDF (Seções 3.1, 3.2, 4.3; Fig. 2-4; Algorithm 1); p. 6 do PDF (Table 3); p. 9 do PDF (Table 8)",
+        "observacao": "Pacote: designação de papel («You are an Automated Program Repair tool») e descrição da tarefa → instrucao; função defeituosa no prompt → contexto; dois exemplos (função defeituosa, cadeia de raciocínio e função corrigida) selecionados de um pool construído automaticamente na fase de coleta → exemplos; indicador «Let's think step by step» e CoT nos exemplos → raciocinio; reapresentação da mensagem de falha dos testes em até 5 interações → feedback; até 25 sessões independentes com verificação por testes → amostragem. Os acrescentados referem-se ao comparador BaseChatGPT (Basic LLM), descrito como reparo com exemplos de correções existentes e sem CoT nem feedback; o número de tentativas e a temperatura dos Basic LLMs são nao_informado, de modo que não é possível dizer se amostragem é compartilhada ou acrescentada. Pacote híbrido: a seleção padrão (Contrastive-based Selection) usa codificador UniXcoder ajustado por aprendizado contrastivo (fora do escopo). O contraste com os Basic LLMs (Table 3) e com Zero-Shot/Few-Shot (Table 8) isola o pacote, não um mecanismo único. No QuixBugs, os autores usaram 2 exemplos projetados manualmente, sem fase de coleta (p. 6 do PDF)."
+      },
+      {
+        "nome_original": "CoT few-shot learning (knowledge collection + few-shot selection) — variante ThinkRepair-v1",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 do PDF (Seção 5.3, RQ3-Analysis Procedure e Experiment Settings; Table 8, linhas Few-Shot e ThinkRepair-v1)",
+        "observacao": "ThinkRepair-v1 = ThinkRepair sem interaction feedback (CoT few-shot ✓, feedback ✗); comparada com Few-Shot (dois exemplos de correções sem CoT). Também há o par ThinkRepair (✓/✓) vs ThinkRepair-v2 (✗/✓). O que muda entre Few-Shot e ThinkRepair-v1 é a inclusão de cadeias de raciocínio nos exemplos e a origem/seleção dos exemplos (pool coletado automaticamente e Contrastive-based Selection); o critério de seleção dos exemplos na condição Few-Shot é nao_informado. amostragem incluída porque o estudo declara que todas as ablações usam as configurações padrão da Seção 4.3 (25 tentativas)."
+      },
+      {
+        "nome_original": "Interaction feedback — variante ThinkRepair-v2",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4-5 do PDF (Seção 3.2.3); p. 9 do PDF (Table 8, linhas Few-Shot e ThinkRepair-v2; Fig. 9 na p. 10 do PDF)",
+        "observacao": "ThinkRepair-v2 = ThinkRepair sem CoT few-shot learning (CoT ✗, feedback ✓). O modelo de feedback impresso (p. 4 do PDF) termina com «Let's think step by step»; o estudo não diz se esse gatilho permanece em ThinkRepair-v2, de modo que a presença de raciocinio nessa variante é nao_informado. Também há o par ThinkRepair vs ThinkRepair-v1 (57→80) e a variação do número de interações (Fig. 9)."
+      },
+      {
+        "nome_original": "Contrastive-based Selection",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 do PDF (Seção 3.2.1); p. 9 do PDF (Table 9); p. 10 do PDF (texto sobre custo das estratégias)",
+        "observacao": "Estratégia padrão de seleção dos dois exemplos (clusterização K-means das funções do pool e escolha do exemplo mais similar de cada cluster, com embeddings do UniXcoder ajustado com R-Drop). Comparada na Table 9 com Semantic-based, IR-based e Randomly Selection, mantidos os demais componentes. O acréscimo em relação a Randomly Selection é o critério de seleção por similaridade (categoria exemplos, que também está presente na seleção aleatória). Híbrido: o ajuste fino do codificador está fora do escopo; a diferença Contrastive vs Semantic é justamente esse ajuste fino."
+      },
+      {
+        "nome_original": "Semantic-based Selection",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 do PDF (Seção 3.2.1); p. 9 do PDF (Table 9, coluna SSelect)",
+        "observacao": "Estratégia alternativa de seleção (UniXcoder pré-treinado, K-means e similaridade de cosseno), avaliada na Table 9 contra as demais estratégias; não adotada como padrão. Classificada como comparador da estratégia padrão. [D108, correção registrada] Pacote avaliado contra Randomly Selection (Table 9, p. 9; ChatGPT (backend das análises da RQ3), Defects4J V1.2 (255 bugs), número de correções corretas: base 68 × comparador 73), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "IR-based Selection",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 do PDF (Seção 3.2.1); p. 9 do PDF (Table 9, coluna ISelect)",
+        "observacao": "Recuperação de exemplos semelhantes por BM25 sobre o pool; comparador na Table 9. [D108, correção registrada] Pacote avaliado contra Randomly Selection (Table 9, p. 9; ChatGPT (backend das análises da RQ3), Defects4J V1.2 (255 bugs), número de correções corretas: base 68 × comparador 70), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "Randomly Selection",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (Seção 3.2.1); p. 9 do PDF (Table 9, coluna RSelect)",
+        "observacao": "Seleção aleatória de exemplos do pool; linha de base das estratégias de seleção."
+      },
+      {
+        "nome_original": "Basic LLMs (BaseChatGPT, BaseCodeLlama, BaseDeepSeek, BaseStarCoder)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção 5.1, RQ1-Analysis Procedure); p. 6 do PDF (Tables 3 e 4); p. 7 do PDF (Table 5)",
+        "observacao": "Reparo com os LLMs básicos usando correções existentes como exemplos, sem CoT e sem feedback. O texto exato do prompt, o número de exemplos, o número de tentativas e a temperatura desses comparadores não são informados; instrucao registrada porque a condição consiste em pedir ao LLM que repare a função. Comparador executado pelos autores."
+      },
+      {
+        "nome_original": "Zero-Shot",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9 do PDF (Experiment Settings; Table 8, linha Zero-Shot)",
+        "observacao": "ChatGPT solicitado diretamente a reparar o defeito sem outra informação. amostragem pela declaração de que as ablações usam as configurações padrão da Seção 4.3."
+      },
+      {
+        "nome_original": "Few-Shot",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 9 do PDF (Experiment Settings; Table 8, linha Few-Shot)",
+        "observacao": "Dois exemplos de correções sem informação de CoT (correções existentes como exemplos). Acrescenta exemplos em relação a Zero-Shot (34→36 na Table 8). O critério de seleção dos dois exemplos é nao_informado. [D108, correção registrada] Pacote avaliado contra Zero-Shot (Table 8, p. 9; ChatGPT, Defects4J V1.2 (função única, informação de falha em nível de método), # Correct Fixes: base 34 × comparador 36), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": [
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção 4.2; Table 2); p. 6 do PDF (Table 4); p. 7 do PDF (Table 5); p. 11 do PDF (Seção 7.2)",
+        "observacao": "Sistema conversacional com ChatGPT que reinsere informação de testes; resultados copiados do artigo original ([63]), não reexecutados. Mecanismos não isolados neste estudo; descrição do prompt limitada à frase da Seção 7.2."
+      },
+      {
+        "nome_original": "Codex e GPT-NeoX (Xia et al. [61])",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção 4.2; Table 2); p. 6 do PDF (Table 4); p. 7 do PDF (Table 5)",
+        "observacao": "LLMs aplicados diretamente ao reparo sem ajuste fino; resultados copiados de [61]. O estudo não descreve o prompt desses comparadores além do uso da função defeituosa; demais mecanismos nao_informado."
+      },
+      {
+        "nome_original": "AlphaRepair",
+        "mecanismos": [
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção 4.2; Table 2); p. 6 do PDF (Table 4); p. 7 do PDF (Table 5); p. 10 do PDF (Table 10)",
+        "observacao": "Reparo cloze-style com CodeBERT pré-treinado, sem ajuste fino; nos Defects4J/QuixBugs os resultados vêm do artigo original; no RWB (Table 10) o estudo relata uma análise comparativa própria. Mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Fine-tuning de UniXcoder com R-Drop (Contrastive-based Selection)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino, por aprendizado contrastivo, do codificador usado para gerar embeddings e selecionar exemplos; não altera os pesos do LLM de reparo. A diferença entre Contrastive-based e Semantic-based Selection é esse ajuste fino.",
+        "localizador": "p. 4 do PDF (Seção 3.2.1)"
+      },
+      {
+        "nome_original": "Sampling temperature",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 1 para obter um conjunto diverso de patches candidatos.",
+        "localizador": "p. 5 do PDF (Seção 4.3)"
+      },
+      {
+        "nome_original": "Repair attempts / interaction number / end-to-end timeout",
+        "natureza": "orcamento",
+        "descricao": "Até 25 sessões independentes por defeito, até 5 interações por sessão (≤125 patches por defeito) e tempo limite de 5 horas por defeito; 25 tentativas também na fase de coleta. A Fig. 9 varia o número máximo de interações (1 a 7).",
+        "localizador": "p. 4 do PDF (Seção 3.1.3); p. 5 do PDF (Seção 4.3; Table 2); p. 10 do PDF (Fig. 9)"
+      },
+      {
+        "nome_original": "Backend LLMs (ChatGPT, CodeLlama, DeepSeek-Coder, StarCoder)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo subjacente mantendo o método; a diferença entre ThinkRepair e ThinkRepair* (e entre colunas da Table 3) é de modelo, não de prompt.",
+        "localizador": "p. 5 do PDF (Seções 4.3 e 5.1); p. 6 do PDF (Table 3)"
+      },
+      {
+        "nome_original": "NMT-based APRs (KNOD, TENURE, SelfAPR, RewardRepair, CURE, DeepDebug, CoCoNuT, DLFix)",
+        "natureza": "ajuste_fino",
+        "descricao": "Comparadores baseados em modelos ajustados em dados de correções (Table 2: Fine-Tuning ✓); resultados copiados dos artigos originais. Não são técnicas de prompting e não entram em extracoes.",
+        "localizador": "p. 5 do PDF (Table 2); p. 8 do PDF (Table 6); p. 9 do PDF (Table 7)"
+      }
+    ],
+    "modelos": [
+      "ChatGPT gpt-3.5-turbo (via API da OpenAI; snapshot/data da versão nao_informado)",
+      "CodeLlama 13B (versão/checkpoint específico nao_informado)",
+      "DeepSeek-Coder 7B (versão/checkpoint específico nao_informado)",
+      "StarCoder 16B (versão nao_informado)",
+      "UniXcoder (codificador para seleção de exemplos; versão nao_informado)",
+      "Codex e GPT-NeoX (comparadores; resultados de [61]; versões nao_informado neste estudo)",
+      "CodeBERT (base do AlphaRepair; versão nao_informado neste estudo)"
+    ],
+    "benchmarks": [
+      "Defects4J 1.2: 391 bugs no total, 255 single function (SF), 154 single hunk (SH), 80 single line (SL); 6 projetos Java; usado na fase de reparo",
+      "Defects4J 2.0: 438 bugs no total, 228 SF, 159 SH, 78 SL; 9 projetos adicionais; usado na fase de coleta para reparar o 1.2 e, em experimento inverso, como conjunto de reparo com coleta no 1.2",
+      "QuixBugs-Java: 40 bugs, 40 SF, 37 SH, 37 SL",
+      "QuixBugs-Python: 40 bugs, 40 SF, 40 SH, 40 SL",
+      "RWB V1.0 (Real-World Bugs, commits após outubro de 2021): 113 bugs coletados, 44 single-function após filtragem",
+      "RWB V2.0 (commits após março de 2023): 61 bugs coletados, 29 single-function após filtragem",
+      "Sobreposição: Defects4J 1.2 e 2.0 sem bugs em comum; SH é subconjunto de SF e SL é subconjunto de SH; no QuixBugs-Java SH = SL e no QuixBugs-Python todas as correções são SL. Para ThinkRepair, só o cenário SF foi executado e SH/SL são subconjuntos dos resultados SF; para ChatRepair, Codex e GPT-NeoX os três cenários foram executados separadamente nos artigos de origem."
+    ],
+    "metricas": [
+      "number of correct patches (número de defeitos com patch correto; patch plausível conferido manualmente como semanticamente equivalente à correção real); denominador = número de bugs do conjunto/cenário (Table 1), não indicado explicitamente em cada tabela de resultados",
+      "number of plausible patches (definida na Seção 4.2; valores não relatados nas tabelas de resultados)",
+      "tempo de seleção de exemplos (≈0,01 s por função para Semantic/Contrastive; 0,9 ms para IR/Random) e tempo médio total por defeito (inferior a 20 minutos), como informação de custo"
+    ],
+    "linguagens": [
+      "Java",
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Tendência do ThinkRepair a modificar excessivamente o código por «over-inferring»: no Mockito-12 altera uma linha não defeituosa, o patch passa em todos os testes, mas a semântica diverge da correção real; BaseChatGPT corrige com exclusividade 4 defeitos que o ThinkRepair não corrige.",
+        "localizador": "p. 7 do PDF (Seção 5.1; Fig. 5)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento de dados: patches de referência dos desenvolvedores podem estar nos dados de treinamento do LLM; 24 de 98 patches corretos (24,5%) coincidem lexicalmente com a correção de referência no Defects4J V1.2.",
+        "localizador": "p. 10 do PDF (Seção 6.1.1; Seção 6.2, Internal Validity)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça interna pela validação manual da correção dos patches plausíveis (julgamento de equivalência semântica).",
+        "localizador": "p. 10 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O custo de interação com o ChatGPT cresce com o número de interações e o custo de invocar a API restringiu a ablação ao Defects4J V1.2; custo monetário ou em tokens não quantificado. Tempo de seleção quantificado (≈0,01 s vs 0,9 ms por função) e considerado desprezível pelos autores.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Data Splitting e Impacts of Interaction Number); p. 10 do PDF (custo das estratégias de seleção)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: a eficácia observada pode não se aplicar a outros conjuntos de defeitos.",
+        "localizador": "p. 11 do PDF (Seção 6.2, External Validity)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Exame minucioso e discussão de cada patch na validação manual, seguindo trabalhos anteriores.",
+        "avaliada": "nao",
+        "localizador": "p. 10 do PDF (Seção 6.2)"
+      },
+      {
+        "descricao": "Conjuntos de coleta (Defects4J V2.0) e de reparo (Defects4J V1.2) sem bugs em comum, controlando sobreposição entre exemplos do pool e defeitos avaliados.",
+        "avaliada": "nao",
+        "localizador": "p. 5-6 do PDF (Table 1, nota; Seção 5.1, Data Splitting)"
+      },
+      {
+        "descricao": "Coleta de defeitos reais posteriores aos cortes de pré-treinamento (RWB V1.0 após outubro de 2021 para ChatGPT; RWB V2.0 após março de 2023 para DeepSeek) e comparação com AlphaRepair; não há condição com e sem contaminação nem comparação com os Basic LLMs no RWB.",
+        "avaliada": "nao",
+        "localizador": "p. 10 do PDF (Seção 6.1.2; Table 10)"
+      },
+      {
+        "descricao": "Análise que exclui os 24 patches lexicalmente idênticos à referência (restam 29 defeitos únicos corrigidos) e comparação com BaseChatGPT (46 correções a mais).",
+        "avaliada": "nao",
+        "localizador": "p. 11 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "descricao": "Avaliação também no QuixBugs, além do Defects4J, para ampliar a generalização.",
+        "avaliada": "nao",
+        "localizador": "p. 11 do PDF (Seção 6.2, External Validity)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Basic LLMs executados pelos autores (BaseChatGPT etc.), condições Zero-Shot e Few-Shot da ablação, estratégias alternativas de seleção; e sistemas da literatura com resultados copiados dos artigos originais (ChatRepair, Codex, GPT-NeoX, AlphaRepair e APRs NMT), apresentados nas tabelas de resultados com orçamentos de patches diferentes (Table 2).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto afirma desempenho superior do ThinkRepair em todos os projetos frente aos Basic LLMs, mas na Table 3 há empates no Mockito (ChatGPT 6 vs BaseChatGPT 6; CodeLlama 4 vs BaseCodeLlama 4; StarCoder 2 vs BaseStarCoder 2).",
+        "localizador": "p. 6 do PDF (RQ1-Results; Table 3, linha Mockito)"
+      },
+      {
+        "descricao": "O texto afirma superioridade sobre BaseChatGPT em todos os projetos «with or without perfect fault information», mas a Table 5 mostra empate no Mockito com perfect fault info (6 vs 6).",
+        "localizador": "p. 6 do PDF (texto sobre Table 5); p. 7 do PDF (Table 5, linha Mockito)"
+      },
+      {
+        "descricao": "O texto afirma que ThinkRepair supera BaseChatGPT «in all settings», mas a Table 4 mostra empates no QuixBugs-Java SH (36 vs 36 com method-level e com perfect fault info).",
+        "localizador": "p. 6 do PDF (texto RQ1; Table 4)"
+      },
+      {
+        "descricao": "O mesmo total com valores por projeto diferentes: ThinkRepair* (CodeLlama) soma 70 nas Tables 3/5 (Chart 10, Closure 20, Lang 13, Math 21, Mockito 4, Time 2) e na Table 6 (Chart 6, Closure 19, Lang 16, Math 22, Mockito 5, Time 2), ambas com perfect fault info no Defects4J V1.2.",
+        "localizador": "p. 6 do PDF (Table 3); p. 7 do PDF (Table 5); p. 8 do PDF (Table 6)"
+      },
+      {
+        "descricao": "Rótulo inconsistente: ThinkRepair* denota CodeLlama nas Seções 5.1-5.2, mas DeepSeek na avaliação de vazamento (Seção 6.1.2, Table 10).",
+        "localizador": "p. 6 do PDF (Seção 5.1); p. 10 do PDF (Seção 6.1.2; Table 10)"
+      },
+      {
+        "descricao": "No QuixBugs os autores declaram usar 2 exemplos projetados manualmente, sem fase de coleta, mas a Table 9 relata resultados diferentes por estratégia de seleção no QuixBugs-Java (39/38/38/38) e QuixBugs-Python (40/40/39/39); o estudo não explica de que pool as estratégias selecionaram exemplos nesse conjunto. As diferenças de 27 e 13 defeitos frente à seleção aleatória citadas no texto correspondem aos totais (#Sum) que incluem o QuixBugs.",
+        "localizador": "p. 6 do PDF (Data Splitting); p. 9 do PDF (Table 9); p. 9-10 do PDF (Impacts of Few-Shot Selection Strategy)"
+      },
+      {
+        "descricao": "Definição de métrica inconsistente: o patch plausível é definido como o que passa nos testes mas não é semanticamente equivalente à correção real, e em seguida os autores dizem identificar os patches plausíveis que são semanticamente equivalentes; o número de patches plausíveis, anunciado como métrica, não aparece nas tabelas.",
+        "localizador": "p. 5 do PDF (Seção 4.2, Evaluation Metrics)"
+      },
+      {
+        "descricao": "Resumo e conclusão afirmam 12∼65 defeitos a mais que os SOTA no Defects4J V2.0; a Table 7 e o texto da RQ2 dão 60∼65 a mais frente aos APRs NMT (107 vs 47-42). Por cálculo próprio, o limite inferior 12 só coincide com a diferença single line frente ao AlphaRepair na Table 4 (47 vs 35), cenário diferente de SF; o estudo não explicita a origem — aparente inconsistência.",
+        "localizador": "p. 1 do PDF (Abstract); p. 6 do PDF (Table 4); p. 8-9 do PDF (RQ2; Table 7); p. 11 do PDF (Conclusion)"
+      },
+      {
+        "descricao": "Inversão: no Mockito, ThinkRepair corrige 7 defeitos com method-level fault info e 6 com perfect fault info (Table 5).",
+        "localizador": "p. 7 do PDF (Table 5, linha Mockito)"
+      },
+      {
+        "descricao": "Saturação: na Fig. 9 o número de patches corretos chega a 80 com 5 interações e permanece 80 com 6 e 7; o ganho cai de 57→75 (1→2 interações) para 75→80 (2→5).",
+        "localizador": "p. 9 do PDF (Impacts of Interaction Number); p. 10 do PDF (Fig. 9)"
+      },
+      {
+        "descricao": "Condições discrepantes entre comparadores: resultados de ChatRepair, Codex, GPT-NeoX, AlphaRepair e APRs NMT foram copiados dos artigos originais, com orçamentos de até 200, 5.000 ou 10.000 patches ou 5 horas (SelfAPR: «no setting reported»), enquanto ThinkRepair usa ≤125 patches; ChatRepair, Codex e GPT-NeoX executaram SF, SH e SL separadamente, enquanto os valores SH/SL do ThinkRepair derivam do cenário SF.",
+        "localizador": "p. 5 do PDF (Table 2); p. 6 do PDF (Experiment Settings)"
+      },
+      {
+        "descricao": "Os Basic LLMs não têm número de tentativas, temperatura, número e critério de seleção de exemplos informados, ao contrário do ThinkRepair (25 sessões × 5 interações, temperatura 1, dois exemplos); o número de repetições dos experimentos não é informado, apesar da temperatura 1.",
+        "localizador": "p. 5 do PDF (Seções 4.3 e 5.1)"
+      },
+      {
+        "descricao": "A avaliação de vazamento no RWB compara só com AlphaRepair (19 vs 9 no RWB V1.0 com ChatGPT; 10 vs 6 no RWB V2.0 com DeepSeek), sem Basic LLM nem ThinkRepair com ChatGPT no RWB V2.0; a conclusão de que o vazamento não afeta significativamente o desempenho é dos autores.",
+        "localizador": "p. 10 do PDF (Seção 6.1.2; Table 10)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Fase de coleta: o LLM gera CoT e função corrigida para funções defeituosas do conjunto de coleta, e só as funções que passam em toda a suíte de testes (até 25 tentativas por defeito) entram no pool de conhecimento; trata-se da construção automática do repositório de exemplos.",
+        "localizador": "p. 3-4 do PDF (Seções 3.1.1-3.1.3; Fig. 3)"
+      },
+      {
+        "descricao": "Duas configurações de informação de falha: perfect fault info (inclui localização em nível de instrução) e method-level fault info (sem localização em nível de instrução). A ablação (Table 8), o número de interações (Fig. 9) e as estratégias de seleção usam ChatGPT com method-level fault info.",
+        "localizador": "p. 6 do PDF (Fault Information); p. 9 do PDF (Data Splitting and Fault Information)"
+      },
+      {
+        "descricao": "Os valores Few-Shot da Table 8 (36) e BaseChatGPT com method-level fault info no SF do Defects4J V1.2 (Table 5: 36) coincidem; as descrições usam a mesma expressão («directly using existing bug-fixing data as examples»), mas o estudo não declara que são a mesma execução.",
+        "localizador": "p. 7 do PDF (Table 5); p. 9 do PDF (Table 8)"
+      },
+      {
+        "descricao": "No QuixBugs não houve fase de coleta: foram usados 2 exemplos projetados manualmente segundo um guia de boas práticas.",
+        "localizador": "p. 6 do PDF (Data Splitting)"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (GitHub vinci-grape/ThinkRepair); não acessado nem validado nesta extração.",
+        "localizador": "p. 11 do PDF (Seção 9); p. 12 do PDF (ref. [2])"
+      },
+      {
+        "descricao": "Experimentos executados em workstation com Xeon Gold 6226R, 192 GB RAM e GPU RTX 3090; tempo total médio por defeito inferior a 20 minutos segundo os autores.",
+        "localizador": "p. 5 do PDF (Seção 4.3)"
+      },
+      {
+        "descricao": "Motivação: os autores apresentam a construção manual de prompts de alta qualidade como «costly endeavor»; é argumento de motivação, não risco medido da técnica.",
+        "localizador": "p. 1 do PDF (Abstract)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Automated Program Repair (APR) is a promising approach to automatically fix bugs in computer programs, which can significantly reduce debugging time and enhance software reliability.",
+        "localizador": "p. 1 do PDF (Seção 1)"
+      },
+      {
+        "trecho": "The former phase automatically collects various chains of thoughts that constitute pre-fixed knowledge by instructing LLMs with the Chain-of-Thought (CoT) prompt.",
+        "localizador": "p. 1 do PDF (Abstract)"
+      },
+      {
+        "trecho": "The latter phase targets fixing a bug by first selecting examples for few-shot learning and second automatically interacting with LLMs, optionally appending with feedback of testing information.",
+        "localizador": "p. 1 do PDF (Abstract)"
+      },
+      {
+        "trecho": "ThinkRepair starts a role for LLM with an instruction like “You are an Automated Program Repair tool”.",
+        "localizador": "p. 3 do PDF (Seção 3.1.1)"
+      },
+      {
+        "trecho": "In this paper, we follow the best practice in previous work [58] and adopt the same prompt named “Let’s think step by step”.",
+        "localizador": "p. 3 do PDF (Seção 3.1.1)"
+      },
+      {
+        "trecho": "Here, the failing information is added into a template: “The fixed version is still not correct. {test failure message}. Please fix it again. Let’s think step by step.”",
+        "localizador": "p. 4 do PDF (Seção 3.2.3)"
+      },
+      {
+        "trecho": "Contrastive-based Selection utilizes the contrastive learning framework R-Drop [46] to further fine-tune UniXcoder for better semantic embedding.",
+        "localizador": "p. 4 do PDF (Seção 3.2.1)"
+      },
+      {
+        "trecho": "The maximum number of repair attempts is set to 25 (i.e., 25 independent sessions) for ThinkRepair as the default for auto-fixing the single function bugs.",
+        "localizador": "p. 5 do PDF (Seção 4.3)"
+      },
+      {
+        "trecho": "A sampling temperature of 1 is utilized to obtain a diverse set of potential patches [16].",
+        "localizador": "p. 5 do PDF (Seção 4.3)"
+      },
+      {
+        "trecho": "In addition, we build baseline approaches, BaseChatGPT, BaseCodeLlama, BaseDeepSeek, and BaseStarCoder, which utilize the basic LLMs to perform a repair (i.e., directly using existing bug-fixing data as examples) without any Chains-of-Thoughts reasoning process and feedback information.",
+        "localizador": "p. 5 do PDF (Seção 5.1)"
+      },
+      {
+        "trecho": "Zero-Shot means that we directly prompt ChatGPT to fix a bug without providing any other information.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Experiment Settings)"
+      },
+      {
+        "trecho": "Few-Shot means that we provide ChatGPT with two examples of fixes but do not include CoT information (i.e., directly using existing bug-fixing data as examples).",
+        "localizador": "p. 9 do PDF (Seção 5.3, Experiment Settings)"
+      },
+      {
+        "trecho": "We build a variant of ThinkRepair without interaction feedback as ThinkRepair-v1 and another variant without CoT few-shot learning as ThinkRepair-v2.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Experiment Settings)"
+      },
+      {
+        "trecho": "All of our ablation experiments utilize the default settings outlined in Section 4.3.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Experiment Settings)"
+      },
+      {
+        "trecho": "Since QuixBugs dataset has the limited number of functions (i.e., 40 for both Java and Python), for comprehensively evaluating the performance differences, we adhere to the best-practice guide [55], manually designed 2 examples for fixing bugs without the collection phase.",
+        "localizador": "p. 6 do PDF (Seção 5.1, Data Splitting)"
+      },
+      {
+        "trecho": "Since all of the studied baselines were already evaluated on Defects4J, following the convention in APR work [61, 62], we directly compare the auto-fix results obtained in previous studies [61–63] under the same settings.",
+        "localizador": "p. 6 do PDF (Seção 5.1, Experiment Settings)"
+      },
+      {
+        "trecho": "The reason may be attributed to ThinkRepair’s inclination to excessively modify bugs stemming from over-inferring.",
+        "localizador": "p. 7 do PDF (Seção 5.1)"
+      },
+      {
+        "trecho": "We find that out of 98 correct patches, 24 of them lexically match the ground-truth (24.5%), while the other patches semantically match the ground-truth.",
+        "localizador": "p. 10 do PDF (Seção 6.1.1)"
+      },
+      {
+        "trecho": "The second one comes from potential data leakage since referenced developer patches may be part of the training data of LLM.",
+        "localizador": "p. 10 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "trecho": "The first internal threat arises from the manual validation employed to determine the correctness of the plausible patches.",
+        "localizador": "p. 10 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "trecho": "To mitigate this concern, we conduct a thorough examination and comprehensive discussion of each patch, following prior work [21, 61, 62, 64, 65, 67].",
+        "localizador": "p. 10 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "trecho": "Defects4J V1.2 and Defects4J V2.0 are two completely independent versions, with no overlapping bugs between them.",
+        "localizador": "p. 6 do PDF (Seção 5.1, Data Splitting)"
+      },
+      {
+        "trecho": "The first dataset (RWB V1.0) comprises bug-fixing commits after October 2021, while the second dataset (RWB V2.0) includes bug-fixing commits after March 2023, resulting 113 and 61 bugs, respectively.",
+        "localizador": "p. 10 do PDF (Seção 6.1.2)"
+      },
+      {
+        "trecho": "Moreover, even after excluding all the correct patches (24) that aligned with the reference developer patch, ThinkRepair is still capable of generating the correct patch for 29 unique bugs, none of which could be fixed by any previous methods.",
+        "localizador": "p. 11 do PDF (Seção 6.2, Internal Validity)"
+      },
+      {
+        "trecho": "However, when continuously increasing the number of interactions, the rate of performance improvement decreases (i.e., 75→80) and meanwhile, the interaction cost with ChatGPT is increasing.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Impacts of Interaction Number)"
+      },
+      {
+        "trecho": "Considering the cost of invoking the ChatGPT API multiple times for this ablation study, we concentrate our experiments on Defects4J V1.2, which has the most number of single function bugs (i.e., 255) among our studied datasets.",
+        "localizador": "p. 9 do PDF (Seção 5.3, Data Splitting and Fault Information)"
+      },
+      {
+        "trecho": "The effectiveness observed in ThinkRepair’s performance may not be applicable across different repair datasets.",
+        "localizador": "p. 11 do PDF (Seção 6.2, External Validity)"
+      },
+      {
+        "trecho": "We observe that with perfect fault information, ThinkRepair demonstrates superior performance across all projects compared to Basic LLMs.",
+        "localizador": "p. 6 do PDF (RQ1-Results)"
+      },
+      {
+        "trecho": "ThinkRepair can outperform the BaseChatGPT in all settings.",
+        "localizador": "p. 6 do PDF (RQ1-Results)"
+      },
+      {
+        "trecho": "A plausible patch is a patch that can pass all test cases but is not semantically equivalent to the actual fix.",
+        "localizador": "p. 5 do PDF (Seção 4.2, Evaluation Metrics)"
+      },
+      {
+        "trecho": "Following the previous work [61, 62], we also manually check and identify the plausible patches that are semantically equivalent to the actual fixes.",
+        "localizador": "p. 5 do PDF (Seção 4.2, Evaluation Metrics)"
+      },
+      {
+        "trecho": "We evaluate data leakage on both ChatGPT and DeepSeek, denoting them as ThinkRepair and ThinkRepair*, respectively.",
+        "localizador": "p. 10 do PDF (Seção 6.1.2)"
+      },
+      {
+        "trecho": "To facilitate comparison, we employ the top two performing models, ChatGPT and CodeLlama, in the following sections of our results, denoting them as ThinkRepair and ThinkRepair*, respectively.",
+        "localizador": "p. 6 do PDF (Seção 5.1)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ThinkRepair",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "raciocinio",
+        "feedback",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio",
+        "feedback"
+      ],
+      "comparador": "BaseChatGPT (Basic LLM with perfect fault info)",
+      "modelo": "ChatGPT (gpt-3.5-turbo)",
+      "benchmark": "Defects4J V1.2, cenário single function",
+      "metrica": "number of correct patches (Table 3: número de defeitos corrigidos com sucesso, linha #Sum)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 52,
+        "intervencao": 98
+      },
+      "denominador": "255 single function bugs do Defects4J 1.2 (Table 1); a Table 3 não imprime o denominador",
+      "condicoes": "Perfect fault info (inclui localização em nível de instrução). ThinkRepair: pool de exemplos coletado no Defects4J V2.0 (228 funções), dois exemplos por Contrastive-based Selection, até 25 sessões independentes com até 5 interações de feedback (≤125 patches por defeito), temperatura 1, tempo limite de 5 horas. BaseChatGPT: correções existentes usadas como exemplos, sem CoT e sem feedback; número de exemplos, número de tentativas e temperatura nao_informado. Número de repetições do experimento nao_informado. Correção julgada por verificação manual de equivalência semântica dos patches plausíveis. Valor por projeto conferido: soma das linhas de projeto igual ao #Sum nas duas colunas. Ganho atribuível ao pacote (híbrido, com codificador ajustado na seleção), não a um mecanismo isolado. conferido_pdf: Table 3 aberta na p. 6 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Não há principal declarado com um único comparador: o resumo destaca melhoria sobre vários baselines (27%∼344.4%). Tables 1 e 2 são descritivas; a Table 3 é a primeira tabela com contraste de prompting (ThinkRepair vs Basic LLMs); primeira métrica (número de defeitos corrigidos), primeiro modelo (ChatGPT) e primeira linha de base de prompting (BaseChatGPT); usado o total impresso (#Sum) do mesmo benchmark.",
+      "derivacao": "direta",
+      "localizador": "p. 6 do PDF (Table 3: ThinkRepair vs. Basic LLMs for different projects on Defects4J V1.2, linha #Sum, colunas ChatGPT e BaseChatGPT); página impressa não visível na imagem",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "#Sum 98 70 63 59 52 44 39 37",
+          "localizador": "p. 6 do PDF, Table 3, linha #Sum; colunas ThinkRepair with perfect fault info (ChatGPT, CodeLlama, DeepSeek, StarCoder) e Basic LLM with perfect fault info (BaseChatGPT, BaseCodeLlama, BaseDeepSeek, BaseStarCoder)"
+        },
+        {
+          "trecho": "Table 3 illustrates the number of bugs successfully repaired by ThinkRepair and Basic LLMs for different projects in the scenario of single function bug-fixing.",
+          "localizador": "p. 6 do PDF (RQ1-Results)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "CoT few-shot learning (knowledge collection + few-shot selection) — ThinkRepair-v1",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "raciocinio",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio"
+      ],
+      "comparador": "Few-Shot (dois exemplos de correções sem CoT)",
+      "modelo": "ChatGPT (gpt-3.5-turbo)",
+      "benchmark": "Defects4J V1.2, cenário single function",
+      "metrica": "# Correct Fixes",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 36,
+        "intervencao": 57
+      },
+      "denominador": "255 single function bugs do Defects4J V1.2 (declarado na Seção 5.3 e na Table 1)",
+      "condicoes": "Ablação com ChatGPT e method-level fault info (sem localização em nível de instrução); ambas as condições sem interaction feedback; configurações padrão da Seção 4.3 (até 25 tentativas, temperatura 1). ThinkRepair-v1: exemplos com CoT do pool coletado e selecionados; Few-Shot: dois exemplos de correções existentes sem CoT, com critério de seleção nao_informado. A diferença abrange inclusão de CoT e origem/seleção dos exemplos (componente CoT few-shot learning = knowledge collection + few-shot selection). Número de repetições nao_informado. conferido_pdf: Table 8 aberta na p. 9 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa; componentes isolados completam o alvo de três, primeiro os da tabela de ablação (Table 8), na ordem da tabela: o primeiro componente (CoT Few-Shot Learning) é isolado pelo par Few-Shot vs ThinkRepair-v1, que o texto também relata (36→57).",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (Table 8: The performance difference among different components, linhas Few-Shot e ThinkRepair-v1, coluna # Correct Fixes)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "ThinkRepair-v1 ✓ ✗ 57",
+          "localizador": "p. 9 do PDF, Table 8; colunas Models, CoT Few-Shot Learning, Interaction Feedback, # Correct Fixes"
+        },
+        {
+          "trecho": "Few-Shot ✗ ✗ 36",
+          "localizador": "p. 9 do PDF, Table 8; colunas Models, CoT Few-Shot Learning, Interaction Feedback, # Correct Fixes"
+        },
+        {
+          "trecho": "(3) The combination between “Knowledge Collection” and “Few-Shot Selection” is effective for ThinkRepair, which improves ChatGPT a lot (i.e., 36→57) and emphasizes the importance of prompting ChatGPT by selecting high-quality of examples.",
+          "localizador": "p. 9 do PDF (RQ3-Results, Impacts of Components)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Interaction feedback — ThinkRepair-v2",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "feedback",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "Few-Shot (dois exemplos de correções sem CoT)",
+      "modelo": "ChatGPT (gpt-3.5-turbo)",
+      "benchmark": "Defects4J V1.2, cenário single function",
+      "metrica": "# Correct Fixes",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 36,
+        "intervencao": 62
+      },
+      "denominador": "255 single function bugs do Defects4J V1.2 (declarado na Seção 5.3 e na Table 1)",
+      "condicoes": "Ablação com ChatGPT e method-level fault info; ambas as condições sem CoT few-shot learning; ThinkRepair-v2 com até 5 interações de feedback com mensagens de falha dos testes; configurações padrão da Seção 4.3 (até 25 tentativas, temperatura 1). O modelo de feedback impresso inclui «Let's think step by step»; se esse gatilho permanece em ThinkRepair-v2 é nao_informado. Número de repetições nao_informado. conferido_pdf: Table 8 aberta na p. 9 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação (Interaction Feedback), isolado pelo par Few-Shot vs ThinkRepair-v2, que o texto também relata (36→62); completa o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (Table 8: The performance difference among different components, linhas Few-Shot e ThinkRepair-v2, coluna # Correct Fixes)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "ThinkRepair-v2 ✗ ✓ 62",
+          "localizador": "p. 9 do PDF, Table 8; colunas Models, CoT Few-Shot Learning, Interaction Feedback, # Correct Fixes"
+        },
+        {
+          "trecho": "(4) The “Interaction Feedback” seems to contribute the performance of ThinkRepair, which brings ChatGPT with a large improvement (i.e., 36→62).",
+          "localizador": "p. 9 do PDF (RQ3-Results, Impacts of Components)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e três questões de pesquisa explícitas (comparação com APRs baseados em LLM, com APRs NMT e análise de sensibilidade).",
+      "localizador": "p. 2 do PDF (contribuições); p. 5 do PDF (Seção 5, RQ-1 a RQ-3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Fases, componentes do prompt, divisão de dados, orçamento e temperatura do ThinkRepair são descritos; porém o prompt e as configurações dos Basic LLMs e das condições Zero-Shot/Few-Shot não são detalhados, e não se explica como as estratégias de seleção foram aplicadas ao QuixBugs, onde se declara uso de exemplos manuais.",
+      "localizador": "p. 3-5 do PDF (Seções 3 e 4.3); p. 6 do PDF (Data Splitting); p. 9 do PDF (Table 9)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores executados com o mesmo modelo (Basic LLMs, Zero-Shot, Few-Shot, variantes de ablação e de seleção), mas os sistemas da literatura têm resultados copiados dos artigos originais, com orçamentos de patches diferentes, e as configurações dos Basic LLMs não são informadas.",
+      "localizador": "p. 5 do PDF (Table 2; Seção 5.1); p. 6 do PDF (Experiment Settings); p. 9 do PDF (Table 8)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "A métrica de patches corretos é usual e os denominadores podem ser obtidos da Table 1, mas a definição de patch plausível é contraditória, os plausíveis não são relatados, a correção depende de julgamento manual e os valores por projeto de ThinkRepair* divergem entre as Tables 3/5 e 6 com o mesmo total.",
+      "localizador": "p. 5 do PDF (Seção 4.2; Table 1); p. 6-8 do PDF (Tables 3, 5 e 6)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Discute validação manual, vazamento de dados e validade externa, mas não aborda não determinismo (temperatura 1 sem repetições informadas), versão do modelo nem a heterogeneidade das condições dos comparadores copiados.",
+      "localizador": "p. 10-11 do PDF (Seção 6.2)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Pacote de replicação indicado (não acessado nesta extração), modelos e parâmetros principais informados; faltam snapshot do gpt-3.5-turbo, número de repetições e prompts completos dos comparadores.",
+      "localizador": "p. 5 do PDF (Seção 4.3); p. 11 do PDF (Seção 9)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo trata o vazamento explicitamente (correspondência lexical de 24/98 patches, conjuntos RWB posteriores aos cortes de pré-treinamento, conjuntos de coleta e reparo disjuntos), mas a evidência no RWB compara só com AlphaRepair, em amostras pequenas (44 e 29 defeitos) e sem Basic LLM, e o RWB V2.0 usa outro modelo (DeepSeek).",
+      "localizador": "p. 6 do PDF (Data Splitting); p. 10-11 do PDF (Seções 6.1 e 6.2; Table 10)"
+    }
+  ],
+  "leitura": "completa. Texto extraído lido integralmente (964 linhas). Páginas do PDF abertas visualmente: p-01, p-03, p-04, p-05, p-06, p-07, p-08, p-09, p-10, p-11. As imagens não mostram número de página impressa; os localizadores usam a posição no PDF."
+}

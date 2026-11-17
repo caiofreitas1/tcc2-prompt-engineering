@@ -1,0 +1,264 @@
+{
+  "estudo": "S1763",
+  "texto_fonte": "fontes/textos/lote/S1763.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Vanilla",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2, seção III.A; PDF p. 3, seção IV.B; Tabela I, PDF p. 4; Tabela II, PDF p. 5 (páginas impressas não numeradas)",
+        "observacao": "Prompt base: requisito funcional da UI multimídia mais o protocolo de saída comum (um único documento HTML autocontido em HTML, CSS e JavaScript puros; sem explicações, cercas Markdown, frameworks externos nem código provisório) → instrucao e restricoes (formato e restrições de estilo). O protocolo é idêntico em todos os grupos. Linha de base de todas as comparações; o EVRR é definido em relação a ela. A Fig. 1 lista 'Format & Examples' no estágio de embutir regras e 'System Prompt' no estágio de geração, mas o texto não descreve exemplos no prompt; por isso exemplos não foi atribuído (nao_informado)."
+      },
+      {
+        "nome_original": "Prompt Only (security rule embedding / security-aware prompt construction)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 2, seção III.A; PDF p. 3, seção IV.B; Tabela I, PDF p. 4; Tabela II, PDF p. 5; seção V.B, PDF p. 4",
+        "observacao": "Segundo bloco do prompt com regras de segurança do lado do cliente (desencoraja sinks HTML inseguros, execução de código por string, URLs dinâmicas não verificadas, pré-validação fraca de upload e tratamento em texto claro de informação sensível) → restricoes (restrições de segurança). Contrafactual de ingrediente: Vanilla × Prompt Only diferem só em 'Rules' (Tabela I), e Full Framework × w/o Prompt Embedding é a ablação que retira só as regras. Classificada como componente porque é parte do framework proposto, embora seja a contribuição 1 e objeto da RQ1."
+      },
+      {
+        "nome_original": "Repair with general self-review instruction (grupo w/o Static Feedback)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["contexto", "feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "PDF p. 2–3, seção III.C; Tabela I, PDF p. 4; Tabela II, PDF p. 5",
+        "observacao": "Segunda chamada ao LLM que recebe o requisito original e o documento gerado (código como insumo → contexto) com instrução geral para verificar e melhorar a segurança (autocorreção/autorrevisão → feedback). Contraste pareado: na matriz da Tabela I, 'Prompt Only' (Rules Yes, Repair No, Static feedback No) e 'w/o Feedback' (Rules Yes, Repair Yes, Static feedback No) diferem apenas em 'Repair'; resultados na Tabela II (linhas Prompt Only e w/o Static Feedback). O estudo não analisa esse contraste diretamente. A etapa de reparo também usa outros parâmetros de decodificação (temperatura 0,2; até 10.000 tokens), fora do escopo."
+      },
+      {
+        "nome_original": "Structured static feedback (relatório estático estruturado do ESLint no prompt de reparo)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 2, seções III.B e III.C; PDF p. 3; Tabela I, PDF p. 4; Tabela II, PDF p. 5; seção V.C, PDF p. 4",
+        "observacao": "Relatório normalizado em JSON com identificadores de regra, localizações e explicações curtas, produzido por ESLint, eslint-plugin-security, parsing HTML e verificações próprias, entregue ao prompt de reparo (feedback de analisador). Contrafactual de ingrediente: Full Framework × w/o Static Feedback diferem só em 'Static feedback' (Tabela I); o estudo apresenta esse contraste como separação entre feedback específico e autorrevisão vaga (RQ2). Em categorias, a condição sem o ingrediente já tem feedback (autorrevisão); o ingrediente acrescentado é o feedback de analisador, que substitui a instrução geral."
+      },
+      {
+        "nome_original": "Full Framework",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["restricoes", "contexto", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, PDF p. 1; seção III, PDF p. 2–3; Fig. 1, PDF p. 3; Tabela I, PDF p. 4; Tabela II, PDF p. 5",
+        "observacao": "Pacote: regras de segurança embutidas + geração + análise estática + reparo guiado pelo relatório estruturado + reanálise. Contrafactual de pacote: Full Framework × Vanilla (Tabela II). O ganho do pacote não se atribui a um único mecanismo. Pacote híbrido: a etapa de reparo usa parâmetros de decodificação diferentes da geração (temperatura 0,2 e até 10.000 tokens contra 0,3 e até 8.000), intervenção fora do escopo. Acrescentados em relação a Vanilla: restricoes (regras), contexto (documento gerado no prompt de reparo) e feedback (relatório do analisador)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Parâmetros de decodificação (generation/repair)",
+        "natureza": "decodificacao",
+        "descricao": "Geração com temperatura 0,3 e até 8.000 tokens de saída; reparo com temperatura 0,2 e até 10.000 tokens; top-p = 1,0 nas duas etapas. Diferem entre grupos com e sem reparo.",
+        "localizador": "PDF p. 3, seção IV.C"
+      },
+      {
+        "nome_original": "Validator and retry policy",
+        "natureza": "outro",
+        "descricao": "Validador que verifica se a saída é analisável e se contém os elementos centrais da tarefa (aceitando implementações equivalentes); saída malformada ou incompleta é refeita até duas vezes com o mesmo prompt congelado; após três falhas, registra-se falha de geração. Protocolo comum a todos os grupos, também instrumento de medida do VOR e do SSVOR.",
+        "localizador": "PDF p. 3, seção III.D"
+      }
+    ],
+    "modelos": [
+      {"nome": "deepseek-chat", "versao": "nao_informado", "observacao": "Identificador de modelo registrado no log, acessado como serviço hospedado; snapshot/versão não informados; o endpoint não expõe semente determinística."}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto piloto sintético de 10 requisitos de UI multimídia (dos autores)", "quantidade": "10 requisitos; 150 requisições (10 requisitos × 5 grupos × 3 repetições); 30 por grupo", "observacao": "Tarefas: portfólio multimídia, página de podcast, galeria de vídeo, curso online, perfil de compartilhamento de música, landing page de livestream, editor de photo-story, painel de revisão de mídia, museu virtual e perfil de criador de vídeos curtos (P10). Sobreposição descrita: seis envolvem vídeo, cinco upload de imagem ou captura de tela, quatro áudio e a maioria tem entrada de texto livre. Os denominadores do EVRR e do IPR são os conjuntos de requisitos válidos pareados por repetição, cujo tamanho por repetição não é impresso; os testes de Wilcoxon têm n pareado entre 25 e 27, sem o n de cada comparação.", "localizador": "PDF p. 3, seção IV.A; PDF p. 4, seção IV.C; PDF p. 5, seção V.D"}
+    ],
+    "metricas": [
+      {"nome": "Valid/30", "descricao": "Total de saídas válidas por grupo nas três repetições (de 30 requisições).", "localizador": "Tabela II, PDF p. 5"},
+      {"nome": "Valid output rate (VOR)", "descricao": "Saídas que passam no parsing e nas verificações de validade específicas da tarefa divididas por todas as requisições.", "localizador": "PDF p. 4, seção IV.C; Fig. 2(b), PDF p. 5"},
+      {"nome": "Final findings/valid output", "descricao": "Densidade de achados estáticos candidatos finais por saída válida; média ± desvio-padrão amostral entre três repetições.", "localizador": "Tabela II, PDF p. 5"},
+      {"nome": "IPR (initial finding reduction)", "descricao": "Redução de achados iniciais em relação ao Vanilla sobre requisitos válidos pareados.", "localizador": "Eq. (1), PDF p. 4"},
+      {"nome": "RR (repair reduction)", "descricao": "Redução de achados entre antes e depois do reparo no próprio grupo.", "localizador": "Eq. (1), PDF p. 4"},
+      {"nome": "EVRR (end-to-end static finding reduction)", "descricao": "Redução de achados finais do grupo em relação aos achados iniciais do Vanilla sobre requisitos pareados; média entre repetições ± desvio-padrão amostral.", "localizador": "Eq. (1) e (2), PDF p. 4; Tabela II e Fig. 2(a), PDF p. 5"},
+      {"nome": "Static-secure valid output rate (SSVOR)", "descricao": "Saídas válidas com zero achados estáticos finais divididas por todas as requisições; não é métrica de sucesso funcional dinâmico.", "localizador": "PDF p. 4, seção IV.C; Tabela II, PDF p. 5"},
+      {"nome": "Runtime (s)", "descricao": "Tempo de execução médio por registro.", "localizador": "Tabela II, PDF p. 5"},
+      {"nome": "Generation-failure counts", "descricao": "Contagem de falhas de geração por requisito e grupo, agregada nas três repetições.", "localizador": "Fig. 3, PDF p. 5"},
+      {"nome": "Paired Wilcoxon signed-rank (Holm)", "descricao": "Teste exploratório sobre contagens finais de achados em pares válidos (mesmo requisito e repetição).", "localizador": "PDF p. 4, seção IV.C; PDF p. 5, seção V.D"}
+    ],
+    "linguagens": ["HTML", "CSS", "JavaScript"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Código front-end gerado por LLM pode reproduzir padrões inseguros (innerHTML inseguro, URLs de mídia não verificadas, tratamento fraco de entrada, validação de upload incompleta).", "localizador": "PDF p. 1, seção I"},
+      {"categoria": "seguranca", "descricao": "O framework cobre só padrões do lado do cliente; verificações no cliente não substituem autorização, validação, codificação de saída e testes do lado do servidor; ausência de sink inseguro numa página não prova que a aplicação é segura.", "localizador": "PDF p. 1, seção I; PDF p. 2, seção III.B; PDF p. 6, seção VI"},
+      {"categoria": "correcao_funcional", "descricao": "18 falhas de geração (16 por falta do comportamento de vídeo exigido, 2 por falta de áudio), 15 delas no requisito P10; prompts de segurança e feedback de reparo não compensam a não implementação de uma função de mídia central.", "localizador": "PDF p. 5, seção V.E; Fig. 3, PDF p. 5"},
+      {"categoria": "custo", "descricao": "Configurações com reparo elevam o tempo médio de cerca de 51 s para cerca de 79 s por registro (segunda chamada ao modelo e nova análise); o estudo trata como custo de tempo de execução.", "localizador": "Resumo, PDF p. 1; Tabela II, PDF p. 5; seção VI, PDF p. 6"},
+      {"categoria": "nao_determinismo", "descricao": "O endpoint não expõe semente determinística e pode mudar com o tempo; prompts e metadados salvos não garantem reexecuções idênticas.", "localizador": "PDF p. 6, seção VI"},
+      {"categoria": "outro", "descricao": "Validade da medida: achados estáticos são candidatos, podem incluir falsos positivos ou omitir fluxos de execução; o SSVOR não verifica o comportamento no navegador; scanner e validador foram desenvolvidos para o experimento e podem favorecer padrões sintaticamente observáveis.", "localizador": "PDF p. 2, seção III.B; PDF p. 6, seção VI"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Embutir regras de segurança do lado do cliente antes da geração (Prompt Only comparado com Vanilla; Full Framework comparado com w/o Prompt Embedding).", "avaliada": "sim", "localizador": "Seção V.B, PDF p. 4; Tabela II, PDF p. 5"},
+      {"descricao": "Reparo guiado pelo relatório estático estruturado (Full Framework comparado com w/o Static Feedback e com Prompt Only).", "avaliada": "sim", "localizador": "Seção V.C e V.D, PDF p. 4–5; Tabela II, PDF p. 5"},
+      {"descricao": "Métricas calculadas sobre requisitos válidos pareados para evitar viés por número diferente de saídas válidas; denominador zero tratado como indefinido.", "avaliada": "nao", "localizador": "PDF p. 4, seção IV.C"},
+      {"descricao": "Falhas de geração mantidas no denominador do VOR e nunca contadas como saídas seguras com zero achados.", "avaliada": "nao", "localizador": "PDF p. 3, seção III.D"},
+      {"descricao": "Regras de equivalência do validador checadas com exemplos de regressão (positivos e contraexemplos incompletos) antes da execução formal.", "avaliada": "nao", "localizador": "PDF p. 3, seção III.D; PDF p. 6, seção VI"},
+      {"descricao": "Protocolo de saída, ordem das tarefas, texto das regras, configuração do scanner e validador congelados antes da execução; execuções de depuração excluídas das estatísticas; registros com hashes de prompts e metadados.", "avaliada": "nao", "localizador": "PDF p. 4, seção IV.C; PDF p. 6, seção VI"},
+      {"descricao": "Três repetições independentes, média e desvio-padrão amostral; correção de Holm para comparações múltiplas.", "avaliada": "nao", "localizador": "PDF p. 3–4, seção IV.C"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Resultado nulo: a comparação de contagens finais entre Full Framework e w/o Prompt Embedding não é sustentada após a correção de Holm (p = 0.159724), embora o texto atribua às regras efeito preventivo.", "localizador": "Seção V.D, PDF p. 5"},
+      {"descricao": "Prompt Only, w/o Static Feedback e Full Framework têm a mesma etapa de geração (regras sim), mas o texto relata densidade inicial de 1.11 para Prompt Only e 1.52 para Full Framework; Vanilla e w/o Prompt Embedding (geração sem regras) têm 3.30 e 3.13. A diferença entre condições pré-reparo idênticas sugere variação entre execuções; a densidade inicial de w/o Static Feedback não é impressa. Os valores iniciais de 1.52 e 3.13 só aparecem no texto, não na Tabela II.", "localizador": "Seção V.B, PDF p. 4; Tabela II, PDF p. 5"},
+      {"descricao": "Métricas próximas e distintas: o RR de w/o Prompt Embedding no texto é 88.14% e o EVRR na Tabela II é 88.80 ± 7.32; o RR do Full Framework (90.48%) também difere do EVRR (95.16 ± 4.76). São métricas com denominadores diferentes (RR sobre achados iniciais do próprio grupo; EVRR sobre achados iniciais do Vanilla), não divergência de valor.", "localizador": "Seção V.B, PDF p. 4; Eq. (1), PDF p. 4; Tabela II, PDF p. 5"},
+      {"descricao": "A Fig. 1 mostra 'Feedback Loop (Iterative Repair)' e lista 'Format & Examples' no estágio de embutir regras, enquanto o texto descreve uma única chamada de reparo seguida de reanálise ('a second model call') e não menciona exemplos no prompt.", "localizador": "Fig. 1, PDF p. 3; seções III.A e III.C, PDF p. 2–3; seção V.A, PDF p. 4"},
+      {"descricao": "Parágrafo duplicado: a frase sobre o SSVOR do Full Framework (76.67% ± 11.55% contra 43.33% ± 11.55% e 40.00% ± 10.00%) aparece duas vezes, com redação levemente diferente, no fim da p. 4 e no início da coluna esquerda da p. 5.", "localizador": "Seção V.C, PDF p. 4–5"},
+      {"descricao": "Totais conferidos (cálculo próprio): a soma da coluna Valid/30 (26 + 27 + 25 + 27 + 27 = 132) coincide com as 132 saídas válidas e o VOR global de 88.0% (132/150); as falhas por grupo na Fig. 3 (4, 3, 5, 3, 3; total 18; P10 = 15) são compatíveis com 30 − Valid/30 e com a faixa de VOR de 83.33% a 90.00%. Não se encontrou divergência.", "localizador": "Tabela II e Fig. 3, PDF p. 5; seções V.A e V.E, PDF p. 4–5"},
+      {"descricao": "Concentração de falhas: 15 das 18 falhas vêm de P10, que falha em todos os grupos e repetições; os autores dizem que a validade agregada é sensível à composição do conjunto.", "localizador": "Seção V.E e Fig. 3, PDF p. 5; seção VI, PDF p. 6"},
+      {"descricao": "Variabilidade alta entre repetições em algumas condições: SSVOR do Vanilla 13.33 ± 15.28 e EVRR de w/o Static Feedback 67.93 ± 13.59, com apenas três repetições.", "localizador": "Tabela II, PDF p. 5"},
+      {"descricao": "Limitações declaradas: 10 requisitos sintéticos, um único serviço de modelo, três repetições; testes exploratórios com pares ausentes por falhas de geração.", "localizador": "Seção IV.C, PDF p. 4; seção VI, PDF p. 6"},
+      {"descricao": "Os rótulos dos grupos variam entre a Tabela I ('w/o Prompt', 'w/o Feedback'), a Tabela II ('w/o Prompt Embedding', 'w/o Static Feedback') e as figuras ('−Prompt', '−Feedback'); a correspondência é inferida pela ordem e pelas definições.", "localizador": "Tabela I, PDF p. 4; Tabela II, Fig. 2 e Fig. 3, PDF p. 5"}
+    ],
+    "observacoes": [
+      {"descricao": "A etapa de reparo é parte do pipeline de geração (o LLM corrige o próprio documento gerado) e não uma tarefa de reparo de programas existentes; por isso a tarefa classificada é só geracao, e o reparo entra como mecanismo feedback.", "localizador": "Seção III, PDF p. 2–3"},
+      {"descricao": "O mesmo scanner estático fornece o feedback ao reparo e mede o desfecho (achados finais, EVRR, SSVOR); observação do extrator, que o estudo reconhece em parte ao dizer que as regras podem favorecer padrões sintaticamente observáveis.", "localizador": "Seções III.B e III.D, PDF p. 2–3; seção VI, PDF p. 6"},
+      {"descricao": "O grupo w/o Prompt Embedding (reparo com relatório estruturado, sem regras) difere do Vanilla em dois componentes (reparo e feedback estático) e serve como comparador da ablação das regras contra o Full Framework.", "localizador": "Tabela I, PDF p. 4"},
+      {"descricao": "Os textos completos dos prompts, das regras e dos requisitos e o conjunto de regras do scanner não são impressos; não há declaração de disponibilidade de código ou dados, embora a contribuição 4 se descreva como avaliação piloto reprodutível.", "localizador": "PDF p. 1, contribuições; seções III–IV, PDF p. 2–4"},
+      {"descricao": "Contagens de novas tentativas semelhantes entre grupos (três a cinco por repetição, em média), sem valores por grupo.", "localizador": "Seção V.E, PDF p. 5"},
+      {"descricao": "As barras da Fig. 2 não foram lidas para extrair valores; os números vêm da Tabela II.", "localizador": "Fig. 2 e Tabela II, PDF p. 5"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper presents a security governance framework that combines pre-generation rule embedding, ESLint-based static analysis, structured feedback, and LLM-based repair.", "localizador": "Resumo, PDF p. 1"},
+      {"trecho": "However, LLM-generated front-end code may reproduce insecure patterns, including unsafe innerHTML use, unchecked media URLs, weak input handling, and incomplete upload validation.", "localizador": "Seção I, PDF p. 1"},
+      {"trecho": "A common output protocol asks the model to return one concise, self-contained HTML document using vanilla HTML, CSS, and JavaScript.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "It excludes explanations, Markdown fences, external frameworks, and placeholder code.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "This protocol is identical across all groups.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "For groups with prompt embedding, a second block lists client-side rules.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "It discourages unsafe HTML sinks, string-based code execution, unchecked dynamic URLs, weak upload pre-validation, and plaintext handling of sensitive information.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "The output is normalized into a structured report containing rule identifiers, locations, and short explanations.", "localizador": "Seção III.B, PDF p. 2"},
+      {"trecho": "Repair groups receive the original requirement and generated document.", "localizador": "Seção III.C, PDF p. 2"},
+      {"trecho": "The Full Framework and the variant without prompt embedding additionally receive the structured static report.", "localizador": "Seção III.C, PDF p. 2"},
+      {"trecho": "The repair prompt asks the LLM to remove reported issues while keeping the requested layout and interaction logic.", "localizador": "Seção III.C, PDF p. 2–3"},
+      {"trecho": "The variant without static feedback receives only a general instruction to check and improve security.", "localizador": "Seção III.C, PDF p. 3"},
+      {"trecho": "This contrast separates specific machine-readable feedback from a vague self-review request.", "localizador": "Seção III.C, PDF p. 3"},
+      {"trecho": "A malformed or incomplete output is retried at most twice with the same frozen prompt.", "localizador": "Seção III.D, PDF p. 3"},
+      {"trecho": "Such failures remain in the denominator of the valid output rate and are never counted as zero-finding secure outputs.", "localizador": "Seção III.D, PDF p. 3"},
+      {"trecho": "The equivalence rules were checked with fixed regression examples before the formal run, including positive cases and deliberately incomplete counterexamples.", "localizador": "Seção III.D, PDF p. 3"},
+      {"trecho": "Vanilla provides the functional requirement only.", "localizador": "Seção IV.B, PDF p. 3"},
+      {"trecho": "Prompt Only adds security rules but skips repair.", "localizador": "Seção IV.B, PDF p. 3"},
+      {"trecho": "The two “w/o” variants remove one component from the full pipeline.", "localizador": "Seção IV.B, PDF p. 3"},
+      {"trecho": "The experiment uses the logged model identifier deepseek-chat.", "localizador": "Seção IV.C, PDF p. 3"},
+      {"trecho": "Generation uses temperature 0.3 and at most 8,000 output tokens; repair uses temperature 0.2 and at most 10,000 tokens.", "localizador": "Seção IV.C, PDF p. 3"},
+      {"trecho": "Each of the 10 requirements is evaluated under five groups and three independent repeats, producing 150 requested outputs.", "localizador": "Seção IV.C, PDF p. 3–4"},
+      {"trecho": "Results from earlier debugging runs are kept separate and are not included in the statistics.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "To avoid bias caused by different numbers of valid outputs, the metrics are computed on matched valid requirements.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "SSVOR is not a dynamic functional-success metric.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "Because the sample is small and generation failures create missing pairs, these tests are exploratory.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "A total of 132 outputs were valid and 18 were recorded as generation failures.", "localizador": "Seção V.A, PDF p. 4"},
+      {"trecho": "Prompt Only reduces average initial findings per valid output from 3.30 in Vanilla to 1.11.", "localizador": "Seção V.B, PDF p. 4"},
+      {"trecho": "The Full Framework starts from 1.52 initial findings per valid output.", "localizador": "Seção V.B, PDF p. 4"},
+      {"trecho": "Across three repeats, the no-prompt repair group achieves an RR of 88.14%, compared with 90.48% for the Full Framework.", "localizador": "Seção V.B, PDF p. 4"},
+      {"trecho": "The comparison with the variant without prompt embedding is not supported after correction (p = 0.159724).", "localizador": "Seção V.D, PDF p. 5"},
+      {"trecho": "Paired sample sizes range from 25 to 27 because generation failures remove incomplete pairs.", "localizador": "Seção V.D, PDF p. 5"},
+      {"trecho": "Sixteen failures are caused by missing required video behavior and two by missing audio behavior.", "localizador": "Seção V.E, PDF p. 5"},
+      {"trecho": "It also shows a boundary of the method: security prompts and repair feedback cannot compensate for a model that does not implement a core requested media function.", "localizador": "Seção V.E, PDF p. 5"},
+      {"trecho": "The overall VOR is 88.0%.", "localizador": "Seção V.E, PDF p. 5"},
+      {"trecho": "Reported issues are static candidate findings that may include false positives or miss runtime-specific flows, and SSVOR does not verify full browser behavior.", "localizador": "Seção VI, PDF p. 6"},
+      {"trecho": "The endpoint exposes no deterministic random seed, and the framework covers only client-side patterns, which must be complemented by server-side validation, authorization, output encoding, and deployment testing.", "localizador": "Seção VI, PDF p. 6"},
+      {"trecho": "The scanner and validator were developed for this experiment, so rule selection may favor syntactically observable patterns.", "localizador": "Seção VI, PDF p. 6"},
+      {"trecho": "Because the hosted endpoint may change over time, saved prompts and metadata improve reproducibility but cannot guarantee identical reruns.", "localizador": "Seção VI, PDF p. 6"},
+      {"trecho": "Repair-enabled configurations increased the average runtime from approximately 51 s to 79 s.", "localizador": "Resumo, PDF p. 1"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Full Framework",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["restricoes", "contexto", "feedback"],
+      "comparador": "Vanilla",
+      "modelo": "deepseek-chat (versão nao_informado)",
+      "benchmark": "Conjunto piloto sintético de 10 requisitos de UI multimídia (dos autores)",
+      "metrica": "Valid/30",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 26, "intervencao": 27},
+      "denominador": "30 requisições por grupo (10 requisitos × 3 repetições)",
+      "condicoes": "Total de saídas válidas nas três repetições; saída malformada ou incompleta refeita até duas vezes com o mesmo prompt antes de contar como falha. Geração com temperatura 0,3 e até 8.000 tokens; reparo (só no Full Framework) com temperatura 0,2 e até 10.000 tokens; top-p 1,0. Ganho de pacote (regras + reparo com relatório estático), não atribuível a um mecanismo isolado; pacote inclui decodificação diferente na etapa de reparo. Os testes de Wilcoxon referem-se às contagens finais de achados, não a esta métrica. Valores conferidos na imagem da Tabela II (PDF p. 5).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca o Full Framework com várias métricas (redução de achados ponta a ponta, taxa de saídas válidas, SSVOR) sem que uma prevaleça. A Tabela I é descritiva (definição dos grupos); a primeira tabela com o contraste é a Tabela II. Técnica focal Full Framework; primeira métrica (Valid/30), único modelo (deepseek-chat), primeira linha de base de prompting listada (Vanilla).",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 5, colunas Group e Valid/30, linhas Vanilla e Full Framework",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Vanilla 26 3.30 ± 1.48 0.00 ± 0.00 13.33 ± 15.28 50.59 ± 6.58", "localizador": "Tabela II, PDF p. 5, linha Vanilla; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"},
+        {"trecho": "Full Framework 27 0.15 ± 0.13 95.16 ± 4.76 76.67 ± 11.55 79.44 ± 3.44", "localizador": "Tabela II, PDF p. 5, linha Full Framework; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Prompt Only (security rule embedding / security-aware prompt construction)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "Vanilla",
+      "modelo": "deepseek-chat (versão nao_informado)",
+      "benchmark": "Conjunto piloto sintético de 10 requisitos de UI multimídia (dos autores)",
+      "metrica": "Valid/30",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 26, "intervencao": 27},
+      "denominador": "30 requisições por grupo (10 requisitos × 3 repetições)",
+      "condicoes": "As duas condições diferem só no bloco de regras de segurança (Tabela I); sem reparo; geração com temperatura 0,3, até 8.000 tokens, top-p 1,0; até duas novas tentativas por saída inválida. Valores conferidos na imagem da Tabela II (PDF p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal já representada e só uma tarefa no escopo; componente isolado incluído para completar o alvo de três, na ordem da tabela de ablação (Tabela II): o primeiro componente é o embutimento de regras (linha Prompt Only, comparada com a primeira linha de base, Vanilla); primeira métrica (Valid/30).",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 5, colunas Group e Valid/30, linhas Vanilla e Prompt Only; Tabela I, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Prompt Only 27 1.11 ± 0.19 63.03 ± 11.45 43.33 ± 11.55 52.00 ± 3.58", "localizador": "Tabela II, PDF p. 5, linha Prompt Only; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"},
+        {"trecho": "Vanilla 26 3.30 ± 1.48 0.00 ± 0.00 13.33 ± 15.28 50.59 ± 6.58", "localizador": "Tabela II, PDF p. 5, linha Vanilla; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Structured static feedback (relatório estático estruturado do ESLint no prompt de reparo)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "w/o Static Feedback (reparo com instrução geral de autorrevisão)",
+      "modelo": "deepseek-chat (versão nao_informado)",
+      "benchmark": "Conjunto piloto sintético de 10 requisitos de UI multimídia (dos autores)",
+      "metrica": "Valid/30",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 27, "intervencao": 27},
+      "denominador": "30 requisições por grupo (10 requisitos × 3 repetições)",
+      "condicoes": "As duas condições têm regras e chamada de reparo (temperatura 0,2, até 10.000 tokens); diferem só no relatório estático estruturado contra instrução geral de verificar e melhorar a segurança (Tabela I). Até duas novas tentativas por saída inválida. Valores conferidos na imagem da Tabela II (PDF p. 5).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três, na ordem da tabela de ablação (Tabela II): após o embutimento de regras, o componente seguinte com ablação é o feedback estático estruturado (linha w/o Static Feedback contra Full Framework); primeira métrica (Valid/30).",
+      "derivacao": "direta",
+      "localizador": "Tabela II, PDF p. 5, colunas Group e Valid/30, linhas w/o Static Feedback e Full Framework; Tabela I, PDF p. 4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w/o Static Feedback 27 0.93 ± 0.23 67.93 ± 13.59 40.00 ± 10.00 77.78 ± 0.81", "localizador": "Tabela II, PDF p. 5, linha w/o Static Feedback; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"},
+        {"trecho": "Full Framework 27 0.15 ± 0.13 95.16 ± 4.76 76.67 ± 11.55 79.44 ± 3.44", "localizador": "Tabela II, PDF p. 5, linha Full Framework; colunas Group, Valid/30, Final findings/valid output, EVRR (%), SSVOR (%), Runtime (s)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Questão de pesquisa e quatro RQs explícitas (efeito das regras nos achados iniciais, do feedback estruturado no reparo, do pipeline completo e custos/falhas).", "localizador": "Seção I, PDF p. 1; seção IV.A, PDF p. 3"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Grupos, parâmetros de decodificação, política de novas tentativas, validador e fórmulas das métricas são descritos e o protocolo foi congelado; porém os textos dos prompts, das regras, dos requisitos e as regras do scanner não são impressos.", "localizador": "Seções III–IV, PDF p. 2–4"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Linha de base Vanilla e ablações executadas no mesmo modelo, tarefas e repetições, com matriz de condições explícita (Tabela I).", "localizador": "Tabela I, PDF p. 4; Tabela II, PDF p. 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas formalmente e a coluna Valid/30 é coerente com o VOR e a Fig. 3; mas os achados são candidatos estáticos sem confirmação, o SSVOR não mede correção funcional, os tamanhos dos conjuntos pareados que servem de denominador ao EVRR por repetição não são impressos, o n de cada teste de Wilcoxon é dado só como faixa, e densidades iniciais aparecem só no texto.", "localizador": "Seção IV.C, PDF p. 4; seção V, PDF p. 4–5; seção VI, PDF p. 6"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de discussão e limitações trata tamanho e natureza sintética do conjunto, modelo único, falsos positivos do scanner, concentração de falhas, ausência de semente, escopo só do lado do cliente e viés do scanner próprio.", "localizador": "Seção VI, PDF p. 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Identificador do modelo, temperaturas, limites de tokens e top-p informados; mas não há semente, o endpoint pode mudar, prompts e regras não são impressos e não há declaração de disponibilidade de código ou dados.", "localizador": "Seção IV.C, PDF p. 3–4; seção VI, PDF p. 6"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Os requisitos são sintéticos e criados para o estudo, mas o artigo não discute contaminação no pré-treinamento nem no prompt.", "localizador": "Seção IV.A, PDF p. 3"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (6 páginas; páginas impressas sem numeração visível). Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04, p-05 e p-06 (Tabela I em p-04; Tabela II, Fig. 2 e Fig. 3 em p-05)."
+  }
+}

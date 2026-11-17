@@ -1,0 +1,309 @@
+{
+  "estudo": "S1121",
+  "texto_fonte": "fontes/textos/lote/S1121.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2512.09679v1 [cs.SE], 10 dez. 2025 (preprint; manuscrito formatado para Empirical Software Engineering, sem dados de aceite); a numeração impressa coincide com a posição no PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-Shot",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 6",
+        "observacao": "Linha de base: geração direta do código a partir da descrição do problema, sem passos intermediários de raciocínio. É o prompt base do qual derivam as demais condições. O texto exato do prompt não é impresso."
+      },
+      {
+        "nome_original": "Zero-Shot CoT",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 6; Tabelas 3-6, p. 9, 12-13",
+        "observacao": "Acrescenta 'Let’s think step by step' à descrição do problema; o raciocínio é produzido pelo próprio modelo de código (gerador '–' na Tabela 1). O contraste com Zero-Shot, no mesmo modelo e benchmark, difere só nessa instrução de raciocínio; configurações de decodificação declaradas consistentes entre paradigmas dentro de cada modelo (Seção 6.2), sem valores informados."
+      },
+      {
+        "nome_original": "Self-Planning",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": ["exemplos", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 6; Tabelas 3-6, p. 9, 12-13",
+        "observacao": "Pacote híbrido: o plano (decomposição em subtarefas e ordem de execução) é gerado por outro modelo, GPT-5-Mini, com 3 exemplos (3-shot ICL) e depois usado pelo modelo de código. O contraste com Zero-Shot confunde a estrutura de planejamento, os exemplos fornecidos ao gerador e a capacidade do modelo gerador (componente fora do escopo, selecao_modelo); o ganho é do pacote. Exemplos usados no prompt do gerador, não necessariamente no prompt do modelo de código; o texto dos prompts não é impresso."
+      },
+      {
+        "nome_original": "SCoT (Structured CoT)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 7; Tabelas 3-6, p. 9, 12-13; Seção 5.4.1 e Tabela 9, p. 21-22",
+        "observacao": "Pacote híbrido: raciocínio gerado por GPT-5-Mini com 3 exemplos e restrito a slots de template predefinidos (estruturas sequence/branch/loop na Seção 4.2; 'problem analysis → algorithm design → edge case handling → implementation' na Seção 5.4.1), depois fornecido ao modelo de código. O contraste com Zero-Shot (Tabelas 3-6 e 9) é de pacote e confunde template, exemplos e modelo gerador. O contraste SCoT vs. MSCoT (RQ4) mantém o template, mas difere no gerador (GPT-5-Mini vs. modelo 7B ajustado), nos exemplos (3-shot só no SCoT) e no comprimento (380 vs. 150 tokens em média); não isola um ingrediente de prompting."
+      },
+      {
+        "nome_original": "Reasoning-CoT",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 7; Tabelas 3-6, p. 9, 12-13",
+        "observacao": "Pacote híbrido: cadeias longas de raciocínio geradas zero-shot pelo DeepSeek-R1 (modelo de raciocínio treinado com aprendizado por reforço) e fornecidas ao modelo de código. A decomposição, a exploração de soluções e a autocorreção descritas são intrínsecas ao modelo gerador, não um laço de feedback com execução ou testes induzido pelo prompt; por isso não foram classificadas como feedback nem decomposicao. O contraste com Zero-Shot confunde o raciocínio com a escolha do modelo gerador (selecao_modelo)."
+      },
+      {
+        "nome_original": "MSCoT",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 2.2, p. 4; Seção 5.4, p. 21-22; Tabela 9, p. 22",
+        "observacao": "Raciocínio estruturado leve, gerado por um modelo de 7B ajustado (fine-tuned; modelo-base não informado), com o mesmo template do SCoT; usado como alternativa de baixa qualidade em RQ4. A Tabela 9 traz Δ MSCoT vs. Zero-Shot, contraste de pacote híbrido (inclui ajuste_fino do gerador). Não entra em RQ1-RQ3."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Geradores de CoT GPT-5-Mini (Self-Planning, SCoT) e DeepSeek-R1 (Reasoning-CoT)",
+        "natureza": "selecao_modelo",
+        "descricao": "As cadeias de raciocínio externas são produzidas por modelos diferentes do modelo de código avaliado; a capacidade do gerador faz parte do pacote e o estudo atribui parte do efeito à qualidade do gerador (RQ4).",
+        "localizador": "Tabela 1, p. 6; Seção 4.2, p. 6-7"
+      },
+      {
+        "nome_original": "Modelo de 7B ajustado que produz o MSCoT",
+        "natureza": "ajuste_fino",
+        "descricao": "Gerador de raciocínio estruturado leve obtido por ajuste fino de pesos (modelo-base e procedimento não informados neste artigo).",
+        "localizador": "Seção 5.4 e 5.4.1, p. 21-22"
+      },
+      {
+        "nome_original": "Seis modelos de código (Qwen2.5-Coder, Qwen3-Coder, GPT-3.5-Turbo, GPT-5) e pares de capacidade de RQ3",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo de código com o mesmo prompt; em RQ3, pares pequeno/grande com prompts SCoT idênticos para analisar efeito de capacidade, não de prompting.",
+        "localizador": "Seção 4.4, p. 8; Seção 5.3.1, p. 16"
+      },
+      {
+        "nome_original": "Decoding settings",
+        "natureza": "decodificacao",
+        "descricao": "Declarados consistentes entre paradigmas dentro de cada modelo; temperatura, top-p, tamanho máximo e número de amostras não informados.",
+        "localizador": "Seção 6.2, p. 26"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-Coder-7B-Instruct (Alibaba DAMO; 7B, denso, open-source)", "versao": "nao_informado (link Hugging Face impresso; acesso 'as of mid-2025')", "localizador": "Seção 4.4 e nota 1, p. 8; Tabela 2, p. 8"},
+      {"nome": "Qwen2.5-Coder-32B-Instruct (Alibaba DAMO; 32B, denso, open-source)", "versao": "nao_informado (link Hugging Face impresso)", "localizador": "Seção 4.4 e nota 2, p. 8; Tabela 2, p. 8"},
+      {"nome": "Qwen3-Coder-30B-A3B-Instruct (Alibaba DAMO; MoE, 30B total, 3B ativos)", "versao": "nao_informado (link Hugging Face impresso)", "localizador": "Seção 4.4 e nota 3, p. 8; Tabela 2, p. 8"},
+      {"nome": "Qwen3-Coder-480B-A35B-Instruct (Alibaba DAMO; MoE, 480B total, 35B ativos)", "versao": "nao_informado (link Hugging Face impresso)", "localizador": "Seção 4.4 e nota 4, p. 8; Tabela 2, p. 8"},
+      {"nome": "GPT-3.5-Turbo (OpenAI, API)", "versao": "nao_informado", "localizador": "Seção 4.4 e nota 5, p. 8; Tabela 2, p. 8"},
+      {"nome": "GPT-5 (OpenAI, API)", "versao": "nao_informado", "localizador": "Seção 4.4 e nota 6, p. 8; Tabela 2, p. 8"},
+      {"nome": "GPT-5-Mini (gerador de CoT para Self-Planning e SCoT)", "versao": "nao_informado", "localizador": "Tabela 1, p. 6; Seção 4.2, p. 6-7"},
+      {"nome": "DeepSeek-R1 (gerador de CoT para Reasoning-CoT)", "versao": "nao_informado", "localizador": "Tabela 1, p. 6; Seção 4.2, p. 7"},
+      {"nome": "Modelo de 7B ajustado (gerador do MSCoT)", "versao": "nao_informado (modelo-base não informado)", "localizador": "Seção 5.4, p. 21"}
+    ],
+    "benchmarks": [
+      {"nome": "MBPP", "quantidade": "974 tarefas Python, média de 3 casos de teste por problema, conforme a descrição; denominador usado na Tabela 3 nao_informado (ver heterogeneidade)", "localizador": "Seção 4.3.1, p. 7; Tabela 3, p. 9"},
+      {"nome": "HumanEval", "quantidade": "164 problemas Python, 7-8 casos de teste cada", "localizador": "Seção 4.3.1, p. 7"},
+      {"nome": "OpenEval", "quantidade": "178 problemas orientados a raciocínio", "localizador": "Seção 4.3.1, p. 7"},
+      {"nome": "MHPP", "quantidade": "210 problemas em sete categorias, média de 14 casos de teste", "localizador": "Seção 4.3.1, p. 7"},
+      {"nome": "CodeHarmony (subconjunto de teste)", "quantidade": "153 amostras (de 16.153 no total)", "localizador": "Seção 4.3.1, p. 7"},
+      {"nome": "BigCodeBench", "quantidade": "'approximately 1,140' tarefas Python, segundo a descrição; o eixo da Figura 1 parece rotular 'bigcodebench_hard'; denominador usado na Tabela 3 nao_informado (ver heterogeneidade)", "localizador": "Seção 4.3.1, p. 7; Figura 1, p. 10; Tabela 3, p. 9"},
+      {"nome": "HumanEval-XL", "quantidade": "164 problemas por linguagem, 1.968 no total, segundo a descrição; denominador por linguagem nas Tabelas 4-6 e 9 nao_informado (ver heterogeneidade)", "localizador": "Seção 4.3.2, p. 7; Tabelas 4-6, p. 12-13; Seção 5.4.1, p. 21"},
+      {"nome": "Subconjunto de RQ3 (HumanEval, MBPP, CodeHarmony, OpenEval com SCoT)", "quantidade": "174 casos assimétricos de 2.316 avaliações (composição de 2.316 não explicada)", "localizador": "Seção 5.3.1, p. 16; Tabela 7, p. 17"}
+    ],
+    "metricas": [
+      {"nome": "Pass@1 (%)", "definicao": "proporção de programas gerados que passam em todos os testes na primeira tentativa, média sobre N problemas (Eq. 5); número de amostras por problema e de execuções nao_informado", "localizador": "Seção 4.5, p. 8-9"},
+      {"nome": "Token consumption (Average Token Count)", "definicao": "tokens por problema por método de CoT, como aproximação de custo computacional; só para Reasoning-CoT, SCoT e Self-Planning (Figura 1)", "localizador": "Seção 5.1.2 e Figura 1, p. 10; Seção 6.3, p. 26"},
+      {"nome": "Taxas de casos assimétricos S↓F↑L e L↓F↑S (%)", "definicao": "proporção, entre casos assimétricos de um par de modelos, em que o menor falha e o maior acerta (ou o inverso)", "localizador": "Seção 5.3.1, p. 16; Tabela 7, p. 17"},
+      {"nome": "Distribuição de tipos de erro (contagens)", "definicao": "categorização manual dos 174 casos assimétricos (Tabela 8)", "localizador": "Seção 5.3.3, p. 17; Tabela 8, p. 18"}
+    ],
+    "linguagens": ["Python (seis benchmarks de RQ1)", "HumanEval-XL, segundo a Seção 4.3.2: Python, Java, JavaScript, C++, C#, PHP, Ruby, Go, Rust, Swift, Kotlin, TypeScript", "HumanEval-XL, segundo as Tabelas 4-6: C#, Go, Java, Kotlin, Scala, Swift, TypeScript, JavaScript, Perl, PHP, Python, Ruby (divergência registrada em heterogeneidade)"],
+    "riscos": [
+      {"categoria": "alucinacao", "descricao": "Zero-Shot CoT degrada o desempenho em média (52,03% vs. 54,10% do Zero-Shot, médias do texto) por 'reasoning hallucinations': passos intermediários coerentes, mas funcionalmente incorretos.", "localizador": "Seção 1, p. 3; Seção 5.1.1, p. 10; Seção 5.1.5, p. 11"},
+      {"categoria": "correcao_funcional", "descricao": "Raciocínio estruturado de baixa qualidade (MSCoT) fica abaixo do Zero-Shot em média (−2,77 na Tabela 9) ao introduzir restrições espúrias que induzem a geração ao erro.", "localizador": "Seção 5.4.2, p. 22; Tabela 9, p. 22"},
+      {"categoria": "correcao_funcional", "descricao": "Nos 174 casos assimétricos com SCoT, erros de tipo e de limite (107; 61,5%), desalinhamento entre raciocínio e execução (37; 21,3%, como import ausente) e divergência lógica (22; 12,6%) causam falhas; modelos maiores também introduzem falhas por superelaboração.", "localizador": "Seção 5.3.2-5.3.4, p. 17-19; Tabela 8, p. 18"},
+      {"categoria": "custo", "descricao": "Reasoning-CoT consome 2.000-7.000 tokens por problema contra 200-700 de Self-Planning e SCoT ('10×'), o que o estudo considera impraticável sob restrição de orçamento; custo em tokens quantificado na Figura 1, custo monetário e tempo não quantificados.", "localizador": "Seção 5.1.2 e Figura 1, p. 10; Seção 5.1.5, p. 12"},
+      {"categoria": "contaminacao", "descricao": "Contaminação dos benchmarks pode enviesar os valores absolutos de Pass@1; o estudo não controla os corpora de pré-treinamento.", "localizador": "Seção 6.2, p. 26"},
+      {"categoria": "outro", "descricao": "Problemas de implementação (scripts de avaliação, ambiente de execução, hiperparâmetros de decodificação) podem enviesar os valores absolutos de Pass@1.", "localizador": "Seção 6.2, p. 26"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Conclusões restritas a diferenças relativas entre paradigmas no mesmo modelo, consideradas menos sensíveis a vazamento de dados; sem verificação de sobreposição.", "avaliada": "nao", "localizador": "Seção 6.2, p. 26"},
+      {"descricao": "Reuso ou seguimento de pipelines públicos de avaliação, verificações de sanidade em tarefas amostradas e decodificação consistente entre paradigmas em cada modelo.", "avaliada": "nao", "localizador": "Seção 6.2, p. 26"},
+      {"descricao": "Cobertura de níveis de dificuldade, 12 linguagens e modelos abertos e proprietários, com resultados por modelo e por benchmark, para reduzir a ameaça à validade externa.", "avaliada": "nao", "localizador": "Seção 6.1, p. 25"},
+      {"descricao": "Recomendações de desenho de templates por escala (lembretes explícitos de execução para modelos pequenos, prompts de validação e viés de simplicidade para modelos grandes), propostas e não avaliadas.", "avaliada": "nao", "localizador": "Seção 5.3.5, p. 19-20"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Zero-Shot (geração direta), executado com os mesmos modelos e benchmarks; MSCoT como comparador adicional em RQ4",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Resultado nulo ou inverso: Zero-Shot CoT fica abaixo do Zero-Shot na média de RQ1 (52,03% vs. 54,10%, médias do texto) e, na Tabela 3, também em BigCodeBench para os quatro modelos Qwen (por exemplo, Qwen3-Coder-30B: 14,19 vs. 31,76).", "localizador": "Seção 5.1.1, p. 10; Tabela 3, p. 9"},
+      {"descricao": "Inversões em RQ4: MSCoT fica abaixo do Zero-Shot em 11 das 12 linhas da Tabela 9 (só GPT-3.5 Static tem +3,36), e SCoT fica abaixo do Zero-Shot no GPT-5 (−1,46 Static; −1,25 Dynamic).", "localizador": "Tabela 9, p. 22"},
+      {"descricao": "Médias de RQ1 no texto (Reasoning-CoT 58,86%, Self-Planning 57,60%, SCoT 56,65%, Zero-Shot CoT 52,03%, Zero-Shot 54,10%) diferem das médias das linhas 'Average' da Tabela 3 sobre os seis modelos (58,51; 57,70; 56,59; 51,69; 54,11; cálculos próprios). Aparente inconsistência; o estudo não informa como as médias do texto foram calculadas.", "localizador": "Seção 5.1.1, p. 10; Tabela 3, p. 9"},
+      {"descricao": "O texto atribui +12,65% ao Reasoning-CoT no GPT-3.5 e +1,45% ao Self-Planning no GPT-5; as linhas 'Average' da Tabela 3 dão 58,39 − 46,48 = 11,91 e 61,08 − 59,84 = 1,24 (cálculos próprios). Aparente inconsistência.", "localizador": "Seção 5.1.1, p. 10; Tabela 3, p. 9"},
+      {"descricao": "A Seção 4.3.2 lista C++ e Rust entre as 12 linguagens do HumanEval-XL; a legenda e as linhas das Tabelas 4-6 e a Seção 5.2.2 trazem Scala e Perl no lugar delas.", "localizador": "Seção 4.3.2, p. 7; Tabelas 4-6, p. 12-13; Seção 5.2.2, p. 14"},
+      {"descricao": "A Seção 4.3.2 informa 164 problemas por linguagem, mas todos os valores de Pass@1 das Tabelas 4-6 são múltiplos de 1,25, compatíveis com 80 problemas e não com 164 (por exemplo, 53,75% de 164 = 88,15, não inteiro; cálculos próprios). Aparente inconsistência; denominador real nao_informado.", "localizador": "Seção 4.3.2, p. 7; Tabelas 4-6, p. 12-13"},
+      {"descricao": "BigCodeBench é descrito com cerca de 1.140 tarefas, mas valores da Tabela 3 como 18,24 e 14,86 não correspondem a contagens inteiras sobre 1.140 com arredondamento a duas casas (18,24% de 1.140 = 207,9; 14,86% = 169,4; cálculos próprios); o eixo da Figura 1 parece rotular 'bigcodebench_hard'. MBPP é descrito com 974 tarefas, mas valores como 57,20 e 50,60 também não correspondem a contagens inteiras sobre 974 (557,1; 492,8; cálculos próprios). Aparente inconsistência; denominadores reais nao_informado.", "localizador": "Seção 4.3.1, p. 7; Tabela 3, p. 9; Figura 1, p. 10"},
+      {"descricao": "Média geral no mesmo HumanEval-XL e modelos: o texto de RQ2 dá Zero-Shot 71,26% e SCoT 76,47%; a linha 'Overall Average' da Tabela 9 dá Zero 71,94 e SCoT 76,67.", "localizador": "Seção 5.2.1, p. 13; Tabela 9, p. 22"},
+      {"descricao": "Nas linhas 'Static' da Tabela 9, Zero e SCoT coincidem com a linha 'Overall Average' das Tabelas 4-6, não com 'Static Avg.' (por exemplo, GPT-3.5: Tabela 9 Static 55,21 e 70,63; Tabela 4 Overall Average 55,21 e 70,63; Static Avg. 56,25 e 72,14), enquanto as linhas 'Dynamic' coincidem com 'Dynamic Avg.' (53,75 e 68,50). O padrão se repete nos seis modelos.", "localizador": "Tabela 9, p. 22; Tabelas 4-6, p. 12-13"},
+      {"descricao": "A narrativa diz que o gap SCoT−MSCoT é maior nos modelos menores (GPT-3.5 +14,06%, Qwen2.5-7B +4,46%) e menor no GPT-5 e Qwen3-480B (+3,28%, +5,70%); na Tabela 9 o gap do Qwen2.5-7B (+5,41; +3,50) é menor que o do Qwen3-480B (+4,89; +6,50), do Qwen2.5-32B e do Qwen3-30B. Narrativa contradiz a tabela.", "localizador": "Seção 5.4.2, p. 22-23; Tabela 9, p. 22"},
+      {"descricao": "A narrativa diz que a degradação do MSCoT é 'most severe in large models (GPT-5: -4.64%, Qwen3-480B: -1.36%)', mas o Qwen3-480B tem a menor degradação média e o Qwen3-30B tem −3,86 e −5,50 na Tabela 9.", "localizador": "Seção 5.4.2, p. 22; Tabela 9, p. 22"},
+      {"descricao": "Totais dos casos assimétricos divergem: Tabela 7 dá 117 S↓F↑L e 57 L↓F↑S; Tabela 8 dá 119 (68,4%) e 55 (31,6%), ambas com 174 casos.", "localizador": "Tabela 7, p. 17; Tabela 8, p. 18"},
+      {"descricao": "O texto dá 40,23% de L↓F↑S médio no MBPP; a média das três taxas da Tabela 7 (18,18; 37,14; 64,29) é 39,87 e a proporção agregada (26/71) é 36,62 (cálculos próprios). Aparente inconsistência; o estudo não diz qual estimador usou.", "localizador": "Seção 5.3.2 e Tabela 7, p. 17"},
+      {"descricao": "O texto dá TypeScript com '88.82% average with Self-Planning, +15.32% over Zero-Shot'; a média dos seis modelos nas Tabelas 4-6 é 89,79 para Self-Planning e 82,50 para Zero-Shot (diferença 7,29; cálculos próprios). Aparente inconsistência; o estudo não informa como a média foi obtida.", "localizador": "Seção 5.2.3, p. 14; Tabelas 4-6, p. 12-13"},
+      {"descricao": "Custo relativo do Reasoning-CoT descrito como '10×' em RQ1 e como '3–5× higher token cost' em RQ2, sem medição de tokens específica para RQ2.", "localizador": "Seção 5.1.2, p. 10; Seção 5.2.4, p. 15"},
+      {"descricao": "Diferenças em pontos percentuais são apresentadas como '%' (resumo: 'improving Pass@1 by 5–12%'; Seção 5.4.2: '+7.50 percentage points' e, no mesmo parágrafo, '+2.81%' para a mesma coluna Δ da Tabela 9). Ambiguidade entre p.p. e variação relativa.", "localizador": "Resumo, p. 1; Seção 5.1.1, p. 10; Seção 5.4.2, p. 22"},
+      {"descricao": "O template do SCoT é descrito como slots de 'sequence/branch/loop structures' na Seção 4.2 e como 'problem analysis → algorithm design → edge case handling → implementation' na Seção 5.4.1; o estudo não esclarece se é o mesmo template.", "localizador": "Seção 4.2, p. 7; Seção 5.4.1, p. 22"},
+      {"descricao": "Os paradigmas externos usam geradores diferentes (GPT-5-Mini, DeepSeek-R1) do modelo de código; as diferenças entre paradigmas confundem estrutura do prompt e capacidade do gerador. Os autores reconhecem que o desenho do prompt pode influenciar além da estrutura do paradigma e que só controlam isso parcialmente em RQ4.", "localizador": "Tabela 1, p. 6; Seção 6.3, p. 26"},
+      {"descricao": "Limitações declaradas: Pass@1 e tokens não capturam legibilidade, segurança ou desempenho em execução; a análise de informação mútua é conceitual, sem estimação; o mapeamento para 'structured' e 'reflective' é aproximado; benchmarks e famílias de modelos limitados.", "localizador": "Seções 6.1 e 6.3, p. 25-26"},
+      {"descricao": "Número de execuções, número de amostras por problema e parâmetros de decodificação não informados; não há testes de significância nem intervalos de confiança, embora o texto use 'significantly' no resumo.", "localizador": "Resumo, p. 1; Seção 4.5, p. 8; Seção 6.2, p. 26"}
+    ],
+    "observacoes": [
+      {"descricao": "RQ3 é análise de capacidade (pares de modelos com SCoT idêntico), não contraste de técnica de prompting; os 174 casos assimétricos foram inspecionados manualmente (quem executou não informado).", "localizador": "Seção 5.3.1-5.3.3, p. 16-18"},
+      {"descricao": "O enquadramento teórico (I(Y;C|X) e hipóteses H1-H4) é usado como lente conceitual; os autores medem apenas proxies (Pass@1, tokens, taxas assimétricas, gaps de qualidade).", "localizador": "Seção 3.2, p. 5; Seção 6.3, p. 26"},
+      {"descricao": "A Figura 1 mostra custo em tokens só para reasoning-r1, three-shot-SCoT e three-shot-SelfPlanning por benchmark; não traz Zero-Shot nem Zero-Shot CoT e os valores não estão impressos.", "localizador": "Figura 1, p. 10"},
+      {"descricao": "Disponibilidade de dados: 'Data available on request from the authors'; os prompts completos não são impressos (só ilustrações nas Figuras 2-4, com passos elididos).", "localizador": "Declarations, p. 27; Figuras 2-4, p. 19-21"},
+      {"descricao": "A Seção 4.2 anuncia 'six representative CoT paradigms', mas a Tabela 1 lista cinco; o MSCoT só aparece em RQ4.", "localizador": "Seção 4.2, p. 6; Tabela 1, p. 6"}
+    ],
+    "citacoes": [
+      {"trecho": "Zero-Shot CoT elicits spontaneous reasoning by appending “Let’s think step by step” to problem descriptions, encouraging the model to produce reasoning chains before code without requiring exemplars.", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Zero-Shot serves as the baseline, generating code directly from problem descriptions without intermediate reasoning steps.", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Self-Planning uses GPT-5-Mini with 3-shot in-context learning to generate hierarchical reasoning.", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Given exemplars demonstrating task decomposition, the model first breaks problems into subtasks, outlines their execution order, then generates code following the plan.", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "SCoT (Structured CoT) also employs GPT-5-Mini with 3-shot in-context learning, but constrains reasoning within predefined template slots (e.g., sequence/branch/loop structures).", "localizador": "Seção 4.2, p. 7"},
+      {"trecho": "Reasoning-CoT leverages DeepSeek-R1, an open-source reasoning-oriented model trained with reinforcement learning.", "localizador": "Seção 4.2, p. 7"},
+      {"trecho": "Without requiring exemplars, DeepSeek-R1 generates long-form reflective reasoning chains featuring explicit problem decomposition, multiple solution explorations, and self-correction mechanisms.", "localizador": "Seção 4.2, p. 7"},
+      {"trecho": "Using structured CoT as a controlled framework, we compare high-quality reasoning (SCoT generated by GPT-5-Mini via 3-shot ICL) against lightweight reasoning (MSCoT produced by a fine-tuned 7B model) as prompts for downstream code generation across six models and 12 languages.", "localizador": "Seção 5.4, p. 21"},
+      {"trecho": "Both MSCoT and SCoT follow identical template structures (problem analysis → algorithm design → edge case handling → implementation), differing only in generation quality and token length (MSCoT: 150 tokens average, SCoT: 380 tokens average).", "localizador": "Seção 5.4.1, p. 22"},
+      {"trecho": "Naive Zero-Shot CoT often degrades performance due to reasoning hallucinations.", "localizador": "Seção 1, p. 3"},
+      {"trecho": "This indicates that unguided self-generated reasoning often degrades performance, likely due to reasoning hallucinations where models produce logically coherent but functionally incorrect intermediate steps.", "localizador": "Seção 5.1.1, p. 10"},
+      {"trecho": "This indicates that low-quality structured reasoning can harm performance by introducing spurious constraints that mislead generation, validating our information-theoretic prediction that poorly-formed C may increase H(Y|X,C) rather than reduce it.", "localizador": "Seção 5.4.2, p. 22"},
+      {"trecho": "While Reasoning-CoT ranks first in 18/36 model-dataset combinations, its 10× higher token cost makes it impractical for deployment scenarios with budget constraints.", "localizador": "Seção 5.1.5, p. 12"},
+      {"trecho": "Reasoning-CoT consumes 2,000–7,000 tokens per problem, compared to 200–700 tokens for Self-Planning and SCoT.", "localizador": "Seção 5.1.2, p. 10"},
+      {"trecho": "Implementation issues (e.g., evaluation scripts, execution environment, decoding hyperparameters) and benchmark contamination could bias absolute Pass@1 scores.", "localizador": "Seção 6.2, p. 26"},
+      {"trecho": "We reuse or closely follow public evaluation pipelines where available, perform sanity checks on sampled tasks, and keep decoding settings consistent across paradigms within each model.", "localizador": "Seção 6.2, p. 26"},
+      {"trecho": "Since we do not control model pre-training corpora, we focus our conclusions on relative differences between CoT paradigms under the same model, which are less sensitive to potential data leakage.", "localizador": "Seção 6.2, p. 26"},
+      {"trecho": "These metrics do not capture aspects such as readability, security, or runtime performance, and our information-theoretic analysis (via I(Y;C|X)) is conceptual rather than based on exact mutual information estimation.", "localizador": "Seção 6.3, p. 26"},
+      {"trecho": "Manual inspection of all 174 asymmetric cases reveals three dominant error patterns (Table 8):", "localizador": "Seção 5.3.3, p. 17"},
+      {"trecho": "With 164 problems per language (1,968 total), it enables systematic evaluation of CoT effectiveness across statically typed languages (Java, C++, C#, TypeScript, Go, Rust, Swift, Kotlin) and dynamically typed languages (Python, JavaScript, Ruby, PHP).", "localizador": "Seção 4.3.2, p. 7"},
+      {"trecho": "BigCodeBench Zhuo et al (2024) comprises approximately 1,140 Python tasks with 33.5 lines of code and 5–6 test cases per problem on average.", "localizador": "Seção 4.3.1, p. 7"},
+      {"trecho": "Data available on request from the authors.", "localizador": "Declarations, p. 27"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Zero-Shot CoT",
+      "mecanismos": ["instrucao", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "Zero-Shot",
+      "modelo": "Qwen2.5-Coder-7B-Instruct (versão nao_informado)",
+      "benchmark": "BigCodeBench (Python)",
+      "metrica": "Pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.24, "intervencao": 14.86},
+      "denominador": "nao_informado; a Seção 4.3.1 descreve cerca de 1.140 tarefas, mas os valores impressos não correspondem a contagens inteiras sobre 1.140 (ver heterogeneidade)",
+      "condicoes": "Mesmo modelo de código nas duas condições; 'Let’s think step by step' acrescentado ao problema, raciocínio gerado pelo próprio modelo. Decodificação declarada consistente entre paradigmas, sem parâmetros informados; número de amostras e de execuções nao_informado. A linha 'Average' da Tabela 3 (média de seis benchmarks heterogêneos) não foi usada. Valores conferidos visualmente na Tabela 3, p. 9.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca vários paradigmas (Self-Planning, SCoT, Reasoning-CoT, Zero-Shot CoT) sem que um prevaleça. Tabelas 1 e 2 são descritivas; a Tabela 3 é a primeira com o contraste. Primeira métrica (Pass@1), primeiro modelo (Qwen2.5-Coder-7B-Instruct), primeira linha (BigCodeBench), linha de base Zero e primeira técnica após ela (CoT = Zero-Shot CoT).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 9 (PDF e impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BigCodeBench 18.24 14.86 20.27 16.89 28.38 29.73 31.08 29.05 22.97 29.73", "localizador": "Tabela 3, p. 9; colunas Zero, CoT, Self-P, SCoT, Reas de Qwen2.5-Coder-7B-Instruct e depois de Qwen2.5-Coder-32B-Instruct"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-Planning",
+      "mecanismos": ["instrucao", "exemplos", "decomposicao"],
+      "mecanismos_acrescentados": ["exemplos", "decomposicao"],
+      "comparador": "Zero-Shot",
+      "modelo": "Qwen2.5-Coder-7B-Instruct (versão nao_informado); plano gerado por GPT-5-Mini (versão nao_informado)",
+      "benchmark": "BigCodeBench (Python)",
+      "metrica": "Pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.24, "intervencao": 20.27},
+      "denominador": "nao_informado (ver heterogeneidade sobre o tamanho do BigCodeBench)",
+      "condicoes": "Pacote híbrido: plano gerado por GPT-5-Mini com 3-shot ICL e fornecido ao modelo de código; o contraste com Zero-Shot confunde planejamento, exemplos e modelo gerador, e o ganho é do pacote. Plano com 200-700 tokens por problema segundo o texto (Seção 5.1.2). Decodificação, amostras e execuções nao_informado. Valores conferidos visualmente na Tabela 3, p. 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela 3, Pass@1, primeiro modelo, primeira linha, linha de base Zero).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 9 (PDF e impressa); Tabela 1, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BigCodeBench 18.24 14.86 20.27 16.89 28.38 29.73 31.08 29.05 22.97 29.73", "localizador": "Tabela 3, p. 9; colunas Zero, CoT, Self-P, SCoT, Reas de Qwen2.5-Coder-7B-Instruct e depois de Qwen2.5-Coder-32B-Instruct"},
+        {"trecho": "Self-Planning uses GPT-5-Mini with 3-shot in-context learning to generate hierarchical reasoning.", "localizador": "Seção 4.2, p. 6"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SCoT (Structured CoT)",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "restricoes"],
+      "mecanismos_acrescentados": ["exemplos", "raciocinio", "restricoes"],
+      "comparador": "Zero-Shot",
+      "modelo": "Qwen2.5-Coder-7B-Instruct (versão nao_informado); raciocínio gerado por GPT-5-Mini (versão nao_informado)",
+      "benchmark": "BigCodeBench (Python)",
+      "metrica": "Pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.24, "intervencao": 16.89},
+      "denominador": "nao_informado (ver heterogeneidade sobre o tamanho do BigCodeBench)",
+      "condicoes": "Pacote híbrido: raciocínio estruturado em slots de template, gerado por GPT-5-Mini com 3-shot ICL e fornecido ao modelo de código; o contraste confunde template, exemplos e modelo gerador. Raciocínio com 200-700 tokens por problema segundo o texto (Seção 5.1.2). Decodificação, amostras e execuções nao_informado. Valores conferidos visualmente na Tabela 3, p. 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela 3, Pass@1, primeiro modelo, primeira linha, linha de base Zero). Excede o alvo de três por exceção para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 9 (PDF e impressa); Tabela 1, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BigCodeBench 18.24 14.86 20.27 16.89 28.38 29.73 31.08 29.05 22.97 29.73", "localizador": "Tabela 3, p. 9; colunas Zero, CoT, Self-P, SCoT, Reas de Qwen2.5-Coder-7B-Instruct e depois de Qwen2.5-Coder-32B-Instruct"},
+        {"trecho": "SCoT (Structured CoT) also employs GPT-5-Mini with 3-shot in-context learning, but constrains reasoning within predefined template slots (e.g., sequence/branch/loop structures).", "localizador": "Seção 4.2, p. 7"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Reasoning-CoT",
+      "mecanismos": ["instrucao", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "Zero-Shot",
+      "modelo": "Qwen2.5-Coder-7B-Instruct (versão nao_informado); raciocínio gerado por DeepSeek-R1 (versão nao_informado)",
+      "benchmark": "BigCodeBench (Python)",
+      "metrica": "Pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.24, "intervencao": 28.38},
+      "denominador": "nao_informado (ver heterogeneidade sobre o tamanho do BigCodeBench)",
+      "condicoes": "Pacote híbrido: raciocínio longo gerado zero-shot pelo DeepSeek-R1 e fornecido ao modelo de código; o contraste confunde o raciocínio com a escolha do modelo gerador. Raciocínio com 2.000-7.000 tokens por problema segundo o texto (Seção 5.1.2). Decodificação, amostras e execuções nao_informado. Valores conferidos visualmente na Tabela 3, p. 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem (Tabela 3, Pass@1, primeiro modelo, primeira linha, linha de base Zero). Excede o alvo de três por exceção para cobrir técnica focal; o contraste SCoT vs. MSCoT (Tabela 9) não foi extraído porque SCoT já está representada e MSCoT é comparador.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 9 (PDF e impressa); Tabela 1, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "BigCodeBench 18.24 14.86 20.27 16.89 28.38 29.73 31.08 29.05 22.97 29.73", "localizador": "Tabela 3, p. 9; colunas Zero, CoT, Self-P, SCoT, Reas de Qwen2.5-Coder-7B-Instruct e depois de Qwen2.5-Coder-32B-Instruct"},
+        {"trecho": "Reasoning-CoT leverages DeepSeek-R1, an open-source reasoning-oriented model trained with reinforcement learning.", "localizador": "Seção 4.2, p. 7"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Lacunas e quatro questões de pesquisa (RQ1-RQ4) explicitadas, com hipóteses H1-H4 associadas.", "localizador": "Seção 1, p. 2-3; Seção 4.1, p. 6"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Paradigmas, geradores, benchmarks e modelos descritos; porém os prompts e templates não são impressos, parâmetros de decodificação e número de amostras não são informados, o gerador do MSCoT não é detalhado, a lista de linguagens diverge entre texto e tabelas e o anúncio de seis paradigmas não corresponde aos cinco da Tabela 1.", "localizador": "Seção 4.2-4.4, p. 6-8; Tabelas 4-6, p. 12-13; Seção 5.4, p. 21; Seção 6.2, p. 26"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Zero-Shot executado com os mesmos modelos e benchmarks, e Zero-Shot CoT difere dele só na instrução; mas Self-Planning, SCoT e Reasoning-CoT usam geradores externos (GPT-5-Mini, DeepSeek-R1), o que confunde estrutura do prompt e capacidade do gerador, e SCoT vs. MSCoT difere também em exemplos e gerador; os autores reconhecem controle apenas parcial.", "localizador": "Tabela 1, p. 6; Tabela 3, p. 9; Tabela 9, p. 22; Seção 6.3, p. 26"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@1 definido (Eq. 5) e tokens usados como aproximação de custo; porém os denominadores não são informados e os valores impressos são incompatíveis com os tamanhos declarados (HumanEval-XL, BigCodeBench, MBPP), as médias do texto divergem das tabelas, as linhas 'Static' da Tabela 9 coincidem com as médias gerais das Tabelas 4-6, os totais das Tabelas 7 e 8 não coincidem e há mistura de p.p. com '%' (cálculos próprios em heterogeneidade).", "localizador": "Seção 4.5, p. 8-9; Tabelas 3-9, p. 9-22; Seções 5.1.1, 5.2.1 e 5.4.2, p. 10-22"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção própria discute validade externa (benchmarks e modelos limitados), interna (implementação, decodificação, contaminação) e de construto (Pass@1, análise conceitual, mapeamento aproximado dos paradigmas).", "localizador": "Seção 6, p. 25-26"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos de código com nome e link, benchmarks referenciados e geradores de CoT nomeados; mas sem snapshots dos modelos de API, sem prompts completos, sem parâmetros de decodificação e com dados apenas sob solicitação aos autores.", "localizador": "Seção 4.4 e notas 1-6, p. 8; Tabela 1, p. 6; Seção 6.2, p. 26; Declarations, p. 27"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Reconhece que a contaminação pode enviesar valores absolutos e restringe as conclusões a diferenças relativas no mesmo modelo, mas não verifica sobreposição com o pré-treinamento nem controla o risco.", "localizador": "Seção 6.2, p. 26"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [6, 9, 10, 12, 13, 17, 18, 22, 23],
+    "observacao": "Texto extraído lido integralmente (1.201 linhas). Páginas abertas para conferir a Tabela 1 (p. 6), a Tabela 3 com os valores extraídos (p. 9), a Figura 1 e as médias do texto de RQ1 (p. 10; rótulos do eixo em baixa resolução), a Tabela 4 (p. 12), as Tabelas 5 e 6 e as médias do texto de RQ2 (p. 13), as Tabelas 7 e 8 (p. 17-18), a Tabela 9 (p. 22) e a Figura 5 e a narrativa de RQ4 (p. 23)."
+  }
+}

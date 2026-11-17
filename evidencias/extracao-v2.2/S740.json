@@ -1,0 +1,290 @@
+{
+  "estudo": "S740",
+  "texto_fonte": "fontes/textos/lote/S740.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2505.13938v4 [cs.LG], 23 Oct 2025 (impresso na margem da p. 1 do PDF); rodapé da p. 1: 39th Conference on Neural Information Processing Systems (NeurIPS 2025) Track on Datasets and Benchmarks. A numeração impressa coincide com a posição no PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Few-Shot Baseline (FS: few-shot prompting with 1–2 examples)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 do PDF (Tabela 1, bloco «Few-Shot Baseline»; Seção 3, «Evaluated Baselines»; Fig. 5); p. 16 do PDF (Seção A.4); p. 18–21 e 23–26 do PDF (Fig. 12–15 e 17–20)",
+        "observacao": "Linha de base do estudo, cujo objeto é o benchmark CLEVER, e não uma técnica de prompting. Cada etapa (geração de especificação, prova de equivalência, geração de implementação, prova de correção) usa prompt de sistema com papel («You are a good Lean 4 programmer») e diretrizes (instrucao), 1–2 exemplos resolvidos (exemplos), modelo opcional [THOUGHTS] para pensar antes de escrever (raciocinio), formato de saída delimitado por [END] e proibições como não usar `in` nem `sorry` (restricoes) e, como insumo, a descrição em linguagem natural, a especificação formal, a implementação e, na geração de implementação, casos de teste em Lean (contexto). As etapas são encadeadas (decomposicao) e cada uma é repetida até gerar código Lean compilável ou esgotar o tempo (amostragem com seleção pelo compilador; se a mensagem de erro volta ao modelo nas novas tentativas FS: nao_informado). Decomposição e repetição pertencem ao protocolo de avaliação (Fig. 5), comum a todas as abordagens. Não há condição sem exemplos (zero-shot) nem outra variação de ingrediente; o contraste executado é com o COPRA Baseline nas etapas de prova. A linha «Hybrid Baseline» (GPT-5-mini FS com KiminaProver-7b FS nas provas) usa o mesmo prompting FS e difere por modelo; foi registrada em componentes_fora_escopo (selecao_modelo)."
+      },
+      {
+        "nome_original": "COPRA Baseline (COPRA [31] nas etapas de prova)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 do PDF (Tabela 1, bloco «COPRA Baseline»; Seção 3, «Evaluated Baselines»); p. 9 do PDF (Tabela 2, linhas COPRA); p. 16 do PDF (Seção A.4); p. 22 e 27 do PDF (Fig. 16 e 21)",
+        "observacao": "Também apresentado pelo estudo como linha de base. Substitui as etapas 2 e 4 (provas de equivalência e de correção) pelo agente COPRA; a geração de especificação e de implementação continua FS, por isso o pacote herda instrucao, exemplos, raciocinio, contexto, restricoes, decomposicao e amostragem. O prompt de exemplo do COPRA traz objetivos, hipóteses e passos já executados (contexto), passos incorretos, último passo e mensagem de erro do Lean (feedback) e exige a resposta no formato [RUN TACTIC] … [END] (restricoes); o prompt de sistema é descrito como quase idêntico ao do artigo original do COPRA e não é reproduzido. Contraste executado: mesma linha GPT-4o e Claude-3.7 com FS em todas as etapas (Tabela 1), mesmo orçamento de 600 s; COPRA só foi executado com esses dois modelos. Pacote híbrido: o COPRA é descrito como agente neuro-simbólico de busca de prova, componente que não é prompting (ver componentes_fora_escopo); o ganho do pacote não se atribui ao feedback isoladamente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "COPRA [31], neuro-symbolic proof search agent",
+        "natureza": "outro",
+        "descricao": "Parte de busca de prova do agente COPRA, que interage com o Lean para produzir provas compatíveis; o estudo não detalha o algoritmo de busca e remete ao artigo original [31]. É componente simbólico do pacote COPRA Baseline, não ingrediente de prompting.",
+        "localizador": "p. 6 do PDF (Seção 3, «Evaluated Baselines»); p. 8 do PDF (último parágrafo de «Proof Difficulty and Structure»)"
+      },
+      {
+        "nome_original": "Hybrid Baseline (GPT-5-mini FS + KiminaProver-7b [33] para as provas)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo nas etapas de prova por um provador especializado (KiminaProver-7b), combinado com GPT-5-mini na geração; o prompting continua FS. Não há linha GPT-5-mini com FS em todas as etapas, de modo que a linha não forma contraste de prompting. O estudo relata problemas de análise da saída do Kimina, com formato não padrão.",
+        "localizador": "p. 6 do PDF (Tabela 1, bloco «Hybrid Baseline»); p. 8 do PDF (terceiro parágrafo)"
+      },
+      {
+        "nome_original": "600-second time budget (pass@k-seconds, k = 600)",
+        "natureza": "orcamento",
+        "descricao": "Orçamento de tempo total por problema compartilhado pelas quatro etapas; cada etapa é repetida até compilar ou até o tempo acabar. É parâmetro da métrica e do protocolo, comum a todas as abordagens.",
+        "localizador": "p. 6 do PDF (legenda da Tabela 1; «Evaluation Metric»; Fig. 5)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado"},
+      {"nome": "o4-mini", "versao": "nao_informado"},
+      {"nome": "Claude-3.7", "versao": "nao_informado (variante e snapshot não informados)"},
+      {"nome": "DeepSeek-R1", "versao": "nao_informado"},
+      {"nome": "GPT-5-mini", "versao": "nao_informado (só na Hybrid Baseline)"},
+      {"nome": "KiminaProver-7b [33]", "versao": "nao_informado (só nas provas da Hybrid Baseline)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CLEVER (Curated Lean Verified Code Generation Benchmark)",
+        "quantidade": "161 problemas, adaptados de 164 problemas do HumanEval [4]",
+        "observacao": "Cada problema tem descrição em linguagem natural, especificação formal de referência não computável escrita por humanos, assinatura da função em Lean e teoremas de equivalência e de correção. O denominador das porcentagens das Tabelas 1 e Fig. 6 não é declarado coluna a coluna; a introdução fala em «1/161» para o fim a fim e a legenda da Fig. 6 liga «one problem» a 0.62%."
+      },
+      {
+        "nome": "conjunto de prompts few-shot do CLEVER",
+        "quantidade": "5 problemas distintos do HumanEval",
+        "observacao": "Implementações escritas à mão e, em parte, provas de equivalência e de isomorfismo manuais; destinado a prompts few-shot. Os prompts FS usam 1–2 exemplos; quais dos 5 problemas entram em cada etapa: nao_informado."
+      }
+    ],
+    "metricas": [
+      {"nome": "pass@k-seconds (Pass@k-sec, k = 600): fração de tarefas resolvidas dentro do orçamento de tempo; colunas Spec Cert. (Compiled, Proved), Impl Cert. (Compiled, Proved) e End-to-End", "aplicacao": "todas as abordagens da Tabela 1; End-to-End é a métrica principal declarada", "localizador": "p. 6 do PDF (legenda da Tabela 1; «Evaluation Metric»); p. 7 do PDF («Results»)"},
+      {"nome": "compile@k e prove@k (pass@k [4])", "aplicacao": "Fig. 6, curvas por abordagem", "localizador": "p. 6 do PDF; p. 7 do PDF (Fig. 6)"},
+      {"nome": "# Qed, Avg. # Lines, # Line (Min-Max), Avg. Time (s) das provas encontradas", "aplicacao": "Tabela 2, FS e COPRA", "localizador": "p. 9 do PDF (Tabela 2)"}
+    ],
+    "linguagens": [
+      "Lean 4 (especificações, implementações e provas geradas)",
+      "descrições de entrada no formato de docstring Python do HumanEval"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Casos de teste dão cobertura parcial e não garantem correção semântica; por isso a aprovação nos testes fica fora da métrica principal. O estudo também mostra que especificações computáveis ou incompletas permitem «trapacear» com programas triviais ou cópia da especificação (Fig. 3; Fig. 8, programa que sempre retorna 0 no FVAPPS).",
+        "localizador": "p. 2 do PDF (introdução); p. 4 do PDF (Fig. 3); p. 7 do PDF («Results», último parágrafo); p. 14 do PDF (Seção A.1, Fig. 8)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os modelos geram artefatos compiláveis com frequência, mas a certificação formal fica abaixo de 10% em todas as abordagens; o sucesso fim a fim é raro porque as tarefas com especificação certificável tendem a ter provas de correção difíceis, e vice-versa.",
+        "localizador": "p. 7 do PDF (legenda da Fig. 6); p. 8 do PDF (primeiro parágrafo)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O estudo apresenta o desenho com especificações não computáveis e separadas da implementação como forma de exigir raciocínio «rather than pattern matching or memorization». Não discute contaminação do HumanEval no pré-treinamento dos modelos nem afirma contaminação efetiva.",
+        "localizador": "p. 10 do PDF (Seção 5)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falhas de análise da saída: o formato não padrão do KiminaProver-7b gerou problemas de parsing que estrangularam o pipeline híbrido (0 especificações e 1 implementação certificadas).",
+        "localizador": "p. 8 do PDF (terceiro parágrafo)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Reprodutibilidade dos resultados ao longo do tempo: o estudo justifica a ausência de barras de erro dizendo que os modelos avaliados mudam com o tempo.",
+        "localizador": "p. 31 do PDF (checklist, item 7)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Especificações de referência não computáveis (proposições em Prop), escritas e revisadas por humanos, para impedir que a implementação seja copiada da especificação; ilustrado com exemplos, sem comparação medida.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seção 2); p. 4 do PDF (Fig. 3 e «Challenges Encountered during Formalization»)"
+      },
+      {
+        "descricao": "A implementação é verificada contra a especificação de referência oculta, e não contra a especificação gerada, e cada etapa é diagnosticada pelo verificador de tipos do Lean.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (Seção 2)"
+      },
+      {
+        "descricao": "Exemplos few-shot tirados de um conjunto de 5 problemas distintos do HumanEval (conjuntos disjuntos entre exemplos e teste), como controle de procedimento.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF (primeiro parágrafo)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Few-Shot Baseline (FS em todas as etapas), executado pelo estudo com GPT-4o, o4-mini, Claude-3.7 e DeepSeek-R1; contrastado com o COPRA Baseline nos mesmos modelos GPT-4o e Claude-3.7, no mesmo benchmark, métrica e orçamento de 600 s (Tabela 1, p. 6 do PDF).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Legenda que contradiz as tabelas: a legenda da Fig. 6 diz que todos os modelos few-shot certificam só uma especificação (0.62%), mas a Tabela 1 traz o4-mini FS com Spec Cert. Proved 1.242% e a Tabela 2 traz o4-mini FS Spec com # Qed 2.",
+        "localizador": "p. 7 do PDF (legenda da Fig. 6, item b); p. 6 do PDF (Tabela 1, linha o4-mini, coluna Spec Cert. Proved); p. 9 do PDF (Tabela 2, linha o4-mini FS Spec)"
+      },
+      {
+        "descricao": "Aparente inconsistência (cálculo próprio): DeepSeek-R1 FS tem Impl Cert. Proved 5.559% na Tabela 1 e # Qed 9 na Tabela 2; 9/161 dá cerca de 5.590%, não 5.559%. A legenda da Fig. 6 informa 5.6%. O denominador não é declarado na tabela, e a origem da diferença não é explicada.",
+        "localizador": "p. 6 do PDF (Tabela 1, linha DeepSeek-R1); p. 9 do PDF (Tabela 2, linha DeepSeek-R1 FS Impl); p. 7 do PDF (legenda da Fig. 6, item d)"
+      },
+      {
+        "descricao": "Condições discrepantes não explicadas: no COPRA Baseline a geração de especificação continua FS, mas Spec Cert. Compiled difere da linha FS do mesmo modelo (GPT-4o 84.472% FS contra 76.398% COPRA; Claude-3.7 86.957% contra 81.366%), enquanto Impl Cert. Compiled é idêntica (68.323% e 65.217%). O estudo não diz se as linhas vêm de execuções distintas; número de execuções e sementes: nao_informado.",
+        "localizador": "p. 6 do PDF (Tabela 1, linhas GPT-4o e Claude-3.7 dos blocos Few-Shot e COPRA)"
+      },
+      {
+        "descricao": "Narrativa parcialmente divergente da tabela: a legenda da Tabela 2 diz que few-shot gera provas tipicamente mais curtas, mas para Claude-3.7 Spec a média de linhas é 38.0 com FS e 30.5 com COPRA; e DeepSeek-R1 FS encontra 9 provas de implementação, mais que GPT-4o COPRA (6). «Brittle» e «robustness» não são medidos.",
+        "localizador": "p. 9 do PDF (Tabela 2 e legenda)"
+      },
+      {
+        "descricao": "Resultado nulo no fim a fim: nenhuma abordagem resolve mais de um problema (problema 53); GPT-4o FS e a Hybrid Baseline ficam em 0% e as demais em 0.621%. Os contrastes entre FS e COPRA no fim a fim envolvem no máximo um problema.",
+        "localizador": "p. 6 do PDF (Tabela 1, coluna End-to-End, e legenda); p. 2 do PDF (introdução, «1/161»)"
+      },
+      {
+        "descricao": "Unidade de k ambígua na Fig. 6: a legenda descreve resultados «across k attempts», mas as linhas pontilhadas indicam extrapolação além do limite de 600 s, unidade de tempo; os rótulos dos eixos não são legíveis na imagem da página. O texto define pass@k-seconds (tempo) e também compile@k e prove@k (pass@k).",
+        "localizador": "p. 7 do PDF (Fig. 6 e legenda); p. 6 do PDF («Evaluation Metric»)"
+      },
+      {
+        "descricao": "Comparação incompleta: COPRA foi executado só com GPT-4o e Claude-3.7; a Hybrid Baseline usa outro modelo de geração (GPT-5-mini) sem linha FS correspondente; não há condição zero-shot nem variação do número de exemplos.",
+        "localizador": "p. 6 do PDF (Tabela 1)"
+      },
+      {
+        "descricao": "Limitações: o checklist afirma que, por ser artigo de benchmark, o trabalho não tem limitações, e que não há barras de erro nem testes de significância; o próprio texto, porém, relata 3 problemas do HumanEval não formalizados, problemas de parsing do Kimina e o limite de tempo como obstáculo às provas de especificação do Claude-3.7 com COPRA.",
+        "localizador": "p. 29 do PDF (checklist, item 2); p. 31 do PDF (checklist, item 7); p. 5 do PDF; p. 8 do PDF (segundo e terceiro parágrafos)"
+      },
+      {
+        "descricao": "A compilação da implementação inclui validação contra casos de teste adaptados do HumanEval, de modo que «Compiled» em Impl Cert. não mede só a verificação de tipos.",
+        "localizador": "p. 7 do PDF («Results», segundo parágrafo)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O objeto do estudo é o benchmark; as abordagens avaliadas são apresentadas como linhas de base. Nenhuma técnica de prompting é proposta como focal.",
+        "localizador": "p. 2 do PDF (contribuições); p. 6 do PDF («Evaluated Baselines»)"
+      },
+      {
+        "descricao": "Esforço manual de construção do benchmark: cerca de 25 minutos por especificação e mais 15 minutos de revisão cruzada; alguns problemas passaram de uma hora. Provas de correção manuais para uma pequena amostra variaram de 10 a 225 linhas.",
+        "localizador": "p. 4 do PDF (último parágrafo)"
+      },
+      {
+        "descricao": "Problemas não formalizados: 22 e 137 (tipos dinâmicos ou polimórficos) e 162 (MD5, por falta de biblioteca de hash em Lean). Adaptações de tipo em 103 (Option String) e 129 (união disjunta).",
+        "localizador": "p. 5 do PDF"
+      },
+      {
+        "descricao": "Claude-3.7 com COPRA resolve todas as tarefas de certificação de implementação que qualquer outra abordagem resolve; a Fig. 22 mostra uma prova de 35 linhas (problema 139).",
+        "localizador": "p. 8 do PDF; p. 28 do PDF (Fig. 22)"
+      },
+      {
+        "descricao": "O estudo informa repositório no GitHub, conjunto no HuggingFace e código de avaliação online; os pacotes não foram acessados nem validados nesta extração.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "descricao": "Os prompts aparecem só como trechos (Fig. 12–21, com partes omitidas por «........»); o prompt de sistema do COPRA não é reproduzido. Parâmetros de decodificação (temperatura, tamanho máximo) não são informados.",
+        "localizador": "p. 16 do PDF (Seção A.4); p. 18–27 do PDF"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "We use CLEVER to evaluate several few-shot and agentic approaches based on state-of-the-art language models.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "FS indicates few-shot prompting with 1–2 examples.", "localizador": "p. 6 do PDF, legenda da Tabela 1"},
+      {"trecho": "The Few-Shot Baseline uses large language models (GPT-4o, Claude-3.7, o4-mini, and DeepSeek-R1) to generate all components—specifications, implementations, and proofs—via few-shot prompting with 1–2 exemplars.", "localizador": "p. 6 do PDF, Seção 3, «Evaluated Baselines»"},
+      {"trecho": "The COPRA Baseline replaces the proof generation steps (Stages 2 and 4) with COPRA [31], a neuro-symbolic proof search agent designed to produce Lean-compatible proofs when provided with an off-the-shelf foundational model and a Lean theorem statement to prove.", "localizador": "p. 6 do PDF, Seção 3, «Evaluated Baselines»"},
+      {"trecho": "As described in Figure 5, each step in the CLEVER pipeline (spec generation, equivalence proof, implementation, and correctness proof) is retried until a valid Lean-compilable output is found or the time runs out.", "localizador": "p. 6 do PDF, Seção 3, «Evaluation Metric»"},
+      {"trecho": "You are a good Lean 4 programmer.", "localizador": "p. 18 do PDF, Fig. 12"},
+      {"trecho": "You can first think about the problem in a general way and then write the proposition.", "localizador": "p. 18 do PDF, Fig. 12"},
+      {"trecho": "DO NOT ever use the `in` keyword, it is not a valid keyword in Lean 4.", "localizador": "p. 18 do PDF, Fig. 12"},
+      {"trecho": "Also included in the input are zero or more test cases in Lean 4 that follow the specification and that your definition should pass.", "localizador": "p. 23 do PDF, Fig. 17"},
+      {"trecho": "COPRA’s system prompt, used for both isomorphism and correctness, is nearly identical to the original one in the COPRA paper [31].", "localizador": "p. 16 do PDF, Seção A.4"},
+      {"trecho": "In addition to the main benchmark, we release a small hand-curated few-shot prompt dataset comprising of 5 problems distinct from HUMANEVAL.", "localizador": "p. 5 do PDF, primeiro parágrafo"},
+      {"trecho": "Our primary evaluation metric focuses strictly on semantic correctness: a task is considered successful only if both the specification and the implementation are formally certified via Lean proofs.", "localizador": "p. 7 do PDF, «Results»"},
+      {"trecho": "While passing these tests provides some evidence of functional correctness[25], we deliberately exclude them from our core success metric—since test cases offer only partial coverage and cannot guarantee semantic soundness (see Section 2 for discussion).", "localizador": "p. 7 do PDF, «Results»"},
+      {"trecho": "This ambiguity allows a code generator to “cheat” by generating trivial programs or copying code from the specification (see Section A.1).", "localizador": "p. 2 do PDF, introdução"},
+      {"trecho": "However, it certified almost nothing (0 spec, 1 impl), as the pipeline was bottlenecked by these same parsing issues.", "localizador": "p. 8 do PDF, terceiro parágrafo"},
+      {"trecho": "By enforcing a separation between specification intent and implementation behavior, the benchmark demands genuine reasoning rather than pattern matching or memorization.", "localizador": "p. 10 do PDF, Seção 5"},
+      {"trecho": "All few-shot models solve only one problem (0.62%), while GPT-4o (CoPRA) proves 1.8%.", "localizador": "p. 7 do PDF, legenda da Fig. 6"},
+      {"trecho": "Justification: Since this is a benchmark paper, it doesn’t have any limitation as such.", "localizador": "p. 29 do PDF, checklist, item 2"},
+      {"trecho": "Justification: This is a benchmark paper, we test the capabilities of various LLMs on our problems, these models tend to change from time to time.", "localizador": "p. 31 do PDF, checklist, item 7"},
+      {"trecho": "As a result, we were able to formalize 161 out of the original 164 problems.", "localizador": "p. 5 do PDF"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "COPRA Baseline (COPRA [31] nas etapas de prova; FS na geração de especificação e de implementação)",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Few-Shot Baseline (FS em todas as etapas)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "CLEVER (161 problemas derivados do HumanEval)",
+      "metrica": "Pass@k-sec (k = 600), Spec Cert., Proved: fração de tarefas em que a prova de equivalência entre a especificação gerada e a de referência foi aceita pelo kernel do Lean dentro de 600 s",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0.621, "intervencao": 1.863},
+      "denominador": "nao_informado na Tabela 1 (fração de tarefas; o benchmark tem 161 problemas, mas o denominador não é declarado por coluna). Contagens impressas na Tabela 2 para GPT-4o Spec: # Qed 1 (FS) e 3 (COPRA).",
+      "condicoes": "Mesmo modelo (GPT-4o), mesma geração de especificação e de implementação por FS (1–2 exemplos), mesmo orçamento total de 600 s por problema, com cada etapa repetida até compilar ou esgotar o tempo (Fig. 5). Difere a geração das provas (etapas 2 e 4): FS contra o agente COPRA, pacote híbrido com busca de prova neuro-simbólica. A métrica mede a certificação da especificação, subetapa da geração de código verificada; a especificação gerada é compilada em proporções diferentes nas duas linhas (Spec Cert. Compiled 84.472% FS e 76.398% COPRA), sem explicação do estudo. Na mesma tabela, a métrica principal declarada (End-to-End) é 0% (FS) e 0.621% (COPRA). Número de execuções, sementes e parâmetros de decodificação: nao_informado; não há intervalo de confiança nem teste estatístico. Valores conferidos visualmente na Tabela 1 (p. 6) e as contagens na Tabela 2 (p. 9).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Não há principal declarado: o estudo avalia várias abordagens como linhas de base, sem destacar uma técnica. A Tabela 1 é a primeira tabela com contraste de prompting (FS contra COPRA, mesmo modelo). Primeiro modelo listado com o contraste: GPT-4o; primeira linha de base de prompting: Few-Shot Baseline. A primeira coluna (Spec Cert. Compiled) mede a geração de especificação, feita por FS nas duas condições, e não é pertinente ao contraste, que muda só as provas; a primeira métrica pertinente é Spec Cert. Proved. Não há técnica focal nem outra tarefa para cobertura nem tabela de ablação.",
+      "derivacao": "direta",
+      "localizador": "p. 6 do PDF (= p. 6 impressa), Tabela 1, linhas «GPT-4o» dos blocos «Few-Shot Baseline» e «COPRA Baseline», coluna Pass@k-sec / Spec Cert. / Proved; p. 9 do PDF, Tabela 2, linhas GPT-4o FS Spec e GPT-4o COPRA Spec",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o FS FS FS FS 84.472% 0.621% 68.323% 0.621% 0%", "localizador": "p. 6 do PDF, Tabela 1, bloco Few-Shot Baseline; colunas Model, Spec Gen, Equiv Proof, Impl Gen, Corr Proof, Spec Cert. Compiled, Spec Cert. Proved, Impl Cert. Compiled, Impl Cert. Proved, End-to-End"},
+        {"trecho": "GPT-4o FS COPRA FS COPRA 76.398% 1.863% 68.323% 3.727% 0.621%", "localizador": "p. 6 do PDF, Tabela 1, bloco COPRA Baseline; mesmas colunas"},
+        {"trecho": "GPT-4o FS Spec 1 16.0 16–16 124.3", "localizador": "p. 9 do PDF, Tabela 2; colunas Model, Approach, Certification, # Qed, Avg. # Lines, # Line (Min-Max), Avg. Time (s)"},
+        {"trecho": "GPT-4o COPRA Spec 3 26.3 16–44 97.9", "localizador": "p. 9 do PDF, Tabela 2; mesmas colunas"},
+        {"trecho": "Pass@k-seconds with k = 600 reports the fraction of tasks where Lean successfully compiles the outputs and accepts the associated proofs within a 600-second time budget.", "localizador": "p. 6 do PDF, legenda da Tabela 1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (benchmark curado para geração de código formalmente verificada em Lean e avaliação de LLMs e agentes nele) é declarado no resumo e nas contribuições.",
+      "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline de avaliação, a métrica, o orçamento e a composição das abordagens estão descritos (Fig. 5, Tabela 1) e há trechos dos prompts; faltam prompts completos (trechos omitidos e prompt de sistema do COPRA não reproduzido), escolha dos exemplos por etapa, parâmetros de decodificação, número de execuções e versões dos modelos.",
+      "localizador": "p. 6 do PDF; p. 16–27 do PDF (Seção A.4, Fig. 12–21)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "FS e COPRA são comparados nos mesmos modelos (GPT-4o e Claude-3.7), benchmark e orçamento, mas COPRA não foi executado com o4-mini e DeepSeek-R1, a Hybrid Baseline não tem linha FS correspondente, não há condição zero-shot e a compilação da especificação difere entre linhas que usam a mesma geração FS, sem explicação.",
+      "localizador": "p. 6 do PDF (Tabela 1)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k-seconds, compile@k e prove@k são definidos e a métrica principal é declarada; o denominador não é declarado por coluna; a legenda da Fig. 6 contradiz Tabelas 1 e 2 para o4-mini FS Spec (0.62% contra 1.242% e # Qed 2); 5.559% de DeepSeek-R1 aparenta não corresponder a 9 de 161; a unidade de k na Fig. 6 é ambígua (tentativas ou segundos).",
+      "localizador": "p. 6 do PDF (Tabela 1); p. 7 do PDF (Fig. 6); p. 9 do PDF (Tabela 2)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O texto relata limitações de formalização, problemas de parsing do Kimina e o efeito do limite de tempo, mas não há seção de ameaças à validade; o checklist afirma que o trabalho não tem limitações e que não há barras de erro nem testes de significância.",
+      "localizador": "p. 5 e 8 do PDF; p. 29 do PDF (checklist, item 2); p. 31 do PDF (checklist, item 7)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Benchmark, conjunto de exemplos e código de avaliação são declarados como disponíveis (GitHub, HuggingFace; não acessados nesta extração) e há trechos dos prompts; faltam versões ou snapshots dos modelos, parâmetros de decodificação, número de execuções e recursos computacionais (checklist, item 8: não informado).",
+      "localizador": "p. 1 do PDF (resumo); p. 16 do PDF; p. 30–32 do PDF (checklist, itens 5 e 8)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Há controles de desenho: especificações de referência escritas à mão, não computáveis e ocultas, e exemplos few-shot de 5 problemas distintos do HumanEval; o estudo não discute a contaminação das descrições do HumanEval, que são públicas, no pré-treinamento dos modelos avaliados.",
+      "localizador": "p. 3 do PDF (Seção 2); p. 5 do PDF; p. 10 do PDF (Seção 5)"
+    }
+  ],
+  "leitura": "completa (texto extraído lido integralmente, incluindo apêndices e checklist); páginas do PDF abertas visualmente: p. 1, 6, 7, 8 e 9"
+}

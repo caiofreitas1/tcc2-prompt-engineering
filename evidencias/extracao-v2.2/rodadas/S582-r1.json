@@ -1,0 +1,233 @@
+{
+  "estudo_id": "S582",
+  "texto_fonte": "fontes/textos/lote/S582.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "titulo": "VRank: Enhancing Verilog Code Generation from Large Language Models via Self-Consistency",
+    "versao_fonte": "arXiv:2502.00028v1 [cs.AR], 22 Jan 2025 (carimbo na margem da p. 1 do PDF)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "VRank",
+        "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao", "raciocinio", "contexto"],
+        "mecanismos_acrescentados": ["amostragem", "decomposicao", "raciocinio", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3, Sec. III (três estágios); p. 4, Fig. 2, Fig. 3 e Fig. 4; p. 6, Tabela III (colunas Baseline Pass@1 e Our Method CoT Reference)",
+        "observacao": "Pacote completo: o mesmo prompt de geração da Fig. 3 (instrução e restrições de formato e de interface pela declaração do módulo) gera n candidatos (amostragem); o LLM gera um testbench com casos de teste sem sinal de referência; os candidatos são simulados em iverilog, agrupados por saídas idênticas e os clusters ranqueados pela pontuação de consistência R(c) inspirada em MBR (amostragem com seleção por consistência; pipeline encadeado geração–testbench–simulação → decomposicao); na decisão final, o caso de teste divergente, o código do testbench gerado e a especificação são fornecidos ao LLM (contexto), com zero-shot CoT (raciocinio) seguido de pedido de resumo em JSON (restricoes), repetido x vezes com limiar de concordância th% (amostragem). O contrafactual da Tabela III é o pacote contra a escolha aleatória entre os mesmos 50 candidatos; o ganho é do pacote e não autoriza atribuição a um único mecanismo. A versão com CoT só é relatada para GPT-4o e GPT-4o-mini; para Llama e CodeV-Qwen a Tabela III traz só a versão sem CoT. A seleção usa execução em simulador (iverilog) dos candidatos sobre testbench gerado pelo LLM, sem testbench humano no laço; não há retorno de erros ao LLM para corrigir o código, por isso feedback não foi atribuído."
+      },
+      {
+        "nome_original": "Execution-based clustering e Cluster Ranking (Our Method sem Chain-of-Thought)",
+        "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao"],
+        "mecanismos_acrescentados": ["amostragem", "decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3, Sec. III-A e III-B; p. 5, Sec. V-B (RQ2); p. 6, Tabela III (colunas Baseline e Our Method Pass@1–Pass@3)",
+        "observacao": "Parte do sistema proposto (por isso componente). Na Tabela III, as colunas Our Method Pass@1–Pass@3 são relatadas sem CoT e comparadas com a escolha aleatória entre os mesmos candidatos. O contraste isola o subpacote geração de testbench pelo LLM + simulação + agrupamento + ranqueamento, não um ingrediente único. A comparação de funções de pontuação (strict loss contra case-wise loss, RQ4) é variação interna da regra de seleção, relatada só em figura (Fig. 5), e está em observacoes."
+      },
+      {
+        "nome_original": "Chain-of-Thought (CoT) final decision / CoT Reference",
+        "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao", "raciocinio", "contexto"],
+        "mecanismos_acrescentados": ["raciocinio", "contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3–4, Sec. III-C; p. 4, Fig. 4; p. 6, Tabela III (colunas Our Method Pass@1 e CoT Reference) e Sec. V-E (RQ5)",
+        "observacao": "Estágio final do VRank: zero-shot CoT («Think step by step») para prever a saída de referência do caso de teste divergente entre os dois clusters do topo, com o código do testbench e a especificação no prompt (contexto), seguido de resumo em JSON; repetido x vezes, com troca de clusters se mais de th% das referências concordarem com o segundo cluster. Restricoes (formato JSON), amostragem (x repetições com limiar) e decomposicao (raciocínio seguido de resumo) já existem como categorias no subpacote sem CoT, por isso não constam como acrescentadas. Contrafactual: Our Method Pass@1 (sem CoT) contra CoT Reference, mesmos modelos e conjuntos; só para GPT-4o e GPT-4o-mini. Valores de th% e x usados na Tabela III não são informados; th% = 80% e x = 5 aparecem só na discussão da Fig. 6."
+      },
+      {
+        "nome_original": "Baseline (direct generation / random sampling)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4, Fig. 3 e Sec. IV-2 (Eq. 4); p. 5, Sec. V-B; p. 6, Tabela III",
+        "observacao": "Linha de base do mesmo prompt da Fig. 3 (instrução de completar o código e restrições de formato do bloco de código e de interface pela declaração do módulo), sem seleção: pass@k estimado pela fórmula de escolha aleatória (Eq. 4) com n = 50 amostras, as mesmas usadas pelo método. Não é uma execução separada do método, mas uma estimativa sobre o mesmo conjunto de amostras."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "default temperature",
+        "natureza": "decodificacao",
+        "descricao": "Todos os candidatos são gerados com a temperatura padrão de cada modelo; o valor numérico não é informado. Aplica-se igualmente ao baseline e ao método.",
+        "localizador": "PDF p. 5, Sec. IV, 3º parágrafo da coluna esquerda"
+      },
+      {
+        "nome_original": "4-bit quantization with AutoAWQ",
+        "natureza": "outro",
+        "descricao": "Quantização de 4 bits do Llama-3-70B (AutoAWQ, servido por vLLM); compressão do modelo, não prompting. Aplica-se ao baseline e ao método para esse modelo.",
+        "localizador": "PDF p. 5, Sec. IV, 3º parágrafo da coluna esquerda"
+      },
+      {
+        "nome_original": "iverilog simulation",
+        "natureza": "outro",
+        "descricao": "Simulação dos candidatos em iverilog sobre o testbench gerado pelo LLM (para agrupamento) e sobre o testbench humano do benchmark (só para validar a escolha). É infraestrutura de execução usada pela seleção, não alteração do prompt.",
+        "localizador": "PDF p. 4, Sec. IV-1"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "gpt-4o-2024-08-06", "observacao": "Fechado (OpenAI)."},
+      {"nome": "GPT-4o-mini", "versao": "gpt-4o-mini-2024-07-18", "observacao": "Fechado (OpenAI)."},
+      {"nome": "Llama-3-70B (Llama na Tabela III; Llama-3 na Fig. 5)", "versao": "nao_informado", "observacao": "Aberto; quantização de 4 bits com AutoAWQ, vLLM; 4 GPUs NVIDIA A100. Variante instruct ou base não informada."},
+      {"nome": "CodeV-QWen (CodeV-Qwen na Tabela III)", "versao": "nao_informado", "observacao": "Aberto, ajustado para Verilog [15]; Huggingface Transformers. A indicação «version: 4» na referência [15] é a versão do artigo no arXiv, não do modelo. Sem resultado CoT por não suportar saída JSON formalizada."}
+    ],
+    "benchmarks": [
+      {"nome": "VerilogEval-Human", "versao": "nao_informado", "quantidade": "156 problemas", "observacao": "Subconjuntos na Tabela III: CMB(81) (combinacionais) e SEQ(75) (sequenciais). 81 + 75 = 156 (cálculo próprio), mas o artigo não declara explicitamente que CMB e SEQ particionam o Human. Fig. 6 usa uma taxonomia de cinco tipos de entrada sem contagens por tipo."}
+    ],
+    "metricas": [
+      {"nome": "pass@k (Pass@1, Pass@2, Pass@3; functional correctness)", "definicao": "Definição original de [10]: taxa de algum dos k primeiros candidatos ser funcional e passar o testbench humano; para o baseline, estimador de escolha aleatória (Eq. 4) com n = 50. Para o método, o artigo não define explicitamente como os k primeiros candidatos são obtidos; a Sec. III-B descreve a escolha de um candidato por cluster em ordem.", "denominador": "Problemas do benchmark (156 no Human; 81 em CMB; 75 em SEQ, como impresso); o número de repetições sobre o qual os valores da Tabela III são médias não é informado explicitamente.", "localizador": "PDF p. 4, Sec. IV-2 e Eq. 4; p. 6, Tabela III"},
+      {"nome": "CoT Reference (pass@1 após a decisão por CoT)", "definicao": "Pass@1 do candidato final depois do estágio de CoT.", "denominador": "Igual ao de pass@1.", "localizador": "PDF p. 6, Tabela III"},
+      {"nome": "Increase", "definicao": "Coluna impressa com sufixo %; os valores coincidem (cálculo próprio) com a diferença em pontos percentuais entre o melhor pass@1 do método (CoT Reference quando há; Our Method Pass@1 caso contrário) e o Baseline Pass@1.", "denominador": "nao_aplicavel", "localizador": "PDF p. 6, Tabela III"},
+      {"nome": "Contagem de candidatos com e sem consistência (Tabela I) e de tarefas por posição do cluster correto (Tabela II)", "definicao": "Tabela I: 7800 amostras do GPT-4o (50 × 156) por correção e consistência; Tabela II: tarefas por posição do cluster com solução correta.", "denominador": "7800 amostras (Tabela I); 156 problemas, com semântica da linha Incorrect não explicada (Tabela II)", "localizador": "PDF p. 5, Tabelas I e II"},
+      {"nome": "Pass Rate(%) por categoria de entrada (Fig. 6)", "definicao": "Taxa de aprovação do GPT-4o por tipo de descrição (Baseline, Cluster Rank, CoT Ref.), só em gráfico de barras sem valores impressos.", "denominador": "nao_informado", "localizador": "PDF p. 6, Fig. 6"}
+    ],
+    "linguagens": ["Verilog (código gerado e testbenches)", "inglês (especificações em linguagem natural)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Testbenches gerados por LLM podem conter sinais de referência errados, e usá-los diretamente pode levar a código de baixa qualidade; por isso o VRank usa testbench sem referência.", "localizador": "PDF p. 2, Sec. II-A, último parágrafo da coluna esquerda"},
+      {"categoria": "correcao_funcional", "descricao": "Consistência não garante correção: 1135 amostras (14,6%) do GPT-4o eram incorretas mas consistentes, e em 6 tarefas o cluster com solução correta ficou em segundo lugar; candidatos consistentes e incorretos podem ser escolhidos.", "localizador": "PDF p. 5, Sec. V-A e Tabelas I e II"},
+      {"categoria": "nao_determinismo", "descricao": "Aleatoriedade na geração dos casos de teste (o experimento é repetido 5 vezes para atenuá-la) e grande variabilidade do baseline do CodeV-Qwen.", "localizador": "PDF p. 5, Sec. IV, 1º parágrafo da coluna esquerda; Sec. V-B"},
+      {"categoria": "custo", "descricao": "O estudo menciona o equilíbrio entre custo computacional e desempenho ao sugerir amostras menores para modelos mais caros; custo não quantificado.", "localizador": "PDF p. 5, Sec. V-C"},
+      {"categoria": "outro", "descricao": "Limitação de aplicabilidade: o estágio CoT não foi relatado para Llama e CodeV-Qwen porque eles não suportam saída JSON formalizada.", "localizador": "PDF p. 6, nota da Tabela III"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Testbench gerado imprime só entradas e saídas, sem sinal de referência, evitando referências erradas geradas pelo LLM.", "avaliada": "nao", "localizador": "PDF p. 3, Sec. III-A"},
+      {"descricao": "Repetição do experimento 5 vezes para atenuar a aleatoriedade na geração de casos de teste (10 vezes no experimento de tamanho de amostra).", "avaliada": "nao", "localizador": "PDF p. 5, Sec. IV e Sec. V-C"},
+      {"descricao": "Decisão final por CoT para resolver inconsistências entre os dois clusters do topo e corrigir escolhas erradas do ranqueamento; comparada com o método sem CoT na Tabela III para GPT-4o e GPT-4o-mini.", "avaliada": "sim", "localizador": "PDF p. 3–4, Sec. III-C; p. 6, Tabela III e Sec. V-E"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Escolha aleatória entre os mesmos n = 50 candidatos gerados pelo prompt da Fig. 3 (direct generation baseline / random sampling), pass@k estimado pela Eq. 4 (PDF p. 4; p. 5, Sec. V-B; p. 6, Tabela III).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "O «10.5% average increase» do resumo e da conclusão coincide (cálculo próprio) com a média simples da coluna Increase no Human (9,3; 10,4; 6,7; 15,7 → 10,525), que mistura a versão com CoT (GPT-4o e GPT-4o-mini) e a versão sem CoT (Llama e CodeV-Qwen) e modelos heterogêneos; a Tabela III imprime Increase com %, mas os valores coincidem com diferenças em pontos percentuais (por exemplo, 58,1 − 48,8 = 9,3, cálculo próprio), não com variação relativa.", "localizador": "PDF p. 1, Abstract; p. 6, Tabela III; p. 7, Sec. VI"},
+      {"descricao": "Na coluna Increase, GPT-4o CMB(81) imprime 7,6% e SEQ(75) 13,6%, enquanto as diferenças entre CoT Reference e Baseline Pass@1 impressas dão 7,5 e 13,7 (cálculo próprio); diferença de 0,1 compatível com arredondamento dos valores subjacentes, que o artigo não informa.", "localizador": "PDF p. 6, Tabela III"},
+      {"descricao": "Aparente inconsistência entre Human e os subconjuntos: no CodeV-Qwen, Baseline Pass@2 no Human (43,7%) e Pass@3 (53,2%) excedem os valores de CMB (40,5%; 44,2%) e de SEQ (38,7%; 43,2%), o que não seria possível se Human fosse a união ponderada de CMB(81) e SEQ(75). Outras linhas também divergem da média ponderada por 81 e 75 (cálculo próprio; por exemplo, GPT-4o-mini Baseline Pass@1: 48,53 contra 48,8 impresso). O artigo não declara explicitamente que CMB e SEQ particionam o Human nem como os valores são agregados entre repetições.", "localizador": "PDF p. 6, Tabela III"},
+      {"descricao": "Número de repetições divergente: o método diz que o experimento é repetido 5 vezes, e a RQ3 diz 10 vezes; não é informado explicitamente se os valores da Tabela III são médias de 5 repetições, e a Tabela III não traz dispersão.", "localizador": "PDF p. 5, Sec. IV (coluna esquerda) e Sec. V-C"},
+      {"descricao": "Resultado nulo do estágio CoT: para GPT-4o-mini em CMB(81), Our Method Pass@1 e CoT Reference são ambos 78,0%; no Human, a diferença é 57,5% → 58,1%.", "localizador": "PDF p. 6, Tabela III"},
+      {"descricao": "Tabela II é citada no texto como «Fig. II»; a linha Correct soma 113 tarefas (107 + 6 + 0 + 0), coerente com o texto, mas a semântica da linha Incorrect (6, 25, 20, N/A) e dos valores entre parênteses (8) e (1) não é explicada nem reconciliável com 156 problemas a partir do texto.", "localizador": "PDF p. 5, Tabela II e Sec. V-A"},
+      {"descricao": "A Fig. 6 (taxonomia de entradas para GPT-4o) e a Fig. 5 (tamanho de amostra e case-wise loss) não trazem valores numéricos; a narrativa sobre o CoT nas tarefas complexas fala em «maintaining high accuracy», sem ganho quantificado, e a perda da case-wise loss é descrita como 0−2%. Valores das figuras não foram estimados.", "localizador": "PDF p. 6, Fig. 5, Fig. 6 e Sec. V-D e V-E"},
+      {"descricao": "O baseline não é uma execução independente: é a estimativa de escolha aleatória (Eq. 4) sobre as mesmas 50 amostras; o método usa chamadas adicionais ao LLM (testbench e CoT) não contabilizadas na comparação.", "localizador": "PDF p. 4, Sec. IV-2; p. 3, Sec. III-A e III-C"}
+    ],
+    "observacoes": [
+      {"descricao": "RQ4 compara a função de pontuação strict (Eq. 2–3) com a case-wise (Eq. 5–6) dentro da mesma regra de seleção; resultado só na Fig. 5 (Case Loss Avg) e descrito como 0−2% menor em pass@1. Não é contraste com e sem técnica de prompting.", "localizador": "PDF p. 6, Sec. V-D e Fig. 5"},
+      {"descricao": "RQ3 varia o número de candidatos de 5 a 50, com 10 repetições; o método supera o baseline com 5 amostras, e com 20 amostras atinge cerca de 90% do ganho relativo ao de 50 amostras (só em figura e texto).", "localizador": "PDF p. 5, Sec. V-C; p. 6, Fig. 5"},
+      {"descricao": "RQ1 (Tabela I) usa 7800 amostras do GPT-4o (50 × 156): 4426 corretas com consistência, 6 corretas sem consistência, 1135 incorretas com consistência, 2233 incorretas sem consistência; os percentuais do texto conferem com 7800 (cálculo próprio).", "localizador": "PDF p. 5, Tabela I e Sec. V-A"},
+      {"descricao": "O estudo apresenta como motivação que métodos anteriores dependem de inspeção humana ou de testbenches escritos por humanos; o VRank é descrito como sem humano no laço. Não há medida de esforço humano.", "localizador": "PDF p. 1, Abstract; p. 2, Sec. II-B e Fig. 1"},
+      {"descricao": "Os prompts das Fig. 3 e 4 são mostrados com trechos omitidos (<Detail omitted>, <rest of code omitted>); número de casos de teste: pelo menos 10; hardware: 2 Xeon Gold 6126 e 280 GB RAM para simulação. Nenhum pacote de replicação é mencionado.", "localizador": "PDF p. 4, Fig. 3 e Fig. 4; p. 4–5, Sec. IV"}
+    ],
+    "citacoes": [
+      {"trecho": "To enhance the generation efficiency while maintaining the quality of the generated codes, we propose VRank, an automatic framework that generates Verilog codes with LLMs.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "In our framework, multiple code candidates are generated with LLMs by leveraging their probabilistic nature.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "Clusters are ranked based on the consistency they show on testbench.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "To determine the best candidate, Chain-of-Thought is further applied to select the best candidate from the top-ranked clusters.", "localizador": "PDF p. 1, Abstract"},
+      {"trecho": "The VRank framework is designed to enhance the quality of Verilog code generation through a three-stage process: execution-based clustering, cluster ranking, and Chain-of-Thought final decision, as depicted in Fig. 2.", "localizador": "PDF p. 3, Sec. III"},
+      {"trecho": "This testbench is designed to only print the input and output on each test case, without providing any reference signal to check the correctness of the value of each output.", "localizador": "PDF p. 3, Sec. III-A"},
+      {"trecho": "Using zero-shot CoT reasoning, the LLM is prompted to predict the reference output for this specific test case.", "localizador": "PDF p. 3, Sec. III-C"},
+      {"trecho": "After this reasoning attempt, we prompt LLM again to summarize its reasoning and return the reference output in JSON format (Ref. in the figure).", "localizador": "PDF p. 3, Sec. III-C"},
+      {"trecho": "The above attempt of CoT reasoning and summarizing is repeated x times, generating a set of reference outputs.", "localizador": "PDF p. 3, Sec. III-C"},
+      {"trecho": "Complete the following verilog code based on the following requirements. You should generate complete verilog module.", "localizador": "PDF p. 4, Fig. 3 (System Prompt)"},
+      {"trecho": "What should the output be like given the following verilog module description? Think step by step.", "localizador": "PDF p. 4, Fig. 4 (System Prompt)"},
+      {"trecho": "Although LLMs can also be used to automatically generate testbenches [24], the quality of these generated testbenches lags behind that of the generated Verilog modules, indicating wrong reference signals inside such testbenches.", "localizador": "PDF p. 2, Sec. II-A"},
+      {"trecho": "Therefore, directly using them to facilitate Verilog generation can lead to low code quality.", "localizador": "PDF p. 2, Sec. II-A"},
+      {"trecho": "As shown in Table I, 56.7% (4426) of the solutions were correct, and had consistency, whereas only 14.6% (1135) were incorrect but had consistency.", "localizador": "PDF p. 5, Sec. V-A"},
+      {"trecho": "To alleviate the randomness in test case generation, the experiment below is repeated 5 times.", "localizador": "PDF p. 5, Sec. IV"},
+      {"trecho": "Under our prompting strategy, which may differ from the prompting it sees when finetuning on Verilog, CodeV-Qwen can still produce valid solutions, but experiences much variability in baseline.", "localizador": "PDF p. 5, Sec. V-B"},
+      {"trecho": "This suggests that engineers could use a smaller sample size when working with more expensive models, balancing computational cost with performance.", "localizador": "PDF p. 5, Sec. V-C"},
+      {"trecho": "CoT Reference results are not reported for Llama and CodeV-Qwen since they do not support formalized JSON output.", "localizador": "PDF p. 6, nota da Tabela III"},
+      {"trecho": "Both demonstrated the ability to correct previous mistakes by resolving inconsistencies between top-ranked code candidates.", "localizador": "PDF p. 6, Sec. V-E"},
+      {"trecho": "All code candidates are generated on the model’s default temperature.", "localizador": "PDF p. 5, Sec. IV"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "VRank",
+      "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao", "raciocinio", "contexto"],
+      "mecanismos_acrescentados": ["amostragem", "decomposicao", "raciocinio", "contexto"],
+      "comparador": "Baseline (direct generation / random sampling): escolha aleatória entre os mesmos 50 candidatos, Pass@1 pela Eq. 4",
+      "modelo": "GPT-4o-mini (gpt-4o-mini-2024-07-18)",
+      "benchmark": "VerilogEval-Human (Dataset Human)",
+      "metrica": "Pass@1 (functional correctness); intervenção na coluna CoT Reference (pass@1 após a decisão por CoT). A definição citada de [10] é a de escolha aleatória; para o método, o artigo não detalha como o primeiro candidato é contado além da descrição da Sec. III.",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 48.8, "intervencao": 58.1},
+      "denominador": "156 problemas (VerilogEval-Human, Sec. IV-1); número de repetições agregadas não informado explicitamente",
+      "condicoes": "n = 50 candidatos por problema; temperatura padrão do modelo (valor não informado); pelo menos 10 casos de teste no testbench gerado; th% e x usados na Tabela III não informados (th% = 80%, x = 5 citados só para a Fig. 6); o método declara 5 repetições do experimento, mas não diz explicitamente que a Tabela III é a média delas, e não há dispersão. O agregado impresso de 10,5% (média de Increase entre modelos, misturando versão com e sem CoT) não foi usado por não ser compatível; adotada a primeira linha da Tabela III. O baseline é estimado sobre as mesmas amostras, sem as chamadas adicionais de testbench e CoT. Conferido no PDF, p. 6, Tabela III (cabeçalhos Baseline Pass@1 e Our Method CoT Reference; coluna Increase = 9,3%).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo, contribuições e conclusão destacam uma técnica (VRank, que inclui a decisão por CoT), uma métrica (pass@1, functional correctness) e um comparador (o único baseline executado, direct generation/random sampling) no VerilogEval-Human. O agregado impresso de 10,5% mistura modelos e as versões com e sem CoT, logo não é compatível; usou-se o primeiro modelo da Tabela III (GPT-4o-mini, Human), com o VRank completo na coluna CoT Reference, coerente com a coluna Increase.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini / Human; p. 1, Abstract; p. 7, Sec. VI",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o-mini 48.8% 53.2% 55.4% 57.5% 58.7% 59.9% 58.1% 9.3%", "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini, Dataset Human; colunas Baseline Pass@1, Pass@2, Pass@3; Our Method Pass@1, Pass@2, Pass@3, CoT Reference; Increase"},
+        {"trecho": "Experimental results on the VerilogEval-Human benchmark demonstrate a significant 10.5% average increase in functional correctness (pass@1) across multiple LLMs, demonstrating VRank’s effectiveness in improving the accuracy of automated hardware description language generation for complex design tasks.", "localizador": "PDF p. 1, Abstract"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Execution-based clustering e Cluster Ranking (Our Method sem Chain-of-Thought)",
+      "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao"],
+      "mecanismos_acrescentados": ["amostragem", "decomposicao"],
+      "comparador": "Baseline (direct generation / random sampling): escolha aleatória entre os mesmos 50 candidatos, Pass@1 pela Eq. 4",
+      "modelo": "GPT-4o-mini (gpt-4o-mini-2024-07-18)",
+      "benchmark": "VerilogEval-Human (Dataset Human)",
+      "metrica": "Pass@1 (functional correctness), coluna Our Method Pass@1, relatada sem aplicar CoT",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 48.8, "intervencao": 57.5},
+      "denominador": "156 problemas (VerilogEval-Human); número de repetições agregadas não informado explicitamente",
+      "condicoes": "n = 50 candidatos; temperatura padrão; testbench gerado pelo LLM com pelo menos 10 casos; seleção pela pontuação strict R(c); sem CoT, conforme Sec. V-B. Contraste do subpacote testbench gerado + simulação + agrupamento + ranqueamento, não de um ingrediente único. Repetições: ver extração 1. Conferido no PDF, p. 6, Tabela III.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado do sistema, incluído só para completar o alvo de três; primeiro na ordem das colunas da Tabela III, que funciona como tabela de ablação (Our Method Pass@1 sem CoT antes de CoT Reference); primeiro modelo listado (GPT-4o-mini) e primeiro conjunto (Human).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini / Human; p. 5, Sec. V-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o-mini 48.8% 53.2% 55.4% 57.5% 58.7% 59.9% 58.1% 9.3%", "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini, Dataset Human; colunas Baseline Pass@1, Pass@2, Pass@3; Our Method Pass@1, Pass@2, Pass@3, CoT Reference; Increase"},
+        {"trecho": "We report the pass@1 to pass@3 scores for both the baseline and our method, without applying Chain-of-Thought (CoT) reasoning.", "localizador": "PDF p. 5, Sec. V-B"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Thought (CoT) final decision / CoT Reference",
+      "mecanismos": ["instrucao", "restricoes", "amostragem", "decomposicao", "raciocinio", "contexto"],
+      "mecanismos_acrescentados": ["raciocinio", "contexto"],
+      "comparador": "Our Method Pass@1 (execution-based clustering e cluster ranking sem CoT)",
+      "modelo": "GPT-4o-mini (gpt-4o-mini-2024-07-18)",
+      "benchmark": "VerilogEval-Human (Dataset Human)",
+      "metrica": "Pass@1 (functional correctness): Our Method Pass@1 (sem CoT) contra CoT Reference",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 57.5, "intervencao": 58.1},
+      "denominador": "156 problemas (VerilogEval-Human); número de repetições agregadas não informado explicitamente",
+      "condicoes": "CoT aplicado na escolha entre os dois clusters do topo; zero-shot CoT seguido de resumo em JSON, repetido x vezes com limiar th%; valores de x e th% para a Tabela III não informados (th% = 80%, x = 5 citados só na discussão da Fig. 6). Disponível só para GPT-4o e GPT-4o-mini. Demais condições como na extração 2. Conferido no PDF, p. 6, Tabela III.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente isolado na ordem das colunas da Tabela III (CoT Reference contra Our Method Pass@1), incluído para completar o alvo de três; primeiro modelo com CoT listado (GPT-4o-mini) e primeiro conjunto (Human).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini / Human; Sec. V-E",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o-mini 48.8% 53.2% 55.4% 57.5% 58.7% 59.9% 58.1% 9.3%", "localizador": "PDF p. 6, Tabela III, linha GPT-4o-mini, Dataset Human; colunas Baseline Pass@1, Pass@2, Pass@3; Our Method Pass@1, Pass@2, Pass@3, CoT Reference; Increase"},
+        {"trecho": "We applied CoT reasoning to GPT-4o and GPT-4o-mini on identifying top 2 clusters.", "localizador": "PDF p. 6, Sec. V-E"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo do framework e cinco questões de pesquisa (RQ1–RQ5) explicitados.", "localizador": "PDF p. 1, Abstract e contribuições; p. 5, Sec. V"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Os três estágios, a função de pontuação e exemplos de prompts são descritos, mas os prompts aparecem com trechos omitidos, os valores de th% e x usados na Tabela III não são informados (só para a Fig. 6), a contagem de pass@2 e pass@3 do método não é definida explicitamente e o número de repetições diverge entre seções (5 e 10).", "localizador": "PDF p. 3, Sec. III; p. 4, Fig. 3 e 4; p. 5, Sec. IV e V-C; p. 6, Sec. V-E"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há linha de base executada sobre as mesmas 50 amostras (escolha aleatória, Eq. 4) e ablação do CoT, mas não há comparação com outras estratégias de seleção ou de depuração citadas (Fig. 1), e o baseline não recebe as chamadas adicionais ao LLM usadas pelo método.", "localizador": "PDF p. 4, Sec. IV-2; p. 5, Sec. V-B; p. 6, Tabela III"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@k é definido e os tamanhos dos conjuntos são impressos (156, 81, 75), mas a coluna Increase usa % para diferenças em p.p., o 10,5% mistura versões com e sem CoT, a Tabela III não traz dispersão, e os valores do Human não coincidem com CMB e SEQ (CodeV-Qwen Baseline Pass@2 e Pass@3 do Human acima de ambos os subconjuntos).", "localizador": "PDF p. 4, Eq. 4; p. 6, Tabela III; p. 1, Abstract"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças; o estudo menciona a aleatoriedade na geração de casos de teste, a possível diferença entre o prompt usado e o ajuste fino do CodeV-Qwen e a ausência de CoT para modelos sem saída JSON, sem discutir validade externa, contaminação ou custo das chamadas adicionais.", "localizador": "PDF p. 5, Sec. IV e V-B; p. 6, nota da Tabela III"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Snapshots dos modelos da OpenAI, frameworks, quantização e hardware são informados, mas a temperatura é só «default», a versão do Llama e do CodeV-Qwen não é dada, os prompts estão abreviados, th% e x da Tabela III faltam e nenhum código ou pacote de replicação é mencionado.", "localizador": "PDF p. 4, Fig. 3 e 4; p. 5, Sec. IV"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura do texto completo, não há menção a possível presença do VerilogEval-Human nos dados de pré-treinamento ou de ajuste fino dos modelos (incluindo o CodeV-Qwen, ajustado para Verilog).", "localizador": "Texto completo (PDF p. 1–7)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (incluindo referências). Páginas do PDF abertas visualmente: p. 1 (resumo e versão arXiv), p. 3 (método e equações), p. 4 (Fig. 2–4, configuração e Eq. 4), p. 5 (Tabelas I e II, RQ1–RQ3), p. 6 (Tabela III, Fig. 5, Fig. 6, RQ4–RQ5). A citação da conclusão (p. 7) foi localizada pelo texto extraído e pela continuidade da Sec. VI iniciada na p. 6."
+  }
+}

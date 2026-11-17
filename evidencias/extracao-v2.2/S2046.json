@@ -1,0 +1,393 @@
+{
+  "estudo": "S2046",
+  "texto_fonte": "fontes/textos/lote/S2046.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "ReinFix (Reinforcement Ingredient Fixer)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "exemplos", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1-2 do PDF (resumo e introdução), p. 4-7 (seção 3, Algoritmo 1, Figuras 3, 5 e 7), p. 9 (Tabela 5, variantes ❶ e ❻); o PDF (arXiv) não traz paginação impressa visível",
+        "observacao": "Agente ReAct em duas fases: na fase de raciocínio, chama ferramentas de análise estática (Joern/CPG, Tabela 1) para recuperar ingredientes internos (código doador) e analisar a causa-raiz; na fase de solução, recupera de um banco vetorial um par bug-correção com causa-raiz semelhante (top n = 1, Figura 5) e gera sugestões de reparo e vários patches, validados pelos testes (só o top-1 plausível é mantido). Pacote híbrido: inclui ferramentas de análise estática, modelo de embeddings, banco vetorial, orçamento de patches e temperatura, que não são prompting. O contrafactual é ReinFix_NN (dois componentes de busca removidos) contra ReinFix_DP (completo), ambos com GPT-4o no Defects4J V1.2 (Tabela 5, p. 9); o ganho é do pacote e não se atribui a um único mecanismo. Os mecanismos acrescentados são em relação a ReinFix_NN. A composição exata de ReinFix_NN (se mantém raciocínio sobre causa-raiz, decomposição e amostragem) não é detalhada. Não se marcou feedback: o estudo não informa se o resultado da validação de uma tentativa (até 3 por bug) é devolvido ao modelo; as observações das ferramentas são recuperação de contexto, não crítica do código gerado."
+      },
+      {
+        "nome_original": "Internal Ingredients Search (Dependency-Analysis-Based) — variante ReinFix_DN",
+        "mecanismos": ["instrucao", "raciocinio", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4-5 do PDF (seção 3.1, Tabela 1, Figura 4); p. 9 (Tabela 5, linhas ❶ e ❷; seção 5.3.1, item 1)",
+        "observacao": "Busca de ingredientes internos por análise de dependências (Joern/CPG) em quatro níveis (variável, método, classe, arquivo). Ablação ❷ ReinFix_DN contra ❶ ReinFix_NN (GPT-4o, Defects4J V1.2). Também há o contraste ❻ ReinFix_DP contra ❸ ReinFix_NP, analisado pelo estudo no item 3 da seção 5.3.1. A ferramenta de análise estática em si não é prompting; o mecanismo de prompting é o código recuperado inserido no contexto. O estudo não detalha se a variante mantém amostragem e decomposição do pacote completo."
+      },
+      {
+        "nome_original": "External Ingredients Search (Pattern-Matching-Based) — variante ReinFix_NP",
+        "mecanismos": ["instrucao", "raciocinio", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5-6 do PDF (seção 3.2, Figuras 5 e 6); p. 9 (Tabela 5, linhas ❶ e ❸; seção 5.3.1, item 2)",
+        "observacao": "Recuperação (RAG) de pares bug-correção históricos com causa-raiz, usando código defeituoso concatenado à causa-raiz como consulta (embeddings text-embedding-3-large, similaridade cosseno, top n = 1). Exemplos resolvidos recuperados → exemplos e contexto. Ablação ❸ ReinFix_NP contra ❶ ReinFix_NN; segundo o estudo, em ReinFix_NP o LLM raciocina sozinho sobre a causa-raiz. O estudo não detalha se a variante mantém amostragem e decomposição do pacote completo."
+      },
+      {
+        "nome_original": "ReinFix_NN (variante sem os dois componentes de busca)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9 do PDF (seção 5.3, variante ❶; Tabela 5)",
+        "observacao": "Linha de base da ablação, descrita como as capacidades fundamentais de reparo do modelo. Recebe o código defeituoso como insumo (contexto). O estudo não detalha o prompt nem se a variante mantém análise de causa-raiz, sugestões de reparo e geração de vários patches; esses mecanismos ficam sem registro por falta de informação."
+      },
+      {
+        "nome_original": "ReinFix_FP (busca interna substituída pelo esquema de recuperação do FitRepair)",
+        "mecanismos": ["instrucao", "raciocinio", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 9 do PDF (seção 5.3, variante ❹; Tabela 5); p. 10 (seção 5.3.2, item 1; Figura 10-b)",
+        "observacao": "Esquema de recuperação de identificadores por similaridade de código (FitRepair), reimplementado pelos autores no lugar da busca por dependências, com a busca externa Pattern-Matching-Based mantida. O estudo analisa o contraste ❹ contra ❻ (substituição de esquema, 110 contra 146). Contraste pareado na matriz da Tabela 5 (p. 9): ❸ ReinFix_NP (NULL / Pattern-Matching-Based, 108) e ❹ ReinFix_FP (FitRepair / Pattern-Matching-Based, 110) diferem apenas na presença do esquema FitRepair; esse contraste não é analisado pelo estudo."
+      },
+      {
+        "nome_original": "ReinFix_DR (busca externa substituída pelo esquema de recuperação do RAP-Gen)",
+        "mecanismos": ["instrucao", "raciocinio", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 9 do PDF (seção 5.3, variante ❺; Tabela 5); p. 10 (seção 5.3.2, item 2)",
+        "observacao": "Recuperação de padrões de reparo só por similaridade de código (RAP-Gen), reimplementada pelos autores, com a busca interna por dependências mantida. O estudo analisa o contraste ❺ contra ❻ (119 contra 146). Contraste pareado na matriz da Tabela 5 (p. 9): ❷ ReinFix_DN (Dependency-Analysis-Based / NULL, 116) e ❺ ReinFix_DR (Dependency-Analysis-Based / RAP-Gen, 119) diferem apenas na presença do esquema RAP-Gen; esse contraste não é analisado pelo estudo."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (introdução); p. 8 (Tabelas 3 e 4); p. 11 (seção 7)",
+        "observacao": "Sistema comparador baseado em ChatGPT (GPT-3.5) com reparo conversacional guiado por feedback de execução de testes; resultados reaproveitados de estudo anterior, não executados pelos autores; mecanismos não isolados neste estudo."
+      },
+      {
+        "nome_original": "ThinkRepair",
+        "mecanismos": ["instrucao", "raciocinio", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (introdução); p. 8 (Tabelas 3 e 4); p. 10 (Tabela 6); p. 11 (seção 7)",
+        "observacao": "Sistema comparador com cadeia de raciocínio (CoT) sobre ChatGPT; na Tabela 6 aparece também ThinkRepair* com DeepSeek. Resultados reaproveitados de estudos anteriores; mecanismos não isolados neste estudo."
+      },
+      {
+        "nome_original": "RepairAgent",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8 do PDF (Tabelas 3 e 4); p. 11 (seção 7)",
+        "observacao": "Agente baseado em LLM que repara invocando ferramentas externas; o estudo não descreve seus mecanismos além disso. Resultados reaproveitados de estudo anterior; mecanismos não isolados neste estudo."
+      },
+      {
+        "nome_original": "AlphaRepair",
+        "mecanismos": ["contexto", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8 do PDF (Tabela 3); p. 10 (Tabela 6, CodeBERT); p. 11 (seção 7)",
+        "observacao": "O estudo o enquadra no paradigma de prompt-learning, com prompts de templates de reparo para as posições do defeito (CodeBERT). Classificado como outro: preenchimento de máscara em template de reparo. Resultados reaproveitados; mecanismos não isolados."
+      },
+      {
+        "nome_original": "GAMMA",
+        "mecanismos": ["contexto", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8 do PDF (Tabela 3); p. 11 (seção 7)",
+        "observacao": "O estudo o enquadra no paradigma de prompt-learning, com prompts de templates de reparo (predição de máscara). Classificado como outro: preenchimento de máscara em template de reparo. Resultados reaproveitados; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "sampling temperature of 1",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de amostragem 1 para os modelos-base.",
+        "localizador": "p. 7 do PDF, seção 4.5"
+      },
+      {
+        "nome_original": "total maximum patch space size 3*3*5=45",
+        "natureza": "orcamento",
+        "descricao": "Até 3 tentativas por bug, até 3 sugestões de reparo por tentativa e até 5 patches candidatos por sugestão; linha Sampling Times da Tabela 3 compara com orçamentos dos comparadores (por exemplo, ChatRepair 500).",
+        "localizador": "p. 7 do PDF, seção 4.5; p. 8, Tabela 3"
+      },
+      {
+        "nome_original": "perfect fault localization",
+        "natureza": "outro",
+        "descricao": "Localização de defeito perfeita fornecida ao sistema, para evitar vieses de ferramenta de localização; não é prompting.",
+        "localizador": "p. 7 do PDF, seção 4.5"
+      },
+      {
+        "nome_original": "base models gpt-3.5-turbo, gpt-4o, GPT-4, GPT-4-turbo, DeepSeek-Coder",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo-base do ReinFix entre experimentos (Defects4J com GPT-3.5 e GPT-4o; RWB com GPT-3.5, GPT-4, GPT-4-turbo e DeepSeek-Coder) sem alterar o prompt.",
+        "localizador": "p. 7 do PDF, seção 4.5; p. 10-11, seção 5.4 e Tabela 6"
+      },
+      {
+        "nome_original": "TRANSFER vector database (100K random samples, exact match filtering)",
+        "natureza": "outro",
+        "descricao": "Curadoria do corpus de recuperação: amostra aleatória de 100 mil pares do TRANSFER (cerca de um milhão de BFPs), filtragem por correspondência exata contra os benchmarks e indexação com text-embedding-3-large.",
+        "localizador": "p. 7 do PDF, seção 4.4"
+      },
+      {
+        "nome_original": "root cause labeling of the BFP corpus",
+        "natureza": "outro",
+        "descricao": "Rotulagem prévia (offline) da causa-raiz de cada par do corpus por um LLM (GPT-4o, segundo a seção de preparação de dados) para formar trios (buggy_code, fix_code, root_cause); é preparação de dados, não parte do prompt de reparo.",
+        "localizador": "p. 5 do PDF, seção 3.2 (Data Preparation)"
+      }
+    ],
+    "modelos": [
+      {"nome": "gpt-3.5-turbo (ReinFix_GPT3.5)", "versao": "gpt-3.5-turbo-0125 (indicado na entrada de referência [35])", "localizador": "p. 7 do PDF, seção 4.5; p. 12, referência [35]"},
+      {"nome": "gpt-4o (ReinFix_GPT4o, inclusive na ablação)", "versao": "gpt-4o-2024-05-13 (indicado na entrada de referência [39])", "localizador": "p. 7 do PDF, seção 4.5; p. 12, referência [39]"},
+      {"nome": "GPT-4 (ReinFix_GPT4, RWB V1.0)", "versao": "gpt-4-0613", "localizador": "p. 10 do PDF, seção 5.4"},
+      {"nome": "GPT-4-turbo (RWB V2.0)", "versao": "gpt-4-1106-preview", "localizador": "p. 10 do PDF, seção 5.4"},
+      {"nome": "DeepSeek-Coder (ReinFix_DSC, RWB V2.0)", "versao": "nao_informado", "localizador": "p. 10 do PDF, seção 5.4; Tabela 6"},
+      {"nome": "text-embedding-3-large (modelo de embeddings do banco vetorial)", "versao": "nao_informado", "localizador": "p. 5 e p. 7 do PDF, seções 3.2 e 4.4"},
+      {"nome": "GPT-4o (rotulagem de causa-raiz do corpus)", "versao": "nao_informado", "localizador": "p. 5 do PDF, seção 3.2"},
+      {"nome": "Comparadores: ChatRepair e ThinkRepair com GPT-3.5; ThinkRepair* com DeepSeek; AlphaRepair com CodeBERT", "versao": "nao_informado", "localizador": "p. 10 do PDF, Tabela 6; p. 11, seção 6"}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J V1.2", "quantidade": "391 bugs (4 depreciados removidos); 136 MF, 255 SF, 154 SH, 80 SL", "observacao": "SH é subconjunto de SF e SL é subconjunto de SH (sobreposição descrita pelo estudo). Os totais da Tabela 3 contam bugs corrigidos; o estudo não informa sobre qual subconjunto cada comparador relatado foi avaliado.", "localizador": "p. 7 do PDF, seção 4.2 e Tabela 2"},
+      {"nome": "Defects4J V2.0", "quantidade": "438 bugs novos; 210 MF, 228 SF, 159 SH, 78 SL", "observacao": "Mesma relação de subconjuntos SF ⊃ SH ⊃ SL.", "localizador": "p. 7 do PDF, seção 4.2 e Tabela 2"},
+      {"nome": "RWB V1.0", "quantidade": "44 bugs de função única (commits após outubro de 2021)", "observacao": "Usado no estudo de generalização e para mitigar vazamento.", "localizador": "p. 7 do PDF, seção 4.2; p. 10, Tabela 6"},
+      {"nome": "RWB V2.0", "quantidade": "29 bugs de função única (commits após março de 2023)", "observacao": "Usado no estudo de generalização e para mitigar vazamento.", "localizador": "p. 7 do PDF, seção 4.2; p. 10, Tabela 6"}
+    ],
+    "metricas": [
+      {"nome": "correct fixes", "definicao": "bugs com patch plausível verificado por humanos como semanticamente equivalente à correção de referência", "localizador": "p. 6-7 do PDF, seção 3.3; p. 7, seção 4.5; Tabelas 3-6"},
+      {"nome": "plausible fixes", "definicao": "bugs com patch que passa em todos os casos de teste", "localizador": "p. 6-7 do PDF; Tabela 3 (p. 8)"},
+      {"nome": "unique fixes", "definicao": "bugs corrigidos só por uma ferramenta (diagrama de Venn, Defects4J V1.2, GPT-3.5)", "localizador": "p. 8 do PDF, Figura 8"},
+      {"nome": "average cost per bug fix", "definicao": "custo médio em dólares por bug corrigido", "localizador": "p. 11 do PDF, seção 6"},
+      {"nome": "improvement (%)", "definicao": "variação relativa citada no texto (71.76% na ablação; 10.34% no RWB), sem fórmula explícita", "localizador": "p. 2 e p. 10 do PDF"}
+    ],
+    "linguagens": [
+      {"nome": "Java", "localizador": "p. 7 do PDF, seção 4.1 (RQ1: Java bug repair); Defects4J"},
+      {"nome": "RWB: linguagem não declarada explicitamente (projetos Cli, Codec, Collections, Compress, Csv, Jsoup, Lang)", "localizador": "p. 10 do PDF, Tabela 6"}
+    ],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os dados de treino dos LLMs podem conter os patches corretos dos projetos avaliados; também há risco de sobreposição entre o corpus de recuperação (TRANSFER) e os benchmarks. O estudo não afirma contaminação efetiva.",
+        "localizador": "p. 11 do PDF, seção 6 (Data Leakage); p. 7, seção 4.4"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Uso de LLMs pode elevar o custo de reparo; o estudo quantifica o custo médio por bug corrigido: US$ 0,06 (ReinFix_GPT3.5), US$ 1,45 (ReinFix_GPT4o) e US$ 0,42 (ChatRepair, relatado de estudo anterior). O custo de embeddings motivou a amostra de 100 mil pares (não quantificado).",
+        "localizador": "p. 11 do PDF, seção 6 (Repair Costs); p. 7, seção 4.4"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Recuperação de ingredientes sem considerar dependências de programa (similaridade de código) traz código doador irrelevante ou incorreto, que leva o modelo a inferir causas-raiz erradas e a falhar no reparo; recuperação externa só por similaridade de código traz comportamento de reparo irrelevante. O estudo também distingue patches plausíveis (passam nos testes) de corretos (verificação humana).",
+        "localizador": "p. 10 do PDF, seção 5.3.2, itens 1 e 2, Figura 10; p. 6-7, definição de plausible/correct patches"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Possíveis laços infinitos no ciclo de raciocínio e ação do agente ReAct, que o processo do Algoritmo 1 procura evitar; não é cibersegurança.",
+        "localizador": "p. 6 do PDF, seção 3.3"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Avaliação em bugs do RWB coletados após a data de corte dos dados de treino dos LLMs (contaminação).", "avaliada": "nao", "localizador": "p. 11 do PDF, seção 6; p. 10, seção 5.4"},
+      {"descricao": "Filtragem por correspondência exata das amostras do corpus de recuperação que se sobrepõem aos benchmarks (contaminação).", "avaliada": "nao", "localizador": "p. 7 do PDF, seção 4.4"},
+      {"descricao": "Revisão manual dos patches plausíveis para verificar correção semântica (correção funcional); executor e critério da revisão não informados.", "avaliada": "nao", "localizador": "p. 7 do PDF, seção 4.5"},
+      {"descricao": "Busca de código doador por análise de dependências em vez de similaridade de código (correção funcional); comparada com a variante que usa o esquema do FitRepair (ReinFix_FP), medindo correct fixes, não a taxa de código doador irrelevante.", "avaliada": "sim", "localizador": "p. 9 do PDF, Tabela 5; p. 10, seção 5.3.2, item 1"},
+      {"descricao": "Inclusão da causa-raiz na consulta de recuperação externa em vez de só similaridade de código (correção funcional); comparada com a variante que usa o esquema do RAP-Gen (ReinFix_DR), medindo correct fixes.", "avaliada": "sim", "localizador": "p. 9 do PDF, Tabela 5; p. 10, seção 5.3.2, item 2"},
+      {"descricao": "Processo do Algoritmo 1 para evitar laços infinitos no raciocínio e ação do agente.", "avaliada": "nao", "localizador": "p. 6 do PDF, seção 3.3"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os comparadores das Tabelas 3, 4 e 6 não foram executados pelos autores: são resultados relatados em estudos anteriores, com orçamentos de amostragem distintos (Sampling Times: ReinFix 3*3*5; ChatRepair 500; ThinkRepair 25*5; RepairAgent 117; AlphaRepair 5000 etc.) e, na comparação principal, modelos-base distintos (ReinFix_GPT4o com GPT-4o contra ChatRepair com GPT-3.5).",
+        "localizador": "p. 7 do PDF, seção 4.3; p. 8, Tabela 3; p. 11, seção 6"
+      },
+      {
+        "descricao": "Escopos de avaliação diferentes entre sistemas: ReinFix inclui bugs de múltiplas funções nos totais, enquanto o estudo afirma que ThinkRepair foi projetado para função única e que ChatRepair e outros comparadores se concentram em linha única; na Tabela 4, ChatRepair só tem valores em SF (76) no V1.2 e em SL (48) no V2.0. Os totais da Tabela 3 comparam, portanto, conjuntos tentados diferentes.",
+        "localizador": "p. 8 do PDF, seção 5.1 e Tabelas 3 e 4"
+      },
+      {
+        "descricao": "Inconsistência de citação: o texto chama ThinkRepair de «ChatGPT-based APR tool ThinkRepair [49]», mas a referência [49] é ChatRepair e ThinkRepair é [54].",
+        "localizador": "p. 8 do PDF, seção 5.1 (Defects4J V2.0); p. 12, referências [49] e [54]"
+      },
+      {
+        "descricao": "Divergência de nome do modelo: as contribuições atribuem os 146 e 145 bugs e o ganho de 61 bugs da ablação ao «GPT-4», enquanto a implementação, a Tabela 3 e a ablação usam GPT-4o.",
+        "localizador": "p. 2 do PDF (contribuições); p. 7, seção 4.5; p. 8, Tabela 3; p. 9, seção 5.3"
+      },
+      {
+        "descricao": "A variante ReinFix_NN é descrita como as capacidades fundamentais de reparo do «ChatGPT», mas a ablação usa GPT-4o como modelo-base.",
+        "localizador": "p. 9 do PDF, seção 5.3"
+      },
+      {
+        "descricao": "Aparente inconsistência de base: o texto afirma melhoria de 10.34% sobre ThinkRepair no RWB sem informar a base do cálculo. Cálculo próprio: (20 + 12) / (19 + 10) − 1 ≈ 10,34%, o que somaria resultados de RWB V1.0 (GPT-3.5) e RWB V2.0 (DeepSeek), benchmarks e modelos distintos; o estudo não confirma essa reconstrução.",
+        "localizador": "p. 10 do PDF, seção 5.4 e Tabela 6"
+      },
+      {
+        "descricao": "O asterisco de ThinkRepair* (RWB V2.0, DeepSeek) não tem significado explicado no texto lido.",
+        "localizador": "p. 10 do PDF, Tabela 6 e seção 5.4"
+      },
+      {
+        "descricao": "Afirmações sobre vazamento divergem em força: o resumo fala em benchmarks «free of data leakage risk» e a seção 6 diz que a ablação garante que os ganhos independem de vazamento, mas a ablação compara variantes no Defects4J V1.2 com GPT-4o, sem controle de data de corte; a própria seção 6 diz que o RWB ajuda a minimizar o impacto do vazamento.",
+        "localizador": "p. 1 do PDF (resumo); p. 9, seção 5.3; p. 11, seção 6"
+      },
+      {
+        "descricao": "Número de execuções não informado, com temperatura 1; não há medida de variabilidade entre execuções.",
+        "localizador": "p. 7 do PDF, seção 4.5"
+      },
+      {
+        "descricao": "O modelo usado para rotular causas-raiz do corpus aparece como «e.g., GPT-4» em um parágrafo e como GPT-4o («we use GPT-4o in our experiment») na preparação de dados.",
+        "localizador": "p. 5 do PDF, seção 3.2"
+      },
+      {
+        "descricao": "As variantes ReinFix_FP e ReinFix_DR usam esquemas do FitRepair e do RAP-Gen reimplementados pelos autores dentro do ReinFix, não as ferramentas originais (que dependem de ajuste fino de CodeT5).",
+        "localizador": "p. 2 do PDF (introdução); p. 10, seção 5.3.2"
+      },
+      {
+        "descricao": "Conferência própria das somas: as linhas por projeto da Tabela 3 somam os totais impressos do V1.2, e MF + SF da Tabela 4 coincidem com os totais da Tabela 3 para ReinFix e RepairAgent; não se encontrou divergência numérica entre essas tabelas.",
+        "localizador": "p. 8 do PDF, Tabelas 3 e 4"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Kit de nove ferramentas de análise estática baseadas em Joern/CPG (variável, método, classe, arquivo), oferecidas como opcionais ao agente.", "localizador": "p. 2 e p. 4 do PDF, Tabela 1 e seção 3.1"},
+      {"descricao": "Recuperação externa: similaridade cosseno com limiar (valor do limiar não informado) e top n = 1 na configuração do ReinFix.", "localizador": "p. 5-6 do PDF, Figura 5 e equação 4"},
+      {"descricao": "ReinFix_GPT3.5 obtém 21 correções únicas no Defects4J V1.2 frente a RepairAgent, ChatRepair e ThinkRepair (Figura 8).", "localizador": "p. 8 do PDF, Figura 8"},
+      {"descricao": "Comparadores da Tabela 3 não classificados como técnicas de prompting nesta ficha, por serem descritos como ajuste fino, tradução neural ou templates tradicionais: FitRepair (ajuste fino de CodeT5 com identificadores no prompt, híbrido), TENURE, Tare, RAP-Gen (ajuste fino de CodeT5 com recuperação), KNOD, Recoder e TBar.", "localizador": "p. 2 do PDF; p. 7, seção 4.3; p. 8, Tabela 3"},
+      {"descricao": "Repositório de código e dados indicado por link; não foi acessado nem validado nesta extração.", "localizador": "p. 2 do PDF, contribuições (Open Science)"},
+      {"descricao": "Os prompts usados pelo agente não são reproduzidos no artigo; há só a cadeia de execução ilustrativa (Figura 7) e o Algoritmo 1.", "localizador": "p. 6-7 do PDF, Algoritmo 1 e Figura 7"}
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we propose ReinFix, a novel framework that enables LLMs to autonomously search for repair ingredients throughout both the reasoning and solution phases of bug fixing.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "In the reasoning phase, ReinFix integrates static analysis tools to retrieve internal ingredients, such as variable definitions, to assist the LLM in root cause analysis when it encounters difficulty understanding the context.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "During the solution phase, when the LLM lacks experience in fixing specific bugs, ReinFix searches for external ingredients from historical bug fixes with similar bug patterns, leveraging both the buggy code and its root cause to guide the LLM in identifying appropriate repair actions, thereby increasing the likelihood of generating correct patches.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "To coordinate these processes, we implement our approach on the basis of the Reasoning and Acting framework [52], empowering the LLM to autonomously plan, analyze, and invoke the appropriate repair ingredients search tools as needed.", "localizador": "p. 2 do PDF, introdução"},
+      {"trecho": "For each root cause and suggested fix pair, we ask the model to generate multiple patches.", "localizador": "p. 6 do PDF, seção 3.3"},
+      {"trecho": "For validation, only the top-1 plausible patch that passes all test cases is retained.", "localizador": "p. 7 do PDF, seção 4.5"},
+      {"trecho": "Only the internal ingredient search component is used for contextual code search, assisting LLMs in better analyzing the root cause of the bugs.", "localizador": "p. 9 do PDF, seção 5.3 (variante ❷)"},
+      {"trecho": "Only the external ingredient search component is used for bug pattern retrieval, assisting LLMs in better identifying repair behaviors to generate patches.", "localizador": "p. 9 do PDF, seção 5.3 (variante ❸)"},
+      {"trecho": "We removed two key components from the original ReinFix implementation to establish a basic baseline that represents the fundamental repair capabilities of ChatGPT.", "localizador": "p. 9 do PDF, seção 5.3 (variante ❶)"},
+      {"trecho": "One notable example is ChatRepair [49], a ChatGPT-based APR approach that combines patch generation with instant feedback, enabling conversational-style repair interactions.", "localizador": "p. 1 do PDF, introdução"},
+      {"trecho": "Similarly, ThinkRepair [54] uses Chain-of-Thought (CoT) prompting on ChatGPT to enhance bug reasoning during repair.", "localizador": "p. 1 do PDF, introdução"},
+      {"trecho": "For example, RepairAgent [2] enables the LLM-based agent to perform repair by invoking external tools, and FixAgent [24] realizes unified debugging by constructing the multi-agent collaboration paradigm.", "localizador": "p. 11 do PDF, seção 7"},
+      {"trecho": "For example, AlphaRepair [48] and GAMMA [58] generate patches directly for fault locations by leveraging traditional template-based techniques to design specific repair template prompts.", "localizador": "p. 11 do PDF, seção 7"},
+      {"trecho": "The training data of LLMs may contain correct patches for buggy projects, potentially affecting the evaluation.", "localizador": "p. 11 do PDF, seção 6"},
+      {"trecho": "To mitigate this risk, we follow previous work [54] and evaluate on bug cases collected after the cutoff date for LLM training data to ensure that the LLMs have not encountered the bug cases in the testing benchmarks during training.", "localizador": "p. 11 do PDF, seção 6"},
+      {"trecho": "We use the exact match strategy to filter out overlapping samples with those in benchmarks to avoid data leakage.", "localizador": "p. 7 do PDF, seção 4.4"},
+      {"trecho": "Using LLMs may lead to higher repair costs.", "localizador": "p. 11 do PDF, seção 6"},
+      {"trecho": "In comparison, ChatRepair, using GPT-3.5 as the base model, has an average cost of $0.42 per bug fix.", "localizador": "p. 11 do PDF, seção 6"},
+      {"trecho": "Upon analysis, we found that repair ingredient retrieval methods that do not consider program dependencies often introduce irrelevant or incorrect donor code. This can mislead the model into inferring incorrect root causes and result in repair failures.", "localizador": "p. 10 do PDF, seção 5.3.2, item 1"},
+      {"trecho": "Finally, the plausible patches are manually reviewed to verify the semantic correctness.", "localizador": "p. 7 do PDF, seção 4.5"},
+      {"trecho": "The agent reads the bug information and follows the Algorithm 1's analysis process to address complex tasks while avoiding potential infinite loops during reasoning and action.", "localizador": "p. 6 do PDF, seção 3.3"},
+      {"trecho": "Following the common practice in the APR community [42, 46, 48, 49, 54, 58–60], we reuse the reported results from previous studies [14, 32, 42, 46, 48, 49, 54, 58, 60] instead of directly running the APR tools.", "localizador": "p. 7 do PDF, seção 4.3"},
+      {"trecho": "Moreover, our ablation experiments (Section 5.3) demonstrate that the design choices in ReinFix further enhance the repair capability of base models, ensuring that the observed gains are independent of data leakage.", "localizador": "p. 11 do PDF, seção 6"},
+      {"trecho": "Overall, ReinFix achieves a 10.34% improvement over ThinkRepair.", "localizador": "p. 10 do PDF, seção 5.4"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ReinFix (ReinFix_GPT4o)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "exemplos", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "ChatRepair (resultado relatado em estudo anterior, GPT-3.5)",
+      "modelo": "gpt-4o (ReinFix_GPT4o); comparador ChatRepair com GPT-3.5",
+      "benchmark": "Defects4J V1.2",
+      "metrica": "correct fixes (Tabela 3: correct fixes / plausible fixes; linha #Total (D4J V1.2))",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 114, "intervencao": 146},
+      "denominador": "nao_informado como denominador da métrica; o Defects4J V1.2 tem 391 bugs (136 MF + 255 SF, Tabela 2), mas o estudo não informa o conjunto tentado por ChatRepair, cujo resultado foi relatado em estudo anterior e que, segundo o texto, se concentra em linha única",
+      "condicoes": "ReinFix: temperatura 1, localização de defeito perfeita, até 3 tentativas × 3 sugestões × 5 candidatos (Sampling Times 3*3*5), top-1 plausível retido, revisão manual da correção semântica; número de execuções nao_informado. ChatRepair: Sampling Times 500, GPT-3.5, resultado reaproveitado de estudo anterior, não executado pelos autores; backbones e orçamentos diferem. Os mecanismos acrescentados referem-se à base interna ReinFix_NN, não ao ChatRepair. O ganho é do pacote ReinFix, híbrido (ferramentas de análise estática, banco vetorial), e não é efeito isolado de um mecanismo. conferido_pdf: valores 146/207 e 114/- conferidos visualmente na Tabela 3 (p. 8 do PDF).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado inequívoco: o resumo destaca 146 bugs contra «the baselines» (plural, sem nomear o comparador) e as contribuições destacam dois modelos (GPT-3.5 e GPT-4) e dois benchmarks, com comparadores diferentes por benchmark. Tabelas 1 e 2 são descritivas; a Tabela 3 é a primeira com contraste elegível. Dentro dela: primeira métrica (correct fixes), primeiro modelo listado (ReinFix_GPT4o) e primeira linha de base de prompting listada (ChatRepair), no total impresso do primeiro benchmark (D4J V1.2).",
+      "derivacao": "direta",
+      "localizador": "p. 8 do PDF, Tabela 3, linha #Total (D4J V1.2), colunas ReinFix_GPT4o e ChatRepair; texto em p. 7-8, seção 5.1 (Defects4J V1.2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "#Total (D4J V1.2) | ReinFix_GPT4o: 146/207 | ReinFix_GPT3.5: 118/152 | ChatRepair: 114/-", "localizador": "p. 8 do PDF, Tabela 3, linha #Total (D4J V1.2), colunas APR Tool ReinFix_GPT4o, ReinFix_GPT3.5 e ChatRepair (células copiadas como impressas; subscritos transcritos com sublinhado)"},
+        {"trecho": "Specifically, the GPT3.5-based ReinFix_GPT3.5 fixes 4 more bugs (118 vs. 114) than ChatRepair, and the GPT4o-based ReinFix_GPT4o fixed 32 more bugs (146 vs. 114) than ChatRepair.", "localizador": "p. 7-8 do PDF, seção 5.1 (subscritos transcritos com sublinhado)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Internal Ingredients Search (Dependency-Analysis-Based) — ReinFix_DN",
+      "mecanismos": ["instrucao", "raciocinio", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "ReinFix_NN (sem os dois componentes de busca)",
+      "modelo": "gpt-4o",
+      "benchmark": "Defects4J V1.2",
+      "metrica": "Repair Result (correct fixes), Tabela 5",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 85, "intervencao": 116},
+      "denominador": "nao_informado como denominador da métrica; o Defects4J V1.2 tem 391 bugs (Tabela 2)",
+      "condicoes": "Ablação com GPT-4o no Defects4J V1.2; variante ❷ usa só a busca interna por análise de dependências, sem busca externa; ❶ remove os dois componentes. Demais parâmetros (temperatura 1, orçamento 3*3*5, localização perfeita) informados para o ReinFix em geral, sem indicação específica para as variantes; número de execuções nao_informado. A ferramenta de análise estática em si não é prompting; o efeito é do componente de recuperação de contexto. conferido_pdf: valores 85 e 116 conferidos visualmente na Tabela 5 (p. 9 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Há uma só técnica focal e uma só tarefa, já representadas; componentes isolados completam o alvo de três, primeiro pela tabela de ablação, na ordem da tabela: primeiro componente é a busca interna (linha ❷ contra ❶).",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF, Tabela 5, linhas ❶ ReinFix_NN e ❷ ReinFix_DN, coluna Repair Result; texto em p. 9, seção 5.3.1, item 1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "❶ ReinFix_NN | NULL | NULL | 85", "localizador": "p. 9 do PDF, Tabela 5, colunas Variants | Internal Ingredients Search | External Ingredients Search | Repair Result (subscrito transcrito com sublinhado)"},
+        {"trecho": "❷ ReinFix_DN | Dependency-Analysis-Based | NULL | 116", "localizador": "p. 9 do PDF, Tabela 5, colunas Variants | Internal Ingredients Search | External Ingredients Search | Repair Result (subscrito transcrito com sublinhado)"},
+        {"trecho": "As shown in Table 5, ReinFix_DN fixes 31 more bugs (116 compared to 85) than ReinFix_NN.", "localizador": "p. 9 do PDF, seção 5.3.1, item 1 (subscritos transcritos com sublinhado)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "External Ingredients Search (Pattern-Matching-Based) — ReinFix_NP",
+      "mecanismos": ["instrucao", "raciocinio", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "ReinFix_NN (sem os dois componentes de busca)",
+      "modelo": "gpt-4o",
+      "benchmark": "Defects4J V1.2",
+      "metrica": "Repair Result (correct fixes), Tabela 5",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 85, "intervencao": 108},
+      "denominador": "nao_informado como denominador da métrica; o Defects4J V1.2 tem 391 bugs (Tabela 2)",
+      "condicoes": "Ablação com GPT-4o no Defects4J V1.2; variante ❸ usa só a busca externa de padrões de reparo (RAG com causa-raiz, top n = 1, corpus de 100 mil pares do TRANSFER), e o LLM raciocina sozinho sobre a causa-raiz; ❶ remove os dois componentes. Número de execuções nao_informado. conferido_pdf: valores 85 e 108 conferidos visualmente na Tabela 5 (p. 9 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação, na ordem da tabela (linha ❸ contra ❶), para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF, Tabela 5, linhas ❶ ReinFix_NN e ❸ ReinFix_NP, coluna Repair Result; texto em p. 9, seção 5.3.1, item 2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "❸ ReinFix_NP | NULL | Pattern-Matching-Based | 108", "localizador": "p. 9 do PDF, Tabela 5, colunas Variants | Internal Ingredients Search | External Ingredients Search | Repair Result (subscrito transcrito com sublinhado)"},
+        {"trecho": "As shown in Table 5, ReinFix_NP fixes 23 more bugs (108-85) than ReinFix_NN, indicating that the second key component is also crucial for enhancing the repair capability of LLMs.", "localizador": "p. 9 do PDF, seção 5.3.1, item 2 (subscritos transcritos com sublinhado)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (eficácia, cenários, ablação, generalização) ligadas aos experimentos.", "localizador": "p. 7 do PDF, seção 4.1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Arcabouço, algoritmo, ferramentas, temperatura, orçamento de patches e localização perfeita são descritos, mas os prompts não são reproduzidos, o número de execuções não é informado e a revisão manual da correção não identifica executores nem critério.", "localizador": "p. 4-7 do PDF, seções 3 e 4.5"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "A ablação executa variantes com o mesmo modelo (GPT-4o) e benchmark; as comparações com o estado da arte usam resultados relatados por outros estudos, com modelos, orçamentos e escopos (função única, linha única) diferentes.", "localizador": "p. 7 do PDF, seção 4.3; p. 8, Tabelas 3 e 4; p. 9, Tabela 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Correct e plausible fixes são definidos e os totais das Tabelas 3 e 4 coincidem (conferência própria); porém o conjunto tentado por cada comparador não é informado, a correção depende de revisão manual não detalhada e a base da melhoria de 10.34% não é explicada.", "localizador": "p. 6-7 do PDF; p. 8, Tabelas 3 e 4; p. 10, seção 5.4"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A seção de ameaças trata só de vazamento de dados e custo; não discute não determinismo (temperatura 1), viés da revisão manual nem o uso de resultados relatados pelos comparadores.", "localizador": "p. 11 do PDF, seção 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Snapshots dos modelos constam nas referências, hiperparâmetros principais e link de código e dados são informados (link não acessado); faltam os prompts no artigo, a semente da amostra de 100 mil pares, o valor do limiar de similaridade e o número de execuções.", "localizador": "p. 2 do PDF (Open Science); p. 6, equação 4; p. 7, seções 4.4 e 4.5; p. 12, referências [35]-[39]"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo avalia em RWB posterior à data de corte (GPT-3.5, DeepSeek, GPT-4, GPT-4-turbo) e filtra sobreposição do corpus de recuperação por correspondência exata; os resultados principais e a ablação no Defects4J com GPT-4o não têm controle de data de corte, e a afirmação de que a ablação garante independência do vazamento não é sustentada por um controle específico.", "localizador": "p. 7 do PDF, seções 4.2 e 4.4; p. 10, seção 5.4; p. 11, seção 6"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (930 linhas, incluindo referências).",
+    "paginas_pdf_abertas": ["p-01", "p-02", "p-06", "p-07", "p-08", "p-09", "p-10", "p-11"]
+  }
+}

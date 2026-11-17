@@ -1,0 +1,268 @@
+{
+  "estudo": "S1450",
+  "texto_fonte": "fontes/textos/lote/S1450.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_versao": "Giagnorio, Martin-Lopez e Bavota, «No Resource, No Benchmarks, No Problem? Evaluating and Improving LLMs for Code Generation in No-Resource Languages», arXiv:2606.16827v1 [cs.SE], 15 jun. 2026 (versão do PDF lido; páginas impressas coincidem com a posição no PDF).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot (0-shot)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (RQ1); PDF p. 5, seção II-B1; PDF p. 8, Tabela V, coluna 0-shot",
+        "observacao": "Prompt base: descrição em linguagem natural e assinatura da função a implementar (benchmark de geração em nível de função). É a linha de base de todas as comparações da Tabela V. A assinatura da função foi tratada como parte do enunciado da tarefa, não como restrição acrescentada; o mesmo critério vale para todas as condições."
+      },
+      {
+        "nome_original": "few-shot (5-shot)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (RQ2); PDF p. 5, seção II-B2 «Few-Shot»; PDF p. 8, Tabela V",
+        "observacao": "Recupera, por similaridade de embeddings (text-embedding-3-large + FAISS), os cinco exemplos mais semelhantes do conjunto de ajuste fino (funções com docstring) e os antepõe ao prompt. Comparado com 0-shot no mesmo modelo, benchmark e linguagem, com teste de McNemar e OR. O contraste é do pacote (recuperação + exemplos), não isola o número de exemplos nem a recuperação. Na seção de trabalhos relacionados (PDF p. 14) o estudo chama few-shot, RAG e fine-tuning de «baselines» da proposta de transferência de instruções; na RQ2 eles são objeto de investigação."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (RQ2); PDF p. 5, seção II-B2 «RAG»; PDF p. 8, Tabela V",
+        "observacao": "Documentação oficial indexada por embeddings; um LLM auxiliar (gpt-4o-mini-2024-07-18) gera um plano passo a passo independente de linguagem, uma consulta por passo, recupera os cinco trechos mais relevantes e os resume; consultas e resumos são concatenados ao contexto da tarefa. `decomposicao` registrada pelo encadeamento planejamento → consulta → recuperação → resumo; o plano não é executado pelo modelo gerador em etapas. Não há informação de que os trechos recuperados contenham exemplos de código; por isso `exemplos` não foi marcado. Contraste com 0-shot é do pacote."
+      },
+      {
+        "nome_original": "language-specific manual (third prompting strategy)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 11, seção V-A",
+        "observacao": "Manual por linguagem produzido com GPT-4.1 a partir dos arquivos de documentação relevantes para as tarefas dos benchmarks, com explicações curtas e exemplos de código, usado como contexto fixo no prompt. Introduzido na discussão de validade como estimativa aproximada de limite superior das técnicas de aprendizado em contexto; o próprio estudo diz que o manual está «overfitted» às tarefas dos benchmarks. Avaliado só no Qwen 2.5 Coder 32B Instruct, com 10 execuções. A condição sem a técnica (0-shot, mesmo modelo) existe na Tabela V, mas o estudo não analisa esse contraste; compara com «any other in-context learning technique», com fine-tuning e com transferência de instruções, sem teste estatístico relatado para essa comparação. Papel focal atribuído por ser técnica de prompting investigada pelo estudo, ainda que como verificação de validade."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "further pre-training (Pre-trained)",
+        "natureza": "ajuste_fino",
+        "descricao": "Pré-treinamento adicional com objetivo CLM e LoRA (r = 16, α = 32, dropout = 0,05; 5 épocas) das versões base do Qwen 2.5 Coder 32B e do Qwen 3 8B em código e documentação de Gleam e MoonBit.",
+        "localizador": "PDF p. 5, seção II-B2 «Pre-Training»; PDF p. 8, Tabela V"
+      },
+      {
+        "nome_original": "fine-tuning (Fine-tuned)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino com LoRA (5 épocas) do Qwen 2.5 Coder 32B Instruct e do Qwen 3 32B Instruct em pares docstring–função de Gleam e MoonBit.",
+        "localizador": "PDF p. 5, seção II-B2 «Fine-Tuning»; PDF p. 8, Tabela V"
+      },
+      {
+        "nome_original": "instruction transferring (Diff; fine-tuning reuse / weight diff transfer)",
+        "natureza": "outro",
+        "descricao": "Aritmética de pesos: soma da diferença entre os pesos do modelo instruct e do modelo base aos pesos do modelo base pré-treinado na linguagem-alvo; altera pesos sem treinamento adicional.",
+        "localizador": "PDF p. 9–10, seção IV; PDF p. 10, Tabela VI"
+      },
+      {
+        "nome_original": "temperature 0.2",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,2 em todos os modelos, exceto o3-mini (padrão do fornecedor).",
+        "localizador": "PDF p. 5, seção II-B1"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "uso": "RQ1 (0-shot) e RQ2 (5-shot, RAG); parâmetros estimados em ~200B, corte 2023-10", "localizador": "PDF p. 4, Tabela II"},
+      {"nome": "o3-mini", "versao": "nao_informado", "uso": "RQ1 e RQ2 (5-shot, RAG); temperatura padrão", "localizador": "PDF p. 4, Tabela II; PDF p. 5"},
+      {"nome": "Qwen 2.5 Coder 32B Instruct", "versao": "nao_informado", "uso": "RQ1, RQ2 (5-shot, RAG, fine-tuning), manual de linguagem (PDF p. 11) e Mi na RQ3", "localizador": "PDF p. 4, Tabela II; PDF p. 10–11"},
+      {"nome": "Qwen 3 32B Instruct", "versao": "nao_informado", "uso": "RQ1 e RQ2 (5-shot, RAG, fine-tuning)", "localizador": "PDF p. 4, Tabela II"},
+      {"nome": "Qwen 2.5 Coder 32B Base", "versao": "nao_informado", "uso": "RQ2 (pré-treinamento) e RQ3", "localizador": "PDF p. 4, Tabela II"},
+      {"nome": "Qwen 3 8B Base", "versao": "nao_informado", "uso": "RQ2 (pré-treinamento) e RQ3", "localizador": "PDF p. 4, Tabela II"},
+      {"nome": "Qwen 3 8B Instruct", "versao": "nao_informado", "uso": "Mi na transferência de instruções (RQ3); não consta da Tabela II", "localizador": "PDF p. 10, seção IV"},
+      {"nome": "gpt-4o-mini", "versao": "gpt-4o-mini-2024-07-18", "uso": "LLM auxiliar Me do pipeline de RAG (plano, consultas, resumos)", "localizador": "PDF p. 5"},
+      {"nome": "GPT-4.1", "versao": "nao_informado", "uso": "resumo da documentação no manual de linguagem", "localizador": "PDF p. 11"},
+      {"nome": "text-embedding-3-large (OpenAI)", "versao": "nao_informado", "uso": "embeddings para recuperação no few-shot e no RAG", "localizador": "PDF p. 5"},
+      {"nome": "ChatGPT", "versao": "nao_informado", "uso": "ponto de partida da tradução dos benchmarks (não é condição avaliada)", "localizador": "PDF p. 3"}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval (MultiPL-E; traduzido para Gleam e MoonBit pelos autores)", "quantidade": "154 problemas por linguagem (exclusão de 6 de 161 por serem específicos de Python e de problemas ausentes no MultiPL-E em alguma linguagem)", "localizador": "PDF p. 3"},
+      {"nome": "MBPP (MultiPL-E; traduzido para Gleam e MoonBit pelos autores)", "quantidade": "355 problemas por linguagem (exclusão de 27 de 399 e de problemas ausentes no MultiPL-E em alguma linguagem)", "localizador": "PDF p. 3"},
+      {"nome": "McEval-Hard (proposto pelos autores a partir das tarefas difíceis do McEval)", "quantidade": "227 tarefas, traduzidas para as nove linguagens (de 385 tarefas difíceis: 35 sem testes e 87 duplicadas removidas, além das muito específicas da linguagem de origem, cuja quantidade não é informada)", "localizador": "PDF p. 4"},
+      {"nome": "Observação sobre denominadores", "quantidade": "pass@1 calculado por tarefa com n = 10 repetições; o estudo exemplifica 154 tarefas × 10 repetições = 1.540 valores de pass@1 para o teste de McNemar em HumanEval-Gleam. Os benchmarks das três fontes são distintos; o estudo não descreve sobreposição entre eles.", "localizador": "PDF p. 5–6, seção II-C"}
+    ],
+    "metricas": [
+      {"nome": "pass@1", "definicao": "1 se o código passa em todos os testes unitários da tarefa, 0 caso contrário; calculado com n = 10 repetições; métrica de referência", "localizador": "PDF p. 5, seção II-C"},
+      {"nome": "passed% (percentual de testes unitários aprovados)", "definicao": "correção parcial; resultados completos só no pacote de replicação", "localizador": "PDF p. 5–6"},
+      {"nome": "teste de McNemar com Odds Ratio (OR) e p-valores ajustados por Benjamini-Hochberg", "definicao": "comparação de cada técnica contra 0-shot no mesmo modelo; ORs não significativos impressos em cinza na Tabela V", "localizador": "PDF p. 6; PDF p. 7"},
+      {"nome": "classificação de falhas em erros sintáticos e semânticos", "definicao": "erro sintático: viola a gramática da linguagem; semântico: sintaticamente correto, com erro de execução ou teste reprovado; resultados completos no pacote de replicação", "localizador": "PDF p. 6"}
+    ],
+    "linguagens": ["Python", "Java", "R", "Lua", "Haskell", "Julia", "Racket", "Gleam", "MoonBit"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Em Gleam e MoonBit a maioria das falhas decorre de erros sintáticos; os LLMs não dominam a sintaxe básica das linguagens sem recursos.", "localizador": "PDF p. 6–7"},
+      {"categoria": "contaminacao", "descricao": "Possível vazamento entre os arquivos coletados de Gleam e MoonBit (usados no pré-treinamento, no ajuste fino e como base de exemplos do few-shot) e os benchmarks; o estudo descreve controle em duas etapas (ver mitigações).", "localizador": "PDF p. 4, seção II-A4"},
+      {"categoria": "contaminacao", "descricao": "Pressuposto de que os LLMs avaliados não viram código Gleam ou MoonBit no treinamento; o estudo declara que não pode verificar a ausência dessas linguagens nos dados de treinamento e usa apenas a cronologia das linguagens e os README dos modelos como indício limitado.", "localizador": "PDF p. 11–12, seção V-B"},
+      {"categoria": "nao_determinismo", "descricao": "Natureza estocástica dos LLMs, tratada com 10 execuções por benchmark e linguagem.", "localizador": "PDF p. 5, seção II-B1"},
+      {"categoria": "custo", "descricao": "Custo do ajuste fino por instrução tratado como extremamente alto (componente fora do escopo de prompting); não quantificado. O estudo também não fez ajuste de hiperparâmetros por exigir recursos computacionais significativos (não quantificado).", "localizador": "PDF p. 9, seção IV; PDF p. 11, seção V-A"},
+      {"categoria": "outro", "descricao": "Contexto selecionado dinamicamente pelo few-shot e pelo RAG pode não cobrir todos os recursos da linguagem necessários à tarefa (ameaça à validade examinada com o manual de linguagem).", "localizador": "PDF p. 11, seção V-A"},
+      {"categoria": "outro", "descricao": "O manual de linguagem foi construído a partir das tarefas conhecidas dos benchmarks («overfitted»), o que o torna estimativa aproximada de limite superior, não cenário realista.", "localizador": "PDF p. 11, seção V-A"},
+      {"categoria": "outro", "descricao": "Erros na tradução dos benchmarks podem influenciar os achados; na amostra inspecionada foram encontrados 14 prompts (4%) e dois testes (0,6%) com problemas.", "localizador": "PDF p. 12–13, seção V-C"},
+      {"categoria": "outro", "descricao": "Possível viés na avaliação post-hoc da qualidade dos dados de ajuste fino, feita pelos dois primeiros autores.", "localizador": "PDF p. 12, seção V-C"},
+      {"categoria": "outro", "descricao": "Generalização limitada: nove linguagens, seis LLMs e três benchmarks em nível de função, que podem não refletir cenários reais de uso.", "localizador": "PDF p. 13, seção V-D"},
+      {"categoria": "outro", "descricao": "Modelos base pré-treinados não seguem instruções, sendo subótimos como assistentes de programação (limitação de componente fora do escopo).", "localizador": "PDF p. 9, resposta à RQ2"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Dez execuções de cada modelo por tarefa, com pass@1 calculado com n = 10.", "avaliada": "nao", "localizador": "PDF p. 5"},
+      {"descricao": "Controle de vazamento em duas etapas: remoção de arquivos com função de mesmo nome das funções dos benchmarks e busca de 8-gramas das tarefas, com conferência manual pelo primeiro autor; o mesmo controle foi aplicado ao conjunto de ajuste fino, que é a base de exemplos do few-shot.", "avaliada": "nao", "localizador": "PDF p. 4, seção II-A4; PDF p. 5 (base do few-shot)"},
+      {"descricao": "Escolha de linguagens com versão estável lançada após a data de corte dos LLMs avaliados (quando informada).", "avaliada": "nao", "localizador": "PDF p. 2–3"},
+      {"descricao": "Verificação sintática automática e inspeção manual das traduções dos benchmarks; conferência de amostra de 50 instâncias de Gleam pelo criador da linguagem; inspeção independente de amostra estratificada de 346 tarefas traduzidas pelos dois primeiros autores, com resolução de divergências por discussão.", "avaliada": "nao", "localizador": "PDF p. 3–4; PDF p. 12–13, seção V-C"},
+      {"descricao": "Validação manual de amostras de 374 (Gleam) e 333 (MoonBit) instâncias dos conjuntos de ajuste fino, com α de Krippendorff.", "avaliada": "nao", "localizador": "PDF p. 12, seção V-C"},
+      {"descricao": "Ajuste de p-valores por Benjamini-Hochberg para comparações múltiplas.", "avaliada": "nao", "localizador": "PDF p. 6"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "0-shot executado no mesmo modelo, benchmark e linguagem (Tabelas IV e V).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Inversões entre técnicas de prompting: few-shot supera RAG em pass@1 em 7 de 12 casos para Gleam e 8 de 12 para MoonBit; nos demais RAG supera few-shot (por exemplo, Qwen 2.5 Coder 32B Instruct, HumanEval-Gleam: 5-shot 7.79 e RAG 14.29). Contagem conferida na Tabela V.", "localizador": "PDF p. 7 (texto); PDF p. 8, Tabela V"},
+      {"descricao": "Ganhos pequenos no McEval-Hard: por exemplo, GPT-4o em Gleam passa de 0.97 (0-shot) para 1.23 (5-shot) e 2.16 (RAG); o estudo afirma que no McEval-Hard o ganho é substancialmente menor. Os ORs não significativos são impressos em cinza, mas a distinção entre cinza e preto não foi lida com segurança na imagem da página, por isso não se registra quais ORs são significativos.", "localizador": "PDF p. 8, Tabela V e texto"},
+      {"descricao": "OR e diferença de pass@1 não andam juntos: Qwen 2.5 Coder 32B Instruct, McEval-Hard-Gleam, RAG 0.88 (OR 23.00) contra 5-shot 1.32 (OR 3.33); o estudo adverte que OR maior não implica maior diferença de pass@1.", "localizador": "PDF p. 7; PDF p. 8, Tabela V"},
+      {"descricao": "Manual de linguagem: o estudo diz que os resultados nos dois primeiros benchmarks são «significantly better» que as demais técnicas de aprendizado em contexto, sem relatar teste estatístico para essa comparação; no McEval-Hard-MoonBit o manual (6.61) fica abaixo do RAG no mesmo modelo (7.05, Tabela V) — comparação própria de valores impressos.", "localizador": "PDF p. 11, seção V-A; PDF p. 8, Tabela V"},
+      {"descricao": "Introdução afirma que o pré-treinamento adicional leva os modelos a «approaching a ∼15% pass@1» no McEval-Hard, enquanto a conclusão informa até 12% (Gleam) e 26% (MoonBit) e a Tabela V traz 12.47 e 25.86 (Qwen 2.5 Coder 32B Base); aparente divergência entre introdução e corpo.", "localizador": "PDF p. 2; PDF p. 8, Tabela V; PDF p. 14, seção VII"},
+      {"descricao": "Introdução afirma pass@1 «higher than 25%» no McEval-Hard com transferência de instruções, mas a Tabela VI mostra 22.33 (Gleam) e 19.82 (MoonBit) para Qwen 3 8B; só Qwen 2.5 Coder 32B (26.08 e 32.60) supera 25%.", "localizador": "PDF p. 2; PDF p. 10, Tabela VI"},
+      {"descricao": "Texto diz que o desempenho em linguagens sem recursos fica «between 0% and 20%», mas a Tabela IV traz 20.31 (GPT-4o, MBPP, Gleam); possível arredondamento, não informado.", "localizador": "PDF p. 6; PDF p. 7, Tabela IV"},
+      {"descricao": "Texto informa aumento médio de 23% do pass@1 em Gleam com o pré-treinamento em relação ao modelo base (0-shot); cálculo próprio a partir da Tabela V (média das seis diferenças dos dois modelos base) dá cerca de 21,2 p.p.; para MoonBit o cálculo próprio (≈28,1 p.p.) coincide com os 28% do texto. Aparente inconsistência; o estudo não informa o procedimento de cálculo. Componente fora do escopo.", "localizador": "PDF p. 10; PDF p. 8, Tabela V"},
+      {"descricao": "A seção IV usa Qwen 3 8B Instruct como Mi, modelo que não consta da Tabela II (que lista Qwen 3 Instruct 32B).", "localizador": "PDF p. 4, Tabela II; PDF p. 10"},
+      {"descricao": "Redução de erros sintáticos de 15.36% (few-shot) e 8.94% (RAG) em relação a 0-shot sem indicar se é variação relativa ou em pontos percentuais; os dados estão só no pacote de replicação.", "localizador": "PDF p. 7"},
+      {"descricao": "Resultado nulo de componente fora do escopo: transferência de instruções não melhora ⟨MoonBit, McEval-Hard, Qwen 3⟩ (19.87 → 19.82; OR = 1, não significativo); e divergência entre pass@1 (44.42 vs 36.82) e passed% (46.58 vs 47.95) para Qwen 3 8B em HumanEval-MoonBit.", "localizador": "PDF p. 10, Tabela VI e texto; PDF p. 11"},
+      {"descricao": "Valores de 0-shot coincidem entre as Tabelas IV e V, e os valores de pré-treinamento coincidem entre as Tabelas V e VI (conferência própria).", "localizador": "PDF p. 7, Tabela IV; PDF p. 8, Tabela V; PDF p. 10, Tabela VI"}
+    ],
+    "observacoes": [
+      {"descricao": "A contribuição central declarada (resumo e conclusão) é o pré-treinamento adicional seguido de transferência de instruções por diferença de pesos, intervenção fora do escopo de prompting; few-shot e RAG são as técnicas de prompting investigadas na RQ2.", "localizador": "PDF p. 1, resumo; PDF p. 14, seção VII"},
+      {"descricao": "A tradução dos benchmarks partiu de traduções geradas pelo ChatGPT com transformações textuais explícitas e exemplos de boas traduções, seguidas de verificação sintática e inspeção manual; os testes exigiram correções maiores. É procedimento de construção do benchmark, não condição avaliada.", "localizador": "PDF p. 3"},
+      {"descricao": "A criação dos benchmarks exigiu cerca de 340 horas de trabalho manual.", "localizador": "PDF p. 14, seção VII"},
+      {"descricao": "Decodificação restrita por gramática foi mencionada como mitigação possível de erros sintáticos, mas não foi experimentada.", "localizador": "PDF p. 11, seção V-A"},
+      {"descricao": "Número de épocas (5) definido pelo monitoramento da perda; testes após a 1ª e a 3ª épocas deram diferença de até ±3,4% em pass@1 na 3ª época (componente fora do escopo).", "localizador": "PDF p. 11, seção V-A"},
+      {"descricao": "Pacote de replicação com benchmarks, gerações, prompts, scripts e resultados adicionais está indicado por DOI (Zenodo); não foi acessado nesta extração.", "localizador": "PDF p. 6, seção II-D; referência [26], PDF p. 15"},
+      {"descricao": "As técnicas de aprendizado em contexto foram aplicadas só aos modelos com seguimento de instruções; o few-shot e o RAG não foram aplicados aos modelos base.", "localizador": "PDF p. 4, seção II-A3"}
+    ],
+    "citacoes": [
+      {"trecho": "Code generation is the task of automatically implementing source code from a higher-level specification, typically written in natural language.", "localizador": "PDF p. 1, seção I"},
+      {"trecho": "In RQ1, all LLMs are experimented in a zero-shot setting (i.e., used out of the box).", "localizador": "PDF p. 2, seção II"},
+      {"trecho": "All prompts feature for each coding task the natural language description and the signature of the function to implement.", "localizador": "PDF p. 5, seção II-B1"},
+      {"trecho": "Few-shot consists in prompting the LLM with concrete examples of code generations in the no-resource language of interest before asking for a new code generation task.", "localizador": "PDF p. 2, seção II"},
+      {"trecho": "During code generation, we transform the benchmark prompt into embeddings and retrieve the top-five most similar examples from the processed knowledge base.", "localizador": "PDF p. 5, seção II-B2"},
+      {"trecho": "These examples are prepended to the final code generation prompt.", "localizador": "PDF p. 5, seção II-B2"},
+      {"trecho": "RAG, instead, injects in the prompt information taken from the languages’ documentation which is retrieved based on its relevance for the code generation task at hand.", "localizador": "PDF p. 2, seção II"},
+      {"trecho": "Finally, we concatenate the generated queries and their summaries and use them to augment the task context.", "localizador": "PDF p. 5, seção II-B2"},
+      {"trecho": "To assess the extent to which this could have impacted our findings, we implemented a third prompting strategy, consisting in a language-specific manual covering all information necessary to solve the tasks in our three benchmarks.", "localizador": "PDF p. 11, seção V-A"},
+      {"trecho": "The resulting manual can then be used as fixed prompt context for each code generation request submitted to an LLM.", "localizador": "PDF p. 11, seção V-A"},
+      {"trecho": "Indeed, the manual is effectively “overfitted” to a set of known code-generation tasks, namely those included in the benchmarks, which would not be known a priori in a realistic usage scenario.", "localizador": "PDF p. 11, seção V-A"},
+      {"trecho": "Indeed, in Gleam and MoonBit the vast majority of failures are due to syntactic errors, indicating that LLMs struggle with the basic syntax of these languages.", "localizador": "PDF p. 6, seção III"},
+      {"trecho": "To avoid data leakage between the collected Gleam and MoonBit files and the used benchmarks, we perform a two-step process.", "localizador": "PDF p. 4, seção II-A4"},
+      {"trecho": "Also, we performed the same two-step data leakage checks mentioned for the pre-training datasets, removing all suspect functions.", "localizador": "PDF p. 4, seção II-A4"},
+      {"trecho": "For the open models considered in this work, we therefore cannot verify the absence of these languages from the training data.", "localizador": "PDF p. 11–12, seção V-B"},
+      {"trecho": "To account for the stochastic nature of LLMs, each model was run 10 times on each benchmark and language.", "localizador": "PDF p. 5, seção II-B1"},
+      {"trecho": "However, this additional context may not always capture all language features required by the LLM to solve the task at hand.", "localizador": "PDF p. 11, seção V-A"},
+      {"trecho": "Also, our findings could be influenced by errors made during the benchmarks’ translations.", "localizador": "PDF p. 12, seção V-C"},
+      {"trecho": "As a result, we found 14 prompts (4%) and two tests (0.6%) presenting issues.", "localizador": "PDF p. 12, seção V-C"},
+      {"trecho": "We also acknowledge a possible validity threat because the analysis was performed post-hoc by the first two authors, which may have introduced some bias in the evaluation.", "localizador": "PDF p. 12, seção V-C"},
+      {"trecho": "Also, the specific tasks we used to test the selected LLMs may not reflect the real usage scenarios in which programming languages are used.", "localizador": "PDF p. 13, seção V-D"},
+      {"trecho": "However, (i) instruction-tuning datasets are typically not publicly available, and (ii) the cost of such a process is known to be extremely high [30], since large datasets are needed.", "localizador": "PDF p. 9, seção IV"},
+      {"trecho": "We adjust p-values using the Benjamini-Hochberg procedure [34] to account for multiple comparisons (e.g., the performance of o3-mini in zero-shot is compared against what the same model achieves using few-shot, and RAG).", "localizador": "PDF p. 6, seção II-C"},
+      {"trecho": "To assess the quality of the fine-tuning datasets, we manually validated a random sample of 374 instances from the Gleam dataset and 333 instances from the MoonBit dataset.", "localizador": "PDF p. 12, seção V-C"},
+      {"trecho": "We use the fine-tuning dataset described in Section II-A4 as the knowledge base from which to retrieve code examples.", "localizador": "PDF p. 5, seção II-B2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "few-shot (5-shot)",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "0-shot",
+      "modelo": "GPT-4o",
+      "benchmark": "HumanEval traduzido para Gleam (HumanEval-Gleam)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 7.60, "intervencao": 15.45},
+      "denominador": "154 tarefas do HumanEval-Gleam, cada uma executada 10 vezes (o estudo exemplifica 154 × 10 = 1.540 valores de pass@1 para o teste de McNemar nesse benchmark)",
+      "condicoes": "Cinco exemplos recuperados por similaridade (text-embedding-3-large + FAISS) do conjunto de ajuste fino e antepostos ao prompt; mesmos parâmetros de inferência da RQ1 (temperatura 0,2); 10 execuções por tarefa. OR do teste de McNemar impresso: 8.56 (p-valores ajustados por Benjamini-Hochberg); a significância é sinalizada por cor (cinza = não significativo) e a cor desta célula não foi lida com segurança, por isso não se registra a significância. Sem agregado impresso entre modelos, benchmarks ou linguagens. Conferido na Tabela V (PDF p. 8) e no texto (PDF p. 7).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado de prompting: resumo e conclusão destacam pré-treinamento e transferência de instruções (fora do escopo) e citam few-shot só como exemplo, ao lado de RAG. A Tabela IV traz só 0-shot (sem contraste). A Tabela V é a primeira com contraste de prompting; primeira métrica pass@1, primeiro modelo GPT-4o, primeira linha de base de prompting 0-shot, primeira técnica (coluna 5-shot), primeira linha HumanEval e primeiro bloco de linguagem (Gleam).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 8), Tabela V, bloco GPT-4o, linha HumanEval, colunas Gleam 0-shot e 5-shot; PDF p. 7, texto",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "HumanEval 7.60 15.45 ( 8.56) 14.22 (21.40) — — 12.60 25.97( 5.29) 22.86 ( 3.59) — —", "localizador": "PDF p. 8, Tabela V, bloco GPT-4o; colunas Dataset | Gleam: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained | MoonBit: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained"},
+        {"trecho": "For example, applying few-shot to GPT-4o on Gleam, increases the pass@1 on HumanEval from 7.60% to 15.45%, resulting in an OR=8.56, which indicates that, among the discordant cases, few-shot was over 8 times more likely than zero-shot to produce a correct implementation.", "localizador": "PDF p. 7, seção III, RQ2"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG)",
+      "mecanismos": ["instrucao", "contexto", "decomposicao"],
+      "mecanismos_acrescentados": ["contexto", "decomposicao"],
+      "comparador": "0-shot",
+      "modelo": "GPT-4o",
+      "benchmark": "HumanEval traduzido para Gleam (HumanEval-Gleam)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 7.60, "intervencao": 14.22},
+      "denominador": "154 tarefas do HumanEval-Gleam, cada uma executada 10 vezes",
+      "condicoes": "Documentação oficial indexada por embeddings; LLM auxiliar gpt-4o-mini-2024-07-18 gera plano, consultas por passo e resumos dos cinco trechos recuperados por consulta, concatenados ao contexto da tarefa; temperatura 0,2; 10 execuções por tarefa. OR impresso: 21.40; significância não registrada porque a cor da célula (cinza = não significativo) não foi lida com segurança. Conferido na Tabela V (PDF p. 8).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal de prompting ainda não representada; pela mesma regra de ordem: Tabela V, pass@1, GPT-4o, 0-shot, HumanEval, Gleam.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 8), Tabela V, bloco GPT-4o, linha HumanEval, colunas Gleam 0-shot e RAG",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "HumanEval 7.60 15.45 ( 8.56) 14.22 (21.40) — — 12.60 25.97( 5.29) 22.86 ( 3.59) — —", "localizador": "PDF p. 8, Tabela V, bloco GPT-4o; colunas Dataset | Gleam: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained | MoonBit: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "language-specific manual (third prompting strategy)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "5-shot (primeira técnica de aprendizado em contexto na ordem da Tabela V, no mesmo modelo)",
+      "modelo": "Qwen 2.5 Coder 32B Instruct",
+      "benchmark": "HumanEval traduzido para Gleam (HumanEval-Gleam)",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 7.79, "intervencao": 15.58},
+      "denominador": "nao_informado para a condição do manual (o estudo não liga explicitamente o valor ao número de tarefas); o HumanEval-Gleam tem 154 tarefas",
+      "condicoes": "Contraste só em prosa (seção V-A): o estudo compara o manual com «any other in-context learning technique» sem imprimir os valores comparadores; o valor de 5-shot (7.79) vem da Tabela V, mesmo modelo e benchmark, e o RAG no mesmo modelo e benchmark teve 14.29. Manual como contexto fixo, gerado com GPT-4.1 a partir da documentação relevante às tarefas dos benchmarks e verificado manualmente pelos dois primeiros autores; 10 execuções. O estudo trata o manual como limite superior aproximado, por estar ajustado às tarefas conhecidas dos benchmarks; as condições não são equivalentes a um uso realista. Nenhum teste estatístico é relatado para esta comparação, embora o texto use «significantly better». Conferido no PDF (p. 11, texto; p. 8, Tabela V).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Terceira técnica focal de prompting, ausente de tabelas e figuras; contraste relatado só em prosa (PDF p. 11), primeiro benchmark e linguagem citados (HumanEval, Gleam); comparador pela ordem da Tabela V entre as técnicas de aprendizado em contexto com que o estudo compara o manual.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 11 (impressa 11), seção V-A, texto; PDF p. 8, Tabela V, bloco Qwen 2.5 Coder 32B Instruct, linha HumanEval, coluna Gleam 5-shot",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "We obtained a pass@1 of 15.58% on HumanEval, 25.07% on MBPP, and 1.76% of McEval-Hard for Gleam, and 32.47% on HumanEval, 39.44% on MBPP, and 6.61% of McEval-Hard for MoonBit.", "localizador": "PDF p. 11, seção V-A"},
+        {"trecho": "While results on the first two benchmarks are significantly better than any other in-context learning technique, and nearly on par with the fine-tuning baseline, they are still underperforming against our best technique (i.e., instruction transferring).", "localizador": "PDF p. 11, seção V-A"},
+        {"trecho": "HumanEval 6.49 7.79 ( 3.00) 14.29 (13.00) 24.74 (32.22) — 11.04 23.25( 9.17) 27.08 ( 4.48) 34.74 (11.43) —", "localizador": "PDF p. 8, Tabela V, bloco Qwen 2.5 Coder 32B Instruct; colunas Dataset | Gleam: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained | MoonBit: 0-shot, 5-shot, RAG, Fine-tuned, Pre-trained"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo e três questões de pesquisa explícitos (popularidade da linguagem; aprendizado em contexto, pré-treinamento e ajuste fino; transferência de instruções).", "localizador": "PDF p. 2, seção II; PDF p. 9–10, seção IV"},
+    {"criterio": "procedimento", "julgamento": "atende", "justificativa": "Few-shot, RAG e manual descritos com fonte de recuperação, modelo de embeddings, número de exemplos ou trechos, LLM auxiliar e etapas; temperatura e número de execuções informados; prompts completos remetidos ao pacote de replicação.", "localizador": "PDF p. 5, seção II-B; PDF p. 11, seção V-A"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "0-shot executado no mesmo modelo, benchmark e linguagem, com teste de McNemar, OR e correção de Benjamini-Hochberg; para o manual, a comparação com as demais técnicas é só narrativa e sem teste.", "localizador": "PDF p. 5–6, seção II-C; PDF p. 8, Tabela V; PDF p. 11"},
+    {"criterio": "metricas", "julgamento": "atende", "justificativa": "pass@1 e passed% definidos, com n = 10 repetições e número de tarefas por benchmark; valores de 0-shot coincidem entre Tabelas IV e V e de pré-treinamento entre V e VI. Ressalvas: significância indicada só pela cor do OR; reduções de erros sintáticos sem indicar se são relativas; passed% só no pacote de replicação.", "localizador": "PDF p. 3–6; PDF p. 7–8, Tabelas IV e V; PDF p. 10, Tabela VI"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de validade trata procedimento e escolhas das técnicas (com experimento do manual), pressupostos de exposição prévia, qualidade dos dados e dos benchmarks traduzidos e generalização.", "localizador": "PDF p. 11–13, seção V"},
+    {"criterio": "reprodutibilidade", "julgamento": "atende", "justificativa": "Hiperparâmetros, modelos, dados e procedimento descritos; pacote de replicação com benchmarks, gerações, prompts e scripts indicado por DOI. O pacote não foi acessado nem validado nesta extração; versões/snapshots dos modelos principais não são informadas.", "localizador": "PDF p. 5–6, seções II-B e II-D; referência [26]"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Controle de vazamento em duas etapas entre dados coletados (incluindo a base de exemplos do few-shot) e benchmarks, e discussão de possível exposição dos LLMs a Gleam e MoonBit, reconhecida como não verificável. Não se informa se a documentação usada no RAG passou pelo mesmo controle, e a contaminação dos benchmarks originais em linguagens de alto recurso (RQ1) não é discutida; o manual é declaradamente ajustado às tarefas dos benchmarks.", "localizador": "PDF p. 4, seção II-A4; PDF p. 11–12, seções V-A e V-B"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (972 linhas, incluindo referências).",
+    "paginas_abertas_pdf": [4, 5, 6, 7, 8, 10, 11]
+  }
+}

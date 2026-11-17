@@ -1,0 +1,539 @@
+{
+  "estudo": "S530",
+  "texto_fonte": "fontes/textos/lote/S530.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "DRC-Coder",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "decomposicao",
+          "exemplos",
+          "contexto",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "feedback",
+          "multiagente"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (Resumo); p. 2 (Introdução, contribuições); p. 4-6 (Seção 4, Figs. 5-9); p. 7 (Seção 5.1 Baselines; Tabela 1)",
+        "observacao": "Pacote completo: prompt inicial estruturado (definição da tarefa e papéis → instrucao; requisitos de formato de entrada/saída e descrição da regra de projeto → restricoes; guia passo a passo em subtarefas → decomposicao; dois exemplos de layout com localizações de DRV → exemplos), dois agentes LLM (Planner e Programmer) em group chat (multiagente; fases de planejamento e codificação, categoria decomposicao já presente no prompt base), funções de ferramenta com VLM que analisam imagens da regra e dos layouts e devolvem texto ao Planner (contexto) e função DRC Code Evaluation que executa o código no conjunto de layouts e devolve relatório de desempenho para depuração iterativa (feedback). Comparador: standard prompting com o mesmo prompt da Figura 6, sem feedback de ferramentas (p. 7). O contraste DRC-Coder × standard prompting isola o pacote, não um mecanismo individual. O estudo afirma configuração zero-shot no sentido de não fornecer exemplos de código (p. 4); os exemplos de layout com DRVs foram classificados como exemplos de entrada/saída. O pacote usa VLM (GPT-4o) para interpretar imagens; o estudo declara não haver ajuste fino (p. 6)."
+      },
+      {
+        "nome_original": "standard prompting",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "decomposicao",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 (Seção 5.1, Baselines; Tabela 1); p. 4 (Figura 6)",
+        "observacao": "Linha de base principal: usa o prompt da Figura 6 para gerar o código diretamente, sem feedback das funções de ferramenta. É condição de comparação; seus mecanismos não são isolados. Número de execuções e parâmetros de decodificação não informados."
+      },
+      {
+        "nome_original": "vision capability (Foundry Rule Analysis e Layout DRV Analysis)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "decomposicao",
+          "exemplos",
+          "contexto",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 (Seção 4.2, Figs. 7-8); p. 7 (Seção 5.1 Baselines; Seção 5.3; Tabela 2 e Tabela 1)",
+        "observacao": "Duas funções de ferramenta que chamam um VLM (GPT-4o) para interpretar a imagem e o texto da regra de projeto e as imagens dos layouts com DRVs, devolvendo análise textual ao Planner. Ablação: variante multi-agent w/o vision capability mantém Planner e Programmer sem essas funções (Tabela 2), comparada pelo estudo com o DRC-Coder completo (Tabela 1, GPT-4o). As duas funções são retiradas juntas; não há isolamento de cada uma."
+      },
+      {
+        "nome_original": "multi-agent setting (Planner e Programmer)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "decomposicao",
+          "exemplos",
+          "contexto",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "multiagente"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (Seção 4); p. 7 (Seção 5.1 Baselines; Seção 5.3; Tabela 2 e Tabela 1)",
+        "observacao": "Ablação: variante single-agent with vision capability usa só o Programmer para gerar o código diretamente (Tabela 2). Retirar o Planner retira também o papel que, no sistema completo, chama as funções de análise visual e faz o re-raciocínio; o estudo não descreve como a variante de agente único usa as ferramentas nem se mantém o DRC Code Evaluation (nao_informado). O isolamento é aproximado."
+      },
+      {
+        "nome_original": "DRC Code Evaluation (auto-evaluation / auto-debugging)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "decomposicao",
+          "exemplos",
+          "contexto",
+          "feedback",
+          "multiagente"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 5-6 (Seção 4.3, Figura 9); p. 7 (Tabela 1, #iteration); p. 8 (Figura 11)",
+        "observacao": "Executa o código gerado nos layouts do conjunto, compara com os DRVs de referência da ferramenta comercial e devolve precisão, revocação, F1 e falsos negativos/positivos aos agentes. Não há ablação que retire só esse componente; a única condição sem feedback é o standard prompting, que também não tem Planner nem análise visual (contraste de pacote). O estudo mostra apenas a evolução por rodada no estudo de caso da regra M0.S.1 (Figura 11) e o número de iterações por regra (Tabela 1)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "escolha do VLM (GPT-4o × Phi-3)",
+        "natureza": "selecao_modelo",
+        "descricao": "Experimento preliminar que compara as respostas de dois VLMs à explicação de uma regra e de um layout; fundamenta a escolha do GPT-4o para as funções de ferramenta. Comparação qualitativa, sem alterar o prompt.",
+        "localizador": "p. 3 (Seção 2.2, Figura 2)"
+      },
+      {
+        "nome_original": "LLM de base Llama3 × GPT-4o",
+        "natureza": "selecao_modelo",
+        "descricao": "Mesmo método (standard prompting e DRC-Coder) executado com dois LLMs; a diferença entre modelos não é efeito de prompting.",
+        "localizador": "p. 7 (Tabela 1; Seção 5.2)"
+      },
+      {
+        "nome_original": "DRC report preprocessing (conversão para DRVs em grade)",
+        "natureza": "outro",
+        "descricao": "Pré-processamento que converte os relatórios da ferramenta DRC comercial (polígonos em coordenadas físicas) em DRVs na representação em grade, usados como referência pela função DRC Code Evaluation e na avaliação.",
+        "localizador": "p. 3-4 (Seção 3.2, Figura 4)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-4o",
+        "versao": "OpenAI API version 2024-05-13",
+        "observacao": "Usado para Planner, Programmer e os VLMs das duas funções de ferramenta (p. 6)."
+      },
+      {
+        "nome": "Llama3",
+        "versao": "nao_informado",
+        "observacao": "Usado para standard prompting e DRC-Coder na Tabela 1; tamanho e versão não informados; o estudo não informa qual VLM foi usado nas funções de ferramenta nas execuções com Llama3 (p. 7)."
+      },
+      {
+        "nome": "Phi-3",
+        "versao": "nao_informado",
+        "observacao": "Apenas no experimento preliminar de explicação de imagens (Figura 2, p. 3)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "conjunto próprio de layouts de células padrão gerados com NVCell (nó tecnológico sub-3nm) com relatórios de ferramenta DRC comercial",
+        "quantidade": "207 layouts de células padrão; 7 regras de projeto (M0.S.1, M0.S.2, VIA0.S.1, M1.S.1, M1.S.2, VIA1.S.1, M2.S.1)",
+        "observacao": "Os mesmos 207 layouts são usados pela função DRC Code Evaluation durante a geração (Figura 9) e como conjunto de avaliação (p. 6); os dois exemplos de layout do prompt são sorteados do mesmo conjunto (p. 4). Número de DRVs ou de grades avaliados não informado; não há conjunto separado de teste descrito."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Precision (P)",
+        "denominador": "nao_informado (DRVs detectados pelo código; número não informado; a Figura 9 indica média sobre 207 layouts)"
+      },
+      {
+        "nome": "Recall (R)",
+        "denominador": "nao_informado (DRVs da ferramenta comercial; número não informado)"
+      },
+      {
+        "nome": "F1 score (F)",
+        "denominador": "nao_informado; declarada métrica principal (p. 5-6); linha Average da Tabela 1 resume as 7 regras sem fórmula explícita"
+      },
+      {
+        "nome": "#iteration (iterações de depuração)",
+        "denominador": "por regra; só para DRC-Coder com GPT-4o"
+      },
+      {
+        "nome": "Runtime (sec)",
+        "denominador": "por regra; só para DRC-Coder com GPT-4o"
+      }
+    ],
+    "linguagens": [
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Alucinação de um único agente LLM em codificação DRC complexa e alucinação induzida por contextos longos, que leva a limitar o relatório de DRVs.",
+        "localizador": "p. 2 (Introdução); p. 6 (Seção 4.3)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Falsos positivos e falsos negativos de DRVs produzidos pelo código gerado, isto é, verificador DRC que não reproduz o relatório da ferramenta comercial.",
+        "localizador": "p. 2 (Seção 2.1); p. 7 (Seção 5.2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de comprimento de contexto dos LLMs impede reportar todos os DRVs no relatório de feedback.",
+        "localizador": "p. 6 (Seção 4.3)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Divisão da tarefa entre dois agentes especializados (Planner e Programmer) para melhorar o raciocínio e reduzir alucinação. O efeito é medido por P/R/F1 na ablação single-agent (Tabela 2) contra o sistema completo (Tabela 1); alucinação não é medida diretamente.",
+        "avaliada": "sim",
+        "localizador": "p. 2 (Introdução); p. 7 (Seção 5.3; Tabelas 1 e 2)"
+      },
+      {
+        "descricao": "Função DRC Code Evaluation com feedback de falsos positivos e negativos para depuração automática. Só comparada como parte do pacote contra standard prompting, sem condição que retire apenas o feedback.",
+        "avaliada": "nao",
+        "localizador": "p. 2 (Seção 2.1); p. 5-6 (Seção 4.3); p. 7 (Seção 5.1)"
+      },
+      {
+        "descricao": "Relatar apenas DRVs com distâncias x, y únicas para contornar o limite de contexto e a alucinação em contextos longos.",
+        "avaliada": "nao",
+        "localizador": "p. 6 (Seção 4.3)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O texto afirma «37% higher F1 score» para DRC-Coder com GPT-4o (Tabela 1: F médio 0.631 × 1.000). Cálculo próprio: diferença de 0.369 (36,9 p.p.) e variação relativa à linha de base de cerca de 58,5%; o valor impresso coincide com a diferença absoluta e com (intervenção − base)/intervenção, não com a variação relativa à base. O estudo não define o cálculo.",
+        "localizador": "p. 7 (Seção 5.2; Tabela 1, linha Average, colunas GPT-4o F)"
+      },
+      {
+        "descricao": "Ablação: «32.5% and 30.7% higher F1 score, respectively» das variantes sobre standard prompting (F 0.631). Cálculo próprio com a Tabela 2: (0.935 − 0.631)/0.935 ≈ 32,5% e (0.911 − 0.631)/0.911 ≈ 30,7%, isto é, a diferença dividida pelo valor da variante; em p.p. seriam 30,4 e 28,0, e relativamente à base cerca de 48,2% e 44,4%. Além disso, a ordem de «respectively» corresponde à ordem da Tabela 2 (multi-agent w/o vision primeiro), oposta à ordem em que as variantes são listadas na Seção 5.1 (single-agent primeiro). Aparente inconsistência de definição e de ordem.",
+        "localizador": "p. 7 (Seção 5.1 Baselines; Seção 5.3; Tabela 2, linha Average; Tabela 1)"
+      },
+      {
+        "descricao": "Llama3: «improvement with 42.2%» do DRC-Coder sobre standard prompting (Tabela 1: F médio 0.421 × 0.726). Cálculo próprio: diferença de 0.305 (30,5 p.p.), variação relativa à base de cerca de 72,4% e (0.726 − 0.421)/0.726 ≈ 42,0%; nenhum coincide exatamente com 42,2%, possivelmente por valores não arredondados. Aparente inconsistência; a fonte não informa o cálculo.",
+        "localizador": "p. 7 (Seção 5.2; Tabela 1, linha Average, colunas Llama3 F)"
+      },
+      {
+        "descricao": "Resultados nulos por regra: com GPT-4o, standard prompting já atinge 1.000 em P, R e F na regra VIA1.S.1, igual ao DRC-Coder; as duas variantes da ablação também atingem 1.000 em M1.S.2, VIA1.S.1 e M2.S.1. Inversões entre variantes: single-agent w/ vision tem F médio menor (0.911 × 0.935), mas F maior em M0.S.1 (0.946 × 0.747) e M1.S.1 (1.000 × 0.844).",
+        "localizador": "p. 7 (Tabela 1, colunas GPT-4o; Tabela 2)"
+      },
+      {
+        "descricao": "Com Llama3, o DRC-Coder não chega a 1.000: F de 0.234 em M1.S.2 e 0.255 em VIA1.S.1; em M0.S.1 a precisão do DRC-Coder (0.795) é menor que a do standard prompting (0.841). Standard prompting com Llama3 tem P, R e F iguais a 0.000 em M1.S.2. O estudo reconhece que o método com Llama3 não é tão eficaz quanto com GPT-4o.",
+        "localizador": "p. 7 (Tabela 1, colunas Llama3; Seção 5.2)"
+      },
+      {
+        "descricao": "Valores idênticos sem explicação: na regra M0.S.2, standard prompting tem P 0.657, R 0.489 e F 0.554 tanto com Llama3 quanto com GPT-4o, e o exemplo de relatório da Figura 9 mostra Precision 0.6570, Recall 0.4894, F1 Score 0.5540. O estudo não comenta a coincidência; não se julga erro.",
+        "localizador": "p. 7 (Tabela 1, linha M0.S.2); p. 6 (Figura 9)"
+      },
+      {
+        "descricao": "Condição de avaliação: a função DRC Code Evaluation compara o código, durante a geração, com os relatórios de referência dos layouts do conjunto (Figura 9 indica 207 layouts), e a avaliação final usa o mesmo conjunto de 207 layouts; os exemplos do prompt também são sorteados dele. Não se descreve conjunto separado de teste; o F1 de 1.000 mede o alinhamento com os relatórios usados no próprio ciclo de depuração. Leitura do procedimento descrito, não declarada pelo estudo como limitação.",
+        "localizador": "p. 4 (Seção 4.1); p. 5-6 (Seção 4.3, Figura 9); p. 6 (Seção 5.1, Evaluation method)"
+      },
+      {
+        "descricao": "Assimetria de orçamento entre condições: standard prompting gera o código diretamente sem feedback, enquanto o DRC-Coder com GPT-4o itera em média 2.3 vezes (1 a 3 por regra). Número de execuções por condição, variância e parâmetros de decodificação não informados; os resultados são valores únicos por regra.",
+        "localizador": "p. 7 (Seção 5.1 Baselines; Tabela 1, #iteration)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A depuração é etapa interna do ciclo de geração (auto-debugging com feedback de avaliação), não tarefa de reparo de código fornecido; por isso a tarefa registrada é apenas geracao.",
+        "localizador": "p. 1 (Resumo); p. 4 (Seção 4; Figura 5)"
+      },
+      {
+        "descricao": "Tempo de geração: média de 2.3 iterações e 210 s por regra com GPT-4o; o estudo afirma redução de custos de engenharia e de tempo frente à codificação manual, sem medir custo nem comparar com engenheiros (não quantificado).",
+        "localizador": "p. 1 (Resumo); p. 7 (Tabela 1; Seção 5.2); p. 8 (Conclusão)"
+      },
+      {
+        "descricao": "Estudo de caso da regra M0.S.1 mostra a evolução por rodada do DRC Code Evaluation: P 0.74, R 0.57, F 0.61; depois P 0.86, R 1.00, F 0.92; por fim P 1.00, R 1.00, F 1.00. É contribuição cumulativa, sem condição sem feedback.",
+        "localizador": "p. 8 (Figura 11, passos 5, 8 e 11)"
+      },
+      {
+        "descricao": "Implementação com o toolkit AutoGen; o Planner decide em cada rodada se chama as funções de análise; a análise visual usa visualizações em grade dos layouts construídas pelos autores.",
+        "localizador": "p. 4-5 (Seções 3.2 e 4.2); p. 6 (Seção 5.1)"
+      },
+      {
+        "descricao": "Extensões sugeridas (outras linguagens como C++, chatbot de explicação DRC, feedback humano) não foram avaliadas.",
+        "localizador": "p. 8 (Conclusão)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this paper, we present DRC-Coder, a multi-agent framework with vision capabilities for automated DRC code generation.",
+        "localizador": "p. 1 (Resumo)"
+      },
+      {
+        "trecho": "We also design an auto-evaluation function for LLMs to enable DRC code debugging.",
+        "localizador": "p. 1 (Resumo)"
+      },
+      {
+        "trecho": "By assigning two LLMs with different roles to handle each sub-task, we enhance the LLM reasoning ability and reduce the potential hallucination of LLMs in solving complex DRC coding with one agent.",
+        "localizador": "p. 2 (Introdução)"
+      },
+      {
+        "trecho": "This could help LLM to effectively avoid false positives and negatives of DRVs produced by the generated code.",
+        "localizador": "p. 2 (Seção 2.1)"
+      },
+      {
+        "trecho": "To make DRC-Coder more applicable when facing new technology node, our code generation is under a zero-shot setting, i.e., no example codes are provided during generation.",
+        "localizador": "p. 4 (Seção 4)"
+      },
+      {
+        "trecho": "The fix part contains: (1) A task definition for developing a Python function to identify DRVs in layout data. (2) The requirements that formally states the input and output format of the function. (3) A step-by-step guide that decomposes coding problem into subtasks for the Planner and Programmer.",
+        "localizador": "p. 4 (Seção 4.1)"
+      },
+      {
+        "trecho": "The DR dependent part has: (1) The target design rule description from foundry document. (2) Layout examples with metal information and corresponding DRV locations to provide concrete cases for analysis.",
+        "localizador": "p. 4 (Seção 4.1)"
+      },
+      {
+        "trecho": "Note that we randomly select two layout examples that has the target DRVs from our dataset to construct the prompt.",
+        "localizador": "p. 4 (Seção 4.1)"
+      },
+      {
+        "trecho": "This multi-agent approach decomposes the DRC process into planning and coding phases, allowing each agent to focus on its specialized task to enhance overall system performance.",
+        "localizador": "p. 4 (Seção 4)"
+      },
+      {
+        "trecho": "In detail, this function executes our generated code on cell layouts in the dataset and directly compares the code output with the golden DRC reports of the commercial tool.",
+        "localizador": "p. 5 (Seção 4.3)"
+      },
+      {
+        "trecho": "We cannot report all the DRVs due to context length limitation of LLMs and the potential hallucination problem of LLMs triggered by long contexts.",
+        "localizador": "p. 6 (Seção 4.3)"
+      },
+      {
+        "trecho": "Planner and Programmer agents, along with the VLMs embedded in two tool functions, are powered by GPT-4o [12] using the OpenAI API version 2024-05-13.",
+        "localizador": "p. 6 (Seção 5.1)"
+      },
+      {
+        "trecho": "Our evaluation dataset, generated as described in Section 3, comprises 207 standard cell layouts and covers 7 distinct design rules, as illustrated in Table 1.",
+        "localizador": "p. 6 (Seção 5.1)"
+      },
+      {
+        "trecho": "Thus, the main baseline is set to the standard prompting, which using prompt in Figure 6 to directly generate the code without tool function feedback.",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "trecho": "We set two variants of DRC-Coder as other baselines for abalation study: (1) single-agent with vision capability: Only use Programmer to directly generate code and (2) multi-agent without vision capability: Keep Planner and Programmer but without Foundry Rule and Layout DRV Analysis.",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "trecho": "This inconsistency shows the limitations of conventional prompting when dealing with the intricate DRC.",
+        "localizador": "p. 7 (Seção 5.2)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "DRC-Coder",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "decomposicao",
+        "exemplos",
+        "contexto",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "feedback",
+        "multiagente"
+      ],
+      "comparador": "standard prompting",
+      "modelo": "GPT-4o (OpenAI API version 2024-05-13)",
+      "benchmark": "conjunto próprio de 207 layouts de células padrão (NVCell, nó sub-3nm), 7 regras de projeto",
+      "metrica": "F1 score (F)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.631,
+        "intervencao": 1.0
+      },
+      "denominador": "nao_informado (número de DRVs ou grades não informado; linha Average da Tabela 1 resume as 7 regras; a Figura 9 indica média sobre 207 layouts por regra)",
+      "condicoes": "Linha Average da Tabela 1 (agregado impresso das 7 regras: M0.S.1, M0.S.2, VIA0.S.1, M1.S.1, M1.S.2, VIA1.S.1, M2.S.1), colunas GPT-4o. Standard prompting: prompt da Figura 6, geração direta sem feedback das ferramentas. DRC-Coder: Planner e Programmer com GPT-4o, funções de análise visual com GPT-4o e DRC Code Evaluation; média de 2.3 iterações de depuração e 210 s por regra. Os dois exemplos de layout do prompt e a função de feedback usam o mesmo conjunto de 207 layouts empregado na avaliação. Número de execuções, temperatura e demais parâmetros de decodificação: nao_informado. Ganho de pacote, não atribuível a um ingrediente. Conferido no PDF, p. 7, Tabela 1.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo identifica uma técnica (DRC-Coder), um comparador (standard prompting) e os valores F1 1.000 × 0.631; F1 é declarada métrica principal (p. 5-6 e p. 7). Os valores citados correspondem à linha Average (agregado impresso das 7 regras) das colunas GPT-4o, o LLM do sistema principal; o agregado não mistura modelos.",
+      "derivacao": "direta",
+      "localizador": "p. 7, Tabela 1, linha Average, colunas GPT-4o / Standard prompting F e DRC-Coder F; p. 1 (Resumo)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 0.425 0.618 0.421 0.684 0.914 0.726 0.690 0.624 0.631 1.000 1.000 1.000 2.3 210",
+          "localizador": "p. 7, Tabela 1, linha Average; colunas: Llama3 Standard prompting P R F, Llama3 DRC-Coder P R F, GPT-4o Standard prompting P R F, GPT-4o DRC-Coder P R F #iteration Runtime (sec)"
+        },
+        {
+          "trecho": "Experimental results show that targeting on a sub-3nm technology node for a state-of-the-art standard cell layout tool, DRC-Coder achieves perfect F1 score 1.000 in generating DRC codes for meeting the standard of a commercial DRC tool, highly outperforming standard prompting techniques (F1=0.631).",
+          "localizador": "p. 1 (Resumo)"
+        },
+        {
+          "trecho": "Note that we serve F1 score as our primary metric since it offers a comprehensive view of effectiveness by balancing both precision and recall.",
+          "localizador": "p. 5-6 (Seção 4.3)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "vision capability (Foundry Rule Analysis e Layout DRV Analysis)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "decomposicao",
+        "exemplos",
+        "contexto",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "DRC-Coder multi-agent w/o vision capability",
+      "modelo": "GPT-4o (OpenAI API version 2024-05-13)",
+      "benchmark": "conjunto próprio de 207 layouts de células padrão (NVCell, nó sub-3nm), 7 regras de projeto",
+      "metrica": "F1 score (F)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.935,
+        "intervencao": 1.0
+      },
+      "denominador": "nao_informado (número de DRVs ou grades não informado; linhas Average resumem as 7 regras)",
+      "condicoes": "Intervenção: DRC-Coder completo com GPT-4o (Tabela 1, linha Average, DRC-Coder F). Comparador: variante que mantém Planner e Programmer sem as funções Foundry Rule Analysis e Layout DRV Analysis (Tabela 2, linha Average, Multi-agent w/o vision capability F). Os valores vêm de duas tabelas; o próprio estudo compara as variantes com o DRC-Coder completo da Tabela 1. As duas funções visuais são retiradas juntas. Número de execuções e parâmetros de decodificação: nao_informado. Conferido no PDF, p. 7, Tabelas 1 e 2.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente isolado incluído para completar o alvo de três, primeiro da tabela de ablação (Tabela 2, primeira coluna). Métrica F1, declarada principal pelo estudo; usado o agregado impresso (linha Average) das 7 regras, com o mesmo modelo.",
+      "derivacao": "direta",
+      "localizador": "p. 7, Tabela 2, linha Average, Multi-agent w/o vision capability F; Tabela 1, linha Average, GPT-4o DRC-Coder F; Seção 5.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 0.961 0.934 0.935 0.876 0.995 0.911",
+          "localizador": "p. 7, Tabela 2, linha Average; colunas: Multi-agent w/o vision capability P R F, Single-agent w/ vision capability P R F"
+        },
+        {
+          "trecho": "Average 0.425 0.618 0.421 0.684 0.914 0.726 0.690 0.624 0.631 1.000 1.000 1.000 2.3 210",
+          "localizador": "p. 7, Tabela 1, linha Average; colunas: Llama3 Standard prompting P R F, Llama3 DRC-Coder P R F, GPT-4o Standard prompting P R F, GPT-4o DRC-Coder P R F #iteration Runtime (sec)"
+        },
+        {
+          "trecho": "However, they fall short of the full DRC-Coder (second column in Table 1) in some design rules.",
+          "localizador": "p. 7 (Seção 5.3)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "multi-agent setting (Planner e Programmer)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "decomposicao",
+        "exemplos",
+        "contexto",
+        "feedback",
+        "multiagente"
+      ],
+      "mecanismos_acrescentados": [
+        "multiagente"
+      ],
+      "comparador": "DRC-Coder single-agent w/ vision capability",
+      "modelo": "GPT-4o (OpenAI API version 2024-05-13)",
+      "benchmark": "conjunto próprio de 207 layouts de células padrão (NVCell, nó sub-3nm), 7 regras de projeto",
+      "metrica": "F1 score (F)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.911,
+        "intervencao": 1.0
+      },
+      "denominador": "nao_informado (número de DRVs ou grades não informado; linhas Average resumem as 7 regras)",
+      "condicoes": "Intervenção: DRC-Coder completo com GPT-4o (Tabela 1, linha Average, DRC-Coder F). Comparador: variante que usa só o Programmer para gerar o código diretamente, com capacidade visual (Tabela 2, linha Average, Single-agent w/ vision capability F). O estudo não informa se a variante mantém o DRC Code Evaluation nem como o Programmer chama as funções visuais (nao_informado); retirar o Planner também retira o planejamento e o re-raciocínio. Número de execuções e parâmetros de decodificação: nao_informado. Conferido no PDF, p. 7, Tabelas 1 e 2.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três, segundo da tabela de ablação (Tabela 2, segunda coluna). Métrica F1, declarada principal; agregado impresso (linha Average) das 7 regras, mesmo modelo.",
+      "derivacao": "direta",
+      "localizador": "p. 7, Tabela 2, linha Average, Single-agent w/ vision capability F; Tabela 1, linha Average, GPT-4o DRC-Coder F; Seção 5.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 0.961 0.934 0.935 0.876 0.995 0.911",
+          "localizador": "p. 7, Tabela 2, linha Average; colunas: Multi-agent w/o vision capability P R F, Single-agent w/ vision capability P R F"
+        },
+        {
+          "trecho": "Average 0.425 0.618 0.421 0.684 0.914 0.726 0.690 0.624 0.631 1.000 1.000 1.000 2.3 210",
+          "localizador": "p. 7, Tabela 1, linha Average; colunas: Llama3 Standard prompting P R F, Llama3 DRC-Coder P R F, GPT-4o Standard prompting P R F, GPT-4o DRC-Coder P R F #iteration Runtime (sec)"
+        },
+        {
+          "trecho": "These results indicate the importance of visual capability in interpreting certain design rules and the advantage of our multi-agent setting in task decomposition of the DRC coding task.",
+          "localizador": "p. 7-8 (Seção 5.3)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O problema (geração automática de código de verificadores DRC) e as contribuições são declarados explicitamente.",
+      "localizador": "p. 1 (Resumo); p. 2 (Introdução, lista de contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O fluxo, os agentes, as funções de ferramenta e o prompt inicial (parcialmente, com reticências) são descritos; faltam número de execuções, parâmetros de decodificação, critério de parada além da correção, configuração das execuções com Llama3 (incluindo o VLM) e o funcionamento exato da variante de agente único.",
+      "localizador": "p. 4-6 (Seção 4, Figs. 5-9); p. 6-7 (Seção 5.1)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linha de base executada (standard prompting com o mesmo prompt) e duas variantes de ablação, mas o comparador principal gera sem feedback enquanto o DRC-Coder itera com os relatórios de referência do próprio conjunto de avaliação; não há linha de base com o mesmo orçamento de iterações nem com feedback sem multiagente e visão.",
+      "localizador": "p. 7 (Seção 5.1 Baselines; Tabelas 1 e 2)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "P, R e F1 são adequadas ao desbalanceamento e F1 é declarada principal, mas o número de DRVs ou grades (denominador) não é informado, a forma da média (por layout e entre regras) não é explicitada e as variações percentuais no texto («37%», «32.5%», «30.7%», «42.2%») não seguem uma definição informada. Os valores coincidem entre texto e tabelas para F médio (0.631, 1.000).",
+      "localizador": "p. 5-6 (Seção 4.3, Figura 9); p. 7 (Seções 5.2-5.3; Tabelas 1 e 2)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "nao_informado",
+      "justificativa": "Não há discussão de ameaças à validade; o texto menciona apenas a limitação de contexto dos LLMs no relatório de feedback e o desempenho inferior com Llama3, sem discutir generalização, sobreposição entre conjunto de feedback e de avaliação ou não determinismo.",
+      "localizador": "p. 6 (Seção 4.3); p. 7 (Seção 5.2); p. 8 (Conclusão)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelo e versão (GPT-4o, API 2024-05-13), framework (AutoGen) e parte do prompt; não há declaração de disponibilidade de código, prompts completos ou dados, e o conjunto depende de NVCell, de ferramenta DRC comercial e de regras de um nó sub-3nm não identificados publicamente.",
+      "localizador": "p. 3 (Seção 3); p. 4 (Figura 6); p. 6 (Seção 5.1)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_atende",
+      "justificativa": "O estudo não discute contaminação, mas o procedimento descrito mostra que os exemplos do prompt são sorteados do conjunto de avaliação e que a função de feedback compara o código, durante a geração, com os relatórios de referência dos mesmos 207 layouts usados na avaliação final, sem conjunto separado de teste. Contaminação por pré-treinamento não é discutida.",
+      "localizador": "p. 4 (Seção 4.1); p. 5-6 (Seção 4.3, Figura 9); p. 6 (Seção 5.1, Evaluation method)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [
+      1,
+      4,
+      6,
+      7,
+      8
+    ],
+    "observacao": "Texto extraído lido integralmente (9 páginas, incluindo referências). Páginas abertas visualmente: p. 1 (resumo), p. 4 (Figuras 5-6, Seção 4.1), p. 6 (Figura 9, Seção 5.1), p. 7 (Tabelas 1 e 2, Seções 5.1-5.3), p. 8 (Figura 11, conclusão). O PDF não imprime números de página; os localizadores usam a posição no arquivo."
+  }
+}

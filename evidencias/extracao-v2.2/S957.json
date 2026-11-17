@@ -1,0 +1,388 @@
+{
+  "estudo": "S957",
+  "texto_fonte": "fontes/textos/lote/S957.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Akella, Kaul, Narayanam, Mehta. Quality Assessment of Tabular Data using Large Language Models and Code Generation. arXiv:2509.10572v2 [cs.SE], 21 set. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Three-stage framework (statistical inlier detection + LLM-driven rule and code generation)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (Resumo); p. 2, Fig. 1 e Seção 2; pp. 3-5, Seções 2.2-2.4; p. 6, Tabelas 2, 4 e 5",
+        "observacao": "Pacote híbrido: detecção estatística de inliers (fora do escopo) seguida de geração de regras com Gemma-3-12B (prompt de três partes com papel/diretrizes → instrucao; exemplos genéricos, de domínio e de iterações anteriores → exemplos; esquema, perfis de colunas, base de conhecimento e amostras → contexto; formato JSON e comportamentos permitidos/proibidos → restricoes), enriquecimento com especificação e pseudocódigo e etapas encadeadas até a geração de código (decomposicao), filtros por LLM que descartam regras entre candidatas (conflitos e rubrica → amostragem) e reparo do código com a exceção da execução (feedback). Não há base de prompting identificável, por isso acrescentados vazio. O pacote é comparado apenas com detectores de erros que não usam LLM nem prompting (ED2, FAHES, KATARA, IQR, IF, SD, Max-Entropy, Min-K), que não constituem condição «sem o pacote» no mesmo pipeline; por isso tipo_contrafactual nenhum. Os papéis distintos (gerador, 'data-quality auditor', 'senior data-quality engineer') atuam em sequência, sem interação descrita; não classificados como multiagente."
+      },
+      {
+        "nome_original": "Domain-aware few-shot examples (domain-specific few-shot examples)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (Domain-aware few-shot examples); p. 4 (Seção 2.3); p. 5, Seção 3.3; p. 7, Tabela 6; p. 10, Apêndice A.1; p. 12, Tabela 7",
+        "observacao": "Repositório de rule cards (manuais ou coletados de vários domínios) recuperados por similaridade de cosseno com all-MiniLM-L6-v2 e inseridos no prompt (recuperação de exemplos resolvidos → exemplos e contexto). A Seção 3.3 executa o pipeline com e sem exemplos de domínio (Tabela 6, F1 de detecção). O estudo não diz se a condição 'without' retira só os exemplos de domínio da geração de regras ou também os exemplos de código de domínio da Seção 2.3; o texto chama a condição sem exemplos de 'generic prompt' (p. 5), e o Apêndice A.1 descreve 'without few-shot exemplars' (p. 10). Por ser parte do sistema proposto com ablação, papel componente."
+      },
+      {
+        "nome_original": "Without domain-specific few-shot examples (generic prompt)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seções 3.3 e Observations; p. 7, Tabela 6",
+        "observacao": "Condição do pipeline sem exemplos específicos de domínio. Exemplos mantidos porque o template de geração (Fig. 8, p. 14) traz 'Example Format Compliance Rules' genéricos, e os prompts de conflito e rubrica têm exemplos; contexto mantido (esquema, perfis). O estudo não detalha o conteúdo exato desta condição (ver a técnica anterior)."
+      },
+      {
+        "nome_original": "Few-shot examples from previous iterations (iterative prompting strategy inspired by self-consistency)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Few-shot examples from previous iterations); p. 14, Fig. 8 ('Rules From Previous Iterations For Test Schema')",
+        "observacao": "Subconjunto aleatório de rule cards geradas nas iterações anteriores reinserido como exemplos no prompt. Embora 'inspired by the self-consistency technique', não há votação nem seleção por consistência descrita nesta etapa; classificado como exemplos. Número de iterações não informado. Sem condição com e sem este componente."
+      },
+      {
+        "nome_original": "Rule-type-specific prompt templates (three-part rule-generation prompt with LLM-generated schema description)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Pipeline to generate Rules); p. 13, Fig. 6; p. 14, Fig. 8",
+        "observacao": "Cabeçalho de tarefa com tipo de regra e intenção, blocos com exemplos, regras anteriores, seção de conhecimento e lista de comportamentos permitidos e proibidos, e esquema da tabela (em lotes para tabelas largas). A descrição do esquema é gerada antes por outra chamada ao LLM (etapa encadeada → decomposicao). Prompt base da geração de regras; não isolado."
+      },
+      {
+        "nome_original": "Knowledge Base / retrieval-augmented generation (external knowledge sources, e.g., ZIP codes, country codes)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (Resumo); p. 2, Fig. 1; p. 11-12, Apêndice A.4",
+        "observacao": "Trechos de bases de conhecimento (CEPs, códigos de país, formatos de telefone) acrescentados ao prompt; tabelas de referência também usadas pelo código gerado (Fig. 3). Sem ablação."
+      },
+      {
+        "nome_original": "Pipeline to enrich Rules (rule enrichment prompt: Column Profile, Draft Rule Card, Clean vs. Noise Sample; Specification and Pseudocode)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Pipeline to enrich Rules); p. 4; Fig. 10 (Apêndice A.4)",
+        "observacao": "Etapa encadeada que refina cada regra com perfil estatístico da coluna, amostras limpas e ruidosas (dependentes do filtro de inliers) e devolve especificação e pseudocódigo (pseudocódigo intermediário → decomposicao). O template (Fig. 10) inclui rótulos de status e um exemplo resolvido. Sem ablação."
+      },
+      {
+        "nome_original": "Conflict-Resolution Filter (Multi-Layer Guardrails)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 2.2.1; Fig. 12-14 (Apêndice A.4); p. 11, Apêndice A.3",
+        "observacao": "Prompt com papel de auditor, exemplos e formato JSON que identifica pares de regras conflitantes e indica qual descartar (seleção entre respostas candidatas → amostragem). Sem ablação."
+      },
+      {
+        "nome_original": "Rubric-Based Rule Evaluation",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 2.2.1; Fig. 15 e 16 (Apêndice A.4); p. 12",
+        "observacao": "Gemma-3-12B rotula cada regra com um catálogo de rótulos (papel de 'senior data-quality engineer', exemplos genéricos e de domínio, esquema e amostra de dez linhas, saída JSON); só regras High-value, Correct ou Correct-fixable seguem (seleção → amostragem). Sem ablação."
+      },
+      {
+        "nome_original": "Python Code Generation prompt (five context components with dynamically selected few-shot code snippets)",
+        "mecanismos": ["contexto", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 2.3 e Fig. 3; Fig. 17 (Apêndice)",
+        "observacao": "Prompt com esquema, perfis das colunas-alvo, rule card enriquecida com especificação e pseudocódigo (insumo de etapa anterior → decomposicao), amostra de linhas e exemplos de código recuperados por similaridade (contexto e exemplos). O texto do prompt de geração de código não é reproduzido; instruções e restrições explícitas não informadas (nao_informado), embora o código gere uma função check(df). Sem ablação."
+      },
+      {
+        "nome_original": "Execution-error repair (exception fed back to the model)",
+        "mecanismos": ["feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, Seção 2.3",
+        "observacao": "Cada trecho é executado em poucas linhas; em caso de erro, a exceção é devolvida e o modelo repara o código. Número de rodadas de reparo e frequência de erros não informados. Sem ablação."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Inlier–Outlier Detection (Sparx algorithm on Apache Spark; BERT embeddings for string columns)",
+        "natureza": "outro",
+        "descricao": "Pré-processamento estatístico que separa linhas inliers e outliers (detecção multivariada com Sparx, testes univariados por tipo de coluna, limiar predefinido de células outliers por linha). Não é prompting, embora determine as amostras limpas e ruidosas inseridas nos prompts. Ablacionado na Tabela 3 (com vs. sem o filtro).",
+        "localizador": "p. 2, Seção 2.1; p. 5, Seção 3.2; p. 6, Tabela 3"
+      },
+      {
+        "nome_original": "End-to-End DQ Assessment Workflow (execution of check(df) functions and unified error mask)",
+        "natureza": "outro",
+        "descricao": "Execução determinística das funções geradas sobre o CSV ruidoso, agregação dos índices em máscara de erros e geração do relatório de qualidade.",
+        "localizador": "pp. 4-5, Seção 2.4"
+      },
+      {
+        "nome_original": "Model assignment (Gemma-3-12B for rules; Qwen-2.5-Coder 32B for code)",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha de modelos distintos para regras e código, sem comparação com outros modelos.",
+        "localizador": "p. 2, Seção 2.2; p. 4, Seção 2.3"
+      }
+    ],
+    "modelos": [
+      {"nome": "Gemma-3-12B", "versao": "nao_informado", "localizador": "p. 2, Seção 2.2; p. 4, Seção 2.2.1", "observacao": "Usado na geração, enriquecimento, resolução de conflitos e rubrica das regras. Só o tamanho (12B) é informado; snapshot não informado."},
+      {"nome": "Qwen-2.5-Coder (32 B)", "versao": "nao_informado", "localizador": "p. 4, Seção 2.3", "observacao": "Usado na geração de código Python; snapshot não informado."},
+      {"nome": "all-MiniLM-L6-v2", "versao": "nao_informado", "localizador": "p. 3 (Domain-aware few-shot examples)", "observacao": "Modelo de embeddings para recuperar exemplos; não gera código."},
+      {"nome": "BERT", "versao": "nao_informado", "localizador": "p. 2, Seção 2.1", "observacao": "Embeddings de colunas de texto na detecção de outliers (fora do escopo)."}
+    ],
+    "benchmarks": [
+      {"nome": "Dez conjuntos limpos com ruído REIN unificado (Adult, Beers, Bikes, Breast Cancer, HAR, Movies, Nasa, Rayyan, Soil Moisture, Tax)", "quantidade": "30 conjuntos corrompidos (10 conjuntos × níveis de ruído de 10%, 20% e 30% das células); número de linhas e células nao_informado", "localizador": "p. 5, Seção 3.1; p. 6, Tabelas 2 e 3"},
+      {"nome": "Conjuntos de robustez entre domínios (3D Printer, Water-Quality, Citation, Power) com 30% de ruído", "quantidade": "4 conjuntos; tamanho nao_informado", "localizador": "p. 5, Seção 3.3; p. 7, Tabela 6"},
+      {"nome": "REIN benchmark (conjuntos ruidosos fornecidos pela fonte)", "quantidade": "nao_informado: o texto fala em 'six domain-diverse tables', mas a Tabela 4 lista 10 conjuntos (Adult, Beers, Bikes, Breast Cancer, Flights, HAR, Hospital, Mercedes, Nasa, Soil Moisture)", "localizador": "p. 5, Seção 3.4; p. 6, Tabela 4; p. 27, Tabela 21"},
+      {"nome": "ED2 benchmark", "quantidade": "nao_informado: o texto fala em 'six datasets', mas a Tabela 5 (esquerda) lista 5 (Beers, Flights, Hospital, Restaurant, Soccer)", "localizador": "p. 5, Seção 3.4; p. 6, Tabela 5"},
+      {"nome": "RAHA benchmark", "quantidade": "5 conjuntos (Beers, Flights, Hospital, Movies, Rayyan)", "localizador": "p. 5, Seção 3.4; p. 6, Tabela 5", "observacao": "Beers, Flights e Hospital também aparecem em ED2 e REIN com ruído diferente; o estudo atribui as diferenças de resultado ao ruído."},
+      {"nome": "Análise de confiança (Beers, SmartFactory, NASA, Adult)", "quantidade": "4 conjuntos", "localizador": "p. 10, Apêndice A.1; p. 12, Tabela 7", "observacao": "Avalia regras, não código."}
+    ],
+    "metricas": [
+      {"nome": "F1 (error detection F1 scores)", "denominador": "nao_informado", "localizador": "p. 5, Seção 3.1; pp. 6-7, Tabelas 2-6", "observacao": "Comparação de máscara booleana de células com rótulos verdadeiros (p. 4, Seção 2.3); não se informa se o F1 é micro ou macro, por célula ou por conjunto, nem o número de células com erro."},
+      {"nome": "Precision (P) e Recall (R)", "denominador": "nao_informado", "localizador": "p. 27, Tabela 21; p. 13, Apêndice A.8"},
+      {"nome": "Per-rule Confidence (linear probability, escala 0-100)", "denominador": "nao_informado", "localizador": "p. 10, Apêndice A.1; p. 12, Tabela 7", "observacao": "Média macro por conjunto e tipo de regra; mede as regras, não o código."},
+      {"nome": "Coverage of Target Columns (|X ∩ Y| / |Y|)", "denominador": "número de colunas do esquema (|Y|), por conjunto", "localizador": "p. 10, Apêndice A.1, Eq. (1); p. 12, Tabela 7"}
+    ],
+    "linguagens": [
+      {"nome": "Python (pandas)", "localizador": "p. 4, Seção 2.3 e Fig. 3"}
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "O LLM produziu regras conflitantes ou mutuamente exclusivas, atribuídas em parte a alucinações do modelo (por exemplo, transaction_date exigida como 'YYYY-MM-DD' e como ano de quatro dígitos); a rubrica também prevê o rótulo Hallucinated-overly-specific.",
+        "localizador": "p. 4, Seção 2.2.1; p. 11, Apêndice A.3 e Fig. 5"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Regras conflitantes também decorrem de inconsistências entre as amostras de dados usadas nas iterações (por exemplo, gênero com ou sem 'Other'); dados ruidosos no contexto levam a regras falso-positivas, que o filtro de inliers busca reduzir.",
+        "localizador": "p. 4, Seção 2.2.1; p. 5, Seção 3.2; p. 11, Apêndice A.3 e Fig. 4"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O código gerado pode falhar na execução; o estudo prevê o reparo a partir da exceção, sem quantificar a frequência de erros.",
+        "localizador": "p. 4, Seção 2.3"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Soluções baseadas em LLM de trabalhos relacionados são descritas como computacionalmente caras por exigirem inferência por linha ou treino por conjunto; refere-se a outras abordagens, e o custo não é quantificado para o pipeline avaliado.",
+        "localizador": "p. 1, Introdução; p. 6, Conclusão"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite da janela de contexto do Gemma em tabelas largas, tratado pela divisão do esquema em lotes.",
+        "localizador": "p. 3 (Pipeline to generate Rules)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Filtro estatístico de inliers para fornecer contexto limpo ao LLM e reduzir regras falso-positivas; comparado com o pipeline sem o filtro (Tabela 3). O filtro não é prompting.",
+        "avaliada": "sim",
+        "localizador": "p. 5, Seção 3.2; p. 6, Tabela 3"
+      },
+      {
+        "descricao": "Filtro de resolução de conflitos por LLM que remove regras conflitantes antes da rubrica; sem condição sem o filtro.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 2.2.1"
+      },
+      {
+        "descricao": "Avaliação por rubrica que retém só regras High-value, Correct ou Correct-fixable; sem condição sem a rubrica.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 2.2.1"
+      },
+      {
+        "descricao": "Execução do código em poucas linhas e reparo a partir da exceção; sem condição sem reparo.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 2.3"
+      },
+      {
+        "descricao": "Divisão do esquema em lotes para caber na janela de contexto; sem avaliação.",
+        "avaliada": "nao",
+        "localizador": "p. 3 (Pipeline to generate Rules)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Three-stage framework (statistical inlier detection + LLM-driven rule and code generation)",
+        "motivo": "Os resultados do pacote (Tabelas 2, 4 e 5) só o comparam com detectores de erros que não usam prompting (ED2, FAHES, KATARA, IQR, IF, SD, Max-Entropy, Min-K, RAHA); não há contraste de técnicas de prompting para o pacote inteiro."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "A legenda da Tabela 3 diz '(30% noise)', mas a tabela traz linhas de 10%, 20% e 30%. O texto afirma que o F1 'declined significantly across all datasets (having 30% noise)', sem teste estatístico; nas linhas de 10%, HAR inverte (0.42 com filtro vs. 0.51 sem) e Rayyan empata (0.94 vs. 0.94). Nas linhas de 30% as quedas vão de 0.01 (Bikes 0.82/0.81; Tax 0.32/0.31) a 0.76 (Soil Moisture 0.80/0.04) (diferenças por cálculo próprio).",
+        "localizador": "p. 5, Seção 3.2; p. 6, Tabela 3"
+      },
+      {
+        "descricao": "O texto diz que o método obtém o maior F1 em '26 of 30 settings'. Por contagem própria na Tabela 2, 'Ours' é estritamente o maior em 24 condições e empata no maior valor em Rayyan 10% (0.94, com ED2 e Max Entropy), total de 25; não é o maior em Adult 10% (ED2 0.96 vs. 0.94), Movies 10%, 20% e 30% (ED2 0.75/0.76/0.77 vs. 0.71/0.71/0.68) e Nasa 30% (Max Entropy 0.93 vs. 0.91).",
+        "localizador": "p. 5, Observations; p. 6, Tabela 2"
+      },
+      {
+        "descricao": "Contagens de conjuntos divergem entre texto e tabelas: o REIN benchmark é descrito com 'six domain-diverse tables', mas a Tabela 4 tem 10 conjuntos (e o texto depois fala em '9 of 10 data sets'); o ED2 é descrito com 'six datasets', mas a Tabela 5 (esquerda) tem 5.",
+        "localizador": "p. 5, Seção 3.4 e Observations; p. 6, Tabelas 4 e 5"
+      },
+      {
+        "descricao": "A conclusão afirma que a abordagem 'consistently outperforms existing detectors', mas na Tabela 5 o método fica abaixo de ED2 em Hospital (0.82 vs. 1.00) e Restaurant (0.61 vs. 0.76), empata em Soccer (0.81), e fica abaixo de RAHA em Beers (0.95 vs. 0.99) e Rayyan (0.75 vs. 0.78); na Tabela 4 fica abaixo de ED2 em Hospital (0.86 vs. 0.99).",
+        "localizador": "p. 6, Conclusão e Tabelas 4 e 5"
+      },
+      {
+        "descricao": "A Seção 3.1 remete o F1 da Tabela 2 ao Apêndice A.8, que diz que a Tabela 21 mostra 'the earlier F1 comparison' com P e R 'across all datasets and noise levels'; porém a Tabela 21 não tem níveis de ruído e seus conjuntos e valores de F1 coincidem com a Tabela 4 (REIN), não com a Tabela 2. Além disso, vários F1 da Tabela 21 são aparentemente incompatíveis com a média harmônica dos P e R impressos (por exemplo, Ours Hospital P 0.81, R 0.65, F1 0.85; Ours Mercedes 0.42, 0.23, 0.73; Ours Nasa 0.93, 0.85, 0.96; ED2 Hospital 0.83, 0.67, 0.99): aparente inconsistência; o estudo não informa como P, R e F1 são agregados (micro, macro, por coluna ou por conjunto), o que impede verificar.",
+        "localizador": "p. 5, Seção 3.1; p. 13, Apêndice A.8; p. 27, Tabela 21; p. 6, Tabela 4"
+      },
+      {
+        "descricao": "O efeito dos exemplos de domínio na Tabela 6 é pequeno em três dos quatro conjuntos (3D Printer 0.68 vs. 0.66; Citation 0.80 vs. 0.78; Water-Quality 0.21 vs. 0.17) e maior em Power-Consumption (0.71 vs. 0.61), único caso citado no texto como 'clear gain'; quatro conjuntos, um único nível de ruído (30%), sem número de execuções nem medida de variabilidade. A condição sem exemplos é chamada 'without domain-specific' (Tabela 6), 'generic prompt' (p. 5) e, na análise do Apêndice A.1, 'without few-shot exemplars', sem definição precisa do que é retirado.",
+        "localizador": "p. 5, Seção 3.3 e Observations; p. 7, Tabela 6; p. 10, Apêndice A.1"
+      },
+      {
+        "descricao": "Na Tabela 7 (regras, não código), a cobertura de DATA_TYPE_VALIDATION é maior sem exemplos (0.875) do que com exemplos (0.848), inversão em relação à hipótese declarada; a análise usa SmartFactory, conjunto que não aparece nos demais experimentos.",
+        "localizador": "p. 10, Apêndice A.1; p. 12, Tabela 7"
+      },
+      {
+        "descricao": "A rubrica é chamada 'eight-point rubric', mas o texto lista dez rótulos (Duplicate, Redundant, Trivial, Risk-false-positive, Miscategorized, Ambiguous, Hallucinated-overly-specific, High-value, Correct, Correct-fixable) e o prompt da Fig. 15 também tem dez códigos, com 'incorrect_fixable' em lugar de 'Correct-fixable'.",
+        "localizador": "p. 4, Seção 2.2.1; Fig. 15 (Apêndice A.4)"
+      },
+      {
+        "descricao": "Os mesmos conjuntos (Beers, Flights, Hospital) têm F1 diferentes entre REIN, ED2 e RAHA (por exemplo, Hospital: 0.86 na Tabela 4, 0.82 no ED2 e 0.86 no RAHA; Beers: 1.00, 1.00 e 0.95); o estudo atribui as diferenças ao ruído de cada benchmark.",
+        "localizador": "p. 5, Seção 3.4; p. 6, Tabelas 4 e 5"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "As métricas medem a detecção de erros pelo código gerado (F1 contra rótulos verdadeiros), não a correção funcional do código por testes; não há medida direta de taxa de compilação ou execução do código.",
+        "localizador": "p. 4, Seções 2.3-2.4; p. 5, Seção 3"
+      },
+      {
+        "descricao": "A ablação do filtro de inliers (Tabela 3) é de componente fora do escopo; não foi extraída.",
+        "localizador": "p. 5, Seção 3.2; p. 6, Tabela 3"
+      },
+      {
+        "descricao": "A análise de confiança e cobertura com e sem exemplos (Apêndice A.1, Tabela 7) mede as regras geradas pelo Gemma, não o código; não foi extraída por não medir código e por repetir técnica e tarefa já cobertas.",
+        "localizador": "p. 10, Apêndice A.1; p. 12, Tabela 7"
+      },
+      {
+        "descricao": "Inconsistências de documentação no apêndice: A.6 ('Generated Rules for the Bike Dataset') diz que a Tabela 17 lista regras 'for the breast-cancer data set', e a legenda da Tabela 17 indica Rayyan; as Tabelas 13 e 17, 14 e 18, 15 e 19, 16 e 20 têm conteúdo repetido.",
+        "localizador": "p. 13, Apêndices A.5-A.7; Tabelas 13-20 (apêndice, páginas posteriores à p. 18)"
+      },
+      {
+        "descricao": "Parâmetros não informados: número de iterações de geração, número de exemplos por prompt, tamanho das amostras, limiar de outliers, parâmetros de decodificação, número de execuções e número de rodadas de reparo de código. Não há menção a pacote de replicação, código ou repositório de exemplos publicado.",
+        "localizador": "texto completo, pp. 1-27"
+      },
+      {
+        "descricao": "As linhas de base (ED2, FAHES, KATARA, IQR, IF, SD, Max-Entropy, Min-K) são descritas como executadas sobre os conjuntos corrompidos, sem detalhes de configuração.",
+        "localizador": "p. 5, Seção 3.1"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "After filtering data samples through traditional clustering, we iteratively prompt LLMs to produce semantically valid quality rules and synthesize their executable validators through code-generating LLMs.", "localizador": "p. 1, Resumo"},
+      {"trecho": "To generate reliable quality rules, we aid LLMs with retrieval-augmented generation (RAG) by leveraging external knowledge sources and domain-specific few-shot examples.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Robust guardrails ensure the accuracy and consistency of both rules and code snippets.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Yet, existing LLM-based solutions—such as fine-tuned models, prompt-driven detectors (Heidari et al., 2019; Mehra et al., 2024; Zhang et al., 2024), or in-context repair mechanisms (Chung et al., 2017; Biester et al., 2024; Ni et al., 2024a,b)—remain computationally expensive, either requiring per-row inference or dataset-specific training.", "localizador": "p. 1, Introdução"},
+      {"trecho": "Each rule-generation prompt follows a structured, three-part format.", "localizador": "p. 3, Seção 2.2"},
+      {"trecho": "For wide tables, the schema is split into manageable batches to fit within Gemma’s context window while still preserving column-level details.", "localizador": "p. 3, Seção 2.2"},
+      {"trecho": "Cosine similarity selects the nearest domain; its representative rule cards for each rule type are then added to the prompt.", "localizador": "p. 3, Domain-aware few-shot examples"},
+      {"trecho": "We employ an iterative prompting strategy inspired by the self-consistency technique in CoT (Wang et al., 2023) reasoning.", "localizador": "p. 3, Few-shot examples from previous iterations"},
+      {"trecho": "In subsequent iterations, a randomly selected subset of these generated cards is included as additional exemplars in the prompt, progressively refining the model output.", "localizador": "p. 3, Few-shot examples from previous iterations"},
+      {"trecho": "These contradictions stemmed primarily from two sources: (i) inconsistencies in the sample data frames used across iterations; (ii) LLMs hallucinations (see Appendix A.3 for examples).", "localizador": "p. 4, Seção 2.2.1"},
+      {"trecho": "An eight-point rubric (Hashemi et al., 2024) assesses each surviving rule card.", "localizador": "p. 4, Seção 2.2.1"},
+      {"trecho": "In the final stage, each rule card is translated into executable Python code using Qwen-2.5-Coder (32 B) (Bai et al., 2023), an LLM specialized for code generation.", "localizador": "p. 4, Seção 2.3"},
+      {"trecho": "We dynamically select these few-shot examples by embedding both the current table description and all stored code snippets using sentence embeddings, ranking them by cosine similarity, and inserting the most relevant samples into the prompt.", "localizador": "p. 4, Seção 2.3"},
+      {"trecho": "We run each snippet on a few rows; if it errors, the exception is fed back and the model repairs the code (see Figure 3).", "localizador": "p. 4, Seção 2.3"},
+      {"trecho": "As shown in Table 3, F1 scores declined significantly across all datasets (having 30% noise), emphasizing the filter’s critical role in providing clean context to the LLM to reduce false-positive rule generation.", "localizador": "p. 5, Seção 3.2"},
+      {"trecho": "We run the tests in two modes—one using domain-specific few-shot examples and one without—and report the resulting F1 scores side-by-side in Table 6, highlighting the merit of domain-specific examples.", "localizador": "p. 5, Seção 3.3"},
+      {"trecho": "Across ten data sets and three noise levels, our method records the top F1 in 26 of 30 settings, markedly surpassing the next best detector on challenging tables such as Bikes, Breast Cancer, and Soil-Moisture.", "localizador": "p. 5, Observations"},
+      {"trecho": "Evaluated on both REIN synthetic stress benchmarks and standard datasets from ED2 and RAHA, our approach consistently outperforms existing detectors in accuracy.", "localizador": "p. 6, Conclusão"},
+      {"trecho": "Table 21 shows the earlier F1 comparison with precision-recall breakdowns, offering a fuller view of detector performance across all datasets and noise levels.", "localizador": "p. 13, Apêndice A.8"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Domain-aware few-shot examples (domain-specific few-shot examples)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "Without domain-specific few-shot examples",
+      "modelo": "Pipeline com Gemma-3-12B (regras) e Qwen-2.5-Coder (32 B) (código); snapshots não informados",
+      "benchmark": "3D Printer (manufacturing), com erros sintéticos pela injeção de cinco componentes do REIN, 30% de ruído",
+      "metrica": "Error detection F1 scores (legenda da Tabela 6)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.66, "intervencao": 0.68},
+      "denominador": "nao_informado (número de células ou erros do conjunto não informado; agregação do F1 não informada)",
+      "condicoes": "Pipeline completo nas duas condições, com ruído de 30%; difere pela presença de exemplos de domínio. O estudo não diz se a condição sem exemplos de domínio afeta só a geração de regras ou também os exemplos de código da Seção 2.3, nem se mantém exemplos genéricos (o texto chama a condição de 'generic prompt'). Número de execuções, número de exemplos e parâmetros de decodificação não informados. Conferido no PDF, p. 7, Tabela 6 (cabeçalho 'Few-shot examples' com subcolunas 'With domain-specific' e 'Without domain-specific'); 0.68 em negrito. O ganho mede a detecção de erros pelos validadores gerados, não a correção funcional do código.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a conclusão destacam o framework inteiro, comparado só com detectores que não usam prompting, e mencionam conjuntamente conhecimento externo e exemplos de domínio. Tabelas 2, 4 e 5 não contêm contraste de prompting; a Tabela 3 isola componente fora do escopo. A primeira tabela com contraste elegível de prompting é a Tabela 6; primeira métrica (F1), único modelo (pipeline) e primeira linha (3D Printer). Não há agregado impresso. A Tabela 7 (mesma técnica) mede regras, não código, e não é cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (PDF; sem paginação impressa), Tabela 6, linha 3D Printer, colunas 'With domain-specific' e 'Without domain-specific'; p. 5, Seção 3.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "3D Printer 0.68 0.66", "localizador": "p. 7, Tabela 6, linha 3D Printer; colunas Dataset, Few-shot examples: With domain-specific, Without domain-specific"},
+        {"trecho": "We run the tests in two modes—one using domain-specific few-shot examples and one without—and report the resulting F1 scores side-by-side in Table 6, highlighting the merit of domain-specific examples.", "localizador": "p. 5, Seção 3.3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O resumo e a introdução definem o objetivo (framework de três etapas para avaliação de qualidade de dados tabulares com geração de regras e código por LLM), e a Seção 3 anuncia as avaliações (linhas de base, módulo de inliers, exemplos de domínio, benchmarks padrão).",
+      "localizador": "p. 1, Resumo e Introdução; p. 5, Seção 3"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As etapas são descritas e há templates de prompt no apêndice (Fig. 8, 10, 12, 15), mas o prompt de geração de código não é reproduzido e não se informam número de iterações, número de exemplos, tamanho das amostras, limiar de outliers, decodificação, número de rodadas de reparo nem o conteúdo exato da condição sem exemplos de domínio.",
+      "localizador": "pp. 2-5, Seção 2; Apêndice A.4; p. 5, Seção 3.3"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há oito linhas de base não-LLM executadas nos mesmos conjuntos e ablações do filtro de inliers e dos exemplos de domínio, mas nenhuma linha de base com LLM ou prompting simples, as configurações das linhas de base não são descritas e o contraste de prompting cobre só quatro conjuntos com um nível de ruído.",
+      "localizador": "p. 5, Seções 3.1-3.4; pp. 6-7, Tabelas 2-6"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "F1, P e R são usados, mas a forma de agregação e os denominadores não são informados; vários F1 da Tabela 21 são aparentemente incompatíveis com P e R impressos; a Tabela 21 é apresentada como detalhamento da Tabela 2, mas coincide com a Tabela 4; a legenda da Tabela 3 (30%) não corresponde ao conteúdo; e as contagens do texto ('26 of 30', 'six' conjuntos) divergem das tabelas.",
+      "localizador": "p. 5, Seções 3.1-3.4; p. 6, Tabelas 2-5; p. 13, Apêndice A.8; p. 27, Tabela 21"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há discussão de ameaças à validade ou limitações do próprio estudo; só se mencionam problemas de regras conflitantes como motivação dos filtros.",
+      "localizador": "texto completo, pp. 1-27"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos nomeados com tamanho, templates de prompt e conjuntos públicos com links são informados, mas não há snapshots, parâmetros de decodificação, número de execuções, repositório de exemplos nem código ou pacote de replicação.",
+      "localizador": "pp. 2-4, Seção 2; Apêndice A.4; pp. 7-10, Referências"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos conjuntos públicos (Kaggle, UCI, ED2, RAHA, REIN) no pré-treinamento dos modelos nem a sobreposição entre o repositório de exemplos 'harvested from diverse application domains' e os conjuntos de teste.",
+      "localizador": "texto completo; p. 3 (Domain-aware few-shot examples); p. 5, Seção 3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-03", "p-04", "p-05", "p-06", "p-07", "p-10", "p-11", "p-12", "p-13", "p-14", "p-18", "p-27"],
+    "observacao": "Texto extraído lido integralmente (2111 linhas, incluindo referências e apêndices). Tabelas 2-6 conferidas nas pp. 6-7, Tabela 7 na p. 12 e Tabela 21 na p. 27; Seções 2.2-3.4 conferidas nas pp. 3-5; Apêndices A.1-A.8 nas pp. 10-13; Fig. 8 na p. 14. As páginas dos demais prompts do apêndice (Fig. 10, 12, 15) não foram abertas; seus localizadores usam o número da figura."
+  }
+}

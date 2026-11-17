@@ -1,0 +1,284 @@
+{
+  "estudo": "S645",
+  "texto_fonte": "fontes/textos/lote/S645.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "SEIDR (Synthesize, Execute, Instruct, Debug, and Rank)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": ["feedback", "multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3-7 (Seção 2, Fig. 1-3); p. 12-13 (Seção 4.3.2, prompts); p. 17 e p. 19 (ablações N = 1 e N = ∞); p. 29 (Tabela 4)",
+        "observacao": "Mecanismos referentes à configuração das experiências de generalização (GPT-3.5/Llama 3, INSTRUCT^LLM): mensagem de sistema com papel e diretrizes (instrucao); template com exemplos de E/S (exemplos); template de código com preâmbulo e programa candidato fornecido no prompt (contexto); restrições de formato da saída (restricoes); execução com testes de validação, stderr e pares de E/S falhos devolvidos ao modelo (feedback); agente explicador e agente depurador que interagem (multiagente); vários candidatos por geração com ranqueamento e seleção dos W melhores (amostragem). O contrafactual executado é a condição replace-only (N = ∞), que o estudo chama de ablação com a opção de reparo desligada, com o mesmo teto de programas gerados; ela difere de SEIDR em mais de um ingrediente (reparo guiado por execução, explicação por LLM e ranqueamento iterativo), por isso o isolamento é do pacote e o ganho, se houver, não é atribuível a um único mecanismo. Pacote híbrido: inclui amostragem com temperatura crescente (spring sampling) e teto de programas, que estão fora do escopo de prompting. Na exploração inicial (Codex), o pacote usa INSTRUCT^static com a instrução fixa S0, sem LLM explicador (ver componentes)."
+      },
+      {
+        "nome_original": "replace-only (tree arity N = ∞; repair option turned off)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7-8 (Seção 2.2, Fig. 4); p. 14 (Seção 4.4.1); p. 15 (Tabela 2, coluna ∞(100)); p. 17; p. 19",
+        "observacao": "Amostragem de até 1000 (Codex) ou 100 (GPT-3.5/Llama 3) programas a partir do prompt SYNTHESIZE, sem segunda geração nem reparo; o estudo a descreve como amostragem aleatória do LLM. Comparador do pacote SEIDR; os mecanismos dele não são isolados no estudo."
+      },
+      {
+        "nome_original": "replace option (tree arity N > 1), contrastada com repair-only (N = 1)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 7-8 (Seção 2.2); p. 17; p. 19; p. 29 (Tabela 4, linhas N* = 1 e N* = 2)",
+        "observacao": "O estudo trata N = 1 como ablação em que a opção de substituição é desligada (busca só de reparo). Nas experiências de generalização, N* = 1 mantém N_explain = 2 e, portanto, ainda gera dois filhos por geração com seleção do melhor (Tabela 2, p. 15); a categoria amostragem está nas duas condições e o contraste é de amplitude da busca (N_synth, N_debug e W), por isso mecanismos_acrescentados fica vazio. Mesmo critério aplicado nas outras entradas."
+      },
+      {
+        "nome_original": "lexicase selection (RANK agent)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 7 (Seção 2.1.5); p. 26 (Seção 5.2.2, Tabela 3); p. 27 (Fig. 14-15); p. 29 (Tabela 4); p. 30 (Tabela 5)",
+        "observacao": "Substitui a seleção por torneio pela seleção lexicase no ranqueamento dos pais, com o mesmo N*, modelo, conjunto de dados e teto de 100 programas. Não acrescenta categoria: troca o critério de seleção dentro de amostragem. O próprio estudo atribui as diferenças principalmente aos LLMs e ao laço de depuração, não à estratégia de seleção (p. 27-28)."
+      },
+      {
+        "nome_original": "tournament selection (RANK agent)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 7 (Seção 2.1.5); p. 26; p. 29 (Tabela 4)",
+        "observacao": "Estratégia de seleção padrão de SEIDR (ordena pela pontuação média nos testes e mantém os W melhores). O contraste existente é a substituição por lexicase nas mesmas condições, não a ausência de seleção."
+      },
+      {
+        "nome_original": "INSTRUCTstatic (debug instruction S0: Make sure that {Ival} -> {Oval}.)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "feedback", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (Seção 2.1.3, Fig. 3); p. 12 (Seção 4.3.1); p. 13 (Tabela 1); p. 14 (Seção 4.4.1)",
+        "observacao": "Template fixo que insere o primeiro par de E/S falho ou o stderr na instrução de depuração; usado só na exploração inicial com Codex. Não há condição comparável com INSTRUCTLLM (os dois desenhos foram usados com modelos e prompts diferentes)."
+      },
+      {
+        "nome_original": "INSTRUCTLLM (bug explanation generated by p_explain)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6-7 (Seção 2.1.3, Fig. 3); p. 12-13 (Seção 4.3.2); p. 16 (Seção 4.6)",
+        "observacao": "LLM explicador que recebe problema, código candidato e erro e produz um resumo do defeito, repassado ao LLM depurador; usado só nas experiências de generalização com GPT-3.5 e Llama 3. Sem contrafactual com INSTRUCTstatic em condições comparáveis."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "spring sampling",
+        "natureza": "decodificacao",
+        "descricao": "Amostragem com temperatura monotonicamente crescente ao longo dos programas gerados no lote.",
+        "localizador": "PDF p. 5 (Seção 2.1.1)"
+      },
+      {
+        "nome_original": "temperature parameter change for program candidates from the same parent",
+        "natureza": "decodificacao",
+        "descricao": "Alteração da temperatura dos LLMs para diversificar os filhos de um mesmo pai nas experiências de generalização; valores não informados.",
+        "localizador": "PDF p. 16 (Seção 4.6)"
+      },
+      {
+        "nome_original": "max programs generated (1000 / 100)",
+        "natureza": "orcamento",
+        "descricao": "Teto de programas candidatos gerados por problema: 1000 na exploração inicial e 100 nas experiências de generalização.",
+        "localizador": "PDF p. 13 (Tabela 1); p. 14 (Seção 4.4); p. 15 (Tabela 2); p. 16 (Seção 4.6)"
+      },
+      {
+        "nome_original": "choice of LLM (Codex, GPT-3.5, Llama 3)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo que executa os agentes (RQ2), acompanhada de troca de prompts entre a exploração inicial e a generalização.",
+        "localizador": "PDF p. 10 (RQ2); p. 11-12 (Seção 4.2)"
+      },
+      {
+        "nome_original": "PushGP (genetic programming with down-sampled lexicase selection)",
+        "natureza": "outro",
+        "descricao": "Sistema de programação genética usado como referência em PSB2, sem prompting; valor (17 problemas) citado da literatura, não executado no estudo.",
+        "localizador": "PDF p. 17; p. 28; p. 29 (Tabela 4); p. 32 (nota 22)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Codex-edit", "versao": "code-davinci-edit-001", "uso": "p_synth e p_debug na exploração inicial", "localizador": "PDF p. 11 (nota 11); p. 15 (Seção 4.6)"},
+      {"nome": "GPT-3", "versao": "text-davinci-003", "uso": "sumarização de defeitos na exploração inicial, segundo a Seção 4.2; a Seção 4.4.1 e a Tabela 1 fixam INSTRUCTstatic e listam só Codex (ver heterogeneidade)", "localizador": "PDF p. 11 (nota 12); p. 13 (Tabela 1); p. 14"},
+      {"nome": "GPT-3.5", "versao": "gpt-3.5-turbo (snapshot nao_informado)", "uso": "p_synth, p_explain e p_debug nas experiências de generalização", "localizador": "PDF p. 11 (nota 13); p. 15 (Tabela 2)"},
+      {"nome": "Llama 3", "versao": "8B (variante e quantização nao_informado)", "uso": "p_synth, p_explain e p_debug nas experiências de generalização, via ollama e LangChain", "localizador": "PDF p. 12; p. 15 (Tabela 2); p. 16"},
+      {"nome": "GPT-3.5 (ChatGPT), GPT-4, Code Llama 34B, Unnatural Code Llama 34B, CodeGeeX", "versao": "nao_informado", "uso": "valores de HumanEval-X citados como relatados pelos autores originais, sem SEIDR; não executados no estudo", "localizador": "PDF p. 28; p. 30 (Tabela 5)"},
+      {"nome": "GPT-4o", "versao": "nao_informado", "uso": "uma execução de custo citado (315 USD); uso descartado e sem resultados relatados", "localizador": "PDF p. 14 (nota 16)"}
+    ],
+    "benchmarks": [
+      {"nome": "PSB2 (Program Synthesis Benchmark 2)", "quantidade": "25 problemas", "detalhes": "Divisão de treino usada como validação: 100 pares de E/S na exploração inicial e 50 na generalização; avaliação final com 2000 pares de E/S sorteados da divisão de teste. Denominador das métricas de problemas resolvidos: 25.", "localizador": "PDF p. 10-11 (Seção 4.1.1); p. 16 (Seção 4.6); p. 31"},
+      {"nome": "HumanEval-X (HumanEval-Python e HumanEval-C++)", "quantidade": "164 problemas em cada linguagem", "detalhes": "Média de 7,25 testes (Python) e 6,95 (C++); até cinco testes no prompt de rascunho; todos os testes visíveis ao laço de depuração e à validação, sem divisão de teste separada.", "localizador": "PDF p. 11 (Seção 4.1.2); p. 16 (Seção 4.6)"}
+    ],
+    "metricas": [
+      {"nome": "number of solved problems (TPR = 1)", "definicao": "Problemas cujo programa final passa todos os testes de teste.", "denominador": "25 (PSB2); 164 (HumanEval-X)", "localizador": "PDF p. 15 (Seção 4.5); p. 17 (Fig. 5); p. 20 (Fig. 8)"},
+      {"nome": "pass@k", "definicao": "Número de problemas com TPR = 1 se SEIDR for interrompido após gerar k programas; não usa o estimador não enviesado do Codex. Na Tabela 4 é média do número de problemas sobre as execuções; na Tabela 5, percentual de tarefas.", "denominador": "25 (PSB2); 164 (HumanEval-X)", "localizador": "PDF p. 15 (Seção 4.5); p. 28; p. 29 (Tabela 4); p. 30 (Tabela 5)"},
+      {"nome": "test pass rate (TPR) / mean TPR (%)", "definicao": "Percentual de casos de teste totalmente aprovados por correspondência exata da saída.", "denominador": "nao_informado para a média (problemas e execuções agregados não detalhados)", "localizador": "PDF p. 15 (Seção 4.5); p. 21 (Fig. 9)"},
+      {"nome": "Excess Programs Generated (EPG)", "definicao": "Número de programas gerados antes do primeiro programa que passa todos os testes de validação.", "denominador": "nao_aplicavel", "localizador": "PDF p. 15 (Seção 4.5)"},
+      {"nome": "solved at least once", "definicao": "União dos problemas resolvidos em todas as execuções e hiperparâmetros para um conjunto de dados, linguagem e modelo.", "denominador": "25 (PSB2); 164 (HumanEval-X)", "localizador": "PDF p. 22; p. 28; p. 29-30 (Tabelas 4 e 5)"}
+    ],
+    "linguagens": ["Python", "C++"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Síndrome do quase acerto: código gerado parecido com a solução correta, mas reprovado nos testes; em problemas não resolvidos, casos de teste e instruções de depuração levaram os programas a devolver respostas a entradas individuais em vez de implementar o algoritmo, e alguns programas definiram a entrada no próprio código.", "localizador": "PDF p. 1 (resumo); p. 18"},
+      {"categoria": "correcao_funcional", "descricao": "Risco de o programa não passar em testes além dos 2000 sorteados do conjunto de teste do PSB2, considerado baixo pelos autores.", "localizador": "PDF p. 31 (Seção 5.3)"},
+      {"categoria": "nao_determinismo", "descricao": "LLMs não determinísticos: o mesmo prompt pode produzir respostas diferentes (RQ3); experimentos com Codex e GPT-3 rodados uma única vez.", "localizador": "PDF p. 10 (RQ3); p. 31 (Seção 5.3)"},
+      {"categoria": "seguranca", "descricao": "Codex, GPT-3 e GPT-3.5 são modelos caixa-preta e podem gerar código malicioso; a saída deve ser revisada antes de ser executada.", "localizador": "PDF p. 31 (Seção 5.3)"},
+      {"categoria": "contaminacao", "descricao": "Resultados podem estar enviesados por contaminação de dados de pré-treinamento e pela otimização dos modelos para benchmarks populares, como HumanEval-Python; os autores argumentam que EPG > 1 indica efeito apenas parcial, sem controle experimental.", "localizador": "PDF p. 19-20; p. 31-32 (Seção 5.3)"},
+      {"categoria": "custo", "descricao": "O estudo trata custo financeiro e tempo: cerca de 550 USD (GPT-3 e Codex), 266 USD (GPT-3.5), uma execução com GPT-4o a 315 USD, cerca de 42 h (PSB2) e 156 h (HumanEval-X) por execução; EPG é apresentado como indicativo do custo computacional (inferências, compilações e execuções).", "localizador": "PDF p. 14 (Seção 4.4.2, notas 16-17); p. 15 (Seção 4.5); p. 31"},
+      {"categoria": "outro", "descricao": "Validade externa: PSB2 e HumanEval-X exigem funções menores que software de escala de produção; desempenho com outros benchmarks e modelos não testados.", "localizador": "PDF p. 31 (Seção 5.3)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Seis execuções por configuração com GPT-3.5 e Llama 3 para medir a variabilidade.", "avaliada": "nao", "localizador": "PDF p. 14; p. 31"},
+      {"descricao": "Amostragem com temperatura crescente, que segundo os autores reduz a estocasticidade nas soluções de EPG baixo.", "avaliada": "nao", "localizador": "PDF p. 31"},
+      {"descricao": "Avaliação final em 2000 testes sorteados do conjunto de teste do PSB2, separados do conjunto de validação usado no ranqueamento.", "avaliada": "nao", "localizador": "PDF p. 11; p. 16; p. 31"},
+      {"descricao": "Recomendação de revisar a saída do LLM antes de executá-la em uso real.", "avaliada": "nao", "localizador": "PDF p. 31"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "replace-only (N = ∞), mesma configuração de prompts e mesmo teto de programas; PushGP e os LLMs da Tabela 5 são valores citados de outros trabalhos",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Conjunto de aridades divergente: o texto e a Tabela 4 usam N* ∈ {1, 2, 4, 10, 16, 100}, mas a Tabela 2 lista as colunas 1, 4, 8, 10, 16 e ∞(100), com 8 no lugar de 2.", "localizador": "PDF p. 14 (Seção 4.4.2); p. 15 (Tabela 2); p. 29 (Tabela 4)"},
+      {"descricao": "Tabela 4, C++/GPT-3.5, N* = 1 tournament: pass@10 = 5.6 e pass@100 = 5.5. Como pass@k é o número de problemas resolvidos após k programas, a média sobre as mesmas execuções não deveria diminuir com k; aparente inconsistência. Cálculo próprio adicional: médias de seis execuções inteiras são múltiplos de 1/6, e valores como 5.6, 4.6 (C++/GPT-3.5, pass@10, N* = 4), 1.4 (C++/Llama 3, pass@10, N* = 10) e 2.6 (C++/Llama 3, pass@100, N* = 4) não correspondem a esse arredondamento; a fonte não informa se alguma execução foi excluída nem o critério de arredondamento.", "localizador": "PDF p. 29 (Tabela 4); p. 28 (média sobre execuções)"},
+      {"descricao": "Problemas resolvidos ao menos uma vez com Llama 3 em PSB2: o texto informa 10 nas duas linguagens; a Tabela 4 informa 11 para Python e para C++.", "localizador": "PDF p. 22; p. 29 (Tabela 4)"},
+      {"descricao": "Contagem de experimentos aparentemente inconsistente: o texto soma 6 × 6 × 2 = 72 experimentos e diz que a seleção lexicase acrescenta 12, mas há dois conjuntos de dados e duas linguagens, e a Tabela 3 lista oito configurações lexicase (22 a 29) com seis execuções cada.", "localizador": "PDF p. 14; p. 26 (Tabela 3)"},
+      {"descricao": "Narrativa versus figura: o texto afirma benefício das aridades 10 e 100 sobre repair-only e replace-only, mas na Fig. 5 (Codex, C++) a aridade 100 e a ∞ resolvem ambas 14 problemas.", "localizador": "PDF p. 17 (Fig. 5 e Seção 5.1.1)"},
+      {"descricao": "A conclusão afirma desempenho superior ao uso de LLMs sem SEIDR com os mesmos prompts e o mesmo orçamento, mas na Tabela 4 a condição replace-only (N* = 100) tem o maior pass@100 de Llama 3 em PSB2-Python (3.8) e, em GPT-3.5/PSB2-Python, 13.7 supera N* = 1 (12.0), 2 (12.0), 4 (13.3) e 16 tournament (13.3); em HumanEval-C++ com GPT-3.5, N* = 100 tem o menor pass@100 (31.3). O resultado depende da aridade, do modelo e do conjunto; o estudo reconhece que não há aridade líder nas experiências de generalização.", "localizador": "PDF p. 26 (quadro RQ1-RQ3); p. 29 (Tabela 4); p. 30 (Tabela 5); p. 32 (Conclusão)"},
+      {"descricao": "O texto cita como melhor resultado de GPT-3.5 em PSB2 16 problemas (Python, aridade 10) e 11 (C++), enquanto as médias da Tabela 4 chegam a 14.5 (Python) e 10.0 (C++, lexicase); a estatística usada no texto (provavelmente o máximo por execução da Fig. 8) não é declarada.", "localizador": "PDF p. 20; p. 29 (Tabela 4)"},
+      {"descricao": "Escopo divergente sobre soluções tardias com Codex: p. 17 informa 5 problemas resolvidos com mais de 500 programas em Python e 1 em C++ (consistente com a Fig. 6b), enquanto p. 20 diz que só dois problemas são resolvidos com EPG > 100; a p. 20 não declara se se limita à aridade 10.", "localizador": "PDF p. 17-18 (Fig. 6b); p. 20"},
+      {"descricao": "Papel do GPT-3 na exploração inicial ambíguo: a Seção 4.2 o indica para sumarização de defeitos, mas a Seção 4.4.1 fixa INSTRUCTstatic com S0 e a Tabela 1 lista só Codex.", "localizador": "PDF p. 11; p. 13 (Tabela 1); p. 14"},
+      {"descricao": "Comparações externas heterogêneas: PushGP (17 problemas) usa orçamento de até 100 execuções com 60 milhões de programas; os LLMs sem SEIDR da Tabela 5 têm valores relatados pelos autores originais, com estimador de pass@k diferente do adotado (p. 15); em pass@1 as iterações de SEIDR não contam e as diferenças refletem estocasticidade.", "localizador": "PDF p. 15; p. 28; p. 30 (Tabela 5); p. 32 (nota 22)"},
+      {"descricao": "Em HumanEval-X todos os testes ficam visíveis ao laço de depuração e à validação, sem divisão de teste separada, ao contrário do PSB2; pass@k em HumanEval-X é medido nos mesmos testes usados como feedback.", "localizador": "PDF p. 11; p. 16"},
+      {"descricao": "Seleção lexicase versus torneio: sem estratégia líder; melhora relatada só em C++ com GPT-3.5, e o estudo atribui as diferenças principalmente aos LLMs e ao laço de depuração, pois a pontuação salta de 0 para 1 na maioria dos casos.", "localizador": "PDF p. 26-28 (Seção 5.2.2, Fig. 14-16)"}
+    ],
+    "observacoes": [
+      {"descricao": "Tarefa: o estudo avalia síntese de programas a partir de descrição e exemplos de E/S; o reparo é etapa interna do laço de geração, sem programas defeituosos fornecidos como entrada, por isso só geracao foi classificada.", "localizador": "PDF p. 3 (Seção 2); p. 10 (Seção 4)"},
+      {"descricao": "Componentes não prompting do sistema: EXECUTE (compilação e execução contra o conjunto de validação, com pontuação por linhas de saída e pontuação 0 se houver stderr) e RANK (seleção dos W melhores).", "localizador": "PDF p. 5-7 (Seções 2.1.2 e 2.1.5)"},
+      {"descricao": "Exploração inicial com Codex e S0 (Fig. 5): aridade 10 resolve 19 problemas (Python) e 17 (C++), contra 15 e 14 em replace-only (∞) e 13 e 8 em repair-only (1); execução única por configuração. Não extraída por ser outro modelo e outra condição da mesma técnica e tarefa.", "localizador": "PDF p. 17 (Fig. 5); p. 13 (Tabela 1)"},
+      {"descricao": "Experimento preliminar (sem números relatados) indicou que reduzir o conjunto de validação de 100 para 50 pares não altera a TPR final em 2000 testes.", "localizador": "PDF p. 16"},
+      {"descricao": "Pacote de replicação com código e resultados indicado no Zenodo (DOI 10.5281/zenodo.13754705); não acessado nesta extração.", "localizador": "PDF p. 33"},
+      {"descricao": "Versão lida: arXiv:2503.07693v1, aceita em ACM Trans. Evol. Learn. Optim. (fevereiro de 2025), DOI 10.1145/3719351; extensão do artigo GECCO-2023.", "localizador": "PDF p. 1"}
+    ],
+    "citacoes": [
+      {"trecho": "We address this with a multi-agent framework called Synthesize, Execute, Instruct, Debug, and Repair (SEIDR).", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "SEIDR is a multi-agent iterative framework that uses feedback from code execution and failing test cases to update the initially generated buggy code.", "localizador": "PDF p. 2, Seção 1"},
+      {"trecho": "We populate this template with a comment indicating a textual task description and several I/O examples from the training set.", "localizador": "PDF p. 5, Seção 2.1.1"},
+      {"trecho": "We consider two different designs of the INSTRUCT agent: INSTRUCTstatic and INSTRUCTLLM shown in Figure 3.", "localizador": "PDF p. 6, Seção 2.1.3"},
+      {"trecho": "We consider two different parent selection algorithms: tournament selection and lexicase selection.", "localizador": "PDF p. 7, Seção 2.1.5"},
+      {"trecho": "You are an experienced software developer.", "localizador": "PDF p. 12, Seção 4.3.2 (mensagem de sistema)"},
+      {"trecho": "Only complete the code, do not add triple quotes, do not give explanations.", "localizador": "PDF p. 12, Seção 4.3.2 (prompt de p_synth)"},
+      {"trecho": "Describe how I should fix the code in a very concise manner.", "localizador": "PDF p. 13, Seção 4.3.2 (prompt de p_explain)"},
+      {"trecho": "Note that experiments with N = 1 and N = ∞ can be considered as ablation studies, where the replace option and repair option are turned off correspondingly.", "localizador": "PDF p. 17, Seção 5.1.1"},
+      {"trecho": "As before, experiments with N* = 1 and N* = ∞ correspond to ablation studies, where the replace option or the repair option is turned off.", "localizador": "PDF p. 19, Seção 5.2.1"},
+      {"trecho": "Test cases and debug instructions in bowling frequently skewed the resulting programs to return answers to individual bowling score strings instead of writing an algorithm to calculate the score based on each next character.", "localizador": "PDF p. 18, Seção 5.1.1"},
+      {"trecho": "The large language models for code editing and text completion used in this study are non-deterministic, which can affect the results.", "localizador": "PDF p. 31, Seção 5.3"},
+      {"trecho": "Codex, GPT-3, and GPT-3.5 are black-box models and can generate malicious code [Pearce et al. 2022].", "localizador": "PDF p. 31, Seção 5.3"},
+      {"trecho": "The results can be skewed towards high performance in the programming languages prevailing in the pre-training dataset used by the authors of the tested LLMs – an issue also known as data contamination.", "localizador": "PDF p. 31, Seção 5.3"},
+      {"trecho": "The total cost of running the experiments with GPT-3 and Codex were around 550 USD, and the experiments with GPT-3.5 amounted to 266 USD.", "localizador": "PDF p. 14, Seção 4.4.2"},
+      {"trecho": "Experiments with Llama 3 and GPT-3.5 are restarted six times.", "localizador": "PDF p. 31, Seção 5.3"},
+      {"trecho": "Specifically, PSB2 and HumanEval-X contain programming tasks that require smaller functions to be generated than production-scale software.", "localizador": "PDF p. 31, Seção 5.3"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SEIDR (Synthesize, Execute, Instruct, Debug, and Rank)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+      "mecanismos_acrescentados": ["feedback", "multiagente"],
+      "comparador": "replace-only (N* = 100, tournament): amostragem de programas pelo prompt SYNTHESIZE sem reparo",
+      "modelo": "GPT-3.5 (gpt-3.5-turbo) como p_synth, p_explain e p_debug",
+      "benchmark": "PSB2 (Python)",
+      "metrica": "pass@10 (average number of solved PSB2 problems)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 12.2, "intervencao": 11.5},
+      "denominador": "25 problemas do PSB2; valor é média sobre as execuções",
+      "condicoes": "Intervenção: SEIDR com N* = 2 (N_synth = N_debug = 2, N_explain = 2, W = 2, conforme Seção 4.4.2; a Tabela 2 não traz a coluna N* = 2, ver heterogeneidade), seleção por torneio, INSTRUCTLLM, prompts da Seção 4.3.2. Comparador: N* = 100, todos os programas na primeira geração, sem explicação nem reparo. Ambos: teto de 100 programas, validação com 50 pares de E/S, teste com 2000 pares, seis execuções por configuração com média na tabela, temperaturas variadas (valores não informados). pass@1 foi descartada como não pertinente porque o estudo afirma que em k = 1 as iterações de SEIDR não são consideradas. Pela definição de geração da Seção 4.4.2, em k = 10 a condição N* = 2 já inclui uma rodada de reparo (inferência própria). Diferença do pacote, não de um ingrediente isolado. Valores conferidos na imagem da p. 29.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo e conclusão destacam vários comparadores (replace-only, repair-only, PushGP), vários modelos e várias métricas (problemas resolvidos, resolvidos ao menos uma vez, pass@100). As Tabelas 1 a 3 são de hiperparâmetros; a Tabela 4 é a primeira tabela com o contraste de prompting. Primeiro modelo: GPT-3.5 (Python). Primeira linha de base de prompting: replace-only (N* = 100); PushGP não é prompting. Como intervenção, a primeira linha de SEIDR completo (com reparo e substituição), já que N* = 1 e N* = 100 são as ablações declaradas. Primeira métrica pertinente: pass@10.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 29, Tabela 4 (Python, GPT-3.5, linhas N* = 2 e N* = 100, coluna pass@10); p. 14 (Seção 4.4.2); p. 19; p. 28",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "2 tournament 9.3 11.5 12.0", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "100 tournament 10.8 12.2 13.7", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "Note that at cutoff k = 1, iterations of SEIDR are not taken into account, because the first program candidate is the one LLMs generate from a template, and the trees at cutoff k = 1 have only one program in each of them, regardless of the parent selection strategy or tree arity.", "localizador": "PDF p. 28, Seção 5.2.3"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "replace option (tree arity N > 1), contrastada com repair-only (N = 1)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+      "mecanismos_acrescentados": [],
+      "comparador": "repair-only (N* = 1, tournament)",
+      "modelo": "GPT-3.5 (gpt-3.5-turbo) como p_synth, p_explain e p_debug",
+      "benchmark": "PSB2 (Python)",
+      "metrica": "pass@10 (average number of solved PSB2 problems)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 12.0, "intervencao": 11.5},
+      "denominador": "25 problemas do PSB2; valor é média sobre as execuções",
+      "condicoes": "Intervenção: N* = 2 (N_synth = N_debug = 2, N_explain = 2, W = 2). Comparador: N* = 1 (N_synth = N_debug = 1, N_explain = 2, W = 1, Tabela 2), que o estudo chama de ablação com a opção de substituição desligada; mesmo assim gera dois filhos por geração e seleciona o melhor, de modo que o contraste é de amplitude da busca e não de presença da categoria amostragem. Mesmos prompts, modelo, seleção por torneio, teto de 100 programas, 50 pares de validação, 2000 de teste, seis execuções. pass@1 descartada pelo mesmo motivo da extração anterior. Valores conferidos na imagem da p. 29.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Sem outra técnica focal nem outra tarefa do escopo; componente isolado para completar o alvo de três, primeiro da tabela de resultados que contém as ablações (Tabela 4), na ordem das linhas: a ablação repair-only (N* = 1) vem antes. A ablação replace-only já está coberta pela extração do pacote. Primeiro modelo: GPT-3.5 (Python); primeira métrica pertinente: pass@10.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 29, Tabela 4 (Python, GPT-3.5, linhas N* = 1 e N* = 2, coluna pass@10); p. 15 (Tabela 2); p. 19",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "1 tournament 10.5 12.0 12.0", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "2 tournament 9.3 11.5 12.0", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "As before, experiments with N* = 1 and N* = ∞ correspond to ablation studies, where the replace option or the repair option is turned off.", "localizador": "PDF p. 19, Seção 5.2.1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "lexicase selection (RANK agent)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "feedback", "multiagente", "amostragem"],
+      "mecanismos_acrescentados": [],
+      "comparador": "tournament selection (N* = 16)",
+      "modelo": "GPT-3.5 (gpt-3.5-turbo) como p_synth, p_explain e p_debug",
+      "benchmark": "PSB2 (Python)",
+      "metrica": "pass@100 (average number of solved PSB2 problems)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 13.3, "intervencao": 14.2},
+      "denominador": "25 problemas do PSB2; valor é média sobre as execuções",
+      "condicoes": "N* = 16 nas duas condições (W = N_synth = N_debug = 16, N_explain = 2; Tabela 3, experimento 23), teto de 100 programas, seis execuções, mesmos prompts e modelo; muda só a estratégia de seleção dos pais. N* = 16 foi escolhido pelos autores como a melhor aridade pela TPR média da Fig. 9. pass@1 descartada (sem iterações em k = 1, p. 28); pass@10 descartada porque, com N_synth = 16, os 10 primeiros programas pertencem à primeira geração, antes de qualquer ranqueamento (inferência própria a partir da Seção 4.4.2). Sem teste estatístico. Valores conferidos na imagem da p. 29.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado seguinte na Tabela 4 para completar o alvo de três; primeiro modelo listado com lexicase é GPT-3.5 (Python). Primeira métrica pertinente: pass@100.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 29, Tabela 4 (Python, GPT-3.5, linhas N* = 16 tournament e N* = 16 lexicase, coluna pass@100); p. 26 (Tabela 3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "16 tournament 10.0 11.3 13.3", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "16 lexicase 10.2 12.3 14.2", "localizador": "PDF p. 29, Tabela 4, Python/GPT-3.5, colunas N*, Parent selection, pass@1, pass@10, pass@100"},
+        {"trecho": "Therefore, we appoint differences in results between lexicase and tournament parent selection primarily to the LLMs themselves and the debugging loop rather than to the parent selection strategy.", "localizador": "PDF p. 27-28, Seção 5.2.2"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (trade-off reparo-substituição, generalização para outros LLMs e conjunto, repetibilidade e estratégia de seleção).", "localizador": "PDF p. 10 (Seção 4, RQ1-RQ4)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Prompts completos, hiperparâmetros tabelados e algoritmo descrito; porém as temperaturas usadas nas experiências de generalização não são informadas, a Tabela 2 diverge do conjunto de aridades do texto e o papel do GPT-3 na exploração inicial é ambíguo.", "localizador": "PDF p. 5; p. 11-16 (Seções 4.2-4.6, Tabelas 1-3)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparador executado com o mesmo orçamento (replace-only e repair-only como ablações), mas as comparações com PushGP e com outros LLMs usam valores citados, com orçamento ou estimador de pass@k diferentes, e o contraste replace-only difere de SEIDR em vários ingredientes.", "localizador": "PDF p. 15; p. 17; p. 19; p. 28-30"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Métricas definidas e denominadores dos problemas informados (25 e 164), mas pass@k é relatado ora como média de contagem, ora como percentual; há valores da mesma métrica que não coincidem entre texto e tabela (10 contra 11 com Llama 3) e uma aparente inconsistência de pass@10 maior que pass@100; não há testes estatísticos.", "localizador": "PDF p. 15 (Seção 4.5); p. 22; p. 29-30 (Tabelas 4 e 5)"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção própria discute validade externa, interna, não determinismo, execução única com Codex, código malicioso e contaminação.", "localizador": "PDF p. 31-32 (Seção 5.3)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Pacote de replicação indicado no Zenodo (não acessado) e prompts publicados, mas Codex e GPT-3 foram descontinuados, o snapshot do GPT-3.5 e a variante do Llama 3 não são informados, e os experimentos com Codex rodaram uma vez.", "localizador": "PDF p. 11-12; p. 14; p. 31; p. 33"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo reconhece o risco e a possível otimização para benchmarks populares, mas só argumenta efeito parcial com base em EPG > 1, sem controle; em HumanEval-X os testes de avaliação também alimentam o laço de depuração.", "localizador": "PDF p. 11; p. 19-20; p. 31-32"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (2550 linhas, incluindo referências). Páginas do PDF abertas visualmente: 14, 15, 17, 18, 20, 22, 23, 26, 29, 30. A paginação impressa coincide com a posição no PDF."
+  }
+}

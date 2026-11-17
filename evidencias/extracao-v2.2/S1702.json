@@ -1,0 +1,492 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "PECKER (prompt rectification / security-centric rewriting)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["restricoes", "contexto", "otimizacao_prompt"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1-2 (impressas 914-915), Resumo e Contribuições; PDF p. 4-6 (impressas 917-919), Seção IV",
+        "observacao": "O prompt avaliado herda do prompt bruto (raw prompt) a descrição em linguagem natural do objetivo (instrucao) e a estrutura com protótipo da função e lista ordenada de operações (restricoes, como especificação). O PECKER acrescenta restrições de segurança em linguagem natural (novo ingrediente da categoria restricoes, já presente na base como especificação), recuperadas da base SOSIN construída a partir de CodeQL, CWE e patches do GitHub (contexto: conhecimento externo recuperado), e reescreve o prompt automaticamente, com identificação de operações sensíveis por GPT-4.0, análise de correlação de risco, SODG e cobertura mínima de vértices para escolher operações críticas e posição de inserção (otimizacao_prompt). Não há condição sem PECKER comparável: os prompts brutos foram executados apenas na construção do conjunto de dados e retidos só se o Copilot gerasse código vulnerável (até três tentativas), isto é, a condição sem a técnica é filtro de seleção pelo desfecho, não braço de comparação; por isso avaliada_isoladamente = nao. As variantes PECKER-SLA e PECKER-CNA isolam componentes, não o pacote."
+      },
+      {
+        "nome_original": "sensitive location analysis (inserção das restrições na posição de cada operação sensível)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 6 (impressa 919), Seção IV-D2; PDF p. 9-10 (impressas 922-923), Variants Comparisons e Tabela VI",
+        "observacao": "Ablação PECKER contra PECKER-SLA: ambas restringem só as operações críticas; PECKER-SLA anexa as restrições ao fim do prompt em vez de inseri-las junto à operação. As categorias de mecanismo são as mesmas nas duas condições; o ingrediente que difere é a decisão automática de posição (classificado em otimizacao_prompt)."
+      },
+      {
+        "nome_original": "critical operation selection (seleção de operações críticas por cobertura de vértices no SODG)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 6 (impressa 919), Seção IV-D1; PDF p. 9-10 (impressas 922-923), Variants Comparisons e Tabela VI",
+        "observacao": "Ablação PECKER contra PECKER-CNA: ambas inserem as restrições na posição das operações; PECKER-CNA gera restrições para todas as operações sensíveis identificadas, sem selecionar as críticas. As categorias de mecanismo são as mesmas nas duas condições; o ingrediente que difere é a seleção automática do que inserir (classificado em otimizacao_prompt). A seleção é feita por algoritmo guloso de cobertura de vértices, mas o efeito sobre o Copilot ocorre pelo conteúdo do prompt."
+      },
+      {
+        "nome_original": "PECKER-SLA",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Variants Comparisons; Tabelas V e VI",
+        "observacao": "Variante de ablação \"without sensitive location analysis\"; serve de comparador do componente de localização. Seus mecanismos não são isolados por outra condição."
+      },
+      {
+        "nome_original": "PECKER-CNA",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Variants Comparisons; Tabelas V e VI",
+        "observacao": "Variante de ablação \"without critical operation selection\"; serve de comparador do componente de seleção. Seus mecanismos não são isolados por outra condição."
+      },
+      {
+        "nome_original": "Raw Prompt / risky prompt",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 916), Seção II-B; PDF p. 7 (impressa 920), Prompt Dataset Construction e Prompt Generation",
+        "observacao": "Prompt base com protótipo da função, descrição do objetivo e lista ordenada de operações, gerado por GPT-4o/GPT-4.0 e ajustado manualmente. Foi executado no Copilot apenas para selecionar prompts que reproduzem a vulnerabilidade (até três tentativas); não há linha de resultado dessa condição nas tabelas de RQ2, por isso não é tratado como braço comparável."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Risky Prompt Detection / Sensitive Operation Extraction (RQ1)",
+        "natureza": "outro",
+        "descricao": "Classificação de prompts como arriscados e predição de vulnerabilidades a partir de operações sensíveis (LLM, base SOSIN e análise de correlação de risco). É etapa de análise do prompt avaliada como classificação (precisão, revocação, F1), não como geração de código; seus resultados (Tabelas II e III) não entram em extracoes.",
+        "localizador": "PDF p. 7-8 (impressas 920-921), Seção V-B, Tabelas II e III"
+      },
+      {
+        "nome_original": "Construção da base SOSIN (Textual Pattern Rewriting and Formalization)",
+        "natureza": "outro",
+        "descricao": "Base de conhecimento construída manualmente por dois doutorandos a partir de consultas CodeQL, sugestões da CWE e 100 pares de trechos antes e depois de patches por tipo de vulnerabilidade; é insumo do qual as restrições são recuperadas, não condição de prompting avaliada.",
+        "localizador": "PDF p. 5 (impressa 918), Seção IV-B; PDF p. 10 (impressa 923), Discussion"
+      }
+    ],
+    "modelos": [
+      {"nome": "GitHub Copilot", "versao": "nao_informado", "uso": "gerador de código avaliado"},
+      {"nome": "GPT-4.0 (API gpt-4-1106-preview)", "versao": "gpt-4-1106-preview", "uso": "identificação de operações sensíveis no PECKER"},
+      {"nome": "GPT-4o / GPT-4.0", "versao": "nao_informado", "uso": "geração dos prompts do conjunto de dados; o estudo nomeia o modelo de forma divergente (GPT-4o na seção Prompt Generation e GPT-4.0 em Prompt Dataset Construction)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto de prompts próprio (39 projetos do GitHub com mais de 500 estrelas)",
+        "quantidade": "593 prompts (509 risky prompts e 84 non-risky prompts), replicando 541 vulnerabilidades, conforme impresso",
+        "observacao": "A soma das linhas da coluna de risky prompts da Tabela I é 510 (cálculo próprio), contra Total impresso de 509. RQ1 usa 1.743 operações sensíveis rotuladas manualmente; RQ2 avalia só os 481 risky prompts reconhecidos pelo PECKER (Tabelas IV e V, por prompt) e 511 vulnerabilidades detectadas (Tabela VI, por CWE; soma das colunas de cada esquema = 511, cálculo próprio). O tamanho do corpus (509 ou 541) difere do denominador das métricas de RQ2 (481 ou 511).",
+        "localizador": "PDF p. 7 (impressa 920), Dataset e Tabela I; PDF p. 8-10 (impressas 921-923)"
+      }
+    ],
+    "metricas": [
+      "Precision, Recall, F1 (RQ1, extração de operações sensíveis e predição de vulnerabilidades)",
+      "Successful rectification (Suc.)",
+      "Failed rectification on Functionality (F-Func.)",
+      "Failed rectification on Security (F-Sec.)",
+      "Failed generation (F-Gen.)",
+      "Time Cost (segundos)",
+      "Number of Word Insertion"
+    ],
+    "linguagens": ["C", "C++", "Python", "Java", "PHP"],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Geradores de IA produzem código inseguro quando o prompt descreve operações sensíveis com pouca ou nenhuma proteção (cibersegurança).",
+        "localizador": "PDF p. 2 (impressa 915), Seção II-A"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Falhas de segurança residuais após a retificação (F-Sec.): o PECKER não identificou operações críticas e acrescentou restrições incompletas, e as vulnerabilidades não foram totalmente mitigadas.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "As restrições inseridas podem alterar a funcionalidade original (F-Func.), como no exemplo do FFmpeg em que o código passou a operar sobre um único plano.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Restrições adicionais aumentam a complexidade do prompt e podem confundir o Copilot, gerando laços infinitos ou de validação, sobretudo em casos ligados a CWE-119; restrições para todas as operações (PECKER-CNA) podem sobrecarregar o Copilot e comprometer o objetivo funcional.",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Seção V-C"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falha de geração (F-Gen.): o Copilot não gera código completo dentro do tempo limite («0 suggestion»), o que o estudo associa à complexidade do prompt e, no PECKER-SLA, à falta de objetivo claro para cada restrição.",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Seção V-C"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O código gerado pelo Copilot pode variar muito para o mesmo prompt e o mesmo objetivo funcional.",
+        "localizador": "PDF p. 2 (impressa 915), Seção II-A"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo de tempo e de tamanho do prompt tratado em RQ3: 3,46 s em média para análise e retificação, 2,97 s adicionais de resposta do Copilot e cerca de 21,95 palavras inseridas por prompt arriscado.",
+        "localizador": "PDF p. 10 (impressa 923), Seção V-D"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Retificação do prompt pelo PECKER, com inserção de restrições de segurança específicas por operação sensível, para evitar código vulnerável.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Seção V-C, Tabelas IV e VI",
+        "observacao": "Não há braço comparável sem a retificação: os prompts brutos foram selecionados por produzirem código vulnerável."
+      },
+      {
+        "descricao": "Inserção das restrições junto à posição de cada operação crítica (sensitive location analysis), para que o Copilot ligue restrição e operação.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 10 (impressa 923), Tabela VI (PECKER contra PECKER-SLA)"
+      },
+      {
+        "descricao": "Seleção de operações críticas por cobertura mínima de vértices no SODG, para evitar restrições redundantes que sobrecarregam o Copilot.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 10 (impressa 923), Tabela VI (PECKER contra PECKER-CNA)"
+      },
+      {
+        "descricao": "Avaliação do código gerado por CodeQL e inspeção manual.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 8 (impressa 921), Seção V-C"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "PECKER-SLA e PECKER-CNA (variantes de ablação executadas, Tabelas V e VI); não há braço executado com o prompt bruto nem com prompts genéricos de segurança",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Tabela I: as linhas da coluna «# Risky Prompts» (259, 151, 60, 21, 19) somam 510 (cálculo próprio), mas o Total impresso é 509; a coluna de non-risky (46, 23, 11, 1, 3) soma 84, igual ao total. O texto chama a Tabela I de distribuição de vulnerabilidades, embora a legenda seja distribuição de prompts.",
+        "localizador": "PDF p. 7 (impressa 920), Tabela I e parágrafo «Eventually, we created 509 risky prompts»"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela em RQ1: o texto afirma F1 de 84.08% para 1.540 de 1.743 operações, mas a linha Total da Tabela II traz F1 de 80.48 (precisão 73.90, revocação 88.35).",
+        "localizador": "PDF p. 7 (impressa 920), texto de Sensitive Operation Extraction; PDF p. 8 (impressa 921), Tabela II"
+      },
+      {
+        "descricao": "Tabela III: aparente inconsistência na revocação total impressa (94.41) frente a 507 confirmados de 541 (93,72%, cálculo próprio; 511/541 = 94,45%, cálculo próprio); o estudo não define o estimador. As linhas de #Detected somam 510 (cálculo próprio) contra Total 511. A linha CWE-862 traz Detected 0 e Confirmed 0 com precisão e revocação de 100.00; a linha CWE-362 traz Detected 4, Confirmed 0, precisão 0.00 e revocação N/A. O texto define #Detected como número de prompts, mas o total (511) excede os 481 prompts reconhecidos.",
+        "localizador": "PDF p. 8 (impressa 921), Tabela III e parágrafo final de Risky Prompt Detection"
+      },
+      {
+        "descricao": "Tabela VI x Tabela III: na Tabela VI, CWE-862 tem 1 Suc. em cada esquema, embora a Tabela III registre Detected 0 para CWE-862; CWE-362 tem 4 casos na Tabela VI (PECKER Suc. 4) com Confirmed 0 na Tabela III.",
+        "localizador": "PDF p. 8 (impressa 921), Tabela III; PDF p. 10 (impressa 923), Tabela VI"
+      },
+      {
+        "descricao": "Unidade divergente entre definição, tabelas e narrativa em RQ2: as métricas Suc./F-Func./F-Sec./F-Gen. são definidas por prompt; as Tabelas IV e V contam prompts (cada esquema soma 481, cálculo próprio), e a Tabela VI conta vulnerabilidades por CWE (cada esquema soma 511, cálculo próprio). O texto diz que a Tabela VI mostra os 471 de 481 prompts do PECKER (valor da Tabela IV) e que PECKER-SLA e PECKER-CNA retificaram 487 e 479 risky prompts (valores da Tabela VI), enquanto a Tabela V traz 460 e 450 prompts. As falhas citadas para PECKER-SLA (8 F-Func., 10 F-Sec., 6 F-Gen.) e os «32 failed cases» do PECKER-CNA correspondem à Tabela VI (11+12+9 = 32, cálculo próprio); na Tabela V são 6, 9, 6 e 10+13+8 = 31 (cálculo próprio).",
+        "localizador": "PDF p. 9 (impressa 922), definições e primeiro parágrafo de resultados; PDF p. 10 (impressa 923), Tabelas IV, V e VI e texto de Variants Comparisons"
+      },
+      {
+        "descricao": "Resumo e introdução usam denominadores diferentes sem explicitá-los: «identified and rectified 471» entre 509 risky prompts (resumo), «471 (93%)» (471/509 = 92,5%, cálculo próprio) e «improve 98% of vulnerable solution code (mitigating 501 vulnerabilities)» (501/511 = 98,0% e 501/541 = 92,6%, cálculos próprios); em RQ1 o PECKER identificou 481 dos 509, e a retificação foi avaliada só sobre esses 481.",
+        "localizador": "PDF p. 1 (impressa 914), Resumo; PDF p. 2 (impressa 915), Evaluation; PDF p. 8-9 (impressas 921-922)"
+      },
+      {
+        "descricao": "O resumo apresenta 3.46s como custo adicional por prompt, mas em RQ3 3,46 s correspondem à análise e retificação, com 2,97 s adicionais de resposta do Copilot medidos à parte.",
+        "localizador": "PDF p. 2 (impressa 915), Evaluation; PDF p. 10 (impressa 923), Seção V-D"
+      },
+      {
+        "descricao": "Ausência de braço comparável sem a técnica: os prompts brutos foram retidos apenas se o Copilot gerasse código funcional e inseguro (até três tentativas), de modo que a condição sem PECKER é vulnerável por construção; o número de execuções das condições retificadas não é informado.",
+        "localizador": "PDF p. 7 (impressa 920), Prompt Dataset Construction e Prompt Generation"
+      },
+      {
+        "descricao": "Linhas de base simples (por exemplo, prefixar «Please generate secure code» ou listar avisos de CWE) são apenas discutidas, sem execução; a comparação com trabalhos como PromSec e Codexity é só textual.",
+        "localizador": "PDF p. 10 (impressa 923), Discussion on baselines; PDF p. 11 (impressa 924), Related Work"
+      },
+      {
+        "descricao": "A conclusão afirma que o PECKER é generalizável a outros assistentes de programação, mas o próprio estudo restringe o escopo ao GitHub Copilot e só o avalia.",
+        "localizador": "PDF p. 2 (impressa 915); PDF p. 11 (impressa 924), Conclusion"
+      },
+      {
+        "descricao": "Nome divergente do modelo usado para gerar os prompts: GPT-4o na seção Prompt Generation e GPT-4.0 em Prompt Dataset Construction.",
+        "localizador": "PDF p. 7 (impressa 920)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O PECKER usa Langchain, NLTK para segmentar o prompt em sentenças numeradas e um template de tarefa criado manualmente para o GPT-4.0 classificar operações sensíveis; a análise de correlação de risco e a cobertura de vértices são algorítmicas e determinam o conteúdo e a posição das restrições.",
+        "localizador": "PDF p. 5-6 (impressas 918-919), Seções IV-C e IV-D"
+      },
+      {
+        "descricao": "Esforço manual descrito pelo estudo: construção da base SOSIN por autores com experiência em segurança, cerca de 20 minutos de dois autores por tipo de vulnerabilidade, apresentado como esforço único; os prompts do conjunto foram ajustados manualmente e refinados iterativamente.",
+        "localizador": "PDF p. 10 (impressa 923), Discussion; PDF p. 7 (impressa 920)"
+      },
+      {
+        "descricao": "Em média cada prompt envolve 2,66 operações sensíveis e o PECKER seleciona 1,95 por prompt para restrição; 32 risky prompts têm mais de um tipo de vulnerabilidade e, segundo o estudo, todos foram retificados.",
+        "localizador": "PDF p. 9-10 (impressas 922-923)"
+      },
+      {
+        "descricao": "O repositório de dados e código é indicado em link anônimo; não foi acessado nem validado nesta extração.",
+        "localizador": "PDF p. 2 (impressa 915); PDF p. 11 (impressa 924), referência [7]"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address the challenges, we devise a prompt-enhancing approach, PECKER.",
+        "localizador": "PDF p. 1 (impressa 914), Resumo"
+      },
+      {
+        "trecho": "Given the risky prompts, PECKER conducts security-centric rewriting to strengthen the “potentially insecure” descriptions, thereby guiding AI code generators in mitigating vulnerabilities during code generation.",
+        "localizador": "PDF p. 1 (impressa 914), Resumo"
+      },
+      {
+        "trecho": "We integrated PECKER with one of the most prevalent AI code generators, GitHub Copilot for evaluation.",
+        "localizador": "PDF p. 1 (impressa 914), Resumo"
+      },
+      {
+        "trecho": "Among 509 risky prompts, PECKER successfully identified and rectified 471 risky prompts.",
+        "localizador": "PDF p. 1 (impressa 914), Resumo"
+      },
+      {
+        "trecho": "An effective prompt needs to include: 1) a function prototype declaring the return type, function name, argument types, and argument names; 2) a broad description of the functional goal written in natural language; and 3) a detailed list of operations to be performed within the function body, presented in the order they should be executed.",
+        "localizador": "PDF p. 3 (impressa 916), Seção II-B"
+      },
+      {
+        "trecho": "It searches for the textual security restrictions in the SOSIN database and integrates these restrictions with the specific operations.",
+        "localizador": "PDF p. 5 (impressa 918), Seção IV-A"
+      },
+      {
+        "trecho": "Taking the split sentences and the task template as input, PECKER adopts GPT-4.0 by invoking API gpt-4-1106-preview to examine each sentence and identify what operations are involved in each sentence.",
+        "localizador": "PDF p. 6 (impressa 919), Seção IV-C1"
+      },
+      {
+        "trecho": "When integrating security restrictions, PECKER precisely identifies the position of each security critical operation within the prompt and situates the corresponding security restriction directly alongside it, rather than aggregating all security measures either at the beginning or end of the prompt.",
+        "localizador": "PDF p. 6 (impressa 919), Seção IV-D2"
+      },
+      {
+        "trecho": "Prompts were retained only if Copilot generated functionally accurate but insecure code, with up to three attempts allowed.",
+        "localizador": "PDF p. 7 (impressa 920), Prompt Dataset Construction"
+      },
+      {
+        "trecho": "When prompts specify sensitive operations with minimal or no security protection, it can inadvertently introduce vulnerabilities into solution codes [4].",
+        "localizador": "PDF p. 2 (impressa 915), Seção II-A"
+      },
+      {
+        "trecho": "The solution codes generated by Copilot may vary significantly, even when given the same prompt to fulfill the same functional goal.",
+        "localizador": "PDF p. 2 (impressa 915), Seção II-A"
+      },
+      {
+        "trecho": "Although the entire structure remained similar, the modified version diverged from its original functionality with limits to processing a single plane at a time rather than multiple planes.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "trecho": "Therefore, incomplete security restrictions were added.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "trecho": "It indicates that the security restriction added by PECKER may increase the complexity of the prompt and further confuse Copilot during code generation.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "trecho": "Nonetheless, these restrictions can overwhelm Copilot, causing it to lose focus due to the excessive functional descriptions.",
+        "localizador": "PDF p. 10 (impressa 923), Variants Comparisons"
+      },
+      {
+        "trecho": "In particular, PECKER-SLA generated security restrictions solely for critical operations but appended these restrictions to the end of each prompt, whereas PECKER-CNA generated security restrictions for all identified sensitive operations and inserted the restrictions at the exact positions where these operations are declared.",
+        "localizador": "PDF p. 9-10 (impressas 922-923), Variants Comparisons"
+      },
+      {
+        "trecho": "We evaluate the rectified prompts by applying them to Copilot and assessing the resulting code via CodeQL and manual inspection.",
+        "localizador": "PDF p. 8 (impressa 921), Seção V-C"
+      },
+      {
+        "trecho": "PECKER required 3.46 seconds on average to detect vulnerabilities and perform rectification, with most time spent identifying sensitive operations.",
+        "localizador": "PDF p. 10 (impressa 923), Seção V-D"
+      },
+      {
+        "trecho": "Each revision incurred an additional 2.97 seconds on average, which remains within acceptable latency for interactive use.",
+        "localizador": "PDF p. 10 (impressa 923), Seção V-D"
+      },
+      {
+        "trecho": "For each risky prompt, PECKER adds about 21.95 words.",
+        "localizador": "PDF p. 10 (impressa 923), Seção V-D"
+      },
+      {
+        "trecho": "On average, it takes two authors approximately 20 minutes to process each vulnerability type.",
+        "localizador": "PDF p. 10 (impressa 923), Discussion"
+      },
+      {
+        "trecho": "However, such generic prompts lack operation-specific guidance and may result in ambiguous instructions, which often fail to address the actual causes of vulnerabilities.",
+        "localizador": "PDF p. 10 (impressa 923), Discussion on baselines"
+      },
+      {
+        "trecho": "PECKER successfully identified 1,540 out of 1,743 sensitive operations, achieving an F1 @ 84.08%.",
+        "localizador": "PDF p. 7 (impressa 920), Sensitive Operation Extraction"
+      },
+      {
+        "trecho": "Total | 1,743 | 2,084 | 1,540 | 73.90 | 88.35 | 80.48",
+        "localizador": "PDF p. 8 (impressa 921), Tabela II, colunas Sensitive Operation, # Bench., # Detected, # Confirmed, Prec. (%), Rec. (%), F1 (%)"
+      },
+      {
+        "trecho": "Total | 541 | 511 | 507 | 99.22 | 94.41 | 96.76",
+        "localizador": "PDF p. 8 (impressa 921), Tabela III, colunas CWE-ID, # Benchmark, # Detected, # Confirmed, Precision (%), Recall (%), F1 (%)"
+      },
+      {
+        "trecho": "CWE-862 | 1 | 0 | 0 | 100.00 | 100.00 | 100.00",
+        "localizador": "PDF p. 8 (impressa 921), Tabela III, mesmas colunas"
+      },
+      {
+        "trecho": "In total, PECKER successfully identified 481 (out of 509) risky prompts and predicted 507 (out of 541) vulnerabilities.",
+        "localizador": "PDF p. 8 (impressa 921), Risky Prompt Detection"
+      },
+      {
+        "trecho": "Total | 509 | 84",
+        "localizador": "PDF p. 7 (impressa 920), Tabela I, colunas Programming Language, # Risky Prompts, # Non-risky Prompts (linhas C 259 46; C++ 151 23; Python 60 11; JAVA 21 1; PHP 19 3)"
+      },
+      {
+        "trecho": "Table VI demonstrates the results of prompt rectification. In total, PECKER successfully rectified 471 out of 481 recognized risky prompts.",
+        "localizador": "PDF p. 9 (impressa 922), Seção V-C"
+      },
+      {
+        "trecho": "Specifically, PECKER-SLA and PECKER-CNA rectified 487 and 479 risky prompts, respectively.",
+        "localizador": "PDF p. 10 (impressa 923), Variants Comparisons"
+      },
+      {
+        "trecho": "PECKER | 471 | 4 | 4 | 2",
+        "localizador": "PDF p. 10 (impressa 923), Tabela IV, colunas Scheme, Suc., F-Func., F-Sec., F-Gen."
+      },
+      {
+        "trecho": "PECKER-SLA | 460 | 6 | 9 | 6",
+        "localizador": "PDF p. 10 (impressa 923), Tabela V, colunas Scheme, Suc., F-Func., F-Sec., F-Gen."
+      },
+      {
+        "trecho": "PECKER-CNA | 450 | 10 | 13 | 8",
+        "localizador": "PDF p. 10 (impressa 923), Tabela V, colunas Scheme, Suc., F-Func., F-Sec., F-Gen."
+      },
+      {
+        "trecho": "These rectified prompts can not only improve 98% of vulnerable solution code (mitigating 501 vulnerabilities), but also ensure the intended functionalities remain unchanged.",
+        "localizador": "PDF p. 2 (impressa 915), Evaluation"
+      },
+      {
+        "trecho": "We strongly believe that our approach can be applied to any AI code generators, but to keep us focused - the scope of this paper is only GitHub Copilot.",
+        "localizador": "PDF p. 2 (impressa 915)"
+      },
+      {
+        "trecho": "Considering the vulnerable functions (with vulnerable code snippets) as the targets, we adopted GPT-4o to generate textual prompts that describe the functional goal, input arguments, expected output, and then manually adjusted the prompts correspondingly.",
+        "localizador": "PDF p. 7 (impressa 920), Prompt Generation"
+      },
+      {
+        "trecho": "All our datasets and source code of PECKER are open source at [7].",
+        "localizador": "PDF p. 2 (impressa 915), Contributions"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "PECKER",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["otimizacao_prompt"],
+      "comparador": "PECKER-SLA (without sensitive location analysis)",
+      "modelo": "GitHub Copilot (versão nao_informado)",
+      "benchmark": "Conjunto de prompts próprio (risky prompts reconhecidos pelo PECKER; 39 projetos; C, C++, Python, Java, PHP)",
+      "metrica": "Successful rectification (Suc.) — definida por prompt («The rectified prompt successfully guides Copilot towards mitigating ALL vulnerabilities, without affecting the original functionalities»), mas a Tabela VI, intitulada «Results of vulnerability rectification», conta por vulnerabilidade/CWE; o texto descreve os mesmos valores ora como prompts ora remetendo à Tabela VI",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 487, "intervencao": 501},
+      "denominador": "nao_informado na Tabela VI; a soma Suc.+F-Func.+F-Sec.+F-Gen. de cada esquema é 511 (cálculo próprio), igual ao Total de # Detected da Tabela III",
+      "condicoes": "Agregado impresso (linha Total da Tabela VI) sobre os tipos de CWE do mesmo conjunto, mesmo modelo e mesma métrica. O contraste isola a análise de localização: ambas as condições restringem só operações críticas; PECKER-SLA anexa as restrições ao fim do prompt. Avaliação por CodeQL e inspeção manual. Número de execuções por prompt nao_informado; versão e parâmetros do Copilot nao_informado. Avaliação restrita aos risky prompts reconhecidos pelo PECKER (481 prompts nas Tabelas IV e V). Valores por prompt em tabelas separadas: PECKER 471 (Tabela IV) e PECKER-SLA 460 (Tabela V), não usados aqui porque nenhuma das duas tabelas contém o contraste. conferido_pdf: sim; linha Total legível na imagem da p. 10, embora as células por CWE sejam pequenas.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo e contribuições destacam PECKER e 471 prompts retificados, sem condição comparadora. Tabelas I a III são descritivas ou de classificação (RQ1); a Tabela IV traz só PECKER e a Tabela V só as variantes, portanto nenhuma contém o contraste. A primeira tabela com o contraste é a Tabela VI; primeira métrica Suc., único modelo Copilot, primeira linha de base listada PECKER-SLA; usado o agregado impresso Total.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10 (impressa 923), Tabela VI, linha Total, colunas PECKER Suc. e PECKER-SLA Suc.",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Total | 501 | 4 | 4 | 2 | 487 | 8 | 10 | 6 | 479 | 11 | 12 | 9",
+          "localizador": "PDF p. 10 (impressa 923), Tabela VI, colunas CWE-ID; PECKER Suc., F-Func., F-Sec., F-Gen.; PECKER-SLA Suc., F-Func., F-Sec., F-Gen.; PECKER-CNA Suc., F-Func., F-Sec., F-Gen."
+        },
+        {
+          "trecho": "PECKER-SLA: without sensitive location analysis.",
+          "localizador": "PDF p. 10 (impressa 923), nota da Tabela VI"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "critical operation selection",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["otimizacao_prompt"],
+      "comparador": "PECKER-CNA (without critical operation selection)",
+      "modelo": "GitHub Copilot (versão nao_informado)",
+      "benchmark": "Conjunto de prompts próprio (risky prompts reconhecidos pelo PECKER; 39 projetos; C, C++, Python, Java, PHP)",
+      "metrica": "Successful rectification (Suc.) — definida por prompt, mas contada por vulnerabilidade/CWE na Tabela VI («Results of vulnerability rectification»)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 479, "intervencao": 501},
+      "denominador": "nao_informado na Tabela VI; a soma das quatro colunas de cada esquema é 511 (cálculo próprio), igual ao Total de # Detected da Tabela III",
+      "condicoes": "Intervenção = PECKER completo; comparador = PECKER-CNA, que gera restrições para todas as operações sensíveis identificadas e as insere nas posições exatas; o contraste isola a seleção de operações críticas. Agregado impresso (linha Total da Tabela VI). Avaliação por CodeQL e inspeção manual; número de execuções e versão do Copilot nao_informado. Valores por prompt em tabelas separadas: PECKER 471 (Tabela IV) e PECKER-CNA 450 (Tabela V). O ganho é do componente dentro do pacote PECKER, não do PECKER contra o prompt bruto. conferido_pdf: sim; linha Total legível na imagem da p. 10.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado por ablação, incluído para completar o alvo de três na ordem da tabela de ablação: o primeiro componente (sensitive location analysis, PECKER contra PECKER-SLA) já está representado pela primeira extração; o segundo é a seleção de operações críticas. Não há outros componentes nem contrastes pareados para uma terceira extração.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10 (impressa 923), Tabela VI, linha Total, colunas PECKER Suc. e PECKER-CNA Suc.",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Total | 501 | 4 | 4 | 2 | 487 | 8 | 10 | 6 | 479 | 11 | 12 | 9",
+          "localizador": "PDF p. 10 (impressa 923), Tabela VI, colunas CWE-ID; PECKER Suc., F-Func., F-Sec., F-Gen.; PECKER-SLA Suc., F-Func., F-Sec., F-Gen.; PECKER-CNA Suc., F-Func., F-Sec., F-Gen."
+        },
+        {
+          "trecho": "PECKER-CNA: without critical operation selection.",
+          "localizador": "PDF p. 10 (impressa 923), nota da Tabela VI"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (reconhecimento de prompts arriscados, efetividade da retificação e custo).",
+      "localizador": "PDF p. 7 (impressa 920), Seção V"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline do PECKER e a construção do conjunto de prompts são descritos, mas faltam número de execuções, configuração e versão do Copilot, critérios da inspeção manual e detalhes de como as variantes foram executadas; o modelo gerador dos prompts é nomeado de forma divergente (GPT-4o e GPT-4.0).",
+      "localizador": "PDF p. 5-7 (impressas 918-920); PDF p. 8-9 (impressas 921-922)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparação executada com duas variantes de ablação (PECKER-SLA e PECKER-CNA), mas não com o prompt bruto em condições comparáveis (os prompts brutos foram selecionados por gerarem código vulnerável) nem com prompts genéricos de segurança ou outras ferramentas, que são apenas discutidos.",
+      "localizador": "PDF p. 7 (impressa 920); PDF p. 10 (impressa 923), Tabela VI e Discussion on baselines"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas de RQ2 são definidas, mas por prompt, enquanto a Tabela VI conta vulnerabilidades; os denominadores não são explicitados; os valores da mesma métrica divergem entre Tabelas IV/V e VI e entre texto e tabelas (471/481 atribuídos à Tabela VI; 487 e 479 chamados de prompts); o F1 do texto (84.08%) diverge da Tabela II (80.48); a Tabela III tem aparente inconsistência na revocação total e na linha CWE-862.",
+      "localizador": "PDF p. 7-10 (impressas 920-923), Tabelas II, III, IV, V e VI"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças; o estudo reconhece prompts sintéticos, analisa casos de falha, discute o esforço manual e as linhas de base, mas não trata não determinismo nas medições, viés da inspeção manual, seleção dos prompts pelo desfecho nem contaminação.",
+      "localizador": "PDF p. 7 (impressa 920); PDF p. 9-10 (impressas 922-923), Seção V-C e Discussion"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Dados e código são indicados em repositório anônimo (não acessado) e o snapshot do GPT-4 usado na identificação é informado (gpt-4-1106-preview), mas a versão do Copilot, o número de execuções e a lista de projetos no artigo não são informados.",
+      "localizador": "PDF p. 2 (impressa 915); PDF p. 6-7 (impressas 919-920)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute contaminação; os prompts derivam de funções de projetos populares de código aberto com vulnerabilidades públicas, mas o artigo não analisa nem controla esse aspecto.",
+      "localizador": "PDF p. 7 (impressa 920), Dataset; texto completo sem menção"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "motivo": "Texto extraído lido integralmente (linhas 1-788, PDF p. 1-12, impressas 914-925).",
+    "paginas_abertas_visualmente": [1, 2, 7, 8, 9, 10]
+  }
+}

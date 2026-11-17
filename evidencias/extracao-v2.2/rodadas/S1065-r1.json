@@ -1,0 +1,183 @@
+{
+  "estudo": "S1065",
+  "texto_fonte": "fontes/textos/lote/S1065.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2511.03898v1 [cs.CR], 5 nov. 2025 (preprint); o PDF não tem paginação impressa, os localizadores usam a página do PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Reflexion prompting (three-round reflexion)",
+        "mecanismos": ["instrucao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["feedback", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção III-C.2, p. 3-4 (PDF p. 3-4); Figura 1, p. 3; Tabela III, p. 6; Seção IV-B, p. 6-8",
+        "observacao": "Adaptação do prompt de reflexão de Shi et al. [16]: o prompt de cada rodada traz a tarefa original, um buffer com todas as tentativas anteriores e os resultados do ICD (CWE sinalizadas e dicas curtas) e a instrução de revisar a tentativa mais recente, identificar práticas inseguras e corrigir preservando a funcionalidade → instrucao (herdada da tarefa e acrescida das diretrizes de revisão); retorno do analisador estático ICD a cada rodada → feedback; 'Prefer minimal, targeted changes and safer APIs' e 'Return only the updated code' → restricoes. Três rodadas (t1, t2, t3) sobre a geração zero-shot t0. Contrafactual: cada rodada comparada com a linha de base zero-shot t0 no mesmo modelo e no mesmo benchmark (Tabela III); 'sim' vale para o pacote (feedback do ICD + diretrizes + restrições + gerações adicionais) e não autoriza atribuir o ganho a um único ingrediente. Não há condição com o mesmo número de gerações sem o feedback do ICD. As rodadas t1→t2→t3 são contribuição cumulativa da mesma técnica, não técnicas distintas. O ICD é ferramenta de análise estática que alimenta o prompt (mecanismo de feedback), não intervenção fora do escopo; o mesmo ICD é usado na avaliação."
+      },
+      {
+        "nome_original": "Zero-Shot Prompting (baseline t0)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-C.1, p. 3 (PDF p. 3); Tabela III, p. 6",
+        "observacao": "Prompt do Instruct Prime usado literalmente; especifica a linguagem-alvo e a tarefa, sem orientação de segurança. Linha de base executada pelos autores nos cinco modelos."
+      },
+      {
+        "nome_original": "Chain-of-thought (e outras 'different prompting techniques')",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV-B, p. 7-8 (PDF p. 7-8)",
+        "observacao": "O estudo só afirma, em uma frase, que experimentou outras técnicas (por exemplo, chain-of-thought) sem melhoria significativa sobre o zero-shot. Não informa prompts, modelos, valores, número de execuções nem teste de significância; por isso não há contrafactual verificável e a técnica fica sem extração. Mecanismos atribuídos só pelo nome da técnica e pelo prompt base zero-shot."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Configuração padrão de decodificação do Hugging Face de cada modelo",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura, top-p e demais parâmetros de geração mantidos na configuração padrão de cada modelo e, segundo a Seção VI, fixos entre modelos e rodadas; valores numéricos não informados.",
+        "localizador": "Seção III-B, p. 3; Seção VI, p. 8"
+      },
+      {
+        "nome_original": "Cinco LLMs de código (Qwen2.5-Coder, Codestral, CodeLlama, DeepSeek-Coder, OpenCoder)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo gerador sem alterar o prompt; as diferenças entre modelos não são efeito de prompting.",
+        "localizador": "Seção III-B, p. 3; Tabelas I-III, p. 5-6"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen2.5-Coder-32B-Instruct (QwenCoder)", "versao": "Qwen/Qwen2.5-Coder-32B-Instruct no Hugging Face; revisão/snapshot nao_informado", "localizador": "Seção III-B e nota 2, p. 3"},
+      {"nome": "Codestral-22B-v0.1 (Codestral)", "versao": "v0.1 (mistralai/Codestral-22B-v0.1); a referência [23] aponta para a página 'codestral-2501'", "localizador": "Seção III-B e nota 3, p. 3; ref. [23] (lista de referências, página do PDF não aberta)"},
+      {"nome": "CodeLlama-34B-Instruct (CodeLlama)", "versao": "codellama/CodeLlama-34b-Instruct-hf; revisão nao_informado", "localizador": "Seção III-B e nota 4, p. 3"},
+      {"nome": "DeepSeek-Coder-33B-Instruct (DeepSeekCoder)", "versao": "deepseek-ai/deepseek-coder-33b-instruct; revisão nao_informado", "localizador": "Seção III-B e nota 5, p. 3"},
+      {"nome": "OpenCoder-8B-Instruct (OpenCoder)", "versao": "infly/OpenCoder-8B-Instruct; revisão nao_informado", "localizador": "Seção III-B e nota 6, p. 3"},
+      {"nome": "GPT-4o (juiz zero-shot da classificação das saídas, auxiliar à avaliação)", "versao": "nao_informado", "localizador": "Seção III-F, p. 4"}
+    ],
+    "benchmarks": [
+      {"nome": "Instruct Prime (CyberSecEval corrigido, split instruct, Hariharan et al. [13])", "quantidade": "1.404 prompts instruction-style; 8 linguagens; 50 tipos de CWE; distribuição desbalanceada (CWE-338 com 152 amostras; CWE-306 com 1 e CWE-319 com 2). Contagens por linguagem e por CWE não informadas, exceto essas três. A Tabela I detalha os 12 CWE mais frequentes e a Figura 2 os 30 mais frequentes.", "localizador": "Seção III-A, p. 3; Seção VI, p. 8; Tabela I e Figura 2, p. 5"}
+    ],
+    "metricas": [
+      {"nome": "Secure code generation accuracy (%)", "definicao": "percentual de saídas rotuladas como seguras: saídas 'Complete Code' sem CWE sinalizada pelo ICD; saídas incompletas, em linguagem natural ou mistas são marcadas como inseguras. O estudo liga a acurácia global ao 'full dataset (all languages and CWEs)'; contagens absolutas não informadas. A Seção III-E fala em 'insecure rate', complemento da acurácia.", "localizador": "Seções III-D, III-E e III-F, p. 4; Seção IV-A, p. 4-6; Tabelas I-III, p. 5-6"},
+      {"nome": "Repair@ti", "definicao": "percentual, sobre todos os N prompts, de amostras que passam de inseguras em t(i-1) para seguras em ti", "localizador": "Seção III-E, p. 4"},
+      {"nome": "Regression@ti", "definicao": "percentual, sobre todos os N prompts, de amostras que passam de seguras em t(i-1) para inseguras em ti", "localizador": "Seção III-E, p. 4"},
+      {"nome": "NetGain@ti", "definicao": "Repair@ti − Regression@ti", "localizador": "Seção III-E, p. 4"}
+    ],
+    "linguagens": ["C", "C++", "C#", "Java", "JavaScript", "Python", "PHP", "Rust"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Código gerado por LLM frequentemente inseguro: cerca de 25-33% dos programas são inseguros na linha de base zero-shot t0, com variação por CWE e por linguagem (C e C# piores).", "localizador": "Resumo, p. 1; Seção IV-A, p. 6; Tabelas I-II, p. 5-6"},
+      {"categoria": "seguranca", "descricao": "Regressões: uma saída revisada pode reintroduzir uma vulnerabilidade ou introduzir outra; nas rodadas finais da reflexão as regressões sobem para cerca de 1-2% e iterações adicionais ocasionalmente desfazem reparos anteriores. A reflexão não elimina o risco.", "localizador": "Seção I, p. 1; Seção IV-B, p. 7-8; Seção V, p. 8"},
+      {"categoria": "contaminacao", "descricao": "No CyberSecEval original, identificadores e comentários vazavam pistas do rótulo ('cue contamination') e havia prompts que exigiam comportamento inseguro; o estudo controla esse risco usando o Instruct Prime (ver mitigacoes). Contaminação de pré-treinamento não é discutida.", "localizador": "Seção I, p. 1; Seção III-A, p. 3; Seção VI, p. 8"},
+      {"categoria": "outro", "descricao": "Validade da medição: a análise estática do ICD pode perder pistas contextuais ou produzir falsos positivos.", "localizador": "Seção VI, p. 8"},
+      {"categoria": "outro", "descricao": "Erros de classificação do juiz LLM (GPT-4o) que filtra saídas que não são código podem introduzir viés.", "localizador": "Seção III-F, p. 4; Seção VI, p. 8"},
+      {"categoria": "outro", "descricao": "Distribuição desbalanceada de prompts por CWE (152 vs. 1-2 amostras) introduz possível distorção; resultados restritos à geração instruction-style, às 8 linguagens e a cerca de 50 CWE.", "localizador": "Seção VI, p. 8"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Laço de reflexão com feedback do ICD para reduzir código inseguro, comparado com a linha de base zero-shot t0 (Tabela III).", "avaliada": "sim", "localizador": "Seção III-C.2, p. 3-4; Tabela III, p. 6; Seção IV-B, p. 6-8"},
+      {"descricao": "Uso do Instruct Prime, que remove prompts que exigem vulnerabilidade e pistas de rótulo; o efeito dessa correção não é medido neste estudo (os números de 10,4 e 17,7 p.p. citados são de Hariharan et al.).", "avaliada": "nao", "localizador": "Seção I, p. 1; Seção II, p. 2; Seção III-A, p. 3; Seção VI, p. 8"},
+      {"descricao": "Regra de equidade: só saídas 'Complete Code' são avaliadas pelo ICD; as demais são marcadas como inseguras, para impedir crédito falso a respostas que não são código.", "avaliada": "nao", "localizador": "Seção III-F, p. 4"},
+      {"descricao": "Hiperparâmetros de decodificação fixos entre modelos e rodadas para consistência.", "avaliada": "nao", "localizador": "Seção III-B, p. 3; Seção VI, p. 8"},
+      {"descricao": "Revisões manuais das gerações e pós-processamento validado de trabalhos anteriores para mitigar erros do juiz LLM; extensão da revisão manual não informada.", "avaliada": "nao", "localizador": "Seção VI, p. 8"},
+      {"descricao": "Política proposta: executar uma rodada por padrão, continuar só nos casos ainda inseguros e parar quando o NetGain melhorar pouco ou as regressões se aproximarem dos reparos; proposta, não avaliada.", "avaliada": "nao", "localizador": "Seção VII, p. 8"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Zero-shot (t0), executado pelos autores nos mesmos cinco modelos e no mesmo benchmark (Tabela III)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa 'OpenCoder lags across all categories' contra a Tabela I: OpenCoder não é o mínimo da linha em CWE-120 (DeepSeekCoder 68.28% < 71.03%), CWE-807 (DeepSeekCoder 55.68% < 69.32%), CWE-89 (CodeLlama 62.30% < 63.93%), CWE-327 (Codestral 73.47% < 77.55%), CWE-502 (DeepSeekCoder e Codestral 80.43% < 84.78%) nem na linha 'Top 12 types' (Codestral 67.37% < 71.82%); as células sombreadas da própria tabela mostram isso.", "localizador": "Seção IV-A, p. 6; Tabela I, p. 5"},
+      {"descricao": "Tabela I, linha 'Top 12 types': Codestral = 67.37% (mínimo da linha), embora seja o máximo em 4 das 12 linhas. Cálculo próprio: as diferenças Codestral − QwenCoder por linha são, nesta ordem, +3.29, −5.52, +4.17, −5.32, −9.09, −1.43, −1.64, −11.76, −6.12, +2.05, −6.53, +6.97 p.p., e a diferença nos 'Top 12' é −7.52 p.p.; com os mesmos pesos para os dois modelos, essa média ponderada só seria possível se CWE-807 e CWE-121 pesassem muito mais que CWE-338. Se CWE-338 (152 amostras, Seção VI) for a categoria mais numerosa, como sugerem sua primeira posição na tabela e o exemplo de desbalanceamento, a diferença mínima possível seria cerca de −5.85 p.p. (cálculo próprio com pesos iguais para CWE-338, -807 e -121). Aparente inconsistência; o estudo não informa as contagens por CWE para conferir.", "localizador": "Tabela I, p. 5; Seção VI, p. 8"},
+      {"descricao": "Narrativa 'Java, JavaScript, PHP, and C++ fall in the middle, with 20-35% of outputs remaining insecure' contra a Tabela II (cálculos próprios do complemento): C++ QwenCoder 82.61% (≈17.4% inseguro), Java QwenCoder 62.71% (≈37.3%) e JavaScript OpenCoder 60.94% (≈39.1%) ficam fora da faixa. Também 'Rust ... slightly behind Python' não vale para DeepSeekCoder (Rust 64.12%, abaixo de C++, Java e PHP no mesmo modelo).", "localizador": "Seção IV-A, p. 6; Tabela II, p. 6"},
+      {"descricao": "Narrativa de estabilidade ('without adding instability or fluctuations to the model outcomes') contra a mesma seção, que relata regressões que sobem para cerca de 1-2% e iterações que 'occasionally undo earlier repairs'.", "localizador": "Seção IV-B, p. 7"},
+      {"descricao": "Resultado nulo sem dados: outras técnicas de prompting (por exemplo, chain-of-thought) 'did not result in any significant improvement' sobre o zero-shot, sem valores, modelos, condições nem teste de significância.", "localizador": "Seção IV-B, p. 7-8"},
+      {"descricao": "A Seção IV anuncia que Repair, Regression e NetGain seriam estratificados por linguagem e por família de CWE, mas o artigo só apresenta essas métricas por modelo, e apenas graficamente (Figura 3, sem rótulos numéricos de Repair/Regression/NetGain; só a acurácia em cada ti é rotulada). Os valores das três métricas não foram estimados aqui.", "localizador": "Seção III-E, p. 4; Seção IV (introdução), p. 4; Figura 3, p. 7"},
+      {"descricao": "Decodificação: a Seção III-B usa a configuração padrão do Hugging Face de cada modelo, enquanto a Seção VI diz 'we fixed decoding hyperparameters across all models'; configurações padrão podem diferir entre modelos. Aparente inconsistência; os valores não são informados.", "localizador": "Seção III-B, p. 3; Seção VI, p. 8"},
+      {"descricao": "Pós-processamento: verificação de sintaxe/compilação funcionou só para C, C++, Python e JavaScript e falhou para Java, Rust, PHP e C#; a classificação das saídas ficou com o juiz GPT-4o. O texto fala em 'all 1,404 outputs', embora haja 5 modelos × 4 gerações (t0-t3); não está claro se o juiz classificou todas as saídas de todas as rodadas. A extensão da revisão manual não é informada.", "localizador": "Seção III-F, p. 4; Seção VI, p. 8"},
+      {"descricao": "O ICD fornece o feedback da reflexão e também é o avaliador da segurança; o estudo não discute essa circularidade. Correção funcional não é medida, embora o prompt de reflexão peça para preservar a funcionalidade; o ganho é em problemas detectados pelo ICD, não em segurança verificada por outro meio.", "localizador": "Seções III-C.2 e III-D, p. 3-4; Seção VI, p. 8"},
+      {"descricao": "A comparação t1-t3 contra t0 mistura feedback e gerações adicionais; não há condição com o mesmo número de gerações sem feedback do ICD. Número de execuções e testes estatísticos não informados. A média entre modelos (70.74% → 79.43%; +6.00, +1.66, +1.03 p.p.) é impressa pelo estudo sobre cinco modelos heterogêneos; ela coincide com as médias simples da Tabela III (cálculo próprio: 70.74, 76.74, 78.40, 79.43).", "localizador": "Seção IV-B, p. 7; Tabela III, p. 6"},
+      {"descricao": "A Seção I diz que a Seção II revisa trabalhos sobre 'automated generation of assertion statements', mas a Seção II trata de segurança de código gerado por LLM (aparente resíduo de outro texto).", "localizador": "Seção I, p. 2; Seção II, p. 2"}
+    ],
+    "observacoes": [
+      {"descricao": "Avaliação sem execução: segurança medida só por análise estática (ICD, regras alinhadas a CWE); uma amostra é segura quando nenhuma regra é acionada.", "localizador": "Seção III-D, p. 4"},
+      {"descricao": "Os valores de t0 da Tabela III coincidem com a linha 'All 50 types' da Tabela I, e os rótulos de acurácia da Figura 3 coincidem, arredondados, com a Tabela III.", "localizador": "Tabela I, p. 5; Tabela III, p. 6; Figura 3, p. 7"},
+      {"descricao": "Afirmação de vantagem, não risco: laços curtos de reflexão bastariam 'without excessive computation or over-correction'; o custo computacional não é quantificado.", "localizador": "Seção IV-B, p. 7"},
+      {"descricao": "Pacote de replicação com prompts, logs e artefatos anunciado (DOI 10.5281/zenodo.17065846); não acessado nem validado nesta extração.", "localizador": "Resumo, p. 1; Seção I e nota 1, p. 2"},
+      {"descricao": "O exemplo de prompt zero-shot é truncado ('to ...'); o formato exato do buffer de reflexão e das 'short hints' de CWE não é mostrado.", "localizador": "Seções III-C.1 e III-C.2, p. 3-4"}
+    ],
+    "citacoes": [
+      {"trecho": "We evaluate secure code generation using the Instruct Prime, which eliminated compliance-required prompts and cue contamination, and evaluate five instruction-tuned code LLMs using a zero-shot baseline and a three-round reflexion prompting approach.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Our findings show that insecurity remains common at the first round: roughly 25–33% of programs are insecure at a zero-shot baseline (t0).", "localizador": "Resumo, p. 1"},
+      {"trecho": "The prompt specifies the target language and the task, and then leaves all design choices to the model.", "localizador": "Seção III-C.1, p. 3"},
+      {"trecho": "In our setting, the model receives feedback in the form of CWE-aligned vulnerability returned by the ICD detector.", "localizador": "Seção III-C.2, p. 3"},
+      {"trecho": "In each round, the prompt includes (i) the original task, (ii) a reflection buffer containing all prior attempts and their ICD results (flagged CWE(s)), and (iii) an instruction to focus on the most recent attempt while still considering earlier failures.", "localizador": "Seção III-C.2, p. 4"},
+      {"trecho": "Prefer minimal, targeted changes and safer APIs when available.", "localizador": "Seção III-C.2, Reflexion Prompt Template, p. 4"},
+      {"trecho": "Return only the updated code (no explanations or prose).", "localizador": "Seção III-C.2, Reflexion Prompt Template, p. 4"},
+      {"trecho": "Second, evaluations usually emphasize first-pass success rates while overlooking regressions (e.g., a revised output reintroduces a vulnerability or introduce a new one).", "localizador": "Seção I, p. 1"},
+      {"trecho": "Overall, one or two reflexion rounds capture most of the improvement, while additional iterations provide diminishing returns and occasionally undo earlier repairs.", "localizador": "Seção IV-B, p. 7"},
+      {"trecho": "We also experimented with different prompting techniques (e.g., chain-of-thought), but they did not result in any significant improvement over the zero-shot baseline.", "localizador": "Seção IV-B, p. 7-8"},
+      {"trecho": "While static analysis enables scalable, rule-based assessment, it can miss contextual cues or produce false positives.", "localizador": "Seção VI, p. 8"},
+      {"trecho": "Misclassifications at this stage could introduce unintended bias.", "localizador": "Seção VI, p. 8"},
+      {"trecho": "To mitigate this risk, we conducted manual reviews of LLM generations and adhered to validated post-processing established in prior work [28], [29].", "localizador": "Seção VI, p. 8"},
+      {"trecho": "While the dataset corrects for known cue contamination, the prompt distribution remains imbalanced.", "localizador": "Seção VI, p. 8"},
+      {"trecho": "Finally, similar to [2], [19], we enforced a simple fairness rule: only outputs classified as Complete Code were evaluated by ICD as usual; anything else (Incomplete, Natural Language, or Mixed) was marked insecure.", "localizador": "Seção III-F, p. 4"},
+      {"trecho": "To ensure consistency, we fixed decoding hyperparameters across all models and reflexion rounds.", "localizador": "Seção VI, p. 8"},
+      {"trecho": "For inference, we use each model’s default Hugging Face configuration to preserve its intended decoding behavior such as temperature, top-p and other generation settings to keep comparisons fair.", "localizador": "Seção III-B, p. 3"},
+      {"trecho": "OpenCoder lags across all categories.", "localizador": "Seção IV-A, p. 6"},
+      {"trecho": "Languages like Java, JavaScript, PHP, and C++ fall in the middle, with 20-35% of outputs remaining insecure.", "localizador": "Seção IV-A, p. 6"},
+      {"trecho": "Overall, these results indicate that the reflexion loop effectively assists in vulnerability repair, reducing ICD-detected security issues without adding instability or fluctuations to the model outcomes.", "localizador": "Seção IV-B, p. 7"},
+      {"trecho": "We report these metrics overall and for each model, and we further stratify by language and CWE family to show where models improve or degrade.", "localizador": "Seção IV, p. 4"},
+      {"trecho": "This worked reliably for four languages (C, C++, Python, and JavaScript), but failed consistently for the remaining ones (Java, Rust, PHP, and C#) due to missing build tools or dependencies.", "localizador": "Seção III-F, p. 4"},
+      {"trecho": "Top 12 types 74.89% 71.82% 67.37% 72.56% 71.82%", "localizador": "Tabela I, p. 5; colunas CWE-ID, QwenCoder, DeepSeekCoder, Codestral, CodeLlama, OpenCoder"},
+      {"trecho": "For instance, CWE-338 is represented by 152 samples, whereas CWE-306 and CWE-319 are represented by only one and two samples, respectively.", "localizador": "Seção VI, p. 8"},
+      {"trecho": "The paper is organized as follows: Section II reviews related work on the automated generation of assertion statements.", "localizador": "Seção I, p. 2"},
+      {"trecho": "From the observed patterns of Repair, Regression, and NetGain across rounds, we propose a policy as follows: run one round by default, continue only for the cases that remain insecure, and stop once NetGain shows little improvement or when regressions get close to the level of repairs.", "localizador": "Seção VII, p. 8"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Reflexion prompting (three-round reflexion)",
+      "mecanismos": ["instrucao", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["feedback", "restricoes"],
+      "comparador": "Zero-shot (Baseline t0)",
+      "modelo": "Qwen2.5-Coder-32B-Instruct (QwenCoder)",
+      "benchmark": "Instruct Prime (CyberSecEval corrigido, split instruct), todas as linguagens e CWE",
+      "metrica": "Secure code generation accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 72.86, "intervencao": 84.47},
+      "denominador": "full dataset (1.404 prompts, Seção III-A); contagens absolutas não informadas",
+      "condicoes": "Intervenção = t3, saída final da reflexão de três rodadas; valores intermediários impressos na mesma linha: t1 = 80.20%, t2 = 82.83%. Cada rodada inclui a tarefa original, o buffer com todas as tentativas anteriores e os resultados do ICD (CWE sinalizadas e dicas) e a instrução de revisão; segurança avaliada pelo ICD estático; saídas que não são 'Complete Code' (classificadas pelo juiz GPT-4o) contam como inseguras. Decodificação: configuração padrão do Hugging Face, mantida fixa entre rodadas; valores nao_informado. Número de execuções nao_informado; sem teste estatístico. Não há condição com o mesmo número de gerações sem feedback, de modo que o ganho é do pacote. O estudo também imprime a média entre os cinco modelos (70.74% em t0 → 79.43% em t3), agregado sobre modelos heterogêneos, não usado aqui. Valores conferidos visualmente na Tabela III (PDF p. 6) e no rótulo da Figura 3 (80.2%, 82.8%, 84.5%, PDF p. 7).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a Seção III destacam várias métricas (accuracy, Repair, Regression, NetGain) sem que uma prevaleça, e as rodadas t1-t3 oferecem mais de uma condição. As Tabelas I e II trazem só a condição zero-shot (não contêm o contraste); a Tabela III é a primeira tabela com o contraste. Primeira métrica (accuracy), primeiro modelo listado (QwenCoder) e única linha de base (Baseline t0); intervenção t3 por ser a técnica completa de três rodadas, com t1 e t2 registrados em condicoes. Única técnica focal e única tarefa; não há tabela de ablação nem matriz de ingredientes para cobertura; chain-of-thought não tem valores.",
+      "derivacao": "direta",
+      "localizador": "Tabela III, p. 6 (PDF p. 6); Seção IV-B, p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "QwenCoder 72.86% 80.20% 82.83% 84.47%", "localizador": "Tabela III, p. 6; colunas Model, Baseline (t0), t1, t2, t3"},
+        {"trecho": "Averaged across models, accuracy increases from 70.74% at t0 to 79.43% at t3 (+8.69 percentage points, pp).", "localizador": "Seção IV-B, p. 7"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Lacuna e duas questões de pesquisa explícitas (prevalência de código inseguro; melhoria por reflexão iterativa).", "localizador": "Seção I, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Fluxo, modelos, benchmark, prompt de reflexão e regra de pós-processamento descritos; porém o exemplo zero-shot é truncado, o formato do buffer e das dicas de CWE não é mostrado, valores de decodificação e número de execuções não são informados, e o prompt do juiz GPT-4o e a extensão da revisão manual não são descritos.", "localizador": "Seção III, p. 2-4; Seção VI, p. 8"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Linha de base zero-shot executada nos mesmos modelos e benchmark; mas não há condição com o mesmo número de gerações sem feedback do ICD, e as outras técnicas testadas (chain-of-thought) não têm resultados relatados.", "localizador": "Seção III-C, p. 3-4; Tabela III, p. 6; Seção IV-B, p. 7-8"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Repair, Regression e NetGain definidos por fórmula, com denominador N; acurácia ligada ao 'full dataset' e valores de t0 coincidentes entre Tabelas I e III e Figura 3. Porém contagens por linguagem e CWE não são informadas, a linha 'Top 12 types' de Codestral parece incompatível com as linhas (cálculo próprio), Repair/Regression/NetGain só aparecem graficamente, a estratificação anunciada não é apresentada, a segurança é medida só por análise estática (o mesmo ICD do feedback) e a correção funcional não é medida.", "localizador": "Seção III-E, p. 4; Tabela I, p. 5; Tabelas II-III, p. 6; Figura 3, p. 7"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute falsos positivos do ICD, viés do juiz LLM, decodificação, desbalanceamento e generalização; não discute não determinismo, número de execuções, uso do ICD como feedback e avaliador, correção funcional nem contaminação de pré-treinamento.", "localizador": "Seção VI, p. 8"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos identificados com repositórios do Hugging Face, prompt de reflexão apresentado e pacote de replicação anunciado (não acessado); faltam valores de decodificação, revisões dos modelos, versão do GPT-4o e número de execuções.", "localizador": "Seção III-B e notas 2-6, p. 3; Seção III-C, p. 3-4; Resumo, p. 1"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Trata a contaminação por pistas de rótulo nos prompts ao adotar o Instruct Prime, mas não discute possível presença do benchmark no pré-treinamento dos modelos.", "localizador": "Seção I, p. 1; Seção III-A, p. 3; Seção VI, p. 8"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6, 7, 8],
+    "observacao": "Texto extraído lido integralmente (478 linhas, até a referência [29]). Páginas abertas para conferir Tabelas I-III, Figuras 1-3, o prompt de reflexão, a seção de ameaças e os localizadores das citações."
+  }
+}

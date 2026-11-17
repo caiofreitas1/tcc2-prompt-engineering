@@ -1,0 +1,663 @@
+{
+  "estudo": "S302",
+  "texto_fonte": "fontes/textos/lote/S302.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "COCOGEN",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (Abstract); p. 4-5 (Seções 3.1-3.4, Figuras 3 e 4); p. 6 (Tabela 2); p. 7 (Tabela 3); p. 17 (Apêndice G); PDF sem numeração impressa",
+        "observacao": "Pacote iterativo de geração-verificação-recuperação: prompt de geração com instrução de tarefa, exemplos de demonstração, solução anterior, linha e mensagem de erro do compilador (pylint) e contexto do projeto recuperado (Figura 4b); a recuperação combina busca estrutural (consulta CodeQL/«SQL» sintetizada pelo ChatGPT com demonstrações few-shot, Figura 4a, ou procedimento fixo com tabelas pré-computadas para códigos de erro frequentes) e busca semântica por embeddings. Comparador de que deriva: RepoCoder, que o estudo identifica como a configuração sem compilador e sem SQL (p. 7); em relação a ele, acrescenta feedback do compilador (feedback), contexto estrutural (contexto, categoria já presente no RepoCoder) e demonstrações do prompt de síntese da consulta (exemplos). Não é informado se o RepoCoder reimplementado usa as demonstrações do prompt de geração da Figura 4b. O isolamento é do pacote contra Direct, ReACC e RepoCoder (Tabela 2); o ganho não se atribui a um ingrediente isolado. Inclui ferramentas não generativas (analisador estático, banco CodeQL, codificador de embeddings) que alimentam o prompt; a decodificação está em componentes_fora_escopo."
+      },
+      {
+        "nome_original": "Direct Generation",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 (Seção 4.2; Tabela 2)",
+        "observacao": "Linha de base que insere diretamente os requisitos da tarefa no LLM, sem contexto adicional. O estudo cita Yu et al. (2024) para o método e não informa se os valores da Tabela 2 foram executados pelos autores ou transcritos. Comparador sem mecanismos isolados."
+      },
+      {
+        "nome_original": "ReACC",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 (Seção 4.2; Tabela 2)",
+        "observacao": "Os autores empregam a técnica de geração aumentada por recuperação de ReACC: recuperam contexto do projeto alinhado semanticamente às instruções da tarefa e o inserem no prompt. Comparador sistêmico; seus mecanismos não são isolados pelo estudo, embora a Tabela 2 traga também a linha Direct."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Seção 4.2; Tabela 2); p. 7 (Seção 5.3; Tabela 3)",
+        "observacao": "Recuperação iterativa de trechos de código semelhantes aos gerados anteriormente, inseridos no prompt; o estudo destaca que não usa feedback do compilador. A iteração usa a geração anterior como consulta de recuperação, sem sinal de avaliação, por isso não foi classificada como feedback. Comparador sistêmico sem isolamento próprio; no estudo, equivale à ablação de CoCoGen sem CF e sem SQL. [D108, correção registrada] Pacote avaliado contra Direct Generation (Tabela 2, p. 6; GPT-3.5-Turbo, CoderEval-Python class-runnable, Pass@1: base 8,73 × comparador 35,45), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "compiler feedback (CF)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7 (Tabela 3: linhas «- w/o CF and SQL (RepoCoder)» e «- w/ CF and Semantic, w/o SQL»); p. 14 (Tabela 5); p. 15 (Seção F.1)",
+        "observacao": "Componente de CoCoGen. Mecanismos referem-se à condição «w/ CF and Semantic, w/o SQL». Isolamento por condição com e sem CF: na Tabela 3, RepoCoder (só semântica) contra «w/ CF and Semantic, w/o SQL»; na Tabela 5, Direct, ReACC e RepoCoder com e sem CF (média sobre os seis níveis do CoderEval-Python, GPT-3.5-Turbo). Também avaliado isoladamente com Direct em HumanEval e MBPP (Tabelas 11 e 12)."
+      },
+      {
+        "nome_original": "SQL retriever (Structural Search)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 (Structural Search; Figura 4a); p. 7 (Tabela 3: linhas «COCOGEN» e «- w/ CF and Semantic, w/o SQL»); p. 17 (Apêndice G)",
+        "observacao": "Converte a mensagem do compilador em consulta CodeQL (chamada SQL) por prompt ao ChatGPT com demonstrações few-shot (exemplos) e recupera contexto estrutural do projeto (contexto); para códigos de erro frequentes, a recuperação usa tabelas pré-computadas e procedimento fixo (p. 17). Mecanismos referem-se ao CoCoGen completo. Ablação de retirada única na Tabela 3 (CoCoGen contra «w/ CF and Semantic, w/o SQL») e nas Tabelas 6-8 por nível."
+      },
+      {
+        "nome_original": "semantic retriever (Semantic Search)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 (Semantic Search); p. 7 (Tabela 3: linhas «COCOGEN» e «- w/ CF and SQL, w/o Semantic»)",
+        "observacao": "Recuperação densa de trechos de código semelhantes (até 5 entradas por consulta, p. 13), usando a descrição da tarefa na primeira rodada e o erro com a linha correspondente nas seguintes. Mecanismos referem-se ao CoCoGen completo. Ablação de retirada única na Tabela 3 e nas Tabelas 6-8 por nível."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "decoding temperature 0.7 and top-k sampling",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,7 e amostragem top-k na inferência; o valor de k da amostragem não é informado.",
+        "localizador": "p. 13 (Apêndice A)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5-Turbo",
+        "versao": "nao_informado",
+        "observacao": "invocado por API online da OpenAI; snapshot não informado"
+      },
+      {
+        "nome": "Code Llama (13B)",
+        "versao": "variante base, CodeLlama-13b-hf (Hugging Face)",
+        "observacao": "p. 6 nota de rodapé; p. 12 (Apêndice A)"
+      },
+      {
+        "nome": "ChatGPT",
+        "versao": "nao_informado",
+        "observacao": "usado para sintetizar as consultas CodeQL/SQL a partir do feedback do compilador (p. 5)"
+      },
+      {
+        "nome": "text-ada / text-embedding-ada-002 (OpenAI)",
+        "versao": "text-embedding-ada-002 (Apêndice H); «text-ada» no Apêndice A",
+        "observacao": "codificador dos módulos de recuperação, dimensão 1.536; não gera código"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "CoderEval-Python (Yu et al., 2024)",
+        "quantidade": "230 amostras de teste em seis níveis de dependência; usados class-runnable (55), file-runnable (68) e project-runnable (23)",
+        "observacao": "Tabela 2 e Tabelas 6-8 por nível; Tabela 3 sem indicação dos níveis cobertos; Tabela 5 declara média sobre os seis níveis. A análise de erros da Seção 2.2 descreve 85 tarefas function-level e 145 project-level (ver heterogeneidade)."
+      },
+      {
+        "nome": "HumanEval",
+        "quantidade": "164 problemas (Apêndice B); 163 casos de teste na Seção F.5",
+        "observacao": "avaliação function-level, 0-shot, 10 amostras por caso"
+      },
+      {
+        "nome": "MBPP",
+        "quantidade": "974 problemas",
+        "observacao": "avaliação function-level, 0-shot, 10 amostras por caso"
+      },
+      {
+        "nome": "CrossCodeEval (Python)",
+        "quantidade": "471 repositórios, 2.665 casos de teste em 1.368 arquivos",
+        "observacao": "completação de código em nível de projeto (Tabela 10, GPT-3.5-Turbo)"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@k (k = 1, 5, 10)",
+        "observacao": "estimador não enviesado com n = 20 soluções por tarefa (Seção 4.3); denominador = tarefas do conjunto/nível avaliado, informado para os níveis da Tabela 2 (55, 68, 23) e não informado para a Tabela 3"
+      },
+      {
+        "nome": "C-EM, C-ES, I-EM, I-F1",
+        "observacao": "completação no CrossCodeEval (Apêndice C; Tabela 10)"
+      },
+      {
+        "nome": "CE e CE(%)",
+        "observacao": "número de erros de compilação e proporção entre todas as soluções geradas (Tabelas 11 e 12)"
+      },
+      {
+        "nome": "Number of Errors por tipo e iteração",
+        "observacao": "Figura 6"
+      },
+      {
+        "nome": "latência da análise estática",
+        "observacao": "segundos (Seção F.6)"
+      },
+      {
+        "nome": "proporção de erros com contexto recuperado",
+        "observacao": "93,2% com 3 rodadas no CoderEval-Python (Apêndice G.1)"
+      }
+    ],
+    "linguagens": [
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Programas que compilam podem falhar na execução; CoCoGen não trata erros FUNC, que surgem na execução após compilação bem-sucedida.",
+        "localizador": "p. 5 (Seção 3.4); p. 9 (Limitations)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Soluções degeneradas (código simplista ou redundante) frequentemente passam na compilação, tornando a verificação por compilador ineficaz; também há soluções que interpretam mal os requisitos (Figuras 7-9).",
+        "localizador": "p. 8 (Seção 5.4, Figura 7); p. 14-15 (Apêndice E, Figuras 8 e 9)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros de compilação residuais não corrigidos pelas iterações (blocos Markdown, parênteses desbalanceados não corrigidos em três iterações, confusão com a função de biblioteca sum); desempenho atinge platô com mais iterações.",
+        "localizador": "p. 15 (Seção F.3, Tabela 9); p. 16 (Seção F.5)"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "A compilação bem-sucedida não garante segurança para execução; o estudo menciona requisitos de segurança entre os aspectos da correção funcional, sem detalhar se se trata de cibersegurança ou de segurança operacional, e não avalia o aspecto.",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Exceções em Pass@1 atribuídas pelos autores à variação das soluções geradas; sugerem n maior (por exemplo, 1000) para estabilizar.",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Uso de análise estática aumenta a latência; medida por caso de teste: média 1,27 s, mínimo 0,359 s, máximo 6,984 s; os autores a consideram aceitável.",
+        "localizador": "p. 16 (Seção F.6)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falha da recuperação estrutural em 6,8% dos erros: o LLM não segue as demonstrações CodeQL e gera consultas inválidas, ou a consulta não retorna resultado.",
+        "localizador": "p. 17 (Apêndice G.1)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Feedback do compilador combinado à recuperação de contexto do projeto para corrigir erros de compilação ligados ao contexto (a própria técnica), medido contra condições sem CF.",
+        "avaliada": "sim",
+        "localizador": "p. 7 (Tabela 3); p. 8 (Figura 6); p. 14 (Tabela 5)"
+      },
+      {
+        "descricao": "Recomendação de verificação adicional por testes e revisão manual para assegurar a correção funcional.",
+        "avaliada": "nao",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "descricao": "Geração de n = 20 soluções por tarefa com estimador não enviesado de Pass@k para reduzir a variância amostral.",
+        "avaliada": "nao",
+        "localizador": "p. 7 (Seção 4.3)"
+      },
+      {
+        "descricao": "Sugestão de n muito maior (por exemplo, 1000) para estabilizar Pass@1.",
+        "avaliada": "nao",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "descricao": "Trabalho futuro: integrar documentação, resultados de busca na web e logs de execução como referência para a geração.",
+        "avaliada": "nao",
+        "localizador": "p. 8 (Seção 5.4)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Exceções em Pass@1 na Tabela 2: com GPT-3.5-Turbo, Class Runnable, RepoCoder 35.45 contra CoCoGen 28.00; com Code Llama (13B), File Runnable, Direct 18.53 contra CoCoGen 17.06 (e ReACC 17.65 aparece em negrito apesar de Direct ser maior); Project Runnable, RepoCoder 16.09 contra CoCoGen 13.04. Em File Runnable/Code Llama, Pass@10 de CoCoGen e ReACC é igual (33.82). Os autores atribuem as exceções à variação das soluções geradas.",
+        "localizador": "p. 6 (Tabela 2); p. 7 (Seção 5.1)"
+      },
+      {
+        "descricao": "Linhas ReACC idênticas entre GPT-3.5-Turbo e Code Llama em Class Runnable (20.36, 33.27, 38.18) e Project Runnable (11.30, 19.53, 21.74), e em File Runnable Pass@1 (17.65) e Pass@10 (33.82), diferindo só em File Pass@5 (28.92 contra 27.61); o estudo não explica a coincidência. Aparente inconsistência não esclarecida.",
+        "localizador": "p. 6 (Tabela 2)"
+      },
+      {
+        "descricao": "A Tabela 3 não informa quais níveis do CoderEval-Python cobre. Cálculo próprio: seus valores coincidem com a média ponderada (55, 68, 23 tarefas) das Tabelas 6-8 em todas as células conferidas, exceto RepoCoder Pass@1: impresso 28.72, enquanto a média ponderada de 35.45, 29.41 e 16.96 dá cerca de 29.72. Aparente inconsistência, condicionada à suposição (não declarada pelo estudo) de que a Tabela 3 agrega esses três níveis.",
+        "localizador": "p. 7 (Tabela 3); p. 14-15 (Tabelas 6, 7 e 8)"
+      },
+      {
+        "descricao": "O mesmo RepoCoder com GPT-3.5-Turbo no «CoderEval-Python» tem valores diferentes entre tabelas: Tabela 3 28.72/34.44/36.30 e Tabela 5 36.82/40.73/42.17 (Pass@1/5/10). A Tabela 5 declara média sobre os seis níveis; a Tabela 3 não declara a cobertura, o que sugere denominadores diferentes.",
+        "localizador": "p. 7 (Tabela 3); p. 14 (Tabela 5); p. 15 (Seção F.1)"
+      },
+      {
+        "descricao": "Narrativa diz que a Tabela 2 apresenta resultados no CoderEval e no CrossCodeEval, mas a Tabela 2 traz só divisões do CoderEval; o CrossCodeEval está na Tabela 10.",
+        "localizador": "p. 7 (Seção 5.1); p. 6 (Tabela 2); p. 15 (Tabela 10)"
+      },
+      {
+        "descricao": "Caracterizações divergentes do efeito do feedback do compilador: na Seção 5.3, melhora «not markedly substantial»; na Seção F.1, «notable enhancement» e aumento «substantial» de Pass@1 de 36.82 para 38.00 (RepoCoder, Tabela 5).",
+        "localizador": "p. 7 (Seção 5.3); p. 15 (Seção F.1)"
+      },
+      {
+        "descricao": "Ablação por nível não é uniforme: na Tabela 6 (Class Runnable) o CoCoGen completo tem Pass@1 28.00, menor que todas as variantes ablacionadas (35.45, 30.00, 30.36, 31.45), e Pass@5 44.92, menor que «w/ CF and Semantic, w/o SQL» (45.00); «w/ CF and SQL, w/o Semantic» empata em Pass@10 (49.09). Na Tabela 7 (File Runnable), acrescentar SQL a CF reduz Pass@10 (42.65 para 39.71). A Seção F.2 descreve melhorias consistentes «across most scenarios».",
+        "localizador": "p. 14 (Tabela 6); p. 15 (Tabela 7; Seção F.2)"
+      },
+      {
+        "descricao": "Contagens de tarefas: a Seção 2.2 descreve 85 tarefas function-level e 145 project-level (1450 soluções = 145 × 10), enquanto a Seção 4.1 informa 55, 68 e 23 tarefas nos três níveis dependentes do projeto (soma própria: 146). O estudo não diz se «project-level» da Seção 2.2 corresponde a esses três níveis; aparente inconsistência.",
+        "localizador": "p. 3 (Seção 2.2); p. 6 (Seção 4.1)"
+      },
+      {
+        "descricao": "HumanEval descrito com 164 problemas no Apêndice B e avaliado com 163 casos de teste na Seção F.5 (10 amostras por caso, total de 11.370 amostras com MBPP); a diferença não é explicada.",
+        "localizador": "p. 13 (Apêndice B); p. 16 (Seção F.5)"
+      },
+      {
+        "descricao": "Tabela 11 (HumanEval): Direct com CE = 40 e CE(%) = 2.38%. Cálculo próprio com 1.630 soluções (163 × 10, Seção F.5): 40/1630 ≈ 2,45%, enquanto 7 → 0.42% e 3 → 0.18% são compatíveis com esse denominador; na Tabela 12 (MBPP) as proporções são compatíveis com 9.740 soluções. Aparente inconsistência; a tabela não imprime o denominador.",
+        "localizador": "p. 16 (Tabelas 11 e 12; Seção F.5)"
+      },
+      {
+        "descricao": "Número de amostras por tarefa varia entre análises: n = 20 na Seção 4.3; 10 candidatos na análise de erros da Seção 2.2; 10 amostras por caso em HumanEval/MBPP (Seção F.5), embora Pass@10 seja relatado nessas tabelas. Número de execuções independentes não informado.",
+        "localizador": "p. 3 (Seção 2.2); p. 7 (Seção 4.3); p. 16 (Seção F.5)"
+      },
+      {
+        "descricao": "A Seção 3.4 atribui à Figura 6 a afirmação de que erros de compilação são 66% dos erros em nível de projeto, mas a Figura 6 mostra contagens de erros por iteração; a Figura 2 traz FUNC = 34% no nível de projeto (complemento de 66%, cálculo próprio).",
+        "localizador": "p. 5 (Seção 3.4); p. 3 (Figura 2); p. 8 (Figura 6)"
+      },
+      {
+        "descricao": "Iterações: na Tabela 9, i = 10 é menor que i = 3 em Class Level (47.27 contra 49.09) e File Level (45.59 contra 47.06), igual em Project Level (39.13); a tabela não informa modelo nem k da métrica. Em HumanEval/MBPP (Tabelas 11 e 12), os valores não crescem monotonicamente com as iterações (por exemplo, Pass@10 HumanEval 85.98 em i = 2 e 85.36 em i = 3; Pass@1 MBPP 53.06 em i = 2 e 52.79 em i = 3).",
+        "localizador": "p. 15 (Tabela 9); p. 16 (Tabelas 11 e 12)"
+      },
+      {
+        "descricao": "A afirmação de melhora acima de 80% relativa sobre os LLMs sem contexto (Abstract, Introdução, Conclusão) não especifica métrica, nível nem modelo; não foi verificada numericamente nesta ficha.",
+        "localizador": "p. 1 (Abstract); p. 2 (Introdução); p. 9 (Conclusion)"
+      },
+      {
+        "descricao": "O Apêndice G.1 diz que foram extraídos 11 códigos de erro (Tabela 4), enquanto o Apêndice D diz que 12 tipos são relatados com frequência; a Tabela 4 lista 11 códigos e a categoria OTHER (contagem própria).",
+        "localizador": "p. 14 (Apêndice D; Tabela 4); p. 17 (Apêndice G.1)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Experimento adicional de utilidade do feedback do compilador (Tabela 5): Direct, ReACC e RepoCoder com e sem CF, GPT-3.5-Turbo, média nos seis níveis do CoderEval-Python; não extraído por limite de alvo.",
+        "localizador": "p. 14 (Tabela 5); p. 15 (Seção F.1)"
+      },
+      {
+        "descricao": "Análise da refinação iterativa (Figura 5) com CoCoGen, RepoCoder e uma linha «No Feedback» por número de iterações (0-3) e Tabela 9 com i = 0, 3 e 10; contribuição por iteração, sem extração.",
+        "localizador": "p. 7 (Seção 5.2; Figura 5); p. 15 (Tabela 9)"
+      },
+      {
+        "descricao": "Avaliações adicionais: CrossCodeEval (Tabela 10, GPT-3.5-Turbo, completação) e HumanEval/MBPP (Tabelas 11 e 12, 0-shot, só feedback do compilador contra Direct). São novos benchmarks da mesma técnica e tarefa, sem cobertura.",
+        "localizador": "p. 15 (Tabela 10; Seção F.4); p. 16 (Tabelas 11 e 12; Seção F.5)"
+      },
+      {
+        "descricao": "Esforço manual: dois autores inspecionaram os códigos de erro mais frequentes, pré-computaram seis tabelas e fixaram o procedimento de recuperação para cinco códigos; as quatro consultas de demonstração foram escritas manualmente por um autor; sete erros residuais foram revisados manualmente.",
+        "localizador": "p. 16 (Seção F.5); p. 17-18 (Apêndices G.1 e G.2)"
+      },
+      {
+        "descricao": "Infraestrutura não generativa: pylint como analisador estático, CodeQL para consultas estruturais, tree-sitter-python e codeql-python para construção do banco do projeto, codificador de embeddings; servidor com quatro GPUs Tesla V100 de 32 GB.",
+        "localizador": "p. 13 (Apêndices A e D); p. 17-18 (Apêndices G e H)"
+      },
+      {
+        "descricao": "Análise de erros motivadora (Seção 2.2) com RepoCoder e GPT-3.5-Turbo no CoderEval: Pass@10 de 53.57% (function-level) e 39.73% (project-level); distribuição de tipos de erro na Figura 2.",
+        "localizador": "p. 3 (Seção 2.2; Figura 2)"
+      },
+      {
+        "descricao": "Os autores especulam que um erro residual no MBPP decorre da presença de funções de mesmo nome no conjunto de treinamento; não é apresentado como vazamento de dados de avaliação.",
+        "localizador": "p. 16 (Seção F.5)"
+      },
+      {
+        "descricao": "O link do código e dos dados está impresso; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 (Introdução)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We present COCOGEN, a new code generation approach that uses compiler feedback to improve the LLM-generated code.",
+        "localizador": "p. 1 (Abstract)"
+      },
+      {
+        "trecho": "It then iteratively aligns and fixes the identified errors using information extracted from the code repository.",
+        "localizador": "p. 1 (Abstract)"
+      },
+      {
+        "trecho": "Experimental results show that COCOGEN significantly improves the vanilla LLMs by over 80% in generating code dependent on the project context and consistently outperforms the existing retrieval-based code generation baselines.",
+        "localizador": "p. 1 (Abstract)"
+      },
+      {
+        "trecho": "We implement this by transforming the textual compiler feedback into an SQL query using the ChatGPT.",
+        "localizador": "p. 5 (Seção 3.3, Structural Search)"
+      },
+      {
+        "trecho": "Several examples of paired compiler feedback and SQL queries are provided as demonstrations for in-context learning.",
+        "localizador": "p. 5 (Seção 3.3, Structural Search)"
+      },
+      {
+        "trecho": "In addition to returning the project-level context retrieved by the SQL query, we also enhance the acquired context by retrieving similar code snippets using dense passage retrieval (Karpukhin et al., 2020).",
+        "localizador": "p. 5 (Seção 3.3, Semantic Search)"
+      },
+      {
+        "trecho": "This process goes iterative until no error is reported by the compiler, resulting in an error-free solution that aligns with the project's environment.",
+        "localizador": "p. 5 (Seção 3.4)"
+      },
+      {
+        "trecho": "It is noteworthy that COCOGEN does not take into account FUNC errors, which arise during execution despite successful compilation.",
+        "localizador": "p. 5 (Seção 3.4)"
+      },
+      {
+        "trecho": "This line of method denotes directly inputting the task requirements into LLM for code generation, without providing additional context.",
+        "localizador": "p. 6 (Seção 4.2, Direct Generation)"
+      },
+      {
+        "trecho": "More precisely, we retrieve project contexts aligned with the task instructions semantically through embedding similarity, and leverage them to augment the prompts of LLMs for better code generation.",
+        "localizador": "p. 6 (Seção 4.2, ReACC)"
+      },
+      {
+        "trecho": "Specifically, it involves retrieving similar code snippets derived from the previously generated ones, and employing them to augment the prompts of LLMs.",
+        "localizador": "p. 6 (Seção 4.2, RepoCoder)"
+      },
+      {
+        "trecho": "One distinguishing feature is that this baseline does not leverage compiler feedback.",
+        "localizador": "p. 6 (Seção 4.2, RepoCoder)"
+      },
+      {
+        "trecho": "To explore the impact of each component within COCOGEN on overall performance, we remove various components from COCOGEN, including the compiler, SQL retriever, and semantic retriever.",
+        "localizador": "p. 7 (Seção 5.3)"
+      },
+      {
+        "trecho": "Notably, the configuration that excludes the compiler and SQL, relying solely on semantic retrieval, is known as RepoCoder (Zhang et al., 2023a).",
+        "localizador": "p. 7 (Seção 5.3)"
+      },
+      {
+        "trecho": "We attribute such exceptions to variations in the generated solutions.",
+        "localizador": "p. 7 (Seção 5.1)"
+      },
+      {
+        "trecho": "To reduce sampling variance, we generate n ≥ k solutions (for this study, n = 20 and k = 1, 5, 10) for each task, count the number of correct solutions c ≤ n that pass the unit tests, and calculate the unbiased estimator:",
+        "localizador": "p. 7 (Seção 4.3)"
+      },
+      {
+        "trecho": "However, it is important to note that even programs that compile successfully can experience execution failures.",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "trecho": "Furthermore, the successful compilation of programs does not guarantee their safety for execution.",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "trecho": "As a result, while our findings indicate improvements in quality metrics through the correction of code to properly leverage context, it is imperative to undertake additional verification methods such as testing and manual review to ascertain the functional correctness of the generated code.",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "trecho": "Our analysis reveals that degenerate solutions frequently pass compilation, rendering compiler-based verification ineffective.",
+        "localizador": "p. 15 (Apêndice E)"
+      },
+      {
+        "trecho": "Utilizing static analysis tools to inspect code typically results in increased latency.",
+        "localizador": "p. 16 (Seção F.6)"
+      },
+      {
+        "trecho": "The average latency is recorded at 1.27 seconds, with a minimum of 0.359 seconds and a maximum of 6.984 seconds.",
+        "localizador": "p. 16 (Seção F.6)"
+      },
+      {
+        "trecho": "For the remaining 6.8% of cases, there are two reasons for failure: first, the LLM does not follow the demonstrated CodeQL examples and generates queries that are syntactically or semantically incorrect, thus rejected by the CodeQL query system; second, the query does not return anything because the specified conditions in the query are not satisfied in project context.",
+        "localizador": "p. 17 (Apêndice G.1)"
+      },
+      {
+        "trecho": "In the inference stage, we set the decoding temperature to 0.7, and adopt the top-k sampling strategy.",
+        "localizador": "p. 13 (Apêndice A)"
+      },
+      {
+        "trecho": "There are 55, 68, and 23 tasks associated with each dependency level, respectively.",
+        "localizador": "p. 6 (Seção 4.1)"
+      },
+      {
+        "trecho": "This dataset comprises 85 function-level tasks and 145 project-level tasks.",
+        "localizador": "p. 3 (Seção 2.2)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "COCOGEN",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos",
+        "feedback"
+      ],
+      "comparador": "Direct",
+      "modelo": "GPT-3.5-Turbo (snapshot nao_informado)",
+      "benchmark": "CoderEval-Python, divisão Class Runnable",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 8.73,
+        "intervencao": 28.0
+      },
+      "denominador": "55 tarefas class-runnable (Seção 4.1); n = 20 soluções por tarefa para o estimador (Seção 4.3)",
+      "condicoes": "Valores da Tabela 2 conferidos na imagem da p. 6. Decodificação com temperatura 0,7 e top-k (k não informado); recuperação de até 5 entradas por consulta (Apêndice A). Número de iterações do CoCoGen não declarado na Seção 4; o Apêndice G.1 menciona 3 rodadas e os valores de Pass@10 coincidem com i = 3 da Tabela 9. Número de execuções independentes: nao_informado. Não é informado se os valores de Direct foram executados pelos autores ou transcritos de Yu et al. (2024). O ganho é do pacote CoCoGen (recuperação estrutural e semântica com feedback do compilador), não de um ingrediente isolado. conferido_pdf = sim.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca melhora sobre LLMs sem contexto e sobre as linhas de base de recuperação (mais de um comparador), e Pass@1, Pass@5 e Pass@10 são relatados sem métrica prevalente. Primeira tabela com o contraste: Tabela 2; primeira métrica pertinente: Pass@1 da primeira divisão (Class Runnable); primeiro modelo: GPT-3.5-Turbo; primeira linha de base de prompting listada: Direct.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (Tabela 2, LLM: GPT-3.5-Turbo, colunas Class Runnable Pass@1); PDF sem numeração impressa",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Direct 8.73 12.57 14.55 19.85 27.62 30.88 9.57 12.08 13.04",
+          "localizador": "p. 6, Tabela 2, LLM: GPT-3.5-Turbo, linha Direct; colunas Class Runnable Pass@1/Pass@5/Pass@10, File Runnable Pass@1/Pass@5/Pass@10, Project Runnable Pass@1/Pass@5/Pass@10"
+        },
+        {
+          "trecho": "COCOGEN 28.00 44.92 49.09 30.29 43.58 47.06 21.30 36.73 39.13",
+          "localizador": "p. 6, Tabela 2, LLM: GPT-3.5-Turbo, linha COCOGEN; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "semantic retriever (Semantic Search)",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "- w/ CF and SQL, w/o Semantic",
+      "modelo": "GPT-3.5-Turbo (snapshot nao_informado)",
+      "benchmark": "CoderEval-Python (níveis cobertos não informados na Tabela 3)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 26.37,
+        "intervencao": 28.01
+      },
+      "denominador": "nao_informado (a Tabela 3 não indica os níveis nem o número de tarefas; n = 20 soluções por tarefa para o estimador, Seção 4.3)",
+      "condicoes": "Ablação de retirada única: CoCoGen completo (CF, SQL e semântica) contra a configuração sem recuperação semântica. Valores conferidos na imagem da p. 7. Mesmas condições de decodificação do Apêndice A; número de execuções nao_informado. A cobertura da Tabela 3 difere da Tabela 5 (ver heterogeneidade). conferido_pdf = sim.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa do escopo; componentes da tabela de ablação completam o alvo de três, na ordem da Tabela 3. As duas primeiras linhas ablacionadas retiram dois componentes cada; a primeira linha que retira um único componente em relação ao CoCoGen completo é «- w/ CF and SQL, w/o Semantic». Primeira métrica: Pass@1; único modelo da tabela: GPT-3.5-Turbo.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (Tabela 3, linhas «COCOGEN» e «- w/ CF and SQL, w/o Semantic», coluna Pass@1)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "COCOGEN 28.01 43.01 46.58",
+          "localizador": "p. 7, Tabela 3, linha COCOGEN; colunas Pass@1, Pass@5, Pass@10"
+        },
+        {
+          "trecho": "- w/ CF and SQL, w/o Semantic 26.37 38.31 41.78",
+          "localizador": "p. 7, Tabela 3, linha «- w/ CF and SQL, w/o Semantic»; colunas Pass@1, Pass@5, Pass@10"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SQL retriever (Structural Search)",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos"
+      ],
+      "comparador": "- w/ CF and Semantic, w/o SQL",
+      "modelo": "GPT-3.5-Turbo (snapshot nao_informado)",
+      "benchmark": "CoderEval-Python (níveis cobertos não informados na Tabela 3)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 27.39,
+        "intervencao": 28.01
+      },
+      "denominador": "nao_informado (a Tabela 3 não indica os níveis nem o número de tarefas; n = 20 soluções por tarefa para o estimador, Seção 4.3)",
+      "condicoes": "Ablação de retirada única: CoCoGen completo contra a configuração sem recuperação estrutural (SQL/CodeQL). O componente SQL inclui o prompt de síntese de consulta com demonstrações (Figura 4a) e, para códigos de erro frequentes, tabelas pré-computadas com procedimento fixo (Apêndice G.1). Valores conferidos na imagem da p. 7. Número de execuções nao_informado. conferido_pdf = sim.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente isolado por retirada única na ordem da Tabela 3 («- w/ CF and Semantic, w/o SQL»), usado para completar o alvo de três. Primeira métrica: Pass@1; único modelo: GPT-3.5-Turbo.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (Tabela 3, linhas «COCOGEN» e «- w/ CF and Semantic, w/o SQL», coluna Pass@1)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "COCOGEN 28.01 43.01 46.58",
+          "localizador": "p. 7, Tabela 3, linha COCOGEN; colunas Pass@1, Pass@5, Pass@10"
+        },
+        {
+          "trecho": "- w/ CF and Semantic, w/o SQL 27.39 40.02 44.45",
+          "localizador": "p. 7, Tabela 3, linha «- w/ CF and Semantic, w/o SQL»; colunas Pass@1, Pass@5, Pass@10"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (usar contexto do projeto e feedback do compilador para corrigir erros de contexto na geração em nível de repositório) e as contribuições estão explícitos.",
+      "localizador": "p. 1-2 (Abstract; Introdução, lista de contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Método descrito com figuras, prompts de exemplo e apêndices (extração de contexto, consultas, algoritmo do banco), mas faltam detalhes: número de iterações não declarado na configuração experimental principal, cobertura de níveis da Tabela 3 não indicada, prompt completo de geração e configuração das linhas de base reimplementadas não detalhados.",
+      "localizador": "p. 4-7 (Seções 3-4); p. 17-18 (Apêndices G e H)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Compara com Direct, ReACC e RepoCoder nos mesmos modelos e divisões, além de ablações de componentes e experimentos com e sem feedback do compilador; origem dos valores de Direct não explicitada.",
+      "localizador": "p. 6 (Seção 4.2; Tabela 2); p. 7 (Tabela 3); p. 14 (Tabela 5)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k definido com estimador e n = 20, e métricas de completação definidas; porém o denominador da Tabela 3 não é informado, o RepoCoder tem valores diferentes entre Tabela 3 e Tabela 5, há aparente inconsistência em RepoCoder Pass@1 da Tabela 3 frente às Tabelas 6-8, HumanEval tem 164 ou 163 casos e CE(%) da Tabela 11 parece incompatível com o denominador.",
+      "localizador": "p. 7 (Seção 4.3; Tabela 3); p. 13-16 (Apêndices B, C, F; Tabelas 5-8 e 11)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção Limitations discute que compilação não garante execução correta nem segura e recomenda testes e revisão manual; o estudo também discute variância de Pass@1 e casos de falha, mas não aborda validade externa (uma linguagem, poucos modelos), contaminação nem número de execuções.",
+      "localizador": "p. 7 (Seção 5.1); p. 9 (Limitations); p. 14-15 (Apêndice E)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Link de código e dados impresso (não validado), modelos, temperatura, número de entradas recuperadas e hardware informados; snapshot do GPT-3.5-Turbo e do ChatGPT, valor de k do top-k e número de execuções não informados.",
+      "localizador": "p. 2 (link); p. 12-13 (Apêndice A)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, o estudo não discute possível presença dos benchmarks no pré-treinamento dos modelos; a única menção ao conjunto de treinamento é especulação sobre um erro residual no MBPP.",
+      "localizador": "p. 16 (Seção F.5)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1.340 linhas). Páginas do PDF abertas visualmente: p. 3 (Tabela 1, Figura 2), p. 5 (Figura 4, Seções 3.3-3.4), p. 6 (Tabela 2), p. 7 (Tabela 3, Figura 5), p. 8 (Figura 6), p. 9 (Conclusion, Limitations), p. 13 (Apêndices A-D), p. 14 (Tabelas 4-6), p. 15 (Tabelas 7-10), p. 16 (Tabelas 11-12), p. 17 (Tabelas 13-14, Apêndice G.1). O PDF não tem numeração impressa; as páginas citadas são posições no arquivo.",
+    "paginas_abertas": [
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      13,
+      14,
+      15,
+      16,
+      17
+    ]
+  }
+}

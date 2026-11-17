@@ -1,0 +1,292 @@
+{
+  "estudo_id": "S1695",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Tree of Thoughts (ToT) prompting",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "localizador": "Seção III (Design of ToT Prompting), p. 3 do PDF; Seção III.A e Fig. 2, p. 3-4 do PDF (sem paginação impressa)",
+        "observacao": "O prompt efetivamente descrito tem três etapas em uma única mensagem: analisar a tarefa (raciocinio), planejar os passos de código dividindo o problema em subproblemas (decomposicao) e gerar código Python 3 em formato Markdown (restricoes de formato), com instruções explícitas (instrucao). A ilustração com Fibonacci (Fig. 2) descreve geração e avaliação de múltiplas hipóteses e seleção do melhor ramo pelo próprio LLM, mas o texto não informa que isso ocorra por chamadas separadas, busca em árvore ou votação; por isso amostragem não foi atribuída. A Fig. 1 traz rótulos como ToT controler, Memory, Verification module e corrective Guidelines, que não são descritos no texto. Não há condição contrafactual executada (sem ToT, por exemplo zero-shot) no estudo: a comparação é com números de Ouyang et al. [3]; por isso avaliada_isoladamente = nao."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature (0, 1, 2) — RQ2",
+        "natureza": "decodificacao",
+        "localizador": "Seção V, p. 6 do PDF; Seção VI.D e Tabela V, p. 7 do PDF"
+      },
+      {
+        "nome_original": "n = 5 candidatos em uma única requisição (R1) versus cinco requisições separadas (R2) — RQ3",
+        "natureza": "decodificacao",
+        "localizador": "Seção V, p. 6 do PDF; Seção VI.E e Tabela VI, p. 8 do PDF"
+      }
+    ],
+    "modelos": [
+      "gpt-3.5-turbo (GPT-3.5 Turbo, via API da OpenAI/ChatGPT; versão datada do snapshot nao_informado). O texto menciona gpt-4 como alvo escolhido, mas não apresenta resultados com gpt-4 (p. 5-6 do PDF)."
+    ],
+    "benchmarks": [
+      "CodeContests (conjunto de teste; quantidade de problemas nao_informado: a Tabela I imprime 80.43 em Number of Problems, valor não inteiro e idêntico à média de casos de teste do APPS; p. 4 do PDF)",
+      "APPS (500 problemas amostrados aleatoriamente do conjunto de teste de 5.000; p. 5 do PDF; Tabela I, p. 4)",
+      "HumanEval (164 problemas; p. 5 do PDF; Tabela I, p. 4)",
+      "Total impresso no resumo: 829 problemas de geração de código (p. 1 do PDF)"
+    ],
+    "metricas": [
+      "Test pass rate (Mean, Mean Variance, Diff max., Ratio of worst cases)",
+      "Output Equivalence Rate (OER) e OER (no ex.), média e razão de piores casos",
+      "LCS (longest common subsequence normalizada) — média e pior valor",
+      "LED (Levenshtein edit distance) — média e pior valor",
+      "UnitedDiff e TreeDiff (similaridade estrutural por AST, ferramenta pycode_similar) — média e pior valor"
+    ],
+    "linguagens": ["Python (Python 3)"],
+    "riscos": [
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Variabilidade do código gerado pelo LLM para entradas idênticas, apontada como obstáculo à pesquisa reprodutível; o estudo indica que o ToT não mitiga plenamente essa variabilidade no HumanEval (69% de piores casos).",
+        "localizador": "Resumo, p. 1 do PDF; Seção VI.A e Tabela II, p. 6 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código gerado de modo não determinístico pode conter erros, inconsistências ou ineficiências; temperatura 2 reduz drasticamente a taxa de aprovação nos testes (Tabela V, APPS).",
+        "localizador": "Seção I, p. 1 do PDF; Seção VI.D, p. 7-8 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso do prompting Tree of Thoughts (prompt em três etapas) para reduzir o não determinismo; o efeito é contrastado apenas com números de outro artigo (Ouyang et al. [3]), sem condição sem ToT executada no estudo.",
+        "avaliada": "nao",
+        "localizador": "Resumo, p. 1 do PDF; Seção VI.A, p. 6 do PDF"
+      },
+      {
+        "descricao": "Temperatura 0 em vez da padrão (1) para reduzir variabilidade; medida contra temperaturas 1 e 2 apenas no APPS (fora do escopo de prompting: decodificação).",
+        "avaliada": "sim",
+        "localizador": "Seção VI.D e Tabela V, p. 7-8 do PDF"
+      },
+      {
+        "descricao": "Execução sequencial dos testes com scripts monothread para evitar problemas de concorrência e limite de tempo de 9 segundos por problema (procedimento de controle, sem comparação).",
+        "avaliada": "nao",
+        "localizador": "Seção III (Test Case Execution), p. 3 do PDF"
+      }
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Contraste apenas com números de outro artigo: o estudo compara as razões de piores casos (4.32%, 9%, 69%) com 72.73% e 60.40% (CodeContests, APPS) e 65.85% (HumanEval) reportados por Ouyang et al. [3]; nenhuma condição sem ToT foi executada, e não se informa se os subconjuntos de problemas, a definição de pior caso e o modelo coincidem.",
+        "localizador": "Seção VI.A, p. 6 do PDF"
+      },
+      {
+        "descricao": "Narrativa contradiz o número: para o HumanEval o texto fala em redução menos pronunciada da variabilidade semântica 'from 65.85% to 69%', o que é aumento do valor impresso; o resumo também descreve 69% como redução menos pronunciada.",
+        "localizador": "Resumo, p. 1 do PDF; Seção VI.A, p. 6 do PDF"
+      },
+      {
+        "descricao": "Definição de 'Ratio of worst cases' divergente entre seções: na Seção IV.C é a razão de problemas com diff max da taxa de aprovação igual a 1 ou OER igual a 0; na Seção VI.A os mesmos valores (4.32%, 9%, 69%) são descritos como tarefas sem nenhuma saída de teste idêntica entre as cinco requisições.",
+        "localizador": "Seção IV.C, p. 5 do PDF; Seção VI.A e Tabela II, p. 6 do PDF"
+      },
+      {
+        "descricao": "Inconsistência interna na Tabela II (observação própria): Diff max. = 0.00 nos três benchmarks, descrito como a diferença máxima entre todos os problemas, é incompatível com razões de piores casos da taxa de aprovação de 4.32%, 9% e 69% (definidas por diff max igual a 1) e com variâncias médias positivas. Além disso, as variâncias médias impressas (1.57, 6.40, 7.60) excedem o máximo possível para cinco valores em [0, 1] se a escala for a mesma da média; a unidade não é informada.",
+        "localizador": "Tabela II, p. 6 do PDF; Seção IV.C, p. 5 do PDF"
+      },
+      {
+        "descricao": "Inconsistência de contagem: a Tabela I imprime 80.43 como número de problemas do CodeContests (valor não inteiro e igual à média de casos de teste do APPS); o resumo imprime 829 problemas no total. A quantidade de problemas do CodeContests foi registrada como nao_informado, sem cálculo substituto.",
+        "localizador": "Tabela I, p. 4 do PDF; Resumo, p. 1 do PDF"
+      },
+      {
+        "descricao": "O mesmo cenário (APPS, temperatura 1, cinco requisições) aparece com valores diferentes entre tabelas: OER (no ex.) média 0.49 na Tabela II e 0.50 nas Tabelas V e VI; Diff max. 0.00 na Tabela II e Max Diff 1.00 na Tabela V; razão de piores casos 9% na Tabela II e 0.09 na Tabela VI (R2), mas 0.43 na Tabela V (temperatura 1).",
+        "localizador": "Tabela II, p. 6 do PDF; Tabela V, p. 7 do PDF; Tabela VI, p. 8 do PDF"
+      },
+      {
+        "descricao": "Combinações implausíveis de LCS e LED (observação própria): LED médio e pior igual a 0.00 (sem edições) com LCS de 0.96 no CodeContests (Tabela III) e LCS de 0.05 com LED 0.00 na temperatura 2 (Tabela V). Nas Tabelas III e IV a média é idêntica ao pior valor em todos os benchmarks.",
+        "localizador": "Tabela III, p. 6 do PDF; Tabela IV e Tabela V, p. 7 do PDF"
+      },
+      {
+        "descricao": "Na Tabela V, Max Diff = 1.00 em todas as temperaturas, mas a razão de piores casos é 0.00 na temperatura 2; e OER com pior valor 0.00 convive com razão de piores casos 0.00 (Tabelas V e VI, R2), o que conflita com a definição de pior caso (OER igual a 0) (observação própria).",
+        "localizador": "Tabela V, p. 7 do PDF; Tabela VI, p. 8 do PDF; Seção IV.C, p. 5 do PDF"
+      },
+      {
+        "descricao": "Narrativa da RQ3 contraditória: o texto afirma que os cinco candidatos de uma única requisição (R1) têm similaridades muito semelhantes às de R2, mas a Tabela VI mostra LCS 0.15 (R1) versus 0.98 (R2) e a interpretação seguinte descreve melhoria dramática em R2; a conclusão fala em taxas de aprovação significativamente melhores com 0.17 versus 0.18, sem teste estatístico.",
+        "localizador": "Seção VI.E e Tabela VI, p. 8-9 do PDF"
+      },
+      {
+        "descricao": "Divergência sobre a RQ de temperatura: a Seção V diz que a influência da temperatura é examinada na RQ3, mas a temperatura é a RQ2 na Seção IV.A e na Seção VI.D.",
+        "localizador": "Seção IV.A, p. 4 do PDF; Seção V, p. 6 do PDF; Seção VI.D, p. 7 do PDF"
+      },
+      {
+        "descricao": "Limitação: por restrição financeira (300 $), os resultados de temperatura (RQ2) e a RQ3 são apresentados apenas para o APPS; um único modelo (gpt-3.5-turbo) foi avaliado.",
+        "localizador": "Seção VI.D, p. 7 do PDF; Seção VI.E, p. 8 do PDF"
+      },
+      {
+        "descricao": "Taxas médias de aprovação baixas no CodeContests (0.14) e no APPS (0.18) contrastam com 0.80 no HumanEval; a estabilidade relatada não implica correção funcional.",
+        "localizador": "Tabela II, p. 6 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Procedimento: cinco chamadas sucessivas à API com o mesmo prompt ToT, tomando a primeira resposta de cada; o código extraído é compilado sem modificação; similaridade sintática e estrutural calculada entre o primeiro candidato e os outros quatro.",
+        "localizador": "Seção III, p. 3 do PDF; Seção IV.C, p. 5 do PDF; Seção V, p. 6 do PDF"
+      },
+      {
+        "descricao": "Parâmetros da API: temperature = 1 (padrão) exceto na RQ2; top_p = 1; n = 5 apenas na RQ3; role user com o prompt em content.",
+        "localizador": "Seção V, p. 6 do PDF"
+      },
+      {
+        "descricao": "As ablações de temperatura (RQ2) e de modo de requisição (RQ3) não são de prompting e foram registradas em componentes_fora_escopo; o texto completo do prompt usado não é reproduzido, apenas o esquema de três etapas. Não foi encontrado link para pacote de replicação.",
+        "localizador": "Seção III, p. 3 do PDF; Seções VI.D e VI.E, p. 7-8 do PDF"
+      },
+      {
+        "descricao": "O prompt zero-shot é mencionado como método padrão de avaliação em trabalhos anteriores [20], mas não foi executado como condição neste estudo.",
+        "localizador": "Seção II.C, p. 2 do PDF; Seção III, p. 3 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper showcases the Tree of Thoughts (ToT) prompting strategy as a promising alternative for improving the predictability and quality of code generation results.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Our experiments on GPT-3.5 Turbo model using 829 code generation problems from benchmarks such as CodeContests, APPS (Automated Programming Progress Standard) and HumanEval demonstrate a substantial reduction in non-determinism compared to previous findings.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Nevertheless, we show that the reduction in semantic variability was less pronounced for HumanEval (69%), indicating unique challenges present in this dataset that are not fully mitigated by ToT.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "Non-deterministically generated code may contain errors, inconsistencies, or inefficiencies, limiting its practical utility [6].",
+        "localizador": "Seção I, p. 1 do PDF"
+      },
+      {
+        "trecho": "Unlike the standard methods of evaluating code generation by LLMs [20], where a simple zero-shot prompt is used, our ToT approach involves creating structured prompts in multiple steps to guide the LLM in generating correct and deterministic code.",
+        "localizador": "Seção III (Design of ToT Prompting), p. 3 do PDF"
+      },
+      {
+        "trecho": "Step 2: Plan the coding steps in Python (breaking down the problem into sub-problems).",
+        "localizador": "Seção III (Design of ToT Prompting), p. 3 do PDF"
+      },
+      {
+        "trecho": "Step 3: Generate Python 3 code in Markdown format.",
+        "localizador": "Seção III (Design of ToT Prompting), p. 3 do PDF"
+      },
+      {
+        "trecho": "To enable ChatGPT to produce five distinct predictions from the same prompt, we perform five successive API calls.",
+        "localizador": "Seção III, p. 3 do PDF"
+      },
+      {
+        "trecho": "To ensure that test cases are executed sequentially and to prevent concurrency issues that could arise from simultaneous executions, we use scripts called monothread (instructions are executed in the order they are written).",
+        "localizador": "Seção III (Test Case Execution), p. 3 do PDF"
+      },
+      {
+        "trecho": "For each node, the LLM generates multiple hypotheses or potential solutions.",
+        "localizador": "Seção III.A, item 3, p. 4 do PDF"
+      },
+      {
+        "trecho": "The original test set contains 5,000 problems, and we randomly sample 500 problems.",
+        "localizador": "Seção IV.B, p. 5 do PDF"
+      },
+      {
+        "trecho": "In our study, we examine the influence of temperature in RQ3 with three temperature values: 0, 1, and 2.",
+        "localizador": "Seção V, p. 6 do PDF"
+      },
+      {
+        "trecho": "These results show a drastic reduction in semantic variability for the CodeContests and APPS datasets compared to the results of Ouyang and al. [3] which show percentages of 72.73%; 60.40% for the same datasets.",
+        "localizador": "Seção VI.A, p. 6 do PDF"
+      },
+      {
+        "trecho": "For HumanEval, the reduction in semantic variability is less pronounced (from 65.85% to 69%), which may indicate that the tasks in this dataset present unique challenges that are not fully mitigated by TOT.",
+        "localizador": "Seção VI.A, p. 6 do PDF"
+      },
+      {
+        "trecho": "Due to the limited financial resources (300 $) available for this work, we only present the results for the APPS dataset, with which we were able to experiment with all temperature values.",
+        "localizador": "Seção VI.D, p. 7 do PDF"
+      },
+      {
+        "trecho": "A temperature of 0 promotes accuracy, similarity, and determinism, while a temperature of 2 leads to excessive creativity that hinders the quality and similarity of the generated code.",
+        "localizador": "Seção VI.D (RQ 2 answer), p. 8 do PDF"
+      },
+      {
+        "trecho": "Nevertheless, our observation indicates that the top five candidate codes from a single request (R1) have very similar similarities to the top five candidates from multiple requests (R2).",
+        "localizador": "Seção VI.E, p. 8 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Tree of Thoughts (ToT) prompting",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+      "comparador": null,
+      "modelo": "gpt-3.5-turbo",
+      "benchmark": "CodeContests",
+      "metrica": "Test pass rate — Mean",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": null,
+        "intervencao": 0.14
+      },
+      "denominador": "nao_informado (Tabela I imprime 80.43 como número de problemas do CodeContests, valor incompatível com contagem)",
+      "condicoes": "Estudo sem comparador executado: baseline = null; o contraste com Ouyang et al. [3] está em heterogeneidade. Temperatura 1 (padrão), top_p = 1, cinco requisições separadas com o mesmo prompt ToT, primeira resposta de cada; Python; limite de 9 s por problema. Média sobre os problemas da taxa de aprovação dos cinco candidatos. Conferido visualmente na Tabela II (p. 6 do PDF): cabeçalho Test pass rate / Mean, coluna CodeContests. As variâncias e o Diff max. da mesma tabela têm inconsistências registradas em heterogeneidade.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O estudo não declara um único resultado principal com métrica única (relata similaridade semântica, sintática e estrutural com várias métricas). A Tabela I é descritiva; a Tabela II é a primeira com resultados; primeira métrica (Test pass rate, Mean), único modelo, primeira condição (CodeContests), sem agregado impresso entre benchmarks. Há uma única técnica focal e uma única tarefa, sem necessidade de cobertura.",
+      "localizador": "Tabela II, p. 6 do PDF (sem paginação impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Test pass rate Mean 0.14 0.18 0.80",
+          "localizador": "Tabela II (linha Test pass rate / Mean; colunas CodeContests, APPS, HumanEval), p. 6 do PDF"
+        },
+        {
+          "trecho": "We also report the average value, which represents the average correctness of the generated code.",
+          "localizador": "Seção VI.A, p. 6 do PDF"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo (avaliar o ToT para mitigar o não determinismo na geração de código) e três questões de pesquisa com subquestões são explicitados.",
+      "localizador": "Seção I, p. 1 do PDF; Seção IV.A, p. 4 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve o fluxo (cinco chamadas, extração, execução de testes, métricas) e os parâmetros, mas o prompt ToT só aparece como esquema de três etapas; componentes da Fig. 1 (controlador, memória, módulo de verificação) não são explicados; a contagem do CodeContests é inconsistente e a RQ de temperatura é referida de modo divergente.",
+      "localizador": "Seção III, p. 3 do PDF; Fig. 1, p. 3; Tabela I, p. 4; Seção V, p. 6 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "nao_atende",
+      "justificativa": "Nenhuma condição sem ToT (por exemplo, zero-shot) foi executada; o efeito atribuído ao ToT baseia-se em números de outro artigo (Ouyang et al. [3]), sem garantia de mesmos problemas, modelo ou definição de métricas.",
+      "localizador": "Seção VI.A, p. 6 do PDF; Seção III, p. 3 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são nomeadas e há fórmulas para LCS e LED, mas a definição de pior caso diverge entre seções e as tabelas apresentam valores internamente incompatíveis (Diff max. 0.00 com piores casos positivos, variâncias acima de 1, LED 0.00 com LCS menor que 1).",
+      "localizador": "Seção IV.C, p. 5 do PDF; Tabelas II e III, p. 6; Tabelas IV e V, p. 7 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças à validade; o texto só reconhece a restrição financeira que limitou a RQ2 ao APPS e a menor eficácia no HumanEval, sem discutir ausência de linha de base, modelo único ou validade das métricas.",
+      "localizador": "Seção VI.A, p. 6 do PDF; Seção VI.D, p. 7 do PDF; Seção VII, p. 9 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelo (gpt-3.5-turbo), temperatura, top_p, n e limite de tempo, mas não informa versão datada do modelo, texto integral do prompt, identificadores ou semente da amostra de 500 problemas do APPS, nem pacote de replicação.",
+      "localizador": "Seção III, p. 3 do PDF; Seção IV.B, p. 5 do PDF; Seção V, p. 6 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há discussão sobre possível presença dos benchmarks (CodeContests, APPS, HumanEval) nos dados de treinamento do modelo avaliado.",
+      "localizador": "Texto completo, p. 1-9 do PDF"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente; páginas do PDF abertas visualmente: 1 a 9 (incluindo Tabela I na p. 4, Tabelas II e III na p. 6, Tabelas IV e V na p. 7, Tabela VI na p. 8 e Figs. 1-2 nas p. 3-4)"
+}

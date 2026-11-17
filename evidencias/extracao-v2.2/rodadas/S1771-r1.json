@@ -1,0 +1,173 @@
+{
+  "estudo": "S1771",
+  "texto_fonte": "fontes/textos/lote/S1771.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Request to ChatGPT (two questions followed by the buggy code, without docstrings or comments)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III, PDF p. 2 (impressa 296), Fig. 1; Tabela I, PDF p. 3 (impressa 297)",
+        "observacao": "Prompt base do estudo: as perguntas 'Is there a bug in this program? If there exist a bug, how can we fix it?' (instrucao), uma linha em branco e o código com defeito do QuixBugs sem docstrings e comentários (código fornecido como insumo → contexto). É a condição principal avaliada pelo estudo (avaliação do ChatGPT), mas o objeto declarado é o modelo, não o prompt; na Tabela I ela é comparada com Codex [1] e Standard APR [3], resultados de outros artigos e de outros sistemas, o que não constitui contraste de prompting. Funciona como linha de base de prompting da condição com dica (seção IV.C). As quatro requisições independentes por problema, com critério 'pelo menos uma correta', foram tratadas como parâmetro da métrica de avaliação, não como mecanismo de amostragem da técnica, porque o estudo as apresenta como forma de avaliar a capacidade do modelo."
+      },
+      {
+        "nome_original": "Follow-up Request for ChatGPT (hint with specific and detailed bug descriptions / additional information, without deleting the docstring)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção IV.C e Tabela II, PDF p. 5 (impressa 299); seção V, PDF p. 5",
+        "observacao": "A requisição com dica acrescenta descrições específicas e detalhadas do defeito e mantém a docstring do programa (ambos insumos informativos → contexto). Foi aplicada somente aos problemas não resolvidos na rodada base (15 linhas na Tabela II), depois da rodada base; o total 30/40 é cumulativo (25 da rodada base + 5 resolvidos com a dica), sem condição com a dica sobre os 40 problemas. Além disso, a condição difere do prompt base em mais de um ingrediente (docstring mantida, descrição do defeito e, possivelmente, contexto da conversa anterior, pois o texto fala em 'follow-up request' e em 'conversations', mas também em informação dada 'at the time of request'). O texto do prompt com dica não é mostrado; não se afirma que as perguntas do prompt base foram mantidas, embora seja provável pela descrição. A dica não deriva de execução, testes ou compilador, por isso não foi classificada como feedback."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Codex [1]",
+        "natureza": "outro",
+        "descricao": "Outro modelo de linguagem (Codex), com resultados no QuixBugs retirados de artigos anteriores ([1], [2]); prompt, número de execuções e critério de correção não são descritos neste artigo. Comparação entre modelos/sistemas, não entre técnicas de prompting.",
+        "localizador": "Seção III, PDF p. 2 (impressa 296); Tabela I, PDF p. 3 (impressa 297)"
+      },
+      {
+        "nome_original": "Standard APR [3]",
+        "natureza": "outro",
+        "descricao": "Abordagens padrão de reparo automático de programas (não baseadas em LLM), com resultados retirados da literatura ([3] no cabeçalho da Tabela I; a seção III remete a [2]). Não é prompting.",
+        "localizador": "Seção III, PDF p. 2 (impressa 296); Tabela I e seção IV.A, PDF p. 3 (impressa 297)"
+      },
+      {
+        "nome_original": "Default parameters of the ChatGPT API",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros do ChatGPT mantidos nos valores padrão; os autores dizem não ter modificado parâmetros diretamente. Valores não informados.",
+        "localizador": "Seção IV, PDF p. 3 (impressa 297)"
+      }
+    ],
+    "modelos": [
+      {"nome": "ChatGPT (GPT-3.5)", "versao": "nao_informado (snapshot não informado; experimento conduzido nas versões do ChatGPT de 15 de maio a 10 de junho de 2023)", "observacao": "Parâmetros padrão da API do ChatGPT, segundo os autores; valores não informados."},
+      {"nome": "Codex", "versao": "nao_informado", "observacao": "Resultados retirados de [1], [2]; não executado pelos autores."}
+    ],
+    "benchmarks": [
+      {"nome": "QuixBugs (Python)", "quantidade": "40 programas com defeito (defeitos de uma linha em algoritmos clássicos)", "observacao": "Docstrings e comentários removidos antes de enviar o código ao ChatGPT na rodada base. Denominador da Tabela I: 40 problemas. A condição com dica (Tabela II) cobre apenas os 15 problemas não resolvidos na rodada base; o texto da seção IV.C diz '5 out of 15' e o parágrafo final da seção diz '5 out of 10' (ver heterogeneidade).", "localizador": "Seção III, PDF p. 2 (impressa 296); Tabela I, PDF p. 3; Tabela II, PDF p. 5"}
+    ],
+    "metricas": [
+      {"nome": "Σ (Solved) / bugs fixed out of 40", "descricao": "Número de problemas marcados V: pelo menos uma das quatro execuções correta, segundo julgamento manual da saída (comparação com o programa correto do QuixBugs ou 'simple programming logic'); só patches que localizam e corrigem o defeito introduzido contam; reimplementações completas e correções que introduzem novos erros não contam. Para Codex e Standard APR, os valores vêm de outros artigos com critério não descrito aqui.", "localizador": "Seção IV.A e Tabela I, PDF p. 3 (impressa 297)"},
+      {"nome": "Execuções corretas por problema (x / 4)", "descricao": "Número de execuções corretas entre as quatro requisições independentes, impresso entre parênteses na coluna ChatGPT da Tabela I.", "localizador": "Tabela I, PDF p. 3 (impressa 297)"},
+      {"nome": "Response type (True, True-False, False)", "descricao": "Categorias qualitativas de resposta (detecta e corrige; detecta e não corrige; não detecta nem corrige), ilustradas nas Figs. 3 a 5; o estudo não informa a contagem de respostas por categoria.", "localizador": "Seção IV.B, PDF p. 4–5 (impressas 298–299)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "O ChatGPT pode produzir respostas plausíveis mas incorretas ou sem sentido e introduzir novos defeitos; correções que levaram a novos erros não foram consideradas corretas.", "localizador": "Seção V, PDF p. 5 (impressa 299); seção IV.A, PDF p. 3 (impressa 297)"},
+      {"categoria": "correcao_funcional", "descricao": "Respostas do tipo True-False: o modelo detecta o defeito, mas não produz correção válida (exemplo da Fig. 4).", "localizador": "Seção IV.B, PDF p. 5 (impressa 299); Fig. 4, PDF p. 4 (impressa 298)"},
+      {"categoria": "alucinacao", "descricao": "Respostas do tipo False em que o modelo contradiz os fatos ou responde algo sem relação com a pergunta, por exemplo afirmando que não há defeito (Fig. 5).", "localizador": "Seção IV.B, PDF p. 5 (impressa 299); Fig. 5, PDF p. 4 (impressa 298)"},
+      {"categoria": "seguranca", "descricao": "Os autores mencionam que as respostas podem introduzir vulnerabilidades no código; não há avaliação de segurança no estudo.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+      {"categoria": "nao_determinismo", "descricao": "Variância relativamente alta entre execuções ('relatively high variance in terms of problem fixes') e sensibilidade a variações de formulação ou a prompts repetidos, que pode afetar consistência e reprodutibilidade.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297); seção V, PDF p. 5 (impressa 299)"},
+      {"categoria": "manutenibilidade", "descricao": "Verbosidade excessiva e repetição de certas frases podem reduzir legibilidade e manutenibilidade, introduzindo complexidade e redundância desnecessárias.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+      {"categoria": "contaminacao", "descricao": "Para alguns problemas o ChatGPT propôs reimplementação completa; os autores consideram que ele provavelmente apenas repete o que já aprendeu e não contam essas respostas como correção. O estudo não afirma nem verifica contaminação do QuixBugs no pré-treinamento.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"categoria": "outro", "descricao": "Limitação de generalização: o QuixBugs só contém defeitos de uma linha em algoritmos clássicos e pode não refletir a diversidade e a complexidade de programas Python reais.", "localizador": "Seção V, PDF p. 5 (impressa 299)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Quatro requisições independentes por problema, com registro do número de execuções corretas; os autores afirmam que repetir a requisição é benéfico ao usuário, sem comparação formal com execução única.", "avaliada": "nao", "localizador": "Seção III, PDF p. 2 (impressa 296); seção IV.A e Tabela I, PDF p. 3 (impressa 297)"},
+      {"descricao": "Avaliação estrita: só patches que identificam e corrigem o defeito introduzido contam; reimplementações completas (possível repetição de conteúdo aprendido) e correções que introduzem novos erros não contam.", "avaliada": "nao", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"descricao": "Verificação manual das respostas do ChatGPT quanto à acurácia; executor e procedimento de verificação não detalhados.", "avaliada": "nao", "localizador": "Seção III, PDF p. 2 (impressa 296)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "O resumo afirma que o GPT-3.5 corrigiu com acurácia 30 de 40 defeitos sem indicar que esse total inclui a rodada com dicas; na Tabela I, a rodada base resolve 25 de 40. O resumo também diz que o ChatGPT superou Codex e APR padrão 'significantly', sem teste estatístico relatado.", "localizador": "Resumo, PDF p. 1 (impressa 295); Tabela I, PDF p. 3 (impressa 297); seção V, PDF p. 5 (impressa 299)"},
+      {"descricao": "Denominador da condição com dica divergente: a seção IV.C diz '5 out of 15 problems' e o parágrafo seguinte diz '5 out of 10 problems that were previously unsolvable'. A Tabela II lista 15 problemas (5 marcados V e 10 marcados X, contagem própria na imagem) e a linha Σ (Solved) traz '10 (5)', notação não explicada. A Tabela I tem 15 problemas com X na coluna ChatGPT (contagem própria).", "localizador": "Seção IV.C e Tabela II, PDF p. 5 (impressa 299); Tabela I, PDF p. 3 (impressa 297)"},
+      {"descricao": "Narrativa contradiz a tabela: o texto diz que só BUCKETSORT, 'SHORTHEST-PATH' e IS-VALID-PARENTHESIZATION exigiram 4 execuções para achar a correção, mas a Tabela I registra x/4 como execuções corretas e mostra 4/4 para bucketsort, is-valid-parenthesization, rpn-eval e shortest-paths; 'shorthest-path' não é linha da tabela (shortest-path-length e shortest-path-lengths têm 0/4) e rpn-eval não é citado.", "localizador": "Seção IV.A e Tabela I, PDF p. 3 (impressa 297)"},
+      {"descricao": "A legenda define (X) como 'no answer was given in any of the runs', enquanto o critério dos problemas resolvidos é a correção da resposta; as Figs. 4 e 5 mostram respostas dadas e incorretas. Aparente inconsistência na definição do X.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297); Figs. 4–5, PDF p. 4 (impressa 298)"},
+      {"descricao": "Aparente inconsistência no número de requisições: a seção III relata quatro requisições independentes por problema e a seção IV.C uma requisição de seguimento com dica, mas a seção IV.A afirma 'only a single request was sent to ChatGPT'. O artigo não esclarece se a frase se refere a uma única interação por conversa.", "localizador": "Seção III, PDF p. 2 (impressa 296); seção IV.A, PDF p. 3 (impressa 297); seção IV.C, PDF p. 5 (impressa 299)"},
+      {"descricao": "Redação das perguntas diverge entre texto e figura: o texto cita 'If there is a bug, how can it be fixed?' e a Fig. 1 (e a Fig. 2) mostra 'If there exist a bug, how can we fix it?'.", "localizador": "Seção III e Fig. 1, PDF p. 2 (impressa 296); Fig. 2, PDF p. 4 (impressa 298)"},
+      {"descricao": "Comparadores da Tabela I não foram executados pelos autores: a seção III diz que os resultados de APR vêm de [2] e os de Codex de [1], [2], enquanto o cabeçalho da Tabela I e a seção IV.A atribuem o APR padrão a [3]. Critério de correção, número de execuções e prompt desses comparadores não são descritos; a comparação ChatGPT × Codex × APR mistura modelos, sistemas e procedimentos.", "localizador": "Seção III, PDF p. 2 (impressa 296); Tabela I e seção IV.A, PDF p. 3 (impressa 297)"},
+      {"descricao": "Para o APR padrão, o texto informa 16 problemas resolvidos quando se usa só a suíte de testes considerada na avaliação, e 7 quando se exige generalização a entradas não vistas; a Tabela I usa 7. O critério aplicado ao ChatGPT (julgamento manual) é diferente.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"descricao": "O total de 30/40 com dicas é cumulativo: a dica foi aplicada só aos problemas não resolvidos na rodada base, o número de execuções na condição com dica não é informado e a condição também mantém a docstring removida na rodada base.", "localizador": "Seção IV.C e Tabela II, PDF p. 5 (impressa 299); seção III, PDF p. 2 (impressa 296)"},
+      {"descricao": "As categorias de resposta (True, True-False, False) são definidas e ilustradas, mas o estudo não relata quantas respostas caem em cada categoria.", "localizador": "Seção IV.B, PDF p. 4–5 (impressas 298–299)"},
+      {"descricao": "Os autores dizem usar os parâmetros padrão da API do ChatGPT, mas não descrevem a interface de acesso; a resposta reproduzida na Fig. 3 contém a sequência 'python Copy code'. A conclusão menciona 'vulnerability detection', que não foi avaliada.", "localizador": "Seção IV, PDF p. 3 (impressa 297); Fig. 3, PDF p. 4 (impressa 298); seção V, PDF p. 5 (impressa 299)"}
+    ],
+    "observacoes": [
+      {"descricao": "Conferência própria na imagem da Tabela I: as marcações V somam 25 (ChatGPT), 21 (Codex) e 7 (Standard APR), coincidentes com a linha Σ (Solved).", "localizador": "Tabela I, PDF p. 3 (impressa 297)"},
+      {"descricao": "Os problemas da Tabela II coincidem com os 15 problemas marcados X na coluna ChatGPT da Tabela I (contagem própria); os resolvidos com dica são bitcount, find-first-in-sorted, minimum-spanning-tree, shortest-path-lengths e to-base.", "localizador": "Tabela I, PDF p. 3; Tabela II, PDF p. 5"},
+      {"descricao": "A remoção de docstrings e comentários antes do envio ao ChatGPT é parte do procedimento base; o artigo não justifica a remoção.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"descricao": "Esforço manual: as respostas do ChatGPT foram verificadas manualmente; não se informa quem verificou, quantos avaliadores nem se houve concordância.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"descricao": "A comparação principal do resumo e da conclusão (ChatGPT × Codex × APR padrão) é entre modelos/sistemas, com resultados dos comparadores retirados de outros artigos; por isso não entra em extracoes como contraste de prompting.", "localizador": "Resumo, PDF p. 1; Tabela I, PDF p. 3; seção V, PDF p. 5"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper evaluates the effectiveness of GPT-3.5 in automatically fixing bugs in Python code using QuixBugs.", "localizador": "Resumo, PDF p. 1 (impressa 295)"},
+      {"trecho": "Through testing with 40 different Python bugs, We discovered that GPT-3.5 was able to accurately fix 30 out of 40 bugs cases from QuixBugs benchmark.", "localizador": "Resumo, PDF p. 1 (impressa 295)"},
+      {"trecho": "This benchmark contains docstring and comments of the representative of the algorithm, but all of the docstring and comments will be removed first before ask to ChatGPT and evaluate the quality of the patches generated by the ChatGPT with the correct versions provided by QuixBug.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "ChatGPT is asked to debug Python code that has no docstrings or comments.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "This is done for each problem in the benchmark, and ChatGPT's answers are manually verified for accuracy.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "The same format is followed for every query: the questions are written first, followed by a blank line, and then the code with errors.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "Four independent requests were made to ChatGPT for each programming problem with errors or bugs to assess its ability to solve them.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "These methods have been tested on QuixBugs and the results published in [2].", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "The results of the large-scale language model Codex were taken from a recent paper [1],[2].", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "The experiment was conducted on ChatGPT versions from May 15, 2023, to June 10, 2023.", "localizador": "Seção III, PDF p. 2 (impressa 296)"},
+      {"trecho": "In the research, ChatGPT's parameters were set to the default values from the ChatGPT API [31].", "localizador": "Seção IV, PDF p. 3 (impressa 297)"},
+      {"trecho": "For the results that were obtained through experimenting with ChatGPT, we mark a (V) indicating that at least one of the four runs was correct and we mark an (X) indicating that no answer was given in any of the runs.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "Overall, in this experiment ChatGPT managed to find and fix bugs for 25 benchmark problems, 21 by Codex and only 7 by Standard APR.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "Only for the BUCKETSORT and SHORTHEST-PATH and IS-VALID-PARENTHESIZATION problems did ChatGPT need 4 runs to find a bug fix.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "Therefore, it appears that ChatGPT has a relatively high variance in terms of problem fixes.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "Only patches that identified and corrected the bug introduced by QuixBugs were considered correct.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "ChatGPT is likely just repeating what it has already learned.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "Additionally, a bug was not considered fixed if additional changes made in response to ChatGPT's suggestions resulted in brand-new errors that hindered the program's functionality.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "In this evaluation, only a single request was sent to ChatGPT, which means that the full potential of the dialogue system was not used.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"},
+      {"trecho": "For example, in Figure 5 where the input is a question about the longest common subsequence problem, ChatGPT generates an answer that contradicts the facts or has nothing to do with the question, in this response it cannot detect the bug or acknowledge that there is no bug in the program.", "localizador": "Seção IV.B, PDF p. 5 (impressa 299)"},
+      {"trecho": "By providing specific and detailed bug descriptions as hints, the effectiveness of ChatGPT in automated program repair is significantly enhanced.", "localizador": "Seção IV.C, PDF p. 5 (impressa 299)"},
+      {"trecho": "ChatGPT's successfully resolves 5 out of 15 problems that can't be solved before without the hint makes it able to fix 30/40 bugs.", "localizador": "Seção IV.C, PDF p. 5 (impressa 299)"},
+      {"trecho": "Table 2 shows the results obtained from conversations with ChatGPT by providing additional information (without deleting the docstring) about unsolved benchmark problems.", "localizador": "Seção IV.C, PDF p. 5 (impressa 299)"},
+      {"trecho": "ChatGPT managed to solve 5 out of 10 problems that were previously unsolvable by providing additional information about bugs at the time of request.", "localizador": "Seção IV.C, PDF p. 5 (impressa 299)"},
+      {"trecho": "One of the key concerns is that ChatGPT may produce plausible-sounding but incorrect or nonsensical answers, leading to True, True-False or False in bug fixing, and even introducing new bugs or vulnerabilities in the code.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+      {"trecho": "Additionally, the model's sensitivity to variations in input phrasing or repeated prompts may impact the consistency and reproducibility of bug fixing results, potentially causing unexpected behaviors in the code.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+      {"trecho": "Moreover, ChatGPT's tendency to be excessively verbose and overuse certain phrases might reduce code readability and maintainability, potentially introducing unnecessary complexity and redundancy.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+      {"trecho": "Furthermore, the scope of QuixBugs, focusing solely on one-line defects in classic algorithms, may not adequately reflect the diversity and complexity found in real-world Python programs.", "localizador": "Seção V, PDF p. 5 (impressa 299)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Follow-up Request for ChatGPT (hint with specific and detailed bug descriptions / additional information, without deleting the docstring)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Request to ChatGPT (two questions followed by the buggy code, without docstrings or comments), sem informação específica sobre o defeito",
+      "modelo": "ChatGPT (GPT-3.5), versões de 15 de maio a 10 de junho de 2023; snapshot nao_informado",
+      "benchmark": "QuixBugs (Python), 40 problemas",
+      "metrica": "bugs fixed out of 40 (Σ (Solved): problema resolvido quando pelo menos uma das execuções é julgada correta)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 25, "intervencao": 30},
+      "denominador": "40 problemas",
+      "condicoes": "Contraste cumulativo, não efeito isolado da dica: a rodada base (25/40, Tabela I) usou quatro requisições independentes por problema, sem docstrings e comentários, com julgamento manual; a requisição com dica foi aplicada só aos 15 problemas não resolvidos (Tabela II), e os 30/40 somam os 25 da rodada base aos 5 resolvidos com dica. O valor 30 não aparece em tabela; está impresso no texto (seção IV.C, '30/40'; seção V, '30 out of 40'). A condição com dica também mantém a docstring e possivelmente o contexto da conversa; o conteúdo das dicas e o número de execuções nessa condição não são informados. O texto da seção IV.C dá dois denominadores para os problemas não resolvidos (15 e 10) e a Tabela II traz Σ '10 (5)'. Parâmetros padrão da API do ChatGPT, valores não informados. Conferido no PDF: 25 na linha Σ (Solved) da Tabela I (p-03) e 30 no texto e 5 V na Tabela II (p-05).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Único contraste de prompting do estudo; a conclusão identifica uma técnica (descrições detalhadas do defeito), uma métrica (defeitos corrigidos de 40) e um comparador (sem informação específica do defeito). A comparação com Codex e APR padrão, também destacada, é entre modelos/sistemas e não é elegível.",
+      "derivacao": "direta",
+      "localizador": "Seção V, PDF p. 5 (impressa 299); seção IV.C e Tabela II, PDF p. 5; Tabela I, linha Σ (Solved), coluna ChatGPT, PDF p. 3 (impressa 297)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "In comparison to the Codex system, which achieved a bug-fixing rate of 21 out of 40 bugs, ChatGPT surpassed it by successfully repairing 25 out of 40 bugs in the QuixBugs benchmark without any specific bug information, and further improved its performance by fixing 30 out of 40 bugs with detailed bug descriptions.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+        {"trecho": "ChatGPT's successfully resolves 5 out of 15 problems that can't be solved before without the hint makes it able to fix 30/40 bugs.", "localizador": "Seção IV.C, PDF p. 5 (impressa 299)"},
+        {"trecho": "Σ (Solved) 25 21 7", "localizador": "Tabela I, PDF p. 3 (impressa 297), última linha; colunas ChatGPT, Codex [1], Standard APR [3]"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: avaliar a eficácia do GPT-3.5/ChatGPT no reparo automático de programas Python do QuixBugs e comparar com Codex e APR padrão.", "localizador": "Resumo, PDF p. 1 (impressa 295); introdução, PDF p. 1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "O prompt base, a remoção de docstrings, as quatro requisições e o período de execução são descritos, mas o conteúdo das dicas, o número de execuções com dica, a interface usada e quem fez a verificação manual não são informados; há contradição sobre o número de requisições ('only a single request').", "localizador": "Seção III, PDF p. 2 (impressa 296); seções IV.A e IV.C, PDF p. 3 e 5"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Codex e APR padrão não foram executados pelos autores; os valores vêm de outros artigos, com critérios não descritos e referências divergentes ([2] na seção III, [3] na Tabela I). O contraste de prompting (com e sem dica) é cumulativo e restrito aos problemas não resolvidos.", "localizador": "Seção III, PDF p. 2; Tabela I, PDF p. 3; seção IV.C, PDF p. 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "A métrica de problemas resolvidos e o denominador 40 são informados e a soma da Tabela I confere, mas o critério de correção é manual e inclui 'simple programming logic'; a condição com dica tem denominadores divergentes (15 e 10) e Σ '10 (5)'; a legenda do X é inconsistente; as categorias de resposta não têm contagens.", "localizador": "Seção IV.A e Tabela I, PDF p. 3; seção IV.B–C e Tabela II, PDF p. 5"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A conclusão discute limitações (respostas incorretas, não determinismo, verbosidade, generalização limitada do QuixBugs), mas não discute ameaças da avaliação manual nem da comparação com resultados de outros artigos.", "localizador": "Seção V, PDF p. 5 (impressa 299)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Formato do prompt (Fig. 1) e período de uso informados, mas sem snapshot do modelo, valores de parâmetros, texto das dicas, respostas registradas ou disponibilização de dados.", "localizador": "Seção III e Fig. 1, PDF p. 2 (impressa 296); seção IV, PDF p. 3"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Os autores reconhecem que reimplementações completas provavelmente repetem conteúdo aprendido e não as contam como correção, mas não discutem a presença do QuixBugs (benchmark público) nos dados de treinamento do modelo.", "localizador": "Seção IV.A, PDF p. 3 (impressa 297)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (6 páginas, incluindo referências). Páginas do PDF abertas visualmente: p-02 (seção III e Fig. 1), p-03 (Tabela I) e p-05 (seção IV.C, Tabela II e conclusão)."
+  }
+}

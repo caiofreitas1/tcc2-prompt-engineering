@@ -1,0 +1,656 @@
+{
+  "estudo": "S1727",
+  "texto_fonte": "fontes/textos/lote/S1727.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "traducao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "MERIT (Multi-Signal Error Repair via Intelligent Translation)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (impressa 597), resumo e contribuições; p. 2-4 (impressas 598-600), seções III.A a III.D, Figs. 1, 2 e 7; p. 6 (impressa 602), Tabela I",
+        "observacao": "Pacote em três estágios (tradução com prompt mínimo, verificação por compilação e execução, reparo iterativo em até três rodadas). O prompt de reparo unificado (Fig. 7) contém papel e tarefa (instrucao), código-fonte e código traduzido (contexto), mensagem de erro, diff da AST e padrão de erro (feedback), conhecimento de linguagem com mapeamentos de tipos, idiomas, armadilhas (contexto) e 1-2 exemplos few-shot recuperados (exemplos), reflexão sobre causa-raiz (raciocinio, em chamada separada) e restrição de saída (restricoes). O encadeamento tradução → verificação → reflexão → reparo foi classificado como decomposicao. O comparador é o prompt de tradução direta sem reparo (BL, Tabela I); o sim vale para o pacote inteiro, não para um mecanismo. Pacote híbrido: inclui ferramentas que não são prompting (análise de AST com ast/tree-sitter contra a solução de referência do benchmark, verificação com os testes do benchmark), descritas em componentes_fora_escopo."
+      },
+      {
+        "nome_original": "Baseline (concise prompt for direct translation without repair; BL)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 (impressa 598), seção III.A e Fig. 2; p. 5 (impressa 601), seção IV.E; p. 6 (impressa 602), Tabela I, linhas BL",
+        "observacao": "Prompt mínimo com descrição de papel e tarefa de tradução (instrucao), requisito de formato de saída (restricoes) e a função-fonte (contexto). Linha de base sem reparo."
+      },
+      {
+        "nome_original": "UniTrans (reimplemented; iterative test-feedback repair with LLM-generated test cases)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 (impressa 598), seção II; p. 5 (impressa 601), seção IV.F.2; p. 6 (impressa 602), Tabela II",
+        "observacao": "Sistema comparador reimplementado pelos autores, executado só com CodeLlama-7B, com o mesmo máximo de três iterações e T = 0.2. Os prompts da reimplementação e o número de testes gerados não são descritos; mecanismos atribuídos pela descrição do estudo (geração de testes pelo LLM, tradução e reparo iterativo guiado por falhas de teste). Os mecanismos do sistema não são isolados. [D108, correção registrada] Pacote avaliado contra Baseline (Tabela II, p. 6; CodeLlama-7B, TransCoder, Py→Ja, CA: base 67,9% × comparador 70,3%), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "Signal 1: AST Structural Comparison (AST Diff)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (impressa 599), seção III.C.1 e Fig. 5; p. 7 (impressa 603), Tabelas III (linha w/o AST comparison) e IV",
+        "observacao": "Relatório de discrepâncias estruturais (contagens de funções, laços, ramos, retornos, recursão) entre a tradução e a solução de referência do benchmark na linguagem-alvo, injetado no prompt de reflexão e no de reparo. Classificado como feedback de analisador; como a condição w/o AST comparison mantém feedback (mensagem de erro, padrões de erro, reflexão), a lista de acrescentados é vazia. Isolado por ablação leave-one-out (Tabela III). A geração do relatório depende de ferramenta de análise e da solução de referência (fora do escopo)."
+      },
+      {
+        "nome_original": "Signal 2: Language Knowledge Base",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3-4 (impressas 599-600), seção III.C.2 e Fig. 6; p. 7 (impressa 603), Tabelas III (linha w/o Knowledge Base) e IV",
+        "observacao": "Mapeamentos de tipos, traduções idiomáticas e armadilhas conhecidas (contexto) e pool de exemplos few-shot por par de linguagens, do qual 1-2 exemplos são recuperados (exemplos). Contexto já existe na condição sem a base (código-fonte e traduzido), por isso só exemplos é acrescentado. O conteúdo da base e do pool de exemplos não é publicado."
+      },
+      {
+        "nome_original": "Signal 3: Error Pattern Matching",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 600), seção III.C.3; p. 7 (impressa 603), Tabelas III (linha w/o Error Pattern) e IV",
+        "observacao": "Casa palavras-chave das mensagens do compilador ou da execução com padrões e injeta sugestões direcionadas (feedback e diretrizes, instrucao). As duas categorias já existem na condição w/o Error Pattern, por isso a lista de acrescentados é vazia."
+      },
+      {
+        "nome_original": "Signal 4: LLM Self-Reflection",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (impressa 600), seção III.C.4; p. 7 (impressa 603), Tabelas III (linha w/o Self-Reflection) e IV",
+        "observacao": "Chamada de reflexão antes do reparo, com código traduzido, mensagem de erro e relatório da AST, que produz tipo de erro, análise de causa-raiz e estratégia de reparo (raciocinio, sobre feedback). Feedback e decomposicao continuam na condição w/o Self-Reflection; só raciocinio é acrescentado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "AST parsing and feature extraction (Python ast module, tree-sitter-java, tree-sitter-cpp) against the same-language reference",
+        "natureza": "outro",
+        "descricao": "Ferramenta de análise estática que extrai vetores de características estruturais e os compara com a solução de referência fornecida pelo benchmark (f_gold do TransCoder, solução canônica do HumanEval-X); só o relatório resultante entra no prompt.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "nome_original": "Verification Stage (compilation and execution with benchmark tests)",
+        "natureza": "outro",
+        "descricao": "Compilação e execução com os testes do benchmark (asserções do HumanEval-X; harness com f_gold do TransCoder) para decidir se a tradução está correta e se o reparo é acionado ou aceito; a mesma verificação define CA e EA.",
+        "localizador": "p. 2-3 (impressas 598-599), seção III.B; p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "nome_original": "Temperature T = 0.2",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura fixa para todos os modelos, também usada na reimplementação do UniTrans.",
+        "localizador": "p. 5 (impressa 601), seções IV.E e IV.F.2"
+      },
+      {
+        "nome_original": "Number of repair iterations (at most three rounds; rounds 0-5 in RQ4)",
+        "natureza": "orcamento",
+        "descricao": "Limite de rodadas de reparo (padrão 3, com uma chamada de reflexão e uma de reparo por rodada); a RQ4 compara 0 a 5 rodadas com Grok-3 (Tabela V).",
+        "localizador": "p. 4 (impressa 600), seção III.D; p. 5 (impressa 601), seção IV.F.4; p. 8 (impressa 604), Tabela V"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Claude Sonnet 4.6",
+        "versao": "claude-sonnet-4-6",
+        "observacao": "Anthropic, via API oficial."
+      },
+      {
+        "nome": "Grok-4",
+        "versao": "nao_informado",
+        "observacao": "xAI, via API oficial; snapshot não informado."
+      },
+      {
+        "nome": "Grok-3",
+        "versao": "nao_informado",
+        "observacao": "xAI, via API oficial; snapshot não informado. Usado também na RQ4 (Tabela V)."
+      },
+      {
+        "nome": "GPT-4.1",
+        "versao": "nao_informado",
+        "observacao": "OpenAI, via API oficial; snapshot não informado."
+      },
+      {
+        "nome": "CodeLlama-7B",
+        "versao": "7B, FP16, servido via Ollama 0.1.32",
+        "observacao": "Meta; executado localmente em uma NVIDIA RTX 4090. Único modelo da comparação com UniTrans e da ablação por ordem (Tabela IV)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "TransCoder (GeeksForGeeks)",
+        "versao": "nao_informado",
+        "quantidade": "377 algorithmic functions (problemas com f_gold e harness utilizáveis em Python, Java e C++)",
+        "observacao": "Subconjunto filtrado pelos autores; n = 377 por direção indicado na Tabela III."
+      },
+      {
+        "nome": "HumanEval-X",
+        "versao": "nao_informado",
+        "quantidade": "164 problems each (subconjuntos Python, Java e C++)",
+        "observacao": "Testes adaptados a cada linguagem-alvo; soluções canônicas por linguagem servem de referência para o sinal da AST. Na Tabela V, os dois benchmarks são agregados: 541 programas por direção (377 + 164) e 3246 instâncias em seis direções."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Compilation accuracy (CA)",
+        "definicao": "proporção de traduções que compilam",
+        "localizador": "p. 5 (impressa 601), seção IV.D"
+      },
+      {
+        "nome": "Execution accuracy (EA)",
+        "definicao": "proporção cujas saídas coincidem totalmente com a referência (todas as asserções passam no HumanEval-X; f_filled e f_gold concordam em todas as entradas no TransCoder)",
+        "localizador": "p. 5 (impressa 601), seção IV.D"
+      },
+      {
+        "nome": "CodeBLEU",
+        "definicao": "escore composto de n-gramas, n-gramas ponderados, AST e fluxo de dados, em [0,1]",
+        "localizador": "p. 5 (impressa 601), seção IV.D; p. 8 (impressa 604), seção IV.G.1 (só um exemplo numérico relatado)"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "observacao": "Python 3.10.12"
+      },
+      {
+        "nome": "Java",
+        "observacao": "OpenJDK 17.0.10"
+      },
+      {
+        "nome": "C++",
+        "observacao": "g++ 11.4.0 com -std=c++17"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros semânticos ocultos: traduções que compilam mas divergem em execução são a maior categoria de falhas das traduções de base (42,5%, Fig. 8, denominador não informado); o relatório da AST pode acusar falsos positivos para implementações funcionalmente equivalentes; erros que preservam as contagens estruturais só são expostos pela execução.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1; p. 6 (impressa 602), seção IV.F.5; p. 7 (impressa 603), Fig. 8"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "EA depende da qualidade e cobertura dos testes dos benchmarks; testes incompletos podem aceitar traduções funcionalmente incorretas. Similaridade textual (CodeBLEU) não implica correção funcional.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.1; p. 9 (impressa 605), seção IV.G.2 (validade de construto)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Saídas de LLM não determinísticas podem afetar a estabilidade; as APIs não oferecem semente determinística e não há intervalos de confiança de múltiplas execuções.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.2 (validade interna)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Cada rodada de reparo exige ao menos duas chamadas de API (reflexão e reparo); o estudo trata o número de rodadas como compromisso desempenho-custo. Custo não quantificado (tokens, dinheiro ou tempo não relatados).",
+        "localizador": "p. 4 (impressa 600), seção III.D; p. 6 (impressa 602), seção IV.F.4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa e escalabilidade: só Python, Java e C++ e funções algorítmicas curtas; em escala de repositório, a janela de contexto pode levar a código localmente plausível mas globalmente inconsistente, e o sinal da AST pode gerar ASTs parciais ou características imprecisas.",
+        "localizador": "p. 8-9 (impressas 604-605), seção IV.G.2 (validade externa)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "O relatório da AST só é gerado após falha na verificação e é tratado como contexto diagnóstico consultivo; a aceitação final depende de nova compilação e execução dos testes (limita falsos positivos).",
+        "avaliada": "nao",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "descricao": "Temperatura baixa fixa (T = 0.2) e pipeline uniforme de pós-processamento contra o não determinismo.",
+        "avaliada": "nao",
+        "localizador": "p. 8 (impressa 604), seção IV.G.2"
+      },
+      {
+        "descricao": "Limite de três rodadas de reparo justificado por experimentos piloto, pela análise por rodada e pelo custo em chamadas de API; a Tabela V compara rodadas, mas não mede custo.",
+        "avaliada": "nao",
+        "localizador": "p. 4 (impressa 600), seção III.D; p. 5-6 (impressas 601-602), seção IV.F.4; p. 8 (impressa 604), Tabela V"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resumo e conclusão afirmam ganhos relativos de 1.3%–13.1% em CA e 1.3%–25.7% em EA, mas a Tabela I imprime Δ% menores que 1,3 para Grok-3 no TransCoder: Py→C++ 0.5 (CA) e 0.9 (EA) e Ja→Py 1.0 (CA). Narrativa contradiz a tabela no limite inferior.",
+        "localizador": "p. 1 (impressa 597), resumo; p. 9 (impressa 605), seção V; p. 6 (impressa 602), Tabela I, linha Grok-3 Δ% (TransCoder)"
+      },
+      {
+        "descricao": "O texto da RQ1 diz que o ganho relativo médio de EA vai de 3.2–4.1% para Claude Sonnet 4.6, mas a coluna Avg EA Δ% da Tabela I imprime 4.1 (TransCoder) e 3.9 (HumanEval-X) para esse modelo; 3.2 aparece como Avg CA Δ% no TransCoder. Aparente inconsistência.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.1; p. 6 (impressa 602), Tabela I"
+      },
+      {
+        "descricao": "O texto da RQ1 diz que os ganhos por direção são maiores em Py→Ja e Py→C++ para CodeLlama-7B e GPT-4.1 ('up to 13.1% relative EA') e menores nas direções com alvo Python, cuja EA de base estaria perto de 95%. A Tabela I imprime, para CodeLlama-7B no HumanEval-X, EA Δ% de 25.7 em Ja→Py e 15.6 em C++→Ja, e 13.2 para GPT-4.1 em Py→Ja e C++→Ja no TransCoder; a EA de base do CodeLlama-7B com alvo Python é 74.5 e 71.1 (TransCoder) e 45.1 e 56.7 (HumanEval-X).",
+        "localizador": "p. 5 (impressa 601), seção IV.F.1; p. 6 (impressa 602), Tabela I"
+      },
+      {
+        "descricao": "A RQ2 afirma que a vantagem sobre UniTrans é maior em alvos estritos (Py→C++ +2.9/+2.6 pp; C++→Ja +4.3/+3.9 pp, valores do TransCoder). Cálculo próprio a partir da Tabela II: no HumanEval-X, Ja→Py (alvo Python) tem +4.3 pp CA e +6.1 pp EA; no TransCoder, Ja→C++ tem +3.4/+3.7 pp, maior que Py→C++.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.2; p. 6 (impressa 602), Tabela II"
+      },
+      {
+        "descricao": "Aparente inconsistência na coluna Avg da Tabela I para Grok-3 no TransCoder (a legenda não define Avg; a seção IV.F.4 trata a média das direções como média igualmente ponderada). Cálculo próprio das médias das seis direções: BL EA 89.38 (impresso 89.7); FW CA 96.85 e FW EA 93.22 (impressos 97.3 e 94.5). As demais linhas conferidas coincidem com as médias até o arredondamento. Os valores 97.3/94.5 reaparecem na Tabela III (Grok-3, Full MERIT, TransCoder), enquanto a Tabela V (rodada 3, que corresponde ao orçamento padrão) tem por direção valores compatíveis com as células de FW da Tabela I e média macro de 97.1/93.6.",
+        "localizador": "p. 6 (impressa 602), Tabela I, linhas Grok-3 (TransCoder); p. 7 (impressa 603), Tabela III; p. 8 (impressa 604), Tabela V"
+      },
+      {
+        "descricao": "O mesmo valor difere entre tabelas para GPT-4.1 Full MERIT: Tabela III imprime EA 89.8 (TransCoder) e 96.8 (HumanEval-X); a Tabela I imprime Avg EA FW 89.7 e 96.7. Cálculo próprio das médias por direção da Tabela I: 89.75 e 96.75, de modo que a diferença pode decorrer de arredondamento; a fonte não informa a regra.",
+        "localizador": "p. 6 (impressa 602), Tabela I; p. 7 (impressa 603), Tabela III, linhas GPT-4.1"
+      },
+      {
+        "descricao": "Agregações diferentes entre tabelas: a coluna Avg da Tabela III é média simples dos dois benchmarks (n = 377 e n = 164, sem ponderação; benchmarks heterogêneos), enquanto a Tabela V agrega TransCoder e HumanEval-X em 541 programas por direção. Os 'Avg' das Tabelas III e V não são comparáveis entre si.",
+        "localizador": "p. 7 (impressa 603), Tabela III; p. 5 (impressa 601), seção IV.F.4; p. 8 (impressa 604), Tabela V"
+      },
+      {
+        "descricao": "Condições assimétricas (observação da extração, não discutida pelo estudo): o reparo do MERIT é acionado e aceito pela verificação com os testes do próprio benchmark, os mesmos que definem EA, e o sinal da AST usa a solução de referência do benchmark; o UniTrans é descrito como reparo com testes gerados pelo LLM, e a linha de base não tem reparo nem chamadas extras. O estudo não informa se a reimplementação do UniTrans também usa os testes do benchmark para parar.",
+        "localizador": "p. 2-3 (impressas 598-599), seções III.B e III.C.1; p. 5 (impressa 601), seções IV.E e IV.F.2"
+      },
+      {
+        "descricao": "Comparação com UniTrans feita só com CodeLlama-7B; sem repetições relatadas, intervalos de confiança ou testes estatísticos (o estudo deixa intervalos de múltiplas execuções para trabalho futuro). Número de execuções nao_informado.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.2; p. 8 (impressa 604), seção IV.G.2"
+      },
+      {
+        "descricao": "CodeBLEU pode cair com o reparo: Python→Java com Grok-3, 0.653 na base e 0.515 com o framework; o estudo só relata esse exemplo.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.1"
+      },
+      {
+        "descricao": "Análise de erros (Fig. 8, Fig. 9, Tabela VI) sem denominador absoluto: percentuais 42.5%, 21.4%, 17.9% e 49.1%/50.9% são dados sem o número total de falhas; a Tabela VI lista contagens por armadilha (soma própria: 196) sem o total de erros semânticos ocultos. Rotulagem manual sem indicação de quem rotulou nem de concordância.",
+        "localizador": "p. 6-7 (impressas 602-603), seção IV.F.5, Fig. 8; p. 8 (impressa 604), Fig. 9 e Tabela VI"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O reparo é um estágio do pipeline de tradução; os resultados medem a tradução (CA/EA), não reparo de programas como tarefa autônoma. Por isso a tarefa registrada é só traducao.",
+        "localizador": "p. 2 (impressa 598), seção III; p. 5 (impressa 601), seção IV.D"
+      },
+      {
+        "descricao": "Ablação por ordem (Tabela IV, CodeLlama-7B): todas as ordens convergem para 79.3/72.4 (TransCoder) e 66.4/53.7 (HumanEval-X); as linhas de um único sinal acrescentam também o laço de reparo, por isso não isolam só o sinal. As linhas de três sinais coincidem com as linhas leave-one-out da Tabela III para CodeLlama-7B.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.3; p. 7 (impressa 603), Tabelas III e IV"
+      },
+      {
+        "descricao": "RQ4 com Grok-3: CA macro 94.1→97.1 e EA 89.8→93.6 nas três primeiras rodadas; rodadas 4-5 acrescentam 0.4 pp CA e 0.5 pp EA (orçamento, fora do escopo de prompting).",
+        "localizador": "p. 5-6 (impressas 601-602), seção IV.F.4; p. 8 (impressa 604), Tabela V"
+      },
+      {
+        "descricao": "A escolha de três rodadas é atribuída a experimentos piloto não relatados.",
+        "localizador": "p. 4 (impressa 600), seção III.D"
+      },
+      {
+        "descricao": "Experimentos via API realizados entre fevereiro e março de 2026; código e configurações prometidos para depois da aceitação (não acessados).",
+        "localizador": "p. 5 (impressa 601), seção IV.E"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We propose MERIT (Multi-Signal Error Repair via Intelligent Translation), a repair framework that jointly exploits four complementary signals: abstract syntax tree (AST) structural comparison against a same-language reference, a language knowledge base, error pattern matching, and LLM self-reflection.",
+        "localizador": "p. 1 (impressa 597), resumo"
+      },
+      {
+        "trecho": "Across TransCoder and HumanEval-X, six translation directions among Python, Java, and C++, and five LLMs of varying capability (Claude Sonnet 4.6, Grok-4, Grok-3, GPT-4.1, and CodeLlama-7B), MERIT consistently improves every model, yielding relative gains of 1.3%–13.1% in compilation accuracy (CA) and 1.3%–25.7% in execution accuracy (EA), and it outperforms the single-signal baseline UniTrans by 3.0–3.6 percentage points on CodeLlama-7B under identical settings.",
+        "localizador": "p. 1 (impressa 597), resumo"
+      },
+      {
+        "trecho": "The translation stage uses a minimal prompt template with only three parts: a role description, the translation task, and an output-format requirement (Fig. 2).",
+        "localizador": "p. 2 (impressa 598), seção III.A"
+      },
+      {
+        "trecho": "This minimal design ensures the baseline reflects the unaided translation ability of the LLM, providing a fair reference for measuring the gains of the repair stage.",
+        "localizador": "p. 2 (impressa 598), seção III.A"
+      },
+      {
+        "trecho": "The verification stage compiles and executes a translation to decide whether it is correct.",
+        "localizador": "p. 2 (impressa 598), seção III.B"
+      },
+      {
+        "trecho": "The process iterates for at most three rounds, re-running verification after each round.",
+        "localizador": "p. 3 (impressa 599), seção III.C"
+      },
+      {
+        "trecho": "Both benchmarks provide such a reference: TransCoder supplies a target-language f_gold, and HumanEval-X provides a verified canonical solution per language.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "trecho": "When non-empty, the report is injected into the repair prompt.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "trecho": "Because the comparison is within a single language, two functionally equivalent implementations (e.g., recursive vs. iterative) may still produce a non-empty report.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "trecho": "MERIT limits such false positives by invoking the comparison only after verification has failed—so it never overrides a passing translation—and by treating the report as advisory diagnostic context, with the final accept/reject decision always made by re-running compilation and testing.",
+        "localizador": "p. 3 (impressa 599), seção III.C.1"
+      },
+      {
+        "trecho": "Idiomatic translations capture differences in common operations (e.g., for x in list vs. for (Type x : list); rewriting a Python comprehension as an explicit loop); the base also maintains a few-shot example pool per language pair, from which one or two examples matching the source language, target language, and dominant construct of the failing translation are retrieved into the prompt.",
+        "localizador": "p. 3 (impressa 599), seção III.C.2"
+      },
+      {
+        "trecho": "When the repair prompt is built, the relevant type mappings and idiomatic guidance are injected automatically based on the source and target languages.",
+        "localizador": "p. 4 (impressa 600), seção III.C.2"
+      },
+      {
+        "trecho": "The module extracts keywords from error messages, matches them to patterns, and injects the associated suggestions into the prompt.",
+        "localizador": "p. 4 (impressa 600), seção III.C.3"
+      },
+      {
+        "trecho": "We send the model a reflection prompt containing the translated code, the compiler or runtime error message, and the AST discrepancy report, and ask it to produce three items: the error type (compilation, runtime, or logical), a root-cause analysis, and a suggested repair strategy.",
+        "localizador": "p. 4 (impressa 600), seção III.C.4"
+      },
+      {
+        "trecho": "The four signals are integrated into a single unified repair prompt (Fig. 7): AST comparison provides structural diagnostics, the knowledge base contributes cross-language domain knowledge, error pattern matching offers targeted directions, and self-reflection improves the model’s understanding of its own mistakes.",
+        "localizador": "p. 4 (impressa 600), seção III.D"
+      },
+      {
+        "trecho": "The choice of three rounds is motivated by pilot experiments—most fixable errors are resolved within the first two rounds and the marginal benefit drops sharply afterward, corroborated by the round-by-round analysis in Section IV-F4—and by cost, since each round requires at least two API calls (one reflection, one repair).",
+        "localizador": "p. 4 (impressa 600), seção III.D"
+      },
+      {
+        "trecho": "HumanEval-X [17] is a multilingual extension of HumanEval [18]; we use its Python, Java, and C++ subsets (164 problems each), with test code adapted to each target language.",
+        "localizador": "p. 4 (impressa 600), seção IV.B"
+      },
+      {
+        "trecho": "The baseline uses a concise prompt for direct translation without repair, reflecting the model’s unaided ability; the full framework applies MERIT whenever the baseline fails, with at most three rounds, each consisting of one reflection call and one repair call.",
+        "localizador": "p. 5 (impressa 601), seção IV.E"
+      },
+      {
+        "trecho": "Temperature is fixed at T = 0.2 for all models.",
+        "localizador": "p. 5 (impressa 601), seção IV.E"
+      },
+      {
+        "trecho": "We reimplement UniTrans [8], whose sole signal is iterative test-feedback repair with LLM-generated test cases, and compare it against MERIT on CodeLlama-7B (Table II); CodeLlama-7B is chosen for its headroom and open availability, enabling a reproducible comparison.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.2"
+      },
+      {
+        "trecho": "UniTrans uses the same maximum iterations (three) and temperature (T = 0.2) as MERIT.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.2"
+      },
+      {
+        "trecho": "The leave-one-out ablation removes one signal at a time from the full configuration and reports the resulting drop, isolating each signal’s unique contribution against an otherwise complete pipeline.",
+        "localizador": "p. 5 (impressa 601), seção IV.F.3"
+      },
+      {
+        "trecho": "Logical errors that compile but fail at run time are the largest category (42.5%), followed by missing symbols or methods (21.4%) and type or signature mismatches (17.9%); missing standard-library imports are counted as compilation errors because they prevent compilation.",
+        "localizador": "p. 6 (impressa 602), seção IV.F.5"
+      },
+      {
+        "trecho": "This highlights a known limitation: high textual similarity does not imply functional correctness, and functional correctness does not require textual similarity, consistent with EvalPlus [21].",
+        "localizador": "p. 8 (impressa 604), seção IV.G.1"
+      },
+      {
+        "trecho": "LLM outputs are non-deterministic [22], which may affect stability.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.2"
+      },
+      {
+        "trecho": "We mitigate this with a low fixed temperature (T = 0.2) and a uniform post-processing pipeline; since most APIs lack a deterministic seed, eliminating non-determinism is infeasible, and we leave multi-run confidence intervals to future work.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.2"
+      },
+      {
+        "trecho": "The main scalability limitation is the context window: when cross-file dependencies (class definitions, global constants, imported libraries, call chains, build options) cannot fit in the prompt, MERIT may produce code that is locally plausible but globally inconsistent, affecting the repair, knowledge-base, and self-reflection modules alike.",
+        "localizador": "p. 8 (impressa 604), seção IV.G.2"
+      },
+      {
+        "trecho": "The TransCoder and HumanEval-X tests are provided by the benchmarks; incomplete tests may judge some functionally incorrect translations as correct, a common challenge in code evaluation [21].",
+        "localizador": "p. 9 (impressa 605), seção IV.G.2"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "MERIT (full MERIT framework, FW)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "comparador": "Baseline (BL: concise prompt for direct translation without repair)",
+      "modelo": "Claude Sonnet 4.6 (claude-sonnet-4-6)",
+      "benchmark": "TransCoder (377 algorithmic functions), seis direções entre Python, Java e C++",
+      "metrica": "Compilation accuracy (CA), coluna Avg",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 95.6,
+        "intervencao": 98.6
+      },
+      "denominador": "377 problemas por direção (n = 377 na Tabela III); Avg sobre as seis direções",
+      "condicoes": "Agregado impresso (coluna Avg da Tabela I) da mesma técnica, métrica e comparador sobre as seis direções de tradução do mesmo benchmark e modelo; a legenda não define Avg, e a média por direção desta linha confere com o valor impresso (cálculo próprio). Reparo em até três rodadas (uma chamada de reflexão e uma de reparo por rodada), acionado quando a verificação com os testes do benchmark falha; sinal da AST contra f_gold do benchmark. T = 0.2. Número de execuções nao_informado. Valores conferidos visualmente na Tabela I (p. 6). O ganho é do pacote MERIT (híbrido), não de um mecanismo isolado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca MERIT, mas apresenta CA e EA como métricas principais sem que uma prevaleça, e dois comparadores (sem reparo e UniTrans). Pela ordem: primeira tabela com o contraste (Tabela I, BL × FW), primeira métrica (CA), primeiro modelo (Claude Sonnet 4.6), primeiro conjunto (TransCoder), usando o agregado impresso Avg sobre as direções.",
+      "derivacao": "direta",
+      "localizador": "p. 6 (impressa 602), Tabela I, bloco TransCoder Dataset, linhas Claude Sonnet 4.6 BL e FW, coluna Avg CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Claude Sonnet 4.6 BL 93.9 91.5 92.6 90.2 97.1 92.6 96.3 93.9 97.3 87.8 96.3 95.5 95.6 91.9",
+          "localizador": "p. 6 (impressa 602), Tabela I, TransCoder Dataset, colunas Model, Mode, Py→Ja, Py→C++, Ja→Py, Ja→C++, C++→Py, C++→Ja, Avg (CA EA cada)"
+        },
+        {
+          "trecho": "FW 98.4 96.8 97.9 95.5 99.2 95.5 98.9 97.9 99.2 91.0 97.9 97.3 98.6 95.7",
+          "localizador": "p. 6 (impressa 602), Tabela I, TransCoder Dataset, linha FW de Claude Sonnet 4.6, mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Signal 1: AST Structural Comparison (componente do MERIT)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [],
+      "comparador": "w/o AST comparison (Full MERIT sem o sinal da AST)",
+      "modelo": "Claude Sonnet 4.6 (claude-sonnet-4-6)",
+      "benchmark": "TransCoder (n = 377)",
+      "metrica": "CA",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 97.9,
+        "intervencao": 98.6
+      },
+      "denominador": "n = 377 (Tabela III); a tabela não diz se o valor agrega as seis direções, mas o Full MERIT coincide com o Avg CA da Tabela I",
+      "condicoes": "Ablação leave-one-out: retira só o sinal da AST, mantendo os demais sinais, o laço de até três rodadas e T = 0.2. O ingrediente retirado é feedback de analisador; a categoria feedback permanece na condição comparadora, por isso a lista de acrescentados é vazia. Usada a coluna do TransCoder, e não o Avg da tabela, que é média de dois benchmarks heterogêneos. Número de execuções nao_informado. Valores conferidos visualmente na Tabela III (p. 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado na tabela de ablação (Tabela III), primeiro na ordem da tabela, incluído para completar o alvo; não há outra técnica focal nem outra tarefa do escopo. Primeiro modelo (Claude Sonnet 4.6), primeiro benchmark (TransCoder) e primeira métrica (CA).",
+      "derivacao": "direta",
+      "localizador": "p. 7 (impressa 603), Tabela III, bloco Claude Sonnet 4.6, linhas w/o AST comparison e Full MERIT, coluna TransCoder (n = 377) CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "w/o AST comparison 97.9 94.9 98.6 96.6 98.2 95.7 −0.6 −1.0",
+          "localizador": "p. 7 (impressa 603), Tabela III, Claude Sonnet 4.6, colunas Configuration, TransCoder (n = 377) CA EA, HumanEval-X (n = 164) CA EA, Avg CA EA, ∆ from Full (pp) ∆CA ∆EA"
+        },
+        {
+          "trecho": "Full MERIT 98.6 95.7 99.1 97.7 98.8 96.7 — —",
+          "localizador": "p. 7 (impressa 603), Tabela III, Claude Sonnet 4.6, mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "Signal 2: Language Knowledge Base (componente do MERIT)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos"
+      ],
+      "comparador": "w/o Knowledge Base (Full MERIT sem a base de conhecimento)",
+      "modelo": "Claude Sonnet 4.6 (claude-sonnet-4-6)",
+      "benchmark": "TransCoder (n = 377)",
+      "metrica": "CA",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 98.4,
+        "intervencao": 98.6
+      },
+      "denominador": "n = 377 (Tabela III); a tabela não diz se o valor agrega as seis direções",
+      "condicoes": "Ablação leave-one-out: retira só a base de conhecimento (mapeamentos de tipos, idiomas, armadilhas e 1-2 exemplos few-shot recuperados), mantendo os demais sinais, o laço de até três rodadas e T = 0.2. Contexto permanece na condição comparadora; só exemplos é acrescentado. O ganho não separa o contexto da base dos exemplos recuperados. Usada a coluna do TransCoder. Número de execuções nao_informado. Valores conferidos visualmente na Tabela III (p. 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente na ordem da tabela de ablação (Tabela III), incluído para completar o alvo de três; mesmo modelo, benchmark e métrica pela regra de ordem.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (impressa 603), Tabela III, bloco Claude Sonnet 4.6, linhas w/o Knowledge Base e Full MERIT, coluna TransCoder (n = 377) CA",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "w/o Knowledge Base 98.4 95.3 98.9 97.2 98.6 96.2 −0.2 −0.5",
+          "localizador": "p. 7 (impressa 603), Tabela III, Claude Sonnet 4.6, colunas Configuration, TransCoder (n = 377) CA EA, HumanEval-X (n = 164) CA EA, Avg CA EA, ∆ from Full (pp) ∆CA ∆EA"
+        },
+        {
+          "trecho": "Full MERIT 98.6 95.7 99.1 97.7 98.8 96.7 — —",
+          "localizador": "p. 7 (impressa 603), Tabela III, Claude Sonnet 4.6, mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Cinco questões de pesquisa explícitas (RQ1-RQ5) sobre eficácia, comparação com UniTrans, ablação, rodadas de reparo e análise de erros.",
+      "localizador": "p. 4 (impressa 600), seção IV.A"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, sinais, templates de prompt (Figs. 2 e 7), seleção dos benchmarks, modelos, temperatura e ferramentas descritos; faltam o conteúdo da base de conhecimento e do pool de exemplos, os textos dos prompts de reflexão, detalhes da reimplementação do UniTrans, os experimentos piloto e o número de execuções.",
+      "localizador": "p. 2-5 (impressas 598-601), seções III e IV.B-IV.E"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Linha de base sem reparo executada para todos os modelos e UniTrans reimplementado com mesmas iterações e temperatura, mas só com CodeLlama-7B; o MERIT usa testes e solução de referência do benchmark no laço, e não se informa se o UniTrans reimplementado usa os mesmos testes para parar.",
+      "localizador": "p. 5 (impressa 601), seções IV.E e IV.F.2; p. 6 (impressa 602), Tabelas I e II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CA, EA e CodeBLEU definidos e n informado na Tabela III, mas a coluna Avg da Tabela I não é definida e não confere com as médias por direção para Grok-3 no TransCoder; valores de GPT-4.1 diferem em 0.1 entre Tabelas I e III; Tabelas III e V usam agregações diferentes; CodeBLEU tem só um exemplo; percentuais da análise de erros sem denominador.",
+      "localizador": "p. 5 (impressa 601), seção IV.D; p. 6-8 (impressas 602-604), Tabelas I, III e V, Figs. 8-9"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças trata validade interna (não determinismo), externa (linguagens, benchmarks simples, escala de repositório, janela de contexto) e de construto (qualidade dos testes).",
+      "localizador": "p. 8-9 (impressas 604-605), seção IV.G.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelos (snapshot só para Claude Sonnet 4.6), T = 0.2, período dos experimentos e versões da cadeia de ferramentas; código e configurações apenas prometidos para depois da aceitação; snapshots de Grok e GPT-4.1 e conteúdo da base de conhecimento não informados.",
+      "localizador": "p. 4-5 (impressas 600-601), seções IV.C e IV.E"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O texto completo não discute possível presença do TransCoder ou do HumanEval-X no pré-treinamento dos modelos nem o uso das soluções de referência do benchmark como insumo do prompt sob esse aspecto.",
+      "localizador": "p. 4 (impressa 600), seção IV.B; p. 8-9 (impressas 604-605), seção IV.G.2"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (9 páginas, incluindo referências). Páginas abertas visualmente para conferir Tabelas I-VI e as Figs. 1, 2, 6 e 7.",
+    "paginas_pdf_abertas": [
+      2,
+      4,
+      6,
+      7,
+      8
+    ]
+  }
+}

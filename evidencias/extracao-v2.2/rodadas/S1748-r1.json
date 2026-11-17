@@ -1,0 +1,325 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "3-shot (few-shot prompting)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção VI-A, p. 5-6 do PDF; Tabelas II e III, p. 7 do PDF; Seção VII-A e VII-B, p. 6-7 do PDF; Conclusão, p. 9 do PDF",
+        "observacao": "Condição 3-shot comparada com a condição zero-shot para os mesmos modelos (GPT-4o, Qwen2.5-Coder-7B-Instruct, CodeLlama-7B-Instruct). O prompt inclui três exemplos de CSP#-PAT-84 selecionados por correspondência de categorias e tags (exemplos de código como demonstração -> exemplos e contexto) e regras de gramática derivadas do manual do PAT (documentação -> contexto). O estudo não informa se as regras de gramática G também estão no prompt zero-shot; por isso o contraste é tratado como pacote (exemplos, possivelmente com gramática) e o efeito não pode ser atribuído só aos exemplos. O texto dos prompts de avaliação não é apresentado; instrucao é atribuída pela condição zero-shot herdada. O estudo apresenta o few-shot também como linha de base (baselines) do benchmark, mas a conclusão destaca 'few-shot learning and grammar prompting' como achado."
+      },
+      {
+        "nome_original": "grammar prompting (grammar rules G derived from the PAT manual)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-B, p. 3 do PDF; Seção VI-A, p. 6 do PDF; Fig. 2, p. 5 do PDF; Conclusão, p. 9 do PDF",
+        "observacao": "Regras de gramática do CSP# incluídas no prompt junto com os exemplos few-shot (e na inferência do NL2CSP). Não há condição com exemplos e sem gramática, nem informação explícita sobre a presença da gramática no zero-shot; nenhum par de condições difere apenas nesse ingrediente."
+      },
+      {
+        "nome_original": "zero-shot",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção VI-A, p. 5 do PDF; Tabelas II e III (linhas sem '(3-shot)'), p. 7 do PDF",
+        "observacao": "Linha de base de prompting. O conteúdo do prompt zero-shot não é descrito; se incluir as regras de gramática G (o estudo não informa), também teria contexto."
+      },
+      {
+        "nome_original": "NL2CSP",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção V e Fig. 2, p. 5 do PDF; Seção VII-D e Fig. 4, p. 8-9 do PDF; Tabelas II e III, p. 7 do PDF",
+        "observacao": "Pacote híbrido: síntese de dados por LLMs (Gemini-2.0-Flash-Exp e GPT-4o-mini), filtro gramatical com ANTLR4 e pré-treinamento continuado do Qwen2.5-Coder-3B-Instruct (fora do escopo), seguido de inferência em 3-shot com regras de gramática. O contrafactual da Fig. 4 compara NL2CSP com o modelo base Qwen2.5-Coder-3B-Instruct no mesmo ajuste 3-shot; o prompting é mantido nas duas condições, de modo que a diferença corresponde aos componentes que não são prompting (dados sintéticos e pré-treinamento continuado). Nas Tabelas II e III, NL2CSP é comparado com modelos de outros backbones (7B e GPT-4o), condições não comparáveis para isolar a técnica. O efeito do pacote não é efeito isolado de prompting; mecanismos_acrescentados vazio porque, em relação ao comparador da Fig. 4, não há ingrediente de prompting acrescentado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Continual Pre-Training",
+        "natureza": "ajuste_fino",
+        "descricao": "Pré-treinamento continuado não supervisionado (predição do próximo token) do Qwen2.5-Coder-3B-Instruct com cerca de 5 milhões de tokens de trechos CSP# sintéticos; 1.200 passos, uma Nvidia A100 80G, taxa de aprendizado 1x10^-5, batch 16.",
+        "localizador": "Seção V, item 3, p. 5 do PDF; Seção VI-A, p. 6 do PDF"
+      },
+      {
+        "nome_original": "Model Target Synthesis e Code Snippet Synthesis",
+        "natureza": "outro",
+        "descricao": "Aumento de dados: Gemini-2.0-Flash-Exp é instruído a gerar modelos e descrições semelhantes a partir de modelos anotados e tags, e GPT-4o-mini-2024-07-18 é instruído a escrever dez trechos CSP# por modelo seguindo a gramática especificada. Embora use prompts, a intervenção atua no modelo avaliado apenas como corpus de treinamento para o pré-treinamento continuado; esses prompts não compõem o prompt de inferência avaliado.",
+        "localizador": "Seção V, itens 1 e 2, e Fig. 2, p. 5 do PDF"
+      },
+      {
+        "nome_original": "Grammar Filter (ANTLR4)",
+        "natureza": "outro",
+        "descricao": "Filtro sintático com o gerador de parsers ANTLR4 que retém apenas os trechos sintéticos sintaticamente corretos para o treinamento.",
+        "localizador": "Seção V, item 3, p. 5 do PDF"
+      },
+      {
+        "nome_original": "nucleus sampling",
+        "natureza": "decodificacao",
+        "descricao": "Amostragem nucleus com temperatura 0,2 e top-k 50 para gerar predições diversas, usada em todas as condições.",
+        "localizador": "Seção VI-A, p. 5-6 do PDF"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "papel_no_estudo": "modelo avaliado em zero-shot e 3-shot"},
+      {"nome": "Qwen2.5-Coder-7B-Instruct", "versao": "Qwen2.5-Coder-7B-Instruct (snapshot nao_informado)", "papel_no_estudo": "modelo avaliado em zero-shot e 3-shot"},
+      {"nome": "CodeLlama-7B-Instruct", "versao": "CodeLlama-7B-Instruct (snapshot nao_informado)", "papel_no_estudo": "modelo avaliado em zero-shot e 3-shot"},
+      {"nome": "Qwen2.5-Coder-3B-Instruct", "versao": "Qwen2.5-Coder-3B-Instruct (snapshot nao_informado)", "papel_no_estudo": "modelo base do NL2CSP e linha de base 3-shot da Fig. 4"},
+      {"nome": "Gemini-2.0-Flash-Exp", "versao": "Gemini-2.0-Flash-Exp", "papel_no_estudo": "síntese de modelos e descrições (aumento de dados)"},
+      {"nome": "GPT-4o-mini", "versao": "GPT-4o-mini-2024-07-18", "papel_no_estudo": "síntese de trechos de código CSP# (aumento de dados)"}
+    ],
+    "benchmarks": [
+      {"nome": "CSP#-Handwrite-45", "quantidade": "45 modelos e 474 processos", "uso": "conjunto de avaliação das tarefas de geração de processos e de modelos", "observacao": "O número de problemas usado como denominador de cada métrica não é ligado explicitamente ao tamanho do conjunto (nao_informado)."},
+      {"nome": "CSP#-PAT-84", "quantidade": "84 modelos e 901 processos", "uso": "fonte dos exemplos few-shot (Ex ⊆ M_PAT)", "observacao": "Derivado de 113 exemplos do PAT após remoção de exemplos semelhantes, duplicados ou excessivamente complexos."},
+      {"nome": "Tarefas definidas: process generation e model generation", "quantidade": "nao_informado (número de instâncias por tarefa não informado)", "uso": "geração de um processo CSP# a partir de (G, Ex, Dm, Dp) e de um modelo completo a partir de (G, Ex, DM)", "observacao": "Revisão humana em amostra aleatória de 20% dos códigos gerados; número absoluto não informado."}
+    ],
+    "metricas": [
+      {"nome": "AST Match", "descricao": "Definida na prosa como percentual de subárvores do AST candidato presentes no AST de referência; a fórmula divide Count_clip(AST_C) por Count(AST_R) (total de subárvores da referência). Impressa em escala 0-1."},
+      {"nome": "Tree Similarity (TRS), impressa como TSR nas tabelas", "descricao": "1 - TED(AST_C, AST_R)/(Size_C + Size_R)."},
+      {"nome": "Tree Similarity of Edit Distance (TSED)", "descricao": "max(1 - TED/max(Size_C, Size_R), 0)."},
+      {"nome": "Pass@3 (pass rate)", "descricao": "Proporção de problemas com pelo menos um de k candidatos sintaticamente correto, com n = k; denominador N = total de problemas (valor não informado)."},
+      {"nome": "Sufficiency", "descricao": "Escala de 1 a 5 atribuída por revisores humanos em amostra de 20%."},
+      {"nome": "Semantic Correctness", "descricao": "Escala de 1 a 5 atribuída por revisores humanos em amostra de 20%."},
+      {"nome": "Pearson Correlation Coefficient", "descricao": "Correlação entre métricas automáticas e humanas, calculada só para os resultados do GPT-4o."}
+    ],
+    "linguagens": ["CSP# (linguagem alvo, sintaxe legível por máquina do CSP suportada pelo PAT)", "linguagem natural (descrições de modelos e processos como entrada)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com exemplos few-shot, o CodeLlama-7B-Instruct tende a copiar os exemplos fornecidos para a saída, o que eleva o Pass@3 em alguns casos sem garantir semântica ou similaridade sintática.",
+        "localizador": "Seção VII-A, p. 7 do PDF; Seção VII-B, p. 7 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O NL2CSP pode gerar código sintaticamente correto que ocasionalmente omite informações essenciais dos requisitos; gerar modelos CSP# completos e semanticamente corretos permanece um desafio (escores absolutos baixos).",
+        "localizador": "Seção VII-A, p. 7 do PDF; Seção VII-B, p. 8 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade da avaliação: as métricas automáticas baseadas em AST são aproximações da correção semântica; a verificação por propriedades no PAT não foi usada por exigir nomes de eventos idênticos ou variáveis auxiliares.",
+        "localizador": "Seção VIII, p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização: os conjuntos de dados são pequenos e os códigos sintetizados têm complexidade limitada; os ganhos do NL2CSP podem não se generalizar a tarefas mais desafiadoras, como a geração de modelos.",
+        "localizador": "Seção VIII, p. 9 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Revisão humana (três voluntários com experiência em CSP) e análise de correlação entre métricas automáticas e humanas para mitigar a limitação das métricas automáticas.",
+        "avaliada": "nao",
+        "localizador": "Seção VI-B, p. 6 do PDF; Seção VII-C, p. 8 do PDF; Seção VIII, p. 9 do PDF"
+      },
+      {
+        "descricao": "Discussões online entre revisores para consenso sobre os critérios de avaliação.",
+        "avaliada": "nao",
+        "localizador": "Seção VI-B, p. 6 do PDF"
+      },
+      {
+        "descricao": "Filtro gramatical (ANTLR4) para garantir a correção sintática dos códigos sintéticos usados no pré-treinamento continuado.",
+        "avaliada": "nao",
+        "localizador": "Seção V, item 3, p. 5 do PDF; Seção VIII, p. 9 do PDF"
+      },
+      {
+        "descricao": "Resultados médios de três execuções com sementes aleatórias diferentes.",
+        "avaliada": "nao",
+        "localizador": "Seção VI-A, p. 6 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Condições zero-shot dos mesmos modelos (Tabelas II e III, p. 7 do PDF); para o NL2CSP, Qwen2.5-Coder-3B-Instruct em 3-shot (Fig. 4, p. 8 do PDF, sem valores impressos).",
+    "so_classificadas": [
+      {
+        "tecnica": "NL2CSP",
+        "motivo": "O único contrafactual comparável (Fig. 4, NL2CSP vs. Qwen2.5-Coder-3B-Instruct em 3-shot) mantém o mesmo prompting nas duas condições e isola componentes fora do escopo (dados sintéticos e pré-treinamento continuado), não uma técnica de prompting; além disso, a Fig. 4 só traz barras, sem valores impressos para a linha de base. As comparações das Tabelas II e III usam backbones diferentes (7B, GPT-4o), condições incompatíveis."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa diverge da Tabela II: o texto atribui ao GPT-4o (3-shot) 3.5926 em Sufficiency e 3.0535 em Semantic Correctness, enquanto a Tabela II imprime 3.5936 e 3.0353.",
+        "localizador": "Seção VII-A, p. 6-7 do PDF; Tabela II, p. 7 do PDF"
+      },
+      {
+        "descricao": "Nome da métrica inconsistente: definida como Tree Similarity (TRS) na Seção VI-B, mas apresentada como TSR nas Tabelas II e III, no texto dos resultados e nas Figs. 3 e 4.",
+        "localizador": "Seção VI-B, p. 6 do PDF; Tabelas II e III, p. 7 do PDF; Figs. 3 e 4, p. 8 do PDF"
+      },
+      {
+        "descricao": "Definição de AST Match: a prosa fala em percentual das subárvores do candidato presentes na referência, mas a fórmula usa como denominador o total de subárvores da referência; os valores são impressos em escala 0-1.",
+        "localizador": "Seção VI-B, p. 6 do PDF"
+      },
+      {
+        "descricao": "Narrativa contradiz células da tabela: o texto afirma que o GPT-4o supera os demais LLMs nos ajustes zero-shot e 3-shot, mas na Tabela II o CodeLlama-7B-Instruct zero-shot tem AST Match 0.0819 contra 0.0761 do GPT-4o; na Tabela III o CodeLlama zero-shot tem TSED 0.0503 contra 0.0417 do GPT-4o, e o CodeLlama 3-shot tem Pass@3 0.3556 contra 0.1556 do GPT-4o (3-shot).",
+        "localizador": "Seção VII-A, p. 6 do PDF; Tabelas II e III, p. 7 do PDF"
+      },
+      {
+        "descricao": "Aparente inconsistência: o texto afirma que nenhum modelo zero-shot gera processos completos sintaticamente corretos, mas a Tabela II imprime Pass@3 de 0.0044 para o GPT-4o zero-shot; a fonte não explica se o valor é considerado desprezível.",
+        "localizador": "Seção VII-A, p. 6 do PDF; Tabela II, p. 7 do PDF"
+      },
+      {
+        "descricao": "Inversões com few-shot: o CodeLlama-7B-Instruct (3-shot) reduz TSR em relação ao zero-shot (0.2927 para 0.1867 na Tabela II; 0.2083 para 0.1312 na Tabela III) e reduz Sufficiency na geração de modelos (1.3333 para 1.1851), embora aumente o Pass@3; o estudo atribui o Pass@3 elevado à cópia dos exemplos. Na Tabela III, o Pass@3 do Qwen2.5-Coder-7B-Instruct passa só de 0.0 para 0.0222.",
+        "localizador": "Tabelas II e III, p. 7 do PDF; Seção VII-A e VII-B, p. 7 do PDF"
+      },
+      {
+        "descricao": "Uso de 'significantly higher' para o Pass@3 do NL2CSP (0.4889) frente a GPT-4o (0.1556) e Qwen2.5-Coder (0.0222) sem teste estatístico relatado; os modelos têm backbones diferentes.",
+        "localizador": "Seção VII-B, p. 7 do PDF; Tabela III, p. 7 do PDF"
+      },
+      {
+        "descricao": "A Fig. 4 apresenta a comparação NL2CSP vs. Qwen2.5-Coder-3B-Instruct (3-shot) só em barras, sem valores impressos; as afirmações de que o Pass@3 'dobra' na geração de processos e aumenta 'quase dez vezes' na geração de modelos não podem ser conferidas numericamente. A legenda da figura grafa 'NLP2CSP (ours)'.",
+        "localizador": "Fig. 4, p. 8 do PDF; Seção VII-D, p. 8-9 do PDF"
+      },
+      {
+        "descricao": "Qualificação das correlações sem limiar definido: a introdução fala em alta correlação entre métricas automáticas e revisão humana e a Seção VII-C chama de forte a correlação de Sufficiency com TSED (0.50, processos) e com TSR (0.57, modelos) e a de Semantic com todas as métricas automáticas (0.40 a 0.67 na Fig. 3); a correlação foi calculada só para os resultados do GPT-4o.",
+        "localizador": "Seção I, p. 1 do PDF; Seção VII-C e Fig. 3, p. 8 do PDF"
+      },
+      {
+        "descricao": "Escores absolutos baixos: o próprio estudo afirma que gerar modelos CSP# completos e semanticamente corretos permanece um desafio e que os ganhos do NL2CSP podem não se generalizar à geração de modelos, enquanto o resumo afirma que os LLMs entendem a maior parte dos requisitos com aprendizado em contexto.",
+        "localizador": "Resumo, p. 1 do PDF; Seção VII-B, p. 8 do PDF; Seção VIII, p. 9 do PDF"
+      },
+      {
+        "descricao": "Composição do prompt zero-shot não informada (presença ou não das regras de gramática G), o que impede separar o efeito dos exemplos do efeito da gramática no contraste zero-shot vs. 3-shot.",
+        "localizador": "Seção VI-A, p. 5-6 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A construção dos conjuntos envolveu esforço manual: três voluntários anotaram os modelos de CSP#-PAT-84; modelos de CSP#-Handwrite-45 foram solicitados aos autores originais ou traduzidos manualmente por voluntários pós-graduandos com experiência em CSP.",
+        "localizador": "Seção I, p. 1 do PDF; Seção IV-A e IV-B, p. 4 do PDF"
+      },
+      {
+        "descricao": "Configuração do pré-treinamento continuado (componente fora do escopo): 5 milhões de tokens sintéticos, 1.200 passos, A100 80G, taxa de aprendizado 1x10^-5, batch 16.",
+        "localizador": "Seção VI-A, p. 6 do PDF"
+      },
+      {
+        "descricao": "Exemplos few-shot vêm de CSP#-PAT-84 e a avaliação usa CSP#-Handwrite-45; o estudo não discute contaminação nem informa quais modelos anotados serviram de semente para a síntese de dados.",
+        "localizador": "Seção IV-C, p. 4 do PDF; Seção V, p. 5 do PDF; Seção VI-A, p. 6 do PDF"
+      },
+      {
+        "descricao": "Os conjuntos são declarados públicos em repositório GitHub; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "Nota de rodapé 1, p. 1 do PDF"
+      },
+      {
+        "descricao": "A introdução cita 'Qwen2.5 [14]' e grafa 'GTP-4o'; as tabelas usam Qwen2.5-Coder-7B-Instruct e GPT-4o.",
+        "localizador": "Seção I, p. 1 do PDF; Tabelas II e III, p. 7 do PDF"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "For both process generation and model generation tasks, the LLMs are evaluated in zero-shot and 3-shot settings.", "localizador": "Seção VI-A, p. 5 do PDF"},
+      {"trecho": "To fully utilize the in-context learning capabilities of LLMs, grammar rules G derived from the PAT manual and few-shot examples are also included in the prompt.", "localizador": "Seção VI-A, p. 6 do PDF"},
+      {"trecho": "Examples are selected from CSP#-PAT-84, prioritizing those with matching categories and tags.", "localizador": "Seção VI-A, p. 6 do PDF"},
+      {"trecho": "Moreover, we introduce NL2CSP, a multi-stage approach designed to improve the performance of LLMs in generating codes in CSP#.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "NL2CSP leverages a combination of data augmentation, grammar-guided code synthesis, and in-context learning to improve the quality of the generated code.", "localizador": "Seção V, p. 5 do PDF"},
+      {"trecho": "We synthesize 5 million tokens of CSP code snippets and conduct continual pre-training on Qwen2.5-Coder-3B-Instruct to enhance its domain-specific knowledge of CSP code.", "localizador": "Seção VI-A, p. 6 do PDF"},
+      {"trecho": "We compare the performance of NL2CSP with the base model, Qwen2.5-Coder-3B-Instruct, using a 3-shot setting.", "localizador": "Seção VII-D, p. 8 do PDF"},
+      {"trecho": "This improvement can be attributed to the use of only syntactically correct training data for continual pre-training.", "localizador": "Seção VII-D, p. 9 do PDF"},
+      {"trecho": "The experiment results demonstrated that, through few-shot learning and grammar prompting, GPT-4o and Qwen2.5-Coder could effectively extract key information from requirements and transform it into CSP code.", "localizador": "Seção IX, p. 9 do PDF"},
+      {"trecho": "Similar to the process generation task, few-shot prompting consistently improves the results for all models except Code Llama.", "localizador": "Seção VII-B, p. 7 do PDF"},
+      {"trecho": "While the 3-shot version generally performs better than the zero-shot version, manual inspection reveals that the Code Llama in the 3-shot setting tends to copy the provided examples into its generated output.", "localizador": "Seção VII-A, p. 7 do PDF"},
+      {"trecho": "This behavior leads to improved Pass@3 in some cases but does not guarantee improvements in semantics or syntactic similarity.", "localizador": "Seção VII-A, p. 7 do PDF"},
+      {"trecho": "This indicates that although it can generate syntactically correct code, it may occasionally overlook key information in the requirements.", "localizador": "Seção VII-A, p. 7 do PDF"},
+      {"trecho": "The low absolute scores across most metrics also indicate that generating complete and semantically correct CSP# models remains a challenge.", "localizador": "Seção VII-B, p. 8 do PDF"},
+      {"trecho": "While AST-based automated metrics are useful for evaluating structural similarity, they are approximations of semantic correctness.", "localizador": "Seção VIII, p. 9 do PDF"},
+      {"trecho": "However, the synthesized codes have limited complexity.", "localizador": "Seção VIII, p. 9 do PDF"},
+      {"trecho": "The performance improvements observed with NL2CSP may not generalize well to more challenging tasks, such as the model generation task.", "localizador": "Seção VIII, p. 9 do PDF"},
+      {"trecho": "To mitigate this limitation, we conduct a human review and investigate the correlation between automated metrics and human review metrics.", "localizador": "Seção VIII, p. 9 do PDF"},
+      {"trecho": "Online discussions among the reviewers are organized to reach a consensus on the evaluation criteria, ensuring the reliability and consistency of the human review.", "localizador": "Seção VI-B, p. 6 do PDF"},
+      {"trecho": "Only syntactically correct codes are retained for further training.", "localizador": "Seção V, item 3, p. 5 do PDF"},
+      {"trecho": "For each process and model, the experimental results are averaged across three runs with different random seeds.", "localizador": "Seção VI-A, p. 6 do PDF"},
+      {"trecho": "In addition to automated metrics, we perform a human review of a randomly selected 20% of the generated codes.", "localizador": "Seção VI-B, p. 6 do PDF"},
+      {"trecho": "GPT-4o significantly outperforms the others, achieving a pass rate of 0.6009, 3.5926 on Sufficiency, and 3.0535 on Semantic Correctness.", "localizador": "Seção VII-A, p. 6-7 do PDF"},
+      {"trecho": "GPT-4o outperforms other LLMs in both zero-shot and 3-shot settings, exhibiting its capability to generate processes in CSP#.", "localizador": "Seção VII-A, p. 6 do PDF"},
+      {"trecho": "In addition, none of these models shows the ability to generate complete syntactically correct processes.", "localizador": "Seção VII-A, p. 6 do PDF"},
+      {"trecho": "Specifically, NL2CSP achieves a Pass@3 rate of 0.4889, significantly higher than GPT-4o (0.1556) and Qwen2.5-Coder (0.0222) in the 3-shot setting.", "localizador": "Seção VII-B, p. 7 do PDF"},
+      {"trecho": "In particular, the Pass@3 metric doubles in the process generation task and increases nearly tenfold in the model generation task.", "localizador": "Seção VII-D, p. 8-9 do PDF"},
+      {"trecho": "Tree Similarity (TRS) also provides the metrics to measure the similarity between two ASTs using tree edit distance.", "localizador": "Seção VI-B, p. 6 do PDF"},
+      {"trecho": "It computes the percentage of subtrees in the candidate AST that are also present in the reference AST.", "localizador": "Seção VI-B, p. 6 do PDF"},
+      {"trecho": "To investigate the correlations between automated and human review metrics proposed in Section VI-B, we calculate the Pearson Correlation Coefficient [46] for the results of GPT-4o, as shown in Fig. 3.", "localizador": "Seção VII-C, p. 8 do PDF"},
+      {"trecho": "We evaluate the baseline models and our approach on the CSP#-Handwrite-45 dataset.", "localizador": "Seção VI-A, p. 6 do PDF"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "3-shot (few-shot prompting)",
+      "mecanismos": ["instrucao", "exemplos", "contexto"],
+      "mecanismos_acrescentados": ["exemplos", "contexto"],
+      "comparador": "zero-shot (linha 'GPT-4o' da Tabela II)",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "CSP#-Handwrite-45, tarefa de geração de processos (process generation)",
+      "metrica": "AST Match (prosa: percentual de subárvores do AST candidato presentes no AST de referência; fórmula: Count_clip(AST_C)/Count(AST_R), com denominador no total de subárvores da referência; impressa em escala 0-1)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.0761, "intervencao": 0.2087},
+      "denominador": "nao_informado (CSP#-Handwrite-45 tem 474 processos, mas o estudo não liga esse número ao denominador da métrica)",
+      "condicoes": "Zero-shot vs. 3-shot no mesmo modelo; exemplos de CSP#-PAT-84 selecionados priorizando categorias e tags correspondentes; regras de gramática G do manual do PAT incluídas no prompt (presença no zero-shot nao_informado, por isso o contraste é de pacote); amostragem nucleus com temperatura 0,2 e top-k 50; resultados médios de três execuções com sementes aleatórias diferentes; dispersão não informada. Valores conferidos visualmente na Tabela II (p. 7 do PDF), colunas 'Automated Evaluation (↑)' / 'AST Match'.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca várias métricas (automáticas e humanas) e vários modelos sem que um prevaleça, e sua proposta principal (NL2CSP) é pacote híbrido. A primeira tabela com contraste de prompting elegível é a Tabela II; primeira métrica pertinente (AST Match), primeiro modelo listado (GPT-4o) e primeira linha de base de prompting (zero-shot). Não há outra técnica focal de prompting com contraste comparável (NL2CSP em so_classificadas), nem outra tarefa do escopo, nem tabela de ablação ou contraste pareado de componente de prompting; a geração de modelos (Tabela III) é nova condição da mesma técnica e tarefa e não conta como cobertura.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, p. 7 do PDF; configuração na Seção VI-A, p. 5-6 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-4o 0.0761 0.3201 0.0498 0.0044 2.6884 2.1992", "localizador": "Tabela II ('Results of the process generation task'), p. 7 do PDF; colunas Models | AST Match | TSR | TSED | Pass@3 | Sufficiency | Semantic"},
+        {"trecho": "GPT-4o (3-shot) 0.2087 0.4226 0.1703 0.6009 3.5936 3.0353", "localizador": "Tabela II ('Results of the process generation task'), p. 7 do PDF; colunas Models | AST Match | TSR | TSED | Pass@3 | Sufficiency | Semantic"},
+        {"trecho": "For both process generation and model generation tasks, the LLMs are evaluated in zero-shot and 3-shot settings.", "localizador": "Seção VI-A, p. 5 do PDF"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O estudo declara o objetivo de explorar LLMs para transformar requisitos em linguagem natural em CSP# e lista as contribuições (conjuntos, tarefas de benchmark com linhas de base, NL2CSP e relação entre métricas automáticas e revisão humana).",
+      "localizador": "Seção I, p. 1-2 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve conjuntos, tarefas, seleção dos exemplos, decodificação, número de execuções e etapas do NL2CSP, mas não apresenta os prompts de avaliação, não informa se o zero-shot inclui as regras de gramática nem o número de instâncias avaliadas por tarefa.",
+      "localizador": "Seções IV-VI, p. 3-6 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparador zero-shot executado para os mesmos modelos e linha de base Qwen2.5-Coder-3B-Instruct (3-shot) para o NL2CSP, mas a composição do prompt zero-shot não é descrita e a linha de base do NL2CSP aparece só em figura sem valores; as comparações do NL2CSP nas tabelas envolvem backbones diferentes.",
+      "localizador": "Seção VI-A, p. 5-6 do PDF; Tabelas II e III, p. 7 do PDF; Fig. 4, p. 8 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas com fórmulas e escalas, mas os denominadores (número de problemas e de códigos revisados) não são informados, a métrica TRS aparece como TSR, a prosa e a fórmula de AST Match divergem quanto ao denominador e os valores do texto para GPT-4o (3-shot) não coincidem com a Tabela II (3.5926 vs. 3.5936; 3.0535 vs. 3.0353); não há dispersão.",
+      "localizador": "Seção VI-B, p. 6 do PDF; Seção VII-A, p. 6-7 do PDF; Tabela II, p. 7 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações discute o tamanho dos conjuntos, a complexidade limitada dos dados sintéticos e a natureza aproximada das métricas automáticas, mas não trata contaminação, ausência de testes estatísticos, viés da revisão humana nem não determinismo além da média de três execuções.",
+      "localizador": "Seção VIII, p. 9 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa hiperparâmetros de decodificação e de treinamento, versões de alguns modelos (GPT-4o-mini-2024-07-18, Gemini-2.0-Flash-Exp) e declara os conjuntos públicos (link não acessado nesta extração), mas não fornece os prompts de avaliação, a versão do GPT-4o nem a disponibilidade dos dados sintéticos e do código.",
+      "localizador": "Nota de rodapé 1, p. 1 do PDF; Seções V e VI-A, p. 5-6 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não menciona contaminação. Os exemplos few-shot vêm de CSP#-PAT-84 e a avaliação usa CSP#-Handwrite-45, mas o estudo não discute vazamento por pré-treinamento nem informa quais modelos anotados serviram de semente para a síntese de dados.",
+      "localizador": "Seções IV-VI, p. 3-6 do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas_visualmente": [1, 4, 5, 6, 7, 8, 9],
+    "observacao": "Texto extraído lido integralmente; páginas impressas não numeradas no PDF, por isso os localizadores usam a posição no arquivo."
+  }
+}

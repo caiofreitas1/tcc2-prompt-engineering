@@ -1,0 +1,325 @@
+{
+  "estudo": "S354",
+  "texto_fonte": "fontes/textos/lote/S354.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "versao_artigo": "arXiv:2405.18649v2 [cs.CL], 13 fev. 2025; nota de rodapé: «Accepted by NeurIPS 2024» (PDF p. 1). Paginação impressa coincide com a posição no PDF a partir da p. 2; a p. 1 não traz número impresso.",
+  "ficha": {
+    "tarefas": ["geracao", "depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Init. (Prompt.)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5, Seção 4.1; PDF p. 6, Tabela 2 (linhas Init. dos blocos Prompt.)",
+        "observacao": "Geração inicial pelo modelo pré-treinado, sem rodada de autodepuração; é a linha de base das condições Refine e Expl. + Refine. O estudo informa 100 amostras por tarefa com temperatura 0,8, mas não descreve o prompt da geração inicial na avaliação (os exemplos 3-shot da Seção 2.1 referem-se à coleta de soluções erradas para treino; as Figuras 7 e 9 a 13 mostram só a descrição do problema no turno do usuário). As asserções de exemplo que integram a descrição dos problemas (Figura 1) foram tratadas como parte do item do benchmark, não como exemplos de prompting; o mesmo vale para todas as condições."
+      },
+      {
+        "nome_original": "Refine (Prompt.; «Code Refinement», «Ask LLM for Self-Refine»)",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["contexto", "feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2, Figura 1 e parágrafo seguinte; PDF p. 14, Seção A.1; PDF p. 15, Figura 5 (3.1); PDF p. 16, Figura 7 (esquerda); PDF p. 6, Tabela 2",
+        "observacao": "Autodepuração por prompting: o código errado e a mensagem de erro ou o teste que falhou são devolvidos ao modelo com o pedido «Please fix it.». No estudo, é a linha de base de prompting (Prompt.) contra o LEDEX (ajuste fino). O contraste com Init. na Tabela 2 isola a rodada de autodepuração como pacote (devolução do código errado + retorno de execução + instrução de correção), não um ingrediente único. Uma refinação amostrada por solução incorreta (PDF p. 5). O estudo não declara explicitamente qual formato de prompt (Figura 5 ou Figura 7) foi usado nas linhas Prompt. da Tabela 2; os estudos de caso com StarCoder por prompting (Figura 9, PDF p. 19) usam o formato da Figura 7."
+      },
+      {
+        "nome_original": "Expl. + Refine (Prompt.; «Code Explanation and Refinement», «Ask LLM for Wrong Solution Explanation and Self-Refine»)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 2, Figura 1 e parágrafo seguinte; PDF p. 14, Seção A.1 e Tabela 10; PDF p. 15, Figura 5 (3.2); PDF p. 16, Figura 7 (direita); PDF p. 6, Tabela 2; PDF p. 7, Tabela 4",
+        "observacao": "Mesmo prompt de Refine, acrescido do pedido de explicar por que o código está errado antes de corrigir («in a chain-of-thought manner»). O estudo compara explicitamente as duas formulações (Seção 1; A.1; linhas Refine e Expl. + Refine das Tabelas 2, 4 e 10), o que isola o ingrediente explicação. A formulação motiva o desenho do LEDEX, mas a proposta do estudo é o treinamento; por isso a técnica de prompting é comparadora, não focal. Em Figura 7 (direita) o pedido vem numerado («1. Explain why the above code is wrong. 2. Propose the correct code.»)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LEDEX SFT (supervised fine-tuning)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino supervisionado de StarCoder-15B, CodeLlama-7B e CodeLlama-13B com explicações e refinamentos verificados por execução; duas épocas, lote 128, AdamW, taxa 2e-5. É a proposta principal do estudo; seus ganhos sobre o prompting não são efeito de prompting.",
+        "localizador": "PDF p. 3-4, Seção 2.2; PDF p. 5, Seção 3"
+      },
+      {
+        "nome_original": "LEDEX RL (PPO com recompensas de código e de explicação)",
+        "natureza": "ajuste_fino",
+        "descricao": "Aprendizado por reforço (PPO) sobre o modelo SFT, com recompensa de refinamento (CodeBLEU + taxa de testes) e de explicação (similaridade de embeddings RoBERTa) atribuídas separadamente; taxa 2e-6, lote 64.",
+        "localizador": "PDF p. 4-5, Seção 2.3; PDF p. 5, Seção 3; PDF p. 15-16, Seção A.3"
+      },
+      {
+        "nome_original": "Coleta e verificação automática de dados (data collection and verification)",
+        "natureza": "outro",
+        "descricao": "Pipeline de construção do conjunto de treino: amostragem de soluções erradas com prompts 3-shot (20 por problema, temperatura 1,0), consulta a GPT-3.5-Turbo, CodeLlama-34B ou ao próprio CodeLlama-7B (prompt da Figura 6, 10 respostas por prompt, temperatura 0,8) e filtragem por execução. O prompting serve aqui para gerar dados de treino; não é condição avaliada como técnica de prompting.",
+        "localizador": "PDF p. 3, Seção 2.1 e Tabela 1; PDF p. 15, Figura 6 e Seção A.2"
+      },
+      {
+        "nome_original": "Fonte dos dados de treino (GPT-3.5-Turbo, CodeLlama-34B, autoinicialização com CodeLlama-7B)",
+        "natureza": "outro",
+        "descricao": "Variação do modelo professor que gera os dados de ajuste fino (RQ3); altera o treinamento, não o prompt de avaliação.",
+        "localizador": "PDF p. 8, Seções 4.3.1 e 4.3.2, Tabelas 5 e 6; PDF p. 9, Tabelas 7 e 8; PDF p. 17-18, Seção A.4.3, Tabelas 12 a 14"
+      },
+      {
+        "nome_original": "Treino só com dados de geração de código (Only Code Generation Data)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ablação de dados de ajuste fino comparando CodeLlama-7B treinado só com dados de geração e com os dados completos do LEDEX.",
+        "localizador": "PDF p. 16-17, Seção A.4.1, Tabela 11"
+      },
+      {
+        "nome_original": "Amostragem com temperatura 0,8 (100 soluções por tarefa) e decodificação gulosa (Tabela 10)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação da avaliação: 100 amostras por tarefa com temperatura 0,8 nas Tabelas 2 a 8 e decodificação gulosa na Tabela 10.",
+        "localizador": "PDF p. 5, Seção 4.1; PDF p. 14, Seção A.1"
+      }
+    ],
+    "modelos": [
+      {"nome": "StarCoder-15B", "versao": "nao_informado (só o tamanho; descrito como modelo pré-treinado)", "uso": "avaliado por prompting e treinado com LEDEX"},
+      {"nome": "CodeLlama-7B", "versao": "nao_informado (só o tamanho; descrito como modelo pré-treinado)", "uso": "avaliado por prompting, treinado com LEDEX e fonte de dados na autoinicialização"},
+      {"nome": "CodeLlama-13B", "versao": "nao_informado (só o tamanho)", "uso": "avaliado por prompting e treinado com LEDEX"},
+      {"nome": "CodeLlama-34B", "versao": "nao_informado (só o tamanho; «a pre-trained model»)", "uso": "fonte de dados de treino (RQ3)"},
+      {"nome": "GPT-3.5-Turbo (rotulado «GPT-3.5» na Tabela 10)", "versao": "nao_informado (snapshot não informado)", "uso": "fonte de dados de treino; avaliado por prompting na Tabela 10 e na Tabela 9"},
+      {"nome": "GPT-4", "versao": "nao_informado", "uso": "avaliador das explicações (Tabela 9)"},
+      {"nome": "all-roberta-large-v1 (RoBERTa)", "versao": "all-roberta-large-v1, 2024 (referência [21])", "uso": "embeddings para a recompensa de explicação"}
+    ],
+    "benchmarks": [
+      {"nome": "MBPP", "quantidade": "conjunto de teste: nao_informado; conjunto de treino usado no treinamento: 374 problemas", "observacao": "Avaliação; o treino usa só os 374 problemas do conjunto de treino."},
+      {"nome": "HumanEval", "quantidade": "nao_informado", "observacao": "Avaliação; grafado «Humanval» no cabeçalho das Tabelas 2, 5, 7, 11 e 12."},
+      {"nome": "MBPP+", "quantidade": "nao_informado", "observacao": "Avaliação; testes mais rigorosos [26]."},
+      {"nome": "HumanEval+", "quantidade": "nao_informado", "observacao": "Avaliação; testes mais rigorosos [26]."},
+      {"nome": "APPS (conjunto de treino)", "quantidade": "5.000 problemas", "observacao": "Só treino."},
+      {"nome": "CodeContests", "quantidade": "6.627 problemas (cabeçalho da Tabela 1)", "observacao": "Só treino."},
+      {"nome": "Amostra para avaliação de explicações (RQ4)", "quantidade": "50 problemas com soluções iniciais incorretas de MBPP e HumanEval", "observacao": "Divisão entre MBPP e HumanEval não informada."}
+    ],
+    "metricas": [
+      {"nome": "pass@1 e pass@10 (pass@k [1])", "denominador": "tarefas de cada benchmark (quantidade nao_informado); 100 amostras por tarefa", "observacao": "Tabela 3 apresenta valores «overall» de MBPP & HumanEval e de MBPP+ & HumanEval+ sem descrever como os benchmarks foram combinados."},
+      {"nome": "success refinement rate / refinement success rate", "denominador": "soluções iniciais incorretas (contagens nao_informado); Tabela 4 é média sobre quatro benchmarks sem descrição da ponderação", "observacao": "Tabela 10 usa decodificação gulosa."},
+      {"nome": "nota de explicação (1 a 5, correção e utilidade)", "denominador": "50 problemas amostrados", "observacao": "Atribuída por GPT-4 e, para StarCoder e GPT-3.5-Turbo, por dois desenvolvedores cuja média é registrada."},
+      {"nome": "CodeBLEU, taxa de testes aprovados, similaridade de explicação", "denominador": "dados de treino", "observacao": "Usadas na recompensa do RL, não como métricas de avaliação."}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Com prompting, o StarCoder gera explicação alucinada do código errado (exemplo do HumanEval).",
+        "localizador": "PDF p. 18, Seção A.5.1; PDF p. 19, Figura 9"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com prompting, o modelo frequentemente apenas repete a solução errada em vez de corrigi-la; os modelos abertos têm capacidade limitada de autorrefinamento por prompting.",
+        "localizador": "PDF p. 18, Seção A.5.1; PDF p. 14, Seção A.1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Refinamentos que passam em todos os testes do HumanEval podem não estar totalmente corretos e falhar em testes mais rigorosos do HumanEval+ (exemplo com CodeLlama-13B após SFT).",
+        "localizador": "PDF p. 18, Seção A.5.3; PDF p. 20, Figura 11"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "LLMs podem produzir explicações ou refinamentos errados, que não podem ser usados cegamente como dados de treino; uma explicação correta também pode ser seguida de refinamento incorreto.",
+        "localizador": "PDF p. 3, Seção 2.1; PDF p. 4, Seção 2.3.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Verificação dos refinamentos coletados por nova execução dos testes; só refinamentos que passam em todos os testes (e suas explicações) entram nos dados de treino.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3, Seção 2.1"
+      },
+      {
+        "descricao": "Avaliação também em MBPP+ e HumanEval+, com casos de teste mais rigorosos.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5, Seção 4.1; PDF p. 7, Seção 4.1.1"
+      },
+      {
+        "descricao": "Treinamento (SFT e RL do LEDEX) como resposta à limitação do autorrefinamento por prompting; intervenção fora do escopo (ajuste fino), comparada com o prompting nas Tabelas 2 a 4 e 9.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 6, Tabelas 2 e 3; PDF p. 7, Tabela 4; PDF p. 10, Tabela 9"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão em relação à afirmação de que pedir explicação aumenta o sucesso do refinamento (Seção 1; A.1): na Tabela 2, StarCoder-15B por prompting no MBPP tem pass@1 de 40.64 com Refine e 40.37 com Expl. + Refine; na Tabela 4 (prompting, média de quatro benchmarks), Refine supera Expl. + Refine para StarCoder-15B (6.90 contra 6.41) e CodeLlama-7B (8.65 contra 8.10), mas não para CodeLlama-13B (11.64 contra 11.97).",
+        "localizador": "PDF p. 2, parágrafo após a Figura 1; PDF p. 6, Tabela 2; PDF p. 7, Tabela 4"
+      },
+      {
+        "descricao": "Na Tabela 10 (decodificação gulosa), CodeLlama-7B no MBPP tem 7.42 com Refine e 6.71 com Expl. + Refine, contrariando o «Generally» do texto. A frase «StarCoder-15B successfully refines only 4.43% to 5.10%» cobre só os valores de Expl. + Refine; os de Refine são 2.58 (MBPP) e 2.04 (HumanEval).",
+        "localizador": "PDF p. 14, Seção A.1 e Tabela 10"
+      },
+      {
+        "descricao": "Condições discrepantes entre tabelas da mesma comparação de prompting: a Tabela 10 usa decodificação gulosa, enquanto as Tabelas 2 e 4 usam 100 amostras com temperatura 0,8 e uma refinação por solução incorreta. A Seção 1 cita GPT-3.5-Turbo com 28.90% «under the same setting», valor que corresponde à linha «GPT-3.5» (Expl. + Refine, MBPP) da Tabela 10.",
+        "localizador": "PDF p. 2, Seção 1; PDF p. 5, Seção 4.1; PDF p. 14, Tabela 10"
+      },
+      {
+        "descricao": "Narrativa diverge da tabela: o texto afirma ganho adicional do RL de «1.85% pass@10» para StarCoder-15B com explicações e refinamentos em MBPP & HumanEval, mas a Tabela 3 imprime «78.66 +1.58».",
+        "localizador": "PDF p. 6-7, Seção 4.1.1; PDF p. 6, Tabela 3"
+      },
+      {
+        "descricao": "O texto afirma que, para StarCoder-15B e CodeLlama-13B, o RL obtém os maiores pass@1 e pass@10 em todos os quatro benchmarks, e a Tabela 2 destaca em negrito 71.93 (LEDEX RL, Expl. + Refine) em MBPP+ pass@10 do StarCoder-15B, mas a linha LEDEX SFT Expl. + Refine imprime 72.19 nessa coluna.",
+        "localizador": "PDF p. 6, Tabela 2 e parágrafo seguinte"
+      },
+      {
+        "descricao": "As melhorias são relatadas com «%» (por exemplo, «15.92%» no resumo e «+15.92» na Tabela 3), sem dizer se são pontos percentuais ou variação relativa. Cálculo próprio na Tabela 4 (16.27 − 6.90 = 9.37, valor impresso como «+9.37») indica diferença absoluta; os valores de prompting agregados que serviriam de base na Tabela 3 não são impressos, e o método de agregação «overall» e a média da Tabela 4 não são descritos.",
+        "localizador": "PDF p. 1, resumo; PDF p. 6, Tabela 3; PDF p. 7, Tabela 4"
+      },
+      {
+        "descricao": "Resultados nulos ou negativos do treinamento (fora do escopo de prompting): CodeLlama-7B LEDEX RL Refine tem −0.60 em pass@1 sobre SFT (Tabela 3); com dados autoinicializados, LEDEX SFT Expl. + Refine tem −0.67 em pass@10 em MBPP+ & HumanEval+ e LEDEX RL Expl. + Refine tem −0.05 em pass@10 em MBPP & HumanEval (Tabela 8).",
+        "localizador": "PDF p. 6, Tabela 3; PDF p. 9, Tabela 8"
+      },
+      {
+        "descricao": "A avaliação da qualidade das explicações combina notas de GPT-4 para todos os modelos com notas humanas só para StarCoder e GPT-3.5-Turbo (células «-» para CodeLlama), por limitação de tempo declarada.",
+        "localizador": "PDF p. 9, Seção 4.4; PDF p. 10, Tabela 9"
+      },
+      {
+        "descricao": "Limitação declarada: só dois tipos de prompt de autodepuração foram usados, e estratégias melhores podem não ter sido exploradas por restrição de recursos.",
+        "localizador": "PDF p. 9, Seção 5"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A proposta do estudo (LEDEX) é um arcabouço de treinamento (coleta de dados, SFT e RL); as técnicas de prompting aparecem como linha de base (Prompt.) e como formatos de instrução usados também no treino. Nenhuma técnica de prompting é apresentada como proposta do estudo.",
+        "localizador": "PDF p. 1, resumo; PDF p. 2, contribuições"
+      },
+      {
+        "descricao": "Refinamento iterativo por até três rodadas (Figura 4 para CodeLlama-7B; Figura 8 para CodeLlama-13B) plota, em cada rodada, o maior pass@k entre Refine e Expl. + Refine, o que impede atribuir o resultado a uma das formulações; o texto cita 47.53% do prompting após três rodadas contra 56.75% do SFT após a primeira (Figura 4 (a)). Contribuição por rodada sem condição sem técnica (cumulativo).",
+        "localizador": "PDF p. 7, Seção 4.2 e Figura 4; PDF p. 8, continuação; PDF p. 17, Seção A.4.2"
+      },
+      {
+        "descricao": "As linhas Prompt. de CodeLlama-13B na Tabela 12 repetem os valores da Tabela 2 (mesma linha de base de prompting reutilizada).",
+        "localizador": "PDF p. 6, Tabela 2; PDF p. 18, Tabela 12"
+      },
+      {
+        "descricao": "Os dois formatos de instrução (só refinamento; explicação e refinamento) também são usados para aumentar os dados de ajuste fino; essa variação não é avaliada como técnica de prompting isolada.",
+        "localizador": "PDF p. 3-4, Seção 2.2; PDF p. 15, Seção A.2"
+      },
+      {
+        "descricao": "Número de execuções independentes e testes de significância não informados; não foi encontrado no texto link de pacote de replicação.",
+        "localizador": "PDF p. 5, Seções 3 e 4.1"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In the domain of code generation, self-debugging is crucial.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "It allows LLMs to refine their generated code based on execution feedback.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "In this work, we propose LEDEX, a training framework that significantly improves the self-debugging capability of LLMs.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "Compared with directly asking for a refined solution (referred to as “Code Refinement” in the feedback block), asking LLMs to provide an explanation of the wrong solution and then refine it in a chain-of-thought manner (referred to as “Code Explanation and Refinement” in the feedback block) helps it to better understand the unit test feedback and increases the success rate of providing refined solutions (details in Appendix A.1).", "localizador": "PDF p. 2, Seção 1"},
+      {"trecho": "We evaluate two prompting strategies for querying LLMs to perform code refinement: one where the LLMs directly generate the refinement (Figure 5 (3.1)), and another where they first explain why the code is incorrect before generating the refinement (Figure 5 (3.2)).", "localizador": "PDF p. 14, Seção A.1"},
+      {"trecho": "Generally, LLMs that first explain the incorrect code are more likely to generate accurate refinements.", "localizador": "PDF p. 14, Seção A.1"},
+      {"trecho": "For the generation of the initial solutions, the models sample 100 solutions per task in the benchmarks (temperature set to 0.8), which are run against the provided test cases.", "localizador": "PDF p. 5, Seção 4.1"},
+      {"trecho": "For every incorrect solution that fails any test case, we let the models sample one refinement (and one explanation).", "localizador": "PDF p. 5, Seção 4.1"},
+      {"trecho": "The improvements from SFT are compared to direct prompting, while the improvements from RL are relative to SFT.", "localizador": "PDF p. 6, Seção 4.1.1"},
+      {"trecho": "The prompting approach does not work for this example, and the prompted StarCoder generates a hallucinated explanation and simply repeats the wrong solution.", "localizador": "PDF p. 18, Seção A.5.1"},
+      {"trecho": "Actually, such simple repeats of wrong solutions are very common when using the prompting approach, which supports our motivation to train LLM to self-debug.", "localizador": "PDF p. 18, Seção A.5.1"},
+      {"trecho": "Yet, the refinement from CodeLlama-13B is not fully correct, as “(x, y, z) == ((int)x, (int)y, (int)z)” is not equivalent to checking if these numbers are integers.", "localizador": "PDF p. 18, Seção A.5.3"},
+      {"trecho": "As LLMs may provide wrong explanations or refinements, we cannot blindly take them as training data.", "localizador": "PDF p. 3, Seção 2.1"},
+      {"trecho": "Thus, we verify the refinements by running them against the test cases again, and only those passing all the test cases are considered correct refinements.", "localizador": "PDF p. 3, Seção 2.1"},
+      {"trecho": "On the MBPP+ and HumanEval+ benchmarks, which feature more rigorous test cases, respectively [26], we observe even greater improvements from RL training on the CodeLlama models.", "localizador": "PDF p. 7, Seção 4.1.1"},
+      {"trecho": "Additionally, our current experiments only use two types of prompts for enabling LLMs to self-debug: one that directly asks for refinement and another that first asks for an explanation of the wrong code followed by refinement.", "localizador": "PDF p. 9, Seção 5"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Refine (Prompt.)",
+      "mecanismos": ["instrucao", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["contexto", "feedback"],
+      "comparador": "Init. (Prompt.)",
+      "modelo": "StarCoder-15B (pré-treinado, sem treinamento LEDEX)",
+      "benchmark": "MBPP",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 37.70, "intervencao": 40.64},
+      "denominador": "nao_informado (número de tarefas do conjunto de avaliação do MBPP não informado; 100 amostras por tarefa)",
+      "condicoes": "Autodepuração em uma rodada: 100 soluções iniciais por tarefa (temperatura 0,8) executadas contra os testes; para cada solução incorreta, uma refinação amostrada com o código errado e o retorno de execução. A métrica mede a geração de código após a autodepuração. O contraste isola a rodada de autodepuração como pacote, não um ingrediente. Formato exato do prompt nas linhas Prompt. não declarado (Figura 5 (3.1) ou Figura 7 esquerda). Número de execuções independentes: nao_informado. Conferido no PDF (p. 6, Tabela 2).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado para prompting: o resumo, as contribuições e a conclusão destacam o LEDEX (ajuste fino), fora do escopo. A Tabela 1 é descritiva; a Tabela 2 é a primeira tabela com contraste de prompting (Init., Refine e Expl. + Refine no bloco Prompt.). Primeira métrica (pass@1 do MBPP), primeiro modelo (StarCoder-15B), primeira linha de base de prompting (Init.) e primeira técnica listada depois dela (Refine).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6 (impressa 6), Tabela 2, bloco StarCoder-15B, Prompt., coluna MBPP pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Init. 37.70 69.60 30.34 63.21 34.90 60.85 26.16 56.77", "localizador": "PDF p. 6, Tabela 2, bloco StarCoder-15B / Prompt., colunas MBPP pass@1 pass@10 | Humanval pass@1 pass@10 | MBPP+ pass@1 pass@10 | HumanEval+ pass@1 pass@10"},
+        {"trecho": "Refine 40.64 71.04 34.05 65.42 40.48 66.59 30.73 61.11", "localizador": "PDF p. 6, Tabela 2, bloco StarCoder-15B / Prompt., colunas MBPP pass@1 pass@10 | Humanval pass@1 pass@10 | MBPP+ pass@1 pass@10 | HumanEval+ pass@1 pass@10"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Expl. + Refine (Prompt.)",
+      "mecanismos": ["instrucao", "contexto", "feedback", "raciocinio"],
+      "mecanismos_acrescentados": ["raciocinio"],
+      "comparador": "Refine (Prompt.)",
+      "modelo": "StarCoder-15B (pré-treinado, sem treinamento LEDEX)",
+      "benchmark": "MBPP",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 40.64, "intervencao": 40.37},
+      "denominador": "nao_informado (número de tarefas do conjunto de avaliação do MBPP não informado; 100 amostras por tarefa)",
+      "condicoes": "Mesmas soluções iniciais (100 por tarefa, temperatura 0,8) e uma refinação por solução incorreta; a única diferença declarada entre as condições é o pedido de explicar o código errado antes de corrigi-lo (Figura 5 (3.1) contra (3.2); Figura 7 esquerda contra direita). Número de execuções independentes: nao_informado. Conferido no PDF (p. 6, Tabela 2).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Nenhuma técnica de prompting é focal; para completar o alvo, cobre-se o componente explicação antes do refinamento, que o estudo isola ao comparar explicitamente as duas formulações (Seção 1; A.1). Não há tabela de ablação de prompting; o par Refine / Expl. + Refine aparece na Tabela 2 (primeira tabela com o contraste), primeira métrica (MBPP pass@1) e primeiro modelo (StarCoder-15B); a condição com o componente é a intervenção e a sem ele é o comparador.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6 (impressa 6), Tabela 2, bloco StarCoder-15B, Prompt., coluna MBPP pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Refine 40.64 71.04 34.05 65.42 40.48 66.59 30.73 61.11", "localizador": "PDF p. 6, Tabela 2, bloco StarCoder-15B / Prompt., colunas MBPP pass@1 pass@10 | Humanval pass@1 pass@10 | MBPP+ pass@1 pass@10 | HumanEval+ pass@1 pass@10"},
+        {"trecho": "Expl. + Refine 40.37 71.60 33.96 67.20 39.23 64.67 30.09 60.72", "localizador": "PDF p. 6, Tabela 2, bloco StarCoder-15B / Prompt., colunas MBPP pass@1 pass@10 | Humanval pass@1 pass@10 | MBPP+ pass@1 pass@10 | HumanEval+ pass@1 pass@10"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e quatro questões de pesquisa explícitos (capacidade de geração e refinamento, refinamento iterativo, generalização, qualidade das explicações).",
+      "localizador": "PDF p. 2, contribuições; PDF p. 5, Seção 4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Amostragem (100 soluções, temperatura 0,8, uma refinação por solução incorreta) e hiperparâmetros de treino descritos; porém o prompt da geração inicial na avaliação e o formato exato usado nas linhas Prompt. não são declarados, e a agregação «overall» (Tabela 3) e a média da Tabela 4 não são descritas.",
+      "localizador": "PDF p. 5, Seções 3 e 4.1; PDF p. 6, Tabela 3; PDF p. 7, Tabela 4; PDF p. 15-16, Figuras 5 e 7"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Linha de base de prompting executada nos mesmos modelos, benchmarks e métricas (Init., Refine e Expl. + Refine), além das condições treinadas.",
+      "localizador": "PDF p. 6, Tabelas 2 e 3; PDF p. 7, Tabela 4; PDF p. 14, Tabela 10"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k definido por referência e adequado; taxa de sucesso do refinamento sem denominadores (número de soluções incorretas) informados; melhorias relatadas com «%» sem distinguir p.p. de variação relativa; divergência entre texto (1.85) e Tabela 3 (+1.58) e negrito da Tabela 2 incompatível com os valores em MBPP+ pass@10 do StarCoder-15B; avaliação de explicações por GPT-4 combinada com notas humanas parciais.",
+      "localizador": "PDF p. 5, Seção 4.1; PDF p. 6, Tabelas 2 e 3; PDF p. 7, Seção 4.1.1 e Tabela 4; PDF p. 10, Tabela 9"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações trata da dependência dos LLMs fornecedores de dados e do uso de só dois tipos de prompt; não discute não determinismo, número de execuções, significância estatística nem contaminação.",
+      "localizador": "PDF p. 9, Seção 5"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Hiperparâmetros, hardware, prompts de exemplo (Figuras 5 a 7) e contagens dos dados de treino informados; versões ou snapshots de GPT-3.5-Turbo e GPT-4 e tamanhos dos conjuntos de avaliação não informados; nenhum pacote de replicação citado no texto.",
+      "localizador": "PDF p. 3, Tabela 1; PDF p. 5, Seção 3; PDF p. 15-16, Figuras 5 a 7"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O treinamento usa só os conjuntos de treino de MBPP (374 problemas) e APPS (5.000), o que separa dados de treino e de avaliação do MBPP; o estudo não discute possível presença de MBPP ou HumanEval no pré-treinamento dos modelos avaliados nem nos exemplos usados no prompting.",
+      "localizador": "PDF p. 3, Seção 2.1"
+    }
+  ],
+  "leitura": {
+    "situacao": "completa",
+    "observacao": "Texto extraído lido integralmente (1.254 linhas, incluindo apêndices).",
+    "paginas_pdf_abertas": [6, 7, 9, 10, 14, 15, 16]
+  }
+}

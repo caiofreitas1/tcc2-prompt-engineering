@@ -1,0 +1,695 @@
+{
+  "estudo": "S724",
+  "texto_fonte": "fontes/textos/lote/S724.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2505.07270v3 [cs.SE], 24 Sep 2025 (impresso na margem da p. 1 do PDF); o PDF não traz numeração de página impressa",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "SPECFIX",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "feedback",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "decomposicao",
+          "feedback",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo e introdução); p. 5–7 do PDF (Seção IV, Algoritmo 1, Seções IV-A e IV-B); p. 8 do PDF (Tabela I, linhas «Original» e «SPECFIX»); p. 9 do PDF (Tabelas II e III)",
+        "observacao": "Técnica que reescreve automaticamente a descrição do problema (o prompt de geração), que é depois usada em geração zero-shot. Pacote: o mesmo LLM extrai os exemplos de entrada e saída embutidos na descrição (instrucao), gera entradas de teste, amostra N = 20 programas que são agrupados em clusters semânticos pela saída nas entradas geradas (amostragem); calcula entropia semântica (SE) e consistência com os exemplos (EC); seleciona o maior cluster com EC = 1 ou, se nenhum cluster passa todos os exemplos, repara um programa do cluster mais provável com self-refine guiado por falhas de teste (feedback); o prompt de inferência contrastiva de especificação recebe o programa selecionado e os rejeitados com suas saídas (contexto) e produz a revisão mínima da descrição; a revisão só é aceita se SE diminuir e EC aumentar, em até K iterações (feedback, otimizacao_prompt); a divisão em reparo da distribuição e inferência contrastiva é a decomposição declarada (decomposicao). Os exemplos de entrada e saída já estão na descrição original (exemplos, herdado da condição Original). O contrafactual é de pacote: a Tabela I compara a descrição reparada com a descrição original, no mesmo modelo e na mesma geração zero-shot; o ganho não pode ser atribuído a um único mecanismo. Pacote híbrido: inclui agrupamento por execução, seleção por voto majoritário e configuração de temperatura, que não são prompting (ver componentes_fora_escopo). O valor de K usado nos experimentos principais não é informado."
+      },
+      {
+        "nome_original": "Original (descrições antes do reparo, geração zero-shot)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 do PDF (Seção V-A, Benchmarks); p. 8 do PDF (legenda e linhas «Original» da Tabela I; Seção V-D)",
+        "observacao": "Prompt base: a descrição do benchmark como impressa, usada em geração zero-shot. As descrições embutem exemplos de entrada e saída (HumanEval+: 2,81 exemplos por problema em média e 161 descrições com ao menos um exemplo; MBPP+: um exemplo por problema), por isso exemplos é atribuído também a esta condição. O texto do prompt de geração não é reproduzido no artigo."
+      },
+      {
+        "nome_original": "Original + µFix",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "raciocinio",
+          "feedback",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio",
+          "feedback",
+          "restricoes"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 do PDF (Fig. 3 e Seção II-C); p. 8 do PDF (Seção V-B e linhas «Original + µFix» da Tabela I)",
+        "observacao": "Abordagem de raciocínio de outro trabalho [8], usada como linha de base: prompt formatado que pede a análise passo a passo dos casos de teste («You MUST follow the format», restricoes), cadeia de raciocínio sobre os exemplos (raciocinio) e revisão da análise quando os programas falham nos exemplos (feedback). Não modifica a descrição, por isso não tem Mod%. A Tabela I traz a condição Original no mesmo modelo, o que dá um contraste de pacote, mas como sistema comparador seus mecanismos não são isolados; por isso avaliada_isoladamente = nao. [D108, correção registrada] Pacote avaliado contra Original, geração zero-shot (Tabela I, p. 8; DeepSeek, HumanEval+, Pass@1: 87,8 × 88,9), no mesmo modelo, benchmark e métrica; os ingredientes do pacote não são isolados, e o resultado não se atribui a um mecanismo isolado."
+      },
+      {
+        "nome_original": "Vanilla Repair",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "decomposicao",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao",
+          "otimizacao_prompt"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7 do PDF (Seção V-B, Vanilla Repair); p. 8 do PDF (linhas «Vanilla Repair» da Tabela I)",
+        "observacao": "Linha de base construída pelos autores: o LLM primeiro classifica a descrição como ambígua ou não e, se ambígua, é instruído a resolver a ambiguidade adotando a interpretação mais provável (duas etapas encadeadas, decomposicao; reescrita automática do prompt, otimizacao_prompt). Os exemplos embutidos permanecem na descrição. Prompts não reproduzidos no artigo. Sistema comparador sem isolamento de mecanismos. [D108, correção registrada] Pacote avaliado contra Original, geração zero-shot (Tabela I, p. 8; DeepSeek, HumanEval+, Pass@1: 87,8 × 84,8), no mesmo modelo, benchmark e métrica; os ingredientes do pacote não são isolados, e o resultado não se atribui a um mecanismo isolado."
+      },
+      {
+        "nome_original": "ClarifyGPT-auto",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "decomposicao",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF (Fig. 2 e Seção II-B); p. 7–8 do PDF (Seção V-B, ClarifyGPT-auto); p. 8 do PDF (linhas «ClarifyGPT-auto» da Tabela I)",
+        "observacao": "Adaptação de ClarifyGPT [2] pelos autores: a ambiguidade é detectada por mais de um cluster semântico entre N = 20 programas amostrados (amostragem); o LLM gera perguntas de esclarecimento, responde-as com o prompt de simulação de usuário a partir dos exemplos embutidos (em vez dos testes ocultos do original) e as respostas são concatenadas à descrição original (decomposicao, otimizacao_prompt). Sistema comparador sem isolamento de mecanismos. [D108, correção registrada] Pacote avaliado contra Original, geração zero-shot (Tabela I, p. 8; DeepSeek, HumanEval+, Pass@1: 87,8 × 89,0), no mesmo modelo, benchmark e métrica; os ingredientes do pacote não são isolados, e o resultado não se atribui a um mecanismo isolado."
+      },
+      {
+        "nome_original": "semantic entropy (SE) [guia do reparo; variante SPECFIXwoSE]",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "feedback",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "amostragem"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10 do PDF (Seção V-G); p. 11 do PDF (Tabela V, colunas «SPECFIXwoSE» e «SPECFIX»)",
+        "observacao": "Critério de reparo baseado na entropia semântica dos clusters de programas amostrados. A ablação compara SPECFIX com SPECFIXwoSE (removendo SE), com Pass@1 sobre os conjuntos inteiros porque as variantes modificam descrições diferentes. O artigo não descreve como a variante opera sem o critério (por exemplo, se mantém a amostragem e a seleção por probabilidade), por isso a atribuição de amostragem como ingrediente retirado é aproximada."
+      },
+      {
+        "nome_original": "example consistency (EC) [guia do reparo; variante SPECFIXwoEC]",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto",
+          "decomposicao",
+          "feedback",
+          "amostragem",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 do PDF (Definição 3); p. 10 do PDF (Seção V-G); p. 11 do PDF (Tabela V, colunas «SPECFIXwoEC» e «SPECFIX»)",
+        "observacao": "Critério que mede a fração de exemplos de entrada e saída embutidos que os programas de cada cluster satisfazem, obtida por execução (feedback de execução sobre os exemplos). A ablação compara SPECFIX com SPECFIXwoEC (removendo EC). O artigo não descreve como o ramo de reparo de programa opera sem EC, por isso a categoria do ingrediente retirado é aproximada."
+      },
+      {
+        "nome_original": "contrastive specification inference",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 do PDF (contribuições); p. 7 do PDF (Seção IV-B)",
+        "observacao": "Prompt que recebe o programa selecionado com suas saídas (evidência a favor) e os programas rejeitados com suas saídas (evidência contrária) e pede que o modelo diagnostique a ambiguidade e reescreva a especificação com edição mínima. O texto do prompt está só nos materiais suplementares, não consultados. Não há condição sem este componente; as Figs. 2 e 3 são exemplos qualitativos, não contrafactual."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature 0 for all tasks; default temperature for program sampling",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura fixada em 0 em todas as tarefas, exceto na amostragem de programas, que usa a temperatura padrão de cada LLM para obter diversidade. Comum a todas as condições.",
+        "localizador": "p. 7 do PDF (Seção V-A, parágrafo após Benchmarks)"
+      },
+      {
+        "nome_original": "Partition (semantic clustering by test outputs)",
+        "natureza": "outro",
+        "descricao": "Agrupamento algorítmico dos programas amostrados conforme as saídas nas entradas de teste geradas; programas com saídas idênticas formam um cluster. As entradas são geradas por prompting, mas a partição é procedimento de execução e comparação, não prompting. Faz parte do pacote híbrido SPECFIX e também de ClarifyGPT-auto.",
+        "localizador": "p. 6 do PDF (Seção IV-A e Algoritmo 1, linhas 1–5)"
+      },
+      {
+        "nome_original": "majority voting / modified z-score with deferral to user",
+        "natureza": "outro",
+        "descricao": "Regra estatística de seleção de cluster: no SPECFIX padrão, o cluster mais provável entre os que têm EC = 1; na mitigação, o z-score modificado exige que a probabilidade do cluster supere substancialmente as demais, senão a escolha entre dois programas é devolvida ao usuário (simulado pelos autores com testes ocultos). A seleção por votação faz parte da amostragem do pacote; o critério estatístico e a intervenção do usuário não são prompting.",
+        "localizador": "p. 6 do PDF (Probability-guided Repair); p. 10 do PDF (Seção V-H)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-4o (OpenAI)",
+        "versao": "nao_informado (cita o system card [17]; snapshot não informado)"
+      },
+      {
+        "nome": "GPT-4o-mini (OpenAI)",
+        "versao": "nao_informado"
+      },
+      {
+        "nome": "DeepSeek-V3",
+        "versao": "nao_informado (apenas o nome; cita o relatório técnico [7])"
+      },
+      {
+        "nome": "Qwen2.5-Coder-32B-Instruct",
+        "versao": "nao_informado (apenas o nome e o tamanho de 32B)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "HumanEval+ (EvalPlus)",
+        "quantidade": "164 problemas; 2,81 exemplos por problema em média; 161 descrições com ao menos um exemplo embutido",
+        "observacao": "Pass@1 da Tabela I sobre todos os problemas; Tabelas II e III usam subconjuntos de descrições modificadas, com tamanho na coluna «#»."
+      },
+      {
+        "nome": "MBPP+ (EvalPlus)",
+        "quantidade": "378 problemas Python verificados manualmente, um exemplo em cada problema",
+        "observacao": "A Seção V-H fala em 542 instâncias para HumanEval+ e MBPP+ juntos."
+      },
+      {
+        "nome": "LiveCodeBench v6 (livecodebench_v6)",
+        "quantidade": "175 problemas publicados entre janeiro e maio de 2025 (LeetCode, AtCoder, Codeforces)",
+        "observacao": "Escolhido para reduzir o risco de vazamento de dados; testes ocultos diferentes dos exemplos das descrições."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@1",
+        "definicao": "probabilidade de um programa gerado passar em todos os testes; estimada com dez programas independentes por problema",
+        "denominador": "problemas do benchmark inteiro (Tabelas I e V) ou subconjunto de descrições modificadas (Tabelas II e III, coluna «#»)"
+      },
+      {
+        "nome": "AvgPassRate (APR)",
+        "definicao": "razão esperada de testes aprovados entre os programas gerados",
+        "denominador": "nao_informado além dos problemas do benchmark"
+      },
+      {
+        "nome": "%Pass@1>0 (NZP@1)",
+        "definicao": "proporção de problemas com Pass@1 maior que zero",
+        "denominador": "problemas do benchmark"
+      },
+      {
+        "nome": "Majority@20 (M@20)",
+        "definicao": "acurácia do programa mais frequente entre 20 amostras (voto majoritário)",
+        "denominador": "problemas do benchmark"
+      },
+      {
+        "nome": "Semantic Entropy (SE)",
+        "definicao": "entropia da distribuição dos programas gerados entre clusters semânticos",
+        "denominador": "N = 20 programas por descrição"
+      },
+      {
+        "nome": "Mod%",
+        "definicao": "razão de descrições modificadas",
+        "denominador": "problemas do benchmark"
+      },
+      {
+        "nome": "Incorrect-Modification Rate (IMR)",
+        "definicao": "texto: fração de modificações que reduzem Pass@1; legenda da Tabela VI: fração de descrições modificadas que são incorretas",
+        "denominador": "descrições modificadas (número absoluto não informado na Tabela VI)"
+      },
+      {
+        "nome": "incremento relativo do tamanho da descrição",
+        "definicao": "crescimento percentual médio do tamanho da descrição reparada em relação à original (unidade de tamanho não informada)",
+        "denominador": "nao_informado"
+      },
+      {
+        "nome": "tempo médio de reparo e custo em tokens",
+        "definicao": "36,7 segundos e 6770,7 tokens por descrição (média)",
+        "denominador": "nao_informado (não diz sobre quais modelos e benchmarks a média é calculada)"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "observacao": "Explícito para MBPP+ («hand-verified Python programming problems») e nos exemplos das Figs. 1 e 3; para HumanEval+ e LiveCodeBench a linguagem usada não é declarada no artigo (nao_informado)."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Ambiguidades sutis na descrição levam o LLM a gerar código incorreto mesmo com exemplos de entrada e saída que esclarecem a intenção (motivação do estudo).",
+        "localizador": "p. 3 do PDF (Observation 1, Seção II-A)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O próprio SPECFIX produz modificações incorretas que reduzem Pass@1: IMR médio de 3,23% e Pass@1 de 20,93% nessas modificações, atribuídos principalmente ao voto majoritário quando clusters correto e incorreto têm probabilidades próximas.",
+        "localizador": "p. 10 do PDF (Seção V-H); p. 11 do PDF (Tabela VI)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "SPECFIX supõe que os exemplos de entrada e saída estão corretos; em 5 de 542 instâncias de HumanEval+ e MBPP+ os exemplos conflitavam com as soluções de referência, o que levou a esclarecimentos incorretos.",
+        "localizador": "p. 10 do PDF (Seção V-H, último parágrafo)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Linhas de base de reparo por LLM produzem esclarecimentos redundantes, inconclusivos ou enganosos; no exemplo da Fig. 2, a taxa de aprovação após os esclarecimentos de ClarifyGPT-auto cai para 0.",
+        "localizador": "p. 3 do PDF (Fig. 2 e Seção II-B); p. 4 do PDF (Observation 2)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Risco de vazamento de dados de avaliação: o ClarifyGPT original simula o usuário com testes ocultos, o que os autores substituem pelos exemplos das descrições; LiveCodeBench v6 é escolhido para minimizar vazamento. O artigo não discute contaminação de HumanEval+ e MBPP+ no pré-treinamento. A simulação de usuário da mitigação da Seção V-H usa testes ocultos.",
+        "localizador": "p. 7 do PDF (Seção V-A, Benchmarks); p. 8 do PDF (Seção V-B, ClarifyGPT-auto); p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Variabilidade da geração: os experimentos são repetidos três vezes e é relatada a média; a abordagem depende de temperatura de amostragem não nula. Os autores atribuem a inversão no subconjunto de 8 casos (Vanilla Repair, HumanEval+, Qwen2.5) a possível ruído estatístico.",
+        "localizador": "p. 7 do PDF (Seção V-A); p. 9 do PDF (Seção V-D, texto após a Tabela III)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo relata tempo médio de reparo de 36,7 segundos e custo médio de 6770,7 tokens por descrição; não compara esse custo com as linhas de base nem informa sobre quais modelos e benchmarks a média é calculada.",
+        "localizador": "p. 9 do PDF (Seção V-D, parágrafo antes do quadro RQ1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Descrições alongadas pelas linhas de base (esclarecimentos de ClarifyGPT-auto e cadeias de raciocínio de µFix) podem reduzir a compreensão do problema e levar a sobreajuste aos esclarecimentos ou exemplos (afirmação dos autores, não medida).",
+        "localizador": "p. 10 do PDF (Seção V-F)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaças à validade: a abordagem supõe que o código possa ser executado de forma independente e que alguns candidatos sejam corretos ou quase corretos; validade de construto da operacionalização da ambiguidade por Pass@1, SE e EC; algumas ambiguidades podem exigir intervenção humana; validade externa limitada aos três benchmarks e aos exemplos embutidos.",
+        "localizador": "p. 10–11 do PDF (Seção VI)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Z-score modificado no voto majoritário, com devolução da escolha ao usuário (simulado com testes ocultos) em 10,8% das modificações; IMR cai para 1,58% e Pass@1 nas modificações incorretas sobe para 47,93% (médias antes e depois na Tabela VI). A simulação com testes ocultos não equivale a usuário real.",
+        "avaliada": "sim",
+        "localizador": "p. 10 do PDF (Seção V-H); p. 11 do PDF (Tabela VI)"
+      },
+      {
+        "descricao": "Em ClarifyGPT-auto, substituição dos testes ocultos pelos exemplos das descrições para eliminar risco de vazamento.",
+        "avaliada": "nao",
+        "localizador": "p. 8 do PDF (Seção V-B, ClarifyGPT-auto)"
+      },
+      {
+        "descricao": "Uso de LiveCodeBench v6 (problemas de janeiro a maio de 2025) para minimizar vazamento; testes ocultos diferentes dos exemplos das descrições.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção V-A, Benchmarks)"
+      },
+      {
+        "descricao": "Repetição de todos os experimentos três vezes, com relato da média; temperatura 0 fora da amostragem de programas.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção V-A)"
+      },
+      {
+        "descricao": "Avaliação pareada restrita à interseção das descrições modificadas por SPECFIX e por cada linha de base, para neutralizar diferenças de detecção de ambiguidade.",
+        "avaliada": "nao",
+        "localizador": "p. 9 do PDF (Tabela II e texto após a Tabela III)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a tabela na ablação: o texto diz que SPECFIX tem Pass@1 2,2% maior que SPECFIXwoSE e 0,92% maior que SPECFIXwoEC, mas na Tabela V a coluna SPECFIXwoEC tem valores menores que SPECFIXwoSE em todas as 12 linhas (por exemplo, DeepSeek-V3/HumanEval+: 90.55 woSE, 89.95 woEC, 91.99 SPECFIX). Cálculo próprio sobre as 12 linhas: diferença média de cerca de 0,92 em relação a woSE e de cerca de 2,22 em relação a woEC, ou seja, os números do texto parecem trocados entre as variantes (ou os rótulos das colunas estão trocados). Não é possível dizer qual está certo.",
+        "localizador": "p. 10 do PDF (Seção V-G); p. 11 do PDF (Tabela V)"
+      },
+      {
+        "descricao": "Valor diferente entre texto e tabela: o texto diz que DeepSeek/HumanEval+ chega a AvgPassRate de 95,6% com SPECFIX, mas a Tabela I imprime APR de 95.9% nessa célula.",
+        "localizador": "p. 8 do PDF (Seção V-D e Tabela I, DeepSeek, HumanEval+, coluna APR)"
+      },
+      {
+        "descricao": "Proporção de descrições modificadas com valores e denominadores diferentes: 43,58% em média no resumo e na Seção V-D; 24% na Seção V-H (descrições modificadas em HumanEval+ e MBPP+); a coluna Mod% da Tabela I varia de 16,9% a 82,3% por modelo e benchmark. O artigo não explica como cada média é calculada.",
+        "localizador": "p. 1 do PDF (resumo); p. 9 do PDF (Seção V-D); p. 10 do PDF (Seção V-H); p. 8 do PDF (Tabela I, colunas Mod%)"
+      },
+      {
+        "descricao": "Os ganhos «30.9%» (Pass@1 no subconjunto modificado) e «10.48%» (transferência entre modelos) não são qualificados como variação relativa ou em pontos percentuais; já «4.09%» é declarado absoluto. As médias são feitas entre modelos e benchmarks heterogêneos.",
+        "localizador": "p. 1 do PDF (resumo); p. 9 do PDF (Seção V-D e quadro RQ1); p. 10 do PDF (quadro RQ2)"
+      },
+      {
+        "descricao": "Inversão em métrica secundária: NZP@1 de SPECFIX fica abaixo de Original em DeepSeek/HumanEval+ (93.3% vs 93.9%), DeepSeek/MBPP+ (83.2% vs 83.6%), GPT-4o/HumanEval+ (90.2% vs 91.5%) e GPT-4o/MBPP+ (82.7% vs 84.9%), embora a legenda diga que SPECFIX supera consistentemente as outras abordagens nas métricas de geração de código.",
+        "localizador": "p. 8 do PDF (Tabela I, colunas NZP@1)"
+      },
+      {
+        "descricao": "Legenda da Tabela I afirma superioridade consistente na redução de incerteza, mas em LiveCodeBench a SE de Original + µFix é menor que a de SPECFIX com DeepSeek (0.1 vs 0.3) e Qwen2.5 (0.3 vs 0.4) e igual com GPT-4o (0.3) e GPT-4o-mini (0.4).",
+        "localizador": "p. 8 do PDF (Tabela I, LiveCodeBench, coluna SE)"
+      },
+      {
+        "descricao": "Na Tabela II, SPECFIX fica abaixo do original e da linha de base no subconjunto Vanilla Repair/HumanEval+/Qwen2.5 (8 casos: 36.25% original, 35.00% baseline, 29.17% SPECFIX), o que os autores reconhecem; além disso, em Vanilla Repair/LiveCodeBench/GPT-4o-mini (2 casos) SPECFIX empata com a linha de base (50.00% e 50.00%), o que não é registrado no texto que afirma Pass@1 maior em todos os demais subconjuntos.",
+        "localizador": "p. 9 do PDF (Tabela II e texto após a Tabela III)"
+      },
+      {
+        "descricao": "Transferência entre modelos com quedas (células em vermelho na Tabela III): por exemplo, descrições reparadas por GPT-4o avaliadas no DeepSeek em HumanEval+ (72.62/71.13), por DeepSeek avaliadas no Qwen2.5 em MBPP+ (49.95/46.68), por GPT-4o-mini em MBPP+ nos três outros modelos (55.36/51.03; 57.11/51.42; 52.10/48.70) e por GPT-4o-mini avaliadas no GPT-4o em LiveCodeBench (22.12/20.96).",
+        "localizador": "p. 9 do PDF (Tabela III); p. 10 do PDF (Seção V-E)"
+      },
+      {
+        "descricao": "Configuração de K divergente: o experimento de iterações em LiveCodeBench/Qwen2.5 relata Pass@1 de 31,17% (k=1) e 36,51% (k=3), enquanto a Tabela I imprime 33.1% e a Tabela V 33.12 para SPECFIX nessa combinação; o valor de K usado nos experimentos principais não é informado, de modo que a relação entre os números não pode ser verificada.",
+        "localizador": "p. 10 do PDF (Seção V-G, último parágrafo); p. 8 do PDF (Tabela I); p. 11 do PDF (Tabela V)"
+      },
+      {
+        "descricao": "Incoerência na formulação do objetivo: o texto diz que o objetivo final é uma descrição com SE = 1 e EC = 0, enquanto o Algoritmo 1 (linha 12) trata como não ambígua a descrição com se = 0 e ec = 1 e a explicação no mesmo parágrafo (cluster único, todos os programas passam nos exemplos) corresponde a SE = 0 e EC = 1.",
+        "localizador": "p. 6 do PDF (parágrafo após a Definição 4 e Algoritmo 1)"
+      },
+      {
+        "descricao": "Definição de IMR diferente entre texto («fraction of modifications that reduce Pass@1») e legenda da Tabela VI («fraction of modified descriptions that are incorrect»); a Tabela VI rotula os benchmarks como HumanEval e MBPP, sem o sinal +.",
+        "localizador": "p. 10 do PDF (Seção V-H); p. 11 do PDF (legenda e corpo da Tabela VI)"
+      },
+      {
+        "descricao": "O reparo de programas é descrito como «self-refine method [16]», mas a referência [16] é CYCLE («Learning to self-refine the code generation»), abordagem que treina o modelo; o artigo não deixa claro se o reparo usa prompting do mesmo LLM ou outro modelo.",
+        "localizador": "p. 6–7 do PDF (Program Repair Based Description Repair); p. 12 do PDF (referência [16])"
+      },
+      {
+        "descricao": "Pass@1 é estimado com dez programas por problema, Majority@20 com 20 amostras e SE com N = 20; o número de amostras difere entre métricas da mesma tabela.",
+        "localizador": "p. 8 do PDF (Seção V-C); p. 7 do PDF (Seção V-A)"
+      },
+      {
+        "descricao": "As linhas de base Vanilla Repair e ClarifyGPT-auto são adaptações feitas pelos próprios autores (ClarifyGPT original não foi desenhado para reparo automático e usa testes ocultos), e µFix não modifica descrições; a comparação é com versões adaptadas, não com os sistemas originais.",
+        "localizador": "p. 3 do PDF (Seção II-B); p. 7–8 do PDF (Seção V-B)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Componentes do sistema SPECFIX: Extract_Examples, Generate_Inputs (por prompting do mesmo LLM), Partition (por execução), reparo guiado por probabilidade (cluster com EC = 1 de maior probabilidade, inspirado em CodeT), reparo de programa com feedback de execução quando nenhum cluster passa todos os exemplos, inferência contrastiva de especificação e aceitação da revisão só quando SE diminui e EC aumenta.",
+        "localizador": "p. 6–7 do PDF (Seção IV e Algoritmo 1)"
+      },
+      {
+        "descricao": "Escolha de N = 20 a partir de experimento em subconjunto de problemas com N de 5 a 40: entropia de 0,096 (N=5) a 0,1123 (N=20), com flutuações pequenas depois.",
+        "localizador": "p. 7 do PDF (Seção V-A, último parágrafo)"
+      },
+      {
+        "descricao": "Experimento com o hiperparâmetro k (1 a 10) em LiveCodeBench e Qwen2.5: Pass@1 de 31,17% (k=1) a 36,51% (k=3), depois flutuações pequenas. Não é ablação de prompting.",
+        "localizador": "p. 10 do PDF (Seção V-G)"
+      },
+      {
+        "descricao": "RQ2 avalia descrições reparadas por um modelo na geração de outro modelo (Tabela III); o ganho médio de 10,48% é relatado sem qualificação de unidade.",
+        "localizador": "p. 9–10 do PDF (Tabela III e Seção V-E)"
+      },
+      {
+        "descricao": "RQ3 mede o aumento relativo do tamanho da descrição (Tabela IV): por exemplo, com GPT-4o em MBPP+, ClarifyGPT-auto 576,6% e µFix 426,6% contra 237,4% de SPECFIX; o texto arredonda para 576,61% e 425,56% (este último difere de 426.6% na tabela).",
+        "localizador": "p. 10 do PDF (Seção V-F e Tabela IV)"
+      },
+      {
+        "descricao": "Esforço do usuário: a introdução descreve que perguntas de esclarecimento redundantes impõem carga cognitiva adicional aos usuários; na mitigação, o usuário é consultado em 10,8% das modificações para escolher entre dois programas (simulado com testes ocultos). O estudo não trata esse esforço como custo.",
+        "localizador": "p. 1 do PDF (introdução); p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "descricao": "Código, scripts e dados declarados disponíveis em https://github.com/msv-lab/SpecFix; os prompts estão nos materiais suplementares. Nenhum dos dois foi acessado nesta extração.",
+        "localizador": "p. 2 do PDF (fim da introdução); p. 7 do PDF (fim da Seção IV-B)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Without human intervention or external information, SPECFIX modified 43.58% of descriptions, improving Pass@1 on the modified set by 30.9%.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "trecho": "This yields a 4.09% absolute improvement across the entire benchmark.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "trecho": "To address this, we decompose this task into two simpler steps: (1) analyzing and repairing the LLM’s interpretation of the description — captured by the distribution of programs it induces — using traditional testing and program repair, and (2) refining the description based on distribution changes via a method we call contrastive specification inference.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "trecho": "Observation 1: Subtle ambiguities in natural language problem descriptions can lead LLMs to generate incorrect code, even when clarifying I/O examples are present.",
+        "localizador": "p. 3 do PDF (Seção II-A)"
+      },
+      {
+        "trecho": "Specifically, we employ the self-refine method [16], which utilizes incorrect programs, together with the runtime feedback (e.g. test failures, expected output and actual output), and automatically generate a corrected program.",
+        "localizador": "p. 6–7 do PDF (Seção IV-A, Program Repair Based Description Repair)"
+      },
+      {
+        "trecho": "SPECFIX realizes this objective by prompting an LLM with both the supporting evidence (selected program & outputs) and the contradicting evidence (rejected programs & outputs), and asking the model to (i) diagnose the sources of ambiguity and (ii) rewrite the specification so that only the intended behavior remains admissible.",
+        "localizador": "p. 7 do PDF (Seção IV-B)"
+      },
+      {
+        "trecho": "To minimize the risk of data leakage, we select livecodebench_v6, which contains 175 problems released between January 2025 and May 2025.",
+        "localizador": "p. 7 do PDF (Seção V-A, Benchmarks)"
+      },
+      {
+        "trecho": "To account for generation variability, we repeated all experiments three times and reported the average performance.",
+        "localizador": "p. 7 do PDF (Seção V-A)"
+      },
+      {
+        "trecho": "If a description is judged as ambiguous, the model is prompted to resolve the ambiguity by adopting the most likely interpretation.",
+        "localizador": "p. 7 do PDF (Seção V-B, Vanilla Repair)"
+      },
+      {
+        "trecho": "Whereas the original approach simulates human clarifications using hidden test cases, we replace this mechanism with examples drawn directly from the problem descriptions to eliminate data-leakage risks.",
+        "localizador": "p. 7–8 do PDF (Seção V-B, ClarifyGPT-auto)"
+      },
+      {
+        "trecho": "µFix [8] analyzes program failures on input–output examples and generates reasoning chains to iteratively refine its interpretation of problem descriptions.",
+        "localizador": "p. 8 do PDF (Seção V-B)"
+      },
+      {
+        "trecho": "SPECFIX’s average repair time is 36.7 seconds, and the average token cost is 6770.7 tokens per description.",
+        "localizador": "p. 9 do PDF (Seção V-D)"
+      },
+      {
+        "trecho": "On average, IMR is 3.23%, and Pass@1 on incorrectly modifications is 20.93%.",
+        "localizador": "p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "trecho": "As a mitigation strategy, we apply modified z-score for majority voting: a cluster is selected only if its probability substantially exceeds all others [26].",
+        "localizador": "p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "trecho": "This resulted in IMR’s drop to 1.58% and Pass@1’s rise to 47.93%.",
+        "localizador": "p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "trecho": "In HumanEval+ and MBPP+, we identified 5 out of 542 instances where the examples conflicted with the reference solutions (< 1%), causing SPECFIX to produce incorrect clarifications.",
+        "localizador": "p. 10 do PDF (Seção V-H)"
+      },
+      {
+        "trecho": "On average, SPECFIX improves 2.2% and 0.92% higher Pass@1 than SPECFIXwoSE and SPECFIXwoEC, respectively.",
+        "localizador": "p. 10 do PDF (Seção V-G)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SPECFIX",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "decomposicao",
+        "feedback",
+        "amostragem",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "decomposicao",
+        "feedback",
+        "amostragem",
+        "otimizacao_prompt"
+      ],
+      "comparador": "Original (descrições antes do reparo, geração zero-shot)",
+      "modelo": "DeepSeek-V3 (versão nao_informado)",
+      "benchmark": "HumanEval+ (164 problemas)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 87.8,
+        "intervencao": 92.0
+      },
+      "denominador": "todos os problemas do HumanEval+ (164, Seção V-A); a Tabela I diz relatar as métricas «on all problems in benchmarks»; SPECFIX modificou 20,1% das descrições nesta combinação (coluna Mod%)",
+      "condicoes": "Mesmo modelo para reparo e geração; geração zero-shot a partir da descrição original ou da reparada; Pass@1 estimado com dez programas independentes por problema; N = 20 programas amostrados para a SE e o agrupamento; temperatura 0 exceto na amostragem de programas (temperatura padrão do modelo); experimentos repetidos três vezes, com relato da média; K (iterações de reparo) não informado para este experimento. O ganho é do pacote SPECFIX (híbrido, com agrupamento por execução e seleção por voto), não de um mecanismo isolado. Conferido visualmente na Tabela I (p. 8 do PDF) e no texto da Seção V-D.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo identifica uma técnica (SPECFIX), uma métrica (Pass@1) e um comparador (as descrições originais, antes do reparo). O resultado abrange quatro modelos e três benchmarks e não há agregado impresso dos valores das condições (30,9% e 4,09% são diferenças, não valores de Pass@1); aplicou-se o primeiro na ordem das tabelas de resultados: Tabela I, primeiro modelo (DeepSeek), primeiro benchmark (HumanEval+).",
+      "derivacao": "direta",
+      "localizador": "p. 8 do PDF (Tabela I, modelo DeepSeek, linhas «Original» e «SPECFIX», grupo HumanEval+, coluna Pass@1; Seção V-D)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Original – 87.8% 94.1% 93.9% 89.6% 0.1 – 79.4% 88.9% 83.6% 80.2% 0.1 – 37.5% 65.3% 44.6% 40.0% 0.5",
+          "localizador": "p. 8 do PDF (Tabela I, modelo DeepSeek, linha «Original»; colunas HumanEval+ Mod%, Pass@1, APR, NZP@1, M@20, SE, depois MBPP+ e LiveCodeBench)"
+        },
+        {
+          "trecho": "SPECFIX 20.1% 92.0% 95.9% 93.3% 92.7% 0.0 19.3% 82.1% 91.8% 83.2% 82.2% 0.0 66.3% 40.8% 69.9% 47.0% 41.9% 0.3",
+          "localizador": "p. 8 do PDF (Tabela I, modelo DeepSeek, linha «SPECFIX»; mesmas colunas)"
+        },
+        {
+          "trecho": "For instance, on the HumanEval+ benchmark with DeepSeek, SPECFIX achieves a Pass@1 of 92.0% surpassing the performance of the original descriptions (87.8%), and the results of ClarifyGPT-auto (89.0%).",
+          "localizador": "p. 8 do PDF (Seção V-D)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "semantic entropy (SE) [guia do reparo; variante SPECFIXwoSE]",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "decomposicao",
+        "feedback",
+        "amostragem",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "amostragem"
+      ],
+      "comparador": "SPECFIXwoSE (SPECFIX sem o critério de entropia semântica)",
+      "modelo": "DeepSeek-V3 (versão nao_informado)",
+      "benchmark": "HumanEval+ (164 problemas)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 90.55,
+        "intervencao": 91.99
+      },
+      "denominador": "conjunto inteiro do HumanEval+ («we report the Pass@1 over the entire datasets»)",
+      "condicoes": "Ablação de componente do pacote: a variante retira só o critério SE; como cada variante modifica descrições diferentes, o Pass@1 é calculado sobre o conjunto inteiro. Demais condições presumivelmente as do experimento principal, mas o artigo não as repete na Seção V-G; não descreve como a variante opera sem SE. A narrativa da Seção V-G (2,2% sobre woSE) não corresponde à ordem das colunas da tabela (ver heterogeneidade); registraram-se os valores das colunas como impressos. Conferido visualmente na Tabela V (p. 11 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa; para completar o alvo de três, componentes isolados da tabela de ablação, na ordem da tabela: primeiro SE (coluna SPECFIXwoSE), primeiro modelo (DeepSeek-V3), primeiro conjunto (HumanEval+).",
+      "derivacao": "direta",
+      "localizador": "p. 11 do PDF (Tabela V, HumanEval+, DeepSeek-V3, colunas «SPECFIXwoSE» e «SPECFIX»); p. 10 do PDF (Seção V-G)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "DeepSeek-V3 90.55 89.95 91.99",
+          "localizador": "p. 11 do PDF (Tabela V, grupo HumanEval+; colunas SPECFIXwoSE, SPECFIXwoEC, SPECFIX)"
+        },
+        {
+          "trecho": "Because SPECFIX and its two variants modify different descriptions under their own criteria, we report the Pass@1 over the entire datasets.",
+          "localizador": "p. 10 do PDF (Seção V-G)"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "example consistency (EC) [guia do reparo; variante SPECFIXwoEC]",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto",
+        "decomposicao",
+        "feedback",
+        "amostragem",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "SPECFIXwoEC (SPECFIX sem o critério de consistência com os exemplos)",
+      "modelo": "DeepSeek-V3 (versão nao_informado)",
+      "benchmark": "HumanEval+ (164 problemas)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 89.95,
+        "intervencao": 91.99
+      },
+      "denominador": "conjunto inteiro do HumanEval+ («we report the Pass@1 over the entire datasets»)",
+      "condicoes": "Ablação de componente do pacote: a variante retira só o critério EC; Pass@1 sobre o conjunto inteiro. O artigo não descreve como o reparo de programa opera sem EC. A narrativa da Seção V-G (0,92% sobre woEC) não corresponde à ordem das colunas da tabela (ver heterogeneidade); registraram-se os valores das colunas como impressos. Conferido visualmente na Tabela V (p. 11 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação, na ordem da tabela (coluna SPECFIXwoEC), para completar o alvo de três; primeiro modelo (DeepSeek-V3), primeiro conjunto (HumanEval+).",
+      "derivacao": "direta",
+      "localizador": "p. 11 do PDF (Tabela V, HumanEval+, DeepSeek-V3, colunas «SPECFIXwoEC» e «SPECFIX»); p. 10 do PDF (Seção V-G)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "DeepSeek-V3 90.55 89.95 91.99",
+          "localizador": "p. 11 do PDF (Tabela V, grupo HumanEval+; colunas SPECFIXwoSE, SPECFIXwoEC, SPECFIX)"
+        },
+        {
+          "trecho": "First, SPECFIX consistently outperforms both SPECFIXwoSE and SPECFIXwoEC, indicating both two components is beneficial.",
+          "localizador": "p. 10 do PDF (Seção V-G)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O problema (reparo automático de descrições ambíguas) e três questões de pesquisa (eficácia, generalização entre modelos, tamanho das alterações) são declarados.",
+      "localizador": "p. 1–2 do PDF (introdução e contribuições); p. 7 do PDF (Seção V, RQ1–RQ3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Algoritmo, estratégias de reparo, N = 20, temperaturas, dez amostras para Pass@1 e três repetições são descritos; mas o valor de K nos experimentos principais não é informado, os prompts estão só em material suplementar e não se descreve como as variantes da ablação operam sem SE ou EC.",
+      "localizador": "p. 6–7 do PDF (Seção IV, Algoritmo 1, Seção V-A); p. 8 do PDF (Seção V-C); p. 10 do PDF (Seção V-G)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Comparação com as descrições originais e com três linhas de base executadas (Vanilla Repair, ClarifyGPT-auto, Original + µFix) nos mesmos modelos e benchmarks, mais comparação pareada nas interseções de descrições modificadas; as duas primeiras são adaptações feitas pelos autores, o que é declarado.",
+      "localizador": "p. 7–8 do PDF (Seção V-B); p. 8 do PDF (Tabela I); p. 9 do PDF (Tabela II)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Cinco métricas definidas e tamanhos dos benchmarks informados; porém os ganhos agregados (30,9%, 10,48%) não indicam se são relativos, a proporção de descrições modificadas aparece com valores diferentes (43,58% e 24%), o APR citado no texto (95,6%) difere da tabela (95.9%), a narrativa da ablação parece trocar as variantes e IMR tem duas definições.",
+      "localizador": "p. 8 do PDF (Seção V-C, V-D e Tabela I); p. 9 do PDF (Seção V-D); p. 10–11 do PDF (Seções V-G, V-H e Tabelas V e VI)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças à validade (suposições da abordagem, validade de construto e externa) e análise de erros do próprio método com mitigação avaliada.",
+      "localizador": "p. 10 do PDF (Seção V-H); p. 10–11 do PDF (Seção VI)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código, scripts e dados declarados em repositório público (não acessado) e prompts em material suplementar; versões ou snapshots dos modelos e o valor de K não são informados, e a temperatura de amostragem é a padrão de cada modelo, sem valor numérico.",
+      "localizador": "p. 2 do PDF (link do repositório); p. 7 do PDF (Seções IV-B e V-A)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Escolha de LiveCodeBench v6 para minimizar vazamento, testes ocultos diferentes dos exemplos e substituição dos testes ocultos em ClarifyGPT-auto; não discute contaminação de HumanEval+ e MBPP+ no pré-treinamento dos modelos avaliados.",
+      "localizador": "p. 7 do PDF (Seção V-A, Benchmarks); p. 8 do PDF (Seção V-B)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (844 linhas). Páginas do PDF abertas visualmente: p. 2, 4, 5, 6, 7, 8, 9, 10 e 11 (Tabela I na p. 8; Tabelas II e III na p. 9; Tabela IV na p. 10; Tabelas V e VI na p. 11)."
+  }
+}

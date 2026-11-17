@@ -1,0 +1,556 @@
+{
+  "estudo": "S383",
+  "texto_fonte": "fontes/textos/lote/S383.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Few-shot prompting (adaptive prompts, dynamically retrieving examples from the training set)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 2 (PDF), seção 4 Experimental Setup, Few-shot Prompting; p. 7-8, Apêndice A; p. 11, Table 2, linhas 'Context Info (Zero Samples)' a '(Five Samples)'",
+        "observacao": "Prompt multipartes (Figure 3, p. 9): System Info (persona → instrucao), Env Info (grade, cores, funções pick/place → contexto; 'only use these specified functions' → restricoes), Task Info (formato 'Output' → instrucao/restricoes), Context Info com os três turnos mais similares do conjunto de treino recuperados por all-MiniLM-L6-v2 (→ contexto e exemplos) e Other Info (sem explicações, sem loops, 'Stick to the given format' → restricoes; 'Think step by step' → raciocinio, embora a mesma seção proíba texto/explicações). Contrafactual: Table 2 (Llama-3-8b, validação) compara Zero Samples com One a Five Samples mantendo os demais componentes; o isolamento é do ingrediente 'exemplos recuperados'. A recuperação por similaridade não é comparada com exemplos fixos ou aleatórios, de modo que o ganho não pode ser atribuído à recuperação em si. O contraste só foi executado com Llama-3-8b no conjunto de validação."
+      },
+      {
+        "nome_original": "System Info",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 (PDF), Figure 3; p. 11, Table 2, linha 'Env Info + Task Info + Context Info (Three Samples) + Other Info'",
+        "observacao": "Persona ('You are an expert at interpreting natural language instructions...'). Ablação do estudo: a linha sem System Info difere do prompt completo com três exemplos apenas nesse componente (Llama-3-8b, validação)."
+      },
+      {
+        "nome_original": "Environment Info (Env Info)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "restricoes"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 (PDF), Figure 3; p. 11, Table 2, linha 'System Info + Task Info + Context Info (Three Samples) + Other Info'",
+        "observacao": "Descrição da grade 11x9x11, eixos, cores e quantidades, assinaturas de pick/place (contexto) e regras de uso das funções ('You should only use these specified functions and not create any hypothetical functions'; uso de pick só para peças já colocadas) (restricoes). Ablação do estudo: difere do prompt completo com três exemplos apenas nesse componente."
+      },
+      {
+        "nome_original": "Task Info",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "restricoes"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 9 (PDF), Figure 3; p. 11, Table 2, linha 'System Info + Env Info + Context Info (Three Samples) + Other Info'",
+        "observacao": "Descrição da tarefa e do formato de resposta ('respond with code under the label \"Output\"'). Ablação do estudo: difere do prompt completo com três exemplos apenas nesse componente. Sem extração numérica porque o alvo de três comparações foi atingido."
+      },
+      {
+        "nome_original": "Other Info",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "restricoes",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "restricoes",
+          "raciocinio"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 9 (PDF), Figure 3; p. 11, Table 2, linhas 'System Info + Env Info + Context Info (Three Samples) + Other Info' e 'System Info + Env Info + Context Info (Three Samples)'",
+        "observacao": "Diretrizes finais: sem texto/explicações, código Python simples, sem loops ou comentários, não gerar instruções, seguir o formato e 'Think step by step'. O estudo não analisa este componente; a matriz da Table 2 tem duas linhas que diferem apenas em Other Info, ambas sem Task Info: 'System Info + Env Info + Context Info (Three Samples) + Other Info' (0.17) e 'System Info + Env Info + Context Info (Three Samples)' (0.17). A instrução 'Think step by step' não é isolada dentro de Other Info. Sem extração numérica porque o alvo de três comparações foi atingido."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LLM Fine Tuning (Llama-3-8b fine-tuned, Q-LORA)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino do Llama-3-8b no conjunto de treino com Q-LORA, 15 épocas, taxa de aprendizado 0.0002, Adam, batch 32, parada antecipada pela perda de validação; resultado na Table 1 (0.19 contra 0.18 do modelo sem ajuste).",
+        "localizador": "p. 3 (PDF), seção 4, LLM Fine Tuning; p. 8, Apêndice B; p. 3, Table 1"
+      },
+      {
+        "nome_original": "temperature 0 and max_new_tokens = 500",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação aplicados a todos os modelos.",
+        "localizador": "p. 3 (PDF), seção 4"
+      },
+      {
+        "nome_original": "Model Variants (GPT-4-O, Llama-3-8b, Llama-3-70b; CodeLlama-34b excluído)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação de modelos com o mesmo prompt na Table 1; CodeLlama-34b foi testado e excluído dos resultados por gerar instruções novas (alucinações).",
+        "localizador": "p. 3 (PDF), Table 1; p. 8, Apêndices A.1 e A.2"
+      },
+      {
+        "nome_original": "BAP (fine-tuned)",
+        "natureza": "outro",
+        "descricao": "Modelo encoder-decoder de Jayannavar et al. (2020) usado como linha de base na Table 1; não é intervenção de prompting do estudo e o texto não informa se foi reexecutado ou se os valores foram transcritos do artigo original.",
+        "localizador": "p. 3 (PDF), Table 1 e legenda"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-4 (version o) / GPT-4-O",
+        "versao": "nao_informado (snapshot e data de acesso não informados; acessado via API)"
+      },
+      {
+        "nome": "Llama-3-70b (instruction-tuned)",
+        "versao": "nao_informado (acessado via API; provedor não informado)"
+      },
+      {
+        "nome": "Llama-3-8b (instruction-tuned)",
+        "versao": "nao_informado (executado localmente em uma A100 de 80GB)"
+      },
+      {
+        "nome": "Llama-3-8b (fine-tuned)",
+        "versao": "nao_informado; ajuste fino com Q-LORA pelos autores"
+      },
+      {
+        "nome": "BAP (fine-tuned) (Jayannavar et al., 2020)",
+        "versao": "H2 in game history, 4x data augmentation"
+      },
+      {
+        "nome": "CodeLlama-34b",
+        "versao": "nao_informado; testado e excluído dos resultados"
+      },
+      {
+        "nome": "all-MiniLM-L6-v2 (Sentence Transformers)",
+        "versao": "pre-trained; usado só para recuperar exemplos por similaridade"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Minecraft Dialogue corpus / collaborative dialogue dataset (Narayan-Chen et al., 2019), convertido em pares instrução + pseudo-código",
+        "quantidade": "150 target structures, 547 dialogue games; train 309 games (3,792 turn-code pairs), development 101 games (1,335 turn-code pairs), test 137 games (1,615 turn-code pairs)",
+        "observacao": "Table 1 usa o conjunto de teste; a ablação da Table 2 usa o conjunto de validação. Os exemplos em contexto são recuperados do conjunto de treino. A soma dos jogos (309 + 101 + 137 = 547, cálculo próprio) bate com o total impresso. O denominador do F1 micro-médio (número de ações/blocos) não é informado; o número de pares turno-código não é o denominador da métrica."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Micro-Average F1-score (micro-averaged F1 on all dialogue turns)",
+        "definicao": "ações previstas comparadas com o ground truth por cor do bloco, coordenadas X, Y, Z e tipo de comando (pick ou place), seguindo Jayannavar et al. (2020)",
+        "localizador": "p. 3 (PDF), seção 4, Evaluation metrics; Table 1"
+      },
+      {
+        "nome": "F1 (Table 2)",
+        "definicao": "a Table 2 só indica 'F1'; não diz se é micro-média",
+        "localizador": "p. 11 (PDF), Table 2"
+      },
+      {
+        "nome": "percentual de enunciados com código correto por categoria (spatial prepositions, geometric/real-world shapes, anaphora)",
+        "definicao": "critério de 'correto' e denominador não definidos explicitamente",
+        "localizador": "p. 3 (PDF), seção 5; p. 8, Apêndice C"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python (código/pseudo-código com chamadas place() e pick())",
+        "localizador": "p. 2 (PDF), seção 3.1; p. 9, Figure 3"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "CodeLlama-34b gerou instruções novas (alucinações), o que impediu a avaliação; o modelo foi excluído dos resultados.",
+        "localizador": "p. 8 (PDF), Apêndice A.1"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os modelos erram com preposições espaciais, formas geométricas/objetos reais e anáforas; limitações listadas: localizações fora das dimensões da grade, falha em instruções na perspectiva do agente e dificuldade com abstrações do diálogo.",
+        "localizador": "p. 3 (PDF), seção 5; p. 4, seção 5.1; p. 5, Limitations"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Execução direta de código gerado com conteúdo nocivo poderia afetar o sistema inteiro; também a extensão do estudo simulado para agentes no mundo real pode levar a consequências incorretas (segurança operacional, não cibersegurança).",
+        "localizador": "p. 5 (PDF), Ethics Statement; p. 5, Limitations (iv)"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Código gerado pode favorecer certos estilos e prejudicar a portabilidade; a complexidade do código gerado pode dificultar refinamento e reúso pelo usuário final.",
+        "localizador": "p. 5 (PDF), Ethics Statement"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade da avaliação: 23.3% dos turnos contêm erros do builder no ground truth (place seguido de pick), o que penaliza o modelo; instruções subespecificadas impedem correspondência de 100% com o ground truth.",
+        "localizador": "p. 3-4 (PDF), seção 5, Builder Mistakes e Underspecified Instructions"
+      }
+    ],
+    "mitigacoes": [],
+    "sem_comparador": "nao",
+    "baseline": "Table 2 (ablação executada pelos autores com Llama-3-8b na validação): prompt sem exemplos e prompts sem cada componente. Table 1: BAP (fine-tuned) de Jayannavar et al. (2020), linha de base não baseada em prompting, com origem dos valores não explicitada.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a tabela: o Apêndice A.1 afirma que o prompt com todos os componentes é ótimo, mas a Table 2 mostra F1 0.19 para 'Env Info + Task Info + Context Info (Three Samples) + Other Info' (sem System Info), acima de 0.18 do prompt completo com três exemplos.",
+        "localizador": "p. 8 (PDF), Apêndice A.1; p. 11, Table 2"
+      },
+      {
+        "descricao": "O Apêndice A.1 estende a conclusão da ablação a 'the LLMs in our experiments', mas a legenda da Table 2 informa que a ablação usou só Llama-3-8b, no conjunto de validação.",
+        "localizador": "p. 8 (PDF), Apêndice A.1; p. 11, Table 2, legenda"
+      },
+      {
+        "descricao": "Resultados nulos na ablação: Two, Three, Four e Five Samples têm o mesmo F1 (0.18); as linhas sem Task Info com e sem Other Info têm o mesmo F1 (0.17). Não há variância nem número de execuções informados.",
+        "localizador": "p. 11 (PDF), Table 2"
+      },
+      {
+        "descricao": "O resumo afirma que few-shot prompting melhora 'significantly' sobre linhas de base, mas não há teste estatístico; na Table 1, Llama-3-8b com few-shot (0.18) fica abaixo do BAP (0.21), assim como o Llama-3-8b ajustado (0.19); só GPT-4 (0.39) e Llama-3-70b (0.33) superam o BAP.",
+        "localizador": "p. 1 (PDF), Abstract; p. 3, Table 1"
+      },
+      {
+        "descricao": "O texto relata '∼6% improvement' do Llama-3-8b ajustado sobre a versão sem ajuste; na Table 1 os valores são 0.19 e 0.18 (diferença de 0.01 em F1, cálculo próprio). O '∼6%' é compatível com variação relativa (cálculo próprio: 0.01/0.18 ≈ 5.6%), mas a fonte não diz se é variação relativa ou absoluta. Componente fora do escopo (ajuste fino).",
+        "localizador": "p. 3 (PDF), seção 5 e Table 1; p. 8, Apêndice B"
+      },
+      {
+        "descricao": "Linha de base BAP com condições distintas (H2 in game history, 4x data augmentation, encoder-decoder ajustado) e origem dos valores não explicitada (reexecução ou transcrição de Jayannavar et al., 2020). O mesmo valor 0.21 é atribuído na seção 2 a Shi et al. (2022) ('With a best F1-score of 0.21') e na Table 1 ao BAP de Jayannavar et al. (2020): atribuição ambígua.",
+        "localizador": "p. 2 (PDF), seção 2; p. 3, Table 1 e legenda"
+      },
+      {
+        "descricao": "Percentuais por categoria com denominadores ambíguos: para GPT-4, '75.42% of the utterances include a spatial preposition, but the model correctly generates code for only 26.03% of them' (fração do subconjunto); no Apêndice C, Llama-3-70b 'could predict correct action sequences for 22.66% of utterances' 'Out of 75.42%', e 14.11% 'out of 29.85% of utterances', sem deixar claro se o percentual é do subconjunto ou de todos os enunciados. O critério de 'correto' por enunciado não é definido.",
+        "localizador": "p. 3 (PDF), seção 5; p. 8, Apêndice C"
+      },
+      {
+        "descricao": "Ruído no ground truth: 23.3% dos turnos contêm erros do builder, que reduzem os escores; instruções subespecificadas também limitam a correspondência exata. Os F1 relatados não foram recalculados após filtrar esses casos.",
+        "localizador": "p. 3-4 (PDF), seção 5, Builder Mistakes e Underspecified Instructions"
+      },
+      {
+        "descricao": "Condições discrepantes entre tabelas: a Table 1 usa o conjunto de teste e a Table 2 o de validação; o F1 0.18 do Llama-3-8b aparece nas duas tabelas, mas em conjuntos diferentes, e a Table 2 não indica se o F1 é micro-médio como na Table 1.",
+        "localizador": "p. 3 (PDF), Table 1; p. 11, Table 2"
+      },
+      {
+        "descricao": "O prompt pede 'Think step by step' e, na mesma seção, proíbe gerar outros textos ou explicações; o efeito dessa instrução não é isolado.",
+        "localizador": "p. 9 (PDF), Figure 3, Other Info"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A tarefa de previsão de ações do Builder é modelada como geração de código: instruções do diálogo são convertidas em chamadas place()/pick() com cor e coordenadas.",
+        "localizador": "p. 1-2 (PDF), seções 1 e 3.1"
+      },
+      {
+        "descricao": "Custo e recursos relatados sem enquadramento como risco: GPT-4-o e Llama-3-70b via API com custo de $12; Llama-3-8b executado localmente em uma A100 de 80GB por 10 horas no total.",
+        "localizador": "p. 8 (PDF), Apêndice A.2"
+      },
+      {
+        "descricao": "Variações do número de exemplos (zero a cinco) na Table 2 são tratadas como configurações da mesma técnica few-shot, não como técnicas distintas; a configuração adotada é a de três exemplos com todos os componentes.",
+        "localizador": "p. 8 (PDF), Apêndice A.1; p. 11, Table 2"
+      },
+      {
+        "descricao": "O corpus convertido é prometido para 'the time of the conference'; não há link de código ou dados no texto. Não foi acessado pacote de replicação.",
+        "localizador": "p. 2 (PDF), nota de rodapé 1"
+      },
+      {
+        "descricao": "Análise qualitativa (Figure 2) só com GPT-4, com dois exemplos por categoria, escolhidos sem critério de amostragem informado.",
+        "localizador": "p. 4 (PDF), Figure 2 e seção 5.1"
+      },
+      {
+        "descricao": "Número de execuções por condição não informado (temperatura 0 é parâmetro de decodificação, não número de execuções).",
+        "localizador": "p. 3 (PDF), seção 4"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Leveraging LLMs’ in-context learning abilities, we use few-shot prompting techniques, that significantly improve performance over baseline methods.",
+        "localizador": "p. 1 (PDF), Abstract"
+      },
+      {
+        "trecho": "Taking advantage of the code-generation capabilities of LLMs, we model the action prediction task as a code-generation task.",
+        "localizador": "p. 1 (PDF), seção 1"
+      },
+      {
+        "trecho": "This is followed by dynamically adapted in-context examples suitable to the current turn instruction from the training set.",
+        "localizador": "p. 2 (PDF), seção 4, Few-shot Prompting"
+      },
+      {
+        "trecho": "The top three turns and their corresponding builder actions are selected as in-context examples.",
+        "localizador": "p. 2 (PDF), seção 4, Few-shot Prompting"
+      },
+      {
+        "trecho": "Adopting the approach recommended by Song et al. (2023), we use adaptive prompts, dynamically retrieving examples from the training set that are similar to the current test instruction.",
+        "localizador": "p. 7 (PDF), Apêndice A"
+      },
+      {
+        "trecho": "You are an expert at interpreting natural language instructions and translating them into specific actions for placing colored blocks within a 3D grid.",
+        "localizador": "p. 9 (PDF), Figure 3, System Info"
+      },
+      {
+        "trecho": "You should only use these specified functions and not create any hypothetical functions.",
+        "localizador": "p. 9 (PDF), Figure 3, Environment Info"
+      },
+      {
+        "trecho": "Stick to the given format. Think step by step.",
+        "localizador": "p. 9 (PDF), Figure 3, Other Info"
+      },
+      {
+        "trecho": "Consequently, we use the prompt featuring all components with three in-context examples to ensure the best performance.",
+        "localizador": "p. 8 (PDF), Apêndice A.1"
+      },
+      {
+        "trecho": "However, the results were not sat- isfactory because the generated response contained new instructions generated by model (hallucinations) and it was impossible to evaluate the closeness of the resulting generation to the ground truth, and hence this model is excluded from the experimental results.",
+        "localizador": "p. 8 (PDF), Apêndice A.1"
+      },
+      {
+        "trecho": "Moreover, it’s crucial to ensure LLM-generated responses are free from harmful code, as their direct execution could impact the entire system.",
+        "localizador": "p. 5 (PDF), Ethics Statement"
+      },
+      {
+        "trecho": "Another concern is the potential complexity of LLM-generated code, which can hinder end-user refinement and reuse.",
+        "localizador": "p. 5 (PDF), Ethics Statement"
+      },
+      {
+        "trecho": "However, the pre-trained LLMs, which inherit biases from their training data, may lead to code that favors certain styles and neglects others, hindering code portability.",
+        "localizador": "p. 5 (PDF), Ethics Statement"
+      },
+      {
+        "trecho": "(iv) Since the study is carried out in a simulated world, extending it to real-world agents may lead to incorrect consequences..",
+        "localizador": "p. 5 (PDF), Limitations"
+      },
+      {
+        "trecho": "In the test set, 75.42% of the utterances include a spatial preposition, but the model correctly generates code for only 26.03% of them, highlighting significant challenges in interpreting spatial prepositions and a need for improvement.",
+        "localizador": "p. 3 (PDF), seção 5, Spatial Prepositions"
+      },
+      {
+        "trecho": "These inaccuracies in the ground truth lead to lower evaluation scores, as the model is penalized for errors that are not indicative of its true performance.",
+        "localizador": "p. 4 (PDF), seção 5, Builder Mistakes"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Few-shot prompting (adaptive prompts, dynamically retrieving examples from the training set)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos"
+      ],
+      "comparador": "System Info + Env Info + Task Info + Context Info (Zero Samples) + Other Info",
+      "modelo": "Llama-3-8b",
+      "benchmark": "Minecraft Dialogue dataset, validation split",
+      "metrica": "F1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.15,
+        "intervencao": 0.18
+      },
+      "denominador": "nao_informado (conjunto de validação com 101 games e 1,335 turn-code pairs; o número de ações que forma o denominador do F1 não é informado)",
+      "condicoes": "Intervenção: 'System Info + Env Info + Task Info + Context Info (Three Samples) + Other Info', configuração adotada pelo estudo; três turnos de treino mais similares recuperados com all-MiniLM-L6-v2. Comparador: mesmo prompt com zero exemplos. Só Llama-3-8b, conjunto de validação. Temperatura 0 e max_new_tokens = 500 (informados para todos os modelos). Número de execuções nao_informado; sem variância ou teste estatístico. A Table 2 não diz se o F1 é micro-médio. One Sample = 0.17 e Two/Four/Five Samples = 0.18 na mesma tabela. O isolamento é do ingrediente exemplos recuperados; a recuperação por similaridade não é comparada com seleção fixa ou aleatória. conferido_pdf: valores, cabeçalho e legenda conferidos na imagem da p. 11.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca few-shot prompting contra 'baseline methods' (plural), e o único comparador da Table 1 é o BAP, modelo ajustado que não é condição de prompting, com vários modelos LLM e sem agregado. A Table 1 não contém contraste de prompting; a primeira tabela com contraste elegível é a Table 2 (único modelo, Llama-3-8b; métrica F1). A primeira linha de base de prompting listada é Zero Samples; a intervenção é a configuração da técnica focal adotada pelo estudo (três exemplos, todos os componentes).",
+      "derivacao": "direta",
+      "localizador": "p. 11 (PDF; página impressa não numerada), Table 2, linhas 1 e 4; p. 8, Apêndice A.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "System Info + Env Info + Task Info + Context Info (Zero Samples) + Other Info 0.15",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 1"
+        },
+        {
+          "trecho": "System Info + Env Info + Task Info + Context Info (Three Samples) + Other Info 0.18",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 4"
+        },
+        {
+          "trecho": "Specifically, omitting in-context examples results in poor performance, while excluding environment information reduced the score slightly.",
+          "localizador": "p. 8 (PDF), Apêndice A.1"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "System Info",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "instrucao"
+      ],
+      "comparador": "Env Info + Task Info + Context Info (Three Samples) + Other Info",
+      "modelo": "Llama-3-8b",
+      "benchmark": "Minecraft Dialogue dataset, validation split",
+      "metrica": "F1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.19,
+        "intervencao": 0.18
+      },
+      "denominador": "nao_informado (número de ações do conjunto de validação não informado)",
+      "condicoes": "Intervenção: prompt completo com três exemplos ('System Info + Env Info + Task Info + Context Info (Three Samples) + Other Info'). Comparador: o mesmo sem System Info. Só Llama-3-8b, validação; temperatura 0, max_new_tokens = 500; número de execuções nao_informado; sem variância ou teste. O estudo afirma que o prompt com todos os componentes é ótimo, o que diverge desta linha (ver heterogeneidade). conferido_pdf: valores conferidos na imagem da p. 11.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado na tabela de ablação, incluído para completar o alvo de três; primeiro componente da Table 2 na ordem da tabela depois do contraste de número de exemplos (já coberto pela extração 1).",
+      "derivacao": "direta",
+      "localizador": "p. 11 (PDF; página impressa não numerada), Table 2, linhas 4 e 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Env Info + Task Info + Context Info (Three Samples) + Other Info 0.19",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 7"
+        },
+        {
+          "trecho": "System Info + Env Info + Task Info + Context Info (Three Samples) + Other Info 0.18",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 4"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Environment Info (Env Info)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "restricoes",
+        "raciocinio"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "restricoes"
+      ],
+      "comparador": "System Info + Task Info + Context Info (Three Samples) + Other Info",
+      "modelo": "Llama-3-8b",
+      "benchmark": "Minecraft Dialogue dataset, validation split",
+      "metrica": "F1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.17,
+        "intervencao": 0.18
+      },
+      "denominador": "nao_informado (número de ações do conjunto de validação não informado)",
+      "condicoes": "Intervenção: prompt completo com três exemplos. Comparador: o mesmo sem Env Info. Só Llama-3-8b, validação; temperatura 0, max_new_tokens = 500; número de execuções nao_informado; sem variância ou teste. conferido_pdf: valores conferidos na imagem da p. 11.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado na tabela de ablação, incluído para completar o alvo de três; segundo componente removido na ordem da Table 2.",
+      "derivacao": "direta",
+      "localizador": "p. 11 (PDF; página impressa não numerada), Table 2, linhas 4 e 8; p. 8, Apêndice A.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "System Info + Task Info + Context Info (Three Samples) + Other Info 0.17",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 8"
+        },
+        {
+          "trecho": "System Info + Env Info + Task Info + Context Info (Three Samples) + Other Info 0.18",
+          "localizador": "p. 11 (PDF), Table 2, colunas Prompt e F1, linha 4"
+        },
+        {
+          "trecho": "Specifically, omitting in-context examples results in poor performance, while excluding environment information reduced the score slightly.",
+          "localizador": "p. 8 (PDF), Apêndice A.1"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo é explícito: investigar LLMs para prever a sequência de ações do Builder, modelando a tarefa como geração de código.",
+      "localizador": "p. 1 (PDF), Abstract e seção 1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O prompt completo (Figures 3 e 4), a recuperação dos três exemplos por all-MiniLM-L6-v2, a conversão do corpus e os parâmetros de decodificação são descritos; faltam snapshot do GPT-4o, provedor do Llama-3-70b e número de execuções, e a ablação foi feita só com Llama-3-8b na validação.",
+      "localizador": "p. 2-3 (PDF), seções 3.1 e 4; p. 8, Apêndices A.1 e A.2; p. 9-10, Figures 3 e 4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há ablação de prompting executada (zero exemplos e remoção de componentes), mas só para um modelo e no conjunto de validação; no teste, a única linha de base é o BAP, com condições distintas (H2, 4x data augmentation) e origem dos valores não explicitada, sem condição de prompting comparadora no teste.",
+      "localizador": "p. 3 (PDF), Table 1; p. 11, Table 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "O F1 micro-médio é definido (cor, X, Y, Z e tipo de comando), mas o denominador (número de ações) não é informado, a Table 2 não diz se o F1 é micro-médio, os percentuais por categoria têm denominadores ambíguos e não há variância nem teste, apesar do termo 'significantly'.",
+      "localizador": "p. 3 (PDF), seção 4, Evaluation metrics, e seção 5; p. 8, Apêndice C; p. 11, Table 2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O estudo discute ruído no ground truth (23.3% de turnos com erros do builder), instruções subespecificadas e limitações dos modelos, mas não discute contaminação, não determinismo nem a generalização da ablação de um único modelo para os demais.",
+      "localizador": "p. 3-4 (PDF), seção 5; p. 5, Limitations; p. 8, Apêndice A.1"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Templates de prompt, hiperparâmetros do ajuste fino e parâmetros de decodificação estão impressos, mas o corpus convertido é apenas prometido para a conferência, não há link de código e a versão do GPT-4o não é precisa.",
+      "localizador": "p. 2 (PDF), nota 1; p. 3, seção 4; p. 8, Apêndice B; p. 9-10, Figures 3 e 4"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não trata de vazamento de dados de avaliação no pré-treinamento dos modelos nem no prompt; apenas informa que os exemplos em contexto vêm do conjunto de treino e a avaliação usa o de teste (ou validação, na ablação).",
+      "localizador": "p. 2 (PDF), seções 3 e 4; p. 7, Apêndice A"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas_visualmente": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "observacao": "Texto extraído lido integralmente. A página 6 (referências) não foi aberta visualmente; seu conteúdo no texto extraído é só bibliografia."
+  }
+}

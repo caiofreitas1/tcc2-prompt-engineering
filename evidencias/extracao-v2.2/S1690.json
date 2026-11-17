@@ -1,0 +1,265 @@
+{
+  "estudo": "S1690",
+  "texto_fonte": "fontes/textos/lote/S1690.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot code generation (prompts VHDL refatorados manualmente, 'prompt refactoring')",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 (impressa 3744), resumo e contribuições; p. 2 (impressa 3745), seção II.B e Fig. 3; p. 3 (impressa 3746), seção III.A e Tabela I",
+        "observacao": "A contribuição principal do estudo é o benchmark SVVHD; a geração zero-shot é a única condição de prompting executada e é o objeto da avaliação dos LLMs ('to establish baseline performance'). O exemplo de prompt VHDL da Fig. 3 contém papel/persona ('Act as a professional VHDL designer') e descrição da tarefa (instrucao) e especificação da entidade 'TopModule' com as portas e tipos a declarar (restricoes). Os prompts foram refatorados manualmente a partir dos prompts Verilog do VerilogEval durante a construção do benchmark; não há condição com os prompts Verilog originais nem outra técnica de prompting, portanto não há contrafactual de prompting. O texto completo de cada prompt e eventual mensagem de sistema não são informados além do exemplo da Fig. 3. Os modelos ajustados por LoRA são avaliados no mesmo benchmark, mas a diferença entre eles e o modelo base é de ajuste fino (fora do escopo), não de prompting."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LoRA fine-tuning (FT-Base e FT-Refactored)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino de DeepSeek-Coder-6.7B-Instruct por LoRA (rank 16; projeções Q, K, V e O; bfloat16; batch size 4; gradient accumulation 4; learning rate 2e-4; cosine scheduler; 3 épocas) com o Basic Training Set (1k pares) e com o Refactored Training Set (3.5k pares). Os resultados aparecem na Tabela I como 'Fine-tuned Models'.",
+        "localizador": "p. 4 (impressa 3747), seção III.C; p. 3 (impressa 3746), Tabela I"
+      },
+      {
+        "nome_original": "Refactored Training Set / Basic Training Set (construção com a DeepSeek API)",
+        "natureza": "outro",
+        "descricao": "Construção de dados de treino para o ajuste fino: código VHDL do GitHub validado com GHDL e refatorado pela DeepSeek API, com prompts concisos gerados; e geração automática de pares prompt-código para 12 tipos de circuitos digitais. É preparação de dados de treinamento, não técnica de prompting avaliada na geração.",
+        "localizador": "p. 4 (impressa 3747), seção III.C, Fig. 5 e Tabela II"
+      },
+      {
+        "nome_original": "Rouge-L threshold of 0.55",
+        "natureza": "outro",
+        "descricao": "Filtro de similaridade aplicado às amostras dos conjuntos de treino em relação aos problemas do conjunto de teste, para evitar vazamento de dados.",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      },
+      {
+        "nome_original": "seleção de DeepSeek-Coder-6.7B-Instruct como modelo base",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha do modelo base para o ajuste fino com base na tendência de pass@k ao aumentar k (Tabela I).",
+        "localizador": "p. 3 (impressa 3746), seção III.B"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeLlama-7B-Instruct", "versao": "nao_informado"},
+      {"nome": "Qwen2.5-Coder-7B-Instruct", "versao": "nao_informado"},
+      {"nome": "DeepSeek-Coder-6.7B-Instruct", "versao": "nao_informado"},
+      {"nome": "Mistral-7B-Instruct", "versao": "v0.3"},
+      {"nome": "Granite-3.3-8B-Instruct", "versao": "nao_informado"},
+      {"nome": "Qwen2.5-Coder-14B-Instruct", "versao": "nao_informado"},
+      {"nome": "DeepSeek-Coder-V2-Lite-Instruct", "versao": "nao_informado"},
+      {"nome": "Granite-34B-Code-Instruct-8k", "versao": "nao_informado"},
+      {"nome": "Qwen3-Coder-30B-A3B-Instruct", "versao": "nao_informado", "observacao": "Chamado 'Qwen3-Coder-30B-Instruct' no texto da seção III.B."},
+      {"nome": "DeepSeek-Coder-6.7B-Instruct (FT-Base) e (FT-Refactored)", "versao": "nao_informado", "observacao": "Modelos ajustados por LoRA (fora do escopo de prompting)."},
+      {"nome": "DeepSeek API (construção dos conjuntos de treino)", "versao": "nao_informado", "observacao": "Usada só na preparação de dados de treino; modelo e versão não informados."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "SVVHD",
+        "quantidade": "156 problemas",
+        "descricao": "Problemas do VerilogEval traduzidos para VHDL (ICARUS Verilog ou tradução manual), com dupla verificação de equivalência (EsseFCEC e contraexemplos por negação da saída), prompts refatorados manualmente para VHDL e testbenches automáticos VUnit/GHDL com autoverificação. O denominador do pass@k é a expectativa sobre os problemas (equação 1); o estudo não informa exclusões de problemas.",
+        "localizador": "p. 1 (impressa 3744), resumo e introdução; p. 2-3 (impressas 3745-3746), seções II.B a II.D"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "pass@k (k = 1, 3, 5, 10)",
+        "definicao": "Estimador não enviesado de Chen et al. [28]; n = 20 candidatos por problema, c = candidatos que passam nos testes funcionais; média sobre os problemas.",
+        "localizador": "p. 3 (impressa 3746), seções II.D e III.A, equação (1)"
+      }
+    ],
+    "linguagens": ["VHDL (suporte a VHDL-2008)", "Verilog (origem dos problemas e soluções de referência traduzidas)"],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Vazamento de dados de avaliação para os conjuntos de treino do ajuste fino (amostras muito semelhantes aos problemas do conjunto de teste); controlado por filtro Rouge-L. O estudo não discute contaminação do pré-treinamento dos modelos pelo VerilogEval, que é público.",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Exclusão de amostras de treino com Rouge-L acima de 0,55 em relação aos problemas do conjunto de teste, para evitar vazamento de dados; sem comparação com condição sem o filtro.",
+        "avaliada": "nao",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      }
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resumo × corpo: o resumo afirma que os dois conjuntos de treino produzem melhorias significativas de desempenho, mas a seção III.C diz que o Refactored Training Set teve 'limited improvement' (pass@1 0.219 contra 0.178 do modelo base) e, na Tabela I, o FT-Refactored tem Pass@3 de 0.322, abaixo do 0.336 do modelo base DeepSeek-Coder-6.7B-Instruct. Resultado de ajuste fino, fora do escopo de prompting.",
+        "localizador": "p. 1 (impressa 3744), resumo; p. 3 (impressa 3746), Tabela I; p. 4 (impressa 3747), seção III.C"
+      },
+      {
+        "descricao": "Narrativa seletiva sobre escala: o texto afirma que modelos com mais parâmetros, como DeepSeek-Coder-V2-Lite-Instruct (16B) e Qwen3-Coder-30B, obtiveram pass@1 alto (0.412 e 0.312), mas na Tabela I Granite-34B-Code-Instruct-8k (0.095) e Qwen2.5-Coder-14B-Instruct (0.066) têm pass@1 inferior ao de modelos menores, como Granite-3.3-8B-Instruct (0.295) e DeepSeek-Coder-6.7B-Instruct (0.178). Os resultados zero-shot variam muito entre modelos de escala semelhante.",
+        "localizador": "p. 3 (impressa 3746), seção III.B e Tabela I"
+      },
+      {
+        "descricao": "Nome do modelo diverge entre texto e tabela: 'Qwen3-Coder-30B-Instruct' na seção III.B e 'Qwen3-Coder-30B-A3B-Instruct' na Tabela I; o valor de pass@1 (0.312) coincide.",
+        "localizador": "p. 3 (impressa 3746), seção III.B e Tabela I"
+      },
+      {
+        "descricao": "Inversão de ordenação entre métricas: Granite-3.3-8B-Instruct supera DeepSeek-Coder-6.7B-Instruct em Pass@1 (0.295 × 0.178) e Pass@3 (0.361 × 0.336), mas fica abaixo em Pass@5 (0.378 × 0.403) e Pass@10 (0.395 × 0.469), como o próprio estudo registra.",
+        "localizador": "p. 3 (impressa 3746), Tabela I e seção III.B"
+      },
+      {
+        "descricao": "Os parâmetros de decodificação (temperatura, top-p, tamanho máximo) usados para gerar os 20 candidatos por problema não são informados, nem o número de execuções; a comparação entre modelos depende dessas condições.",
+        "localizador": "p. 3 (impressa 3746), seção III.A"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Construção do benchmark com esforço manual: tradução manual das soluções quando a conversão pelo ICARUS Verilog falhou, scripts TCL para casar portas, modificação manual do código VHDL até passar na verificação de equivalência e refatoração manual de cada prompt.",
+        "localizador": "p. 2 (impressa 3745), seção II.B"
+      },
+      {
+        "descricao": "A confiabilidade dos testbenches é verificada com um candidato correto (cópia da solução de referência, que passa) e um contraexemplo (saída negada, que falha). É validação do instrumento, não técnica de prompting.",
+        "localizador": "p. 3 (impressa 3746), seção II.C e Fig. 4"
+      },
+      {
+        "descricao": "O estudo atribui o pior desempenho do FT-Refactored a 42.7% de código específico de empresas e à maior complexidade do conjunto (31.5 × 13.7 linhas médias), apresentando-o como ruído no treino; aspecto do ajuste fino, fora do escopo.",
+        "localizador": "p. 4 (impressa 3747), seção III.C e Tabela II"
+      },
+      {
+        "descricao": "O estudo se declara open-source, mas o texto não imprime link de repositório do SVVHD; nenhum pacote foi acessado nesta extração.",
+        "localizador": "p. 1 (impressa 3744), resumo; p. 4 (impressa 3747), seção IV"
+      },
+      {
+        "descricao": "Ambiente: quatro GPUs NVIDIA RTX 5880 Ada Generation.",
+        "localizador": "p. 3 (impressa 3746), seção III.A"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Using SVVHD, we conduct zero-shot code generation evaluations with various LLMs to establish baseline performance for the VHDL code generation domain.",
+        "localizador": "p. 1 (impressa 3744), resumo"
+      },
+      {
+        "trecho": "We translated 156 public Verilog evaluation problems into VHDL format and performed dual equivalence verification.",
+        "localizador": "p. 1 (impressa 3744), seção I"
+      },
+      {
+        "trecho": "As shown in Figure 3, we manually refactored each problem’s prompt to conform to VHDL semantics.",
+        "localizador": "p. 2 (impressa 3745), seção II.B"
+      },
+      {
+        "trecho": "Act as a professional VHDL designer.",
+        "localizador": "p. 2 (impressa 3745), Fig. 3, painel 'VHDL Prompt'"
+      },
+      {
+        "trecho": "For model evaluation, we used different LLMs to generate 20 candidate designs for each problem and calculated pass@k for k = 1,3,5, and 10.",
+        "localizador": "p. 3 (impressa 3746), seção III.A"
+      },
+      {
+        "trecho": "We used it to compute the similarity between generated code samples and the problems in our test set, excluding samples that are too similar to prevent data leakage.",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      },
+      {
+        "trecho": "During the model fine-tuning stage, we employed LoRA for parameter-efficient fine-tuning.",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      },
+      {
+        "trecho": "Subsequently, we construct both a refactored training set and a basic training set for model fine-tuning, which yield significant performance improvements.",
+        "localizador": "p. 1 (impressa 3744), resumo"
+      },
+      {
+        "trecho": "In contrast, the Refactored Training Set achieved only 0.219 on pass@1, showing limited improvement.",
+        "localizador": "p. 4 (impressa 3747), seção III.C"
+      },
+      {
+        "trecho": "Among the evaluated models, those with larger parameter counts, such as DeepSeek-Coder-V2-Lite-Instruct (16B) [34] and Qwen3-Coder-30B-Instruct [36], achieved high pass@1 scores of 0.412 and 0.312, respectively, demonstrating strong zero-shot performance.",
+        "localizador": "p. 3 (impressa 3746), seção III.B"
+      },
+      {
+        "trecho": "If verification still failed after ensuring port matching, we manually modified the VHDL code until the equivalence check passed.",
+        "localizador": "p. 2 (impressa 3745), seção II.B"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "zero-shot code generation (prompts VHDL refatorados manualmente)",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "CodeLlama-7B-Instruct",
+      "benchmark": "SVVHD (156 problemas derivados do VerilogEval)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": null, "intervencao": 0.017},
+      "denominador": "Expectativa sobre os problemas do SVVHD (156 problemas; o estudo não informa exclusões), com n = 20 candidatos por problema",
+      "condicoes": "Extração descritiva: estudo sem outra condição de prompting executada; o valor não é efeito da técnica. Geração zero-shot com 20 candidatos por problema; pass@1 calculado pelo estimador não enviesado. Temperatura, top-p, tamanho máximo e número de execuções: nao_informado. Valor conferido na imagem da Tabela I (p. 3).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca a avaliação zero-shot, mas apresenta quatro métricas (pass@1, 3, 5 e 10) sem que uma prevaleça na seção de método, e vários modelos. Aplicada a ordem: Tabela I, primeira métrica (Pass@1), primeiro modelo listado (CodeLlama-7B-Instruct). Não há outra técnica focal nem outra tarefa a cobrir.",
+      "derivacao": "direta",
+      "localizador": "p. 3 (impressa 3746), Tabela I, linha 'CodeLlama-7B-Instruct [29]', coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeLlama-7B-Instruct [29] 0.017 0.048 0.075 0.134",
+          "localizador": "p. 3 (impressa 3746), Tabela I, bloco 'Models (≤ 8B Parameters)', colunas Model | Pass@1 | Pass@3 | Pass@5 | Pass@10"
+        },
+        {
+          "trecho": "Notably, while Granite-3.3-8B-Instruct [33] outperformed DeepSeek-Coder-6.7B-Instruct on pass@1 and pass@3, the latter model demonstrated superior performance on the pass@5 and pass@10 metrics.",
+          "localizador": "p. 3 (impressa 3746), seção III.B"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo é explícito: suprir a falta de um benchmark aberto de geração de VHDL e estabelecer desempenho de referência de LLMs em zero-shot.",
+      "localizador": "p. 1 (impressa 3744), resumo e seção I"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "A construção do benchmark, dos testbenches e do ajuste fino é descrita, e o número de candidatos por problema é informado; faltam os parâmetros de decodificação, o texto completo dos prompts (só há o exemplo da Fig. 3) e eventuais mensagens de sistema.",
+      "localizador": "p. 2-4 (impressas 3745-3747), seções II.B, II.C, III.A e III.C"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparação entre nove modelos e entre modelo base e modelos ajustados, mas nenhuma condição alternativa de prompting; a técnica de prompting não tem comparador.",
+      "localizador": "p. 3 (impressa 3746), Tabela I"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "atende",
+      "justificativa": "pass@k é definido com o estimador não enviesado, n = 20 e k = 1, 3, 5, 10; a média é sobre os problemas do benchmark de 156 problemas. Os valores citados no texto coincidem com a Tabela I. Só há métrica funcional; não há taxa de compilação separada.",
+      "localizador": "p. 3 (impressa 3746), seções II.D, III.A, III.B e Tabela I; p. 4 (impressa 3747), seção III.C"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há discussão de ameaças à validade; o estudo trata apenas o vazamento entre treino e teste (filtro Rouge-L) e a confiabilidade do instrumento (dupla verificação de equivalência e autoverificação dos testbenches). Não discute não determinismo, parâmetros de amostragem nem limitações da tradução.",
+      "localizador": "p. 2-3 (impressas 3745-3746), seções II.B e II.C; p. 4 (impressa 3747), seção III.C"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Hiperparâmetros do LoRA e hardware são informados e o benchmark é declarado open-source, mas o texto não imprime link de repositório; parâmetros de decodificação, versões dos modelos e prompts completos não são informados.",
+      "localizador": "p. 1 (impressa 3744), resumo; p. 3 (impressa 3746), seção III.A; p. 4 (impressa 3747), seções III.C e IV"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Controla o vazamento entre os conjuntos de treino e o teste com limiar Rouge-L de 0,55, mas não discute contaminação do pré-treinamento dos modelos avaliados, embora os problemas derivem do VerilogEval público.",
+      "localizador": "p. 4 (impressa 3747), seção III.C; p. 1 (impressa 3744), seção I"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (5 páginas, incluindo referências). Páginas do PDF abertas visualmente: p-01, p-02 (Fig. 3, prompt VHDL), p-03 (Tabela I) e p-04 (Tabela II e Fig. 5)."
+  }
+}

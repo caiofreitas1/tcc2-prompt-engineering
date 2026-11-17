@@ -67,7 +67,10 @@ Só a decisão humana `incluir` no texto completo coloca um estudo no corpus def
 Campos obrigatórios: id, estudo_id, tarefa, tecnica, modelo, benchmark, metrica,
 unidade, comparador, resultado, localizador, fonte, status, revisao_humana.
 `resultado`: objeto com baseline e intervencao numéricos ou null se não reportados;
-`unidade`: percentual, proporcao, contagem, tempo ou qualitativo; não misturar escalas.
+`unidade`: percentual, proporcao, contagem, tempo, energia, temperatura, qualitativo ou
+nao_informado (D106); não misturar escalas. Em energia e temperatura, e quando a métrica
+não tem unidade definida, a unidade literal (ex.: mWh, °C) ou o nome original da métrica
+ficam em `metrica` ou `condicoes`.
 `status`: nao_conferido, conferido_original ou fonte_indisponivel.
 `revisao_humana`: pendente ou confirmada, com revisor e data_revisao quando confirmada.
 `fonte`: caminho relativo ao texto primário, igual ao registro do estudo.
@@ -86,6 +89,42 @@ Contrato 2 (extrações a partir do protocolo v2, marcadas com `"contrato": 2`) 
   quando o estudo não trata do tema. Categorias no protocolo, seção 9.
 - `prompt_versao`: versão do prompt de extração.
 E1–E2 seguem o contrato 1 da T02.
+
+Extrações com `prompt_versao` ex-v2 (D97) acrescentam `selecao` (`principal_declarado`,
+`desempate_ordem` ou `cobertura`), `mecanismos` e `condicoes`, e, quando houver,
+`selecao_motivo` para exceções ao alvo de três por estudo.
+
+## fichas.jsonl
+Uma ficha por estudo incluído, extraída com ex-v2 (D97): estudo_id, tarefas, tecnicas
+(`{nome_original, mecanismos, papel, avaliada_isoladamente, localizador}`, com papel
+focal, comparador ou componente), modelos, benchmarks, metricas, linguagens, riscos,
+mitigacoes, sem_comparador, so_classificadas, heterogeneidade (busca dirigida a
+discrepâncias, não amostra neutra), citacoes, texto_fonte, leitura (completa ou parcial),
+prompt_versao, executor, modelo_executor, data e revisao_humana (pendente ou confirmada,
+com revisor e data_revisao). A conferência humana usa o estudo como unidade: ficha,
+extrações e qualidade do estudo juntas.
+
+Com ex-v2.1 (D101), a ficha acrescenta `componentes_fora_escopo`
+(`{nome_original, natureza, localizador}`, natureza `ajuste_fino`, `embeddings_aprendidos`,
+`decodificacao`, `orcamento`, `selecao_modelo` ou `outro`) e `observacoes`;
+`avaliada_isoladamente` aceita só `sim` ou `nao`; `qualidade` é uma lista de sete objetos.
+As extrações acrescentam `sentido` (`maior_melhor` ou `menor_melhor`; com D106, também
+`nao_informado` quando o artigo não diz se valor maior ou menor é melhor), `denominador` e
+`conferido_pdf` (`sim` ou `nao`). Resultado com `sentido` = `nao_informado` não recebe
+classificação automática de melhora ou piora (`variacao` em
+`scripts/validar_ficha_extracao.py` devolve vazio).
+
+Com ex-v2.2 (D102):
+- **Técnicas:** acrescentam `mecanismos_acrescentados`, contido em `mecanismos`, que
+  passa a cobrir o pacote completo, e `tipo_contrafactual`: `pacote`, `ingrediente` ou
+  `contraste_pareado` com `avaliada_isoladamente` = `sim`, e `cumulativo` ou `nenhum` com
+  `nao`.
+- **`componentes_fora_escopo`:** acrescenta `descricao`; `natureza` aceita só o rótulo.
+- **Extrações:** acrescentam `mecanismos_acrescentados` e `derivacao` (`direta` ou
+  `contraste_pareado`). Resultado descritivo tem `comparador` e `baseline` nulos e
+  `sem_comparador` = `sim`.
+- **Validação:** `scripts/validar_ficha_extracao.py` confere os rótulos antes de uma
+  ficha ser aceita.
 
 ## afirmacoes.csv
 Uma afirmação empírica por linha. `extracao_ids`: IDs separados por ponto e vírgula.

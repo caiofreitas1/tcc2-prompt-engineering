@@ -1,0 +1,355 @@
+{
+  "estudo": "S799",
+  "texto_fonte": "fontes/textos/lote/S799.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt with the embedded migration taxonomy (system_prompt_with_tax / user_prompt_with_tax; 'w/Tax')",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Resumo, p. 1; Seção III, p. 3-4; Seção IV, p. 4-5; Seção V e Tabela II, p. 5-6 do PDF (sem paginação impressa)",
+        "observacao": "Pacote da condição: instrução para identificar problemas de migração e sugerir refatorações, com a frase 'using your prior knowledge' (instrucao); código-fonte Python com números de linha pré-inseridos e a taxonomia de 43 cenários da versão 0.46 derivada da documentação oficial (contexto); a taxonomia traz colunas 'Example code in source version' e 'Example code in target version', confirmadas pela reutilização de variáveis dos 'taxonomy examples' (exemplos); saída em tabela markdown de seis colunas com Scenario ID ou '*' (restricoes). Em relação à condição sem taxonomia, a única categoria nova é 'exemplos': 'contexto' já está no prompt base (código fornecido), e a taxonomia acrescenta conteúdo dentro dessa categoria; 'restricoes' está nas duas condições (tabela de cinco colunas sem Scenario ID). O contraste é com e sem a taxonomia, com o mesmo modelo, os mesmos 25 trechos e a mesma temperatura; o formato de saída também muda (coluna Scenario ID), e a taxonomia junta conhecimento descritivo e exemplos de código, de modo que o ganho não pode ser repartido entre 'contexto' e 'exemplos'. Prompts não impressos no artigo; mecanismos inferidos da descrição."
+      },
+      {
+        "nome_original": "Prompt without taxonomy (system_prompt_without_tax / user_prompt_without_tax; 'wo/Tax')",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV, p. 4; Fig. 1, p. 3; Tabela II, p. 6 do PDF",
+        "observacao": "Mesma instrução de identificar problemas de migração e propor refatoração, com o código numerado no prompt (contexto) e saída em tabela markdown de cinco colunas (Line, Code, Scenario, Artifact, Refactoring) (restricoes). O estudo a descreve como dependente só do conhecimento pré-treinado do modelo. Sem cadeia de raciocínio, chamada de função ou ferramentas externas, segundo o estudo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Temperature setting of 0.1 (default values for all other parameters)",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetro de decodificação igual nas duas condições.",
+        "localizador": "Seção IV, p. 4-5 do PDF"
+      },
+      {
+        "nome_original": "Taxonomy creation using ChatGPT 4.1, refined and manually verified by experts",
+        "natureza": "outro",
+        "descricao": "Construção prévia da taxonomia de cenários de migração para a versão 0.46 a partir de changelogs, documentação e notas de versão (processo descrito em Suárez et al. [19]); etapa de preparação, não avaliada neste estudo. O estudo afirma que o efeito da qualidade da taxonomia não foi avaliado quantitativamente.",
+        "localizador": "Seção III, p. 3-4; Seção VI, p. 6 do PDF"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "OpenAI gpt-4-0613 (chat.completions API)",
+        "versao": "gpt-4-0613",
+        "observacao": "Modelo das duas condições; temperatura 0.1; sem acesso à internet. A Fig. 1 o rotula apenas 'GPT-4'."
+      },
+      {
+        "nome": "ChatGPT 4.1",
+        "versao": "nao_informado",
+        "observacao": "Usado só para criar a taxonomia da versão 0.46, não na avaliação."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Synthetic Qiskit Python code snippets crafted by the authors",
+        "versao": "alvo Qiskit 0.46; código compatível com 0.41-0.45",
+        "quantidade": "25 trechos (21 com cenários que exigem refatoração; 4 já compatíveis, casos negativos); 9 a 30 linhas cada; 1 a 2 casos por arquivo; 81 linhas a modificar nos 21 trechos",
+        "observacao": "Denominador da identificação de cenários impresso como 21 ('12 of the 21 refactoring scenarios'), igual ao número de trechos, embora cada arquivo tenha um ou dois casos; o número total de instâncias de cenário não é informado. Denominador das sugestões de refatoração: 81 linhas. 50 invocações ao modelo, duas por trecho (uma com e uma sem taxonomia)."
+      },
+      {
+        "nome": "Taxonomy of Qiskit migration scenarios (version 0.46)",
+        "versao": "0.46",
+        "quantidade": "43 cenários (29 deprecações, 6 novos recursos, 8 mudanças estruturais)",
+        "observacao": "Insumo do prompt, não conjunto de avaliação. O resumo da Introdução diz 'approximately 43 representative cases'. Colunas na Tabela I, p. 4."
+      }
+    ],
+    "metricas": [
+      "Scenario Identification: Correctly identified scenarios that need refactoring (TP)",
+      "Scenario Identification: Correctly identified scenarios that does not need refactoring (TN)",
+      "Scenario Identification: FP, FN, Precision, Recall",
+      "Refactoring Suggestions: Correct suggestions (TP), Incorrect suggestions (FP), Missed suggestions (FN), Precision, Recall (sobre 81 linhas)",
+      "Rubrica por recomendação de linha: OK (verde), OK- (amarelo), X+ (laranja), X (vermelho); o mapeamento dos níveis para TP/FP não é informado"
+    ],
+    "linguagens": ["Python (Qiskit, migração de 0.41-0.45 para 0.46)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sugestões de refatoração incorretas ou enganosas: 40 linhas com taxonomia e 61 sem taxonomia (FP na Tabela II); recomendações simplistas, como remover importações de módulos deprecados sem considerar seu uso posterior, ou mal adaptadas ao contexto do código.",
+        "localizador": "Seção V, p. 5; Tabela II e Seção VI, p. 6 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Em 3 dos 4 trechos que não exigiam refatoração, o modelo produziu sugestões de migração incorretas (falsos positivos), nas duas condições.",
+        "localizador": "Seção V, p. 5 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O próprio conteúdo da taxonomia induziu inconsistências: reutilização literal de variáveis de exemplo copiadas dos exemplos da taxonomia, pois o prompt não pedia adaptação ao contexto ou aos nomes de variáveis do código.",
+        "localizador": "Seção VI, p. 6 do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "As versões do Qiskit presentes no corpus de treinamento do modelo não são transparentes; os autores supõem acesso à documentação até 0.46, 1.0 e possivelmente 2.0, o que chamam de variável não controlável. O estudo não afirma contaminação efetiva nem descreve controle.",
+        "localizador": "Seção IV, p. 5 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Números de linha pré-inseridos no código por pré-processamento automático para melhorar a clareza referencial da saída.",
+        "avaliada": "nao",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "descricao": "Saída padronizada em tabela markdown e, com taxonomia, exigência de citar o identificador do cenário ou '*' quando não houver correspondência.",
+        "avaliada": "nao",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "descricao": "Avaliação manual por dois especialistas em computação quântica com rubrica de cores; pontuações conferidas cruzadamente quanto à consistência, sem medida formal de confiabilidade entre avaliadores.",
+        "avaliada": "nao",
+        "localizador": "Seção IV, p. 5 do PDF"
+      },
+      {
+        "descricao": "Taxonomia gerada com ChatGPT 4.1 refinada e verificada manualmente por especialistas.",
+        "avaliada": "nao",
+        "localizador": "Seção III, p. 4 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Mesmo modelo e mesmos 25 trechos com prompt sem a taxonomia (wo/Tax), executado pelos autores (Tabela II).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente inconsistência entre texto e Tabela II na identificação de cenários: o texto diz que, nas duas condições, 1 dos 4 casos negativos foi reconhecido (TN) e os 3 restantes geraram sugestões incorretas (falsos positivos), mas a Tabela II registra FP 9 (w/Tax) e 11 (wo/Tax) e FN 3 nas duas. Cálculo próprio: 21 − 12 = 9 e 21 − 10 = 11 coincidem com o FP da tabela, e 4 − 1 = 3 coincide com o FN, o que sugere rótulos FP/FN trocados em relação às definições do texto; a fonte não permite decidir qual leitura vale.",
+        "localizador": "Seção V, p. 5; Tabela II, p. 6 do PDF"
+      },
+      {
+        "descricao": "Aparente inconsistência nas métricas derivadas da identificação de cenários (cálculo próprio com as contagens impressas): Precision 0.57 e 0.47 equivalem a 12/21 e 10/21, isto é, TP/(TP+FP) com o FP da tabela; Recall 0.76 equivale a 10/(10+3); mas Recall 0.85 (w/Tax) não corresponde a 12/(12+3) = 0,80. O estudo não informa as fórmulas.",
+        "localizador": "Tabela II, p. 6 do PDF"
+      },
+      {
+        "descricao": "Nas sugestões de refatoração, cálculo próprio: Precision 0.55 contra 50/90 = 0,556 e Recall 0.35 contra 29/81 = 0,358, compatíveis com truncamento, não com arredondamento; 0.32 (29/90) e 0.62 (50/81) batem. TP+FN = 81 nas duas condições e TP+FP = 90 nas duas; o total de sugestões emitidas não é informado. A regra de arredondamento não é informada.",
+        "localizador": "Tabela II, p. 6 do PDF"
+      },
+      {
+        "descricao": "Definições ambíguas: o FN das sugestões é descrito como linhas em que o modelo 'failed to detect or provide incorrect suggestions', o que se sobrepõe à definição de FP; a correspondência entre os quatro níveis da rubrica (OK, OK-, X+, X) e TP/FP não é informada.",
+        "localizador": "Seção IV, p. 5; Fig. 2 e Seção V, p. 5 do PDF"
+      },
+      {
+        "descricao": "Narrativa que contradiz o método: os trabalhos relacionados afirmam testar Rephrase-and-Respond e Chain-of-Thought sob mudança de versão e demonstrar que sua eficácia degrada sem adaptação de domínio, mas o método diz que não houve cadeia de raciocínio e não há condição RaR nos resultados. O texto também fala em 'model comparisons' e 'prompt variation experiments', mas só gpt-4-0613 é avaliado, com duas condições de prompt.",
+        "localizador": "Seção II, p. 3; Seção IV, p. 5; Seção VI, p. 6 do PDF"
+      },
+      {
+        "descricao": "A Introdução diz que o primeiro experimento usou exemplos de código reais e sintéticos, mas Método e Resultados descrevem só os 25 trechos sintéticos.",
+        "localizador": "Seção I, p. 2; Seção IV, p. 4; Seção V, p. 5 do PDF"
+      },
+      {
+        "descricao": "O estudo descreve seu cenário como 'static, zero-shot setting' dependente só da memória paramétrica, embora a condição focal forneça no prompt a taxonomia com exemplos de código nas versões de origem e de destino.",
+        "localizador": "Seção II, p. 2; Tabela I, p. 4; Seção VI, p. 6 do PDF"
+      },
+      {
+        "descricao": "O texto diz que a taxonomia 'significantly improves' precisão e revocação, sem teste estatístico; há uma única invocação por trecho e condição (50 no total) e nenhuma medida de variação. Para a identificação de cenários, o próprio estudo fala em melhora moderada (12 contra 10 de 21).",
+        "localizador": "Fig. 1, p. 3; Seção V, p. 5 do PDF"
+      },
+      {
+        "descricao": "Limitações declaradas: só um modelo (gpt-4-0613); migração para uma única versão (0.46); efeito da qualidade da taxonomia observado de forma qualitativa, sem avaliação quantitativa; avaliação manual sem medida de confiabilidade entre avaliadores; código migrado completo não avaliado.",
+        "localizador": "Seção IV, p. 5; Seção VI, p. 6 do PDF"
+      },
+      {
+        "descricao": "A Discussão afirma que os experimentos confirmam a acurácia do modelo em detectar as linhas que exigem refatoração, enquanto a Tabela II registra, com taxonomia, 40 sugestões incorretas e 31 omitidas para 81 linhas (Precision 0.55, Recall 0.62).",
+        "localizador": "Seção VI, p. 6; Tabela II, p. 6 do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Segunda dimensão da Tabela II (não extraída por ser outra métrica da mesma técnica, tarefa e comparador): Correct suggestions (TP) 50 com taxonomia contra 29 sem; Incorrect (FP) 40 contra 61; Missed (FN) 31 contra 52; Precision 0.55 contra 0.32; Recall 0.62 contra 0.35, sobre 81 linhas.",
+        "localizador": "Seção V, p. 5; Tabela II, p. 6 do PDF"
+      },
+      {
+        "descricao": "Esforço manual descrito: construção manual dos 25 trechos, verificação da taxonomia por especialistas e avaliação manual de cada sugestão por dois especialistas. O estudo menciona o 'overhead of building a structured taxonomy' sem quantificá-lo nem tratá-lo como custo medido.",
+        "localizador": "Seção III, p. 4; Seção IV, p. 4-5 do PDF"
+      },
+      {
+        "descricao": "As colunas Degree of Difficulty e Degree of impact in SE/QSE da taxonomia foram retornadas mas não usadas no estudo.",
+        "localizador": "Tabela I, p. 4 do PDF"
+      },
+      {
+        "descricao": "Justificativa do estudo para a taxonomia: a documentação de uma única versão pode exceder a janela de contexto; comparação com documentação bruta no prompt ou com RAG declarada fora do escopo.",
+        "localizador": "Seção VI, p. 5 do PDF"
+      },
+      {
+        "descricao": "Pacote de replicação: repositório GitHub citado como [20]; não acessado nem validado.",
+        "localizador": "Seção V, p. 5; referência [20], p. 7 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This taxonomy, along with the original Python source code, is provided as input to an LLM, which is then tasked with identifying instances of migration scenarios in the code and suggesting appropriate refactoring solutions.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "For each code sample, we conducted two independent interactions with the same LLM: one where the full migration taxonomy was included as context, and one where it was omitted.",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "trecho": "When the taxonomy was included, the prompt additionally required the model to reference the corresponding scenario identifier or indicate with an ”*” if no match was found, indicating the model found a migration scenario not present in the taxonomy.",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "trecho": "To standardize the model outputs and facilitate comparison, we instructed the LLM to return its migration suggestions in a structured markdown table format.",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "trecho": "Line numbers were pre-inserted in the code through an automated preprocessing step to improve referential clarity in the output.",
+        "localizador": "Seção IV, p. 4 do PDF"
+      },
+      {
+        "trecho": "All experiments were conducted using OpenAI’s gpt-4-0613 model via the chat.completions API endpoint, with a temperature setting of 0.1 and default values for all other parameters.",
+        "localizador": "Seção IV, p. 4-5 do PDF"
+      },
+      {
+        "trecho": "No chain-of-thought prompting, function calling, or external tools were used.",
+        "localizador": "Seção IV, p. 5 do PDF"
+      },
+      {
+        "trecho": "As such, we assume the model had access to documentation up to Qiskit versions 0.46, 1.0, and possibly 2.0 at the time of training, which introduces an uncontrollable variable discussed later in the discussion.",
+        "localizador": "Seção IV, p. 5 do PDF"
+      },
+      {
+        "trecho": "The review process was performed independently without formal inter-rater reliability measures, though all scores were cross-checked for consistency.",
+        "localizador": "Seção IV, p. 5 do PDF"
+      },
+      {
+        "trecho": "In the remaining 3 non-refactoring cases, the model produced incorrect migration suggestions (false positives).",
+        "localizador": "Seção V, p. 5 do PDF"
+      },
+      {
+        "trecho": "The taxonomy-assisted model produced 40 incorrect or misleading changes (false positives), compared to 61 incorrect suggestions without the taxonomy.",
+        "localizador": "Seção V, p. 5 do PDF"
+      },
+      {
+        "trecho": "For example, in cases involving deprecated module imports, the model occasionally suggested their direct removal without considering their subsequent usage within the code, when a proper replacement would have been more appropriate.",
+        "localizador": "Seção VI, p. 6 do PDF"
+      },
+      {
+        "trecho": "As a result, we observed occasional inconsistencies, such as the reuse of placeholder variables copied verbatim from the taxonomy examples.",
+        "localizador": "Seção VI, p. 6 do PDF"
+      },
+      {
+        "trecho": "Thus, we created a taxonomy targeting version 0.46 using ChatGPT 4.1.",
+        "localizador": "Seção III, p. 4 do PDF"
+      },
+      {
+        "trecho": "The results were refined and manually verified by experts in quantum computing programming.",
+        "localizador": "Seção III, p. 4 do PDF"
+      },
+      {
+        "trecho": "The were a total of 50 invocations to the model, two per each of the 25 code snippets.",
+        "localizador": "Legenda da Fig. 1, p. 3 do PDF"
+      },
+      {
+        "trecho": "We test these prompting strategies under the added stressor of Qiskit version drift and demonstrate that their effectiveness degrades in the absence of domain adaptation—highlighting new boundary conditions for prompt engineering in quantum code tasks.",
+        "localizador": "Seção II, p. 3 do PDF"
+      },
+      {
+        "trecho": "In contrast to approaches like RAG, our study operates in a static, zero-shot setting.",
+        "localizador": "Seção II, p. 2 do PDF"
+      },
+      {
+        "trecho": "However, the impact of taxonomy quality on model performance was not quantitatively assessed in this study and warrants further investigation.",
+        "localizador": "Seção VI, p. 6 do PDF"
+      },
+      {
+        "trecho": "The model failed to detect or provide incorrect suggestions on 31 lines that required refactoring when guided by the taxonomy, while it missed 52 of such lines in the absence of the taxonomy (false negatives).",
+        "localizador": "Seção V, p. 5 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Prompt with the embedded migration taxonomy (w/Tax)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "Same task prompt without the taxonomy (wo/Tax)",
+      "modelo": "gpt-4-0613 (OpenAI chat.completions API, temperature 0.1)",
+      "benchmark": "25 synthetic Qiskit Python code snippets (21 requiring refactoring to Qiskit 0.46, 4 already compatible)",
+      "metrica": "Correctly identified scenarios that need refactoring (TP)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 10, "intervencao": 12},
+      "denominador": "21 trechos que exigiam refatoração (o texto diz '12 of the 21 refactoring scenarios'); cada arquivo tem um ou dois casos, e o número total de instâncias de cenário não é informado",
+      "condicoes": "Uma invocação por trecho e condição (50 invocações no total); temperatura 0.1; sem cadeia de raciocínio, ferramentas ou internet; código com números de linha pré-inseridos; taxonomia de 43 cenários da versão 0.46. Avaliação manual por dois especialistas, sem medida de confiabilidade entre avaliadores. A condição com taxonomia também exige a coluna Scenario ID na saída. Sem medida de dispersão nem teste estatístico. As outras linhas da mesma seção da Tabela II (TN, FP, FN, Precision, Recall) têm aparente inconsistência com o texto (ver heterogeneidade); o valor de TP (12 contra 10) coincide entre texto e tabela. Valores conferidos visualmente na Tabela II (p. 6 do PDF) e no texto da Seção V (p. 5): conferido_pdf = sim.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições não destacam métrica; a Tabela II apresenta duas dimensões (identificação de cenários e sugestões de refatoração) com várias métricas sem que uma prevaleça. A Tabela I é descritiva; a Tabela II é a primeira com o contraste w/Tax contra wo/Tax; a primeira métrica pertinente é TP da identificação de cenários e o único modelo é gpt-4-0613. Há uma só técnica focal e uma só tarefa, sem tabela de ablação nem contraste pareado adicional, por isso não há cobertura; as sugestões de refatoração são outra métrica da mesma comparação e ficam em observacoes.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, p. 6 do PDF (sem paginação impressa); Seção V, p. 5 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Correctly identified scenarios that need refactoring (TP) 12 10",
+          "localizador": "Tabela II, seção Scenario Identification, p. 6 do PDF; colunas Metric, w/Tax, wo/Tax"
+        },
+        {
+          "trecho": "With the taxonomy, the model correctly identified 12 of the 21 refactoring scenarios.",
+          "localizador": "Seção V, p. 5 do PDF"
+        },
+        {
+          "trecho": "Without the taxonomy, 10 of the 21 scenarios were correctly identified.",
+          "localizador": "Seção V, p. 5 do PDF"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito: avaliar o impacto de fornecer a taxonomia estruturada ao LLM na identificação de cenários de migração e na sugestão de refatorações do Qiskit.",
+      "localizador": "Seção I, p. 1-2; Seção III, p. 3; Seção IV, p. 4 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Modelo, temperatura, número de trechos, estrutura das saídas e rubrica são descritos; os prompts, a taxonomia e os trechos não são impressos no artigo, e não se informa como os níveis da rubrica viram TP/FP.",
+      "localizador": "Seção IV, p. 4-5; Fig. 2, p. 5 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Condição sem taxonomia executada com o mesmo modelo, os mesmos 25 trechos e a mesma temperatura; difere na taxonomia e na coluna Scenario ID da saída.",
+      "localizador": "Seção IV, p. 4; Tabela II, p. 6 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Denominadores informados (21 trechos, 81 linhas) e métricas de sugestão consistentes com as contagens; mas, na identificação de cenários, FP e FN da Tabela II divergem do texto, Recall 0.85 não é reproduzível com as contagens, as fórmulas não são informadas e a definição de FN se sobrepõe à de FP.",
+      "localizador": "Seção V, p. 5; Tabela II, p. 6 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece o corpus de treinamento não transparente, a ausência de medida de confiabilidade entre avaliadores, o uso de um só modelo, a migração para uma única versão e a não quantificação do efeito da qualidade da taxonomia; não discute não determinismo com uma só invocação, tamanho da amostra nem o fato de os trechos sintéticos serem construídos pelos autores.",
+      "localizador": "Seção IV, p. 5; Seção VI, p. 6 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Snapshot do modelo (gpt-4-0613), temperatura e API informados, e repositório com scripts, dados e resultados citado como acessível; os prompts e os trechos não estão no artigo, e o repositório não foi acessado nem validado.",
+      "localizador": "Seção IV, p. 4-5; Seção V, p. 5; referência [20], p. 7 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece que a documentação do Qiskit até 0.46, 1.0 e possivelmente 2.0 pode estar no treinamento e chama isso de variável não controlável, mas não aplica controle; a extensão para a versão 2.0 é trabalho futuro.",
+      "localizador": "Seção IV, p. 5; Seção VI, p. 7 do PDF"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente; páginas do PDF abertas visualmente: 1, 3, 4, 5, 6"
+}

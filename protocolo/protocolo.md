@@ -217,7 +217,7 @@ ou de tabela desordenada.
 | Lote piloto (T05) | Triagem independente de 100 registros aleatórios, sem ver as decisões das IAs | κ de Cohen autor × consenso das IAs; revocação |
 | Exclusões de título e resumo (T05) | Amostra aleatória de 100 exclusões consensuais das IAs | Estimar estudos relevantes perdidos |
 | Texto completo (T06) | Todas as divergências e inclusões; 20% (mínimo 15) das exclusões consensuais | Constituir o corpus |
-| Extração (T07) | 20% das extrações (mínimo 10), priorizando as que sustentam afirmações | Confirmar `revisao_humana` |
+| Extração (T07) | Estudo como unidade (ficha, extrações e qualidade): `max(10, teto(0,20 × N))` estudos, com N = incluídos finais, priorizando os que sustentam afirmações e distribuídos por tarefa e técnica; os 10 do piloto contam se conferidos na versão final da ficha (D97) | Confirmar `revisao_humana` dos estudos conferidos |
 | Texto (T12) | Cada afirmação de `dados/afirmacoes.csv` contra o original | Marcar `sustentada` |
 
 **Regra de parada no piloto:** se o autor incluir um registro que as duas IAs
@@ -271,6 +271,82 @@ riscos e mitigações), que alimenta QP2 e QP3. A extração numérica detalhada
 QP1 é feita para cada comparação reportada; não se comparam números entre
 condições incompatíveis.
 
+**Complemento de 10/11/2026 (D97):** a extração usa o prompt `ex-v2`
+(`protocolo/prompts/extracao-v2.md`), versão de piloto até a calibração em 10 estudos.
+Cada estudo incluído recebe uma ficha classificatória completa (tarefas, técnicas com nome
+original, mecanismo atribuído pelo TCC e papel focal, comparador ou componente, modelos,
+benchmarks, métricas, riscos, mitigações e os sete critérios de qualidade). A extração
+numérica não é exaustiva: até três comparações por estudo como alvo, escolhidas sem
+considerar ganho, perda, significância ou tamanho do efeito, nesta ordem: resultado
+principal declarado pelo estudo; na falta ou empate, a primeira tabela com resultados
+elegíveis de prompting para tarefas do escopo, a primeira métrica pertinente e o primeiro
+modelo; depois, cobertura de técnicas focais e tarefas ainda não representadas. Técnica
+focal sem número extraído fica marcada como só classificada. Resultados nulos, inversões e
+condições discrepantes são registrados à parte, como busca dirigida de heterogeneidade, sem
+serem tratados como amostra neutra. A taxonomia é multirrótulo, com dicionário de
+mecanismos; frequências contam estudos distintos e informam a sobreposição. O trabalho
+segue por lotes: metadados e I4 do lote, extração, conferência. A seleção de comparações
+é simplificação da revisão rápida e limita as conclusões da QP1.
+
+**Calibração de 13/11/2026 (D101):** depois da conferência dos 10 estudos do piloto pelo
+autor, a extração passa ao prompt `ex-v2.1` (`protocolo/prompts/extracao-v2.1.md`). Mudanças:
+intervenções que não são prompting (ajuste fino, embeddings aprendidos, parâmetros de
+decodificação, alocação de orçamento, escolha de modelo sem alterar o prompt) ficam em
+`componentes_fora_escopo`, fora das técnicas, das contagens de mecanismos e das comparações;
+os mecanismos de uma técnica incluem todas as categorias presentes; técnica avaliada
+isoladamente exige condição contrafactual; mitigação avaliada exige comparação com condição
+sem ela; o resultado principal declarado precisa ser único, e o desempate vale para tabela
+ou figura, com o agregado impresso (média ou total) preferido à primeira condição quando
+existir; novo benchmark, modelo ou condição da mesma técnica e tarefa não é cobertura;
+números de outros artigos não são comparador executado; os valores selecionados são
+conferidos visualmente no PDF, com null quando a leitura for insegura; a heterogeneidade
+inclui totais que não batem e contradições entre narrativa, tabelas e figuras; as citações
+são orações completas. Na qualidade, `nao_informado` indica que, após busca no texto
+completo, faltam informações para julgar; `nao_atende`, evidência de descumprimento ou
+inadequação; `parcial`, atendimento incompleto; `atende`, evidência suficiente; a ausência
+de seção própria não determina o julgamento.
+
+**Segunda calibração, 14/11/2026 (D102):** depois da conferência das fichas ex-v2.1 pelo
+autor, a extração passa ao prompt `ex-v2.2` (`protocolo/prompts/extracao-v2.2.md`).
+O resultado principal declarado exige uma técnica, uma métrica e um comparador sem
+desempate. Sem comparador executado, a extração é descritiva, com linha de base nula.
+Quando não há tabela nem figura com o contraste, vale o contraste relatado em prosa, sem
+calcular a condição não impressa. Cada técnica registra a unidade do isolamento (pacote,
+ingrediente, contraste pareado, cumulativo ou nenhum). Contrastes pareados derivados de
+uma matriz de ingredientes só completam o alvo de três, por ordem predeterminada.
+Os mecanismos cobrem o pacote completo, e os acrescentados ficam em campo próprio. Só
+valem agregados impressos compatíveis. Os rótulos de enumeração passam por validação
+(`scripts/validar_ficha_extracao.py`), e linhas de tabela valem como citação. A ausência
+de relato não vira valor. Linhas de base da tabela de resultados do estudo contam como
+comparador, mesmo com valores vindos dos autores originais, com a origem registrada.
+As saídas brutas de cada rodada ficam preservadas, com a versão do prompt, e as correções
+manuais ficam à parte. A concordância nos estudos de calibração não estima a acurácia da
+extração em estudos novos; essa estimativa depende da conferência da amostra de 20%.
+
+**Segundo extrator, 16/11/2026 (D104):** o Codex (gpt-6.1-sol) extrai, com a mesma ex-v2.2,
+parte dos estudos, em ordem decrescente de ID, enquanto o Claude Opus 5.5 segue a ordem
+crescente; cada estudo tem um único extrator. A calibração nos 10 estudos do piloto
+reproduziu 18 de 21 comparações de referência. O modelo extrator é relatado por estudo, e
+a amostra de conferência inclui estudos dos dois extratores.
+
+**Vocabulário de unidade e sentido, 16/11/2026 (D106):** `unidade` passa a aceitar
+`energia`, `temperatura` e `nao_informado`, e `sentido` passa a aceitar `nao_informado`, com
+a unidade literal ou o nome original da métrica preservados em `metrica` ou `condicoes`.
+Resultado sem sentido definido não recebe classificação automática de melhora ou piora. O
+prompt ex-v2.2 congelado não muda; os rótulos novos entram nas fichas finais como correções
+manuais registradas, sem alterar as saídas brutas. É alteração posterior aos dados, motivada
+por quatro estudos (S654, S958, S1234, S1711) que o vocabulário anterior não representava.
+
+**Contrafactual dos sistemas comparadores, 17/11/2026 (D108):** um comparador recebe
+`avaliada_isoladamente` = `sim` e `tipo_contrafactual` = `pacote` quando o estudo traz, na
+mesma tabela ou figura, a condição de base sem ele, com o mesmo modelo, benchmark ou amostra e
+métrica, e o comparador tem resultado próprio. É avaliação do pacote, sem isolamento de
+ingredientes. Fica `nao` / `nenhum` a própria condição de base e o comparador sem condição de
+base comparável. A regra do prompt congelado («sistemas comparadores cujos mecanismos não são
+isolados recebem `nao`») passa a ser lida como ausência de `ingrediente` ou
+`contraste_pareado`, não de `pacote`. As fichas finais são ajustadas por revisão dirigida, com
+cada mudança registrada como correção manual; as saídas brutas não mudam.
+
 ## 10. Qualidade
 
 Rubrica por estudo, adaptada de Dybå e Dingsøyr (2008) e acrescida de critérios
@@ -297,6 +373,19 @@ não ranquear técnicas entre estudos incompatíveis; separar resultado medido,
 inferência do TCC e sugestão dos autores. A taxonomia e a tabela de apoio à
 escolha são examinadas em oito cenários, dois por tarefa, quanto a clareza,
 justificativa nas fontes e orientação concreta; isso não mede eficácia.
+Complemento de 10/11/2026 (D97): os cenários têm origem sintética declarada, são
+aprovados pelo autor e congelados antes do exame, junto com a versão da tabela aplicada;
+incluem situações de evidência insuficiente, em que a ausência de recomendação pode ser a
+resposta adequada. Registram-se, por cenário e critério, julgamento, justificativa e
+ambiguidades.
+Complemento de 14/11/2026 (D103): código-fonte ou do repositório fornecido como insumo
+no prompt conta como `contexto`, mesmo sem recuperação externa. A frequência em
+`mecanismos` descreve o conteúdo das condições avaliadas, não a contribuição das técnicas.
+Na síntese, o contexto já presente no prompt base é separado do acrescentado pela
+técnica, com `mecanismos_acrescentados` e as descrições das condições; a contribuição de
+uma técnica é discutida pelo que ela acrescenta e pelos contrastes efetivamente avaliados.
+A presença de `contexto` não demonstra uso de RAG, enriquecimento do prompt nem efeito
+avaliado isoladamente.
 
 ## 12. Cronograma (D33–D34)
 

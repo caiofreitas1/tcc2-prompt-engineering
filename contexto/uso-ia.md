@@ -248,3 +248,183 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Pedido do autor: avaliar cinco pontos de revisão e aplicar quatro («Sim, aplicar»), D91.
 - Executor: Claude Code (Claude Opus 5.5), recálculo do κ com as decisões anteriores às revisões de S314 e S373 e redação em `monografia/main.tex` e nos capítulos 03, 04 e 05.
 - Revisão humana: pendente; o autor ainda não leu as novas passagens.
+
+## T06 — nona leva do texto completo (08/11/2026)
+
+- Pedido do autor: começar os próximos passos depois do envio do texto inicial (D92).
+- Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) na montagem dos grupos, no selo, na escolha dos estudos para o autor e no formulário.
+- Revisão humana: pendente; o autor confere os 63 estudos no formulário cego.
+
+## T06 — décima leva do texto completo, etapa 3 (08/11/2026)
+
+- Pedido do autor: «Pode ler os 64 agora» (D95).
+- Executores: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2; Claude Code (Claude Opus 5.5) no registro dos PDFs, nos grupos, no selo e no formulário.
+- Revisão humana: pendente; o autor confere os 64 estudos no formulário cego.
+
+## T07 — ficha de extração e piloto (10/11/2026)
+
+- Pedido do autor: registrar a proposta de extração revista («Sim, registrar»), D97.
+- Executores: Claude Code (Claude Opus 5.5), proposta, prompt ex-v2, atualização do protocolo e sorteio do piloto; Codex (IA), dois pareceres de auditoria sobre a proposta.
+- Revisão humana: o autor aprovou a proposta; as fichas do piloto ainda não existem.
+
+## T07 — piloto da extração (11/11/2026)
+
+- Agendado em D97; executado por Claude Code (Claude Opus 5.5): metadados e I4 por API, extração ex-v2 em 10 subagentes Opus, verificação das citações e formulário de conferência (D98).
+- Revisão humana: pendente; o autor confere as 10 fichas inteiras no formulário.
+
+## T06 — última leva do texto completo, etapa 3 (11/11/2026)
+
+- Agendada em D95/D96 e executada por Claude Code (Claude Opus 5.5): grupos g97–g105, selo e formulário (D100).
+- Executores da leitura: IA-A (Claude Opus 5.5) e IA-B (Claude Sonnet 5.5), em subagentes, com tc-v2.
+- Revisão humana: pendente; o autor confere os 36 estudos (nº 384–419) no formulário cego.
+
+## T07 — calibração da ficha de extração (13/11/2026)
+
+- Pedido do autor: «Terminei a conferência do piloto» e respostas sobre agregado, leitura do PDF e qualidade (D101).
+- Executores: Claude Code (Claude Opus 5.5), análise das correções, prompt ex-v2.1, imagens das páginas e comparação; subagentes Claude Opus 5.5 na reaplicação (23 extrações em três rodadas).
+- Revisão humana: conferência do autor das 10 fichas ex-v2 (13/11/2026); as fichas ex-v2.1 ainda não foram conferidas pelo autor.
+- Formulário de conferência das fichas ex-v2.1 publicado em 13/11/2026 (`evidencias/piloto/formulario-ex-v2.1.html`, coleção `extracao_v21_autor`), com as correções anteriores do autor por estudo; verificação aproximada das citações por `scripts/verificar_citacoes_piloto.py` (60 de 242 não achadas no texto extraído, a conferir no PDF).
+
+## T07 — segunda calibração da ficha de extração (14/11/2026)
+- Pedido do autor: «Feito», com as propostas P1–P10 e a indicação de não considerar o novo documento do Codex (13/11/2026); reaplicação agendada pelo agente para depois da renovação da janela de 5 horas (D102).
+- Executores: Claude Code (Claude Opus 5.5), importação da conferência, prompt ex-v2.2, validador de rótulos, comparação com as notas do autor e correções manuais registradas; subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações em duas rodadas (14/11/2026).
+- Revisão humana: conferência do autor das 10 fichas ex-v2.1 (13/11/2026). As fichas ex-v2.2 não foram conferidas pelo autor. O autor confirmou a correção S570 `outro` → `instrucao` e os esclarecimentos da rodada 2 (14/11/2026).
+- Verificação: `scripts/validar_ficha_extracao.py` sem erros nas 10 fichas finais; verificação aproximada das citações (62 de 253 não achadas no texto extraído, a conferir no PDF).
+
+
+## T07 — extração em escala, lote 1 (15/11/2026)
+- Pedido do autor: «Seguir com Opus» (14/11/2026); confirmação da regra de `contexto` (D103).
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S1–S129); Claude Code (Claude Opus 5.5), validação, 6 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-01.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 2 (15/11/2026)
+- Pedido do autor: «Pode começar, assim que o limite semanal acabar, eu reseto ele» (15/11/2026).
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S137–S261); Claude Code (Claude Opus 5.5), validação, 2 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-02.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 3 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S271–S323); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-03.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — calibração do Codex no piloto (16/11/2026)
+- Pedido do autor: paralelizar a extração com a assinatura do Codex; «Instalei o codex cli» (16/11/2026).
+- Executores: Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações ex-v2.2 dos estudos do piloto; Claude Code (Claude Opus 5.5), roteiro de execução, comparação com as fichas finais e relatório (`evidencias/piloto/calibracao-codex.md`).
+- Revisão humana: nenhuma; a adoção do Codex como segundo extrator aguarda decisão do autor.
+
+## T07 — extração em escala, lote 4 e lote C1 (16/11/2026)
+- Pedido do autor: «Sim, adotar» o Codex como segundo extrator (D104).
+- Executores: subagentes Claude Opus 5.5 (Read e Write), 12 extrações (S325–S365); Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 10 extrações gravadas de 15 lançadas (S2233–S2131; 5 interrompidas pelo limite da assinatura); Claude Code (Claude Opus 5.5), roteiro, validação e relatório (`evidencias/extracao-v2.2/lote-04.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 5 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S383–S399 e S397–S479); Claude Code (Claude Opus 5.5), validação, 3 correções manuais registradas e relatórios (`lote-04.md`, `lote-05.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 6 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S491–S569); Claude Code (Claude Opus 5.5), retomada agendada a pedido do autor, validação, 1 correção manual registrada e relatório (`evidencias/extracao-v2.2/lote-06.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lotes C2 e C3 (16/11/2026)
+- Executores: Codex CLI 0.169.0 (gpt-6.1-sol, esforço high), 16 extrações (S2170–S2086); Claude Code (Claude Opus 5.5), roteiro, validação e relatório (`evidencias/extracao-v2.2/lote-C2-C3.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 7 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 execuções (S579–S682), 18 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-07.md`).
+- S667: gravação interrompida por classificador de segurança, sem nova tentativa.
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 8 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S692–S810); Claude Code (Claude Opus 5.5), validação, 5 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-08.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 9 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S821–S979), 19 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-09.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 10 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S996–S1133); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-10.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 11 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S1141–S1503), 19 fichas finais; Claude Code (Claude Opus 5.5), validação, 3 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-11.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 12 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S1556–S1653); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-12.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 13 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 20 extrações (S1666–S1747), 19 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-13.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 14 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 18 extrações (S1763–S1898); Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-14.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 15 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 15 extrações (S1924–S2057); Claude Code (Claude Opus 5.5), validação, 4 correções manuais registradas e relatório (`evidencias/extracao-v2.2/lote-15.md`).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — extração em escala, lote 16 (16/11/2026)
+- Executores: subagentes Claude Opus 5.5 limitados a Read e Write, 4 extrações (S2059–S2085), 3 fichas finais; Claude Code (Claude Opus 5.5), validação e relatório (`evidencias/extracao-v2.2/lote-16.md`, com a situação do corpus ao fim da extração).
+- Revisão humana: nenhuma ficha do lote conferida pelo autor.
+
+## T07 — D106: contrato, fichas retidas e reexame de elegibilidade (16/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), ampliação do contrato, validadores e testes, 7 correções manuais registradas em 5 fichas e situação da extração (`evidencias/extracao-v2.2/situacao-2026-11-16.md`); subagentes Claude Opus 5.5 limitados a Read e Write, reexame de elegibilidade de 8 estudos nos textos primários (`evidencias/extracao-v2.2/reexame-elegibilidade-2026-11-16.md`).
+- Encaminhamentos decididos pelo autor (D106), depois de parecer do Codex trazido por ele. O reexame é recomendação de IA; a inclusão fica para adjudicação do autor.
+- Revisão humana: o autor confirmou as correções de S724, S810, S1415 e S1977 como consistência de registros, sem conferência integral das fichas.
+
+## T07 — D107: adjudicação, confirmações e contrafactuais dos comparadores (17/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), registro da adjudicação do autor, recálculo dos fluxos, verificação dos 82 trechos do reexame e reavaliação dos contrafactuais de S6, S216, S724, S1415 e S1977 com conferência nas imagens das páginas (`evidencias/extracao-v2.2/contrafactuais-comparadores-2026-11-17.md`).
+- Revisão humana: adjudicação de inclusão e confirmação das correções de S62, S479 e S552 pelo autor; a reavaliação dos contrafactuais é proposta, sem alteração das fichas.
+
+## T07 — D108: contrafactual dos comparadores (17/11/2026)
+- Executores: Claude Code (Claude Opus 5.5), aplicação em S6, S216, S724, S1415 e S1977 e das propostas validadas; subagentes Claude Opus 5.5 limitados a Read e Write, revisão dirigida de 431 comparadores em 113 estudos, com conferência das tabelas nas imagens (`evidencias/extracao-v2.2/d108-revisao-comparadores.md`).
+- Regra decidida pelo autor («Sim, aplicar»); aplicação de IA, não conferida pelo autor.
+
+## T07 — D109: preparação da conferência humana (17/11/2026)
+- Executor: Claude Code (Claude Opus 5.5). Sorteio da amostra de 61 estudos (`scripts/sortear_conferencia.py`, semente 20261117) e geração e publicação do formulário (`scripts/gerar_formulario_conferencia.py`, artifact privado com a coleção `extracao_v22_autor`), em `evidencias/extracao-v2.2/conferencia/`.
+- A verificação aproximada das citações (`scripts/verificar_citacoes_aprox.py`) só orienta a leitura; a conferência é do autor no PDF e ainda não começou.
+
+## T08–T11 — síntese e redação da versão da banca (17/11/2026, D110)
+- Executores: Claude Code (Claude Opus 5.5), com importação das fichas (`scripts/importar_fichas.py`), contagens por script (`scripts/sintetizar.py`, `evidencias/sinteses/`), integração e revisão do texto; 13 subagentes Claude Opus 5.5 (Read e Write) redigiram sínteses parciais sobre extratos das fichas, e 5 subagentes redigiram as subseções de resultados em LaTeX a partir delas.
+- Checagem automática: todos os IDs de comparação e de estudo citados existem; as frases não foram conferidas no original. Correções de Claude Code nas subseções: contagens de contrafactual por script, retirada de referências às partes internas da síntese e da tabela de mecanismos duplicada.
+- As 97 afirmações novas (A6–A102) entram em `dados/afirmacoes.csv` como rascunho, sem revisor. Nada aqui é revisão humana.
+- Cenários v1 (`evidencias/sinteses/cenarios-v1.md`) e tabela de apoio v1 (`evidencias/sinteses/tabela-apoio-v1.csv`) aguardam o autor.
+
+## T09 — cenários e exame (17/11/2026, D111)
+- Executor: Claude Code (Claude Opus 5.5). Ajuste dos cenários para a v2 a pedido do autor, congelamento com SHA-256, exame da tabela de apoio v1 com conferência dos estudos nas fichas e proposta de julgamento; formulário publicado (`scripts/gerar_formulario_exame.py`).
+- Julgamento final pendente do autor; as propostas não são revisão humana.
+
+## T07 — extração de S1610 e S1617 (17/11/2026, D113)
+- Executores: subagentes Claude Opus 5.5 (Read e Write), ex-v2.2 congelada, imagens a 110 dpi; validador sem erros; fichas finais idênticas às saídas brutas; manifesto acrescido. Claude Code reimportou as fichas, recalculou as contagens e atualizou o texto e as afirmações A103 e A104 (rascunho).
+
+## T06–T07 — última leva da etapa 3 e extração dos 29 estudos (17/11/2026, D114)
+- Executores: Claude Code (Claude Opus 5.5), conferência dos selos de D100, importação das 36 decisões cegas do autor e dos selos das IAs (`scripts/importar_texto_completo.py`), recomendação sobre S1778 (aceita pelo autor), consulta de datas na Crossref, complemento da amostra (`scripts/sortear_conferencia.py --complemento`), republicação do formulário de conferência, reimportação, contagens e atualização do texto; 29 subagentes Claude Opus 5.5 (Read e Write), um por estudo, com a ex-v2.2 congelada e imagens a 110 dpi.
+- A recomendação inicial sobre S1778 dizia que o modelo do COM não era identificado; o extrator achou os modelos na Fig. 2. O motivo registrado foi corrigido antes do commit, e a decisão do autor não muda.
+- Validador sem erros nas 29 saídas brutas; uma correção de unidade em S1883 (registro em `correcoes-manuais.jsonl`, confirmação do autor pendente). Afirmações A105–A117 em rascunho; A45 e A46 atualizadas. Nada aqui é revisão humana.
+
+## T07 — extração de S667 pelo Codex e parecer de elegibilidade (17/11/2026)
+- A pedido do autor («Delegue a extração para o Codex»), S667 foi extraído pelo Codex CLI 0.169.0 (gpt-6.1-sol, esforço high fixado na chamada, porque a configuração local estava em xhigh), com o mesmo prompt operacional das 26 fichas anteriores do Codex e uma instrução a mais: citar só o necessário, sem reproduzir prompts maliciosos completos, porque o estudo trata de jailbreak. Saída bruta validada sem erro; ficha final idêntica à bruta; manifesto acrescido.
+- Claude Code (Claude Opus 5.5) leu S1721, S1929, S1886, S433 e S2053 no texto extraído e nas imagens das páginas e redigiu `evidencias/lote/parecer-elegibilidade-2026-11-17.md`, com recomendações. A decisão é do autor e ainda não foi tomada.
+- D115: o autor aceitou todas as recomendações do parecer («Sim, seguir todas»). Claude Code registrou as decisões, reimportou, repôs a amostra (S1935 no lugar de S1721), republicou o formulário e atualizou contagens, texto e afirmações (A45, A46, A89; A118 nova, rascunho).
+
+## T07 — correções da conferência humana (17/11/2026, D116)
+- Os julgamentos são do autor (formulário, 10 estudos gravados). Claude Code (Claude Opus 5.5) aplicou as 43 alterações de campo nas fichas finais, com registro em `correcoes-manuais.jsonl`, reimportou e recalculou as contagens. A reformatação de S1743 pela gravação mudou só a disposição do JSON.
+- D117: a pedido do autor, Claude Code registrou como corretos, pela declaração do autor, os 56 estudos da amostra sem julgamento gravado, exportou os 10 julgamentos do formulário, propagou a revisão humana para `dados/` (importador) e redigiu a seção sobre o estado da conferência. A declaração é do autor; a redação e as contagens são de IA.
+
+## T12 — formulário de conferência das afirmações (17/11/2026)
+- Executor: Claude Code (Claude Opus 5.5). Gerador `scripts/gerar_formulario_afirmacoes.py` e formulário publicado como artifact privado (coleção `afirmacoes_autor`), com 113 afirmações, seus trechos no texto e as comparações que as sustentam. A conferência é do autor e ainda não começou.
+
+## T09 — julgamento do exame (17/11/2026, D118)
+- O julgamento é do autor (formulário). Claude Code (Claude Opus 5.5) exportou os julgamentos, comparou-os com a proposta e redigiu a seção do exame, a discussão e a conclusão a partir deles.
+
+## T09 — tabela de apoio v2 e proposta para as hipóteses (17/11/2026, D119)
+- Executor: Claude Code (Claude Opus 5.5), a partir das revisões decididas pelo autor no exame. As linhas da v2 reorganizam a v1 e o exame, com métricas conferidas em `dados/extracoes.jsonl`; os IDs citados foram verificados por script. A proposta para as hipóteses é de IA e aguarda o julgamento do autor.
+- D120: o autor confirmou a proposta para as hipóteses; Claude Code registrou o julgamento no texto.
+- D121: Claude Code registrou a confirmação das correções de unidade, a manutenção de S314 e S373, a decisão de tornar o repositório público (texto da metodologia) e descartou a seção local do Codex, a pedido do autor.
+- D122: Claude Code (Claude Opus 5.5) leu os textos completos de seis revisões e de Sallou et al., reescreveu os trabalhos relacionados, a comparação na discussão e o trecho da rubrica, e acrescentou as afirmações A119–A124 (rascunho).
+- D123: Claude Code leu Dybå e Dingsøyr (PDF obtido pelo autor) e registrou na metodologia a correspondência dos critérios com a rubrica (A125, rascunho).
+- D124: o autor conferiu S1935 e as 120 afirmações; Claude Code (Claude Opus 5.5) aplicou as correções, registrou os julgamentos e revisou visualmente as 31 páginas do PDF.
+- D125: Claude Code (Claude Opus 5.5) analisou a revisão pré-envio do autor e o parecer do Codex (fora do repositório), conferiu nos originais os pontos factuais (S62, S1880, contagens nos dados) e aplicou as correções no texto, na tabela v2 e nos dados.
+- D126: Claude Code registrou a nota correta de A106 informada pelo autor e retirou a pendência do texto.

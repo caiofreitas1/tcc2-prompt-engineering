@@ -1,0 +1,241 @@
+{
+  "estudo": "S1010",
+  "texto_fonte": "fontes/textos/lote/S1010.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2510.07604v1 [cs.SE], 8 out. 2025 (preprint); o PDF não traz paginação impressa, os localizadores usam a posição da página no arquivo",
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "RustAssure (LLM Invoker: pipeline de transpilação C→Rust com técnicas de engenharia de prompt)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Resumo e Seção I, p. 1-2; Seção III-A e Figura 2, p. 3-4; Tabela VIII, p. 11",
+        "observacao": "Pacote de prompting do LLM Invoker: função C acompanhada só das expansões de macro, typedefs e definições de struct e função essenciais (contexto); pré-tradução das structs em invocações separadas, armazenadas em cache e fornecidas no prompt com a instrução de usar a definição pré-gerada (decomposicao, contexto, restricoes); usos de campos char* acrescentados ao pedido com instrução de considerá-los (contexto, instrucao); divisão de funções grandes em várias requisições (decomposicao); reenvio da mensagem de erro do compilador com a função C pedindo tradução corrigida e nova tradução quando há bloco unsafe ou chamadas a funções unsafe, até um número configurável de vezes (feedback, restricoes). O texto dos prompts não é apresentado. Não há condição sem o pacote no mesmo LLM nem ablação dos componentes: as comparações com CROWN (ferramenta sintática sem LLM, Tabela VI) e FLUORINE (outro sistema baseado em LLM, resultados do artefato, Tabela VII) contrastam sistemas distintos e não isolam o pacote. O verificador simbólico diferencial (Symbolic Analyzer) não realimenta o LLM na versão avaliada (a realimentação é apresentada como melhoria futura, Seção VII, p. 11); ver componentes_fora_escopo."
+      },
+      {
+        "nome_original": "Header File Preprocessor",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-A, p. 3; Seção V, p. 6",
+        "observacao": "Inclui no pedido ao LLM apenas as expansões de macro, typedefs e definições de struct e função essenciais, extraídas com ferramentas Clang (ASTMatchers). O estudo afirma que enviar só o arquivo .c 'is not adequate', mas não executa essa condição. Mecanismos listados são os do pacote completo avaliado."
+      },
+      {
+        "nome_original": "Struct Transpiler (Struct Transpilation Cache)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-A, p. 3-4",
+        "observacao": "Etapa prévia que pede ao LLM a tradução de todas as structs C; as definições Rust ficam em cache e são fornecidas com cada função, com a instrução de usar a definição pré-gerada (restrição de estrutura/tipos → restricoes; etapa encadeada → decomposicao; definição fornecida → contexto). Motivada pelo não determinismo do LLM, que gera definições divergentes e erros de ligação; sem condição sem o componente."
+      },
+      {
+        "nome_original": "Struct Field Usage Analyzer",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-A, p. 4; Seção VI-A ('Impact of LLM model') e Figura 5, p. 7",
+        "observacao": "Extrai todos os usos de campos char* e os acrescenta ao pedido de pré-tradução das structs, instruindo o LLM a considerá-los. A Seção VI-A só compara modelos (GPT-4o usa Vec<u8>/String; os demais usam ponteiros brutos) com o componente presente; não há condição sem o componente."
+      },
+      {
+        "nome_original": "Context Window Manager",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-A, p. 4",
+        "observacao": "Divide uma função que não cabe na janela de contexto em várias requisições e monta a resposta final a partir dos pedaços. O estudo não informa se o mecanismo foi acionado nos modelos e códigos avaliados (nao_informado)."
+      },
+      {
+        "nome_original": "Feedback Generator",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["feedback", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção III-A, p. 4",
+        "observacao": "Reenvia a mensagem de erro do compilador Rust com a função C original pedindo tradução corrigida (feedback de compilador); pede nova tradução quando o código contém bloco unsafe ou chama funções unsafe (restrição de segurança aplicada por análise do código → restricoes, feedback). Número máximo de tentativas 'configurable', valor usado nao_informado. Sem condição sem o componente."
+      },
+      {
+        "nome_original": "FLUORINE",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção VI-F, p. 9-10; Tabela VII, p. 10; Tabela VIII, p. 11",
+        "observacao": "Transpilador baseado em LLM (GPT-4o) de outro estudo que extrai funções e dependências do código C (contexto) e fornece ao LLM feedback de tradução por fuzzing diferencial (feedback), segundo a descrição resumida da Tabela VIII; os prompts não são descritos no estudo. Os autores não executaram a geração do FLUORINE: usaram as funções extraídas, os mapeamentos JSON e as transpilações Rust fornecidas no artefato (31 de 42 funções da libopenaptx). Sistema comparador cujos mecanismos não são isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Symbolic Analyzer / Semantic Similarity Checker (Symbolizer, Symbolic Executor com KLEE, Language-aware Graph Converter, Graph Edit-distance Calculator)",
+        "natureza": "outro",
+        "descricao": "Teste simbólico diferencial pós-geração que compara os valores simbólicos de retorno das funções C e Rust por distância de edição de grafos (S3 score); não altera o prompt nem realimenta o LLM na versão avaliada. É a principal contribuição de verificação do estudo.",
+        "localizador": "Seções III-B e III-C, p. 4-5; Seção V, p. 6"
+      },
+      {
+        "nome_original": "Atributo #[repr(C, packed)] em toda struct Rust e alinhamento de tipos (Option, String/slice, Vec)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento do código e normalização de tipos para permitir a comparação simbólica e reduzir falsos positivos; não é prompting.",
+        "localizador": "Seção IV, p. 5-6"
+      },
+      {
+        "nome_original": "Escolha entre GPT-4o, GPT-4o-mini, GPT-3.5-turbo e Claude-3.5-Sonnet",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do LLM com o mesmo pipeline; as Tabelas I-III e V comparam modelos, não técnicas de prompting.",
+        "localizador": "Seção VI, p. 6; Tabela I, p. 7; Tabelas II-III, p. 8; Tabela V, p. 10"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o (OpenAI)", "versao": "nao_informado", "localizador": "Seção VI, p. 6; ref. [10], p. 12"},
+      {"nome": "GPT-4o-mini (OpenAI)", "versao": "nao_informado", "localizador": "Seção VI, p. 6; ref. [11], p. 12"},
+      {"nome": "GPT-3.5-turbo (OpenAI)", "versao": "nao_informado", "localizador": "Seção VI, p. 6; ref. [10], p. 12"},
+      {"nome": "Claude-3.5-Sonnet (Anthropic)", "versao": "nao_informado", "localizador": "Seção VI, p. 6; ref. [12], p. 12"},
+      {"nome": "Modelo usado pelo RustAssure na libopenaptx (Tabela VII)", "versao": "nao_informado; o estudo não informa qual LLM transpilou a libopenaptx com o RustAssure", "localizador": "Seção VI-F, p. 9"},
+      {"nome": "GPT-4o nas transpilações do FLUORINE (artefato)", "versao": "nao_informado", "localizador": "Seção VI-F, p. 9"}
+    ],
+    "benchmarks": [
+      {"nome": "libcsv", "quantidade": "405 linhas de código; 29 funções C", "localizador": "Seção VI, p. 6; Tabela I, p. 7"},
+      {"nome": "urlparser", "quantidade": "435 linhas de código; 26 funções C", "localizador": "Seção VI, p. 6; Tabela I, p. 7"},
+      {"nome": "optipng", "quantidade": "3039 linhas de código; 86 funções C", "localizador": "Seção VI, p. 6; Tabela I, p. 7"},
+      {"nome": "libbmp", "quantidade": "287 linhas de código; 16 funções C", "localizador": "Seção VI, p. 6; Tabela I, p. 7"},
+      {"nome": "u8c", "quantidade": "334 linhas de código; 19 funções C; total dos cinco códigos: 176 funções", "localizador": "Seção VI, p. 6; Seção I, p. 2; Tabela I, p. 7"},
+      {"nome": "libopenaptx (comparação com FLUORINE)", "quantidade": "42 funções; 31 com transpilações e mapeamentos JSON no artefato do FLUORINE", "localizador": "Seção VI-F, p. 9; Tabela VII, p. 10"},
+      {"nome": "Testes existentes reescritos para a revocação", "quantidade": "39 testes da libcsv; 5 testes com 13 entradas da u8c", "localizador": "Seção VI-D, p. 8"}
+    ],
+    "metricas": [
+      {"nome": "Perc. compiled (funções Rust compiláveis / funções C)", "definicao": "proporção de funções C transpiladas para funções Rust que compilam; denominador = número de funções C por código (Tabela I)", "localizador": "Seção VI-A, p. 6; Tabela I, p. 7"},
+      {"nome": "Perc. unsafe", "definicao": "percentual de código unsafe; a unidade de contagem não é definida (o texto fala em 'unsafe program statements')", "localizador": "Tabela I e Seção VI-A, p. 7"},
+      {"nome": "Eq. Output / % of Eq. Output (S3 score = 0)", "definicao": "valores de retorno e parâmetros de saída com distância de edição de grafos zero entre C e Rust; denominador = 'Output values' das funções compiladas", "localizador": "Seção III-C, p. 5; Tabela I, p. 7"},
+      {"nome": "Bug", "definicao": "coluna da Tabela I sem definição explícita", "localizador": "Tabela I, p. 7"},
+      {"nome": "Rust instruction coverage", "definicao": "cobertura de instruções na execução simbólica (código compilável)", "localizador": "Tabela II, p. 8"},
+      {"nome": "Tempo de execução simbólica (8 núcleos)", "definicao": "tempo total para executar simbolicamente todas as funções de cada código", "localizador": "Tabela III, p. 8"},
+      {"nome": "Precision e Recall do S3 score", "definicao": "TP, FP e FN de detecção de bugs, só para libcsv e u8c; revocação apoiada em testes reescritos manualmente e revisão manual", "localizador": "Seção VI-D, p. 8; Tabela V, p. 10"},
+      {"nome": "Raw Pointer Decls. / Raw Pointer Uses", "definicao": "contagem de declarações e usos de ponteiros brutos (RustAssure com GPT-4o vs. CROWN)", "localizador": "Seção VI-E, p. 8-9; Tabela VI, p. 10"},
+      {"nome": "Total Function, Compilation Success, Raw Pointer, Passes Fuzzing, Passes Sym. Testing", "definicao": "contagens de funções na comparação com FLUORINE (libopenaptx)", "localizador": "Seção VI-F, p. 9; Tabela VII, p. 10"}
+    ],
+    "linguagens": ["C (origem)", "Rust (destino)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "LLMs não garantem código correto e o código transpilado contém bugs sutis que podem escapar a testes unitários ou fuzzing (por exemplo, u8next_ com estado intermediário incorreto; 20 funções com bugs semânticos na Tabela IV).", "localizador": "Resumo e Seção I, p. 1; Seção II, p. 2; Tabela IV, p. 10"},
+      {"categoria": "seguranca", "descricao": "Código Rust unsafe introduz potenciais vulnerabilidades de corrupção de memória; modelos diferentes do GPT-4o tendem a usar ponteiros brutos e blocos unsafe (Perc. unsafe de 3% a 79% na Tabela I).", "localizador": "Seção I, p. 1; Seção III-A, p. 4; Seção VI-A e Tabela I, p. 7"},
+      {"categoria": "nao_determinismo", "descricao": "Invocações diferentes do LLM geram definições Rust ligeiramente diferentes para as mesmas structs C (por exemplo, nomes de campos), causando erros de ligação.", "localizador": "Seção III-A, p. 3"},
+      {"categoria": "outro", "descricao": "Limitação da janela de contexto: uma função grande pode exceder a janela de modelos com 16K tokens.", "localizador": "Seção III-A, p. 4"},
+      {"categoria": "outro", "descricao": "Falsos positivos do verificador: funções C com bugs de corrupção de memória ausentes no Rust não são simbolicamente equivalentes; otimizações do KLEE ao modelar arrays também geram falsos positivos (FP de 0 a 3 por modelo na Tabela V).", "localizador": "Seção III-B, p. 4; Seção VI-D, p. 8; Tabela V, p. 10"},
+      {"categoria": "outro", "descricao": "Compilação incompleta sem intervenção do usuário: mesmo com GPT-4o, só 89,8% das funções compilam.", "localizador": "Seção I, p. 2; Seção VI-A, p. 6"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Pré-tradução das structs e Struct Transpilation Cache, com instrução de usar a definição pré-gerada, para evitar definições divergentes entre invocações.", "avaliada": "nao", "localizador": "Seção III-A, p. 3-4"},
+      {"descricao": "Struct Field Usage Analyzer para limitar o código unsafe; só há comparação entre modelos com o componente presente.", "avaliada": "nao", "localizador": "Seção III-A, p. 4; Seção VI-A, p. 7"},
+      {"descricao": "Reenvio de erros de compilação e nova tradução quando há unsafe, até um número configurável de vezes.", "avaliada": "nao", "localizador": "Seção III-A, p. 4"},
+      {"descricao": "Divisão de funções em várias requisições para caber na janela de contexto.", "avaliada": "nao", "localizador": "Seção III-A, p. 4"},
+      {"descricao": "Teste simbólico diferencial para detectar divergências funcionais; a capacidade de detecção é comparada com testes existentes, revisão manual e FLUORINE, mas não há medida do efeito sobre o código gerado contra condição sem a verificação.", "avaliada": "nao", "localizador": "Seção III-B e III-C, p. 4-5; Seção VI-D, p. 8; Seção VI-F, p. 9"},
+      {"descricao": "Alinhamento de layout de memória e de tipos (Option, String/slice, Vec) e normalização de grafos para reduzir falsos positivos.", "avaliada": "nao", "localizador": "Seção III-C, p. 5; Seção IV, p. 5-6"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "FLUORINE (sistema baseado em LLM, GPT-4o; transpilações e resultados do artefato dos autores originais, Tabela VII); CROWN (ferramenta sintática sem LLM, não é condição de prompting; Tabela VI). Comparações entre modelos (Tabela I) não são comparadores de prompting.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa contra a tabela: o texto afirma que o GPT-4o superou todos os modelos 'across all codebases' em compilação, mas na Tabela I, para urlparser, GPT-4o-mini tem 92,3% (24/26) contra 88,5% (23/26) do GPT-4o.", "localizador": "Seção VI-A, p. 6; Tabela I, p. 7"},
+      {"descricao": "Médias de Perc. unsafe narradas (13,05%, 20,88%, 31,03%, 59,10%) não coincidem com a média simples das cinco linhas da Tabela I para GPT-4o (≈10,4%, cálculo próprio) e Claude-3.5-Sonnet (≈53,6%, cálculo próprio); para GPT-4o-mini (≈20,4%) e GPT-3.5-turbo (31,0%) a diferença é pequena. Aparente inconsistência: o estudo não informa se a média é ponderada nem a unidade do percentual.", "localizador": "Seção VI-A e Tabela I, p. 7"},
+      {"descricao": "Resumo e conclusão dizem que, das funções compiláveis, '72% produced equivalent symbolic return values'; a Tabela I mede valores de retorno e parâmetros de saída (por exemplo, GPT-4o: 237 de 328 Eq. Output somando as linhas, ≈72,3%, cálculo próprio), não funções. Os totais por modelo da Seção VI-B (72%, 74%, 71%, 80%) coincidem com as somas da Tabela I (cálculos próprios).", "localizador": "Resumo, p. 1; Seção VI-B, p. 7-8; Tabela I, p. 7; Seção IX, p. 11"},
+      {"descricao": "A Seção I fala em 12 bugs semânticos complexos em 20 funções; a Tabela IV tem 13 linhas de bugs (contagem própria), que somam 20 pares modelo-função (contagem própria). Aparente divergência entre o número de bugs e o número de linhas.", "localizador": "Seção I, p. 2; Tabela IV, p. 10"},
+      {"descricao": "A coluna 'Bug' da Tabela I não é definida; sua soma é 27 (cálculo próprio) e alguns valores não coincidem com as entradas da Tabela IV para o mesmo código e modelo (por exemplo, libcsv GPT-4o: 5 na Tabela I, 4 funções na Tabela IV; u8c GPT-4o: 7 contra 4). Como a Tabela I pode incluir bugs simples, a relação não é inequívoca; registrada como relação não explicada.", "localizador": "Tabela I, p. 7; Tabela IV, p. 10; Seção I, p. 2"},
+      {"descricao": "O texto atribui a função scan_option ao código libcsv; a Tabela IV a lista em optipng.", "localizador": "Seção VI-C, p. 8; Tabela IV, p. 10"},
+      {"descricao": "Na Seção I a precisão de 85,7% e 88,2% é chamada 'average precision'; na Seção VI-D é 'overall precision' e corresponde ao agregado de TP/(TP+FP) da Tabela V (36/42 e 15/17, cálculos próprios), não à média das precisões por modelo.", "localizador": "Seção I, p. 2; Seção VI-D, p. 8; Tabela V, p. 10"},
+      {"descricao": "Tabela V, u8c GPT-3.5-turbo: TP = 0, FP = 0, FN = 0, precisão em branco (o texto extraído mostra '-') e revocação impressa 100%, embora a razão seja indefinida com 0/0. Aparente inconsistência.", "localizador": "Tabela V, p. 10"},
+      {"descricao": "Claude-3.5-Sonnet tem o maior percentual de equivalência (80%), mas compila só 48,3% das funções; os percentuais de equivalência têm denominadores diferentes entre modelos (valores de saída das funções compiladas).", "localizador": "Seção VI-B, p. 8; Tabela I, p. 7"},
+      {"descricao": "Comparação com FLUORINE com conjuntos de funções diferentes: FLUORINE tem 31 funções (as fornecidas no artefato, todas compiláveis), RustAssure 42 (38 compiláveis); 'Passes Sym. Testing' do FLUORINE (25) é o resultado do verificador do RustAssure aplicado às transpilações do FLUORINE; 'Passes Fuzzing' do RustAssure é N/A porque os autores verificaram manualmente e não fizeram fuzzing. O modelo usado pelo RustAssure na libopenaptx não é informado.", "localizador": "Seção VI-F, p. 9; Tabela VII, p. 10"},
+      {"descricao": "Comparação com CROWN: CROWN tem maior taxa de compilação (97,3% contra 89,8%) e, em urlparser, ambos têm 88%; a vantagem do RustAssure está em ponteiros brutos (35 contra 271 declarações; 72 contra 258 usos, totais que coincidem com as somas da Tabela VI, cálculos próprios). Em u8c, o RustAssure tem mais usos de ponteiros brutos (69) que o CROWN (52). O texto afirma que, para os demais modelos, a média normalizada é menor que a do CROWN, sem tabela.", "localizador": "Seção VI-E, p. 8-9; Tabela VI, p. 10"},
+      {"descricao": "Limites do verificador: a equivalência é estabelecida por distância de edição de grafos (não por SMT), com timeout de 180 minutos e cobertura de instruções Rust entre 72,21% e 95,91%, o que contrasta com a afirmação introdutória de que a execução simbólica pode 'explore all paths'.", "localizador": "Seção I, p. 1; Seção III-C, p. 5; Seção VI-B, p. 7; Tabela II, p. 8"},
+      {"descricao": "Número de execuções repetidas, temperatura e limite de novas tentativas do Feedback Generator não informados; o estudo reconhece o não determinismo do LLM.", "localizador": "Seção III-A, p. 3-4; Seção VI, p. 6"}
+    ],
+    "observacoes": [
+      {"descricao": "Tempo total de execução simbólica com 8 núcleos de 1h33m a 15h5m por código e modelo; o estudo não o trata como custo.", "localizador": "Tabela III, p. 8"},
+      {"descricao": "Parâmetros do verificador: limite de aninhamento de ponteiros 10; slices simbólicos de tamanho 100; Clang 14, Rustc v1.64, KLEE v3.1, networkx.", "localizador": "Seção III-B, p. 4; Seção IV-C, p. 6; Seção V, p. 6"},
+      {"descricao": "Revocação apoiada em reescrita manual de testes existentes e revisão manual do código Rust de libcsv e u8c pelos autores.", "localizador": "Seção VI-D, p. 8"},
+      {"descricao": "Na comparação com FLUORINE, os autores elaboraram manualmente o arquivo JSON para as 20 funções com bugs; só 1 foi detectada pelo FLUORINE e 14 falhas decorrem de tipos de argumento não suportados.", "localizador": "Seção VI-F, p. 9-10"},
+      {"descricao": "O texto completo dos prompts não é apresentado; o repositório da ferramenta é citado (github.com/davsec-lab/rustassure), não acessado nem validado nesta extração.", "localizador": "Seção I, p. 2; Seção III-A, p. 3-4"},
+      {"descricao": "Mistral 7B é citado como exemplo de janela de contexto pequena, mas não é avaliado.", "localizador": "Seção III-A, p. 4"}
+    ],
+    "citacoes": [
+      {"trecho": "RustAssure presents a system that uses Large Language Models (LLMs) to automatically transpile existing C codebases to Rust.", "localizador": "Resumo, p. 1"},
+      {"trecho": "RustAssure uses prompt engineering techniques to maximize the chances of the LLM generating idiomatic and safe Rust code.", "localizador": "Resumo, p. 1"},
+      {"trecho": "RustAssure uses various prompt-engineering techniques to ensure that the code generated by the LLM compiles successfully, and also minimizes the use of unsafe Rust.", "localizador": "Seção I, p. 1"},
+      {"trecho": "Therefore, RustAssure’s LLM Invoker includes only the essential macro expansions, typedef instructions, and struct and function definitions in the LLM request.", "localizador": "Seção III-A, p. 3"},
+      {"trecho": "Then, for each function that uses these struct types, the pre-generated struct definition is provided along with the C function as the prompt, and the LLM is instructed to use the pre-generated definition.", "localizador": "Seção III-A, p. 3-4"},
+      {"trecho": "To limit the amount of unsafe Rust code, the LLM Invoker extracts all uses of such char* fields and adds them to the LLM request, when pre-translating the struct types, and instructs the LLM to consider these field usages for the transpilation task.", "localizador": "Seção III-A, p. 4"},
+      {"trecho": "To support these models, the LLM Invoker automatically chunks a function into multiple LLM requests if it does not fit within the LLM’s context window.", "localizador": "Seção III-A, p. 4"},
+      {"trecho": "Like previous approaches [17], when the LLM produces a transpilation that does not compile, RustAssure re-attempts the transpilation, by sending the compiler error message along with the original C function to the LLM, requesting a corrected translation.", "localizador": "Seção III-A, p. 4"},
+      {"trecho": "In addition to compilation errors, if the LLM-transpiled Rust code contains any unsafe block, or invokes unsafe functions such as the functions from the libc crate, the LLM Invoker requests a re-translation up to a configurable number of times.", "localizador": "Seção III-A, p. 4"},
+      {"trecho": "However, LLMs are not guaranteed to always generate correct code [9].", "localizador": "Seção I, p. 1"},
+      {"trecho": "Code generated by Large Language Models (LLMs) often contain subtle bugs.", "localizador": "Seção II, p. 2"},
+      {"trecho": "Unsafe Rust code introduces potential memory corruption vulnerabilities in the program, therefore, the amount of unsafe Rust code generated by the LLM must be minimized.", "localizador": "Seção I, p. 1"},
+      {"trecho": "We observed that due to the inherent non-determinism and randomness [15] of LLM models these different invocations can sometimes generate slightly different Rust struct definitions for the same C types.", "localizador": "Seção III-A, p. 3"},
+      {"trecho": "When using these models, a single large function can exceed the context window length.", "localizador": "Seção III-A, p. 4"},
+      {"trecho": "We note that C and Rust functions will not be symbolically equivalent if the C code has memory corruption bugs that are absent in Rust—a limitation that is present even when using concrete test cases.", "localizador": "Seção III-B, p. 4"},
+      {"trecho": "The false positives arise due to optimizations KLEE performs when symbolically modeling arrays and aligning these differences is primarily an engineering effort.", "localizador": "Seção VI-D, p. 8"},
+      {"trecho": "RustAssure can be improved with a feedback loop from the Semantic Checker that returns divergences to the LLM for targeted re-transpilation.", "localizador": "Seção VII, p. 11"},
+      {"trecho": "GPT-4o outperformed all other LLM models across all codebases, successfully transpiling 89.8% of all C functions into compilable Rust functions.", "localizador": "Seção VI-A, p. 6"},
+      {"trecho": "The average percentage of unsafe code across all codebases is 13.05%, 20.88%, 31.03%, and 59.10%, for the GPT-4o, GPT-4o-mini, GPT-3.5-turbo, and Claude-3.5-Sonnet models, respectively.", "localizador": "Seção VI-A, p. 7"},
+      {"trecho": "Figure 6 shows the simplified snippet of the scan_option function from the libcsv codebase.", "localizador": "Seção VI-C, p. 8"},
+      {"trecho": "The overall compilation success rate for RustAssure and CROWN is 89.8% and 97.3%, respectively.", "localizador": "Seção VI-E, p. 9"},
+      {"trecho": "We used a graph edit-distance-based comparison instead of SMT solving to simplify our implementation.", "localizador": "Seção III-C, p. 5"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "RustAssure",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": "FLUORINE",
+      "modelo": "RustAssure: nao_informado para a libopenaptx; FLUORINE: GPT-4o (transpilações do artefato)",
+      "benchmark": "libopenaptx",
+      "metrica": "Compilation Success (número de funções Rust compiláveis)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 31, "intervencao": 38},
+      "denominador": "FLUORINE: 31 funções (as 31 de 42 fornecidas no artefato com mapeamentos JSON); RustAssure: 42 funções",
+      "condicoes": "Comparação de sistemas, não de técnica isolada: o ganho ou perda é do pacote RustAssure frente a outro pacote baseado em LLM, e não se atribui a nenhum ingrediente. Os valores do FLUORINE vêm do artefato dos autores originais (transpilações GPT-4o já prontas, só as 31 funções com mapeamento JSON, descritas como compiláveis); os autores não executaram a geração do FLUORINE. Os denominadores diferem (31 contra 42) e o modelo usado pelo RustAssure não é informado. Temperatura, número de execuções e número máximo de novas tentativas nao_informado. Valores conferidos visualmente na Tabela VII (PDF p. 10) e no texto da Seção VI-F (PDF p. 9).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado com técnica, métrica e comparador únicos (o resumo destaca compilação e equivalência simbólica sem comparador de prompting; as contribuições citam CROWN e FLUORINE). Tabela I compara só modelos com o mesmo pipeline (sem contraste de prompting); Tabela VI compara com CROWN, ferramenta sintática sem LLM, que não é linha de base de prompting. Tabela VII é a primeira tabela com linha de base baseada em LLM; primeira métrica pertinente (Compilation Success; Total Function é descritiva).",
+      "derivacao": "direta",
+      "localizador": "Tabela VII, p. 10 (PDF p. 10, sem paginação impressa); Seção VI-F, p. 9",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "FLUORINE 31 31 0 10 25", "localizador": "Tabela VII, p. 10; colunas Method, Total Function, Compilation Success, Raw Pointer, Passes Fuzzing, Passes Sym. Testing"},
+        {"trecho": "RustAssure 42 38 1 N/A 33", "localizador": "Tabela VII, p. 10; colunas Method, Total Function, Compilation Success, Raw Pointer, Passes Fuzzing, Passes Sym. Testing"},
+        {"trecho": "Instead, the artifact provides the extracted functions, along with their dependencies, and the JSON-mappings for 31 (out of 42) functions for the libopenaptx library, along with their Rust transpilations generated using the GPT-4o model.", "localizador": "Seção VI-F, p. 9"},
+        {"trecho": "Out of the 31 compilable Rust functions generated by FLUORINE, only 10 pass FLUORINE’s differential fuzzing stage, due to crashes in the fuzzer, while RustAssure can establish the semantic equivalence of 25 out of the 31 functions handled by FLUORINE, and 33 out of all 38 compilable functions generated by RustAssure.", "localizador": "Seção VI-F, p. 9"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (transpilar C para Rust seguro e verificar equivalência) e contribuições explicitadas.", "localizador": "Resumo, p. 1; Seção I, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Componentes do pipeline e do verificador descritos, com versões de ferramentas; mas o texto dos prompts, a temperatura, o limite de novas tentativas e o número de execuções não são informados, e o modelo usado na libopenaptx não é identificado.", "localizador": "Seções III-V, p. 3-6; Seção VI-F, p. 9"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparação com CROWN (sem LLM) e com FLUORINE (resultados do artefato, conjunto de 31 de 42 funções), mas nenhuma condição sem o pacote de prompting no mesmo LLM nem ablação dos componentes.", "localizador": "Seções VI-E e VI-F, p. 8-10; Tabelas VI-VII, p. 10"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Denominadores da compilação e da equivalência informados na Tabela I, mas o resumo trata valores de saída como funções, a coluna Bug e a unidade de Perc. unsafe não são definidas, as médias de unsafe não batem com a média simples das linhas, há revocação de 100% com 0/0 e a Tabela VII usa conjuntos de funções diferentes.", "localizador": "Resumo, p. 1; Tabela I e Seção VI-A, p. 7; Tabela V e Tabela VII, p. 10"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há seção de ameaças; o estudo menciona falsos positivos do verificador, limites do KLEE e da janela de contexto e melhorias futuras, mas não discute não determinismo na avaliação, escolha dos códigos ou validade externa.", "localizador": "Seção III-B, p. 4; Seção VI-D, p. 8; Seção VII, p. 11"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Repositório da ferramenta citado e versões de Clang, Rustc e KLEE informadas; snapshots dos modelos, prompts, temperatura e número de execuções não informados. O repositório não foi acessado nem validado.", "localizador": "Seção I, p. 2; Seção V, p. 6"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não discute a possível presença dos códigos avaliados (usados em trabalhos anteriores) no pré-treinamento dos LLMs.", "localizador": "texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "observacao": "Texto extraído lido integralmente (819 linhas). Páginas abertas para conferir Tabela I (p. 7), Tabelas II-III (p. 8), Tabelas IV-VII (p. 10), Tabela VIII (p. 11), Figuras 1-2 (p. 3) e a descrição do LLM Invoker (p. 3-4) e da comparação com CROWN e FLUORINE (p. 8-9). O PDF não tem paginação impressa."
+  }
+}

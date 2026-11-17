@@ -1,0 +1,169 @@
+{
+  "estudo": "S1070",
+  "texto_fonte": "fontes/textos/lote/S1070.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2511.04495v1 [cs.CL], 6 nov. 2025 (artigo de sistema do TSAR 2025 Shared Task); o PDF não tem paginação impressa, os localizadores usam a página do PDF (8 páginas)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Prompts for Generating MRS-Rule Code (Prompts 2.1, 2.2 e 2.3, com upload do Program 1 e de duas imagens)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Caixa 'Prompts for Generating MRS-Rule Code', p. 3; Seção 4.1.1, p. 3; Apêndice A.2, p. 7",
+        "observacao": "Sequência de prompts ao GPT-4o (interface ChatGPT) para gerar o programa MRS-Rule (Program 2). Pedido em linguagem natural do comportamento do programa → instrucao; upload do arquivo do Program 1 (Baseline) e de duas imagens (os três modelos ModernBERT e o método de predição do nível) como insumo → contexto; três prompts encadeados que constroem o código 'step by step' → decomposicao; especificação de regras de aceitação (nível CEFR igual ao alvo e similaridade SBERT ≥ 0.8) e de formato/ordem da saída JSON → restricoes. Sem base identificável: o prompt usado para gerar o Program 1 não é apresentado. Não há condição contrafactual de geração de código: o estudo não compara estratégias de prompting para gerar o mesmo programa nem mede a qualidade do código gerado; a Tabela 2 compara os programas como sistemas de simplificação de texto (tarefa fora do escopo)."
+      },
+      {
+        "nome_original": "Instruction used to fix the code (Fix 2.1, 2.2 e 2.3)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Caixa 'Instruction used to fix the code', p. 3; Seção 4, p. 2",
+        "observacao": "Instruções de correção dadas pelos autores ao GPT-4o depois de observar defeitos na saída do programa gerado (por exemplo, objetos JSON ausentes no arquivo de saída), com novo upload do Program 1 → feedback mediado por humano a partir da execução; herda instrucao, contexto, decomposicao (três correções encadeadas) e restricoes (colunas da saída, verificação da contagem de objetos). Parte do processo de gerar o MRS-Rule; não isolada nem avaliada separadamente; número de iterações além das três correções nao_informado."
+      },
+      {
+        "nome_original": "Prompt for Generating MRS-Joint (Prompts 3.1 e 3.2, com upload do Program 2 e do Program 1)",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Caixa 'Prompt for Generating MRS-Joint', p. 4; Seção 4.2.1, p. 4; Apêndice A.3, p. 8",
+        "observacao": "Dois prompts encadeados ao ChatGPT (GPT-4o) para integrar o prompt LLM do Program 1 ao Program 2 e gerar o código de 'over-generation-then-rank'. Pedido do comportamento → instrucao; upload dos dois arquivos de programa → contexto; dois prompts sucessivos → decomposicao; especificação do procedimento de geração e seleção de candidatos (similaridade de cosseno e nível previsto) → restricoes, mesmo critério aplicado aos Prompts 2.1-2.3. Mecanismos acrescentados: lista vazia, pois o estudo não apresenta um prompt base de geração de código do qual estes derivem (os prompts 3.x não reaproveitam os 2.x). Segundo o estudo, o programa gerado funcionou sem correções. Sem contrafactual de prompting para geração de código; os resultados da Tabela 2 são de simplificação de texto."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Simplificação multi-rodada baseada em regras (replace_words, simplify_numbers_units, strip_relative_clauses, keep_shortest_clause, trim_to_limit, sentence_split; Reconciliation Retries; Nearest-level Fill)",
+        "natureza": "outro",
+        "descricao": "Algoritmo implementado nos programas gerados (MRS-Rule e MRS-Joint) para simplificar texto; não é prompting de geração de código. As diferenças de RMSE e MeaningBERT entre os programas refletem esse algoritmo e a tarefa de simplificação de texto, fora do escopo.",
+        "localizador": "Seções 4.1.1 e 4.1.2, p. 3-4; Figura 1, p. 4; Apêndice A.2.1 e Listing 1, p. 7"
+      },
+      {
+        "nome_original": "Predição de nível CEFR por três classificadores ModernBERT com votação majoritária e verificação de similaridade SBERT (all-MiniLM-L6-v2)",
+        "natureza": "outro",
+        "descricao": "Verificadores usados dentro dos programas gerados (aceitação de candidatos) e na análise do conjunto trial; são modelos classificadores e de embeddings, não prompting.",
+        "localizador": "Seção 3.1 e nota 3, p. 2; Seção 4.1.2, p. 3; Apêndice A (Models), p. 7"
+      },
+      {
+        "nome_original": "Hiperparâmetros multi-rodada (Table 4: similarity_floor, max_steps, max_retries, floor_step, steps_step, w_hit, w_ref, w_orig, llm_timeout, sim_threshold)",
+        "natureza": "orcamento",
+        "descricao": "Limiares de similaridade, número de passos de edição e de tentativas e pesos de pontuação dos programas gerados; controlam o orçamento de iterações e a seleção de candidatos do algoritmo de simplificação, não o prompt.",
+        "localizador": "Tabela 4, p. 7; Seção 4.1.2, p. 3"
+      },
+      {
+        "nome_original": "GPT-4o para gerar o código e GPT-4o-mini como API de simplificação",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha de modelos distintos para a geração de código e para a simplificação; não é comparada nem altera o prompt.",
+        "localizador": "Seção 3.1, p. 2; Apêndice A (Models) e nota 4, p. 7; Limitation, p. 6"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o (geração do código dos três programas, via interface ChatGPT)", "versao": "snapshot nao_informado; nota 4 indica https://chatgpt.com/?model=gpt-4o, acessado em 09/23/2025", "localizador": "Seção 3.1, p. 2; Apêndice A e nota 4, p. 7"},
+      {"nome": "GPT-4o-mini (API OpenAI chamada pelos programas Baseline e MRS-Joint para simplificar texto)", "versao": "nao_informado", "localizador": "Seção 3.1, p. 2; Apêndice A (Models), p. 7"},
+      {"nome": "ModernBERT CEFR classifiers (AbdullahBarayan/ModernBERT-base-doc_en-Cefr, ModernBERT-base-doc_sent_en-Cefr, ModernBERT-base-reference_AllLang2-Cefr2)", "versao": "nao_informado; a nota 3 (p. 2) grafa o terceiro como 'reference_AllLang2-Cefr2' e o Apêndice A (p. 7) como 'reference_AllLang2-Cefr'", "localizador": "Nota 3, p. 2; Apêndice A (Models), p. 7"},
+      {"nome": "sentence-transformers/all-MiniLM-L6-v2 (similaridade semântica)", "versao": "nao_informado", "localizador": "Apêndice A (Models), p. 7"}
+    ],
+    "benchmarks": [
+      {"nome": "TSAR-2025 Shared Task (readability-controlled text simplification), conjunto trial", "quantidade": "40 exemplos; na análise de CEFR-Gap distribuídos em 18 (gap 1), 18 (gap 2) e 4 (gap 3)", "localizador": "Seção 2, p. 1; Tabela 1, p. 2"},
+      {"nome": "TSAR-2025 Shared Task, conjunto test", "quantidade": "200 exemplos; na Tabela 3, 100 com alvo A2 e 100 com alvo B1 (soma das linhas, cálculo próprio)", "localizador": "Seção 2, p. 1; Tabela 3, p. 5"}
+    ],
+    "metricas": [
+      {"nome": "RMSE (CEFR Compliance)", "definicao": "distância entre o nível CEFR previsto e o nível-alvo; menor é melhor. Métrica de simplificação de texto, não de qualidade do código.", "localizador": "Seção 2, p. 1; Tabelas 1-2, p. 2 e 4"},
+      {"nome": "MB-Orig (MeaningBERT entre texto simplificado e original)", "definicao": "preservação de significado em relação à sentença original; maior é melhor", "localizador": "Seção 2, p. 1; Tabelas 1-2, p. 2 e 4"},
+      {"nome": "MB-Ref (MeaningBERT entre texto simplificado e referência humana)", "definicao": "preservação de significado em relação à referência escrita por humano; maior é melhor", "localizador": "Seção 2, p. 1; Tabelas 1-2, p. 2 e 4"},
+      {"nome": "# Simplified sentences that reach the target level (#tgt-lvl reached)", "definicao": "contagem de sentenças que atingem o nível-alvo a cada tentativa (1-6), MRS-Rule vs. MRS-Joint; figura sem rótulos numéricos; conjunto não explicitado na legenda", "localizador": "Figura 3, p. 5"},
+      {"nome": "Matriz de confusão alvo × nível previsto", "definicao": "contagens por nível-alvo (A2, B1, B2) e nível previsto no conjunto test; o sistema a que se refere não é identificado", "localizador": "Tabela 3 e Seção 6.1, p. 5"}
+    ],
+    "linguagens": ["Python (código gerado)", "Inglês (texto simplificado; língua natural, não linguagem de programação)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "O código gerado pelo GPT-4o para o MRS-Rule não funcionou de início: o arquivo de saída continha colunas indevidas e faltavam objetos JSON, exigindo três instruções de correção; o estudo afirma que a geração automática de código ainda requer refinamento.", "localizador": "Seção 4, p. 2; caixa 'Instruction used to fix the code', p. 3; Seção 1, p. 1"},
+      {"categoria": "outro", "descricao": "Saídas incompletas ou truncadas dos programas (por exemplo, 'These accidents are often due to.') podem ser julgadas mais simples pelo preditor CEFR, inflando a conformidade de nível; risco de validade da avaliação automática da simplificação, não de cibersegurança.", "localizador": "Seção 6.2, p. 5; Apêndices B.2 e B.3, p. 8"},
+      {"categoria": "outro", "descricao": "Compromisso entre conformidade de nível e preservação de significado: maiores diferenças de nível CEFR e as regras multi-rodada reduzem a preservação de significado (qualidade da simplificação de texto).", "localizador": "Seção 3.1 e Tabela 1, p. 2; Seção 5, p. 5"},
+      {"categoria": "outro", "descricao": "Limitações declaradas: modelos fechados (GPT-4o, GPT-4o-mini), um único conjunto de dados, uma língua (inglês) e dois tipos de modelos gerados pelo GPT-4o; não houve comparação com outros prompts nem outros agentes de código.", "localizador": "Limitation, p. 6"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Fix 2.3: pedido ao GPT-4o para acrescentar ao programa uma verificação do número de objetos JSON de entrada e de saída e reprocessar os dataset_id ausentes; efeito não medido contra condição sem a correção.", "avaliada": "nao", "localizador": "Caixa 'Instruction used to fix the code', p. 3"},
+      {"descricao": "Nearest-level Fill e fallback conservador para sentenças que não atingem o alvo após as tentativas; parte do algoritmo de simplificação, sem comparação isolada.", "avaliada": "nao", "localizador": "Seção 4.1.2, p. 3-4; Figura 1, p. 4"},
+      {"descricao": "Votação majoritária de três classificadores ModernBERT com regras de desempate para estimar o nível CEFR; procedimento de controle sem comparação.", "avaliada": "nao", "localizador": "Seção 3.1, p. 2"}
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [
+      {"tecnica": "Prompts for Generating MRS-Rule Code (Prompts 2.1, 2.2 e 2.3)", "motivo": "O estudo não mede a qualidade do código gerado (correção, testes, número de defeitos) nem executa outra estratégia de prompting para gerar o mesmo programa. Os números da Tabela 2 (RMSE, MB-Orig, MB-Ref) medem o desempenho dos programas como sistemas de simplificação de texto, tarefa fora do escopo, e refletem o algoritmo especificado (regras multi-rodada, chamada ao GPT-4o-mini), não um efeito de técnica de prompting de geração de código. O 'Baseline (Run 1)' é linha de base de simplificação (prompt de Barayan et al. ao GPT-4o-mini), cujo prompt de geração de código não é apresentado. Sem métrica de geração de código destacada, não cabe extração descritiva."},
+      {"tecnica": "Prompt for Generating MRS-Joint (Prompts 3.1 e 3.2)", "motivo": "Mesmo motivo: o único desfecho sobre o código é qualitativo ('worked well, so there was nothing to fix'), sem métrica; a comparação MRS-Joint vs. Baseline/MRS-Rule na Tabela 2 é de simplificação de texto e envolve um pacote híbrido (prompt ao GPT-4o-mini + regras + seleção de candidatos), não um contraste de prompting para geração de código."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Narrativa 'The Prompt-only baseline model (§3) preserves the original meaning best (highest MeaningBERT-Orig)' contra a Tabela 2: vale no trial (Baseline 0.8453 > MRS-Joint 0.8023 > MRS-Rule 0.7961), mas não no test (Baseline 0.855 < MRS-Rule 0.865 < MRS-Joint 0.866).", "localizador": "Seção 5, p. 4-5; Tabela 2, p. 4"},
+      {"descricao": "Inversão entre trial e test no MB-Ref: MRS-Rule 0.7967 vs. Baseline 0.7958 no trial, mas 0.701 vs. 0.849 no test. A afirmação de que o MRS-Rule mostra 'improved performance over prompting baseline (Table 2)' só se sustenta no RMSE (0.8515 vs. 0.8944 no trial; 0.714 vs. 0.755 no test); MB-Orig no trial (0.7961 vs. 0.8453) e MB-Ref no test pioram.", "localizador": "Seção 4.1.1, p. 3; Tabela 2, p. 4"},
+      {"descricao": "'Our multi-round rules significantly improve the performance' sem teste estatístico; número de execuções nao_informado e parâmetros de decodificação do GPT-4o-mini nao_informado. 'More efficient' para o MRS-Joint não é sustentado por medida de eficiência; a tabela só traz acurácia de nível e preservação de significado.", "localizador": "Seção 5, p. 4-5; Tabela 2, p. 4"},
+      {"descricao": "Tabela 3 ('Confusion matrix on the test data') não identifica qual programa (Baseline, MRS-Rule ou MRS-Joint) a produziu; a Seção 6.1 fala apenas em 'the program'. Linha B2 toda zero; as linhas A2 e B1 somam 100 cada (cálculo próprio), compatível com os 200 exemplos do test.", "localizador": "Tabela 3 e Seção 6.1, p. 5; Seção 2, p. 1"},
+      {"descricao": "Limiares aparentemente inconsistentes: Prompt 2.2 pede similaridade 'default ≥ 0.8'; a Tabela 4 traz similarity_floor 0.88, 'sim_floor (internal) 0.88 ↓' e sim_threshold 0.72-0.75; a Seção 4.1.2 diz que, no reprocessamento, o sistema 'slightly lowers the similarity threshold (to 0.88)' e 'increases the maximum edit steps (to 8)', valores iguais aos da Tabela 4 (similarity_floor 0.88, max_steps 8). O estudo não informa os valores iniciais que seriam reduzidos ou aumentados. Aparente inconsistência.", "localizador": "Caixa de prompts, p. 3; Seção 4.1.2, p. 3; Tabela 4, p. 7"},
+      {"descricao": "A análise de CEFR-Gap (Tabela 1) usa os 40 exemplos do trial e o nível CEFR estimado pelos classificadores dos autores; o grupo de gap 3 tem só 4 exemplos, como o próprio estudo ressalva.", "localizador": "Seção 3.1 e Tabela 1, p. 2"},
+      {"descricao": "Figura 3 (sentenças que atingem o nível-alvo por tentativa) não tem rótulos numéricos e a legenda não diz se o conjunto é trial ou test; valores não estimados nesta extração.", "localizador": "Figura 3, p. 5"},
+      {"descricao": "Erros de redação: 'three failure modes – overshoot, and undergeneration' lista dois; a Seção 4.2 remete ao workflow '(§2)', mas o fluxo é a Figura 2; os casos do Apêndice B são descritos como 'misclassified by the CEFR predictor', embora a análise trate de saídas que não atingem o alvo.", "localizador": "Seção 6.2, p. 5; Seção 4.2, p. 4; Apêndice B, p. 8"},
+      {"descricao": "A posição '7 out of 20 teams' é declarada só no resumo, sem tabela ou fonte no corpo do artigo.", "localizador": "Resumo, p. 1"}
+    ],
+    "observacoes": [
+      {"descricao": "O estudo é sobre simplificação de texto controlada por nível CEFR; a geração de código pelo GPT-4o é o meio de construir os sistemas. O Program 1 (Baseline) também foi gerado pelo GPT-4o, mas o prompt de geração não é apresentado; o prompt de simplificação (Barayan et al., 2025) enviado ao GPT-4o-mini é prompting de simplificação de texto, fora das tarefas do escopo, e por isso não entra em 'tecnicas'.", "localizador": "Seção 3.1, p. 2; Apêndice A.1, p. 7"},
+      {"descricao": "Esforço manual descrito: os autores fizeram upload de arquivos e imagens, conduziram os prompts passo a passo e escreveram três instruções de correção após inspecionar a saída do MRS-Rule; o MRS-Joint não precisou de correção.", "localizador": "Caixas de prompts, p. 3-4; Seção 4.2.1, p. 4"},
+      {"descricao": "Afirmação de vantagem, não risco: o GPT-4o teria 'smartly suggested' sacrificar a preservação semântica em favor da acurácia de nível; trata-se de interpretação dos autores sobre o comportamento do modelo gerador.", "localizador": "Seção 4.1.1, p. 3"},
+      {"descricao": "Repositório anunciado (https://github.com/ounlp/Multi-Round-Text-Simplifier) com os arquivos First/Second/Third_Version_Sentence_Simplification.py; não acessado nem validado nesta extração.", "localizador": "Nota 1, p. 1; Apêndices A.1-A.3, p. 7-8"},
+      {"descricao": "Bibliotecas do código gerado listadas (argparse, os, sys, json, re, math, pathlib, collections, typing, numpy, requests, transformers, SentenceTransformers).", "localizador": "Apêndice A (Libraries), p. 7"}
+    ],
+    "citacoes": [
+      {"trecho": "Inspired by this finding, we propose two multi-round simplification methods and generate them via GPT-4o: rule-based simplification (MRS-Rule) and jointly rule-based LLM simplification (MRS-Joint).", "localizador": "Resumo, p. 1"},
+      {"trecho": "Additionally, we explore the potential of automatic code generation for text simplification, although further refinement remains necessary.", "localizador": "Seção 1, p. 1"},
+      {"trecho": "For the datasets, we use the same trial (40 examples) and test (200 examples) data sets provided by the TSAR workshop to build and evaluate our methods.", "localizador": "Seção 2, p. 1"},
+      {"trecho": "We use GPT-4o to generate the code first (denoted as Baseline or \"Program 1\"), which will call the OpenAI APIs (GPT-4o-mini) with the following prompt from (Barayan et al., 2025).", "localizador": "Seção 3.1, p. 2"},
+      {"trecho": "<Operations:> Upload the Program 1 (Baseline) file into GPT-4o; Upload 2 images (one image is for the three models, and the other is the method to predict the level in the evaluation).", "localizador": "Caixa 'Prompts for Generating MRS-Rule Code', p. 3"},
+      {"trecho": "Prompt 2.2 The program keeps the original meaning by checking semantic similarity (SBERT cosine similarity) at every step and only accepts a simplification if: (1) the CEFR level hits the,target and (2) similarity to the original is above a threshold that you control (default ≥ 0.8).", "localizador": "Caixa 'Prompts for Generating MRS-Rule Code', p. 3"},
+      {"trecho": "Prompts 2.1, 2.2, and 2.3 are the three main prompts that we used to generate the code for the MRS-rule method step by step.", "localizador": "Seção 4.1.1, p. 3"},
+      {"trecho": "Fix 2.1 Fix the program so that the output file contain only the text_id column and simplified_sentence", "localizador": "Caixa 'Instruction used to fix the code', p. 3"},
+      {"trecho": "Because in the output file, there are still some JSON objects missing.", "localizador": "Caixa 'Instruction used to fix the code', Fix 2.2, p. 3"},
+      {"trecho": "The orange box shows the operations and prompts we used to generate the MRS-Rule Code, while the blue box at the bottom shows the further steps we used to fix the generated code to make it work.", "localizador": "Seção 4, p. 2"},
+      {"trecho": "The generated code (see more details in Appendix §A.2) for MRS-Rule does not call any large language model API for simplification, but only rule-based rewriting combined with automatic CEFR level verification and semantic checks.", "localizador": "Seção 4.1, p. 2"},
+      {"trecho": "Then we use Prompt 3.2 to generate the code for over-generation-then-rank.", "localizador": "Seção 4.2.1, p. 4"},
+      {"trecho": "The program, generated when we combined those two files, worked well, so there was nothing to fix.", "localizador": "Seção 4.2.1, p. 4"},
+      {"trecho": "Before simplifying the sentence, the program uses the naive prompt to generate one candidate.", "localizador": "Caixa 'Prompt for Generating MRS-Joint', Prompt 3.1, p. 4"},
+      {"trecho": "More importantly, it also smartly suggested sacrificing semantic preservation for higher CEFR-level accuracy, demonstrating improved performance over prompting baseline (Table 2).", "localizador": "Seção 4.1.1, p. 3"},
+      {"trecho": "If any sentences are still not simplified, the system slightly lowers the similarity threshold (to 0.88), increases the maximum edit steps (to 8), and reprocesses only the remaining sentences—up to six rounds.", "localizador": "Seção 4.1.2, p. 3"},
+      {"trecho": "Baseline (Run 1) 0.755 0.855 0.849", "localizador": "Tabela 2, p. 4; bloco Test; colunas Model, RMSE, MB-Orig, MB-Ref"},
+      {"trecho": "MRS-Rule (Run 2) 0.714 0.865 0.701", "localizador": "Tabela 2, p. 4; bloco Test; colunas Model, RMSE, MB-Orig, MB-Ref"},
+      {"trecho": "MRS-Joint 0.552 0.866 0.837", "localizador": "Tabela 2, p. 4; bloco Test; colunas Model, RMSE, MB-Orig, MB-Ref"},
+      {"trecho": "The Prompt-only baseline model (§3) preserves the original meaning best (highest MeaningBERT-Orig) but shows the weakest control of CEFR level (highest RMSE).", "localizador": "Seção 5, p. 4-5"},
+      {"trecho": "After the evaluation, we found that simply merging two methods into MRS-Joint (§4.2) is more efficient, which is the most accurate model to match the target CEFR level (the best RMSE) while still maintaining the meaning.", "localizador": "Seção 5, p. 4"},
+      {"trecho": "It shows that our multi-round rules significantly improve the performance with a little sacrifice on the meaning preservation.", "localizador": "Seção 5, p. 5"},
+      {"trecho": "As shown in Table 3, the program excels in simplifying complex sentences C1-C2 to the B1 level.", "localizador": "Seção 6.1, p. 5"},
+      {"trecho": "This highlights that incomplete outputs can seem easier to cheat the CEFR predictor as the intended CEFR level.", "localizador": "Seção 6.2, p. 5"},
+      {"trecho": "These examples reveal three failure modes – overshoot, and undergeneration – demonstrating that successful CEFR simplification requires not only simpler words but also balanced control of meaning, style, and completeness.", "localizador": "Seção 6.2, p. 5"},
+      {"trecho": "The models we used are closed-source models such as using GPT-4o for code generation while using GPT-4o-mini for API, which are not explicitly finetuned in the text simplification datasets by us.", "localizador": "Limitation, p. 6"},
+      {"trecho": "Our work is also limited to one dataset and one language (English), and two types of GPT-4o generated model.", "localizador": "Limitation, p. 6"},
+      {"trecho": "Furthermore, focusing on coding generation, we could also extend the study to self-evolve algorithm discovery (Novikov et al., 2025) and compare it with other prompts and more coding agents.", "localizador": "Limitation, p. 6"},
+      {"trecho": "Our submitted systems ranked 7 out of 20 teams.", "localizador": "Resumo, p. 1"}
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "parcial", "justificativa": "O objetivo do sistema (simplificação controlada por nível CEFR com métodos multi-rodada) é claro, mas o aspecto de geração de código por prompting é apenas 'explorado', sem questão de pesquisa ou critério de avaliação próprio.", "localizador": "Resumo e Seção 1, p. 1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Os prompts de geração e correção do MRS-Rule e do MRS-Joint são apresentados literalmente e o fluxo dos programas é descrito; faltam o prompt de geração do Program 1, as imagens enviadas, o número de interações com o ChatGPT e os parâmetros de decodificação do GPT-4o-mini.", "localizador": "Seções 3.1, 4.1 e 4.2, p. 2-4; Apêndice A, p. 7-8"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há linha de base de simplificação executada nos mesmos dados (Baseline, Run 1), mas nenhuma condição alternativa de prompting para gerar código, de modo que o efeito das técnicas de geração de código não pode ser isolado; o próprio estudo aponta a falta de comparação com outros prompts e agentes.", "localizador": "Tabela 2, p. 4; Limitation, p. 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "RMSE e MeaningBERT seguem as métricas oficiais e os conjuntos têm tamanho informado (40 e 200); não há métrica da qualidade do código gerado, a Tabela 3 não identifica o sistema, a Figura 3 não tem valores numéricos e a narrativa sobre MB-Orig contradiz o bloco test da Tabela 2. Não se informa se os níveis do test foram previstos pelos classificadores dos autores ou pela avaliação oficial.", "localizador": "Seção 2, p. 1; Seção 3.1, p. 2; Tabela 2, p. 4; Tabela 3 e Figura 3, p. 5"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A seção Limitation trata de modelos fechados, um conjunto de dados e uma língua; a análise de casos discute falhas do preditor CEFR. Não discute não determinismo, número de execuções, significância nem contaminação.", "localizador": "Limitation, p. 6; Seção 6.2, p. 5"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Repositório anunciado (não acessado), prompts e hiperparâmetros (Tabela 4) informados; o GPT-4o foi usado pela interface ChatGPT sem snapshot, as versões dos modelos e a decodificação não são informadas e as imagens enviadas não são reproduzidas.", "localizador": "Nota 1, p. 1; Apêndice A e nota 4, Tabela 4, p. 7"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não menciona possível presença dos dados do TSAR 2025 ou do código no pré-treinamento dos modelos.", "localizador": "Texto completo, p. 1-8"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6, 7, 8],
+    "observacao": "Texto extraído lido integralmente (459 linhas, até o Apêndice B.3). Todas as 8 páginas abertas para conferir as caixas de prompts, as Tabelas 1-4, as Figuras 1-3 e os localizadores das citações. Nenhuma extração numérica foi registrada porque não há comparação de prompting para tarefa do escopo com métrica (ver so_classificadas)."
+  }
+}

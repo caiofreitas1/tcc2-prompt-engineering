@@ -1,0 +1,351 @@
+{
+  "estudo": "S361",
+  "texto_fonte": "fontes/textos/lote/S361.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Vijayaraghavan et al., VHDL-Eval: A Framework for Evaluating Large Language Models in VHDL Code Generation, arXiv:2406.04379v1 [cs.SE], 6 Jun 2024",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot code generation",
+        "mecanismos": [
+          "instrucao",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (Resumo); p. 3 do PDF, Seção II-C (campo prompt); p. 4 do PDF, Seção IV-A e Tabela II (sem numeração impressa)",
+        "observacao": "Condição base: o prompt é o enunciado do problema em comentário concatenado à declaração da entidade/função VHDL (Seção II-C). O enunciado em linguagem natural foi classificado como instrucao e a declaração da entidade (interface com portas e bibliotecas) como restricoes (especificação); a declaração também poderia ser lida como código fornecido como insumo (contexto). O texto exato dos prompts não é mostrado. Serve de comparador para o ICL; não há condição sem ela."
+      },
+      {
+        "nome_original": "In-Context Learning (ICL)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "contexto"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 do PDF, Seção III-B; p. 4 do PDF, Tabela II e Seção IV-B",
+        "observacao": "Herda o prompt base (enunciado + declaração) e acrescenta k=5 exemplos (\"training\" data) antes de cada prompt de teste; por serem exemplos de código usados como demonstração, recebem exemplos e contexto (dicionário D102). O estudo não informa a origem, o critério de seleção nem a disjunção dos exemplos em relação ao conjunto de teste. O contrafactual é a linha zero-shot do mesmo modelo na Tabela II (Codellama-70b-instruct vs Codellama-70b-instruct-ICL; Granite-20B-Code-Instruct vs Granite-20B-Code-Instruct-ICL); parâmetros de decodificação e número de amostras não são informados para nenhuma das condições. É uma das três metodologias exploradas (zero-shot, ICL, PEFT), com seção de resultados própria (IV-B); a contribuição principal do estudo é o benchmark."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "QLoRA (Parameter-efficient fine-tuning, PEFT)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino de baixo posto do CodeGen2.5 com LoRA (HuggingFace PEFT, AdamW 8-bit), r = 16, α = 32, dropout 0,1, sobre cerca de 1000 amostras de descrição + código VHDL do GitHub; resultado na linha CodeGen2.5-QLoRa da Tabela II. Não é prompting.",
+        "localizador": "p. 3 do PDF, Seção III-B; p. 4 do PDF, Tabela II e Seção IV-C"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Codegen2.5",
+        "versao": "2.5; 7B (variante específica não informada)",
+        "observacao": "treinado em StarCoderData por 1,4T tokens, segundo o estudo"
+      },
+      {
+        "nome": "Codellama-34b-instruct",
+        "versao": "34B instruct (snapshot não informado)"
+      },
+      {
+        "nome": "Codellama-70b-instruct",
+        "versao": "70B instruct (snapshot não informado)"
+      },
+      {
+        "nome": "Granite-20b-instruct / Granite-20B-Code-Instruct",
+        "versao": "20B, ajustado a partir de Granite-20B-Code-Base; link huggingface.co/ibm-granite/granite-20b-code-instruct (snapshot não informado)"
+      },
+      {
+        "nome": "CodeGen2.5-QLoRa",
+        "versao": "CodeGen2.5 com ajuste fino QLoRA (fora do escopo de prompting)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "VHDL-Eval",
+        "quantidade": "202 problemas (#Total VHDL Code after Post-Processing)",
+        "observacao": "Construído a partir de 113 problemas do Verilog-Eval traduzidos para VHDL (de 156 problemas originais, descartando os não traduzíveis pela ferramenta ICARUS) e 131 problemas de tutoriais de VHDL; o pós-processamento remove enunciados duplicados que se sobrepõem ao Verilog-Eval, mas o estudo não informa quantos foram removidos em cada etapa. Média de 33,5 linhas nas soluções canônicas e 4,82 casos de teste por testbench. A conclusão fala em «approximately 200 problems». O estudo não liga explicitamente o corpus de 202 problemas ao denominador das métricas da Tabela II. Conjunto ainda não publicado («will be published soon after getting clearance»).",
+        "localizador": "p. 1 do PDF (Resumo); p. 2 do PDF, Tabela I, Seções II e II-A, nota 1; p. 3 do PDF, Seção II-B-a; p. 4 do PDF, Seção VI"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@1",
+        "definicao": "Pass@k (Eq. 1): expectativa sobre os problemas de 1 − C(n−c,k)/C(n,k), com n ≥ k amostras por tarefa e c amostras aprovadas nos testes",
+        "localizador": "p. 3 do PDF, Seção III-C, Eq. (1)"
+      },
+      {
+        "nome": "Pass@3",
+        "definicao": "idem",
+        "localizador": "p. 3 do PDF, Seção III-C; p. 4 do PDF, Tabela II"
+      },
+      {
+        "nome": "Pass@5",
+        "definicao": "idem",
+        "localizador": "p. 3 do PDF, Seção III-C; p. 4 do PDF, Tabela II"
+      }
+    ],
+    "linguagens": [
+      "VHDL (linguagem-alvo da geração; os problemas do Verilog-Eval foram traduzidos de Verilog para VHDL na construção do conjunto)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Os testbenches criados manualmente podem não cobrir todos os cenários críticos e podem não ser exaustivos ou suficientes para todos os problemas; assim, a aprovação nos testes pode superestimar a correção funcional do código gerado.",
+        "localizador": "p. 4 do PDF, Seção V"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento do benchmark: os autores afirmam não poder garantir que os problemas e o código não estejam no conjunto de treinamento dos LLMs avaliados. O controle descrito (reformulação de enunciados) está em mitigacoes.",
+        "localizador": "p. 3 do PDF, Seção II-B-a; p. 4 do PDF, Seção V"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: os problemas e soluções são autocontidos e não têm as complexidades de projetos reais; a avaliação cobre poucos modelos abertos e não explora hiperparâmetros.",
+        "localizador": "p. 4 do PDF, Seção V"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação do ICL: os limites de tamanho de contexto e a verbosidade do VHDL restringem o número de exemplos (k = 5).",
+        "localizador": "p. 3 do PDF, Seção III-B; p. 4 do PDF, Seção IV-B"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Reformulação dos enunciados (por exemplo, portas lógicas transformadas em implementações de n bits ou inseridas em problemas maiores) para evitar reutilização direta e mitigar vazamento do benchmark; o estudo dá exemplos («For instance») e não informa a quantos problemas a reformulação foi aplicada.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF, Seção II-B-a e Fig. 2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "zero-shot do mesmo modelo (Codellama-70b-instruct; Granite-20B-Code-Instruct), executado no VHDL-Eval com as mesmas métricas (Tabela II)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A Seção III-B descreve o ICL apenas para o Codellama-70b-instruct («We experiment with “Codellama-70b-instruct” model under ICL setup with k=5 examples»), mas a Tabela II e a Seção IV-B também relatam ICL para o Granite-20B-Code-Instruct (0.106 / 0.195 / 0.248), sem descrição de método própria para essa condição.",
+        "localizador": "p. 3 do PDF, Seção III-B; p. 4 do PDF, Tabela II e Seção IV-B"
+      },
+      {
+        "descricao": "Narrativa divergente sobre o efeito do ICL no Granite: a Seção IV-A afirma que o desempenho «notably improves with ICL, particularly in the Pass@5 metrics», enquanto a Seção IV-B fala em «marginal performance improvement» para Codellama-70b-instruct e Granite-20b-instruct. Valores da Tabela II: Granite zero-shot 0.085 / 0.146 / 0.219; Granite ICL 0.106 / 0.195 / 0.248 (Pass@1/3/5).",
+        "localizador": "p. 4 do PDF, Seções IV-A e IV-B, Tabela II"
+      },
+      {
+        "descricao": "A Seção IV-A diz apresentar o desempenho zero-shot de «three models» (Codellama-70b-instruct, Codellama-34b-instruct e Codegen2.5), mas a Tabela II traz uma quarta linha zero-shot (Granite-20B-Code-Instruct: 0.085 / 0.146 / 0.219).",
+        "localizador": "p. 4 do PDF, Seção IV-A e Tabela II"
+      },
+      {
+        "descricao": "A narrativa qualifica o Pass@1 do Codellama-34b-instruct como «comparable» ao do 70b; os valores impressos são 0.184 e 0.229. Não há teste estatístico nem informação de variabilidade para sustentar ou refutar a qualificação.",
+        "localizador": "p. 4 do PDF, Seção IV-A e Tabela II"
+      },
+      {
+        "descricao": "Na Tabela I, as linhas de origem (113 traduzidos do Verilog-Eval e 131 de tutoriais) somam mais que o total de 202 após o pós-processamento (soma de cálculo próprio: 244). O estudo descreve a remoção de duplicatas sobrepostas ao Verilog-Eval no pós-processamento, mas não informa quantos problemas foram removidos nem de qual fonte; a composição final dos 202 problemas por origem não é informada.",
+        "localizador": "p. 2 do PDF, Tabela I; p. 3 do PDF, Seção II-B-a"
+      },
+      {
+        "descricao": "O resumo e a introdução informam 202 problemas; a conclusão fala em «approximately 200 problems».",
+        "localizador": "p. 1 do PDF (Resumo); p. 2 do PDF, Seção II; p. 4 do PDF, Seção VI"
+      },
+      {
+        "descricao": "A correção sintática é declarada como um dos dois objetivos principais da avaliação, mas nenhuma métrica de correção sintática (por exemplo, taxa de compilação) é relatada; os resultados trazem apenas Pass@1/3/5.",
+        "localizador": "p. 2 do PDF, Seção I; p. 4 do PDF, Tabela II"
+      },
+      {
+        "descricao": "O número n de amostras geradas por tarefa, a temperatura e demais parâmetros de decodificação não são informados, embora o próprio estudo afirme que n deve ser suficientemente grande para estimativas de baixa variância de Pass@k. Não há teste estatístico para as diferenças entre ICL e zero-shot.",
+        "localizador": "p. 3 do PDF, Seção III-C; p. 4 do PDF, Seção IV"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A contribuição principal é o benchmark VHDL-Eval e o arcabouço de avaliação com testbenches autoverificáveis no VUnit com o simulador GHDL; a comparação de técnicas é uma avaliação inicial.",
+        "localizador": "p. 2 do PDF, contribuições; p. 3 do PDF, Seção III-A"
+      },
+      {
+        "descricao": "Esforço manual descrito: descrições dos problemas, soluções canônicas e testbenches foram elaborados manualmente; o estudo diz que criar testbenches abrangentes para novas tarefas é demorado e difícil de escalar (apresentado como limitação, não como custo).",
+        "localizador": "p. 2 do PDF, Seção II-A; p. 3 do PDF, Seção II-B-a; p. 4 do PDF, Seção V"
+      },
+      {
+        "descricao": "Ablação que não é de prompting: CodeGen2.5 vs CodeGen2.5-QLoRa na Tabela II (0.072 / 0.110 / 0.190 vs 0.095 / 0.129 / 0.215); registrada apenas como componente fora do escopo.",
+        "localizador": "p. 4 do PDF, Tabela II e Seção IV-C"
+      },
+      {
+        "descricao": "O texto extraído do PDF contém, na região da p. 3, rótulos de uma figura de outro trabalho (CircuitSynth, modelo de recompensa) que não aparecem na imagem renderizada da página; foram tratados como artefato da camada de texto e ignorados.",
+        "localizador": "fontes/textos/lote/S361.txt, linhas 118-153 e 338-356; p. 3 do PDF (imagem)"
+      },
+      {
+        "descricao": "Na Tabela II, os valores da linha Codellama-70b-instruct-ICL aparecem em negrito (maiores valores da tabela).",
+        "localizador": "p. 4 do PDF, Tabela II"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We conduct an initial evaluation of different LLMs and their variants, including zero-shot code generation, in-context learning (ICL), and Parameter-efficient fine-tuning (PEFT) methods.",
+        "localizador": "p. 1 do PDF, Resumo"
+      },
+      {
+        "trecho": "This paper addresses this gap by introducing a comprehensive evaluation framework designed specifically for assessing LLM performance in VHDL code generation task.",
+        "localizador": "p. 1 do PDF, Resumo"
+      },
+      {
+        "trecho": "prompt: Commented problem statement concatenated with function/entity declaration.",
+        "localizador": "p. 3 do PDF, Seção II-C"
+      },
+      {
+        "trecho": "In-Context Learning: We leverage the in-context learning ability of LLMs by placing “training” data into a prompt preceding each test prompt.",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "We experiment with “Codellama-70b-instruct” model under ICL setup with k=5 examples due to the limits on the context length.",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "In our work, we finetune CodeGen2.5 using the LoRA implementation from HuggingFace PEFT [20] and the 8-bit AdamW from bitsandbytes [21].",
+        "localizador": "p. 3 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "Our experiments with in-context learning (ICL) show marginal performance improvement for Codellama-70b-instruct and Granite-20b-instruct models.",
+        "localizador": "p. 4 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "This suggests potential for further improvement by incorporating more meaningful code snippets into the context, but challenges remain due to context length limits and VHDL verbosity.",
+        "localizador": "p. 4 do PDF, Seção IV-B"
+      },
+      {
+        "trecho": "These testbenches, while useful, may not cover all critical scenarios and might not be exhaustive or sufficient for all problem sets.",
+        "localizador": "p. 4 do PDF, Seção V"
+      },
+      {
+        "trecho": "The problem sets and their solutions are self-contained, lacking real-life design complexities.",
+        "localizador": "p. 4 do PDF, Seção V"
+      },
+      {
+        "trecho": "To mitigate potential benchmark leakage issues [19], where evaluation data is inadvertently used for model training, we reframe problem statements to prevent direct reuse.",
+        "localizador": "p. 3 do PDF, Seção II-B-a"
+      },
+      {
+        "trecho": "Lastly, despite efforts to prevent benchmark leakage as explained in Section II-B, we cannot guarantee that the problem sets and code were not part of the original training set of the LLMs evaluated, given the scale of their training data.",
+        "localizador": "p. 4 do PDF, Seção V"
+      },
+      {
+        "trecho": "It is essential to ensure that the number of generated samples n is sufficiently large to yield low variance estimates for Pass@k, as suggested in the literature.",
+        "localizador": "p. 3 do PDF, Seção III-C"
+      },
+      {
+        "trecho": "To systematically evaluate the generated code, we prioritize two primary goals: ensuring syntactic correctness and validating functional correctness through self-verifying testbenches.",
+        "localizador": "p. 2 do PDF, Seção I"
+      },
+      {
+        "trecho": "The dataset will be published soon after getting clearance.",
+        "localizador": "p. 2 do PDF, nota de rodapé 1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-Context Learning (ICL)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "exemplos",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "contexto"
+      ],
+      "comparador": "zero-shot code generation (Codellama-70b-instruct)",
+      "modelo": "Codellama-70b-instruct",
+      "benchmark": "VHDL-Eval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.229,
+        "intervencao": 0.237
+      },
+      "denominador": "nao_informado (o estudo não liga explicitamente o corpus de 202 problemas ao denominador da Tabela II)",
+      "condicoes": "ICL com k=5 exemplos (\"training\" data) antes de cada prompt de teste; origem e critério de seleção dos exemplos nao_informado. Número n de amostras por tarefa, temperatura e demais parâmetros de decodificação nao_informado; número de execuções nao_informado (o 1 de Pass@1 é parâmetro da métrica). Sem teste estatístico. Conferido visualmente na Tabela II (p. 4 do PDF), colunas Models | Pass@1 | Pass@3 | Pass@5; a linha ICL aparece em negrito.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O estudo não declara uma técnica, uma métrica e um comparador principais (explora zero-shot, ICL e PEFT e relata Pass@1, Pass@3 e Pass@5 sem que uma prevaleça). A primeira tabela com o contraste de prompting é a Tabela II; primeira métrica Pass@1, primeiro modelo listado com ICL Codellama-70b-instruct, comparador zero-shot do mesmo modelo. Não há outra técnica focal de prompting nem outra tarefa para cobertura; o Granite com ICL é outro modelo da mesma técnica e tarefa (não é cobertura), e não há tabela de ablação nem matriz de ingredientes para contrastes pareados.",
+      "derivacao": "direta",
+      "localizador": "p. 4 do PDF (sem numeração impressa), Tabela II, linhas Codellama-70b-instruct e Codellama-70b-instruct-ICL, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Codellama-70b-instruct 0.229 0.342 0.391",
+          "localizador": "p. 4 do PDF, Tabela II, linha Codellama-70b-instruct; colunas Models | Pass@1 | Pass@3 | Pass@5"
+        },
+        {
+          "trecho": "Codellama-70b-instruct-ICL 0.237 0.349 0.405",
+          "localizador": "p. 4 do PDF, Tabela II, linha Codellama-70b-instruct-ICL; colunas Models | Pass@1 | Pass@3 | Pass@5"
+        },
+        {
+          "trecho": "We experiment with “Codellama-70b-instruct” model under ICL setup with k=5 examples due to the limits on the context length.",
+          "localizador": "p. 3 do PDF, Seção III-B"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de construir e aplicar um arcabouço de avaliação de LLMs na geração de código VHDL é explícito no resumo, na introdução e nas contribuições.",
+      "localizador": "p. 1 do PDF, Resumo; p. 2 do PDF, Seção I (contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "A construção do conjunto (tradução com ICARUS, raspagem com Scrapy, pós-processamento, testbenches VUnit/GHDL) e o QLoRA são descritos, mas o texto dos prompts, a origem e a seleção dos exemplos de ICL, o número de amostras e a decodificação não são informados, e o método descreve ICL só para o Codellama-70b-instruct, embora os resultados incluam ICL no Granite.",
+      "localizador": "p. 2-3 do PDF, Seções II e III; p. 4 do PDF, Tabela II"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "O ICL é comparado com o zero-shot do mesmo modelo no mesmo benchmark e nas mesmas métricas, mas a comparabilidade das condições (amostras, decodificação, exemplos) não é documentada e não há teste estatístico.",
+      "localizador": "p. 4 do PDF, Tabela II e Seção IV-B"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k é definido por fórmula e os valores aparecem numa única tabela (sem divergência entre tabelas), mas n não é informado, o denominador não é ligado explicitamente aos 202 problemas e a correção sintática, declarada como objetivo, não é medida.",
+      "localizador": "p. 2 do PDF, Seção I; p. 3 do PDF, Seção III-C; p. 4 do PDF, Tabela II"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações discute a suficiência dos testbenches, a ausência de complexidade de projetos reais, o pequeno número de modelos e o vazamento do benchmark, mas não trata da variabilidade da amostragem, do número de amostras nem da seleção dos exemplos de ICL.",
+      "localizador": "p. 4 do PDF, Seção V"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Ferramentas (VUnit, GHDL, ICARUS, Scrapy) e hiperparâmetros do QLoRA são informados, mas o conjunto de dados ainda não estava publicado, os prompts e exemplos de ICL não são fornecidos e os parâmetros de geração não são relatados.",
+      "localizador": "p. 2 do PDF, nota 1; p. 3 do PDF, Seções III-A, III-B e III-C"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece o risco de vazamento e reformula enunciados para mitigá-lo, mas não informa a abrangência da reformulação, não verifica a contaminação e admite não poder garantir sua ausência; parte do conjunto deriva do Verilog-Eval/HDLBits, público.",
+      "localizador": "p. 2 do PDF, Seção II-A; p. 3 do PDF, Seção II-B-a e Fig. 2; p. 4 do PDF, Seção V"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (incluindo referências e apêndice). Páginas do PDF abertas visualmente: p-01, p-02 (Tabela I), p-03 (Seções II-B a III-C, Fig. 2, Eq. 1) e p-04 (Tabela II, Seções IV a VI). O PDF não tem numeração impressa de páginas."
+  }
+}

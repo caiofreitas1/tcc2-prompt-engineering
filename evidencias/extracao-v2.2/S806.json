@@ -1,0 +1,364 @@
+{
+  "estudo": "S806",
+  "texto_fonte": "fontes/textos/lote/S806.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2506.20008v2 [cs.AI], 29 Aug 2025 (impresso na margem da p. 1 do PDF); cabeçalho: «To appear at the IEEE International Conference on Quantum Artificial Intelligence (QAI), Naples, Italy, November 2025». Páginas impressas coincidem com as páginas do PDF (1 a 7).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "vanilla prompting / standard prompting / Non-RAG (base query)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Fig. 3, item 1, Base query); p. 4 do PDF (Seção IV-C, Single-agent generation; Execution Pipeline, item 1); p. 5 do PDF (Tabela II, linhas ✗; Fig. 6, linha Non RAG)",
+        "observacao": "Prompt base: descrição do desafio QHack e template (notebook Jupyter ou Python) fornecidos ao LLM; o template de código entra como contexto (código fornecido como insumo). O texto do prompt e do system prompt não é apresentado. Na geração com um agente, o builder tem até cinco tentativas por desafio, com ou sem RAG; o estudo não descreve o que muda entre tentativas (nova amostra, retorno do teste ou outro), por isso nenhum mecanismo de amostragem ou feedback foi atribuído a esta condição. É a linha de base do RAG (Tabela II) e do multiagente (Fig. 6)."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG) com o PennyLang dataset",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (Seções II-C e III-A); p. 3 do PDF (Fig. 3, item 2; Seção III-B; Algoritmo 2); p. 5 do PDF (Tabela II, linhas ✓ e ✗; Fig. 5)",
+        "observacao": "Um recuperador por similaridade (banco vetorial ChromaDB) seleciona trechos de código do PennyLang (3,347 amostras de repositórios não oficiais, documentação oficial, contribuições do PennyLaneAI e livros) e os anexa ao prompt (P = system_prompt + S + Q). Como os trechos recuperados incluem código e problemas já resolvidos, registraram-se contexto e exemplos; o estudo não separa os dois. Contrafactual: mesmo modelo, mesmo prompt base e mesmo limite de cinco tentativas com e sem RAG, para cinco modelos (Tabela II). O top-k e o modelo de embeddings usados na geração não são informados; MMR com top-k=3 é descrito para a busca do validador no modo multiagente."
+      },
+      {
+        "nome_original": "Multi-Agent (multi-agent refinement / multi-agent evaluation pipeline)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "multiagente", "raciocinio"],
+        "mecanismos_acrescentados": ["feedback", "multiagente", "raciocinio"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo; Fig. 1); p. 3 do PDF (Fig. 3, item 3; Seção III-C); p. 4 do PDF (Seção IV-C, Multi-agent refinement; Execution Pipeline; Retrieval-Augmented Debugging); p. 5 do PDF (Fig. 6); p. 6 do PDF (Seção V, Evaluation on multi-agent)",
+        "observacao": "Code Generation Agent (builder) gera o código a partir da consulta base; o código é executado num notebook Jupyter com Papermill; o Validation & Correction Agent lê logs de execução, erros e falhas dos testes, faz auto-raciocínio, redige relatório estruturado de depuração e reformula a consulta; o builder regenera o código; até cinco iterações. Se o RAG estiver ativo, o contexto recuperado também entra na consulta reformulada; para a condição da Fig. 6 o estudo não informa se o RAG estava ativo, por isso exemplos não foi listado. Contrafactual de pacote: Fig. 6 compara Non RAG, RAG e Multi Agent com o3-mini; o ganho não pode ser atribuído a feedback, multiagente ou raciocínio isoladamente, pois não há ablação. A execução do código é infraestrutura de avaliação que alimenta o feedback (ver componentes_fora_escopo)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "maximum of five attempts / five-attempt budget",
+        "natureza": "orcamento",
+        "descricao": "Limite de cinco tentativas por desafio, tanto na geração com um agente quanto no refinamento multiagente; os mapas de calor registram o número de iterações até a solução aceita.",
+        "localizador": "p. 3 do PDF (Seção III-C); p. 4 do PDF (Seção IV-C, item 5 do Execution Pipeline); p. 5 do PDF (legenda da Fig. 5)"
+      },
+      {
+        "nome_original": "automated execution (Jupyter notebook executed using Papermill)",
+        "natureza": "outro",
+        "descricao": "Execução automatizada do código gerado em ambiente isolado/controlado, com verificação por testes predefinidos (incluindo testes ocultos). Serve de avaliação em todas as condições e de fonte dos logs usados pelo validador; não é técnica de prompting.",
+        "localizador": "p. 2 do PDF (Seção III-A); p. 4 do PDF (Seção IV-C, item 2 do Execution Pipeline; Computational Resources)"
+      },
+      {
+        "nome_original": "ChromaDB vector-based retrieval / embedding model E",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de indexação e busca vetorial do RAG (fragmentação, embeddings, ChromaDB, MMR). Registrada aqui apenas como infraestrutura; o efeito medido é o do pacote RAG, que é prompting (conteúdo recuperado inserido no prompt). Modelo de embeddings nao_informado.",
+        "localizador": "p. 3 do PDF (Fig. 3; Algoritmo 2); p. 4 do PDF (Retrieval-Augmented Debugging; Retrieval Setup)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Claude 3.7", "versao": "nao_informado (variante e snapshot não informados)"},
+      {"nome": "DeepSeek V3", "versao": "nao_informado"},
+      {"nome": "GPT-4.1", "versao": "nao_informado"},
+      {"nome": "LLaMa 4", "versao": "nao_informado (variante não informada)"},
+      {"nome": "Qwen 3", "versao": "nao_informado (tamanho não informado)"},
+      {"nome": "GPT-o3-Mini (o3-mini)", "versao": "nao_informado; usado como builder e validador no multiagente e nas condições Non RAG e RAG da Fig. 6; não aparece na Tabela II"},
+      {"nome": "GPT-4o mini", "versao": "nao_informado; citado na Seção III-A como avaliado com e sem RAG, sem resultados relatados"},
+      {"nome": "GPT-4o", "versao": "nao_informado; citado só na conclusão, sem resultados relatados"},
+      {"nome": "modelo de embeddings E (Algoritmo 2)", "versao": "nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "QHackBench (desafios de programação do QHack 2023 e 2024, PennyLane)",
+        "quantidade": "49 desafios: 28 de 2023 (incluindo 8 tutoriais de 0 pontos) e 21 de 2024; dificuldades Easy, Intermediate e Advanced (8 avançados em 2023, 9 em 2024)",
+        "observacao": "Cada desafio tem enunciado, template (notebook Jupyter ou Python) e funções de teste. A Tabela II relata acurácia por ano (2023, 2024) e média (Avg.); o denominador da acurácia não é ligado explicitamente às 28 e 21 questões. A Fig. 6 mostra só 18 desafios de 2024 (rótulos do eixo; C5-A-24, C7-I-24 e C12-I-24 não aparecem), sem explicação. Fonte dos desafios: repositórios da Xanadu AI [26], [27]."
+      }
+    ],
+    "metricas": [
+      {"nome": "Acc. (%) e Score (pontos dos desafios), por ano e média (Avg.)", "aplicacao": "cinco modelos, com e sem RAG; acurácia não definida formalmente", "localizador": "p. 5 do PDF (Tabela II)"},
+      {"nome": "número de iterações até a solução aceita, por desafio (× = não resolvido em cinco tentativas)", "aplicacao": "cinco modelos, com e sem RAG (Fig. 5); o3-mini e DeepSeek V3 no multiagente (Fig. 6, painel inferior)", "localizador": "p. 5 do PDF (Fig. 5; Fig. 6)"},
+      {"nome": "Challenge Success (Solved / Not Solved por desafio)", "aplicacao": "o3-mini com Non RAG, RAG e Multi Agent em 18 desafios de 2024", "localizador": "p. 5 do PDF (Fig. 6, painel superior)"},
+      {"nome": "taxas de erro por tipo (%): Syn, NoOut, Inc, Run", "aplicacao": "cinco modelos, por ano e média; denominador e condição (RAG ou não) não informados", "localizador": "p. 6 do PDF (Tabela III)"},
+      {"nome": "Pass@k, Execution Success Rate, Correction Efficiency", "aplicacao": "definidas na Seção IV-C-3, mas sem valores numéricos relatados; k não informado", "localizador": "p. 4 do PDF (Seção IV-C-3); p. 3 do PDF (Algoritmo 1, linha 10)"}
+    ],
+    "linguagens": ["Python (framework PennyLane; templates em notebook Jupyter ou Python)"],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Mesmo com RAG, os modelos produzem com frequência APIs alucinadas; no caso Qwen-3 com RAG, tokens extras atribuídos a alucinação causam erro de sintaxe em todas as cinco tentativas.",
+        "localizador": "p. 7 do PDF (Seção VII; Case 2, Listing 3)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Circuitos quânticos incorretos e código sintaticamente válido que falha na execução por lógica quântica errada (sequência de portas, operações inválidas em qubits); taxa de erros de execução de 3.8% a 26.4% entre modelos (Tabela III, média).",
+        "localizador": "p. 6 do PDF (Seção VI-A; Tabela III); p. 7 do PDF (Seção VII)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Contexto recuperado irrelevante induz solução errada: no Tutorial 1, o Qwen-3 com RAG recebeu referências matemáticas sobre precisão de ponto flutuante, criou um laço de tolerância desnecessário, retornou Decimal em vez de float e falhou nos testes ocultos; não havia alternativa quando a recuperação vinha vazia.",
+        "localizador": "p. 7 do PDF (Case 2; parágrafo seguinte ao Listing 3)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ausência de saída gerada (No Output), descrita como supressão, é o tipo de falha mais frequente: de 55.4% (LLaMA 4) a 95.3% (Claude 3.7) na média da Tabela III; denominador não informado.",
+        "localizador": "p. 6 do PDF (Seção VI-A; Tabela III, colunas Average NoOut)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O estudo levanta a hipótese de que alguns modelos memorizaram parte dos desafios de 2023 no pré-treinamento, o que explicaria a queda em 2024. Hipótese não testada; nenhum controle descrito.",
+        "localizador": "p. 5 do PDF (Seção V, Benchmarking Results)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Refinamento multiagente com validador que lê logs e falhas de teste e reformula a consulta, para corrigir soluções incorretas. Comparado com Non RAG e RAG para o3-mini na Fig. 6, mas só por marcas de resolvido/não resolvido por desafio, sem totais impressos.",
+        "avaliada": "sim",
+        "localizador": "p. 3 do PDF (Seção III-C); p. 5 do PDF (Fig. 6); p. 6 do PDF (Seção V, Evaluation on multi-agent)"
+      },
+      {
+        "descricao": "RAG com o PennyLang para reduzir alucinações e chamadas de API alucinadas. A acurácia é comparada com e sem RAG (Tabela II), mas a taxa de alucinação não é medida em nenhuma condição.",
+        "avaliada": "nao",
+        "localizador": "p. 1 do PDF (Seção I); p. 2 do PDF (Seção II-C); p. 3 do PDF (Seção III-B)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Non-RAG (vanilla prompting), executado pelo estudo para cada um dos cinco modelos da Tabela II (p. 5 do PDF), no mesmo benchmark e métrica do RAG. Para o multiagente, Non RAG e RAG com o3-mini executados na Fig. 6 (p. 5 do PDF).",
+    "so_classificadas": [
+      {
+        "tecnica": "Multi-Agent (multi-agent refinement)",
+        "motivo": "Sem valor numérico extraível: a Fig. 6 mostra marcas por desafio, sem totais nem percentuais impressos, e as métricas definidas para o multiagente (Execution Success Rate, Correction Efficiency, Pass@k) não são relatadas. Recebeu extração qualitativa com resultado null."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa divergente da tabela: o resumo diz que o RAG gera resultados aproximadamente semelhantes aos do prompting padrão, «particularly in complex quantum algorithms», a introdução diz que o RAG melhora a acurácia em casos específicos e a conclusão diz que «RAG boosts correctness». Na Tabela II (Avg. Acc.), o RAG fica abaixo do Non-RAG em quatro dos cinco modelos (Claude 3.7: 0.0 contra 31.0; DeepSeek V3: 18.5 contra 49.4; GPT 4.1: 26.8 contra 34.5; Qwen 3: 0.0 contra 10.7) e acima só no LLaMa 4 (47.0 contra 44.0). Não há resultado de acurácia por nível de dificuldade que sustente a menção a algoritmos complexos.",
+        "localizador": "p. 1 do PDF (resumo; Seção I); p. 5 do PDF (Tabela II, colunas Avg. Acc.); p. 7 do PDF (Seção VIII)"
+      },
+      {
+        "descricao": "Inversões por ano: LLaMa 4 tem RAG abaixo do Non-RAG em 2023 (60.7 contra 64.3) e acima em 2024 (33.3 contra 23.8); GPT 4.1 tem RAG acima em 2023 (39.3 contra 35.7) e abaixo em 2024 (14.3 contra 33.3).",
+        "localizador": "p. 5 do PDF (Tabela II, colunas 2023 Acc. (%) e 2024 Acc. (%))"
+      },
+      {
+        "descricao": "Conjunto de modelos inconsistente entre seções: a Seção III-A diz avaliar GPT-4o mini e GPT-o3 Mini com e sem RAG; a Tabela II traz Claude 3.7, DeepSeek V3, GPT 4.1, LLaMa 4 e Qwen 3; a Fig. 6 usa o3-mini, ausente da Tabela II; a conclusão cita avaliações em GPT-4o, GPT-o3-Mini e DeepSeek-V3. Não há resultados para GPT-4o mini nem GPT-4o.",
+        "localizador": "p. 2 do PDF (Seção III-A); p. 5 do PDF (Tabela II; Fig. 6); p. 7 do PDF (Seção VIII)"
+      },
+      {
+        "descricao": "Identidade do validador ambígua: a Seção III-C atribui o Validation & Correction Agent ao GPT-o3-Mini; a legenda da Fig. 3 diz que o validador é implementado com o mesmo LLM; a Seção IV-C lista GPT-o3-Mini e DeepSeek-V3 como modelos do pipeline. Para o multiagente com DeepSeek V3 (Fig. 6, painel inferior), não fica claro qual modelo validou.",
+        "localizador": "p. 3 do PDF (Fig. 3; Seção III-C); p. 4 do PDF (Seção IV-C); p. 5 do PDF (Fig. 6)"
+      },
+      {
+        "descricao": "Métricas definidas e não relatadas: Pass@k (k não informado), Execution Success Rate e Correction Efficiency são definidas, mas os resultados trazem «Acc.» (não definida), Score, taxas de erro e marcas por desafio. O resumo e a introdução afirmam que o multiagente melhora («significantly») a taxa de sucesso de execução, sem valor numérico nem teste estatístico.",
+        "localizador": "p. 1 do PDF (resumo; Seção I-A); p. 4 do PDF (Seção IV-C-3); p. 5 do PDF (Tabela II; Fig. 6)"
+      },
+      {
+        "descricao": "Aparente inconsistência no cálculo da coluna Avg.: o estudo não diz como ela é calculada. Os valores coincidem com a média simples dos dois anos (cálculo próprio: Claude 3.7 Non-RAG, (42.9 + 19.0)/2 = 30.95, impresso 31.0; Score (2400 + 1500)/2 = 1950), embora os anos tenham tamanhos diferentes (28 e 21 desafios). Se 42.9% e 19.0% corresponderem a 12/28 e 4/21 (o estudo não informa), a acurácia agregada sobre os 49 desafios seria cerca de 32.7% (cálculo próprio), não 31.0%.",
+        "localizador": "p. 5 do PDF (Tabela II); p. 4 do PDF (Seção IV-A e IV-B)"
+      },
+      {
+        "descricao": "A Fig. 6 é descrita como avaliação «on QHack 2024 challenges», mas exibe 18 desafios (rótulos do eixo), e não os 21 de 2024 da Tabela I; C5-A-24, C7-I-24 e C12-I-24 não aparecem, sem explicação.",
+        "localizador": "p. 5 do PDF (Fig. 6); p. 4 do PDF (Tabela I); p. 6 do PDF (Seção V, Evaluation on multi-agent)"
+      },
+      {
+        "descricao": "Narrativa possivelmente divergente da figura: o texto diz que, com DeepSeek V3, o multiagente mostra contagens de iteração menores ou comparáveis e convergência mais rápida, sem dizer em relação a quê. No painel inferior da Fig. 6, inspecionado visualmente com resolução limitada, a linha DeepSeek V3 tem o valor máximo (5, «Worst») em várias colunas em que o o3-mini tem valores menores. A figura não traz condição de DeepSeek V3 com um agente para comparar.",
+        "localizador": "p. 5 do PDF (Fig. 6, painel inferior); p. 6 do PDF (Seção V, Evaluation on multi-agent)"
+      },
+      {
+        "descricao": "Remissão incorreta: o parágrafo Attempt Analysis diz que a Tabela II mostra a dinâmica de resolução e iterações, mas a Tabela II só traz acurácia e pontuação; as iterações estão na Fig. 5.",
+        "localizador": "p. 5 do PDF (Seção V, Attempt Analysis; Tabela II; Fig. 5)"
+      },
+      {
+        "descricao": "Estudo de caso contraditório: a Seção VI-B apresenta o LLaMA-4 como caso em que o RAG melhora a qualidade, mas a legenda do Listing 1 diz «RAG equals Non-RAG» e o texto diz que as duas abordagens dão soluções corretas.",
+        "localizador": "p. 6 do PDF (Seção VI-B; Case 1; Listing 1)"
+      },
+      {
+        "descricao": "Procedimento da geração com um agente ambíguo: os mapas de calor registram de 1 a 5 iterações também para Non-RAG e RAG, e a Seção IV-C diz que o builder tem até cinco tentativas, mas não se informa o que muda entre tentativas (nova amostragem, retorno de erros ou outro). Número de execuções independentes, temperatura e sementes: nao_informado.",
+        "localizador": "p. 4 do PDF (Seção IV-C); p. 5 do PDF (Fig. 5)"
+      },
+      {
+        "descricao": "Tabela III sem denominador e sem separação por condição: não informa sobre quantas saídas ou tentativas as taxas são calculadas nem se mistura RAG e Non-RAG («baseline evaluation»).",
+        "localizador": "p. 6 do PDF (Tabela III; Seção VI-A)"
+      },
+      {
+        "descricao": "Limitação declarada: pass@k binário não capta erros semânticos; muitas saídas são sintaticamente corretas, mas falham na execução.",
+        "localizador": "p. 7 do PDF (Seção VII)"
+      },
+      {
+        "descricao": "Descrição do conjunto de 2023 diz «five narrative-based thematic sets», mas nomeia quatro (A Tale of Timbits, Bending Bennett’s Laws, Fall of Sqynet, Office Hijinks); a Tabela I mostra tutoriais e quatro narrativas.",
+        "localizador": "p. 3 do PDF (Seção IV-B); p. 4 do PDF (Tabela I)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Corpus de recuperação PennyLang: 3,347 amostras de quatro fontes (repositórios GitHub não oficiais, documentação oficial do PennyLane, contribuições do PennyLaneAI e livros de computação quântica), descrito em trabalho anterior dos autores [22].",
+        "localizador": "p. 2 do PDF (Seção II-C; Fig. 2)"
+      },
+      {
+        "descricao": "O estudo propõe fallback quando a recuperação vem vazia e destaca a qualidade da recuperação como estratégias, mas não as implementa nem as avalia.",
+        "localizador": "p. 7 do PDF (Case 2; parágrafo seguinte ao Listing 3)"
+      },
+      {
+        "descricao": "Ferramentas: Python 3.10, LangChain, APIs da OpenAI, Anthropic e DeepSeek, JupyterLab, Papermill e ChromaDB, em ambiente de computação de alto desempenho.",
+        "localizador": "p. 4 do PDF (Seção IV-C-4)"
+      },
+      {
+        "descricao": "Os autores se comprometem a publicar o QHackBench, o framework e os resultados; nenhum endereço do pacote é impresso, e nada foi acessado nesta extração.",
+        "localizador": "p. 1 do PDF (resumo)"
+      },
+      {
+        "descricao": "Fig. 5 traz o número de iterações por desafio para cada modelo com e sem RAG; não foi usada para contagens próprias nesta extração.",
+        "localizador": "p. 5 do PDF (Fig. 5)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "This paper benchmarks LLMs for PennyLane-based quantum code generation using real-world challenges from the Quantum Hackathon (QHack).", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "We introduce QHackBench, a novel benchmark dataset derived from QHack competitions, and evaluate model performance under vanilla prompting and Retrieval-Augmented Generation (RAG).", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "Results indicate that RAG-enhanced models, supplemented with an augmented PennyLane dataset, approximately generate similar results as the standard prompting, particularly in complex quantum algorithms.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "Additionally, we introduce a multi-agent evaluation pipeline that iteratively refines incorrect solutions, further enhancing execution success rates.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "To foster further research, we commit to publicly releasing QHackBench, along with our evaluation framework and experimental results, enabling continued advancements in AI-assisted quantum programming.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "Our study shows that while RAG improves accuracy in specific cases, such as reducing hallucinated API calls and refining circuit structures, current foundation models still face significant limitations in generating reliable quantum code.", "localizador": "p. 1 do PDF, Seção I"},
+      {"trecho": "In this study, we report only binary outcomes—each challenge is either solved correctly or not.", "localizador": "p. 1 do PDF, Seção I-A"},
+      {"trecho": "Furthermore, integrating a multi-agent refinement pipeline further improved the execution success rate significantly.", "localizador": "p. 1 do PDF, Seção I-A"},
+      {"trecho": "By leveraging PennyLang, LLMs can access previously solved quantum problems, reducing API hallucinations and improving functional correctness in PennyLane programming [22].", "localizador": "p. 2 do PDF, Seção II-C"},
+      {"trecho": "To analyze the effectiveness of RAG, we evaluate multiple LLMs, including GPT-4o mini (RAG and non-RAG) and GPT-o3 Mini (RAG and non-RAG), allowing a direct comparison between retrieval-enhanced responses and baseline prompting.", "localizador": "p. 2 do PDF, Seção III-A"},
+      {"trecho": "Once the solutions are generated, we employ an automated execution system that runs the code in an isolated environment, verifying functional validity and correctness against predefined test cases.", "localizador": "p. 2 do PDF, Seção III-A"},
+      {"trecho": "Base query. The QHack challenge description and template are provided to LLMs (GPT-4.1, Claude 3.7, ...) for initial code generation.", "localizador": "p. 3 do PDF, legenda da Fig. 3, item 1"},
+      {"trecho": "Retrieval-augmented query If enabled, relevant PennyLang code snippets are retrieved, embedded, and incorporated into the query to enhance accuracy.", "localizador": "p. 3 do PDF, legenda da Fig. 3, item 2"},
+      {"trecho": "Multi-agent pipeline: a validator agent, implemented with the same LLM, inspects run-time logs and hidden-test feedback, performs self-reasoning, reformulates the query, and asks the builder to regenerate code.", "localizador": "p. 3 do PDF, legenda da Fig. 3, item 3"},
+      {"trecho": "This retrieved knowledge is appended to the model prompt, improving accuracy and reducing hallucinations.", "localizador": "p. 3 do PDF, Seção III-B"},
+      {"trecho": "Construct prompt: P = system_prompt + S + Q", "localizador": "p. 3 do PDF, Algoritmo 2, linha 3"},
+      {"trecho": "Validation & Correction Agent (GPT-o3-Mini): Executes the generated code, analyzes errors from execution logs, and iteratively refines the solution through self-reasoning and debugging.", "localizador": "p. 3 do PDF, Seção III-C"},
+      {"trecho": "If RAG is enabled, the retrieved context from the PennyLang dataset is also included in the updated query to enhance code corrections.", "localizador": "p. 3 do PDF, Seção III-C"},
+      {"trecho": "This process is repeated iteratively, with a maximum of five refinement attempts, ensuring that the solution is progressively improved until it successfully passes all test cases or reaches the retry limit.", "localizador": "p. 3 do PDF, Seção III-C"},
+      {"trecho": "We curated a dataset comprising 49 unique QHack challenges from 2023-2024 [26], [27].", "localizador": "p. 3 do PDF, Seção IV-A"},
+      {"trecho": "Single-agent generation. A “builder” LLM receives the challenge and must solve it in at most five attempts, with or without RAG.", "localizador": "p. 4 do PDF, Seção IV-C"},
+      {"trecho": "Multi-agent refinement. A validator LLM inspects failing runs and reformulates the query; the builder then regenerates code.", "localizador": "p. 4 do PDF, Seção IV-C"},
+      {"trecho": "Using RAG, the validator performs a ChromaDB vector search (MMR, top-k=3) over the PennyLang corpus and injects the most relevant code chunks into the follow-up query.", "localizador": "p. 4 do PDF, Seção IV-C-2"},
+      {"trecho": "Pass@k: Probability of obtaining a correct solution within the first k attempts.", "localizador": "p. 4 do PDF, Seção IV-C-3"},
+      {"trecho": "Execution Success Rate: Percentage of solutions that execute without runtime errors.", "localizador": "p. 4 do PDF, Seção IV-C-3"},
+      {"trecho": "Correction Efficiency: Average number of iterations needed for successful code refinement.", "localizador": "p. 4 do PDF, Seção IV-C-3"},
+      {"trecho": "Claude 3.7 ✓ 0.0 0 0.0 0 0.0 0", "localizador": "p. 5 do PDF, Tabela II, linha Claude 3.7 com RAG ✓; colunas 2023 (Acc. (%), Score), 2024 (Acc. (%), Score), Avg. (Acc., Score)"},
+      {"trecho": "✗ 42.9 2400 19.0 1500 31.0 1950", "localizador": "p. 5 do PDF, Tabela II, linha Claude 3.7 sem RAG ✗; colunas 2023 (Acc. (%), Score), 2024 (Acc. (%), Score), Avg. (Acc., Score)"},
+      {"trecho": "One possible explanation for the 2024 drop is that some models may have inadvertently memorized parts of the 2023 challenge set during pretraining, leading to data contamination in the earlier year.", "localizador": "p. 5 do PDF, Seção V"},
+      {"trecho": "Both Claude 3.7 and Qwen 3 achieve zero accuracy in all RAG test conditions.", "localizador": "p. 5 do PDF, Seção V, RAG vs non-RAG"},
+      {"trecho": "DeepSeek V3 exhibits a strong preference for non-RAG operation, with a 31-percentage-point accuracy advantage (49.4% vs. 18.5%), suggesting difficulties in utilizing retrieved context.", "localizador": "p. 5 do PDF, Seção V, RAG vs non-RAG"},
+      {"trecho": "Attempt Analysis: Table II shows important insights into model problem-solving dynamics and computational resource allocation.", "localizador": "p. 5 do PDF, Seção V"},
+      {"trecho": "All three methods use the o3-mini model as the model performing the code completion.", "localizador": "p. 5 do PDF, legenda da Fig. 6"},
+      {"trecho": "Figure 6 compares three prompting methods, vanilla, RAG, and multi-agent, on QHack 2024 challenges using the o3-mini model.", "localizador": "p. 6 do PDF, Seção V, Evaluation on multi-agent"},
+      {"trecho": "The multi-agent approach consistently outperforms both baselines, solving more tasks, including several that RAG or vanilla failed to address.", "localizador": "p. 6 do PDF, Seção V, Evaluation on multi-agent"},
+      {"trecho": "When paired with DeepSeek V3, the multi-agent strategy further demonstrates lower or comparable iteration counts across many challenges, indicating faster convergence.", "localizador": "p. 6 do PDF, Seção V, Evaluation on multi-agent"},
+      {"trecho": "The most prevalent failure type is the absence of generated output, with suppression rates ranging from 55.4% for LLaMA 4 to 95.3% for Claude 3.7.", "localizador": "p. 6 do PDF, Seção VI-A"},
+      {"trecho": "We analyze instances where RAG improves generation quality (LLaMA-4) and introduces critical errors (Qwen-3), conducting detailed error analysis to trace how retrieval noise causes failure.", "localizador": "p. 6 do PDF, Seção VI-B"},
+      {"trecho": "The extra tokens are caused by LLM hallucination.", "localizador": "p. 7 do PDF, Case 2, nota ao Listing 3"},
+      {"trecho": "This case highlights how RAG can degrade performance when irrelevant context misleads the model, demonstrating the importance of retrieval quality and fallback strategies.", "localizador": "p. 7 do PDF, Seção VI-B"},
+      {"trecho": "(1) Even with RAG, models frequently produce hallucinated APIs and incorrect quantum circuits, revealing a lack of domain-specific understanding despite access to documentation.", "localizador": "p. 7 do PDF, Seção VII"},
+      {"trecho": "(2) Binary pass@k fails to capture semantic errors; many outputs are syntactically correct but fail at runtime due to flawed quantum logic.", "localizador": "p. 7 do PDF, Seção VII"},
+      {"trecho": "Comparing vanilla prompting, RAG, and a simple multi-agent refinement method, we find that RAG boosts correctness, while the multi-agent approach improves execution success via iterative reasoning.", "localizador": "p. 7 do PDF, Seção VIII"},
+      {"trecho": "Evaluations on GPT-4o, GPT-o3-Mini, and DeepSeek-V3 highlight both capabilities and limitations in quantum programming, demonstrating the promise of agent-based techniques in this domain.", "localizador": "p. 7 do PDF, Seção VIII"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG) com o PennyLang dataset",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "Non-RAG (vanilla prompting; base query), linha ✗ da Tabela II",
+      "modelo": "Claude 3.7 (versão nao_informado)",
+      "benchmark": "QHackBench (QHack 2023 e 2024)",
+      "metrica": "Acc. (coluna Avg. da Tabela II). A acurácia não é definida formalmente: a Seção IV-C-3 define Pass@k, Execution Success Rate e Correction Efficiency, e o texto chama o valor de «average accuracy»; o estudo diz relatar resultados binários (desafio resolvido ou não).",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 31.0, "intervencao": 0.0},
+      "denominador": "nao_informado (a acurácia não é ligada explicitamente a um denominador; o corpus tem 28 desafios de 2023 e 21 de 2024, e o estudo não diz como a coluna Avg. é calculada)",
+      "condicoes": "Agregado impresso (Avg.) das colunas por ano para o mesmo modelo, técnica e comparador: 2023 Acc. (%) 42.9 sem RAG e 0.0 com RAG; 2024 Acc. (%) 19.0 sem RAG e 0.0 com RAG. Geração com um agente, até cinco tentativas por desafio, com e sem RAG; o que muda entre tentativas nao_informado. RAG por similaridade em banco vetorial ChromaDB sobre o PennyLang; top-k e modelo de embeddings da geração nao_informado. Temperatura, sementes e número de execuções independentes: nao_informado. Valores conferidos visualmente na p. 5 do PDF (Tabela II).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca duas técnicas (RAG e multiagente) e várias métricas (correção funcional, validade sintática, sucesso de execução) sem que uma prevaleça. A Tabela I é descritiva; a primeira tabela com o contraste de prompting é a Tabela II (RAG ✓ contra ✗). Primeira métrica pertinente: acurácia; primeiro modelo listado: Claude 3.7; comparador: linha sem RAG. Usado o agregado impresso compatível (Avg.), que cobre os dois anos do mesmo benchmark para o mesmo modelo, técnica e comparador.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF (página impressa 5), Tabela II, bloco Claude 3.7, linhas ✓ e ✗, colunas Avg. Acc.; texto em p. 5 do PDF, Seção V, RAG vs non-RAG",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Claude 3.7 ✓ 0.0 0 0.0 0 0.0 0", "localizador": "p. 5 do PDF, Tabela II, linha Claude 3.7 com RAG ✓; colunas 2023 (Acc. (%), Score), 2024 (Acc. (%), Score), Avg. (Acc., Score)"},
+        {"trecho": "✗ 42.9 2400 19.0 1500 31.0 1950", "localizador": "p. 5 do PDF, Tabela II, linha Claude 3.7 sem RAG ✗; colunas 2023 (Acc. (%), Score), 2024 (Acc. (%), Score), Avg. (Acc., Score)"},
+        {"trecho": "Both Claude 3.7 and Qwen 3 achieve zero accuracy in all RAG test conditions.", "localizador": "p. 5 do PDF, Seção V, RAG vs non-RAG"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Multi-Agent (multi-agent refinement)",
+      "mecanismos": ["instrucao", "contexto", "feedback", "multiagente", "raciocinio"],
+      "mecanismos_acrescentados": ["feedback", "multiagente", "raciocinio"],
+      "comparador": "Non RAG (vanilla prompting com o3-mini, geração com um agente), primeira linha da Fig. 6",
+      "modelo": "o3-mini (GPT-o3-Mini) como builder e como validador (versão nao_informado)",
+      "benchmark": "QHackBench, 18 desafios de 2024 exibidos na Fig. 6",
+      "metrica": "Challenge Success (Solved / Not Solved por desafio, Fig. 6, painel superior). O texto e o resumo falam em melhora da «execution success rate», definida como percentual de soluções executadas sem erro de execução, mas essa métrica não é relatada numericamente; a figura registra resolução do desafio.",
+      "sentido": "maior_melhor",
+      "unidade": "qualitativo",
+      "resultado": null,
+      "denominador": "nao_informado pelo estudo; a figura mostra 18 rótulos de desafios de 2024 (3 dos 21 de 2024 ausentes, sem explicação)",
+      "condicoes": "A figura não imprime totais nem percentuais por condição; só marcas por desafio, cuja leitura na imagem da página tem resolução limitada; nenhuma contagem foi calculada. Resultado relatado só em prosa qualitativa: o multiagente resolve mais desafios que Non RAG e RAG. Até cinco iterações; validador com o mesmo modelo (o3-mini), que lê logs de execução e falhas de teste e reformula a consulta. Não se informa se o RAG estava ativo na condição Multi Agent da figura. Número de execuções independentes: nao_informado. conferido_pdf = nao porque não há valor numérico impresso a conferir; a Fig. 6 foi aberta (p. 5 do PDF) para confirmar as condições e o modelo.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (multiagente). Não aparece em tabela; a primeira figura com o contraste é a Fig. 6 (Non RAG, RAG, Multi Agent com o3-mini); primeira linha de base listada: Non RAG.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Fig. 6 (painel superior) e legenda; p. 6 do PDF, Seção V, Evaluation on multi-agent",
+      "conferido_pdf": "nao",
+      "citacoes": [
+        {"trecho": "Figure 6 compares three prompting methods, vanilla, RAG, and multi-agent, on QHack 2024 challenges using the o3-mini model.", "localizador": "p. 6 do PDF, Seção V, Evaluation on multi-agent"},
+        {"trecho": "The multi-agent approach consistently outperforms both baselines, solving more tasks, including several that RAG or vanilla failed to address.", "localizador": "p. 6 do PDF, Seção V, Evaluation on multi-agent"},
+        {"trecho": "All three methods use the o3-mini model as the model performing the code completion.", "localizador": "p. 5 do PDF, legenda da Fig. 6"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Desafios de pesquisa e contribuições explícitos: benchmark de PennyLane, framework de avaliação com RAG e multiagente e comparação sistemática de configurações.",
+      "localizador": "p. 1 do PDF, Seções I-B e I-C"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve o pipeline (consulta base, RAG, execução com Papermill, validador, até cinco iterações) e o conjunto de desafios, mas não apresenta os prompts, não informa top-k e modelo de embeddings da geração, temperatura, número de execuções, o que muda entre tentativas na geração com um agente, se o RAG estava ativo no multiagente da Fig. 6, nem por que só 18 desafios de 2024 aparecem na Fig. 6.",
+      "localizador": "p. 2–4 do PDF (Seções III e IV); p. 5 do PDF (Fig. 6)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Non-RAG executado para os cinco modelos da Tabela II, nas mesmas condições do RAG; o multiagente, porém, só é comparado com Non RAG e RAG para o3-mini, modelo ausente da Tabela II, em um subconjunto de 18 desafios e sem totais; os modelos citados na metodologia e na conclusão não coincidem com os relatados.",
+      "localizador": "p. 2 do PDF (Seção III-A); p. 5 do PDF (Tabela II; Fig. 6); p. 7 do PDF (Seção VIII)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Define Pass@k, Execution Success Rate e Correction Efficiency, mas relata «Acc.» sem definição e sem denominador explícito, com média anual de cálculo não informado; a Tabela III não informa denominador; o multiagente não tem valores numéricos. Os valores da Tabela II coincidem com o texto (por exemplo, 49.4, 18.5, 47.0, 44.0, 60.7, 33.3, 32.1, 4.8). O estudo reconhece que pass@k binário não capta erros semânticos.",
+      "localizador": "p. 4 do PDF (Seção IV-C-3); p. 5 do PDF (Tabela II; Seção V); p. 6 do PDF (Tabela III); p. 7 do PDF (Seção VII)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de limitações curta (APIs alucinadas, limite do pass@k binário) e hipótese de contaminação para a queda em 2024; não discute não determinismo, número de execuções, escolha do subconjunto da Fig. 6 nem a divergência entre modelos citados e relatados.",
+      "localizador": "p. 5 do PDF (Seção V); p. 7 do PDF (Seção VII)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Desafios de fonte pública ([26], [27]) e ferramentas identificadas (Python 3.10, LangChain, ChromaDB, Papermill), mas sem versões ou snapshots dos modelos, sem prompts, sem parâmetros de decodificação e sem endereço do pacote; há só compromisso de publicação futura (não acessado).",
+      "localizador": "p. 1 do PDF (resumo); p. 4 do PDF (Seção IV-C-4); p. 7 do PDF (referências [26], [27])"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo menciona possível memorização dos desafios de 2023 no pré-treinamento como explicação da queda em 2024, mas não testa a hipótese nem descreve controle (por exemplo, datas de corte dos modelos ou desafios inéditos).",
+      "localizador": "p. 5 do PDF, Seção V, Benchmarking Results"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo e referências). Tabela II (valores extraídos e citados em heterogeneidade), Fig. 5, Fig. 6, Tabela I, Tabela III e Fig. 3 conferidas visualmente nas páginas do PDF.",
+    "paginas_abertas": [1, 3, 4, 5, 6, 7]
+  }
+}

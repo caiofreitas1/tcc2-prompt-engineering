@@ -1,0 +1,393 @@
+{
+  "estudo": "S919",
+  "texto_fonte": "fontes/textos/lote/S919.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Gong, Sun, Huang, Liang, Zhang, Hao. TRACE: Evaluating Execution Efficiency of LLM-Based Code Translation. arXiv:2508.11468v3 [cs.SE], datado de 31 Aug 2026 na margem da p. 1. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "perf-zero-shot",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 8, Seção 5.3 e Tabela 5; p. 23, Apêndice C.1; p. 24, Figuras 8 e 9",
+        "observacao": "Uma das três 'performance-aware prompts' investigadas na Seção 5.3. Herda do zero-shot o papel de especialista em tradução no system prompt (instrucao), o código-fonte inserido no prompt (contexto) e o formato de saída em bloco Markdown terminado por <|END|> (restricoes); acrescenta só a frase de sistema 'You are also a code optimization expert, ensuring the translated code is efficient and adheres to best practices' (instrucao). As Figuras 8 e 9 diferem apenas nessa frase, e ambas as condições são executadas com os mesmos três modelos na Tabela 5, o que configura contrafactual do ingrediente. A categoria acrescentada é a mesma já presente no prompt base."
+      },
+      {
+        "nome_original": "perf-few-shot",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 8, Seção 5.3 e Tabela 5; p. 23, Apêndice C.1; p. 25, Figura 10",
+        "observacao": "Usa o mesmo system prompt do perf-zero-shot e acrescenta duas traduções eficientes de exemplo (fonte e tradução-alvo 'correct and efficient'), tiradas de outros problemas do TRACE na mesma direção de tradução (exemplos; o código das demonstrações também é contexto, já presente). Em relação ao comparador zero-shot, acrescenta instrução de eficiência e exemplos, por isso o contraste com zero-shot é de pacote. O par perf-few-shot × perf-zero-shot (Figuras 9 e 10; Tabela 5, p. 8) difere apenas nos exemplos e permitiria isolar esse ingrediente por contraste pareado; o estudo não analisa esse contraste. Critério de escolha dos dois exemplos além de 'other problems in TRACE following the same translation direction' não informado."
+      },
+      {
+        "nome_original": "perf-self-refine",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["instrucao", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 8, Seção 5.3 e Tabela 5; p. 9; p. 23, Apêndice C.1; p. 26, Figura 11",
+        "observacao": "Mesmo system prompt do perf-zero-shot; o prompt do usuário inclui a tradução produzida na rodada zero-shot anterior ('Reference Translation') e seu perfil de execução (resultado dos testes, feedback de execução, tempo e memória), pedindo melhoria se ela não for correta ou eficiente (feedback). Em relação ao zero-shot, acrescenta instrução de eficiência e feedback de execução: contraste de pacote. O par perf-self-refine × perf-zero-shot (Figuras 9 e 11; Tabela 5) difere no bloco de feedback, mas a tradução refinada parte da saída zero-shot, não da perf-zero-shot; o estudo não analisa esse contraste. Não se informa sobre quais testes (padrão ou de estresse) é gerado o perfil de execução nem se há mais de uma rodada de refinamento."
+      },
+      {
+        "nome_original": "zero-shot",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Seção 4 (Model Evaluation Protocol); p. 8, Seção 5.3 e Tabela 5; p. 24, Figura 8",
+        "observacao": "Prompt padrão de toda a avaliação dos 28 modelos (Tabela 2) e linha de base da Tabela 5: system prompt com papel de especialista em tradução (instrucao), código-fonte no prompt (contexto) e formato de saída (restricoes). Sem condição sem esses ingredientes."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "greedy decoding (temperature = 0.0)",
+        "natureza": "decodificacao",
+        "descricao": "Uma única tradução por tarefa com decodificação gulosa no protocolo de avaliação (declarado para o prompt zero-shot; não reiterado para as variantes da Tabela 5).",
+        "localizador": "p. 6, Seção 4 (Model Evaluation Protocol)"
+      },
+      {
+        "nome_original": "sampling (temperature = 0.8)",
+        "natureza": "decodificacao",
+        "descricao": "Amostragem com temperatura 0,8 na geração dos sintetizadores de testes de estresse pelo GPT-4o e na construção do conjunto de referência de eficiência com os 28 LLMs.",
+        "localizador": "p. 5, Seção 3.4"
+      },
+      {
+        "nome_original": "Model and Iteration Choice (GPT-4o, Claude-4, DS-V3.2 para geração de testes de estresse)",
+        "natureza": "selecao_modelo",
+        "descricao": "Estudo piloto em 56 problemas para escolher o modelo gerador de testes e o número máximo de iterações (Imax = 5); GPT-4o adotado.",
+        "localizador": "p. 14, Apêndice A.1 e Tabela 6"
+      },
+      {
+        "nome_original": "Reasoning and scaling (variantes de raciocínio e tamanhos de modelo)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre modelos de raciocínio e padrão (por exemplo, Claude-4-Think × Claude-4; DS-Reasoner × DS-V3.2) e entre tamanhos (QC-14B × QC-32B; CodeLlama 7B/13B/34B), sem alteração do prompt.",
+        "localizador": "p. 7, Seção 5.1; p. 6, Tabela 2"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado", "localizador": "p. 16, Tabela 12; p. 8, Tabela 5", "observacao": "Avaliado na Tabela 5; também usado para gerar os sintetizadores de testes de estresse (p. 5, Seção 3.4)."},
+      {"nome": "DeepSeek-V3.2 (DS-V3.2)", "versao": "nao_informado", "localizador": "p. 16, Tabela 12; p. 8, Tabela 5", "observacao": "Avaliado na Tabela 5."},
+      {"nome": "Claude-Sonnet-4 (Claude-4)", "versao": "nao_informado", "localizador": "p. 16, Tabela 12; p. 8, Tabela 5", "observacao": "Avaliado na Tabela 5; snapshot não informado."},
+      {"nome": "Claude-Sonnet-4-Think", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "Claude-Sonnet-3.5", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "DeepSeek-Reasoner", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "Gemini-2.5-Pro", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "Gemini-2.5-Flash", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "GPT-4o-Mini", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "GPT-3.5-Turbo", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "OpenAI-O3", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "OpenAI-O3-Mini", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "CodeLlama-7B, -13B, -34B e respectivas versões Instruct", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "deepseek-coder-6.7b, -33b e respectivas versões Instruct", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"},
+      {"nome": "Qwen2.5-Coder-7B, -14B, -32B e respectivas versões Instruct", "versao": "nao_informado", "localizador": "p. 16, Tabela 12"}
+    ],
+    "benchmarks": [
+      {"nome": "TRACE (TRAnslated Code Efficiency)", "quantidade": "1.000 tarefas de tradução derivadas de 357 problemas; C++→Java (250), Java→C++ (127), Java→Python (148), Python→Java (236), C++→Python (141), Python→C++ (98); 10 testes padrão e 10 testes de estresse por tarefa; conjunto de referência de eficiência de 23,03 traduções por tarefa em média", "localizador": "p. 5, Tabela 1 e Seção 3.5; p. 15, Tabela 9", "observacao": "Proposto pelo estudo. As tarefas foram filtradas com base nos próprios 28 LLMs avaliados (Rule-1 remove tarefas que nenhum modelo resolve). O denominador da Tabela 5 não é declarado explicitamente na Seção 5.3."},
+      {"nome": "TRANSCODER-TEST (versão mais recente, Yang et al., 2024)", "quantidade": "568 problemas; 2.828 tarefas de tradução originais (Tabela 9); 10 testes de correção por problema", "localizador": "p. 3, Seção 3.1; p. 14, Apêndice A.3; p. 15, Tabela 9", "observacao": "Base de problemas do TRACE; os testes padrão verificam a correção funcional."}
+    ],
+    "metricas": [
+      {"nome": "Pass Rate (Pass)", "denominador": "tarefas (percentual de tarefas cujas traduções passam em todos os testes); número de tarefas da Tabela 5 não declarado na Seção 5.3", "localizador": "p. 6, Seção 4 (Metrics)", "observacao": "Correção verificada com os testes padrão do TRANSCODER-TEST; traduções que não compilam, geram erro ou excedem 180 s/4096 MB contam como incorretas."},
+      {"nome": "Beyond score B_T e B_M (tempo de execução e pico de memória)", "denominador": "todas as traduções, com incorretas pontuadas como 0", "localizador": "p. 6, Seção 4 (Metrics), equação de B_X(c)", "observacao": "Normalizado em relação à faixa [mínimo, máximo] do conjunto de referência da tarefa; maior é melhor."},
+      {"nome": "Beyond condicionado B^P_T e B^P_M", "denominador": "somente traduções corretas (varia por modelo e condição)", "localizador": "p. 6, Seção 4 (Metrics)"},
+      {"nome": "Execution Time (ET, s) e Peak Memory Usage (PM, MB)", "denominador": "nao_aplicavel", "localizador": "p. 3, Seção 3; p. 15, Apêndice A.4 e Tabela 11", "observacao": "Média aritmética de cinco execuções; ET por perf stat e PM por amostragem do RSS via psutil."},
+      {"nome": "∆T/∆M (razão de ET/PM em relação à melhor tradução da tarefa)", "denominador": "327 casos ineficientes classificados manualmente", "localizador": "p. 8, Tabela 4"}
+    ],
+    "linguagens": [
+      {"nome": "C++", "observacao": "Compilação g++ -O2 (g++ do Ubuntu 22.04).", "localizador": "p. 15, Tabela 10"},
+      {"nome": "Java", "observacao": "openjdk 17.0.15.", "localizador": "p. 15, Tabela 10"},
+      {"nome": "Python", "observacao": "Python 3.12.", "localizador": "p. 15, Tabela 10"}
+    ],
+    "riscos": [
+      {
+        "categoria": "outro",
+        "descricao": "Ineficiência de execução em traduções funcionalmente corretas (não é cibersegurança): 23,5% das traduções corretas são mais de 2× mais lentas ou mais intensivas em memória que a melhor da tarefa; taxonomia em discrepância de implementação de algoritmo (11,93%), descompasso de construções da linguagem (66,36%) e ineficiência de gestão de recursos (21,71%). O estudo liga eficiência a 'operational cost', sem quantificar custo.",
+        "localizador": "p. 1; p. 2; p. 7, Tabela 3; p. 8, Seção 5.2 e Tabela 4"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Traduções incorretas (falha de compilação, erro de execução ou excesso de recursos) são frequentes em alguns modelos (Pass de 62.5 a 95.5 na Tabela 2); na Seção 5.3, perf-self-refine reduz ligeiramente a correção do Claude-4 (93.4→91.9) ao melhorar o B_T.",
+        "localizador": "p. 6, Seção 4 e Tabela 2; p. 9, Seção 5.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à validade de construto: o conjunto de referência de eficiência é derivado de LLMs; se for mais fraco que implementações otimizadas por humanos, o Beyond pode superestimar o desempenho dos modelos.",
+        "localizador": "p. 9, Seção 6.1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limites de generalização declarados: só tempo de execução e pico de memória (sem latência de E/S, compilação ou energia); só C++, Java e Python; tarefas de nível de método, mais limpas que cenários de classe ou repositório.",
+        "localizador": "p. 10, Limitations"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ruído de medição por carga do sistema na medição de ET e PM; o estudo relata coeficientes de variação tipicamente abaixo de 3,0% no ambiente controlado.",
+        "localizador": "p. 15, Apêndice A.4"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento de dados de avaliação no prompt few-shot: os dois exemplos do perf-few-shot vêm de outros problemas do TRACE na mesma direção. O estudo não discute contaminação por pré-treinamento dos problemas do TRANSCODER-TEST (coletados do GeeksforGeeks) nem apresenta esse procedimento como controle de contaminação.",
+        "localizador": "p. 23, Apêndice C.1; p. 10, Limitations"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Estratégias de prompt orientadas a desempenho (perf-zero-shot, perf-few-shot, perf-self-refine) investigadas para reduzir ineficiências de tradução, comparadas com o zero-shot nos mesmos três modelos.",
+        "avaliada": "sim",
+        "localizador": "p. 8, Seção 5.3 e Tabela 5"
+      },
+      {
+        "descricao": "Ambiente controlado: cada comando fixado no núcleo de CPU menos utilizado (taskset -c) e cada perfil de execução calculado como média de cinco execuções para mitigar ruído; sem comparação com condição sem esse procedimento.",
+        "avaliada": "nao",
+        "localizador": "p. 15, Apêndice A.4 e Tabela 11"
+      },
+      {
+        "descricao": "Limiar de diversidade ϵD = 0,05 escolhido acima da variância observada e do ruído relatado na literatura, para que as tarefas retidas reflitam diferenças reais de eficiência.",
+        "avaliada": "nao",
+        "localizador": "p. 14, Apêndice A.1; p. 15, Apêndice A.4"
+      },
+      {
+        "descricao": "Validação dos testes de estresse (Execution Integrity e Output Consistency nas implementações de referência em C++, Java e Python) para eliminar entradas sensíveis a comportamentos específicos de linguagem.",
+        "avaliada": "nao",
+        "localizador": "p. 4, Seção 3.2 (Test Validation)"
+      },
+      {
+        "descricao": "Verificação com linha de base humana em 50 tarefas sorteadas (Human 2.61 s × FastLLM 2.63 s) para examinar a validade do conjunto de referência; é checagem de sanidade, não comparação com e sem mitigação.",
+        "avaliada": "nao",
+        "localizador": "p. 9, Seção 6.1"
+      },
+      {
+        "descricao": "Classificação independente dos 327 casos ineficientes por dois autores, com resolução de divergências por discussão; concordância não quantificada.",
+        "avaliada": "nao",
+        "localizador": "p. 8, Seção 5.2"
+      },
+      {
+        "descricao": "Exemplos do perf-few-shot tirados de outros problemas do TRACE (não do problema traduzido).",
+        "avaliada": "nao",
+        "localizador": "p. 23, Apêndice C.1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente inconsistência na Tabela 2: a linha 'Average' do bloco Summary (Pass 84.9, B_T 45.8, B_M 37.7, B^P_T 54.0, B^P_M 43.6) é idêntica à linha 'Average' da direção C++→Java na Tabela 15 (84.9 45.8 37.7 54.0 43.6). Por cálculo próprio, a média das médias por direção da Tabela 15 ponderada pelo número de tarefas por direção dá Pass ≈ 82,2; já as linhas Summary dos modelos são compatíveis com essa ponderação (por exemplo, Claude-4: ≈ 93,4, cálculo próprio). O estudo não explica como a média do Summary foi calculada, nem se a Tabela 2 cobre 16 ou 28 modelos.",
+        "localizador": "p. 6, Tabela 2, linha Average; p. 19, Tabela 15, linhas Average"
+      },
+      {
+        "descricao": "Inversão: perf-zero-shot fica abaixo do zero-shot em Pass, B_T e B_M para DS-V3.2 (90.2/49.9/42.7 × 91.9/50.7/44.4) e Claude-4 (91.6/47.9/42.8 × 93.4/48.8/45.5); para GPT-4o, Pass 89.4 × 89.5.",
+        "localizador": "p. 8, Tabela 5"
+      },
+      {
+        "descricao": "perf-self-refine tem Pass menor que o zero-shot nos três modelos (GPT-4o 89.2 × 89.5; DS-V3.2 91.7 × 91.9; Claude-4 91.9 × 93.4); o texto menciona a queda apenas para o Claude-4.",
+        "localizador": "p. 8, Tabela 5; p. 9, Seção 5.3"
+      },
+      {
+        "descricao": "perf-few-shot, descrito como a estratégia de melhoria mais consistente, não é a melhor em todas as colunas: para GPT-4o, B^P_T 54.9 e B^P_M 49.3 ficam abaixo do perf-zero-shot (56.5 e 50.2); para Claude-4, B_T 50.2 e B^P_T 53.3 ficam abaixo do perf-self-refine (52.3 e 56.9). Em relação ao zero-shot, os valores do perf-few-shot são maiores em todas as colunas nos três modelos.",
+        "localizador": "p. 8, Tabela 5 e Seção 5.3"
+      },
+      {
+        "descricao": "As diferenças entre estratégias de prompt são pequenas (por exemplo, 89.4 × 89.5) e vêm de uma única tradução por tarefa (decodificação gulosa declarada para o protocolo zero-shot); não há teste estatístico, intervalo ou variância para Pass e Beyond na Tabela 5; ET e PM são médias de cinco execuções.",
+        "localizador": "p. 6, Seção 4 (Model Evaluation Protocol); p. 8, Tabela 5"
+      },
+      {
+        "descricao": "Condição discrepante entre avaliação principal e estratégias de prompt: 28 modelos na avaliação geral, mas só GPT-4o, DS-V3.2 e Claude-4 na Tabela 5. Os mesmos 28 modelos foram usados para curar o benchmark (filtro de viabilidade e conjunto de referência do Beyond) e para avaliá-lo, e o GPT-4o também gerou os testes de estresse.",
+        "localizador": "p. 5, Seções 3.3-3.4; p. 15, Apêndice A.5; p. 8, Tabela 5"
+      },
+      {
+        "descricao": "Aparente inconsistência nos estudos de caso, possivelmente explicada por arredondamento: a Figura 5 relata desaceleração 'over 6400×' com tempos impressos de 115.86 s e 0.02 s (razão ≈ 5793 por cálculo próprio; acima de 6400 só se o tempo real for menor que ≈ 0,0181 s); a Figura 7 relata 'over 53.9×' com 8.35 s e 0.16 s (≈ 52,2 por cálculo próprio). Os tempos não arredondados não são informados.",
+        "localizador": "p. 20, Figura 5; p. 22, Figura 7"
+      },
+      {
+        "descricao": "Inversões entre famílias de modelos fora do escopo de prompting: Claude-4-Think supera Claude-4 em B_T (49.6 × 48.8), mas DS-V3.2 supera DS-Reasoner (50.7 × 39.3); QC-14B-Inst supera QC-32B-Inst em B_T (54.8 × 48.7).",
+        "localizador": "p. 7, Seção 5.1; p. 6, Tabela 2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O objeto principal do estudo é o benchmark TRACE; as estratégias de prompt são uma das três lentes de avaliação (Seção 5.3) e todas as demais análises usam o prompt zero-shot.",
+        "localizador": "p. 2, Contribuições; p. 6, Seção 5"
+      },
+      {
+        "descricao": "A geração de testes de estresse usa prompting iterativo com GPT-4o (dois sintetizadores mais eficazes como exemplos, perfis de execução e instruções de chain-of-thought, até Imax = 5 iterações). Trata-se de construção do benchmark (geração de entradas de teste), não de técnica avaliada nas tarefas do escopo; as Tabelas 6 e 7 mostram aumento cumulativo de ET e PM por iteração, sem condição sem o enriquecimento do prompt.",
+        "localizador": "p. 4, Seção 3.2 e Algoritmo 1; p. 14, Tabelas 6-7; p. 23, Apêndice C.2; Figura 12"
+      },
+      {
+        "descricao": "Os valores zero-shot de Claude-4 e DS-V3.2 na Tabela 5 coincidem com as colunas Summary da Tabela 2; por cálculo próprio, a média de Pass do GPT-4o ponderada pelas tarefas por direção na Tabela 15 dá 89,5, igual à linha zero-shot da Tabela 5. Isso sugere que a Tabela 5 agrega as seis direções, mas o estudo não declara a base.",
+        "localizador": "p. 6, Tabela 2; p. 8, Tabela 5; p. 19, Tabela 15"
+      },
+      {
+        "descricao": "Esforço manual: análise de 327 casos ineficientes por dois autores e implementação de soluções otimizadas por dois autores com mais de sete anos de experiência para a checagem humana em 50 tarefas.",
+        "localizador": "p. 8, Seção 5.2; p. 9, Seção 6.1"
+      },
+      {
+        "descricao": "O estudo imprime link para código e dados (GitHub); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "descricao": "Correlação entre correção e eficiência: Pearson r = −0.54 (Pass × B^P_T) e 0.57 (Pass × B^P_M) nos 28 modelos; OLS com R² = 0.29 e 0.33.",
+        "localizador": "p. 7, Seção 5.1; p. 17, Tabela 14 e Apêndice B.3"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "3) Inference-time prompt strategies bring only modest improvements, indicating that simple prompting alone is insufficient to improve translation efficiency.", "localizador": "p. 1, Resumo"},
+      {"trecho": "Execution efficiency determines how well a translated program performs, directly influencing responsiveness, scalability, and operational cost.", "localizador": "p. 1, Introdução"},
+      {"trecho": "Notably, 23.5% of functionally correct translations are over 2× slower or more memory-intensive than the most efficient counterparts.", "localizador": "p. 2, Introdução"},
+      {"trecho": "Few-shot prompting provides the most consistent yet modest efficiency gains, suggesting that improving translation efficiency likely requires more than prompt-level intervention.", "localizador": "p. 2, Introdução"},
+      {"trecho": "This enriched prompt (E, Figure 12) incorporates: 1) two of the most effective synthesizers discovered so far; 2) the execution profiles of their outputs; and 3) chain-of-thought instructions.", "localizador": "p. 4, Seção 3.2"},
+      {"trecho": "For each task, the model generates a single translation using greedy decoding (temperature = 0.0) under a zero-shot prompt (Appendix C.1).", "localizador": "p. 6, Seção 4 (Model Evaluation Protocol)"},
+      {"trecho": "Translations that fail to compile, trigger runtime errors, or exceed resource limits (180s or 4096MB) are marked as incorrect and excluded from efficiency evaluation.", "localizador": "p. 6, Seção 4 (Model Evaluation Protocol)"},
+      {"trecho": "Correct translations are then executed on stress tests to measure ET and PM, with each metric reported as the arithmetic mean of five runs.", "localizador": "p. 6, Seção 4 (Model Evaluation Protocol)"},
+      {"trecho": "Two authors independently classified the cases and resolved disagreements through discussion.", "localizador": "p. 8, Seção 5.2"},
+      {"trecho": "Beyond the default zero-shot baseline, we experiment with three performance-aware prompts (Appendix C.1), inspired by recent code efficiency work (Shypula et al., 2023; Liu et al., 2024; Huang et al., 2024a): 1) perf-zero-shot, which adds an explicit system instruction on efficiency; 2) perf-few-shot, which provides two efficient translation examples; and 3) perf-self-refine, which refines the initial translation based on execution feedback.", "localizador": "p. 8, Seção 5.3"},
+      {"trecho": "Overall, prompting yields modest and model-dependent gains.", "localizador": "p. 8, Seção 5.3"},
+      {"trecho": "Other strategies are mixed: perf-self-refine, for instance, improves Claude-4’s time efficiency (BT: 48.8→52.3) while slightly reducing correctness (93.4→91.9).", "localizador": "p. 9, Seção 5.3"},
+      {"trecho": "Taken together, the results suggest that prompt-based strategies can alleviate inefficiencies to a limited extent but fail to eliminate them, highlighting the need for more advanced methods to encode efficiency principles.", "localizador": "p. 9, Seção 5.3"},
+      {"trecho": "A potential threat to construct validity lies in using an LLM-derived translation set (efficiency reference set) as the evaluation anchor.", "localizador": "p. 9, Seção 6.1"},
+      {"trecho": "If the reference set were weaker than human-optimized implementations, the resulting scores could overestimate the model performance.", "localizador": "p. 9, Seção 6.1"},
+      {"trecho": "To examine this risk, we conducted a human-baseline sanity check on 50 randomly sampled tasks (18 C++, 21 Java, and 11 Python).", "localizador": "p. 9, Seção 6.1"},
+      {"trecho": "Meanwhile, we acknowledge that excluding other languages may pose risks to broader generalization.", "localizador": "p. 10, Limitations"},
+      {"trecho": "We acknowledge that this setting is cleaner than real-world translation scenarios, which often involve class-level or repository-level contexts (Jimenez et al., 2023; Ibrahimzada et al., 2025; Xue et al., 2025).", "localizador": "p. 10, Limitations"},
+      {"trecho": "Each execution profile was averaged over five independent runs to mitigate noise from system load.", "localizador": "p. 15, Apêndice A.4"},
+      {"trecho": "These models were utilized for both the curation of the benchmark and the evaluation of the work.", "localizador": "p. 15, Apêndice A.5"},
+      {"trecho": "Four settings are considered: 1) zero-shot, which directly asks the LLM to translate code without additional guidance (Figure 8); 2) perf-zero-shot, which augments the zero-shot setting with explicit efficiency-oriented system instructions (Figure 9); 3) perf-few-shot, which provides the LLM with two efficient code translation examples, which are drawn from other problems in TRACE following the same translation direction (Figure 10); and 4) perf-self-refine, which includes the execution feedback of the translation produced in the previous zero-shot round and asks the LLM for further refinement or optimization (Figure 11).", "localizador": "p. 23, Apêndice C.1"},
+      {"trecho": "You are also a code optimization expert, ensuring the translated code is efficient and adheres to best practices.", "localizador": "p. 24, Figura 9 (System Prompt do perf-zero-shot); repetido nas Figuras 10 e 11"},
+      {"trecho": "Below are some examples of efficient code translations from SRC_LANG to TGT_LANG.", "localizador": "p. 25, Figura 10 (User Prompt do perf-few-shot)"},
+      {"trecho": "If you think the reference TGT_LANG translation is not correct or efficient, please try to improve it. Otherwise, output the original reference TGT_LANG translation without any changes.", "localizador": "p. 26, Figura 11 (User Prompt do perf-self-refine)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "perf-zero-shot",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "zero-shot",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "TRACE (seis direções de tradução entre C++, Java e Python)",
+      "metrica": "Pass (Pass Rate: percentual de tarefas cujas traduções passam em todos os testes), coluna Pass da Tabela 5 'Impact of prompt strategies on efficiency'",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 89.5, "intervencao": 89.4},
+      "denominador": "nao_informado para a Tabela 5 (o TRACE tem 1.000 tarefas; a Seção 5.3 não declara o conjunto avaliado)",
+      "condicoes": "Uma tradução por tarefa; decodificação gulosa (temperatura 0,0) declarada para o protocolo zero-shot e não reiterada para as variantes; correção verificada pelos testes padrão do TRANSCODER-TEST, com limites de 180 s e 4096 MB. A única diferença entre as condições é a frase de sistema sobre eficiência (Figuras 8 e 9). Na mesma linha, a Tabela 5 também reporta B_T, B_M, B^P_T e B^P_M, não extraídos. Sem teste estatístico ou variância. Conferido no PDF, p. 8, Tabela 5 (bloco GPT-4o; cabeçalhos Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a introdução destacam as estratégias de prompt em geral e o few-shot como o ganho mais consistente em 'efficiency', sem uma métrica única (a Tabela 5 tem Pass, B_T, B_M, B^P_T e B^P_M) nem comparador explícito. A primeira tabela com o contraste de prompting é a Tabela 5 (a Tabela 2 só traz o zero-shot); primeira métrica pertinente (Pass, primeira coluna), primeiro modelo (GPT-4o), primeira linha de base de prompting (zero-shot) e primeira técnica na ordem da tabela (perf-zero-shot).",
+      "derivacao": "direta",
+      "localizador": "p. 8 (PDF; sem paginação impressa), Tabela 5, bloco GPT-4o, linhas zero-shot e perf-zero-shot, coluna Pass",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "zero-shot 89.5 48.8 42.2 54.5 47.2", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha zero-shot; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"},
+        {"trecho": "perf-zero-shot 89.4 50.5 44.9 56.5 50.2", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha perf-zero-shot; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "perf-few-shot",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "exemplos"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos"],
+      "comparador": "zero-shot",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "TRACE (seis direções de tradução entre C++, Java e Python)",
+      "metrica": "Pass (Pass Rate: percentual de tarefas cujas traduções passam em todos os testes), coluna Pass da Tabela 5",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 89.5, "intervencao": 93.9},
+      "denominador": "nao_informado para a Tabela 5 (o TRACE tem 1.000 tarefas; a Seção 5.3 não declara o conjunto avaliado)",
+      "condicoes": "Dois exemplos de tradução eficiente tirados de outros problemas do TRACE na mesma direção, mais a frase de sistema sobre eficiência; critério de escolha dos exemplos não informado. Uma tradução por tarefa; decodificação das variantes não reiterada. O ganho em relação ao zero-shot é do pacote (instrução de eficiência + exemplos), não só dos exemplos. Sem teste estatístico. Conferido no PDF, p. 8, Tabela 5 (bloco GPT-4o).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal de prompting, ainda não representada, na ordem da Tabela 5; mesma métrica, modelo e linha de base da primeira extração.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (PDF), Tabela 5, bloco GPT-4o, linhas zero-shot e perf-few-shot, coluna Pass",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "zero-shot 89.5 48.8 42.2 54.5 47.2", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha zero-shot; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"},
+        {"trecho": "perf-few-shot 93.9 51.6 46.3 54.9 49.3", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha perf-few-shot; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "perf-self-refine",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["instrucao", "feedback"],
+      "comparador": "zero-shot",
+      "modelo": "GPT-4o (versão nao_informado)",
+      "benchmark": "TRACE (seis direções de tradução entre C++, Java e Python)",
+      "metrica": "Pass (Pass Rate: percentual de tarefas cujas traduções passam em todos os testes), coluna Pass da Tabela 5",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 89.5, "intervencao": 89.2},
+      "denominador": "nao_informado para a Tabela 5 (o TRACE tem 1.000 tarefas; a Seção 5.3 não declara o conjunto avaliado)",
+      "condicoes": "Refinamento da tradução da rodada zero-shot com seu perfil de execução (resultado dos testes, feedback de execução, tempo e memória) e a frase de sistema sobre eficiência; não se informa sobre quais testes o perfil é gerado nem se há mais de uma rodada. Decodificação das variantes não reiterada. O efeito em relação ao zero-shot é do pacote. Sem teste estatístico. Conferido no PDF, p. 8, Tabela 5 (bloco GPT-4o).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Terceira técnica focal de prompting, ainda não representada, na ordem da Tabela 5; mesma métrica, modelo e linha de base. Completa o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "p. 8 (PDF), Tabela 5, bloco GPT-4o, linhas zero-shot e perf-self-refine, coluna Pass",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "zero-shot 89.5 48.8 42.2 54.5 47.2", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha zero-shot; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"},
+        {"trecho": "perf-self-refine 89.2 49.2 44.0 55.2 49.4", "localizador": "p. 8, Tabela 5, bloco GPT-4o, linha perf-self-refine; colunas Prompt Strategy, Pass, B_T, B_M, B^P_T, B^P_M"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Contribuições explícitas (dimensão de eficiência, benchmark TRACE, análise de 28 LLMs) e três lentes de avaliação, incluindo o impacto de estratégias de prompt na eficiência.",
+      "localizador": "p. 2, Contribuições; p. 6, Seção 5"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "A construção do benchmark, os limiares, o ambiente e os prompts estão bem descritos, mas para a Seção 5.3 não se reitera a decodificação das variantes, não se declara o conjunto de tarefas avaliado, o critério de escolha dos exemplos few-shot nem os testes usados no feedback do perf-self-refine.",
+      "localizador": "pp. 3-6, Seções 3-4; p. 8, Seção 5.3; p. 23, Apêndice C.1"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "A linha de base zero-shot é executada com os mesmos três modelos que as três variantes de prompt, e os templates de todas as condições são reproduzidos (Figuras 8-11); perf-zero-shot difere do zero-shot em um único ingrediente.",
+      "localizador": "p. 8, Tabela 5; pp. 24-26, Figuras 8-11"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass e Beyond são definidos (com fórmula e variantes B e B^P), mas o denominador da Tabela 5 não é declarado, não há variância ou teste para as diferenças entre prompts, e a linha Average do Summary da Tabela 2 coincide com a média C++→Java da Tabela 15 (aparente inconsistência). Os valores zero-shot de Claude-4 e DS-V3.2 coincidem entre as Tabelas 2 e 5.",
+      "localizador": "p. 6, Seção 4 e Tabela 2; p. 8, Tabela 5; p. 19, Tabela 15"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Discute a validade de construto do conjunto de referência com checagem humana em 50 tarefas e declara limitações de métricas, linguagens e granularidade; não discute contaminação nem a significância das diferenças entre prompts.",
+      "localizador": "p. 9, Seção 6.1; p. 10, Limitations"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Reproduz todos os prompts, informa ambiente, compiladores, limites, temperaturas, limiares e link para código e dados (não acessado), mas não informa versões ou snapshots dos modelos proprietários.",
+      "localizador": "p. 1, Resumo; p. 15, Tabelas 10-11; p. 16, Tabela 12; pp. 24-26, Figuras 8-12"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos problemas do TRANSCODER-TEST/GeeksforGeeks no pré-treinamento dos modelos; apenas descreve que os exemplos do perf-few-shot vêm de outros problemas do TRACE, sem tratá-lo como controle de contaminação.",
+      "localizador": "texto completo; p. 10, Limitations; p. 23, Apêndice C.1"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-02", "p-04", "p-05", "p-06", "p-08", "p-09", "p-10", "p-14", "p-15", "p-16", "p-17", "p-18", "p-19", "p-20", "p-22", "p-23", "p-24", "p-25", "p-26"],
+    "observacao": "Texto extraído lido integralmente (1.475 linhas, incluindo referências e apêndices). Tabela 5 conferida na imagem da p. 8; Tabela 2 na p. 6; Tabela 15 nas p. 19; Tabelas 6-9 nas pp. 14-15; Tabela 12 na p. 16; Tabela 14 na p. 17; templates de prompt (Figuras 8-11) nas pp. 24-26; Figuras 5 e 7 nas pp. 20 e 22."
+  }
+}

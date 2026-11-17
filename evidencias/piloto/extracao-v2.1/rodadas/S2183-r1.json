@@ -1,0 +1,428 @@
+{
+  "estudo_id": "S2183",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Dynamic Prompt Engineering (C2: full framework — structured prompts, few-shot exemplars, validation feedback)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "feedback", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 2-4 (impressas 144-146), seções 2.2 e 4; PDF p. 7 (impressa 149), seção 6.4",
+        "observacao": "Pacote proposto: o planner seleciona categorias de auditoria e compõe prompts dinâmicos com trechos do esquema canonicalizado e metadados (contexto), objetivos de auditoria e dicas de dialeto (instrucao), exemplares de problemas e correções, inclusive correções de revisores humanos armazenadas como exemplares (exemplos), etapas encadeadas de diagnóstico, geração e prompt secundário de validação (decomposicao), realimentação com traços de erro do validador (feedback) e contrato de saída com justificativa e guardas de idempotência (restricoes). A comparação C2 vs. C1 contrasta o pacote com prompts estáticos, mas nenhuma condição isola o prompting dinâmico em si, embora a seção 6.4 declare o objetivo de isolar sua contribuição."
+      },
+      {
+        "nome_original": "few-shot exemplars",
+        "mecanismos": ["exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 7 (impressa 149), seção 6.6",
+        "observacao": "O estudo rotula a comparação C1 vs. C2 como «Removing exemplars», mas, pela definição da seção 6.4, C1 também não tem feedback de validação e usa prompts estáticos; a diferença não isola os exemplares."
+      },
+      {
+        "nome_original": "validation feedback (feedback loops integrating validation outcomes / secondary validation prompt enriched with error traces)",
+        "mecanismos": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "PDF p. 3 (impressa 145), seção 2.2; PDF p. 7 (impressa 149), seções 6.4 e 6.6",
+        "observacao": "Ablação de C2 sem feedback de validação (condição contrafactual); o estudo informa apenas a diferença em referential correctness, sem valores absolutos."
+      },
+      {
+        "nome_original": "structured output contracts / code contract",
+        "mecanismos": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 1 (impressa 143), Introdução; PDF p. 4 (impressa 146), seção 4",
+        "observacao": "Saída com SQL, justificativa textual e guarda de idempotência; não há condição sem o contrato."
+      },
+      {
+        "nome_original": "C1: LLM without exemplars or validation feedback (schema reflection and static prompts)",
+        "mecanismos": ["instrucao", "contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.4",
+        "observacao": "Linha de base de prompting estático com o esquema refletido; os mecanismos não são isolados. Resultados reportados apenas para syntactic validity e referential correctness."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "deterministic temperature settings (T = 0.0)",
+        "natureza": "decodificacao",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.1; PDF p. 6 (impressa 148), seção 6"
+      },
+      {
+        "nome_original": "truncated input contexts to 180k tokens per schema",
+        "natureza": "orcamento",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.1"
+      },
+      {
+        "nome_original": "validation and safety phase (parsing/linting, referential checks, idempotency inspection, sandboxed dry-run)",
+        "natureza": "outro",
+        "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "nome_original": "human-in-the-loop review mechanism (Step 5)",
+        "natureza": "outro",
+        "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "nome_original": "C0: rule-based baseline (handcrafted heuristics and static templates)",
+        "natureza": "outro",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.4"
+      }
+    ],
+    "modelos": ["GPT-4-turbo (versão/snapshot nao_informado)"],
+    "benchmarks": [
+      "SchemaPile: 2,700 real-world relational schemas (seções 5.2 e 6.2; a seção 5 diz «over 2,700»); 14,600 distinct issues identificadas; número de patches gerados nao_informado",
+      "Subconjunto estratificado de 270 schemas (10% do corpus) anotado por dois especialistas para a avaliação de detecção (F1)"
+    ],
+    "metricas": [
+      "Issue detection precision, recall e F1 (apenas F1 reportado)",
+      "Syntactic validity of patches (%)",
+      "Referential correctness of patches (%)",
+      "Execution safety (non-destructive dry-run) (%)",
+      "Human acceptance rate (no edits) (%)",
+      "IC 95% por bootstrap não paramétrico; diferenças em pontos percentuais; testes bootstrap pareados (resultados dos testes nao_informado)"
+    ],
+    "linguagens": ["SQL (DDL) nos dialetos PostgreSQL, Oracle, MySQL, SQL Server, HSQLDB e SQLite"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Erros residuais por chaves compostas com incompatibilidade de tipos e referências inferidas a tabelas inexistentes.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.5"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Chaves estrangeiras mapeadas para tabelas-pai plausíveis, mas inexistentes; o modelo propõe referências plausíveis quando os metadados são incompletos.",
+        "localizador": "PDF p. 5-6 (impressas 147-148), seção 5.3; PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Restrições de unicidade excessivas que rejeitam duplicatas legítimas em tabelas de staging ou ETL.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Segurança operacional: normalização excessiva com sugestões que exigem migração de dados além da remediação não destrutiva; dry-runs em sandbox não simulam todos os efeitos colaterais, gatilhos ou cadeias de dependência.",
+        "localizador": "PDF p. 7 (impressa 149), seções 6.7 e 6.8"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sensibilidade dos resultados ao fraseado do prompt, à seleção de exemplares e aos templates de política.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Feedback de validação incorporado às gerações seguintes (ablação de C2 sem feedback reduziu referential correctness em 3,1 p.p., segundo o estudo).",
+        "avaliada": "sim",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.6"
+      },
+      {
+        "descricao": "Validação automática de sintaxe, referências, idempotência e dry-run em sandbox para patches de alto risco.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "descricao": "Guardas IF EXISTS / IF NOT EXISTS para segurança na execução em lote.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6 (impressa 148), seção 5.3"
+      },
+      {
+        "descricao": "Revisão humana de patches ambíguos ou de alto impacto, com correções armazenadas como novos exemplares; o estudo afirma redução da recorrência dos erros, sem dados nem condição comparativa reportados.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 6-7 (impressas 148-149), seções 6.2 e 6.7"
+      },
+      {
+        "descricao": "Temperatura determinística (T = 0.0) para reprodutibilidade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.1"
+      },
+      {
+        "descricao": "Propostas para as ameaças: bibliotecas de exemplares por domínio, dialect embeddings e modelos de recompensa ajustados a políticas institucionais (não executadas).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "validation feedback",
+        "motivo": "O estudo imprime só a redução de 3,1 p.p. em referential correctness, sem valores absolutos e com ponto de referência ambíguo; a extração correspondente tem resultado null."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "A comparação C1 vs. C2 é apresentada como efeito da remoção de exemplares, mas C1 também não tem feedback de validação e usa prompts estáticos; a diferença confunde três componentes.",
+        "localizador": "PDF p. 6-7 (impressas 148-149), seções 6.4 e 6.6"
+      },
+      {
+        "descricao": "Ablação sem feedback: «further reduced referential correctness by 3.1 percentage points» não informa valores absolutos nem a condição de referência (C2 completo ou condição já sem exemplares).",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.6"
+      },
+      {
+        "descricao": "C0 (baseline baseada em regras) é definida, mas nenhum resultado de C0 é reportado; para C1 só há syntactic validity e referential correctness; Q3 pergunta sobre aceitação, mas não há resultado de aceitação por configuração.",
+        "localizador": "PDF p. 6-7 (impressas 148-149), seções 6.1, 6.4 e 6.6"
+      },
+      {
+        "descricao": "A Tabela 2 não identifica a configuração; os valores 92.4 e 88.6 coincidem com os atribuídos a C2 na seção 6.6. A Tabela 2 mistura F1 calculado no subconjunto de 270 schemas com métricas de patches cujo denominador não é informado.",
+        "localizador": "PDF p. 6-7 (impressas 148-149), seções 6.2, 6.5, 6.6 e Tabela 2"
+      },
+      {
+        "descricao": "Human acceptance rate é definida sobre patches aprovados sem edição, mas só patches ambíguos ou de alto impacto foram encaminhados à revisão humana; o denominador dos 82.0% (Tabela 2) e o «over 80% of the patches» da conclusão não são esclarecidos.",
+        "localizador": "PDF p. 6 (impressa 148), seções 6.2 e 6.3; PDF p. 7 (impressa 149), Tabela 2; PDF p. 8 (impressa 150), seção 7"
+      },
+      {
+        "descricao": "Precision e recall são declaradas como métricas, mas só F1 é reportado; o kappa de Cohen é descrito como «substantial agreement» sem valor; testes bootstrap pareados são mencionados sem resultados.",
+        "localizador": "PDF p. 6 (impressa 148), seções 6.2 e 6.3; PDF p. 7 (impressa 149), Tabela 2"
+      },
+      {
+        "descricao": "Os próprios autores ressalvam que o F1 de 0.81 reflete detecção em nível de categoria sobre poucas categorias recorrentes e que a proporção de correções de documentação pode inflar as taxas de sucesso.",
+        "localizador": "PDF p. 7 (impressa 149), seções 6.5 e 6.8"
+      },
+      {
+        "descricao": "Tamanho do corpus: «over 2,700» na seção 5 e «2,700» nas seções 5.2, 6.2 e 7.",
+        "localizador": "PDF p. 5 (impressa 147), seções 5 e 5.2; PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "descricao": "O texto da seção 5.2 contém o resíduo «contentReference[oaicite:2]index=2» no meio de um item da lista de categorias.",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.2"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Pipeline em cinco etapas: reflexão do banco (canonicalização e grafo do esquema), análise/detecção por planner, geração de SQL pelo LLM, validação e segurança, revisão humana com laço de feedback (Figura 1).",
+        "localizador": "PDF p. 4 (impressa 146), Figura 1 e seção 4"
+      },
+      {
+        "descricao": "Tarefa classificada como refatoração (DDL-to-DDL: remediação de falhas de projeto de esquemas relacionais); o estudo também avalia a detecção de problemas (F1), que não é tarefa de geração de código.",
+        "localizador": "PDF p. 3 (impressa 145), seção 2.3; PDF p. 6 (impressa 148), seção 6.1"
+      },
+      {
+        "descricao": "A avaliação exclui migração de dados e transformações dependentes de estado; operações desse tipo são deferidas à revisão humana.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6"
+      },
+      {
+        "descricao": "Tabela 1 é descritiva: frequência das categorias de problemas (41.0, 23.0, 18.0, 10.0, 8.0%) e exemplos de SQL gerado; não contém comparação.",
+        "localizador": "PDF p. 5 (impressa 147), Tabela 1"
+      },
+      {
+        "descricao": "Não há menção a pacote de replicação, repositório de código ou disponibilização dos prompts e exemplares.",
+        "localizador": "texto completo (PDF p. 1-8)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper presents an LLM-assisted SQL remediation framework that automatically detects and corrects design flaws in relational schemas through dynamic prompt engineering and dialect-aware code generation.",
+        "localizador": "PDF p. 1 (impressa 143), Abstract"
+      },
+      {
+        "trecho": "The task is to read a database’s DDL statements, identify structural or semantic issues, and generate new DDL statements that correct or improve them [19].",
+        "localizador": "PDF p. 3 (impressa 145), seção 2.3"
+      },
+      {
+        "trecho": "Dynamic prompts are composed of modular components, including schema excerpts, metadata summaries, audit objectives, and exemplars of both valid and invalid structures.",
+        "localizador": "PDF p. 2 (impressa 144), seção 2.2"
+      },
+      {
+        "trecho": "The system formulates an initial diagnostic prompt, receives the LLM’s proposed SQL remediation, and then constructs a secondary validation prompt enriched with error traces or validator feedback from the previous iteration.",
+        "localizador": "PDF p. 3 (impressa 145), seção 2.2"
+      },
+      {
+        "trecho": "The planner constructs a dynamic prompt containing relevant schema excerpts, metadata, and few-shot exemplars of both problems and fixes.",
+        "localizador": "PDF p. 4 (impressa 146), seção 4"
+      },
+      {
+        "trecho": "The prompt structure follows a code contract that ensures the output is syntactically valid, semantically coherent, and easily parsed for downstream validation.",
+        "localizador": "PDF p. 4 (impressa 146), seção 4"
+      },
+      {
+        "trecho": "Their feedback is stored as additional exemplars for future inference cycles, progressively enhancing the model’s capacity for self-improvement.",
+        "localizador": "PDF p. 4 (impressa 146), seção 4"
+      },
+      {
+        "trecho": "The language model (GPT-4-turbo) received canonicalized table definitions and was prompted to identify structural and semantic design issues, then to generate executable SQL code to correct them.",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.1"
+      },
+      {
+        "trecho": "We used deterministic temperature settings (T = 0.0) to ensure reproducible results and truncated input contexts to 180k tokens per schema.",
+        "localizador": "PDF p. 5 (impressa 147), seção 5.1"
+      },
+      {
+        "trecho": "C0: rule-based baseline that uses handcrafted heuristics and static templates to propose missing constraints, serving as a symbolic control.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.4"
+      },
+      {
+        "trecho": "C1: LLM without exemplars or validation feedback, relying solely on schema reflection and static prompts.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.4"
+      },
+      {
+        "trecho": "C2: full framework that incorporates structured prompts, few-shot exemplars, and feedback loops integrating validation outcomes into subsequent generations.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.4"
+      },
+      {
+        "trecho": "An additional ablation of C2 without validation feedback was performed to measure the effect of feedback-driven refinement.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.4"
+      },
+      {
+        "trecho": "Residual errors were primarily due to composite keys involving type mismatches or inferred references to missing lookup tables.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.5"
+      },
+      {
+        "trecho": "inferred but missing references, where foreign keys mapped to plausible yet nonexistent parent tables",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "trecho": "over-constraining uniqueness, where constraints rejected legitimate duplicates in staging or ETL tables",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "trecho": "overzealous normalization, with suggestions requiring data migration beyond non-destructive remediation",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "trecho": "Construct validity: Execution safety was operationalized through sandbox dry-runs, which cannot simulate all procedural side effects, triggers, or dependency chains that might exist in real deployments.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      },
+      {
+        "trecho": "Internal validity: Prompt phrasing, exemplar selection, and policy templates influence generation outcomes.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      },
+      {
+        "trecho": "The proportion of documentation fixes may inflate success rates relative to structural corrections.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      },
+      {
+        "trecho": "For high-risk patches, such as those that modify existing constraints or rename objects, the system executes dry-run tests in a sandboxed environment.",
+        "localizador": "PDF p. 4 (impressa 146), seção 4"
+      },
+      {
+        "trecho": "For non-destructive refactorings, the system inserted IF EXISTS and IF NOT EXISTS guards to ensure safety during batch execution.",
+        "localizador": "PDF p. 6 (impressa 148), seção 5.3"
+      },
+      {
+        "trecho": "Ambiguous or high-impact patches were routed for human review, where database engineers classified each as accepted or requiring edits.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "trecho": "Incorporating reviewer corrections as new exemplars reduced their recurrence, consistent with self-corrective refinement patterns reported in execution-guided SQL generation [8].",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.7"
+      },
+      {
+        "trecho": "These risks can be mitigated through domain-specific exemplar libraries, dialect embeddings, and reward models fine-tuned to institutional policies [19].",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+      },
+      {
+        "trecho": "Inter-annotator agreement was assessed using Cohen’s Kappa, yielding substantial agreement, after which disagreements were resolved through adjudication to establish the final ground truth.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.2"
+      },
+      {
+        "trecho": "human acceptance rate, defined as the share of patches approved by reviewers without manual edits.",
+        "localizador": "PDF p. 6 (impressa 148), seção 6.3"
+      },
+      {
+        "trecho": "Human reviewers accepted over 80% of the patches without modification, underscoring the practical readiness of the system for integration into continuous database governance pipelines.",
+        "localizador": "PDF p. 8 (impressa 150), seção 7"
+      },
+      {
+        "trecho": "It is important to note that this F1 score reflects detection accuracy over a small set of recurring and well-defined issue categories (e.g., missing keys, missing documentation, unsafe defaults), evaluated against a manually adjudicated ground truth on a stratified subset of schemas.",
+        "localizador": "PDF p. 7 (impressa 149), seção 6.5"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "C2: full framework (structured prompts, few-shot exemplars, validation feedback), comparação rotulada pelo estudo como «Removing exemplars (C1 versus C2)»",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "feedback", "restricoes"],
+      "comparador": "C1: LLM without exemplars or validation feedback, relying solely on schema reflection and static prompts",
+      "modelo": "GPT-4-turbo",
+      "benchmark": "SchemaPile (2,700 schemas)",
+      "metrica": "Syntactic validity of patches (fraction of generated SQL patches that parse without error)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 86.1, "intervencao": 92.4},
+      "denominador": "nao_informado (número de patches não informado)",
+      "condicoes": "Decodificação determinística (temperature = 0.0); contexto de entrada truncado em 180k tokens por schema; mesmo pipeline de reflexão, planejamento e validação. C1 difere de C2 em exemplares, feedback de validação e prompts estáticos vs. estruturados; a diferença não isola os exemplares. O valor 92.4 coincide com a Tabela 2, que não rotula a configuração (IC 95% de 91.6 a 93.1 só para esse valor); sem IC para C1; testes bootstrap pareados mencionados sem resultado reportado. Valores conferidos visualmente no PDF p. 7 (impressa 149), seção 6.6 e Tabela 2.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem resultado principal único (três objetivos e várias métricas). A Tabela 1 é descritiva e a Tabela 2 apresenta uma única condição, sem comparação; a primeira comparação de prompting está no texto da seção 6.6. Usou-se a primeira métrica (syntactic validity) e o único modelo. Esta extração representa também o pacote focal Dynamic Prompt Engineering e a técnica few-shot exemplars, que o estudo associa a essa comparação.",
+      "localizador": "PDF p. 7 (impressa 149), seção 6.6; Tabela 2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Removing exemplars (C1 versus C2) reduced syntactic validity from 92.4% to 86.1% (minus 6.3 percentage points) and referential correctness from 88.6% to 81.0% (minus 7.6 percentage points), showing the value of pattern priming for consistent constraint naming and dialect adaptation.",
+          "localizador": "PDF p. 7 (impressa 149), seção 6.6"
+        }
+      ]
+    },
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "validation feedback (ablation of C2 without validation feedback)",
+      "mecanismos": ["feedback"],
+      "comparador": "C2 without validation feedback",
+      "modelo": "GPT-4-turbo",
+      "benchmark": "SchemaPile (2,700 schemas)",
+      "metrica": "Referential correctness of patches (proportion of patches maintaining key consistency and type compatibility)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado",
+      "condicoes": "O estudo imprime apenas a diferença («further reduced referential correctness by 3.1 percentage points»), sem valores absolutos da condição sem feedback; a referência de «further» é ambígua (C2 completo, 88.6 na Tabela 2, ou condição já sem exemplares). Não se calculou substituto. Outras métricas não são reportadas para a ablação. Temperature = 0.0. Conferido visualmente no PDF p. 7 (impressa 149), seção 6.6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (feedback de validação) ainda não representada isoladamente; única métrica reportada para a ablação.",
+      "localizador": "PDF p. 7 (impressa 149), seção 6.6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Disabling validation feedback within C2 further reduced referential correctness by 3.1 percentage points, as the absence of preflight hints allowed type mismatches and invalid references to persist.",
+          "localizador": "PDF p. 7 (impressa 149), seção 6.6"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivos G1-G3 e questões Q1-Q3 explicitados.",
+      "localizador": "PDF p. 6 (impressa 148), seção 6.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline e o protocolo são descritos, mas os prompts e exemplares não são apresentados, o número de patches e o critério de encaminhamento à revisão humana não são quantificados, e a ablação é descrita sem detalhes de execução.",
+      "localizador": "PDF p. 4 (impressa 146), seção 4; PDF p. 6-7 (impressas 148-149), seções 6.2-6.6"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há C0, C1, C2 e ablação sem feedback, mas C0 não tem resultados, C1 só tem duas métricas, C1 vs. C2 confunde exemplares, feedback e prompts estáticos, e a ablação não tem valores absolutos.",
+      "localizador": "PDF p. 6-7 (impressas 148-149), seções 6.4 e 6.6"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas e a Tabela 2 traz IC 95%, mas precision e recall não são reportadas, o kappa não tem valor, os denominadores dos patches e da aceitação humana não são informados e os testes pareados não têm resultados.",
+      "localizador": "PDF p. 6 (impressa 148), seções 6.2 e 6.3; PDF p. 7 (impressa 149), Tabela 2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "A seção de ameaças discute validade externa, de construto e interna, incluindo a possível inflação por correções de documentação e os limites do dry-run.",
+      "localizador": "PDF p. 7 (impressa 149), seção 6.8"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelo (GPT-4-turbo, sem snapshot), temperatura e truncamento são informados, mas prompts, exemplares, código e dados de avaliação não são disponibilizados e não há pacote de replicação mencionado.",
+      "localizador": "PDF p. 5 (impressa 147), seção 5.1; texto completo"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após busca no texto completo, não há discussão sobre a possível presença dos schemas públicos do SchemaPile nos dados de treinamento do GPT-4-turbo.",
+      "localizador": "texto completo (PDF p. 1-8)"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente; PDF aberto visualmente nas páginas 1-8 (impressas 143-150), com conferência das Tabelas 1 e 2, da Figura 1 e da seção 6.6 (a leitura com o parâmetro pages falhou por falta do pdftoppm; o PDF inteiro foi carregado com imagens das páginas)"
+}

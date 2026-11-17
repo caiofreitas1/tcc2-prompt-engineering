@@ -1,0 +1,99 @@
+\subsection{Exame da tabela nos cenários}\label{sec:exame}
+A Tabela~\ref{tab:cenarios} resume os oito cenários sintéticos, dois por tarefa. Cada um fixa linguagem e domínio,
+modelo, recursos de verificação e orçamento de chamadas. As expectativas de evidência são hipóteses a confrontar. Os
+cenários e a tabela de apoio v1 foram congelados com SHA-256 antes do exame. Para cada cenário, o exame aplica as
+linhas da tabela, confere os estudos citados nas fichas e registra limitações e ambiguidades. Claude Code redigiu o exame e uma proposta de julgamento, e o autor fez o julgamento final. O exame não mede eficácia.
+
+\begin{table}[!t]
+\caption{Cenários do exame (v2, congelada)}\label{tab:cenarios}
+\centering\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.55cm}p{3.2cm}p{2.4cm}p{1.3cm}@{}}
+\hline
+ID & Situação & Verificação & Orçamento\\
+\hline
+G1 & Funções Python a partir de \textit{docstring}; modelo grande & Testes unitários públicos & 5 chamadas\\
+G2 & Contratos Solidity 0.8; modelo local até 8B & \texttt{solc} e analisador estático & 3 chamadas\\
+D1 & Defeito em função Python & Teste que falha e suíte & 10 chamadas\\
+D2 & Defeito em repositório Java a partir de relato & Compilação; suíte não reproduz & 20 chamadas\\
+T1 & Módulo C99 para Rust seguro & \texttt{rustc} e testes portados & 5 rodadas\\
+T2 & COBOL de lote para Java 17 & Só compilador Java & 3 chamadas\\
+R1 & Métodos Python longos, menor complexidade & Testes e medidor de complexidade & 3 chamadas\\
+R2 & Migração de API em cerca de 200 arquivos Java & Compilação, testes, \textit{benchmarks}, \textit{changelog} & 2 por arquivo\\
+\hline
+\end{tabular}
+\end{table}
+
+O autor julgou os oito cenários em 17/11/2026 (Tabela~\ref{tab:julgamento}). Nos três critérios, o resultado foi:
+\begin{itemize}
+  \item clareza: 1 atende e 7 parciais;
+  \item justificativa nas fontes: 2 atendem, 5 parciais e 1 não atende;
+  \item orientação concreta: 1 atende, 6 parciais e 1 não atende.
+\end{itemize}
+O autor concordou com 22 dos 24 julgamentos propostos por Claude Code e rebaixou para parcial a justificativa de
+T1 e R1. Em T1, o resultado citado (S732-C1) vem de um pacote com várias etapas de reparo e limites por etapa, o
+que não equivale a cinco rodadas totais por função. Em R1, os resultados destacados não sustentam ao mesmo tempo a
+redução de complexidade e a de \textit{smells}.
+
+\begin{table}[!t]
+\caption{Julgamento do autor por cenário e critério}\label{tab:julgamento}
+\centering\scriptsize
+\begin{tabular}{@{}lccc@{}}
+\hline
+Cenário & Clareza & Justificativa & Orientação\\
+\hline
+G1 & parcial & atende & parcial\\
+G2 & parcial & parcial & parcial\\
+D1 & parcial & atende & atende\\
+D2 & parcial & parcial & não atende\\
+T1 & atende & parcial & parcial\\
+T2 & parcial & não atende & parcial\\
+R1 & parcial & parcial & parcial\\
+R2 & parcial & parcial & parcial\\
+\hline
+\end{tabular}
+\end{table}
+
+D1 é o único cenário em que justificativa e orientação atendem: a tabela leva a um roteiro executável, com a
+função, o teste e a mensagem de erro no prompt e a verificação pela suíte. A orientação falha em D2, em que a
+suíte não reproduz o defeito e a localização é desconhecida, e a justificativa falha em T2, em que só há compilador
+para uma migração de COBOL que exige equivalência de comportamento. Nos dois casos, a tabela não declara que a
+evidência é insuficiente. As ambiguidades que o autor registrou se repetem entre os cenários:
+\begin{itemize}
+  \item a tabela não diz como repartir um orçamento fixo de chamadas entre reparo e novos candidatos (G1, G2 e T1);
+  \item a condição de \textit{feedback} junta compilador, testes e analisador estático e não distingue o resultado
+  medido, como compilação, aprovação nos testes ou correção do defeito (G2, T1 e T2);
+  \item passar na suíte não garante que a alteração corrija o defeito pretendido nem que preserve o comportamento
+  (D1, D2 e T2);
+  \item a dependência de localização conhecida ou de teste que reproduza o defeito só aparece nas ressalvas (D2);
+  \item a linha de refatoração junta especificação, conhecimento de domínio e exemplos, de fundamentos diferentes
+  (R1 e R2).
+\end{itemize}
+O autor também corrigiu a orientação derivada em alguns cenários. Em G2, a formulação adequada é não recomendar a
+autocrítica sem execução como padrão, já que uma piora com modelo de 1,5B não estabelece o comportamento de todos
+os modelos até 8B. Em D2, compilação e testes existentes ainda dão retorno sobre a alteração, embora não verifiquem
+o defeito relatado. Em T1, o estudo citado não tem orçamento igual ao do cenário. Em R1, de um a três exemplos não
+é uma faixa estabelecida pela evidência.
+
+O autor decidiu aplicar as revisões numa versão 2 da tabela:
+\begin{itemize}
+  \item distinguir os tipos de \textit{feedback} e explicitar o resultado medido (compilação, aprovação nos testes,
+  correção do reparo, complexidade ou desempenho);
+  \item explicitar as dependências de localização e de reprodução do defeito;
+  \item declarar as condições sem evidência suficiente e os casos em que o corpus não orienta a distribuição das
+  chamadas;
+  \item separar os ingredientes agrupados na linha de refatoração;
+  \item diferenciar ausência de evidência, resultado contrário e evidência indireta.
+\end{itemize}
+Na primeira proposta, as oito hipóteses dos cenários foram dadas como confirmadas, H-G1 só em parte. O autor pediu
+que cada hipótese fosse julgada em separado, admitindo confirmação parcial ou resultado inconclusivo. O exame avalia a
+orientação oferecida pela tabela, e não a eficácia das técnicas. O exame completo está em
+\path{evidencias/sinteses/exame-cenarios-v1.md}, e os julgamentos do autor, em
+\path{evidencias/sinteses/exame/julgamentos-autor.json}.
+A versão 2 da tabela, revisada depois do exame, está na Seção~\ref{sec:qp3}. No julgamento em separado, o autor confirmou seis hipóteses e confirmou em parte duas
+(\path{evidencias/sinteses/exame/hipoteses-proposta.md}). H-G1 se confirma em parte porque há evidência para
+considerar testes, \textit{feedback} e planejamento, mas não para escolher entre eles com cinco chamadas. H-T1 se
+confirma em parte porque o resultado citado vem de um pacote com etapas e limites próprios e não cobre a exigência
+de Rust seguro. Nenhuma hipótese ficou inconclusiva. As seis confirmadas incluem as quatro que previam evidência
+insuficiente (H-G2, H-D2, H-T2 e H-R2): nesses cenários, não recomendar uma técnica como padrão é a resposta
+adequada.

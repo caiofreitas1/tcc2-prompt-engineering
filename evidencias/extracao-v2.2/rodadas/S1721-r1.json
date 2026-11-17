@@ -1,0 +1,318 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Counterfactual Prompt Engineering (CPE)",
+        "mecanismos": ["instrucao", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 (impressa 6705), Introdução, item 2; p. 4 (impressa 6707), Seção III.B",
+        "observacao": "Técnica de prompting de diagnóstico, não de melhoria do código: a partir de um prompt base com instrução direta em linguagem natural (por exemplo, «Write a Python function that determines loan eligibility...»), gera-se um prompt pareado em que só os identificadores demográficos são trocados (por exemplo, John → Aisha). Mecanismo `outro` = substituição controlada de indicadores demográficos no prompt para expor viés; `instrucao` herdado do prompt base. O par base/contrafactual é a própria medição de viés (similaridade semântica, mudança de sentimento), não uma condição com e sem a técnica; não há condição sem CPE comparada quanto à qualidade ou ao viés do código. O prompt base não é tratado como técnica comparadora separada."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Reinforcement Learning with Human Feedback (RLHF)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino iterativo (10–20 iterações) do Llama-3.2-3B-Instruct com função de recompensa composta (BC, SS, SIM, DPD com pesos w1–w4) e avaliação humana; é a estratégia de mitigação à qual o estudo atribui a redução de 49% do viés. Altera pesos, não o prompt.",
+        "localizador": "p. 4–5 (impressas 6707–6708), Seções III.D e III.E; p. 6 (impressa 6709), Seção IV.C"
+      },
+      {
+        "nome_original": "PEFT (LoRA) + RLHF",
+        "natureza": "ajuste_fino",
+        "descricao": "Alternativa leve de RLHF com LoRA, avaliada em subconjunto representativo do benchmark (Tabela II).",
+        "localizador": "p. 7 (impressa 6710), Seção V.B e Tabela II; p. 8 (impressa 6711)"
+      },
+      {
+        "nome_original": "Distill + SFT (LoRA) / distilled reward model combined with supervised fine-tuning",
+        "natureza": "ajuste_fino",
+        "descricao": "Modelo de recompensa destilado combinado com ajuste fino supervisionado com LoRA (Tabela II).",
+        "localizador": "p. 7 (impressa 6710), Seção V.B e Tabela II; p. 8 (impressa 6711)"
+      },
+      {
+        "nome_original": "Contextual Code Analysis (CCA)",
+        "natureza": "outro",
+        "descricao": "Procedimento de análise das saídas (nomes, lógica condicional, comentários; frequência de tokens, análise de sentimento, comparação de AST); é instrumento de medição, não intervenção no prompt.",
+        "localizador": "p. 4 (impressa 6707), Seção III.C"
+      },
+      {
+        "nome_original": "gradient checkpointing and mixed-precision training",
+        "natureza": "outro",
+        "descricao": "Técnicas de treinamento exploradas para reduzir custo energético/computacional; sem resultados separados.",
+        "localizador": "p. 7 (impressa 6710), Seção V.B"
+      }
+    ],
+    "modelos": [
+      "meta-llama/Llama-3.2-3B-Instruct (modelo usado na geração e no ajuste fino; snapshot nao_informado)",
+      "GPT-3.5-Turbo (somente «preliminary experiments», sem resultados quantitativos relatados; versão nao_informado)",
+      "CodeT5 (somente «preliminary experiments», sem resultados quantitativos relatados; versão nao_informado)",
+      "BERT embeddings (instrumento de similaridade semântica, não gerador; versão nao_informado)"
+    ],
+    "benchmarks": [
+      "Conjunto próprio de pares de prompts contrafactuais: «more than 50 well-designed pairs of prompts» / «50+ prompt pairs», em cinco domínios (finance, health care, IoT, education, HR); quantidade exata nao_informado",
+      "Subconjunto representativo do benchmark usado na Tabela II; tamanho nao_informado",
+      "Denominadores das métricas e das Figuras 1 e 2 (número de saídas, execuções ou pares) nao_informado; não se liga o tamanho do corpus a cada métrica"
+    ],
+    "metricas": [
+      "Bias Classification Score (BC = wn·N + wl·L + ws·S; pesos nao_informado)",
+      "Bias Mitigation Score (BM = 1 − Final Bias Score)",
+      "Final Bias Score, Sentiment Penalty, Similarity Penalty (Tabela I; fórmulas de penalidade nao_informado)",
+      "Sentiment Shift (SS = |S_original − S_counterfactual|)",
+      "Semantic Similarity (SIM, cosseno entre embeddings BERT)",
+      "Demographic prompt distance (DPD; definição nao_informado)",
+      "Bias Reduction (%) e Bias Score (Post) (Tabela II)",
+      "Wall-clock time (hrs), Peak GPU Memory (GB), GPU-hours, Throughput (samples/sec) (Tabela II)",
+      "Mencionadas sem resultados: conditional asymmetry rates, semantic divergence, correctness, runtime efficiency, maintainability"
+    ],
+    "linguagens": [
+      "Python (no exemplo de prompt; conjunto completo de linguagens nao_informado)"
+    ],
+    "riscos": [
+      {
+        "categoria": "outro",
+        "descricao": "Viés demográfico e interseccional herdado dos dados de treino e expresso em nomes, lógica condicional e comentários do código gerado.",
+        "localizador": "p. 1 (impressa 6704), Resumo; p. 6 (impressa 6709), Seção IV.A"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Para cenários de grupos sub-representados (casos interseccionais), o modelo produziu menos verificações condicionais e tratamento de dados menos complexo, o que o estudo chama de risco de código subótimo.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.A"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Resultados inseguros em ambientes IoT críticos de segurança (segurança operacional/física, não cibersegurança).",
+        "localizador": "p. 1 (impressa 6704), Resumo; p. 8 (impressa 6711), Seção VI"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Compromisso entre redução de viés pelo RLHF e utilidade do código: código mais genérico, desaparecimento de referências a APIs ou bibliotecas de domínio (efeito do ajuste fino, não do prompting).",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.2"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O estudo declara não explorar a variabilidade entre gerações repetidas do mesmo prompt por estocasticidade ou amostragem com temperatura.",
+        "localizador": "p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "RLHF exige recursos computacionais substanciais (GPU/TPU); o RLHF completo falhou por falta de memória de GPU (>40 GB). Custos das alternativas leves quantificados na Tabela II (tempo, memória, GPU-hours, throughput); custo do RLHF completo não quantificado.",
+        "localizador": "p. 7 (impressa 6710), Seção V.B e Tabela II"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Persistência de vieses interseccionais (multiatributo) após o ajuste fino, mais difíceis de mitigar que vieses de eixo único.",
+        "localizador": "p. 7 (impressa 6710), Seção IV.C.3"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Ajuste fino com RLHF para reduzir o viés (fora do escopo de prompting); comparado com escores pré-RLHF.",
+        "avaliada": "sim",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.1"
+      },
+      {
+        "descricao": "Estratégia de recompensa híbrida com coeficiente de relevância de domínio para conter a generalização do código (proposta).",
+        "avaliada": "nao",
+        "localizador": "p. 6–7 (impressas 6709–6710), Seção IV.C.2"
+      },
+      {
+        "descricao": "Objetivos de desenviesamento multirrótulo no RLHF, desenviesamento adversarial e representações desemaranhadas para vieses interseccionais (propostos).",
+        "avaliada": "nao",
+        "localizador": "p. 7 (impressa 6710), Seção IV.C.3"
+      },
+      {
+        "descricao": "Alternativas leves (PEFT/LoRA + RLHF; Distill + SFT) para viabilidade computacional; o RLHF completo não rodou (OOM), de modo que não há comparação de custo contra a condição sem a mitigação.",
+        "avaliada": "nao",
+        "localizador": "p. 7–8 (impressas 6710–6711), Seção V.B e Tabela II"
+      },
+      {
+        "descricao": "Auditorias de viés regulares antes da produção e monitoramento contínuo em implantação (recomendadas).",
+        "avaliada": "nao",
+        "localizador": "p. 7 (impressa 6710), Seção V.A; p. 8 (impressa 6711), Seção VII.6"
+      },
+      {
+        "descricao": "Limpeza e normalização dos prompts (remoção de duplicatas, correção de erros tipográficos) e pareamento controlado mantendo a tarefa inalterada (procedimento de controle).",
+        "avaliada": "nao",
+        "localizador": "p. 3 (impressa 6706), Seção III.A"
+      }
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [
+      {
+        "tecnica": "Counterfactual Prompt Engineering (CPE)",
+        "motivo": "Técnica de diagnóstico sem condição comparadora de prompting executada: o par base/contrafactual é a própria medição do viés. A Seção IV.B relata «notable reduction in the semantic similarity» sem números; a Tabela I traz escores por prompt de uma única condição, sem indicar se são pré ou pós-RLHF e sem métrica destacada pelo estudo para a CPE. O único contraste numérico (pré/pós-RLHF, Tabelas e texto) é de ajuste fino, fora do escopo. Sem técnica e métrica de prompting destacadas, não há extração descritiva."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Texto e Tabela II divergem quanto ao RLHF completo: o texto atribui ao RLHF a redução do Bias Classification Score de média 0,68 para 0,35 (~49%), mas a Tabela II registra para «Full RLHF (Original)» Bias Score «OOM», redução «N/A» e memória «> 40 GB (fails)», com baseline (Base Model) de 0,45, e o texto da Seção V.B diz que o RLHF completo «failed due to GPU memory limitations». O valor de linha de base também difere (0,68 no texto; 0,45 na Tabela II). Não se escolhe um valor como verdadeiro.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.1; p. 7 (impressa 6710), Tabela II e Seção V.B; p. 8 (impressa 6711)"
+      },
+      {
+        "descricao": "Contradição interna sobre a análise estatística: no mesmo parágrafo o estudo reconhece «the absence of error margins, statistical testing, and cross-validation» e depois afirma ter feito ensaios repetidos, desvio-padrão de ±3,8% «(95% confidence interval)», validação cruzada de cinco partições e teste t pareado (p < 0,01). A expressão mistura desvio-padrão e intervalo de confiança. A Seção III.B declara não explorar a variabilidade entre gerações repetidas. Número de execuções nao_informado.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.1; p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "descricao": "Comparação com Fair Code (32% de redução) e BA-LoRA (37%) usa números de outros trabalhos «under similar conditions», sem execução própria nem descrição de amostra comum; não é comparador executado.",
+        "localizador": "p. 5 (impressa 6708), Seção III.G"
+      },
+      {
+        "descricao": "Resumo e conclusão afirmam redução de 49% «while preserving functionality»/«preserving output utility», mas a Seção IV.C.2 relata código mais genérico e perda de APIs de domínio após o RLHF; correctness, runtime efficiency e maintainability são ditas medidas sem valores relatados. O resumo fala em «evaluated benchmarks» (plural), mas só um conjunto próprio é descrito.",
+        "localizador": "p. 1 (impressa 6704), Resumo; p. 5 (impressa 6708), Seção III.E.5; p. 6 (impressa 6709), Seção IV.C.2; p. 8 (impressa 6711), Seção VI"
+      },
+      {
+        "descricao": "Denominadores das figuras não informados e aparentemente incompatíveis com o corpus: o eixo de frequência da Fig. 2 (similaridade semântica) vai até 600, enquanto o corpus tem «more than 50» pares; o eixo da Fig. 1 (sentimento) vai até 12. Não se informa a unidade de observação, se as figuras são pré ou pós-RLHF, nem o número de execuções.",
+        "localizador": "p. 6 (impressa 6709), Fig. 1; p. 7 (impressa 6710), Fig. 2; p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "descricao": "Aparente inconsistência: a Seção III.F afirma que a similaridade semântica garantiu que a lógica e a intenção funcional permaneceram consistentes, mas o eixo da Fig. 2 abrange escores de cerca de −0,1 a 0,3 (marcas impressas) para similaridade de cosseno; falta informar o que cada observação compara para avaliar a compatibilidade.",
+        "localizador": "p. 5 (impressa 6708), Seção III.F; p. 7 (impressa 6710), Fig. 2"
+      },
+      {
+        "descricao": "Tabela I (lida em imagem de baixa resolução): a linha «Career coaching chatbot (gender bias avoidance)» tem Sentiment Penalty 0.0849, Similarity Penalty 0.0880 e Final Bias Score 0.9084 («High Bias»), escore final muito superior às penalidades, ao passo que nas outras linhas o escore final fica próximo delas; como pesos e fórmula do Final Bias Score não são informados, registra-se aparente inconsistência. Os prompts da Tabela I (login system, travel booking, career coaching, scholarship) não correspondem claramente aos cinco domínios descritos, e não se informa se os escores são pré ou pós-RLHF.",
+        "localizador": "p. 7 (impressa 6710), Tabela I; p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "descricao": "Referências aparentemente incompatíveis com as afirmações que sustentam: por exemplo, [3] (produto de operadores de Toeplitz) é citada para viés em código e «blocks of influence», [5] e [6] (métodos de Newton; enxame de partículas para funções booleanas) para viés de nacionalidade e religião, [7]–[11] para RLHF, PEFT, SR-LLM, MPLE e GECOBench, com títulos sem relação.",
+        "localizador": "p. 2–3 (impressas 6705–6706), Seção II; p. 9 (impressa 6712), References"
+      },
+      {
+        "descricao": "Resultados com GPT-3.5-Turbo e CodeT5 são citados como «similar bias trends», sem números; a avaliação quantitativa limita-se a um modelo de 3B. Não há ablação dos componentes (declarada como trabalho futuro).",
+        "localizador": "p. 9 (impressa 6712), Seção VII.7 e parágrafo final"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A metodologia tem três pilares (CCA, CPE, RLHF); só a CPE é prompting. A mitigação avaliada é ajuste fino (RLHF e variantes LoRA/SFT), fora do escopo; o ganho de 49% não é efeito de prompting.",
+        "localizador": "p. 2 (impressa 6705), Introdução; p. 3 (impressa 6706), Seção III"
+      },
+      {
+        "descricao": "Avaliação humana integra o RLHF (avaliadores anotam justiça e neutralidade); número, perfil e protocolo dos avaliadores nao_informado.",
+        "localizador": "p. 3 (impressa 6706), Seção II.H; p. 8 (impressa 6711), Seção V.C"
+      },
+      {
+        "descricao": "Tabela II (alternativas leves) foi conduzida em «a representative subset of the benchmark»: Baseline 0.45 / 0.0%; PEFT (LoRA) + RLHF 0.22 / 51.1% / 11.2 GB; Distill + SFT (LoRA) 0.25 / 44.4% / 9.7 GB. São resultados de ajuste fino, não extraídos.",
+        "localizador": "p. 7 (impressa 6710), Tabela II e Seção V.B"
+      },
+      {
+        "descricao": "O estudo planeja ampliar o benchmark com aumento semissintético e liberar um benchmark com 500+ pares; nenhum artefato de replicação é indicado.",
+        "localizador": "p. 3 (impressa 6706), Seção III.A; p. 9 (impressa 6712), Seção VII.8"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This research investigates bias in LLM-generated code and proposes a multifaceted approach combining contextual code analysis (CCA), counterfactual prompt engineering (CPE), and reinforcement learning with human feedback (RLHF) to detect and mitigate such biases.",
+        "localizador": "p. 1 (impressa 6704), Resumo"
+      },
+      {
+        "trecho": "We generate paired prompts that systematically vary demographic indicators (e.g., gender, race, socioeconomic background, disability) to measure how code outputs shift under controlled interventions.",
+        "localizador": "p. 2 (impressa 6705), Introdução, item 2"
+      },
+      {
+        "trecho": "This approach begins by taking a baseline prompt that reflects a scenario with a traditionally dominant demographic and then creating a paired counterfactual prompt where key demographic identifiers are replaced with those representing underrepresented groups.",
+        "localizador": "p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "trecho": "To mitigate discovered biases, we iteratively fine-tune the model using a human-in-the-loop framework that rewards fairness, neutrality, and structural consistency, without sacrificing code quality.",
+        "localizador": "p. 2 (impressa 6705), Introdução, item 3"
+      },
+      {
+        "trecho": "In these intersectional cases, the model often produced outputs with fewer conditional checks and less complex data handling processes.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.A"
+      },
+      {
+        "trecho": "Such simplification of logic not only reflects the underlying bias in the training distribution but also indicates a potential risk of generating suboptimal code for scenarios involving underrepresented groups.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.A"
+      },
+      {
+        "trecho": "These biases can surface in AI-generated code, leading to ethically problematic, algorithmically skewed, or even unsafe outcomes, particularly concerning in safety-critical and socially sensitive IoT environments.",
+        "localizador": "p. 1 (impressa 6704), Resumo"
+      },
+      {
+        "trecho": "However, the study does not explicitly explore output variability that may result from repeated generations of the same prompt due to model stochasticity or decoding randomness, such as those introduced by temperature-based sampling.",
+        "localizador": "p. 4 (impressa 6707), Seção III.B"
+      },
+      {
+        "trecho": "Our approach, particularly RLHF, demands substantial computational resources, especially when code generation tasks are large and domain specific.",
+        "localizador": "p. 7 (impressa 6710), Seção V.B"
+      },
+      {
+        "trecho": "Overall correctness remained high; however, in certain tasks the code became more generic after RLHF.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.2"
+      },
+      {
+        "trecho": "Our RLHF process yielded a marked improvement in fairness, reflected by a reduction in the bias classification score from an average of 0.68–0.35, representing an observed decrease of approximately 49%.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.1"
+      },
+      {
+        "trecho": "The LoRA + RLHF approach achieved a 51.1% reduction in Bias Score, closely matching full RLHF (which failed due to GPU memory limitations), while using only 11.2 GB of memory and completing in 5 min.",
+        "localizador": "p. 7–8 (impressas 6710–6711), Seção V.B"
+      },
+      {
+        "trecho": "By comparing baseline prompts with their counterfactual counterparts—where only the demographic identifiers were modified—we observed a notable reduction in the semantic similarity between the corresponding code outputs.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.B"
+      },
+      {
+        "trecho": "The RLHF process demonstrated a higher efficacy in mitigating single-axis biases (e.g., gender or race individually) than in addressing multiattribute biases (e.g., the combined effects of gender and disability).",
+        "localizador": "p. 7 (impressa 6710), Seção IV.C.3"
+      },
+      {
+        "trecho": "To counteract this generalization effect, we propose incorporating a hybrid reward strategy that jointly optimizes for fairness and domain fidelity.",
+        "localizador": "p. 6 (impressa 6709), Seção IV.C.2"
+      }
+    ]
+  },
+  "extracoes": [],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de detectar e mitigar viés demográfico e interseccional em código gerado por LLM é declarado, com os três componentes da abordagem.",
+      "localizador": "p. 1 (impressa 6704), Resumo; p. 2 (impressa 6705), Introdução"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve a construção dos pares contrafactuais, as dimensões de análise e o ciclo de RLHF, mas não informa o número exato de pares («more than 50»), os pesos das fórmulas, a definição de DPD, o número e o perfil dos avaliadores humanos, hiperparâmetros de geração e de treinamento nem o tamanho do subconjunto da Tabela II.",
+      "localizador": "p. 3–5 (impressas 6706–6708), Seções III.A–III.F; p. 7 (impressa 6710), Seção V.B"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparação pré/pós-ajuste fino (fora do escopo de prompting), mas para a CPE não há condição comparadora de prompting; o RLHF completo aparece como OOM na Tabela II, apesar do resultado de 49% atribuído a ele no texto; a comparação com Fair Code e BA-LoRA usa números de outros trabalhos.",
+      "localizador": "p. 5 (impressa 6708), Seção III.G; p. 6 (impressa 6709), Seção IV.C.1; p. 7 (impressa 6710), Tabela II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "nao_atende",
+      "justificativa": "As fórmulas de BC, SS, SIM e BM são dadas, mas os pesos e a DPD não; denominadores das métricas e das figuras não são informados; o mesmo escore de viés diverge entre texto (0,68 → 0,35) e Tabela II (baseline 0,45; RLHF completo OOM); métricas de correção e manutenibilidade são ditas medidas sem valores.",
+      "localizador": "p. 5 (impressa 6708), Eqs. (1)–(5); p. 6 (impressa 6709), Seção IV.C.1; p. 7 (impressa 6710), Tabelas I e II, Fig. 2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Reconhece o conjunto pequeno de pares, a não exploração da estocasticidade, a ausência de margens de erro e testes, o uso de um só modelo e a falta de ablação; porém o mesmo parágrafo afirma ter feito testes estatísticos e validação cruzada, o que torna a discussão de ameaças contraditória.",
+      "localizador": "p. 3 (impressa 6706), Seção III.A; p. 4 (impressa 6707), Seção III.B; p. 6 (impressa 6709), Seção IV.C.1; p. 9 (impressa 6712), Seção VII"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O modelo é identificado (meta-llama/Llama-3.2-3B-Instruct) e há um prompt de exemplo e as fórmulas, mas os prompts, pesos, hiperparâmetros e dados não são disponibilizados, e não há indicação de código ou artefato de replicação; o benchmark aberto é trabalho futuro.",
+      "localizador": "p. 4 (impressa 6707), Seções III.B e III.D; p. 9 (impressa 6712), Seção VII.8"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após busca no texto completo, o estudo não discute vazamento dos prompts do benchmark (oriundos de repositórios acadêmicos, desafios abertos e estudos de caso) no pré-treinamento do modelo.",
+      "localizador": "p. 3 (impressa 6706), Seção III.A (origem dos prompts); texto completo"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (p. 1–9). Páginas do PDF abertas visualmente: p-01, p-04, p-05, p-06, p-07, p-08, p-09. Tabela I conferida apenas em imagem de baixa resolução (sem texto extraído da tabela); a Tabela II e as Figs. 1–2 foram conferidas na imagem da p. 7 e p. 6."
+  }
+}

@@ -1,0 +1,626 @@
+{
+  "estudo": "S821",
+  "texto_fonte": "fontes/textos/lote/S821.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "versao_artigo": "arXiv:2506.24015v3 [cs.SE], 3 Oct 2025 (carimbo na p. 1 do PDF)",
+  "ficha": {
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "layered knowledge injection framework (Layered/Hierarchical Knowledge Injection)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos",
+          "outro"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (resumo), p. 2 (contribuições), p. 3 (Seção III e Fig. 2), p. 7 (Tabela II) do PDF",
+        "observacao": "Pacote proposto: prompt CoT com formato de saída restrito (código entre crases triplas, sem explicações), mais contexto injetado em três camadas sucessivas (Bug, Repository e Project Knowledge). Mecanismos herdados do prompt base (Bug Knowledge Layer): instrucao, raciocinio (CoT), restricoes (formato), contexto (fatos do bug). Acrescentados em relação a essa base: contexto (repositório, documentação recuperada), exemplos (histórico de issues resolvidas, do qual o agente de QA extrai estratégias e alterações de código de correções anteriores) e outro (escalonamento progressivo: só os bugs cujo patch falha nos testes recebem o prompt da camada seguinte; o estudo não informa que o patch anterior ou o resultado dos testes volte ao modelo, por isso não foi classificado como feedback). Contrafactual de pacote: a Bug Knowledge Layer (rodada no corpus inteiro e declarada linha de base das camadas seguintes) contra o pacote completo (linha Project Knowledge Layer da Tabela II, resultado cumulativo). Ressalvas: o resultado do pacote é cumulativo entre até três rodadas de 10 respostas por bug não resolvido, enquanto a linha de base tem uma rodada; o ganho é do pacote e não pode ser atribuído a um mecanismo isolado. O pacote inclui componentes fora do escopo (recuperação densa com embeddings e FAISS, análise estática, mineração de co-mudanças, agente de QA com GPT-4o-mini e localização perfeita de falhas): pacote híbrido. O contraste com «All Knowledge Layers at Once» isola o escalonamento (ver técnica própria). A comparação com Parasaram et al. usa números de outro artigo e não é comparador executado."
+      },
+      {
+        "nome_original": "Bug Knowledge Layer",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Seção III), p. 4 (Seções III-B e III-C, RQ1), p. 5 (GitHub Description), p. 7 (Tabela II) do PDF",
+        "observacao": "Primeira camada do pacote e linha de base declarada para as camadas seguintes; informações adaptadas de Parasaram et al.: Buggy Function, Failing Tests, Error Information, Runtime Variables, Angelic Variables e GitHub Description (no máximo três casos de entrada e saída para variáveis de execução e angélicas). Prompt com CoT e formato restrito. Não há condição sem esse contexto (por exemplo, prompt só com a função defeituosa) executada no estudo; por isso sem contrafactual."
+      },
+      {
+        "nome_original": "Repository Knowledge Layer",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 5 (RQ2: Co-occurring Files, Structural Dependencies, Latest Changes), p. 7 (Tabela II e resultados da RQ2), p. 8 (Tabela III) do PDF",
+        "observacao": "Acrescenta à camada de bug as dependências estruturais (funções e classes chamadas e chamadoras, via AST e Jedi, limitadas aos arquivos co-modificados) e o commit mais recente na função defeituosa; os arquivos co-modificados não entram diretamente no prompt. Aplicada só aos bugs não resolvidos na camada anterior (107 para Llama 3.3 e 117 para GPT-4o-mini): contribuição cumulativa por rodada, sem condição comparável sem a camada no mesmo conjunto de bugs com igual número de tentativas."
+      },
+      {
+        "nome_original": "Project Knowledge Layer",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 5 (RQ3: Documentation, Issue Resolution History), p. 8 (resultados da RQ3, Tabela III), p. 7 (Tabela II) do PDF",
+        "observacao": "Acrescenta trechos de documentação recuperados por similaridade e resumidos por um agente de QA (LangChain) e insights de issues resolvidas anteriores ao bug (texto e patches), incluindo estratégias e alterações de código de correções passadas: classificado como contexto e exemplos (recuperação que traz exemplos resolvidos). O estudo não detalha a forma exata como esse material entra no prompt (formatos no pacote de replicação, não consultado). Aplicada só aos bugs não resolvidos após a camada de repositório (79 para Llama 3.3 e 93 para GPT-4o-mini): contribuição cumulativa."
+      },
+      {
+        "nome_original": "progressive, hierarchical injection (escalonamento em camadas, contrastado com o baseline “all-at-once”)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "outro"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 (Seção III-D, Baselines), p. 7 (Tabela II, duas últimas linhas), p. 9 (comparação com o baseline) do PDF",
+        "observacao": "Ingrediente do pacote: injetar o contexto de forma progressiva, avançando à camada seguinte só para bugs cujo patch falha nos testes (outro). O baseline «All Knowledge Layers at Once» injeta simultaneamente as informações das três camadas em todos os bugs; segundo o estudo, serve para avaliar se a injeção progressiva e hierárquica é mais eficaz. Ressalva de comparabilidade: a condição hierárquica concede até três rodadas de 10 respostas aos bugs não resolvidos (resultado cumulativo), enquanto o baseline tem uma rodada; a diferença de orçamento de tentativas acompanha o ingrediente. Também tratado como componente, e não técnica focal distinta, porque é parte do sistema proposto."
+      },
+      {
+        "nome_original": "All Knowledge Layers at Once",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "restricoes",
+          "contexto",
+          "exemplos"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto",
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Seção III-D), p. 7 (Tabela II), p. 9 do PDF",
+        "observacao": "Comparador executado: mesmas informações das três camadas, injetadas de uma vez para os 314 bugs. Mecanismos acrescentados em relação ao prompt base (Bug Knowledge Layer), pelo mesmo critério aplicado às camadas. Os mecanismos do comparador não são isolados. [D108, correção registrada] Pacote avaliado contra Bug Knowledge Layer (Tabela II, p. 7; Llama 3.3, BugsInPy (314 bugs), Pass@1: base 0,47 × comparador 0,38), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "Chain-of-Thought prompting",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 (Seção III-B, Prompting Strategy) do PDF",
+        "observacao": "Usado em todas as condições, com estrutura de prompt semelhante à de Parasaram et al.; não há condição sem CoT. O estudo também diz omitir explicações textuais na saída, o que não é conciliado explicitamente com o CoT (ver heterogeneidade)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Function-granular Perfect Fault Localization",
+        "natureza": "outro",
+        "descricao": "Localização perfeita de falhas no nível de função (oráculo): a função defeituosa é dada ao modelo; o LLM ainda precisa achar as linhas defeituosas.",
+        "localizador": "p. 3 (Seção III-A) do PDF"
+      },
+      {
+        "nome_original": "Dense retrieval pipeline (Sentence Transformer embeddings + FAISS)",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de recuperação: documentação dividida em blocos e indexada com embeddings Sentence Transformer em FAISS; issues passadas ranqueadas por média igualitária de similaridade textual e de código (50%/50%). O conteúdo recuperado entra no prompt (contexto), mas o mecanismo de recuperação não é prompting. Modelo de embeddings: nao_informado.",
+        "localizador": "p. 5 (Documentation e Issue Resolution History) do PDF"
+      },
+      {
+        "nome_original": "LangChain’s QA Retrieval Agent (powered by GPT-4o-mini)",
+        "natureza": "outro",
+        "descricao": "Agente que consulta os documentos e issues indexados com quatro perguntas fixas e extrai o material injetado na Project Knowledge Layer; é etapa de preparação de contexto por outro LLM, cujo efeito não é isolado.",
+        "localizador": "p. 5 do PDF"
+      },
+      {
+        "nome_original": "Co-occurring Files / Structural Dependencies (AST, Jedi) / Latest Changes (Git history)",
+        "natureza": "outro",
+        "descricao": "Mineração de co-mudanças, análise estática e histórico Git usados para obter o contexto de repositório; os arquivos co-modificados servem só como heurística e não entram diretamente no prompt.",
+        "localizador": "p. 5 do PDF"
+      },
+      {
+        "nome_original": "Llama 3.3 vs. GPT-4o-mini",
+        "natureza": "selecao_modelo",
+        "descricao": "Dois modelos avaliados em todas as condições; a comparação entre modelos (incluindo orientação de escolha de modelo por tipo de bug) não é intervenção de prompting.",
+        "localizador": "p. 6–7 do PDF"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Llama 3.3",
+        "versao": "Llama 3.3 (70B parameters); variante e snapshot nao_informado",
+        "localizador": "p. 1 e p. 10 do PDF"
+      },
+      {
+        "nome": "GPT-4o-mini",
+        "versao": "snapshot nao_informado; o estudo atribui «∼8B parameters» citando a referência [60]",
+        "localizador": "p. 1 e p. 10 do PDF"
+      },
+      {
+        "nome": "GPT-4o-mini (no LangChain QA Retrieval Agent da camada de projeto)",
+        "versao": "nao_informado",
+        "localizador": "p. 5 do PDF"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "BugsInPy (subconjunto do conjunto de dados de Parasaram et al.)",
+        "quantidade": "314 instâncias (bug–patch), bugs corrigidos por alteração de uma única função, 16 projetos Python",
+        "detalhes": "Anotação manual em seis tipos (taxonomia de Catolino et al.): Program Anomaly 187, Network 47, Configuration 34, GUI-Related 28, Performance 16, Permission/Deprecation 2 (Tabela I). 69 de 314 instâncias sem relatório vinculado; para 24 não se achou issue nem pull request. Denominador do %Fixed: 314; denominador do Pass@k nas camadas cumulativas: nao_informado.",
+        "localizador": "p. 3 (Seção III-A), p. 4 (Tabela I), p. 5 (GitHub Description) do PDF"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@k (k = 1, 3, 5; n = 10 respostas)",
+        "definicao": "probabilidade de ao menos uma de k respostas passar na suíte de testes (Eq. 1); expectativa sobre o conjunto de consultas Q",
+        "localizador": "p. 6 (Seção III-E) do PDF"
+      },
+      {
+        "nome": "#fixed / %Fixed Bugs",
+        "definicao": "número de bugs com ao menos um patch gerado que passa todos os testes (Eq. 2); patches plausíveis verificados manualmente; denominador 314",
+        "localizador": "p. 6 (Seção III-E), p. 7 (Tabela II) do PDF"
+      },
+      {
+        "nome": "Métricas de complexidade (Cyclomatic Complexity, Maintainability Index, LOC, Halstead Volume/Difficulty/Effort) com Mann–Whitney U e Cohen’s d",
+        "definicao": "usadas na análise de erros (RQ4), não para comparar técnicas",
+        "localizador": "p. 6 e p. 10 (Tabela V) do PDF"
+      }
+    ],
+    "linguagens": [
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Com só os fatos do bug, o Llama 3.3 inventa a existência de um atributo (self._config) em vez de modificar o atributo correto; o mesmo é relatado no bug de Performance do luigi.",
+        "localizador": "p. 2–3 (Seção II, Fig. 1) e p. 8 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Injetar todo o contexto de uma vez reduz o desempenho (o modelo não distingue o contexto relevante); o estudo também cita que contexto excessivo ou não filtrado pode prejudicar o reparo.",
+        "localizador": "p. 3 e p. 9 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Bugs mais complexos e estruturalmente isolados (sobretudo Program Anomaly, Network e GUI) continuam sem correção mesmo com todas as camadas: 85 bugs não resolvidos pelo GPT-4o-mini e 64 pelo Llama 3.3.",
+        "localizador": "p. 9–10 (RQ4, Tabelas IV e V) do PDF"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os dados de treinamento dos LLMs proprietários não são divulgados, o que impede verificar se bugs ou conteúdo dos repositórios estavam no pré-treinamento. O estudo não afirma contaminação efetiva.",
+        "localizador": "p. 10 (Internal Validity) do PDF"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O não determinismo dos LLMs pode levar a resultados variáveis entre respostas.",
+        "localizador": "p. 6 (Seção III-E) do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A eficácia da camada de projeto depende da qualidade da documentação e do registro de issues de cada projeto; nos bugs não resolvidos, parte do contexto de repositório ou projeto não estava disponível (Tabela IV).",
+        "localizador": "p. 8 e p. 9–10 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade de construto: a anotação manual dos tipos de bug pode introduzir viés.",
+        "localizador": "p. 10 (Construct Validity) do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: os achados podem não generalizar para outros LLMs; a distribuição dos tipos de bug é desbalanceada e categorias sub-representadas (por exemplo, Permission/Deprecation, 2 bugs) podem não gerar conclusões aplicáveis.",
+        "localizador": "p. 10 (External Validity) do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Avaliação com pass@k e n = 10 respostas por prompt para lidar com o não determinismo.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF"
+      },
+      {
+        "descricao": "Teste prévio em 10 bugs, 10 execuções por bug e por modelo (200 execuções), com saídas descritas como consistentes; critério de consistência nao_informado.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF"
+      },
+      {
+        "descricao": "Revisão manual de todas as issues e pull requests vinculados para garantir que descrevam o bug sem revelar a correção.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF"
+      },
+      {
+        "descricao": "Contra vazamento: desenho focado na eficácia relativa entre camadas, dois modelos distintos e citação de estudo que encontrou 11% de vazamento no BugsInPy com StarCoder (modelo não usado no estudo).",
+        "avaliada": "nao",
+        "localizador": "p. 10 (Internal Validity) do PDF"
+      },
+      {
+        "descricao": "Anotação dos tipos de bug com duas rodadas de concordância (kappa 0,45 e depois 0,8) e resolução de divergências.",
+        "avaliada": "nao",
+        "localizador": "p. 4 e p. 10 do PDF"
+      },
+      {
+        "descricao": "Patches plausíveis testados e verificados manualmente como correções corretas.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inconsistência na camada de projeto do GPT-4o-mini: o texto diz «fixing 7 additional bugs» e a análise manual cita 7 bugs novos, mas Tabela II e linha Overall da Tabela III dão 229/314 após 221/314 (diferença de 8, cálculo próprio). A soma das linhas por tipo dessa coluna na Tabela III (129+38+21+26+13+1) dá 228 (cálculo próprio). Na RQ4, o total de 85 não resolvidos pelo GPT-4o-mini não bate com a soma das parcelas por tipo informadas no mesmo período (58+9+7+8+3+1 = 86, cálculo próprio); 85 é compatível com 229 e com a união de 99 (85+64−50). Não é possível decidir qual valor é o correto.",
+        "localizador": "p. 7 (Tabela II), p. 8 (Tabela III e texto da RQ3), p. 9 (RQ4) do PDF"
+      },
+      {
+        "descricao": "Comparação com «previous work» (Parasaram et al., 56%, 177/314, GPT-3.5 Turbo e Llama3-70B) usa números de outro artigo, com outros modelos, outra janela de contexto e dois fatos excluídos (Buggy Class Declaration, Used Method Signatures); não é comparador executado. O «improvement of 23%» do resumo corresponde à diferença de 79% para 56%, isto é, 23 pontos percentuais (cálculo próprio), e não a variação relativa. Os testes de qui-quadrado e Z comparam com esses números externos.",
+        "localizador": "p. 1 (resumo), p. 2, p. 6 (Discussion da RQ1), p. 11 (conclusão) do PDF"
+      },
+      {
+        "descricao": "Diferenças em pontos percentuais apresentadas como «%»: «9% higher chance» (Pass@1 de 47% vs. 38%), «significant improvement of 9%» e «8–9%» (65%→74% e 62%→70%), «14% fewer bugs» (62%→48%) e «5% more» (74%→79%).",
+        "localizador": "p. 2, p. 6, p. 7, p. 8, p. 9 do PDF"
+      },
+      {
+        "descricao": "Narrativa da RQ3 afirma «2–3% increases» em Pass@3 e Pass@5 para ambos os modelos, mas na Tabela II o GPT-4o-mini passa de 0.54 para 0.55 (Pass@3) e de 0.61 para 0.62 (Pass@5), aumento de 0,01 (cálculo próprio); o intervalo 2–3 vale para o Llama 3.3 (0.63→0.65; 0.68→0.71).",
+        "localizador": "p. 8 (texto da RQ3) e p. 7 (Tabela II) do PDF"
+      },
+      {
+        "descricao": "A conclusão e a discussão afirmam que a injeção de tudo de uma vez teve desempenho inferior ao da estratégia em camadas «for all bug types», mas não há resultado por tipo de bug para o baseline all-at-once (a Tabela III só traz as três camadas); a Tabela II traz apenas o agregado. No agregado, o Llama 3.3 all-at-once tem %Fixed igual ao da Bug Knowledge Layer (65%, 207/314) e Pass@k menor.",
+        "localizador": "p. 11 (conclusão), p. 7 (Tabela II), p. 8 (Tabela III), p. 9 do PDF"
+      },
+      {
+        "descricao": "Comparabilidade das condições: as camadas de repositório e de projeto só são aplicadas aos bugs não resolvidos e o %Fixed é cumulativo, de modo que a condição em camadas recebe até três rodadas de 10 respostas por bug não resolvido, contra uma rodada da Bug Knowledge Layer e do all-at-once. O estudo não explica como o Pass@k das linhas cumulativas da Tabela II (por exemplo, 0.50 para o Llama 3.3) é calculado sobre os 314 bugs.",
+        "localizador": "p. 5, p. 6 (Eq. 1), p. 7 (Tabela II) do PDF"
+      },
+      {
+        "descricao": "O texto afirma «Over 66% of unresolved bugs lacked one or more pieces» de contexto, mas a Tabela IV dá 40 (41%) com uma informação ausente e 20 (20%) com mais de uma, isto é, 60 de 99 (cerca de 61%, cálculo próprio) na união e 30 de 50 na interseção. Na Tabela IV, 40/99 aparece como 41% (40,4% por cálculo próprio): aparente inconsistência de arredondamento, sem regra de arredondamento informada.",
+        "localizador": "p. 10 (Discussion da RQ4) e p. 9 (Tabela IV) do PDF"
+      },
+      {
+        "descricao": "Tabela V: só LOC tem asterisco de significância (p = 0.02*), mas Cyclomatic Complexity (0.05) e Halstead Difficulty (0.06) estão em negrito; o texto diz que os bugs não resolvidos têm maior complexidade «across all metrics», embora só uma diferença seja significativa e Maintainability Index não difira. O texto chama d = –0.24 de efeito «small to medium» (aparente inconsistência com convenções usuais de Cohen; a fonte não informa o limiar usado). O tamanho dos grupos da Tabela V (resolvidos vs. não resolvidos, de qual modelo ou da união) não é informado.",
+        "localizador": "p. 9–10 (texto da RQ4 e Tabela V) do PDF"
+      },
+      {
+        "descricao": "O estudo atribui ao GPT-4o-mini «∼8B parameters» e sustenta a comparação de escalas com a referência [60], que é um artigo sobre fluxo de calor em ebulição nucleada (ASME Journal of Heat and Mass Transfer), sem relação aparente com o tema.",
+        "localizador": "p. 10 (External Validity) e p. 13 (referência [60]) do PDF"
+      },
+      {
+        "descricao": "O estudo declara usar Chain-of-Thought e, ao mesmo tempo, omitir explicações textuais para que a saída contenha só código; os formatos de prompt estão apenas no pacote de replicação (não consultado), e parâmetros de decodificação (temperatura etc.) não são informados.",
+        "localizador": "p. 4 (Seção III-B) do PDF"
+      },
+      {
+        "descricao": "Na RQ1, o texto diz que Pass@3 e Pass@5 «exceed 50%», mas o Pass@3 do GPT-4o-mini na Bug Knowledge Layer é 0.50 (igual, não superior).",
+        "localizador": "p. 6 (RQ1) e p. 7 (Tabela II) do PDF"
+      },
+      {
+        "descricao": "Para o GPT-4o-mini, o ganho da camada de repositório tem qui-quadrado p = 0.051 e teste Z p = 0.042; o texto o chama de «substantial» e, depois, inclui ambos os modelos em «significant performance gain of 8–9%».",
+        "localizador": "p. 7 (RQ2) do PDF"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A análise manual dos bugs corrigidos em cada camada foi feita pelo primeiro autor e refinada em discussões com os demais autores; os exemplos explicam plausivelmente o efeito do contexto, mas não são contrafactuais.",
+        "localizador": "p. 7 e p. 8 do PDF"
+      },
+      {
+        "descricao": "O estudo apresenta como vantagem da abordagem em camadas economizar tokens e computação; essa economia não é medida.",
+        "localizador": "p. 3 do PDF"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (https://github.com/SOAR-Lab/llm-apr-knowledge-injection) com anotações, prompts e pipeline; não acessado nem validado nesta extração.",
+        "localizador": "p. 2 (nota de rodapé 1) do PDF"
+      },
+      {
+        "descricao": "Análise de disponibilidade de contexto nos 99 bugs não resolvidos (união): 39 com as cinco informações, 40 sem uma, 18 sem duas e 2 sem três; Co-occurring Files e Structural Dependencies foram as ausências mais frequentes.",
+        "localizador": "p. 9 (Tabela IV e texto) do PDF"
+      },
+      {
+        "descricao": "Parte da discussão sugere orientação de escolha de modelo por tipo de bug (GPT-4o-mini para Performance, Llama para Program Anomaly); não é resultado de prompting.",
+        "localizador": "p. 6–7 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We propose a layered knowledge injection framework that incrementally augments LLMs with structured context.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "By progressively injecting knowledge across layers, our approach achieves a fix rate of 79% (250/314) using Llama 3.3, a significant improvement of 23% over previous work.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "We use Chain-of-Thought prompting, a proven strategy for guiding LLMs to process context step by step, as demonstrated in APR and other tasks [9], [20]–[22].",
+        "localizador": "p. 4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "We enforce standardized outputs by requiring all code to be wrapped in triple backticks.",
+        "localizador": "p. 4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "We also omit textual explanations to ensure the output contains only code.",
+        "localizador": "p. 4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "Due to space constraints, we include the detailed prompt formats for each knowledge layer in our replication package.",
+        "localizador": "p. 4 do PDF, Seção III-B"
+      },
+      {
+        "trecho": "The information types in this layer are adopted from Parasaram et al. [9], and serve as a baseline for evaluating the impact of injecting other contextual information in subsequent layers (RQ2 and RQ3).",
+        "localizador": "p. 4 do PDF, Seção III-C"
+      },
+      {
+        "trecho": "We apply this knowledge injection to the bugs unresolved after the Bug Knowledge Layer, allowing us to assess the impact of repository-level context on repair outcomes.",
+        "localizador": "p. 5 do PDF, RQ2"
+      },
+      {
+        "trecho": "Co-occurring files are not directly used in prompts.",
+        "localizador": "p. 5 do PDF, RQ2"
+      },
+      {
+        "trecho": "We inject them to the unresolved bugs after the Repository Knowledge Layer.",
+        "localizador": "p. 5 do PDF, RQ3"
+      },
+      {
+        "trecho": "These past issues often contain relevant knowledge about similar bugs and their resolutions [41], [42].",
+        "localizador": "p. 5 do PDF, Issue Resolution History"
+      },
+      {
+        "trecho": "We consider both the code (patches) and the natural language (titles, descriptions, discussions, and labels).",
+        "localizador": "p. 5 do PDF, Issue Resolution History"
+      },
+      {
+        "trecho": "We compare our approach against two baselines: (1) Parasaram et al. [9]’s approach, which leverages various bug-related contextual information to produce patches; and (2) an approach where information from all three layers (bug, repository, and project knowledge) is injected simultaneously for every bug.",
+        "localizador": "p. 6 do PDF, Seção III-D"
+      },
+      {
+        "trecho": "The second baseline allows us to assess whether progressive, hierarchical injection is more effective than providing all context at once.",
+        "localizador": "p. 6 do PDF, Seção III-D"
+      },
+      {
+        "trecho": "Since our focus is on generating patches for APR, for bug localization we use Function-granular Perfect Fault Localization, as recommended in prior work [9], [18].",
+        "localizador": "p. 3 do PDF, Seção III-A"
+      },
+      {
+        "trecho": "It cannot determine which class attribute to modify and instead hallucinates the existence of a variable self._config.",
+        "localizador": "p. 2–3 do PDF, Seção II"
+      },
+      {
+        "trecho": "These results suggest that providing all information upfront may prevent the model from distinguishing the most relevant context information for a bug, leading to degraded performance.",
+        "localizador": "p. 9 do PDF, RQ3"
+      },
+      {
+        "trecho": "After applying all layers of contextual knowledge, GPT-4o-mini still fails to fix 85 bugs, consisting of 58 Program Anomaly, 9 Network, 7 GUI, 8 Configuration, 3 Performance, and 1 Permission/Deprecation bug.",
+        "localizador": "p. 9 do PDF, RQ4"
+      },
+      {
+        "trecho": "GPT-4o-mini shows a 3% improvement, fixing 7 additional bugs and reaching a 73% fix rate.",
+        "localizador": "p. 8 do PDF, RQ3"
+      },
+      {
+        "trecho": "The training data of proprietary LLMs is not fully disclosed.",
+        "localizador": "p. 10 do PDF, Internal Validity"
+      },
+      {
+        "trecho": "This design isolates the impact of contextual knowledge and mitigates the influence of potential leakage.",
+        "localizador": "p. 10 do PDF, Internal Validity"
+      },
+      {
+        "trecho": "The nondeterminism of LLMs can lead to varying outcomes across responses, which presents challenges when analyzing results.",
+        "localizador": "p. 6 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "We choose n = 10 and report Pass@k with k=1, 3, 5, following prior studies [9], [10].",
+        "localizador": "p. 6 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "All plausible fixes are tested and manually verified to be the correct fix.",
+        "localizador": "p. 6 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "We manually reviewed all linked issues and pull requests to ensure they only describe the bug and do not reveal the actual fix.",
+        "localizador": "p. 5 do PDF, GitHub Description"
+      },
+      {
+        "trecho": "Moreover, the effectiveness of this knowledge depends heavily on how well a project maintains its documentation and issue reporting.",
+        "localizador": "p. 8 do PDF, Discussion da RQ3"
+      },
+      {
+        "trecho": "A threat to construct validity might arise from the manual bug type annotations.",
+        "localizador": "p. 10 do PDF, Construct Validity"
+      },
+      {
+        "trecho": "Our findings may not generalize to all LLMs.",
+        "localizador": "p. 10 do PDF, External Validity"
+      },
+      {
+        "trecho": "Over 66% of unresolved bugs lacked one or more pieces of injected repository or project-level context, limiting the model’s ability to see the full picture.",
+        "localizador": "p. 10 do PDF, Discussion da RQ4"
+      },
+      {
+        "trecho": "Injecting all contextual information at once underperformed our layered strategy for all bug types, reinforcing the importance of incremental, context-aware knowledge injection for maximizing repair performance.",
+        "localizador": "p. 11 do PDF, Seção VII"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "layered knowledge injection framework (resultado cumulativo após a Project Knowledge Layer)",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto",
+        "exemplos",
+        "outro"
+      ],
+      "comparador": "Bug Knowledge Layer",
+      "modelo": "Llama 3.3",
+      "benchmark": "BugsInPy (subconjunto de 314 bugs de Parasaram et al.)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.47,
+        "intervencao": 0.5
+      },
+      "denominador": "Bug Knowledge Layer: corpus inteiro de 314 bugs; linha cumulativa Project Knowledge Layer: nao_informado (o estudo não explica como o Pass@k combina as rodadas sobre os bugs não resolvidos)",
+      "condicoes": "Tabela II; n = 10 respostas por prompt; CoT com saída restrita a código; localização perfeita no nível de função. A condição em camadas é cumulativa: camada de repositório aplicada a 107 bugs não resolvidos e camada de projeto a 79, com até três rodadas por bug, contra uma rodada na linha de base. Temperatura e outros parâmetros de decodificação: nao_informado; número de repetições do experimento além das 10 respostas: nao_informado. Ganho do pacote (inclui recuperação e agente de QA fora do escopo), não atribuível a um ingrediente. Conferido na imagem da p. 7 (Tabela II), valores coincidentes com a linha Overall da Tabela III (p. 8).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo compara com trabalho anterior não executado (Parasaram et al.) e as contribuições destacam dois baselines e duas métricas (#fixed e Pass@k) sem que um prevaleça. Primeira tabela com contraste elegível: Tabela II; primeira métrica Pass@1; primeiro modelo listado Llama 3.3; primeira linha de base de prompting listada: Bug Knowledge Layer (declarada baseline das camadas seguintes); intervenção: linha Project Knowledge Layer, resultado final do pacote em camadas.",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF, Tabela II (colunas Knowledge Injection, LLM, Pass@1)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Bug Knowledge Layer | Llama 3.3 | 0.47 | 0.58 | 0.61 | 65% (207/314)",
+          "localizador": "p. 7 do PDF, Tabela II, colunas Knowledge Injection | LLM | Pass@1 | Pass@3 | Pass@5 | %Fixed Bugs"
+        },
+        {
+          "trecho": "Project Knowledge Layer | Llama 3.3 | 0.50 | 0.65 | 0.71 | 79% (250/314)",
+          "localizador": "p. 7 do PDF, Tabela II, colunas Knowledge Injection | LLM | Pass@1 | Pass@3 | Pass@5 | %Fixed Bugs"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "progressive, hierarchical injection (layered knowledge injection, resultado cumulativo após a Project Knowledge Layer)",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "outro"
+      ],
+      "mecanismos_acrescentados": [
+        "outro"
+      ],
+      "comparador": "All Knowledge Layers at Once",
+      "modelo": "Llama 3.3",
+      "benchmark": "BugsInPy (subconjunto de 314 bugs de Parasaram et al.)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.38,
+        "intervencao": 0.5
+      },
+      "denominador": "All Knowledge Layers at Once: 314 bugs; linha cumulativa Project Knowledge Layer: nao_informado",
+      "condicoes": "Tabela II; mesmas informações das três camadas nas duas condições, que diferem no escalonamento progressivo condicionado à falha nos testes. Ressalva: a condição hierárquica tem até três rodadas de 10 respostas por bug não resolvido; o baseline, uma rodada de 10 respostas. Decodificação: nao_informado. Conferido na imagem da p. 7 (Tabela II, duas últimas linhas).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado do pacote (escalonamento progressivo), contrastado pelo baseline all-at-once, que funciona como ablação desse ingrediente; entra por cobertura para completar o alvo de três, pela mesma regra de ordem (Tabela II, Pass@1, Llama 3.3). Não há outra técnica focal nem tarefa a cobrir; as camadas de repositório e de projeto são cumulativas e não isoladas.",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF, Tabela II (linhas Project Knowledge Layer e All Knowledge Layers at Once, coluna Pass@1); p. 9 do PDF (texto)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "All Knowledge Layers at Once | Llama 3.3 | 0.38 | 0.53 | 0.59 | 65% (207/314)",
+          "localizador": "p. 7 do PDF, Tabela II, colunas Knowledge Injection | LLM | Pass@1 | Pass@3 | Pass@5 | %Fixed Bugs"
+        },
+        {
+          "trecho": "Project Knowledge Layer | Llama 3.3 | 0.50 | 0.65 | 0.71 | 79% (250/314)",
+          "localizador": "p. 7 do PDF, Tabela II, colunas Knowledge Injection | LLM | Pass@1 | Pass@3 | Pass@5 | %Fixed Bugs"
+        },
+        {
+          "trecho": "As shown in the last two rows of Table II), both LLMs perform worse for all Pass@k metrics when provided with all the layers’ information at once.",
+          "localizador": "p. 9 do PDF, RQ3"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas sobre o efeito de cada camada de contexto no reparo por tipo de bug e sobre os bugs que continuam difíceis.",
+      "localizador": "p. 1–2 do PDF (Introdução, RQ1–RQ4)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Fontes de contexto, recuperação e ordem das camadas descritas em detalhe; mas os formatos de prompt estão só no pacote de replicação, parâmetros de decodificação não são informados e não se explica como o Pass@k das linhas cumulativas é calculado.",
+      "localizador": "p. 3–6 do PDF (Seção III)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparadores executados com os mesmos modelos e dados (Bug Knowledge Layer e all-at-once), mas a condição em camadas recebe mais rodadas de tentativas que os comparadores, e o baseline de Parasaram et al. é composto por números de outro artigo com outros modelos.",
+      "localizador": "p. 6 (Seção III-D), p. 7 (Tabela II), p. 6 (Discussion da RQ1) do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k e #fixed definidos por fórmula, com n = 10 e denominador de 314 para %Fixed; porém o denominador do Pass@k nas camadas cumulativas não é informado, e há valores que não coincidem entre texto e tabelas (7 vs. 8 bugs novos do GPT-4o-mini na camada de projeto; soma por tipo 228 vs. 229; 85 vs. 86 não resolvidos; «over 66%» vs. Tabela IV).",
+      "localizador": "p. 6 (Seção III-E), p. 7–10 do PDF (Tabelas II–IV e texto)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute validade de construto (anotação), interna (dados de treinamento, vazamento) e externa (generalização, desbalanceamento dos tipos de bug).",
+      "localizador": "p. 10 do PDF (Seção V)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Conjunto de dados público reutilizado e pacote de replicação indicado (não acessado), mas sem snapshot do GPT-4o-mini, sem parâmetros de decodificação, sem o modelo de embeddings e com os prompts só no pacote externo.",
+      "localizador": "p. 2 (nota de rodapé 1), p. 4–6 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Reconhece o risco e argumenta pelo desenho relativo entre camadas, pelos dois modelos e por estudo externo de vazamento com outro modelo (StarCoder, 11% no BugsInPy); revisa issues para não revelar a correção, mas não verifica vazamento nos modelos usados.",
+      "localizador": "p. 5 e p. 10 (Internal Validity) do PDF"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (884 linhas, incluindo referências). Páginas do PDF abertas visualmente: p. 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 e 13. A Tabela III (p. 8) tem resolução baixa na imagem; os valores usados nas verificações coincidem com o texto extraído e com a linha Overall legível. O PDF não tem paginação impressa visível; localizadores usam a posição no arquivo."
+  }
+}

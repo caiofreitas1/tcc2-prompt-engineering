@@ -1,0 +1,426 @@
+{
+  "estudo": "S202",
+  "texto_fonte": "fontes/textos/lote/S202.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "Shirafuji, Oda, Suzuki, Morishita e Watanobe, «Refactoring Programs Using Large Language Models with Few-Shot Examples», arXiv:2311.11690v1 [cs.PL], 20 nov. 2023 (carimbo arXiv na p. 1 do PDF). O PDF não tem paginação impressa; os localizadores usam a posição da página no arquivo.",
+    "tarefas": [
+      "refatoracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot prompting (Zero-shot)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, Seção III-B e Fig. 3; PDF p. 5, Seção IV-B (instrução de sistema); PDF p. 6, Tabela II",
+        "observacao": "Condição de base: instrução de sistema (refatorar para programa mais legível, eficiente e manutenível; não alterar o comportamento externo; código em bloco; não explicar em linguagem natural) mais o programa do usuário como insumo, sem exemplos. instrucao = papel/objetivos da instrução; restricoes = preservar comportamento externo, formato em bloco de código e proibição de explicações; contexto = programa do usuário fornecido no prompt (D102). amostragem = geração de n = 10 candidatos por programa, comum às três condições; a filtragem dos candidatos pelo juiz automático é descrita como parte da abordagem proposta (Fig. 2), e o estudo não explicita se o CC de cada condição na Tabela II é calculado só sobre os programas filtrados. É a linha de base; não há condição sem ela."
+      },
+      {
+        "nome_original": "One-shot prompting (One-shot)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3, Seções III-B e III-C (lista dos 10 exemplos); PDF p. 6, Tabela II e Fig. 4 e 5",
+        "observacao": "Mesma instrução de sistema e mesmo programa de entrada do zero-shot, acrescidos de um exemplo de refatoração (par original/refatorado preparado manualmente pelos autores). Foram avaliados 10 exemplos distintos (string formatada, função radians, operador lógico em vez de if aninhado, for em vez de while, list comprehension, map, variável descartável, enumerate, zip, operador ternário), cada um contra o zero-shot nas Fig. 4 e 5 (diferenças em pass@10 e CC). Na Tabela II, «One-shot» é o melhor one-shot (exemplo de list comprehension), escolhido a posteriori pelos resultados. O one-shot também é a etapa de avaliação usada para escolher os exemplos do few-shot (Seção III-C). Contraste com o zero-shot: único ingrediente diferente é o exemplo, mantidos modelo, instrução e parâmetros de decodificação."
+      },
+      {
+        "nome_original": "Few-shot prompting with selected best-suited code refactoring examples (3-shot prompting; Few-shot)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "contexto",
+          "exemplos",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1, Resumo; PDF p. 3, Fig. 2 e Seção III; PDF p. 4, Seção III-D (Fórmula 4); PDF p. 6, Tabela II",
+        "observacao": "Proposta do estudo: para cada problema, três exemplos (k = 3) escolhidos por argtopk(1000 S_eP + S_e), isto é, pelos escores do one-shot de cada exemplo no problema e no conjunto (Seções III-C e III-D). A seleção de exemplos resolvidos classifica-se como exemplos pelo dicionário; não se registra otimizacao_prompt porque o dicionário atribui a seleção de exemplos a exemplos. O contraste com o zero-shot (Tabela II, Fig. 4 e 5) compara o pacote «três exemplos selecionados por problema» com a condição sem exemplos; não separa o efeito do número de exemplos do efeito do procedimento de seleção. Contra o one-shot, as duas condições diferem no número de exemplos e no procedimento de escolha (melhor exemplo global a posteriori × três exemplos por problema), de modo que esse contraste não isola um ingrediente único."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature = 0.2; max_tokens = 1,024",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação fixos para todas as gerações de refatoração; não variam entre as condições.",
+        "localizador": "PDF p. 5, Seção IV-B"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "gpt-3.5-turbo (OpenAI API)",
+        "versao": "gpt-3.5-turbo-0301 (snapshot de 1.º de março de 2023)",
+        "uso": "Geração das refatorações em todas as condições; também usado, com temperature = 0 e max_tokens = 10, para identificar a língua natural do código (análise da Tabela VI).",
+        "localizador": "PDF p. 4-5, Seção IV-B; PDF p. 8, Seção V-B-4"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Programas Python corretos do Aizu Online Judge (AOJ), curso Introduction to Programming I (ITP1)",
+        "versao": "nao_informado (data da coleta não informada)",
+        "quantidade": "44 problemas; 296.885 programas coletados (veredito Accepted), 161.670 únicos, 158.081 após remoção de outliers; 880 programas selecionados aleatoriamente (20 por problema)",
+        "observacao": "Casos de teste obtidos pela AOJ API e executados num juiz virtual em sandbox. Os 880 programas (|X_P| = 20 por problema) aparecem tanto na avaliação de cada exemplo em one-shot (Seção III-C) quanto no conjunto final (Seção IV-A); o texto não descreve conjunto separado para a seleção dos exemplos. Semente da amostragem aleatória não informada.",
+        "localizador": "PDF p. 3, Seção III-C; PDF p. 4, Seção IV-A e Tabela I; PDF p. 6, Seção IV-D"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Compilability",
+        "definicao": "P/(P + F), P = programas que compilam, F = que falham",
+        "localizador": "PDF p. 5, Seção IV-C-a"
+      },
+      {
+        "nome": "Pass@1",
+        "definicao": "Fórmula 5 com n = 10 amostras por programa; «pass@1 indicates the ratio of correct programs out of all generated programs». A fórmula escreve a esperança sobre «Problems», embora o texto adapte a métrica a programas; total de amostras não impresso.",
+        "localizador": "PDF p. 5, Seção IV-C-b"
+      },
+      {
+        "nome": "Pass@10",
+        "definicao": "Proporção de programas com pelo menos um candidato correto entre 10 gerações",
+        "localizador": "PDF p. 5, Seção IV-C-b"
+      },
+      {
+        "nome": "McCabe's Cyclomatic Complexity (CC)",
+        "definicao": "Calculada com a biblioteca radon; menor é melhor",
+        "localizador": "PDF p. 5, Seção IV-C-c"
+      },
+      {
+        "nome": "Chars",
+        "definicao": "Número de caracteres",
+        "localizador": "PDF p. 5, Seção IV-C-d"
+      },
+      {
+        "nome": "Tokens",
+        "definicao": "Número de tokens pelo tokenizador oficial do Python, sem comentários e tokens especiais",
+        "localizador": "PDF p. 5, Seção IV-C-e"
+      },
+      {
+        "nome": "Lines of Code (LOC)",
+        "definicao": "Número de linhas, incluindo vazias e de comentário",
+        "localizador": "PDF p. 5, Seção IV-C-f"
+      },
+      {
+        "nome": "Distance (Levenshtein, por caracteres)",
+        "definicao": "Distância de edição entre programa original e gerado",
+        "localizador": "PDF p. 5, Seção IV-C-g"
+      },
+      {
+        "nome": "Similarity",
+        "definicao": "1 − Distance(a,b)/max(|a|,|b|)",
+        "localizador": "PDF p. 5, Seção IV-C-h, Fórmula 6"
+      },
+      {
+        "nome": "Comments (incl./excl.) e Comment Ratio; proporção de línguas naturais",
+        "definicao": "Contagem de comentários com tokenize; língua natural identificada pelo GPT-3.5",
+        "localizador": "PDF p. 8, Tabelas V e VI"
+      }
+    ],
+    "linguagens": [
+      "Python (Python3)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A refatoração, inclusive a feita pelo LLM, pode quebrar um programa que já funcionava; por isso os candidatos são validados e só os corretos são sugeridos.",
+        "localizador": "PDF p. 1, Seção I; PDF p. 2, Seção I"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Programas gerados podem ser maliciosos ou vulneráveis e danificar o computador hospedeiro durante a execução dos testes (segurança operacional da execução, citada a partir de trabalhos anteriores).",
+        "localizador": "PDF p. 6, Seção IV-D"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "O LLM faz ao menos alguma modificação em todos os programas e pode piorar um programa já simples, legível ou conciso que não precisava de refatoração; a Fig. 10b mostra um caso que define uma função excessiva e piora a complexidade.",
+        "localizador": "PDF p. 8, Seção V-A-7 e Fig. 10b; PDF p. 9, Seção VI"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "O LLM apaga comentários que ajudam a entender o programa (média de linhas de comentário de 0,60 para 0,16; razão de comentários de 2,39% para 0,89%) e traduz comentários em japonês para o inglês sem pedido; os autores sugerem que a instrução de sistema pode ter influenciado.",
+        "localizador": "PDF p. 8, Seções V-B-3 e V-B-4, Tabelas V e VI; PDF p. 9"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação educacional: sugerir de uma vez o programa totalmente refatorado, com modificações extensas, pode sobrecarregar os usuários.",
+        "localizador": "PDF p. 9, Seção VI"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Validação dos candidatos por juiz automático com casos de teste ocultos; só programas funcionalmente corretos são sugeridos ao usuário. Não há comparação com uma condição sem filtragem.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 2, Seção I; PDF p. 3, Seção III-A e Fig. 2"
+      },
+      {
+        "descricao": "Execução dos programas gerados num juiz virtual em ambiente sandbox isolado.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6, Seção IV-D"
+      },
+      {
+        "descricao": "Proposta como trabalho futuro, não implementada: detectar se o programa precisa de refatoração ou instruir o LLM a modificar só quando necessário, e oferecer sugestões iterativas com pequena parte das modificações.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9, Seção VI"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Conflito entre métricas: o exemplo de list comprehension, melhor one-shot em pass@10, é o pior em CC, e o exemplo zip, pior em pass@10, é o melhor em CC; os autores relatam correlação positiva de 0,7916 entre pass@10 e CC (Fig. 6) e declaram priorizar pass@10. A legenda da Fig. 6 não identifica quais condições de prompting correspondem aos pontos usados no cálculo do coeficiente.",
+        "localizador": "PDF p. 6, Seção V-A-3, Fig. 4 e 5; PDF p. 7, Fig. 6"
+      },
+      {
+        "descricao": "Inversão em CC: o One-shot da Tabela II tem CC 4,78, maior (pior) que o Zero-shot (4,71); o Few-shot tem 4,67. Na Fig. 5, várias barras de one-shot são positivas (aumento de CC em relação ao zero-shot).",
+        "localizador": "PDF p. 6, Tabela II e Fig. 5"
+      },
+      {
+        "descricao": "Compilability diminui com mais exemplos: 99,99% (Zero-shot), 99,95% (One-shot), 99,93% (Few-shot); os autores reconhecem a queda e priorizam pass@k.",
+        "localizador": "PDF p. 6, Tabela II e Seção V-A-1"
+      },
+      {
+        "descricao": "Vários exemplos em one-shot ficam abaixo do zero-shot em pass@10 (barras negativas na Fig. 4, por exemplo radians, map, enumerate, zip e ternário); o estudo usa a variação para justificar a seleção de exemplos. Os valores das barras não são impressos e não foram estimados.",
+        "localizador": "PDF p. 6, Fig. 4 e Seção V-A-2"
+      },
+      {
+        "descricao": "O «One-shot» da Tabela II é o melhor dos 10 one-shots, escolhido pelos próprios resultados, e os exemplos do few-shot são selecionados por escores de one-shot calculados sobre os programas |X_P| (20 por problema), mesma quantidade e descrição do conjunto final de 880 programas; o texto não descreve conjunto separado de seleção e de teste. O estudo não discute esse ponto; não se afirma viés, apenas a ausência de descrição.",
+        "localizador": "PDF p. 3, Seção III-C; PDF p. 4, Seções III-D e IV-A; PDF p. 6, legenda da Tabela II"
+      },
+      {
+        "descricao": "As reduções de 17,35% em CC e 25,84% em linhas do resumo e da conclusão comparam os programas gerados com os programas de entrada, não com o zero-shot. Cálculo próprio de conferência: (5,65 − 4,67)/5,65 ≈ 17,35% (Tabela II) e (14,82 − 10,99)/14,82 ≈ 25,84% (Tabela III), compatíveis com os valores impressos. O resumo diz que as reduções valem «after filtering only generated programs that are semantically correct», mas as legendas das Tabelas II a VI não dizem se os valores são calculados sobre os programas filtrados, e as Tabelas III a VI não identificam a condição de prompting dos programas «Generated».",
+        "localizador": "PDF p. 1, Resumo; PDF p. 6, Tabela II; PDF p. 8, Tabelas III a VI; PDF p. 9, Seção VII"
+      },
+      {
+        "descricao": "O único teste estatístico (Wilcoxon, p < 0,001) compara o CC dos programas de entrada e gerados; não há teste nem intervalo para as diferenças entre Zero-shot, One-shot e Few-shot, e o número de execuções repetidas não é informado.",
+        "localizador": "PDF p. 6, Seção V-A-4"
+      },
+      {
+        "descricao": "Definição de pass@k: a Fórmula 5 toma a esperança sobre «Problems», enquanto o texto adapta a métrica para «if the program is refactored» e define pass@1 como a razão de programas corretos entre todos os gerados; a unidade de agregação (programa ou problema) fica ambígua.",
+        "localizador": "PDF p. 5, Seção IV-C-b, Fórmula 5"
+      },
+      {
+        "descricao": "Distância mínima de Levenshtein igual a 1 e similaridade máxima de 99,46%: todos os programas gerados têm alguma edição, o que os autores leem como ausência de «cheating case» e também como modificação forçada de programas já legíveis.",
+        "localizador": "PDF p. 7-8, Seção V-A-7 e Tabela IV"
+      },
+      {
+        "descricao": "Limitação declarada: um único LLM (GPT-3.5) avaliado.",
+        "localizador": "PDF p. 9, Seção VI"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Os 10 exemplos de refatoração foram definidos manualmente pelos autores; só um aparece por inteiro (Fig. 3, any() em vez de laço com flag). A resposta do «LLM» nos exemplos é preparada manualmente.",
+        "localizador": "PDF p. 3, Seção III-B e Fig. 3"
+      },
+      {
+        "descricao": "Análises complementares sem contraste entre técnicas de prompting: distribuições de CC (Fig. 7), correlações da distância de Levenshtein com o CC de entrada (0,4886, Fig. 8) e com o número de caracteres (0,7442, Fig. 9), formatação medida com yapf (distância média ao programa formatado de 21,96 na entrada e 7,95 nos gerados) e inspeção qualitativa manual de programas escolhidos aleatoriamente, sem número de programas inspecionados nem registro de avaliadores.",
+        "localizador": "PDF p. 7, Fig. 7 a 9; PDF p. 8, Seções V-B-1 e V-B-2"
+      },
+      {
+        "descricao": "A identificação da língua natural dos comentários foi feita pelo próprio GPT-3.5 (temperature = 0, max_tokens = 10), sem validação humana relatada.",
+        "localizador": "PDF p. 8, Seção V-B-4"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We propose a method to leverage the prompting with few-shot examples of the LLM by selecting the best-suited code refactoring examples for each target programming problem based on the prior evaluation of prompting with the one-shot example.",
+        "localizador": "PDF p. 1, Resumo"
+      },
+      {
+        "trecho": "The system instruction and the user’s program are always passed to the LLM.",
+        "localizador": "PDF p. 3, Seção III-B"
+      },
+      {
+        "trecho": "No examples are passed in the zero-shot, one in the one-shot, and three in the few-shot (i.e., 3-shot).",
+        "localizador": "PDF p. 3, Seção III-B"
+      },
+      {
+        "trecho": "In this phase, each code refactoring example is used for one-shot prompting and evaluated by a validator.",
+        "localizador": "PDF p. 3, Seção III-C"
+      },
+      {
+        "trecho": "As a few-shot prompting, we adopt 3-shot prompting, which provides k = 3 sets of best-performed code refactoring examples.",
+        "localizador": "PDF p. 4, Seção III-D"
+      },
+      {
+        "trecho": "The system instruction is used in all generations, including zero-shot prompting.",
+        "localizador": "PDF p. 5, Seção IV-B"
+      },
+      {
+        "trecho": "More precisely, in this work, we use gpt-3.5-turbo-0301, a snapshot version from March 1st, 2023, for reproducibility.",
+        "localizador": "PDF p. 4-5, Seção IV-B"
+      },
+      {
+        "trecho": "We set the temperature, which determines the creativity of generated texts, to 0.2 to be slightly creative for all generations in this work.",
+        "localizador": "PDF p. 5, Seção IV-B"
+      },
+      {
+        "trecho": "We generate n = 10 samples for each program and report pass@k at k = 1,10.",
+        "localizador": "PDF p. 5, Seção IV-C-b"
+      },
+      {
+        "trecho": "In fact, code refactoring also has a risk of breaking the already working program, which is another reason programmers are reluctant to do code refactoring.",
+        "localizador": "PDF p. 1, Seção I"
+      },
+      {
+        "trecho": "Since the LLM has the potential to break the input program, the generated programs are validated, and only functionally correct programs are suggested to a user.",
+        "localizador": "PDF p. 2, Seção I"
+      },
+      {
+        "trecho": "However, several prior works mentioned that LLMs trained on public source code have a risk of generating malicious or vulnerable programs, which may harm the host computer [2], [43].",
+        "localizador": "PDF p. 6, Seção IV-D"
+      },
+      {
+        "trecho": "Therefore, we prepare a virtual judge system on our isolated sandbox environment to not be affected by the malicious generated programs.",
+        "localizador": "PDF p. 6, Seção IV-D"
+      },
+      {
+        "trecho": "It can worsen an already straightforward, readable, or concise program that is not required to be refactored.",
+        "localizador": "PDF p. 9, Seção VI"
+      },
+      {
+        "trecho": "Figure 10b is the worsened example, defining an excessive function that worsens the complexity.",
+        "localizador": "PDF p. 8, Seção V-B-1"
+      },
+      {
+        "trecho": "Although we observe many cases improving the code readability, we also observe that the LLM deletes many comments that can help understand the program.",
+        "localizador": "PDF p. 8, Seção V-B-3"
+      },
+      {
+        "trecho": "The decrease in the proportion of Japanese and the increase in English in Table VI suggests that the Japanese comments are translated into English without demand.",
+        "localizador": "PDF p. 8, Seção V-B-4"
+      },
+      {
+        "trecho": "Furthermore, since code refactoring is usually performed iteratively, suggesting the fully refactored program with extensive modifications at once can be overwhelming for users.",
+        "localizador": "PDF p. 9, Seção VI"
+      },
+      {
+        "trecho": "For instance, detecting whether the program should be refactored before the refactoring request, or providing some instructions to control the LLM to make modifications only when there is a particular need for refactoring, can be considered.",
+        "localizador": "PDF p. 9, Seção VI"
+      },
+      {
+        "trecho": "This variation of performance among the one-shot prompting highlights the need for selecting the best-suited examples for each problem.",
+        "localizador": "PDF p. 6, Seção V-A-2"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Few-shot (3-shot prompting com exemplos selecionados por problema)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "contexto",
+        "exemplos",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos"
+      ],
+      "comparador": "Zero-shot",
+      "modelo": "gpt-3.5-turbo-0301",
+      "benchmark": "AOJ ITP1 (44 problemas, 880 programas Python corretos, 20 por problema)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 87.44,
+        "intervencao": 91.11
+      },
+      "denominador": "n = 10 amostras geradas para cada programa de entrada (880 programas); pass@1 definido como a razão de programas corretos entre todos os gerados. O total de amostras não é impresso, e a Fórmula 5 escreve a esperança sobre «Problems».",
+      "condicoes": "Mesma instrução de sistema em ambas as condições; temperature = 0.2; max_tokens = 1,024; few-shot com k = 3 exemplos escolhidos por problema pela Fórmula 4 a partir dos escores de one-shot (calculados, segundo a Seção III-C, sobre |X_P| = 20 programas por problema; o texto não descreve conjunto de seleção separado do conjunto avaliado). Número de execuções repetidas: nao_informado. Sem teste estatístico entre as condições de prompting. Conferido visualmente na Tabela II (PDF p. 6): cabeçalhos Pass@1, Pass@10, Compilability, CC; o 91.11% do Few-shot está em negrito como melhor valor.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e a conclusão destacam pass@10, CC e LOC, a Seção V-A-3 prioriza pass@10, mas nenhuma declaração identifica um único comparador (a Tabela II traz Zero-shot e One-shot, e as reduções do resumo comparam com os programas de entrada). Pela ordem: primeira tabela com o contraste (Tabela II), primeira métrica pertinente (Pass@1), único modelo (gpt-3.5-turbo-0301), primeira linha de base de prompting listada (Zero-shot; «Input» não é condição de prompting). Não há outra técnica focal nem outra tarefa a cobrir; o One-shot é comparador e não há tabela de ablação nem matriz de ingredientes com componentes, por isso há uma única extração.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6, Tabela II, linhas Zero-shot e Few-shot, coluna Pass@1 (sem paginação impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Zero-shot 87.44% 93.30% 99.99% 4.71",
+          "localizador": "PDF p. 6, Tabela II, linha Zero-shot; colunas Pass@1, Pass@10, Compilability, CC"
+        },
+        {
+          "trecho": "Few-shot 91.11% 95.68% 99.93% 4.67",
+          "localizador": "PDF p. 6, Tabela II, linha Few-shot; colunas Pass@1, Pass@10, Compilability, CC"
+        },
+        {
+          "trecho": "Both pass@1 and pass@10 scores are improved by giving more examples in prompts, and the proposed 3-shot prompting resulted in the best performance.",
+          "localizador": "PDF p. 6, Seção V-A-1"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (usar o GPT-3.5 para sugerir versões menos complexas de programas Python escritos por usuários, com few-shot de exemplos selecionados) e as contribuições estão declarados.",
+      "localizador": "PDF p. 1-2, Resumo e Seção I"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline (avaliação de exemplos em one-shot, Fórmulas 2 a 4, construção do 3-shot, validação) e a coleta e o pré-processamento dos dados estão descritos; mas só um dos 10 exemplos é mostrado por inteiro, a semente da seleção aleatória não é informada e o texto não descreve conjunto separado para a seleção dos exemplos e para a avaliação final.",
+      "localizador": "PDF p. 3-4, Seções III e IV-A"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Zero-shot e one-shot foram executados com o mesmo modelo, instrução e parâmetros (Tabela II, Fig. 4 e 5); o one-shot apresentado na tabela é o melhor exemplo, escolhido a posteriori, o que é declarado na legenda.",
+      "localizador": "PDF p. 5, Seção IV-B; PDF p. 6, Tabela II e Fig. 4 e 5"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As métricas são definidas e os valores coincidem entre tabelas (por exemplo, CC 5,65 e LOC 14,82 de entrada nas Tabelas I, II e III); porém a Fórmula 5 escreve a esperança sobre problemas enquanto o texto agrega por programas, o total de amostras não é impresso, e as Tabelas II a VI não dizem se usam só os programas filtrados nem, nas Tabelas III a VI, a condição de prompting dos programas gerados.",
+      "localizador": "PDF p. 4, Tabela I; PDF p. 5, Seção IV-C; PDF p. 6, Tabela II; PDF p. 8, Tabelas III a VI"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações discute modificações desnecessárias, sobrecarga do usuário e uso de um único LLM, e o texto discute o efeito da instrução sobre comentários; não discute não determinismo, ausência de testes entre condições de prompting nem a seleção de exemplos sobre os mesmos programas avaliados.",
+      "localizador": "PDF p. 8-9, Seções V-B-4 e VI"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa snapshot do modelo, temperature, max_tokens, texto literal da instrução de sistema, origem dos dados e dos casos de teste; não menciona pacote de replicação, não publica os 10 exemplos completos nem a lista dos 880 programas, e não informa semente nem número de execuções.",
+      "localizador": "PDF p. 3, Seção III-B; PDF p. 4-5, Seções IV-A e IV-B"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo usa programas públicos do AOJ (também distribuídos via CodeNet e CodeContests) e um modelo descrito como baseado em Codex, treinado em código massivo, mas não discute possível presença desses programas ou problemas no pré-treinamento nem controle de vazamento.",
+      "localizador": "PDF p. 4-5, Seções IV-A e IV-B"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (seções I a VII e referências). Páginas do PDF abertas visualmente: p. 3 (Fig. 2 e 3, lista de exemplos), p. 4 (Fórmulas 1 a 4, Tabela I), p. 5 (modelo, parâmetros, métricas), p. 6 (Tabela II, Fig. 4 e 5), p. 7 (Fig. 6 a 9), p. 8 (Tabelas III a VI, Fig. 10), p. 9 (limitações e conclusão)."
+  }
+}

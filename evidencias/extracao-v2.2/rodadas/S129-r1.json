@@ -1,0 +1,330 @@
+{
+  "estudo": "S129",
+  "texto_fonte": "fontes/textos/lote/S129.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot prompt (instruction template)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9 (Table 2 e parágrafo Task design); PDF p. 7 (RQ1); PDF p. 12 (Fig. 3, 0 exemplos); PDF p. 13 (Answer to RQ1)",
+        "observacao": "Prompt base: template com os delimitadores «### Instruction:» e «### Response:», contendo a intenção em linguagem natural. É a condição de referência (0 exemplos) para o ICL no RQ1 e a condição base (sem ajuste) do modelo no RQ4 (Table 4). Não há condição sem o template; é linha de base, não técnica isolada."
+      },
+      {
+        "nome_original": "In-Context Learning (ICL)",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 10 (seção 4.3); PDF p. 12 (Fig. 3); PDF p. 13 (Answer to RQ1); PDF p. 21 (seção 8)",
+        "observacao": "Exemplos (pares instrução-código) sorteados aleatoriamente do conjunto de treino e concatenados ao prompt; até 16 exemplos no Conala e até 8 no CodeAlpacaPy (menos para CodeGen2, por memória). O RQ1 compara 0 exemplos (zero-shot) com 1 a 16 exemplos no mesmo template, modelo e conjunto (Fig. 3), o que isola o ingrediente exemplos. O estudo trata o ICL como linha de base dos PEFT («baseline effectiveness»), por isso papel comparador. Número de sementes e agregação entre sementes: nao_informado."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 10 (seção 4.3); PDF p. 16-17 (seção 5.3, Fig. 7)",
+        "observacao": "Recuperação, com o modelo de embeddings GTE-small, dos exemplos do treino cujas instruções são mais similares à entrada de teste (até 16 no Conala e até 4 no CodeAlpacaPy), concatenados ao prompt. O estudo apresenta o RAG como extensão do ICL e como «strong baseline» para o LoRA. A Fig. 7 compara RAG (por número de exemplos recuperados) com o melhor ICL do RQ1 nos três CodeLlama-7B, isto é, seleção por recuperação contra seleção aleatória de exemplos no mesmo template; ressalva: o ICL é representado pelo máximo entre configurações e o limite de exemplos difere no CodeAlpacaPy (ICL até 8, RAG até 4). Avaliado só nos modelos CodeLlama-7B."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LoRA",
+        "natureza": "ajuste_fino",
+        "descricao": "Técnica PEFT focal do estudo: matrizes treináveis de baixo posto injetadas nas camadas de atenção, com r = 16 e alfa = 32; altera parâmetros do modelo, não o prompt.",
+        "localizador": "PDF p. 5 (seção 2.2); PDF p. 11 (seção 4.6)"
+      },
+      {
+        "nome_original": "IA3",
+        "natureza": "ajuste_fino",
+        "descricao": "Técnica PEFT que aprende um número reduzido de parâmetros adicionais aplicados às camadas de atenção.",
+        "localizador": "PDF p. 5 (seção 2.2); PDF p. 11 (seção 4.6)"
+      },
+      {
+        "nome_original": "Prompt tuning",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "20 tokens virtuais contínuos e treináveis prefixados à entrada (soft prompt), aprendidos por retropropagação com o modelo congelado.",
+        "localizador": "PDF p. 5 (seção 2.2); PDF p. 11 (seção 4.6)"
+      },
+      {
+        "nome_original": "Prefix tuning",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "Tokens virtuais treináveis inseridos em todas as camadas do modelo (20 tokens).",
+        "localizador": "PDF p. 5 (seção 2.2); PDF p. 11 (seção 4.6)"
+      },
+      {
+        "nome_original": "QLoRA-8bit e QLoRA-4bit",
+        "natureza": "ajuste_fino",
+        "descricao": "LoRA combinado com quantização do modelo em 8 ou 4 bits para reduzir memória de GPU durante o ajuste fino.",
+        "localizador": "PDF p. 5 (seção 2.2); PDF p. 11 (seção 4.6); PDF p. 16 (Fig. 5); PDF p. 18 (Table 4)"
+      },
+      {
+        "nome_original": "Full fine-tuning (Full FT)",
+        "natureza": "ajuste_fino",
+        "descricao": "Atualização de todos os parâmetros, usada só para os SLMs (taxa de aprendizado 5e-5).",
+        "localizador": "PDF p. 7 (RQ2); PDF p. 11 (seção 4.6); PDF p. 14 (Table 3)"
+      },
+      {
+        "nome_original": "beam search com beam size 10 e limite de tokens gerados",
+        "natureza": "decodificacao",
+        "descricao": "Busca em feixe de tamanho 10 (até 10 candidatos) e geração de até 64, 128 e 1024 tokens para Conala, CodeAlpacaPy e APPS.",
+        "localizador": "PDF p. 10 (seção 4.2, fim); PDF p. 11-12 (seção 4.6)"
+      },
+      {
+        "nome_original": "CodeLlama-13B-Python e CodeLlama-34B-Python com QLoRA",
+        "natureza": "selecao_modelo",
+        "descricao": "Uso de modelos maiores viabilizado pela quantização, sem alterar o prompt.",
+        "localizador": "PDF p. 11 (seção 4.4); PDF p. 15-16 (Fig. 5)"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeT5+-220M", "versao": "nao_informado", "uso": "SLM; ICL, PEFT e Full FT"},
+      {"nome": "CodeT5+-770M", "versao": "nao_informado", "uso": "SLM; ICL, PEFT e Full FT"},
+      {"nome": "CodeGen-350M-mono", "versao": "nao_informado", "uso": "SLM; ICL, PEFT e Full FT"},
+      {"nome": "CodeGen2-1B", "versao": "nao_informado", "uso": "LLM; ICL e PEFT"},
+      {"nome": "CodeGen2-3.7B", "versao": "nao_informado", "uso": "LLM; ICL e PEFT"},
+      {"nome": "CodeGen2-7B", "versao": "nao_informado", "uso": "LLM; ICL e PEFT"},
+      {"nome": "CodeLlama-7B", "versao": "nao_informado", "uso": "LLM; ICL, RAG e PEFT"},
+      {"nome": "CodeLlama-7B-Instruct", "versao": "nao_informado", "uso": "LLM; ICL, RAG, PEFT e RQ4 (APPS)"},
+      {"nome": "CodeLlama-7B-Python", "versao": "nao_informado", "uso": "LLM; ICL, RAG, PEFT e QLoRA"},
+      {"nome": "CodeLlama-13B-Python", "versao": "nao_informado", "uso": "só QLoRA (Fig. 5)"},
+      {"nome": "CodeLlama-34B-Python", "versao": "nao_informado", "uso": "só QLoRA-4bit (Fig. 5)"},
+      {"nome": "GTE-small", "versao": "nao_informado", "uso": "modelo de embeddings do recuperador do RAG"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conala (versão curada de [91])",
+        "quantidade": "2,135/201/543 amostras de treino/validação/teste",
+        "observacao": "Usado em RQ1-RQ3. Exemplos de ICL e RAG vêm do conjunto de treino. O estudo não liga explicitamente o denominador de EM@k ao tamanho do conjunto de teste (543); denominador da métrica: nao_informado.",
+        "localizador": "PDF p. 8 (seção 4.2)"
+      },
+      {
+        "nome": "CodeAlpacaPy (subconjunto Python curado de CodeAlpaca [8], construído pelos autores)",
+        "quantidade": "2,192/314/628 amostras de treino/validação/teste",
+        "observacao": "Usado em RQ1-RQ3; filtragem de amostras que não passam por análise sintática estática. Denominador de EM@k: nao_informado (o tamanho do teste é 628).",
+        "localizador": "PDF p. 8 (seção 4.2)"
+      },
+      {
+        "nome": "APPS",
+        "quantidade": "10,000 problemas no original (5,000 treino e 5,000 teste); o estudo usa 4,500 treino, 500 validação e 750 teste (250 por nível: introductory, interview, competition)",
+        "observacao": "Usado só no RQ4 (zero-shot contra LoRA/QLoRA); ICL e RAG não foram executados no APPS por falta de memória. Em média 21.2 casos de teste por problema.",
+        "localizador": "PDF p. 8-9 (seção 4.2); PDF p. 18 (seção 5.4)"
+      }
+    ],
+    "metricas": [
+      {"nome": "EM@k (EM@1, EM@10)", "definicao": "EM retorna 1 se o código gerado e o de referência são idênticos; EM@k «computes the average correct predictions among a list of k candidates». A fórmula exata de agregação sobre os k candidatos não é detalhada (nao_informado).", "localizador": "PDF p. 11 (seção 4.5)"},
+      {"nome": "CodeBLEU", "definicao": "Métrica de similaridade [55]; o estudo observa que depende de grafo de fluxo de dados, que pode não estar disponível para códigos curtos.", "localizador": "PDF p. 11 (seção 4.5); PDF p. 13"},
+      {"nome": "average number of test cases passed (Avg)", "definicao": "Proporção de casos de teste aprovados pelo código gerado em cada amostra (APPS).", "localizador": "PDF p. 11 (seção 4.5)"},
+      {"nome": "Pass@k (P@1, P@2, P@5)", "definicao": "Percentual de problemas em que ao menos um dos k primeiros códigos gerados passa em todos os testes (APPS).", "localizador": "PDF p. 11 (seção 4.5); PDF p. 18 (Table 4)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "custo",
+        "descricao": "ICL e RAG acrescentam tokens de entrada ao prompt, o que pode ser inviável quando a informação contextual é grande e aumenta a sobrecarga computacional na inferência; no setup do estudo, o número de exemplos foi limitado por erros de falta de memória e ICL/RAG não foram executados no APPS (prompt acima de 2,048 tokens). O custo de ICL/RAG não é quantificado (a Fig. 1 quantifica só a memória do ajuste fino).",
+        "localizador": "PDF p. 5 (seção 2.1); PDF p. 12 (seção 5.1); PDF p. 18 (seção 5.4); PDF p. 19 (seção 6)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Se o recuperador do RAG não identificar exemplos apropriados, pode injetar informação irrelevante ou enganosa no prompt e degradar o desempenho.",
+        "localizador": "PDF p. 5 (seção 2.1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "ICL e RAG dependem da seleção de exemplos representativos e são sensíveis ao desenho do prompt, o que, segundo os autores, pode resultar em menor eficácia que o ajuste fino.",
+        "localizador": "PDF p. 4 (seção 2.1); PDF p. 5 (seção 3)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível sobreposição entre exemplos de treino (fonte dos exemplos de ICL/RAG e dos dados de ajuste) e de teste; o estudo descreve controle só para o Conala curado. Não discute contaminação por pré-treinamento nem sobreposição no CodeAlpacaPy e no APPS; não afirma contaminação efetiva.",
+        "localizador": "PDF p. 8 (seção 4.2)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "No Conala curado, cada amostra de validação e teste contém ao menos uma função Python ausente do treino e exemplos do mesmo post do StackOverflow ficam em conjuntos diferentes; os autores afirmam garantir que nenhuma intenção de teste aparece no treino.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 8 (seção 4.2)"
+      },
+      {
+        "descricao": "Para a ameaça de escolha de modelos, seleção de modelos de famílias, dados de pré-treinamento, objetivos e tamanhos diversos.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 20 (seção 7, External validity)"
+      },
+      {
+        "descricao": "Para a ameaça de construto, uso de métricas difundidas e de EM@k sobre diferentes números de candidatos.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 20 (seção 7, Construct validity)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão entre técnicas de prompting: no CodeAlpacaPy, o RAG tem EM@10 menor que o ICL com exemplos aleatórios, enquanto no Conala o RAG supera o ICL (CodeLlama-7B: 29.83 com ICL e 35.17 com RAG). Os valores de RAG no CodeAlpacaPy aparecem só como barras na Fig. 7, sem rótulo numérico.",
+        "localizador": "PDF p. 17 (Fig. 7 e seção 5.3, RAG vs. ICL vs. LoRA)"
+      },
+      {
+        "descricao": "Número ótimo de exemplos de ICL divergente entre seções: os achados principais dizem pico com oito exemplos no Conala e quatro no CodeAlpacaPy, enquanto a seção 5.1 diz que a maioria dos modelos atinge o melhor EM@10 com três ou quatro exemplos no CodeAlpacaPy. Também há queda de eficácia com mais de oito exemplos no Conala (adicionar exemplos degrada o resultado).",
+        "localizador": "PDF p. 4 (Main findings); PDF p. 12 (seção 5.1, Fig. 3)"
+      },
+      {
+        "descricao": "Condições discrepantes no ICL: CodeGen2 foi avaliado com menos exemplos que os demais modelos por consumo de memória; o CodeAlpacaPy usa até 8 exemplos no ICL e até 4 no RAG; na comparação com LoRA e RAG, o ICL é representado pela maior pontuação entre as configurações do RQ1, escolhida sobre os próprios resultados de avaliação. O estudo usa sementes diferentes para sortear os exemplos, sem informar quantas nem como os resultados foram agregados.",
+        "localizador": "PDF p. 12 (seção 5.1); PDF p. 10 (seção 4.3); PDF p. 16-17 (seção 5.3, Fig. 7, legenda); PDF p. 21 (seção 8)"
+      },
+      {
+        "descricao": "A resposta ao RQ1 chama CodeLlama-7B de melhor modelo e reporta 11.62 de EM@10 com ICL no CodeAlpacaPy, mas o parágrafo anterior atribui o pico no CodeAlpacaPy (11.94) ao CodeLlama-7B-Python; os rótulos da Fig. 7 (ICL: 11.62 para CL-7B e 11.94 para CL-7B-Python) coincidem com o texto.",
+        "localizador": "PDF p. 13 (seção 5.1 e Answer to RQ1); PDF p. 17 (Fig. 7)"
+      },
+      {
+        "descricao": "Inversão por métrica entre LoRA e ICL: no Conala, o texto afirma que o efeito do LoRA sobre CodeBLEU é menos pronunciado que o do ICL, embora o LoRA tenha EM@10 maior. Os valores de CodeBLEU por modelo na Fig. 6 não são rotulados numericamente.",
+        "localizador": "PDF p. 16 (Fig. 6); PDF p. 17 (seção 5.3, LoRA vs. ICL)"
+      },
+      {
+        "descricao": "Narrativa contra a tabela (fora do escopo de prompting): a discussão afirma que todos os PEFT estudados superam significativamente o full fine-tuning em SLMs como CodeGen-350M-mono e CodeT5+-770M, mas a Table 3 mostra, por exemplo, CodeGen-350M-mono no Conala com EM@10 de 18.42 (Full FT) e 12.52 (Prefix tuning), e no CodeAlpacaPy EM@10 de 5.73 (Full FT) e 0.0 (Prompt tuning e Prefix tuning). Nenhum teste estatístico é relatado para «significantly». A mesma passagem atribui o achado ao RQ1, mas a comparação está no RQ2.",
+        "localizador": "PDF p. 19 (seção 6, New findings for PEFT); PDF p. 14 (Table 3, colunas Conala EM@10 e CodeAlpacaPy EM@10)"
+      },
+      {
+        "descricao": "Aparente inconsistência (cálculo próprio, fora do escopo de prompting): o texto diz que o melhor LLM (CodeLlama-7B-Python com LoRA) supera o melhor SLM (CodeGen-350M-mono com LoRA) em 47.1% no CodeBLEU do Conala; com os valores LoRA da Table 3 (24.27 e 17.89) a razão seria cerca de 35.7%, e 47.1% corresponde a 26.31 (Prompt tuning do CodeLlama-7B-Python) sobre 17.89. Os demais percentuais (39.8%, 41.7%, 72.3%, 48.8%, 9.1%) são compatíveis com os valores LoRA. A fonte não explica a base usada.",
+        "localizador": "PDF p. 13 (seção 5.2, SLMs vs. LLMs); PDF p. 14 (Table 3, linhas CodeLlama-7B-Python e CodeGen-350M-mono)"
+      },
+      {
+        "descricao": "Narrativa contra a tabela no APPS (fora do escopo de prompting): a discussão diz que QLoRA-4bit superou LoRA e QLoRA-8bit no APPS, mas na Table 4 o nível competition tem Avg 6.93 (LoRA), 7.59 (QLoRA-8bit) e 6.66 (QLoRA-4bit), e o nível interview tem P@5 3.20 (LoRA) e 2.80 (QLoRA-4bit). No nível competition, todas as variantes ajustadas têm P@1 abaixo do modelo base (0.56). O texto do RQ4 fala em «+3.60%» de Pass@5 (8.80 para 12.40, diferença absoluta) e a resposta ao RQ4 em «40%» (variação relativa), misturando p.p. e variação relativa; «significant improvements» sem teste estatístico relatado.",
+        "localizador": "PDF p. 18 (Table 4; seção 5.4; Answer to RQ4); PDF p. 19 (seção 6, Effectiveness of QLoRA)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O objeto do estudo é o ajuste fino eficiente em parâmetros (PEFT); ICL, RAG e o prompt zero-shot entram como linhas de base. Os resultados de PEFT, Full FT e QLoRA não são prompting e ficam fora de tecnicas e extracoes.",
+        "localizador": "PDF p. 3 (Introduction); PDF p. 6 (seção 4)"
+      },
+      {
+        "descricao": "O contraste RAG contra ICL (Fig. 7; texto: CodeLlama-7B no Conala, 29.83 com ICL e 35.17 com RAG) é de prompting, mas envolve duas técnicas comparadoras e não técnica focal; por isso não entrou por cobertura.",
+        "localizador": "PDF p. 17 (Fig. 7 e seção 5.3)"
+      },
+      {
+        "descricao": "Durante o ajuste fino, os tokens do template de instrução são ignorados na perda (valor -100), para o modelo focar na geração do código; componente do ajuste fino, não do prompting.",
+        "localizador": "PDF p. 10 (seção 4.2, Task design)"
+      },
+      {
+        "descricao": "Todos os experimentos foram feitos com uma única GPU NVIDIA RTX A5000 de 24GB; código declarado público em https://github.com/martin-wey/peft-llm-code (não acessado nem validado nesta extração).",
+        "localizador": "PDF p. 11-12 (seção 4.6)"
+      },
+      {
+        "descricao": "Os autores afirmam que a implementação de ICL é simples (seleção aleatória de exemplos com sementes diferentes), sem intenção de explorar todo o potencial do ICL.",
+        "localizador": "PDF p. 21 (seção 8)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "Throughout our study, we compare all the studied models on a Python code generation task.", "localizador": "PDF p. 7 (seção 4.2)"},
+      {"trecho": "Second, we seek to compare the effectiveness of LLMs tuned with these PEFT techniques against SLMs, ICL, and RAG.", "localizador": "PDF p. 3 (Introduction)"},
+      {"trecho": "The prompt is in the form of an instruction template, where “### Instruction:” and “### Response:” play the role of delimiting the instruction, i.e., natural language intent, and the answer, i.e., code generation.", "localizador": "PDF p. 9 (seção 4.2, Task design)"},
+      {"trecho": "These examples are randomly sampled from the corresponding training datasets and concatenated with the input prompt during inference.", "localizador": "PDF p. 10 (seção 4.3)"},
+      {"trecho": "At inference time, we retrieve up to 16 examples for Conala and 4 examples for CodeAlpacaPy, selecting those with instructions most similar to the test input.", "localizador": "PDF p. 10 (seção 4.3)"},
+      {"trecho": "In RQ3, we conduct a comparative study of the effectiveness of LoRA with ICL and RAG, a strong baseline that dynamically retrieves relevant examples by selecting those closest to the test instructions from the training set.", "localizador": "PDF p. 3 (Introduction)"},
+      {"trecho": "For Prompt tuning and Prefix tuning, we prepended a set of 20 trainable continuous virtual tokens to each input sample of the models and applied learning rates of 3e − 3 and 3e − 2.", "localizador": "PDF p. 11 (seção 4.6)"},
+      {"trecho": "One concerns the introduction of extra input tokens in the prompt, which may be infeasible when the contextual information is too large.", "localizador": "PDF p. 5 (seção 2.1)"},
+      {"trecho": "If the retrieval mechanism fails to identify appropriate examples, it can inject irrelevant or misleading information into the prompt, ultimately degrading performance.", "localizador": "PDF p. 5 (seção 2.1)"},
+      {"trecho": "However, these techniques comes with its own set of challenges, including the selection of representative examples and sensitivity to prompt design [37, 74, 90].", "localizador": "PDF p. 5 (seção 3)"},
+      {"trecho": "In practice, increasing the number of ICL/RAG examples at inference entails increased computational overhead as the token length of the prompt expands.", "localizador": "PDF p. 19 (seção 6)"},
+      {"trecho": "We do not compare LoRA and QLoRA with ICL and RAG for this dataset because they require increasing the prompt length beyond 2,048 tokens, which leads to out-of-memory errors.", "localizador": "PDF p. 18 (seção 5.4)"},
+      {"trecho": "In this curated version of the dataset, the authors ensured that each sample in the validation and test sets contained at least one Python function that does not appear in the training set.", "localizador": "PDF p. 8 (seção 4.2)"},
+      {"trecho": "Thus, we can guarantee that each natural intent in the test does not appear in the training set.", "localizador": "PDF p. 8 (seção 4.2)"},
+      {"trecho": "Instead, we opted for a simple implementation of ICL by selecting random few-shot examples using different seeds.", "localizador": "PDF p. 21 (seção 8)"},
+      {"trecho": "Furthermore, we note that for the more challenging CodeAlpacaPy datasets, RAG yields lower EM@10 compared to randomly selected examples using ICL, highlighting RAG’s limitations when problem complexity increases.", "localizador": "PDF p. 17 (seção 5.3)"},
+      {"trecho": "Most models achieve their best EM@10 scores when using three or four examples.", "localizador": "PDF p. 12 (seção 5.1)"},
+      {"trecho": "Models achieve peak effectiveness with eight and four examples for Conala and CodeAlpacaPy, respectively.", "localizador": "PDF p. 4 (Main findings)"},
+      {"trecho": "We show that all PEFT techniques studied in this paper significantly outperform full fine-tuning for SLMs like CodeGen-350M-mono and CodeT5+-770M on the Conala and CodeAlpacaPy datasets (see Table 3), highlighting the clear advantages of PEFT in these scenarios.", "localizador": "PDF p. 19 (seção 6)"},
+      {"trecho": "Under the same 24GB GPU memory limitation, the best LLM surpasses the best small model by 39.8%, 41.7%, and 47.1% (72.3%, 48.8%, and 9.1%) in EM@1, EM@10, and CodeBLEU concerning the Conala (CodeAlpacaPy) dataset, respectively.", "localizador": "PDF p. 13 (seção 5.2)"},
+      {"trecho": "Notably, QLoRA-4bit outperformed LoRA and QLoRA-8bit on the Conala and APPs datasets.", "localizador": "PDF p. 19 (seção 6)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "In-Context Learning (ICL)",
+      "mecanismos": ["instrucao", "exemplos"],
+      "mecanismos_acrescentados": ["exemplos"],
+      "comparador": "zero-shot prompt (0 exemplos, mesmo template de instrução)",
+      "modelo": "CodeLlama-7B-Python",
+      "benchmark": "Conala (versão curada; teste com 543 amostras)",
+      "metrica": "EM@10",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 29.47},
+      "denominador": "nao_informado (o conjunto de teste do Conala tem 543 amostras, mas o estudo não liga explicitamente esse número ao denominador de EM@10)",
+      "condicoes": "Fig. 3 apresenta EM@10 com 0 (zero-shot), 1, 2, 3, 4, 5, 8 e 16 exemplos aleatórios do treino, sem rótulos numéricos; o valor zero-shot do CodeLlama-7B-Python não é impresso e não foi estimado pela posição do ponto (baseline = null). O valor da intervenção, 29.47, é o rótulo «ICL: 29.47» da Fig. 7 para CL-7B-Python no Conala, cuja legenda diz que as pontuações de ICL são as maiores obtidas por modelo no RQ1, e também aparece no texto da seção 5.3; é, portanto, o máximo entre as configurações de ICL do RQ1 (na Fig. 3 a estrela do CodeLlama-7B-Python no Conala fica em 8 exemplos, sem valor impresso). Geração com beam search de tamanho 10 e até 64 tokens; template «### Instruction:»/«### Response:». Exemplos sorteados com sementes diferentes; número de execuções/sementes e forma de agregação: nao_informado. Para contexto, o texto relata o contraste completo de outro modelo (CodeLlama-7B: 29.83 com ICL e 7.73 em zero-shot), não usado aqui porque a regra de ordem escolhe o primeiro modelo listado na figura. conferido_pdf = sim: Fig. 3 (p. 12), Fig. 7 (p. 17) e texto (p. 16) abertos visualmente.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O principal declarado do estudo é PEFT contra ICL/RAG, que não é contraste de prompting; nenhuma declaração do resumo, das contribuições ou da conclusão identifica técnica, métrica e comparador de prompting. Nenhuma tabela traz contraste de prompting (Table 3 só tem ajuste fino; Table 4 compara zero-shot com LoRA/QLoRA). A primeira figura com contraste elegível é a Fig. 3 (ICL contra zero-shot): primeira métrica EM@10, primeiro painel Conala, primeiro modelo da legenda CodeLlama-7B-Python, linha de base de prompting zero-shot (0 exemplos). Não há técnica focal de prompting para cobertura (ICL, RAG e zero-shot são comparadores do PEFT), nem ablação de prompting; por isso só uma extração.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 12 (Fig. 3, painel Conala); PDF p. 17 (Fig. 7, rótulo ICL de CL-7B-Python e legenda); PDF p. 16 (seção 5.3, LoRA vs. ICL)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "For example, CodeLlama-7B-Python with LoRA tuning achieves a 23.1% improvement in EM@10 on Conala (36.28 for LoRA vs. 29.47 for ICL).", "localizador": "PDF p. 16 (seção 5.3, LoRA vs. ICL)"},
+        {"trecho": "The ICL scores depict the highest scores achieved for each model in RQ1.", "localizador": "PDF p. 17 (legenda da Fig. 7)"},
+        {"trecho": "Answer to RQ1: ICL drastically improves the effectiveness of all models compared to zero-shot.", "localizador": "PDF p. 13 (Answer to RQ1)"},
+        {"trecho": "Our best model, CodeLlama-7B, achieves EM@10 scores of 29.83 (7.73) and 11.62 (7.01) on Conala and CodeAlpacaPy with ICL (zero-shot), respectively.", "localizador": "PDF p. 13 (Answer to RQ1)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo duplo explícito e quatro questões de pesquisa formuladas, incluindo o desempenho com ICL (RQ1) e a comparação de LoRA com ICL e RAG (RQ3).",
+      "localizador": "PDF p. 3 (Introduction); PDF p. 7 (seção 4.1)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Template do prompt, origem e número de exemplos de ICL, recuperador e número de exemplos do RAG, decodificação e hiperparâmetros são descritos; faltam o número de sementes do sorteio de exemplos do ICL e a forma de agregação entre sementes, e o número de exemplos varia por modelo e conjunto por limites de memória.",
+      "localizador": "PDF p. 9-10 (seções 4.2 e 4.3); PDF p. 11-12 (seção 4.6); PDF p. 12 (seção 5.1); PDF p. 21 (seção 8)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Zero-shot, ICL e RAG são executados no mesmo setup e modelos, mas o ICL é representado pela melhor configuração escolhida sobre os resultados de avaliação, o limite de exemplos difere entre ICL e RAG no CodeAlpacaPy, o RAG só é avaliado nos CodeLlama-7B e ICL/RAG não são executados no APPS; os autores reconhecem que a implementação de ICL é simples.",
+      "localizador": "PDF p. 16-17 (seção 5.3, Fig. 7); PDF p. 18 (seção 5.4); PDF p. 21 (seção 8)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas e tamanhos dos conjuntos de teste informados, mas o denominador de EM@k não é ligado explicitamente ao conjunto de teste e a agregação de EM@k sobre k candidatos é descrita apenas como «average correct predictions»; Conala e CodeAlpacaPy são avaliados só por correspondência (EM, CodeBLEU), sem execução, limitação reconhecida. Os valores de ICL coincidem entre texto e Fig. 7 (29.83, 29.47, 11.62, 11.94), mas há percentual do texto incompatível com a Table 3 (47.1% no CodeBLEU) e figuras sem rótulos numéricos (Fig. 3, Fig. 6, barras de RAG da Fig. 7).",
+      "localizador": "PDF p. 11 (seção 4.5); PDF p. 8 (seção 4.2); PDF p. 13-14 (seção 5.2, Table 3); PDF p. 17 (Fig. 7); PDF p. 20 (seção 7)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute ameaças externas (modelos, conjuntos, monolinguismo Python), internas (hiperparâmetros dos PEFT) e de construto (métricas), com as mitigações adotadas.",
+      "localizador": "PDF p. 20 (seção 7)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código declarado público, hardware, bibliotecas, hiperparâmetros, divisão dos conjuntos e template informados; faltam sementes e número de execuções do ICL e identificação de versão ou checkpoint dos modelos e do GTE-small. O pacote não foi acessado nesta extração.",
+      "localizador": "PDF p. 8-12 (seções 4.2 a 4.6)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Para o Conala, o estudo descreve a separação entre treino (fonte dos exemplos de ICL/RAG) e teste; para CodeAlpacaPy e APPS não descreve controle de sobreposição, e a contaminação por pré-treinamento dos modelos não é discutida.",
+      "localizador": "PDF p. 8 (seção 4.2)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1136 linhas, incluindo referências). Páginas do PDF abertas visualmente: p. 11 (seção 4.5 e 4.6), p. 12 (Fig. 3), p. 13 (seções 5.1-5.2), p. 14 (Table 3), p. 16 (Fig. 5 e Fig. 6), p. 17 (Fig. 7), p. 18 (Table 4). Páginas impressas coincidem com a posição no PDF."
+  }
+}

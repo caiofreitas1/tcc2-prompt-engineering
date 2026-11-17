@@ -1,0 +1,259 @@
+{
+  "estudo": "S588",
+  "texto_fonte": "fontes/textos/lote/S588.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Abdelaal, M.; Lokadjaja, S.; Engert, G. GLLM: Self-Corrective G-Code Generation using Large Language Models with User Feedback. arXiv:2501.17584v1 [cs.SE], 29 jan. 2025.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Structured prompts (parameter extraction for structured prompt creation; predefined G-code prompt template)",
+        "mecanismos": ["instrucao", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3, p-05; contribuição (3), p-03; RQ (2), p-10; Fig. 5b, p-11",
+        "observacao": "Pacote: o modelo extrai parâmetros da descrição (etapa encadeada antes da geração), organiza-os em dicionário Python, compara-os com um template de prompt que serve de checklist, pede ao usuário os valores ausentes e apresenta a trajetória para verificação. O contraste da Fig. 5b (structured vs. unstructured) compara o pacote com a condição sem ele; não isola template, extração de parâmetros ou verificação pelo usuário. O artigo não informa se RAG e o mecanismo autocorretivo estavam ativos nas condições da Fig. 5b; por isso `contexto` e `feedback` não foram listados como presentes (nao_informado). O texto do template e dos prompts não é apresentado."
+      },
+      {
+        "nome_original": "Unstructured prompts",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Fig. 5a e 5b, p-11",
+        "observacao": "Condição de base (descrição da tarefa em linguagem natural) usada como comparador de Structured prompts (Fig. 5b) e como condição em que RAG é comparado com No RAG (Fig. 5a). O conteúdo exato do prompt não estruturado é nao_informado."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 2, p-03–p-04; Seção 5.1, p-09–p-10; RQ (1), p-10; Fig. 5a, p-11",
+        "observacao": "Recupera trechos de PDFs com definições de comandos G-code e documentação da máquina CNC (embeddings do modelo de embedding da OpenAI, armazenados em FAISS; prompt de QA aumentado por recuperação obtido de um hub). Componente do sistema GLLM (contribuição 2), não a proposta principal. Contrafactual: com e sem RAG, somente com prompts não estruturados (Fig. 5a). Os documentos recuperados não são descritos como contendo exemplos resolvidos; por isso não se atribuiu `exemplos`."
+      },
+      {
+        "nome_original": "Self-corrective G-code generation (self-corrective code generation mechanism)",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4, p-06; Seção 4.1, p-07; Seção 4.2 e Algoritmo 1, p-08–p-09; Fig. 3, p-06; Fig. 5c, p-11",
+        "observacao": "Laço iterativo: verificação sintática, checagens específicas de G-code (código inalcançável após M30, movimentos rápidos com a ferramenta em corte, perfuração segura) e correção funcional por distância de Hausdorff contra a trajetória definida pelo usuário; a mensagem de erro é anexada ao prompt e devolvida ao modelo até passar ou atingir número máximo de iterações (valor nao_informado). Não há condição sem o mecanismo; a Fig. 5c relata apenas número médio de iterações por tarefa, sem valores impressos."
+      },
+      {
+        "nome_original": "Description decomposition strategy",
+        "mecanismos": ["instrucao", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3, p-05",
+        "observacao": "Apresentada como «novel prompt design»: infere o número de formas na descrição, divide-a em subtarefas (uma por forma), aplica a cada uma a extração de parâmetros e a geração autocorretiva (daí `feedback` no pacote) e integra os segmentos. Sem condição sem decomposição e sem resultado numérico próprio; a Tarefa #5 é citada como exemplo de uso."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Fine-tuned StarCoder-3B (PEFT, mixed precision training)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino do StarCoder-3B em dados de G-code extraídos do dataset Stack, com PEFT e treinamento em precisão mista; o modelo resultante (FT-StarCoder-3B) é um dos quatro avaliados e também faz a extração de parâmetros.",
+        "localizador": "Seção 2, p-03; Seção 3, p-05; Seção 5.1, p-09"
+      },
+      {
+        "nome_original": "Predetermined maximum number of iterations",
+        "natureza": "orcamento",
+        "descricao": "Limite máximo de iterações do laço autocorretivo; valor nao_informado.",
+        "localizador": "Seção 4, p-06; Seção 4.2, p-09"
+      },
+      {
+        "nome_original": "Postprocessing (G-Code Extraction and Parameters Adjustment)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento programático que remove texto extra da saída e ajusta parâmetros definidos pelo usuário (velocidade do fuso, avanço) no G-code final.",
+        "localizador": "Seção 2, p-04"
+      },
+      {
+        "nome_original": "Tool Path Simulation / CNC Path Visualization (CAMotics, custom Python script)",
+        "natureza": "outro",
+        "descricao": "Simulação e visualização 2D/3D da trajetória para verificação pelo usuário; não altera o prompt.",
+        "localizador": "Seção 2, p-03–p-04; Seção 5.1, p-10"
+      },
+      {
+        "nome_original": "Comparação entre GPT-3.5, Zephyr-7B, CodeLlama-7B e FT-StarCoder-3B",
+        "natureza": "selecao_modelo",
+        "descricao": "O estudo compara modelos abertos e proprietário com o mesmo sistema; diferenças entre modelos não são efeito de prompting.",
+        "localizador": "Seção 5, p-09; Seção 6, p-12"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5", "versao": "nao_informado", "observacao": "proprietário; snapshot nao_informado"},
+      {"nome": "Zephyr-7B", "versao": "nao_informado", "observacao": "usado na forma pré-treinada"},
+      {"nome": "CodeLlama-7B", "versao": "nao_informado", "observacao": "usado na forma pré-treinada; variante (base/instruct) nao_informado"},
+      {"nome": "FT-StarCoder-3B (StarCoder 3B com ajuste fino)", "versao": "nao_informado", "observacao": "ajustado no dataset Stack com PEFT"},
+      {"nome": "Modelo de embedding da OpenAI (RAG)", "versao": "nao_informado", "observacao": "nome do modelo nao_informado"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Seis tarefas próprias de geração de G-code (Fig. 4)",
+        "descricao": "Fresar quadrado (#1), hexágono (#2), forma irregular (#3), círculo (#4), bolsão retangular com duas ilhas circulares (#5) e furar uma grade de furos (#6).",
+        "quantidade": "6 tarefas",
+        "observacao": "Número de tentativas (trials) por tarefa e por execução: nao_informado. Resultados são média de cinco execuções independentes. Descrições textuais das tarefas não são apresentadas (exceto o exemplo da Fig. 1). Denominador da taxa de sucesso não é ligado ao tamanho do corpus.",
+        "localizador": "Seção 5.1, p-10; Fig. 4, p-10"
+      }
+    ],
+    "metricas": [
+      {"nome": "success rate / average success rate", "definicao": "proporção de tentativas em que o G-code gerado passou em todos os testes de validação", "denominador": "nao_informado (número de tentativas não informado)", "localizador": "Seção 5.1, p-10; Fig. 5a e 5b, p-11"},
+      {"nome": "average iterations / average # of iterations", "definicao": "número de ciclos de correção do mecanismo autocorretivo antes de produzir G-code válido", "denominador": "nao_informado", "localizador": "Seção 5.1, p-10; Fig. 5c, p-11"},
+      {"nome": "Hausdorff distance", "definicao": "distância entre a trajetória do G-code e a trajetória definida pelo usuário, usada na validação funcional com limiar", "denominador": "nao_aplicavel", "localizador": "Seção 4.2, p-08–p-09; limiar nao_informado"}
+    ],
+    "linguagens": ["G-code"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "LLMs treinados em texto geral têm dificuldade com a sintaxe e o formato do G-code; o código pode conter comandos inválidos (ex.: G022) ou comandos inalcançáveis após M30.",
+        "localizador": "Contribuição (2), p-02; Seção 4.1, p-07"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Segurança operacional da usinagem (não cibersegurança): movimentos rápidos (G0/G00) com a ferramenta em corte e movimentos horizontais abaixo da altura segura na perfuração podem danificar peça, ferramenta ou máquina.",
+        "localizador": "Seção 4.1, p-07"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "RAG com prompts não estruturados reduziu a taxa de sucesso em todos os modelos; os autores sugerem que RAG pode introduzir complexidades que prejudicam o desempenho.",
+        "localizador": "Seção 5.2 e Fig. 5a, p-11; p-12"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Laços infinitos no refinamento iterativo quando uma solução perfeita é inatingível, com tempo de execução ilimitado; tratado com limite de iterações; não quantificado.",
+        "localizador": "Seção 4, p-06"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Laço autocorretivo com validação sintática, checagens específicas de G-code e validação funcional por distância de Hausdorff, com erros devolvidos ao prompt.", "avaliada": "nao", "localizador": "Seções 4–4.2, p-06–p-09"},
+      {"descricao": "Checagens de segurança de movimentos rápidos com ferramenta em corte e de perfuração segura (Validate Safe Drilling).", "avaliada": "nao", "localizador": "Seção 4.1, p-07"},
+      {"descricao": "Número máximo de iterações para limitar o tempo de execução.", "avaliada": "nao", "localizador": "Seção 4, p-06"},
+      {"descricao": "Extração de parâmetros com template-checklist, solicitação ao usuário dos parâmetros ausentes e verificação pelo usuário da trajetória antes da geração.", "avaliada": "nao", "localizador": "Seção 3, p-05"},
+      {"descricao": "RAG implementado para melhorar a acurácia; comparado com a condição sem RAG (prompts não estruturados), com queda de desempenho.", "avaliada": "sim", "localizador": "Contribuição (2), p-02; Fig. 5a, p-11"},
+      {"descricao": "Resultados relatados como média de cinco execuções independentes.", "avaliada": "nao", "localizador": "Seção 5.1, p-10"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Unstructured prompts (comparador de Structured prompts, Fig. 5b); No RAG com prompts não estruturados (comparador de RAG, Fig. 5a). Sem condição sem o mecanismo autocorretivo.",
+    "so_classificadas": [
+      {"tecnica": "Self-corrective G-code generation", "motivo": "Técnica focal sem condição sem o mecanismo; a Fig. 5c relata apenas número médio de iterações por tarefa e modelo, em gráfico de barras sem valores impressos; o estudo tem comparador executado para outras técnicas, portanto não cabe extração descritiva."},
+      {"tecnica": "Description decomposition strategy", "motivo": "Técnica focal sem contraste com e sem decomposição e sem resultado numérico próprio."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Resultado inverso para RAG: com prompts não estruturados, todos os modelos tiveram taxa de sucesso maior sem RAG; os autores dizem que o resultado exige investigação adicional.", "localizador": "Seção 5.2 e Fig. 5a, p-11; p-12"},
+      {"descricao": "A narrativa afirma que prompts estruturados superam os não estruturados «across all models and tasks», mas a Fig. 5b mostra empates em 100.00 em várias células (CodeLlama-7B Task 1; FT-StarCoder-3B Tasks 1 e 2; GPT-3.5 Task 2; Zephyr-7B Tasks 1 e 2).", "localizador": "p-12; Fig. 5b, p-11"},
+      {"descricao": "A narrativa afirma que CodeLlama-7B e FT-StarCoder-3B atingem taxas de sucesso perfeitas com entradas estruturadas, mas a linha FT-StarCoder-3B-Structured da Fig. 5b traz 80.00 na Task 4.", "localizador": "p-12; Fig. 5b, p-11"},
+      {"descricao": "A narrativa diz que, com prompts não estruturados, as taxas caem significativamente nas tarefas 3 e 4, «particularly for CodeLlama-7B and GPT-3.5»; na Fig. 5b os menores valores não estruturados estão nas Tasks 4 e 5 (0.00 na Task 5 para CodeLlama-7B, FT-StarCoder-3B e Zephyr-7B; GPT-3.5 30.00 na Task 5).", "localizador": "Seção 5.2, p-11; Fig. 5b, p-11"},
+      {"descricao": "Aparente inconsistência entre figuras (cálculo próprio): o texto da Fig. 5a dá aproximadamente 80% de sucesso sem RAG para CodeLlama-7B com prompts não estruturados; a média simples (cálculo próprio) da linha CodeLlama-7B-Unstructured da Fig. 5b (100.00, 90.00, 70.00, 20.00, 0.00, 90.00) é 61,67. O artigo não informa se a condição não estruturada da Fig. 5b usa RAG nem se a Fig. 5a usa as mesmas tarefas e tentativas; não é possível decidir qual valor representa a mesma condição.", "localizador": "Seção 5.2, Fig. 5a e 5b, p-11"},
+      {"descricao": "Denominador não informado: a taxa de sucesso é proporção de tentativas, média de cinco execuções, mas o número de tentativas por execução e por tarefa não é informado; valores como 90.00, 70.00 e 10.00 não são múltiplos de 20, o que é compatível apenas com mais de uma tentativa por execução — aparente lacuna, não inconsistência demonstrada.", "localizador": "Seção 5.1, p-10; Fig. 5b, p-11"},
+      {"descricao": "A taxa de sucesso é medida pelos mesmos testes de validação (incluindo limiar de Hausdorff não informado) que alimentam o laço autocorretivo; não há verificação independente da correção do G-code além desses testes.", "localizador": "Seção 4.2, p-09; Seção 5.1, p-10"},
+      {"descricao": "Os valores das Figs. 5a e 5c não são impressos (gráficos de barras), e as afirmações sobre elas (ex.: GPT-3.5 com maior número de iterações nas tarefas 4 e 5) não podem ser conferidas numericamente; a Fig. 5a tem eixo vertical iniciado em 50.", "localizador": "Fig. 5a e 5c, p-11"},
+      {"descricao": "A conclusão afirma que o artigo foca a comparação entre modelos abertos e proprietários e que modelos abertos alcançam desempenho comparável com prompts estruturados e mecanismos autocorretivos, mas nenhuma das três questões de pesquisa trata dessa comparação e não há teste estatístico.", "localizador": "Seção 5, p-09; RQs, p-10; Seção 6, p-12"}
+    ],
+    "observacoes": [
+      {"descricao": "A extração de parâmetros é descrita como feita pelo FT-StarCoder-3B; o artigo não informa se essa etapa permanece com o FT-StarCoder-3B quando os outros modelos geram o código.", "localizador": "Seção 3, p-05; Seção 5.1, p-09"},
+      {"descricao": "O RAG usa o modelo de embedding da OpenAI, embora a contribuição (1) enfatize modelos abertos para controle e privacidade.", "localizador": "Contribuição (1), p-02; Seção 5.1, p-09"},
+      {"descricao": "Esforço manual descrito: o usuário precisa baixar o G-code e importá-lo manualmente no CAMotics para visualização 3D; também valida parâmetros extraídos e fornece parâmetros ausentes.", "localizador": "Seção 5.1, p-10; Seção 3, p-05"},
+      {"descricao": "Implementação com LangGraph (LangChain), FAISS e interface Streamlit; parâmetros de decodificação não informados; o modelo ajustado foi publicado no Hugging Face, sem link impresso.", "localizador": "Seção 5.1, p-09–p-10"},
+      {"descricao": "Não há tabela de ablação de prompting nem matriz de ingredientes; o único contraste de componente é RAG vs. No RAG (Fig. 5a).", "localizador": "Seção 5.2, p-11"}
+    ],
+    "citacoes": [
+      {"trecho": "GLLM employs advanced prompting strategies and a novel self-corrective code generation approach to ensure both syntactic and semantic correctness of the generated G-code.", "localizador": "Abstract, p-01"},
+      {"trecho": "(3) Advanced Prompting Strategies: We designed a novel prompting strategy and input representation to effectively guide LLMs toward accurate G-code generation.", "localizador": "Introdução, p-03"},
+      {"trecho": "Concurrently, Prompt Engineering refines the user’s input by incorporating a predefined Prompt Template and leveraging a Retrieval Augmented Generation (RAG) mechanism.", "localizador": "Seção 2, p-03"},
+      {"trecho": "This dictionary is then compared against a predefined G-code prompt template that outlines all the necessary parameters for G-code generation.", "localizador": "Seção 3, p-05"},
+      {"trecho": "If any parameters are found to be missing, the system prompts the user to provide the undefined values.", "localizador": "Seção 3, p-05"},
+      {"trecho": "To address this multi-shape scenario, GLLM employs a description decomposition strategy.", "localizador": "Seção 3, p-05"},
+      {"trecho": "The identified errors are then used to augment the initial G-code generation prompt.", "localizador": "Seção 2, p-04"},
+      {"trecho": "Conversely, if the distance exceeds the threshold, an error signal, incorporating the calculated Hausdorff distance value, is appended to the original input prompt and fed back to the LLM.", "localizador": "Seção 4.2, p-09"},
+      {"trecho": "This ensures both a high level of accuracy and a bounded execution time, preventing infinite loops in cases where a perfect solution might be unattainable.", "localizador": "Seção 4, p-06"},
+      {"trecho": "Recognizing that LLMs trained on general text data often struggle with the specific syntax and formatting of G-code, we incorporated domain-specific training data.", "localizador": "Introdução, contribuição (2), p-02"},
+      {"trecho": "Moreover, we implemented a Retrieval-Augmented Generation (RAG) mechanism to improve accuracy.", "localizador": "Introdução, contribuição (2), p-02"},
+      {"trecho": "These lines are flagged as potential errors, prompting the model to revise the code and ensure all commands are logically reachable within the program’s flow.", "localizador": "Seção 4.1, p-07"},
+      {"trecho": "If a rapid movement command is detected while the tool is actively cutting, the system flags a potential safety violation.", "localizador": "Seção 4.1, p-07"},
+      {"trecho": "This check analyzes the generated G-code to guarantee the machine drills only at the specified depths and avoids any unintended horizontal movements at those depths, which could lead to tool breakage or damage to the workpiece.", "localizador": "Seção 4.1, p-07"},
+      {"trecho": "(1) Does RAG exclusively benefit LLM performance when using unstructured prompts?", "localizador": "Seção 5.1, p-10"},
+      {"trecho": "The success rate is defined as the proportion of trials where the generated G-code passed all validation tests.", "localizador": "Seção 5.1, p-10"},
+      {"trecho": "All reported results represent the average of five independent experimental runs.", "localizador": "Seção 5.1, p-10"},
+      {"trecho": "This indicates that the models are more effective in handling unstructured prompts independently, and RAG may introduce complexities that hinder their performance.", "localizador": "Seção 5.2, p-11"},
+      {"trecho": "Structured prompts consistently outperform unstructured ones across all models and tasks, with CodeLlama-7B and FT-StarCoder-3B achieving perfect success rates when using structured inputs.", "localizador": "Seção 5.2, p-12"},
+      {"trecho": "Zephyr and CodeLlama, two 7B parameter models, have been employed in their pre-trained form.", "localizador": "Seção 5.1, p-09"},
+      {"trecho": "While the G-code is generated within our web interface, users must download the code and manually import it into the CAMotics environment for visualization.", "localizador": "Seção 5.1, p-10"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "No RAG (prompts não estruturados)",
+      "modelo": "CodeLlama-7B",
+      "benchmark": "Seis tarefas próprias de geração de G-code (Fig. 4)",
+      "metrica": "Average Success Rate (taxa de sucesso média)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": null},
+      "denominador": "nao_informado",
+      "condicoes": "Prompts não estruturados, com e sem RAG; média sobre tarefas e cinco execuções independentes (o número de tentativas é nao_informado). A Fig. 5a é gráfico de barras sem valores impressos; conferida visualmente na p-11, os valores não foram estimados pela altura das barras. A prosa informa apenas que, sem RAG, CodeLlama-7B e FT-StarCoder-3B chegam a «approximately 80%» de sucesso; o valor com RAG não é impresso. Não se informa se o mecanismo autocorretivo estava ativo nem o número máximo de iterações. Parâmetros de decodificação nao_informado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca várias técnicas (prompts estruturados, mecanismo autocorretivo, RAG) e duas métricas (success rate e average iterations) sem que uma prevaleça. O artigo não tem tabelas; a primeira figura com contraste elegível de prompting é a Fig. 5a (RAG vs. No RAG); primeiro modelo listado: CodeLlama-7B; métrica: taxa de sucesso média.",
+      "derivacao": "direta",
+      "localizador": "Fig. 5a, p-11 (Seção 5.2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "The results reveal that all models achieve higher success rates without RAG, with CodeLlama-7B and FT-StarCoder-3B reaching approximately 80% success.", "localizador": "Seção 5.2, p-11"},
+        {"trecho": "In contrast, the incorporation of RAG results in a noticeable decrease in performance across all models, suggesting that RAG may not be beneficial for improving success rates with unstructured prompts in this context.", "localizador": "Seção 5.2, p-11"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Structured prompts",
+      "mecanismos": ["instrucao", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+      "comparador": "Unstructured prompts",
+      "modelo": "CodeLlama-7B",
+      "benchmark": "Tarefa #1 (fresar um quadrado) das seis tarefas próprias de G-code",
+      "metrica": "success rate",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 100.00, "intervencao": 100.00},
+      "denominador": "nao_informado",
+      "condicoes": "Fig. 5b (heatmap), CodeLlama-7B, Task ID 1; sem agregado impresso por modelo, por isso usou-se a primeira tarefa. Média de cinco execuções independentes; número de tentativas nao_informado. Não se informa se RAG e o mecanismo autocorretivo estavam ativos nas duas condições. conferido_pdf = nao: a imagem da p-11 foi aberta, mas a resolução não permite ler os números das células; os valores vêm da camada de texto do PDF (linhas com rótulo e seis valores), e a ordem dos rótulos e o padrão de cores visíveis no heatmap são coerentes com ela. O ganho, quando houver em outras tarefas, é do pacote structured prompts, não de um ingrediente isolado.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (structured prompts) ainda não representada; primeira figura com o contraste é a Fig. 5b; primeiro modelo listado CodeLlama-7B; primeira condição (Task ID 1).",
+      "derivacao": "direta",
+      "localizador": "Fig. 5b, p-11 (Seção 5.2)",
+      "conferido_pdf": "nao",
+      "citacoes": [
+        {"trecho": "CodeLlama-7B-Structured 100.00 100.00 100.00 100.00 100.00 100.00", "localizador": "Fig. 5b (heatmap), linha Model & Prompt Type, colunas Task ID 1–6, p-11"},
+        {"trecho": "CodeLlama-7B-Unstructured 100.00 90.00 70.00 20.00 0.00 90.00", "localizador": "Fig. 5b (heatmap), linha Model & Prompt Type, colunas Task ID 1–6, p-11"},
+        {"trecho": "Each cell shows the success rate, representing the percentage of times the model successfully generated an accurate G-code for the given task.", "localizador": "Seção 5.2, p-11"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "O objetivo (gerar G-code a partir de linguagem natural) e três questões de pesquisa explícitas sobre RAG, prompts estruturados e mecanismo autocorretivo são declarados.", "localizador": "Abstract, p-01; Seção 5.1, p-10"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Arquitetura, validações e seis tarefas são descritas, mas não se informam as descrições das tarefas, o template e os prompts, o número de tentativas, o limiar de Hausdorff, o limite de iterações, nem quais componentes (RAG, autocorreção) estavam ativos em cada figura.", "localizador": "Seções 2–5.1, p-03–p-10"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparadores executados (prompts não estruturados; sem RAG), mas não há condição sem o mecanismo autocorretivo nem sem decomposição, e as condições das comparações não são totalmente especificadas.", "localizador": "Fig. 5a–5c, p-11"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Taxa de sucesso e iterações médias são definidas, mas o denominador (número de tentativas) não é informado, as Figs. 5a e 5c não imprimem valores e a narrativa diverge da Fig. 5b (ex.: «perfect success rates» vs. 80.00); o valor de ~80% sem RAG na Fig. 5a não se reconcilia claramente com a Fig. 5b.", "localizador": "Seção 5.1, p-10; Seção 5.2, p-11–p-12"},
+    {"criterio": "ameacas", "julgamento": "nao_informado", "justificativa": "O artigo não discute ameaças à validade; apenas registra que o resultado de RAG merece investigação futura.", "localizador": "Seção 5.2, p-12; Seção 6, p-12"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos, frameworks (LangGraph, FAISS, Streamlit) e o número de execuções são informados, mas faltam prompts, template, descrições das tarefas, limiares, parâmetros de decodificação e link para código ou modelo ajustado (apenas menção de upload ao Hugging Face).", "localizador": "Seção 5.1, p-09–p-10"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo não discute possível presença das tarefas ou soluções nos dados de pré-treinamento ou de ajuste fino (dataset Stack).", "localizador": "Seção 5.1, p-09"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (12 páginas). Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04, p-05, p-06, p-07, p-09, p-10, p-11, p-12. Não há numeração impressa visível nas imagens; localizadores usam a posição no arquivo. Os números das células da Fig. 5b não são legíveis na resolução da imagem; os valores foram tomados da camada de texto do PDF."
+  }
+}

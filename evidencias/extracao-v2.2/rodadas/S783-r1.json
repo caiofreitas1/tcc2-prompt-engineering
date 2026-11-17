@@ -1,0 +1,435 @@
+{
+  "estudo": "S783",
+  "texto_fonte": "fontes/textos/lote/S783.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2506.10484v2 [cs.SE], 8 May 2026 (margem da p. 1 do PDF); publicado em Proc. ACM Softw. Eng. 3, FSE, Article FSE174 (July 2026), DOI 10.1145/3808181. As páginas do PDF coincidem com a paginação impressa FSE174:N.",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "ExpeRepair",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (resumo); p. 2–3 do PDF (Seção 1, contribuições); p. 3–8 do PDF (Seção 2); p. 10 do PDF (Seção 3.5); p. 11 do PDF (Tabela 1)",
+        "observacao": "Framework proposto: Program Repair Module (agente de teste e agente de patch, com prompts de tarefa, contexto da issue, feedback de execução iterativo via ReAct, localização hierárquica, várias amostras de patch e seleção final por LLM) mais Memory Module (memória episódica com demonstrações recuperadas por BM25 e memória semântica com insights resumidos e atualizados por ADD/EDIT/REMOVE e anexados ao prompt de tarefa). Mecanismos: instrucao (prompt de tarefa com papel, requisitos e insights como diretrizes); restricoes (formato estrito do patch, requisitos do script de teste); contexto (descrição da issue, estrutura do repositório, conteúdo de arquivos, linhas localizadas, demonstrações recuperadas); exemplos (demonstrações como exemplos em contexto); raciocinio (fase FIX ANALYSIS antes da implementação; ReAct); decomposicao (encadeamento geração de teste → localização → geração de patch → validação); feedback (resultados de execução da tentativa anterior); multiagente (agentes de teste e de patch que colaboram); amostragem (vários patches candidatos e seleção por LLM); otimizacao_prompt (atualização automática dos insights da memória semântica, que o estudo chama de «lightweight auto-prompting technique»). Pacote híbrido: inclui recuperação BM25, execução de testes e ferramentas, e componentes fora do escopo (fallback para o4-mini, temperatura alta). Na Tabela 1 é comparado com sistemas externos cujos resultados foram copiados de leaderboard ou artigos; não existe condição «sem ExpeRepair» com o mesmo restante do sistema, por isso nao/nenhum para o framework inteiro. As ablações isolam módulos (ver Memory Module, Episodic Memory e Semantic Memory)."
+      },
+      {
+        "nome_original": "Program Repair Module (test agent e patch agent com prompts estáticos)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3–4 do PDF (Seção 2.1.1); p. 5–7 do PDF (Seção 2.2 e prompts de teste e de patch); p. 10 do PDF (Seção 3.5)",
+        "observacao": "Prompt base comum a todas as condições da ablação; corresponde à condição «w/o Memory Module» da Tabela 2 e à fase inicial, em que os prompts permanecem estáticos. Não há condição sem este módulo."
+      },
+      {
+        "nome_original": "Memory Module (Episodic Memory + Semantic Memory; dynamic prompt composition)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["contexto", "exemplos", "instrucao", "otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 7–8 do PDF (Seção 2.3); p. 11–12 do PDF (Seção 4.2.1; Tabela 2, linhas «ExpeRepair» e «w/o Memory Module»)",
+        "observacao": "Contrafactual de pacote: ExpeRepair completo contra «w/o Memory Module», que remove as duas memórias e trata cada issue isoladamente, com Claude 3.5 Sonnet. Ingredientes acrescentados: demonstrações recuperadas (contexto e exemplos) e insights anexados ao prompt de tarefa (instrucao) mantidos por resumo e atualização automática (otimizacao_prompt); contexto e instrucao já existem no prompt base por outros ingredientes. O sim do pacote não autoriza atribuir o ganho a uma das memórias isoladamente. O pacote inclui recuperação BM25 e o limite de 15 insights."
+      },
+      {
+        "nome_original": "Episodic Memory",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7 do PDF (Seção 2.3.1); p. 8 do PDF (Seção 2.3.2); p. 11–12 do PDF (Tabela 2, linha «w/o Episodic Memory»); p. 14–15 do PDF (Fig. 4(a); Seção 4.4.1)",
+        "observacao": "Demonstrações (pares entrada/saída bem-sucedida e tuplas entrada/saída falha/feedback/saída bem-sucedida) de issues anteriores do mesmo repositório, recuperadas por BM25 (top-3) e inseridas como exemplos em contexto. A condição «w/o Episodic Memory» mantém a memória semântica. A Fig. 4(a) varia k de 0 a 5; k = 0 reproduz os valores de «w/o Episodic Memory» (44,7% e 52,8%, segundo o texto da p. 15)."
+      },
+      {
+        "nome_original": "Semantic Memory",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["instrucao", "otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7–8 do PDF (Seção 2.3.1 e prompt de resumo e atualização); p. 8 do PDF (Seção 2.3.2); p. 11–12 do PDF (Tabela 2, linha «w/o Semantic Memory»); p. 14–15 do PDF (Fig. 4(b); Seção 4.4.2)",
+        "observacao": "Insights em linguagem natural resumidos pelo LLM a partir de trajetórias de reparo anteriores (análise de por que tentativas falharam ou tiveram sucesso), atualizados por ADD/EDIT/REMOVE, limitados a 15 e anexados ao prompt de tarefa dos dois agentes. A reflexão ocorre entre issues, não sobre a saída da tentativa corrente; por isso foi classificada como instrucao e otimizacao_prompt, e não como feedback. A condição «w/o Semantic Memory» mantém a memória episódica. A Fig. 4(b) varia o número de insights de 0 a 25."
+      },
+      {
+        "nome_original": "Term-Based Retrieval (BM25)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10 do PDF (Memory Activation); p. 12–13 do PDF (Seção 4.2.2; Fig. 2)",
+        "observacao": "Estratégia de seleção dos exemplos da memória episódica. A Fig. 2 compara estratégias substitutas (BM25, embeddings, híbrida), todas com memória episódica presente; é substituição, não condição com e sem o ingrediente. A condição sem recuperação é «w/o Episodic Memory»."
+      },
+      {
+        "nome_original": "Embedding-Based Retrieval (Multilingual-E5-Large)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 12–13 do PDF (Seção 4.2.2; Fig. 2)",
+        "observacao": "Alternativa à BM25 na recuperação de demonstrações, por similaridade de cosseno entre embeddings do Multilingual-E5-Large. Valores só na Fig. 2, com rótulos ilegíveis na imagem; não extraídos."
+      },
+      {
+        "nome_original": "Hybrid Retrieval",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 12–13 do PDF (Seção 4.2.2; Fig. 2)",
+        "observacao": "Combinação linear dos escores de BM25 e embeddings com pesos α e 1−α; α varrido em {0.3, 0.4, 0.5, 0.6, 0.7} e relatado só o melhor resultado. Valores só na Fig. 2, com rótulos ilegíveis; não extraídos."
+      },
+      {
+        "nome_original": "REMOVE (operação de atualização da memória semântica)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7–8 do PDF (Seção 2.3.1 e prompt de atualização); p. 13 do PDF (Seção 4.2.3; Fig. 2)",
+        "observacao": "A Fig. 2 traz quatro variantes (Only ADD, ADD+EDIT, ADD+REMOVE, ADD+EDIT+REMOVE); ADD+EDIT+REMOVE contra ADD+EDIT difere apenas em REMOVE. Nas variantes, quando os insights excedem o limite de entrada, as entradas mais antigas são truncadas. Valores só na Fig. 2, com rótulos ilegíveis; o texto informa apenas um ganho de 3,6 p.p. no Verified «over ADD-only», sem dizer qual variante com REMOVE."
+      },
+      {
+        "nome_original": "EDIT (operação de atualização da memória semântica)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7–8 do PDF (Seção 2.3.1); p. 13 do PDF (Seção 4.2.3; Fig. 2)",
+        "observacao": "ADD+EDIT+REMOVE contra ADD+REMOVE difere apenas em EDIT. Valores só na Fig. 2, com rótulos ilegíveis; não extraídos."
+      },
+      {
+        "nome_original": "SWE-agent",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9 do PDF (Seção 3.3); p. 11 do PDF (Tabela 1)",
+        "observacao": "Sistema comparador (Claude 3.5 Sonnet) descrito só como interface agente–computador para uso autônomo de ferramentas; os prompts não são descritos no estudo, por isso mecanismos não foram atribuídos. Resultado copiado do leaderboard oficial ou do artigo/repositório da ferramenta, não reexecutado. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Aider, AutoCodeRover, SpecRover, Agentless-1.5, OpenHands, PatchPilot, DARS",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9 do PDF (Seção 3.3); p. 11 do PDF (Tabela 1)",
+        "observacao": "Demais sistemas comparadores da Tabela 1, com LLMs diferentes entre si (por exemplo, GPT-4o + Claude 3 Opus no Aider; GPT-4o no AutoCodeRover; «CodeAct v2.1» na coluna LLM do OpenHands; Claude 3.5 Sonnet + DeepSeek R1 no DARS). O estudo descreve só a arquitetura geral (por exemplo, Agentless com fases de localização, reparo e validação; OpenHands com crítico e «experience banks»; PatchPilot com cinco etapas), sem os prompts; mecanismos não atribuídos. Resultados copiados de leaderboard ou artigos, não reexecutados; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "o4-mini (fallback)",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelo acionado em menos de 1% das chamadas quando há indisponibilidade temporária da API; aparece no rótulo das linhas do ExpeRepair na Tabela 1. Não altera o prompt.",
+        "localizador": "p. 10 do PDF (Seção 3.5); p. 11 do PDF (Tabela 1); p. 13–14 do PDF (Seção 4.3)"
+      },
+      {
+        "nome_original": "multiple samplings with a high temperature",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura alta na geração de patches candidatos; valor da temperatura nao_informado. A geração de vários candidatos com seleção entra como amostragem no pacote de prompting; só o parâmetro de temperatura fica fora do escopo.",
+        "localizador": "p. 6 do PDF (Seção 2.2.2)"
+      },
+      {
+        "nome_original": "foundation models (o1-mini, DeepSeek-R1, Claude 3.5 Sonnet, Claude 4 Sonnet)",
+        "natureza": "selecao_modelo",
+        "descricao": "RQ3 troca o modelo de base mantendo os demais componentes; Tabela 1 também apresenta o ExpeRepair com Claude 3.5 Sonnet e com Claude 4 Sonnet. Efeito de escolha de modelo, não de prompting.",
+        "localizador": "p. 11 do PDF (Tabela 1); p. 13–14 do PDF (Seção 4.3; Fig. 3)"
+      },
+      {
+        "nome_original": "truncation of the oldest entries to stay within the input budget",
+        "natureza": "orcamento",
+        "descricao": "Nas variantes de atualização da memória semântica, as entradas mais antigas são truncadas quando os insights excedem o limite de entrada do modelo.",
+        "localizador": "p. 13 do PDF (Seção 4.2.3)"
+      }
+    ],
+    "modelos": [
+      {"nome": "Claude 3.5 Sonnet [3]", "versao": "nao_informado no texto; a referência [3] tem o título «Claude 3.5 Sonnet V2»; snapshot nao_informado", "uso": "modelo principal do ExpeRepair na Tabela 1, em todas as ablações e na análise de sensibilidade"},
+      {"nome": "Claude 4 Sonnet [4]", "versao": "nao_informado", "uso": "ExpeRepair na Tabela 1 e na Fig. 3"},
+      {"nome": "o4-mini", "versao": "nao_informado", "uso": "fallback em menos de 1% das chamadas"},
+      {"nome": "o1-mini [30]", "versao": "nao_informado", "uso": "RQ3 (Fig. 3)"},
+      {"nome": "DeepSeek-R1 [12]", "versao": "nao_informado", "uso": "RQ3 (Fig. 3)"},
+      {"nome": "Multilingual-E5-Large [41]", "versao": "nao_informado", "uso": "embeddings na ablação de recuperação (Fig. 2)"},
+      {"nome": "LLMs dos sistemas comparadores (Claude 3.5 Sonnet; GPT-4o; Claude 3 Opus; DeepSeek R1; «CodeAct v2.1» na linha do OpenHands)", "versao": "nao_informado", "uso": "resultados relatados por terceiros na Tabela 1"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "SWE-Bench Lite [21]",
+        "quantidade": "300 GitHub issues de projetos Python",
+        "observacao": "As cinco primeiras issues de cada repositório são usadas na fase inicial para popular as memórias e também entram no total avaliado, na ordem sequencial padrão. A memória é acumulada sobre as próprias issues do benchmark, por repositório. A análise longitudinal usa os três repositórios com mais issues (Django, SymPy, Matplotlib), com contagens nao_informado."
+      },
+      {
+        "nome": "SWE-Bench Verified [10]",
+        "quantidade": "nao_informado",
+        "observacao": "Descrito como subconjunto curado pela OpenAI, com issues validadas por desenvolvedores humanos; o número de issues não é informado no estudo."
+      }
+    ],
+    "metricas": [
+      {"nome": "pass@1 (%)", "definicao": "percentual de issues resolvidas na primeira tentativa; o texto também a chama de resolution rate", "localizador": "p. 9 do PDF (Seção 3.4); p. 10–12 do PDF (Tabelas 1 e 2)"},
+      {"nome": "Average Cost / AVG Cost ($)", "definicao": "custo médio de inferência por instância em USD; base de preço nao_informado", "localizador": "p. 10 do PDF (Seção 3.4); p. 11 do PDF (Tabela 1)"},
+      {"nome": "Execution Success Rate (ESR, %)", "definicao": "percentual de scripts de reprodução gerados que executam sem erro; denominador (número de scripts) nao_informado", "localizador": "p. 10 do PDF (Seção 3.4); p. 12 do PDF (Tabela 2)"},
+      {"nome": "Reproduction Success Rate (RSR, %)", "definicao": "percentual de scripts de reprodução que reproduzem a issue, verificado manualmente por anotadores humanos; número de anotadores, concordância e denominador nao_informado", "localizador": "p. 10 do PDF (Seção 3.4); p. 12 do PDF (Tabela 2)"},
+      {"nome": "cumulative resolution rate", "definicao": "proporção de issues resolvidas entre as processadas até cada ponto, por repositório", "localizador": "p. 17–18 do PDF (Seção 5.3; Fig. 7)"},
+      {"nome": "contagem de issues resolvidas por interseção de métodos", "definicao": "análise de sobreposição no SWE-Bench Lite", "localizador": "p. 17 do PDF (Seção 5.2; Fig. 6)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível vazamento de dados: os LLMs podem ter sido treinados em repositórios abertos que se sobrepõem aos benchmarks públicos, e os resultados podem refletir exposição prévia. O estudo não afirma contaminação efetiva.",
+        "localizador": "p. 18–19 do PDF (Seção 5.5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Scripts de reprodução focam estreitamente os sintomas da issue, gerando falsos positivos: patches que passam nos testes limitados e falham em contextos mais amplos. LLMs também geram patches incompletos em issues de repositório.",
+        "localizador": "p. 6 do PDF (Seção 2.2.2); p. 7 do PDF (Seção 2.2.3)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Conteúdo recuperado pode induzir soluções inadequadas: a recuperação densa às vezes retorna issues semanticamente relacionadas mas causalmente diferentes; demonstrações demais elevam o risco de incorporar conteúdo menos relevante e diluir a atenção; insights acumulados sem remoção podem saturar o contexto e introduzir ruído.",
+        "localizador": "p. 12 do PDF (Seção 4.2.2); p. 13 do PDF (Seção 4.2.3); p. 15 do PDF (Seção 4.4.1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A eficácia cai quando não há experiência prévia relevante: quatro das seis issues resolvidas só pelo DARS exigem soluções novas com poucos análogos no repositório. Há também problema de partida a frio (cold-start) sem memórias iniciais.",
+        "localizador": "p. 3 do PDF (Seção 2.1); p. 18 do PDF (Seção 5.2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada: poucos LLMs avaliados (possível viés de seleção de modelos) e avaliação restrita a projetos Python.",
+        "localizador": "p. 19 do PDF (Seção 5.5)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A localização de falhas não é otimizada pela memória porque não há oráculo automático para verificar a correção da localização.",
+        "localizador": "p. 18 do PDF (Seção 5.4)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso do SWE-Bench, descrito como mais recente e menos suscetível a contaminação, em vez de benchmarks antigos como Defects4J; ênfase no processo de raciocínio. Não há verificação empírica de contaminação.",
+        "avaliada": "nao",
+        "localizador": "p. 18–19 do PDF (Seção 5.5)"
+      },
+      {
+        "descricao": "Validação de patch: revisão e aumento do patch, 3 testes de validação para casos de borda, 4 patches aumentados e seleção final por LLM, para reduzir falsos positivos. Sem condição sem validação.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção 2.2.3); p. 10 do PDF (Seção 3.5)"
+      },
+      {
+        "descricao": "Operação REMOVE para controlar o crescimento da memória e eliminar ruído, medida contra variantes sem REMOVE (Fig. 2).",
+        "avaliada": "sim",
+        "localizador": "p. 13 do PDF (Seção 4.2.3; Fig. 2)"
+      },
+      {
+        "descricao": "Limite de 15 insights na memória semântica, com variação de 0 a 25 na análise de sensibilidade (Fig. 4(b)).",
+        "avaliada": "sim",
+        "localizador": "p. 10 do PDF (Seção 3.5); p. 14–15 do PDF (Fig. 4(b); Seção 4.4.2)"
+      },
+      {
+        "descricao": "Sem dados externos como issues semente, e inclusão das issues semente no total avaliado, para comparação justa com as linhas de base.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF (Seção 2.1.1); p. 10 do PDF (Seção 4.1)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Na Tabela 1, oito sistemas open-source (SWE-agent, Aider, AutoCodeRover, SpecRover, Agentless-1.5, OpenHands, PatchPilot, DARS) com resultados copiados do leaderboard oficial ou de artigos/repositórios das ferramentas, no mesmo benchmark e métrica; na Tabela 2, ablações executadas pelo estudo com Claude 3.5 Sonnet (w/o Memory Module, w/o Episodic Memory, w/o Semantic Memory).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os valores das linhas de base da Tabela 1 não foram reexecutados: vêm do leaderboard oficial ou de artigos/repositórios, com LLMs diferentes do ExpeRepair (por exemplo, GPT-4o no AutoCodeRover; GPT-4o + Claude 3 Opus no Aider; Claude 3.5 Sonnet + DeepSeek R1 no DARS) e várias células sem valor («-»). Na linha do OpenHands, a coluna LLM traz «CodeAct v2.1», que não identifica o modelo.",
+        "localizador": "p. 11 do PDF (Tabela 1, legenda e coluna LLM)"
+      },
+      {
+        "descricao": "O resumo destaca 60,3% e 74,6% (Claude 4 Sonnet + o4-mini) como melhor desempenho entre os métodos avaliados, mas nenhuma linha de base da Tabela 1 usa Claude 4 Sonnet; com Claude 3.5 Sonnet, o ExpeRepair tem 48,3% e 57,2%.",
+        "localizador": "p. 1 do PDF (resumo); p. 11 do PDF (Tabela 1)"
+      },
+      {
+        "descricao": "Narrativa aparentemente divergente da tabela: o texto diz que o ExpeRepair supera PatchPilot e OpenHands, que chegam a 45,3% e 41,7% «with comparable or slightly higher costs»; na Tabela 1 o custo médio do ExpeRepair com Claude 3.5 Sonnet (1.89) é maior que o do PatchPilot (0.97) e o do OpenHands (1.33). A frase não deixa claro de qual método é o custo mais alto.",
+        "localizador": "p. 11 do PDF (texto após a Tabela 1; Tabela 1, coluna SWE-Bench Lite AVG Cost ($))"
+      },
+      {
+        "descricao": "A seção de ameaças afirma que o ExpeRepair supera linhas de base «built on the same underlying models», mas parte das linhas de base da Tabela 1 usa outros modelos e os valores não foram reexecutados pelo estudo.",
+        "localizador": "p. 19 do PDF (Seção 5.5); p. 11 do PDF (Tabela 1)"
+      },
+      {
+        "descricao": "A introdução afirma que as abordagens atuais tratam cada issue isoladamente e ignoram experiência histórica, mas a descrição da linha de base OpenHands menciona «experience banks».",
+        "localizador": "p. 2 do PDF (Seção 1); p. 9 do PDF (Seção 3.3)"
+      },
+      {
+        "descricao": "A memória é construída sobre as próprias issues do benchmark avaliado, processadas na ordem sequencial, e as cinco primeiras issues de cada repositório (semente) entram no total; a Seção 4.1 diz apenas «the first five issues». O resultado depende da ordem de processamento, e a análise longitudinal mostra alta volatilidade nas primeiras cerca de 20 issues.",
+        "localizador": "p. 4 do PDF (Seção 2.1.1); p. 10 do PDF (Seção 4.1); p. 18 do PDF (Seção 5.3; Fig. 7)"
+      },
+      {
+        "descricao": "Número de execuções, sementes e variabilidade não são informados; a temperatura é descrita apenas como alta. Não há teste estatístico nem intervalo de confiança para as diferenças de pass@1 entre condições.",
+        "localizador": "p. 6 do PDF (Seção 2.2.2); p. 10–12 do PDF (Seções 3.5, 4.1 e 4.2)"
+      },
+      {
+        "descricao": "pass@1 é definido como resolução na primeira tentativa, mas o sistema gera vários candidatos por iteração e seleciona um patch final por LLM; a métrica conta a submissão final única, não a primeira amostra.",
+        "localizador": "p. 9 do PDF (Seção 3.4); p. 10 do PDF (Seção 3.5)"
+      },
+      {
+        "descricao": "Denominadores: o tamanho do SWE-Bench Verified não é informado; os denominadores de ESR e RSR (número de scripts de reprodução) não são informados; o RSR depende de verificação manual sem número de anotadores nem concordância.",
+        "localizador": "p. 9–10 do PDF (Seções 3.2 e 3.4); p. 12 do PDF (Tabela 2)"
+      },
+      {
+        "descricao": "Os valores de Embedding-Based e Hybrid Retrieval e das variantes de atualização da memória semântica estão só na Fig. 2, com rótulos ilegíveis na imagem; o texto diz que REMOVE melhora o pass@1 em 3,6 p.p. no Verified «over ADD-only» sem indicar qual variante com REMOVE, e a variante híbrida reporta só o melhor α da varredura.",
+        "localizador": "p. 12–13 do PDF (Seções 4.2.2 e 4.2.3; Fig. 2)"
+      },
+      {
+        "descricao": "A resposta à RQ4 afirma desempenho quase ótimo para 10–20 insights e k = 2–4, mas os valores para k = 2, 4 e 10 insights aparecem só na Fig. 4 e não são legíveis com segurança; o texto informa queda para 45,3% (Lite) e 55,6% (Verified) com k = 5.",
+        "localizador": "p. 14 do PDF (Fig. 4); p. 15 do PDF (Seções 4.4.1 e 4.4.2; RQ4)"
+      },
+      {
+        "descricao": "O ganho da Tabela 1 é de um sistema híbrido (agentes, execução de testes, recuperação BM25, seleção por LLM, fallback de modelo) contra outros sistemas; não é efeito isolado de prompting.",
+        "localizador": "p. 3–10 do PDF (Seções 2 e 3.5); p. 11 do PDF (Tabela 1)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Geração de testes de reprodução é etapa interna do reparo (o agente de teste gera scripts que validam os patches); ESR e RSR medem essa etapa. A tarefa avaliada no desfecho principal é reparo de issues (depuração).",
+        "localizador": "p. 5 do PDF (Seção 2.2.1); p. 10 do PDF (Seção 3.4)"
+      },
+      {
+        "descricao": "Parâmetros: agente de teste com até 3 rodadas; agente de patch com até 3 iterações e 4 candidatos por iteração; 3 testes de validação; 4 patches aumentados; top-3 demonstrações por BM25; até 15 insights; no máximo quatro operações de atualização por papel em cada issue. Localização hierárquica (arquivos suspeitos e depois linhas) feita pelo LLM.",
+        "localizador": "p. 6 do PDF (Seção 2.2.2); p. 8 do PDF (prompt de atualização); p. 10 do PDF (Seção 3.5)"
+      },
+      {
+        "descricao": "Análise de sensibilidade (Fig. 4): k de 0 a 5 demonstrações e 0 a 25 insights; pico em k = 3 e 15 insights (48,3% e 57,2%), segundo o texto. Parâmetros de prompting do mesmo pacote, não técnicas distintas.",
+        "localizador": "p. 14–15 do PDF (Seção 4.4; Fig. 4)"
+      },
+      {
+        "descricao": "Estudos de caso qualitativos (SymPy com memória semântica; Django com memória episódica) e análise de interseção: ExpeRepair resolve 8 issues exclusivas no Lite, seis delas com padrões recorrentes segundo inspeção manual dos autores (sem número de inspetores informado).",
+        "localizador": "p. 15–17 do PDF (Seção 5.1; Fig. 5); p. 17 do PDF (Seção 5.2; Fig. 6)"
+      },
+      {
+        "descricao": "Os autores imprimem o endereço do código (https://github.com/ExpeRepair/ExpeRepair) e dizem que os prompts restantes estão no site do projeto; o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 1 do PDF (resumo); p. 10 do PDF (Seção 3.5); p. 20 do PDF (Seção 8)"
+      },
+      {
+        "descricao": "Custo médio por instância é relatado (1.89 e 1.96 USD para o ExpeRepair no Lite), mas o estudo o apresenta como vantagem competitiva, não como risco; não foi registrado em riscos.",
+        "localizador": "p. 11 do PDF (Tabela 1 e texto)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "We propose ExpeRepair, a novel LLM-based program repair framework inspired by the dual-memory systems of human cognition, where episodic and semantic memory synergistically support learning and decision-making.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "It further enhances adaptability through dynamic prompt composition, integrating both memory types to replace static prompts with context-aware, experience-driven prompts.", "localizador": "p. 1 do PDF, resumo"},
+      {"trecho": "The repair module orchestrates a test agent and a patch agent, which collaboratively perform test generation, patch generation, and patch validation for each issue.", "localizador": "p. 2–3 do PDF, Seção 1"},
+      {"trecho": "The retrieved demonstrations are then incorporated into the agent’s prompts as in-context examples, offering concrete precedents for constructing accurate reproduction scripts or patches.", "localizador": "p. 8 do PDF, Seção 2.3.2"},
+      {"trecho": "This mechanism, effectively serving as a lightweight auto-prompting technique [36, 37, 45], incrementally improves repair effectiveness by guiding agents with accumulated semantic experience.", "localizador": "p. 8 do PDF, Seção 2.3.2"},
+      {"trecho": "Write the patch using the strict format specified below:", "localizador": "p. 6 do PDF, Prompt for Patch Generation"},
+      {"trecho": "In each iteration, we perform multiple samplings with a high temperature to generate diverse candidate patches.", "localizador": "p. 6 do PDF, Seção 2.2.2"},
+      {"trecho": "Then, we pass candidate patches and their corresponding test results to the LLM, which selects the final patch based on criteria such as correctness and adherence to best practices.", "localizador": "p. 7 do PDF, Seção 2.2.3"},
+      {"trecho": "This is because we empirically observed that reproduction scripts typically focus narrowly on the specific symptoms described in the issue, leading to false positives where patches pass limited tests but fail in broader contexts.", "localizador": "p. 7 do PDF, Seção 2.2.3"},
+      {"trecho": "o4-mini is invoked only in rare fallback cases (less than 1% of total LLM calls) when temporary API unavailability occurs, following a practice similar to SpecRover [35].", "localizador": "p. 10 do PDF, Seção 3.5"},
+      {"trecho": "For baselines, we directly use the reported results either from the official leaderboard or from the tool’s official paper/repository.", "localizador": "p. 11 do PDF, legenda da Tabela 1"},
+      {"trecho": "Unless otherwise specified, all experiments use Claude 3.5 Sonnet as the foundation model.", "localizador": "p. 11 do PDF, Seção 4.2"},
+      {"trecho": "Dense retrieval occasionally returns semantically related yet causally different issues.", "localizador": "p. 12 do PDF, Seção 4.2.2"},
+      {"trecho": "Figure 2 shows that variants without REMOVE consistently underperform, as accumulated insights can saturate the prompt context and introduce noise.", "localizador": "p. 13 do PDF, Seção 4.2.3"},
+      {"trecho": "At the same time, issues solved exclusively by DARS highlight a limitation of ExpeRepair: its effectiveness drops when relevant prior experience is unavailable.", "localizador": "p. 18 do PDF, Seção 5.2"},
+      {"trecho": "This raises the risk that evaluation results reflect prior exposure rather than genuine generalization.", "localizador": "p. 18 do PDF, Seção 5.5"},
+      {"trecho": "To mitigate this concern, we avoid long-standing APR benchmarks (e.g., Defects4J [22]), which are more likely to have been included in model training corpora.", "localizador": "p. 18 do PDF, Seção 5.5"},
+      {"trecho": "Our evaluation is limited to open-source projects implemented in Python, constraining our ability to demonstrate cross-language effectiveness.", "localizador": "p. 19 do PDF, Seção 5.5"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ExpeRepair",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+      "mecanismos_acrescentados": [],
+      "comparador": "SWE-agent (Claude 3.5 Sonnet), resultado relatado no leaderboard oficial ou no artigo/repositório da ferramenta",
+      "modelo": "ExpeRepair: Claude 3.5 Sonnet + o4-mini (fallback em menos de 1% das chamadas); SWE-agent: Claude 3.5 Sonnet",
+      "benchmark": "SWE-Bench Lite",
+      "metrica": "pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 23.0, "intervencao": 48.3},
+      "denominador": "ExpeRepair: SWE-Bench Lite com 300 issues, avaliadas todas, incluindo as issues semente (p. 9 e p. 10 do PDF); SWE-agent: denominador não informado no estudo (valor copiado de terceiros)",
+      "condicoes": "Comparação entre sistemas, não contraste isolado de prompting: o valor do SWE-agent não foi reexecutado e vem do leaderboard ou do artigo/repositório; o ExpeRepair é pacote híbrido (agentes, execução de testes, recuperação BM25, seleção por LLM, fallback para o4-mini). ExpeRepair: até 3 rodadas de geração de teste; até 3 iterações de patch com 4 candidatos cada; 3 testes de validação e 4 patches aumentados; seleção final por LLM; top-3 demonstrações por BM25; até 15 insights; temperatura alta (valor nao_informado); memória acumulada sequencialmente sobre as issues do próprio benchmark, por repositório. Número de execuções: nao_informado. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 11.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca ExpeRepair e pass@1, mas contra «the evaluated open-source methods» (vários comparadores, sem um único), em dois benchmarks e com dois modelos. Primeira tabela com o contraste: Tabela 1; primeira métrica pass@1 (%); primeiro modelo do ExpeRepair listado (Claude 3.5 Sonnet + o4-mini); primeira linha de base listada (SWE-agent); primeira coluna de benchmark (SWE-Bench Lite). Linhas de base relatadas na tabela de resultados contam como comparador (D102).",
+      "derivacao": "direta",
+      "localizador": "p. 11 do PDF (impressa FSE174:11), Tabela 1, linhas «SWE-agent» e «ExpeRepair / Claude 3.5 Sonnet + o4-mini», coluna SWE-Bench Lite pass@1 (%)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SWE-agent | Claude 3.5 Sonnet | 23.0 | 1.62 | 33.6 | 1.59", "localizador": "p. 11 do PDF, Tabela 1, colunas Method | LLM | SWE-Bench Lite pass@1 (%) | AVG Cost ($) | SWE-Bench Verified pass@1 (%) | AVG Cost ($)"},
+        {"trecho": "ExpeRepair | Claude 3.5 Sonnet + o4-mini | 48.3 | 1.89 | 57.2 | 1.74", "localizador": "p. 11 do PDF, Tabela 1, colunas Method | LLM | SWE-Bench Lite pass@1 (%) | AVG Cost ($) | SWE-Bench Verified pass@1 (%) | AVG Cost ($)"},
+        {"trecho": "Using Claude 3.5 Sonnet, ExpeRepair resolves 48.3% of issues on SWE-Bench Lite and 57.2% on SWE-Bench Verified, surpassing all previously published open-source approaches, including PatchPilot [24] and DARS [11].", "localizador": "p. 11 do PDF, Seção 4.1"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Memory Module (Episodic Memory + Semantic Memory; dynamic prompt composition)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "instrucao", "otimizacao_prompt"],
+      "comparador": "w/o Memory Module (remove as memórias episódica e semântica; cada issue tratada isoladamente, com prompts estáticos)",
+      "modelo": "Claude 3.5 Sonnet",
+      "benchmark": "SWE-Bench Lite",
+      "metrica": "pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 42.3, "intervencao": 48.3},
+      "denominador": "SWE-Bench Lite com 300 issues (p. 9 do PDF); a Tabela 2 não informa o denominador por condição",
+      "condicoes": "Ablação executada pelo estudo com Claude 3.5 Sonnet; demais componentes do Program Repair Module mantidos. Contrafactual de pacote: o ganho é do conjunto das duas memórias (com recuperação BM25 top-3 e até 15 insights), não de um ingrediente. Número de execuções: nao_informado; sem teste estatístico. conferido_pdf: valores e cabeçalhos conferidos na imagem da p. 12.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Não há outra técnica focal nem outra tarefa a cobrir; componentes isolados completam o alvo de três, primeiro os da tabela de ablação, na ordem da tabela. Primeira linha de ablação da Tabela 2 (w/o Memory Module); primeira métrica (pass@1); primeiro benchmark (SWE-Bench Lite).",
+      "derivacao": "direta",
+      "localizador": "p. 12 do PDF (impressa FSE174:12), Tabela 2, linhas «ExpeRepair» e «w/o Memory Module», coluna SWE-Bench Lite pass@1 (%); p. 11–12 do PDF, Seção 4.2.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "ExpeRepair | 48.3 | 82.0 | 78.7 | 57.2 | 84.6 | 82.2", "localizador": "p. 12 do PDF, Tabela 2, colunas Method | SWE-Bench Lite pass@1 (%) | ESR (%) | RSR (%) | SWE-Bench Verified pass@1 (%) | ESR (%) | RSR (%)"},
+        {"trecho": "w/o Memory Module | 42.3 | 61.3 | 57.7 | 50.4 | 59.6 | 57.0", "localizador": "p. 12 do PDF, Tabela 2, colunas Method | SWE-Bench Lite pass@1 (%) | ESR (%) | RSR (%) | SWE-Bench Verified pass@1 (%) | ESR (%) | RSR (%)"},
+        {"trecho": "As shown in Table 2, removing the Memory Module leads to the most significant performance degradation, with the resolution rate dropping from 48.3% to 42.3% on SWE-Bench Lite and from 57.2% to 50.4% on SWE-Bench Verified.", "localizador": "p. 12 do PDF, Seção 4.2.1"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Episodic Memory",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "raciocinio", "decomposicao", "feedback", "multiagente", "amostragem", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "w/o Episodic Memory (remove as demonstrações em contexto; mantém a memória semântica)",
+      "modelo": "Claude 3.5 Sonnet",
+      "benchmark": "SWE-Bench Lite",
+      "metrica": "pass@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 44.7, "intervencao": 48.3},
+      "denominador": "SWE-Bench Lite com 300 issues (p. 9 do PDF); a Tabela 2 não informa o denominador por condição",
+      "condicoes": "Ablação executada pelo estudo com Claude 3.5 Sonnet; ingrediente retirado: demonstrações recuperadas por BM25 (top-3) nas gerações de teste e de patch; memória semântica mantida. Número de execuções: nao_informado; sem teste estatístico. O valor de 44,7% coincide com k = 0 na Seção 4.4.1 (texto da p. 15). conferido_pdf: valores e cabeçalhos conferidos na imagem da p. 12.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda linha de ablação da Tabela 2, na ordem da tabela, para completar o alvo de três; primeira métrica (pass@1) e primeiro benchmark (SWE-Bench Lite). A memória semântica (terceira linha) ficou fora pelo alvo.",
+      "derivacao": "direta",
+      "localizador": "p. 12 do PDF (impressa FSE174:12), Tabela 2, linhas «ExpeRepair» e «w/o Episodic Memory», coluna SWE-Bench Lite pass@1 (%); p. 11–12 do PDF, Seção 4.2.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "ExpeRepair | 48.3 | 82.0 | 78.7 | 57.2 | 84.6 | 82.2", "localizador": "p. 12 do PDF, Tabela 2, colunas Method | SWE-Bench Lite pass@1 (%) | ESR (%) | RSR (%) | SWE-Bench Verified pass@1 (%) | ESR (%) | RSR (%)"},
+        {"trecho": "w/o Episodic Memory | 44.7 | 68.0 | 65.0 | 52.8 | 68.4 | 64.6", "localizador": "p. 12 do PDF, Tabela 2, colunas Method | SWE-Bench Lite pass@1 (%) | ESR (%) | RSR (%) | SWE-Bench Verified pass@1 (%) | ESR (%) | RSR (%)"},
+        {"trecho": "The pass@1 decreases to 44.7% on SWE-Bench Lite and 52.8% on SWE-Bench Verified, accompanied by ESR and RSR reductions of 14.0/13.7 pp on Lite and 16.2/17.6 pp on Verified.", "localizador": "p. 12 do PDF, Seção 4.2.1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Problema (experiência histórica ignorada e prompts estáticos), proposta e quatro questões de pesquisa explícitas.", "localizador": "p. 2–3 do PDF (Seção 1); p. 8–9 do PDF (Seção 3.1)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Fluxo, prompts principais e parâmetros de iteração e amostragem descritos; mas temperatura sem valor, número de execuções e sementes não informados, prompts restantes só no site do projeto, e resultado dependente da ordem de processamento das issues.", "localizador": "p. 3–8 do PDF (Seção 2); p. 10 do PDF (Seção 3.5)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Ablações executadas com o mesmo modelo e benchmarks; mas as linhas de base da Tabela 1 não foram reexecutadas, vêm de leaderboard ou artigos e usam LLMs diferentes, com células ausentes.", "localizador": "p. 11 do PDF (Tabela 1 e legenda); p. 11–13 do PDF (Seção 4.2)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "pass@1, custo, ESR e RSR definidos, e os valores de pass@1 coincidem entre Tabela 1, Tabela 2 e o texto da Seção 4.4; mas o tamanho do SWE-Bench Verified e os denominadores de ESR e RSR não são informados, o RSR depende de anotação manual sem detalhes, e não há variabilidade nem teste estatístico.", "localizador": "p. 9–10 do PDF (Seções 3.2 e 3.4); p. 11–12 do PDF (Tabelas 1 e 2); p. 15 do PDF (Seção 4.4)"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seções próprias de limitação (localização sem oráculo) e de ameaças (vazamento de dados, poucos modelos, só Python), além da limitação sem experiência prévia na análise de interseção.", "localizador": "p. 18 do PDF (Seções 5.2 e 5.4); p. 18–19 do PDF (Seção 5.5)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Código e prompts declarados como públicos e parâmetros principais informados; versões ou snapshots dos modelos não informados, temperatura sem valor, prompts restantes fora do artigo; o pacote não foi acessado nesta extração.", "localizador": "p. 1 do PDF (resumo); p. 10 do PDF (Seção 3.5); p. 20 do PDF (Seção 8)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O risco de vazamento é discutido e mitigado pela escolha do SWE-Bench em vez de Defects4J, mas sem verificação empírica; a avaliação em benchmarks sem contaminação fica para trabalho futuro.", "localizador": "p. 18–19 do PDF (Seção 5.5)"}
+  ],
+  "leitura": "completa; texto extraído lido integralmente (994 linhas). Páginas do PDF abertas visualmente: p. 9, 10, 11 (Tabela 1), 12 (Tabela 2), 13 (Fig. 2), 14 (Figs. 3 e 4) e 15. Os rótulos numéricos das Figs. 2, 3 e 4 são pequenos demais para leitura segura na imagem; os números dessas figuras citados vêm do texto."
+}

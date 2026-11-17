@@ -1,0 +1,312 @@
+{
+  "estudo_id": "S303",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RepairAgent",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.1 (Abstract); p.2 (contribuições); p.3, Tabela I e seção III-C; p.4, Fig. 2 e Fig. 3; p.5-6, seção III-D e Tabela II",
+        "observacao": "Pacote híbrido: prompt dinâmico (papel, objetivos e diretrizes → instrucao; padrões de correção com exemplo de código defeituoso e corrigido → exemplos; comentários e campo 'thoughts' → raciocinio; estados da máquina de estados → decomposicao; seção de informação coletada, código lido/buscado e testes falhos → contexto; resultados de testes e do último comando → feedback; formato JSON e ferramentas permitidas por estado → restricoes; write_fix amostra até 30 variantes testadas → amostragem) somado a ferramentas, middleware (correção heurística da saída) e execução isolada em Docker. Não há condição 'sem agente' executada no estudo: as linhas de base (ChatRepair, ITER, SelfAPR) não foram executadas pelos autores, que usaram patches fornecidos pelos autores dessas abordagens (p.7), e ITER e SelfAPR usam modelos autotreinados, não prompting (p.9). A ablação (Tabela VI, p.9) isola componentes, não o pacote. Nenhuma base identificável, por isso mecanismos_acrescentados vazio."
+      },
+      {
+        "nome_original": "search tools (search_code_base, find_similar_api_calls)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p.5, seção III-D-2; p.6, Tabela II; p.9, Tabela VI (linha 'No search tools') e parágrafo 'Importance of search tools'",
+        "observacao": "Ablação 'No search tools' contra 'RepairAgent (default)' nos mesmos 100 bugs. As ferramentas de busca trazem código do repositório para a seção de informação coletada do prompt (contexto). O estudo não diz se a ferramenta generate_method_body, agrupada na Tabela II sob 'Search and generate code', também foi retirada; o texto chama de 'search tools' as ferramentas search_code_base e find_similar_api_calls (p.5)."
+      },
+      {
+        "nome_original": "state machine",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p.4, Fig. 2 e seção III-C-4 (State Description); p.9, Tabela VI (linha 'No state machine') e parágrafo 'Importance of state machine'",
+        "observacao": "Máquina de estados finitos que restringe as ferramentas disponíveis por estado (restricoes, D102) e organiza o reparo em estados/etapas ('Understand the bug', 'Collect information to fix the bug', 'Try to fix the bug') informados no prompt (decomposicao). Os objetivos estáticos (Goals) permanecem nas duas condições e foram classificados como instrucao."
+      },
+      {
+        "nome_original": "long-term memory (Gathered information)",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p.4, seção III-C-6 (Gathered Information); p.9-10, Tabela VI (linha 'Single-cycle memory') e parágrafo 'Importance of long-term memory'",
+        "observacao": "A variante 'Single-cycle memory' mantém informação nova por um único ciclo em vez de acumular toda a informação coletada. A categoria contexto existe nas duas condições; o ingrediente acrescentado é o acúmulo da informação coletada entre ciclos, classificado como contexto."
+      },
+      {
+        "nome_original": "recurring fix patterns (Guidelines)",
+        "mecanismos": ["instrucao", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.3, seção III-C-3 (Guidelines)",
+        "observacao": "Lista de padrões de correção recorrentes com descrição curta e exemplo de código defeituoso e corrigido; não há condição sem a lista."
+      },
+      {
+        "nome_original": "comments above the modified code / \"thoughts\" field",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.3, seção III-C-3; p.4, seção III-C-7 e Fig. 3",
+        "observacao": "Instrução para comentar o raciocínio no código e campo 'thoughts' no formato de saída; não isolados."
+      },
+      {
+        "nome_original": "Specification of output format (JSON)",
+        "mecanismos": ["restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.3, Tabela I; p.4, seção III-C-7 e Fig. 3; p.6, Fig. 5",
+        "observacao": "Formato JSON de resposta (thoughts/command) e de patch para write_fix; não isolado."
+      },
+      {
+        "nome_original": "write_fix (sampling of multiple fix variants with test validation)",
+        "mecanismos": ["feedback", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem", "feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.6, Tabela II e texto da seção III-D-3",
+        "observacao": "A ferramenta pede ao LLM até 30 variantes da correção sugerida, remove duplicatas e executa os testes para cada variante; mudanças são revertidas se os testes falham. Não há condição sem amostragem."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p.7, seção V-A-b (Baselines); p.8, Tabelas III e IV; p.9 (comparação de custos)",
+        "observacao": "Sistema comparador de prompting iterativo com GPT-3.5 descrito apenas em termos gerais (prompt com o código defeituoso e feedback de tentativas anteriores, p.1-2 e p.7). Não foi executado neste estudo: a comparação usa patches fornecidos pelos autores da abordagem (p.7); seus mecanismos não são isolados. O contraste foi registrado em heterogeneidade, não em extracoes."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "run_fault_localization (perfect fault localization / GZoltar)",
+        "natureza": "outro",
+        "descricao": "Insumo de localização de falhas: por padrão, localização perfeita (oráculo com arquivos e linhas a editar); na variante 'Realistic localization', GZoltar baseado em espectro. É condição experimental do insumo, não técnica de prompting.",
+        "localizador": "p.5, seção III-D-3; p.9-10, Tabela VI e parágrafo 'Impact of fault localization'"
+      },
+      {
+        "nome_original": "Middleware: Parsing and Refining LLM Output",
+        "natureza": "outro",
+        "descricao": "Pós-processamento heurístico da resposta do LLM (mapeamento de nomes de ferramentas e argumentos por substring e distância de Levenshtein, limiar 0,1) e detecção de comandos repetidos.",
+        "localizador": "p.6-7, seção III-E-1"
+      },
+      {
+        "nome_original": "isolated environment (Docker)",
+        "natureza": "outro",
+        "descricao": "Execução dos comandos em contêiner Docker para não interferir no ambiente hospedeiro.",
+        "localizador": "p.7, seções III-E-2 e IV"
+      },
+      {
+        "nome_original": "maximum number of cycles (40 by default)",
+        "natureza": "orcamento",
+        "descricao": "Orçamento de ciclos de interação com o LLM; o prompt também informa ciclos executados e restantes.",
+        "localizador": "p.3, seção III-C-3; p.5, início da coluna esquerda"
+      },
+      {
+        "nome_original": "generate_method_body token limits",
+        "natureza": "decodificacao",
+        "descricao": "A ferramenta limita o contexto de código a 12k tokens e a geração a 4k tokens.",
+        "localizador": "p.5, seção III-D-2"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5-0125 (OpenAI)", "uso": "agente RepairAgent e LLM gerador de código da ferramenta generate_method_body ('the same LLM')", "localizador": "p.7, seção IV; p.5, seção III-D-2"},
+      {"nome": "GPT-3.5 (ChatRepair)", "versao": "nao_informado", "uso": "linha de base não executada neste estudo", "localizador": "p.9, 'Comparison to prior work'; p.11, Threats"},
+      {"nome": "modelos autotreinados de ITER e SelfAPR", "versao": "nao_informado", "uso": "linhas de base não executadas e que não são prompting", "localizador": "p.9"}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J", "quantidade": "835 bugs de 17 projetos Java: 395 bugs de 6 projetos em Defects4Jv1.2 e 440 bugs de 11 projetos em Defects4Jv2", "observacao": "A soma impressa das linhas de projeto da Tabela III na coluna Bugs é 834 (cálculo próprio), diferente do Total 835.", "localizador": "p.7, seção V-A-a; p.8, Tabela III"},
+      {"nome": "Defects4J (subconjunto da ablação)", "quantidade": "100 bugs selecionados aleatoriamente (os mesmos 100 para todas as configurações), dos quais o RepairAgent completo corrige 21", "localizador": "p.9, seção V-D"},
+      {"nome": "GitBug-Java", "quantidade": "199 bugs de 55 projetos; amostra aleatória de 100 bugs (19 single-line, 64 multi-line, 17 multi-file), no mínimo um e no máximo dois por projeto", "localizador": "p.7, seção V-A-a; p.9, Tabela V"}
+    ],
+    "metricas": [
+      {"nome": "Plausible (número de bugs com correção plausível)", "definicao": "correção que passa todos os casos de teste, não necessariamente correta", "denominador": "835 (Tabela III), 100 (Tabela V), 100 (Tabela VI)", "localizador": "p.7, seção V-A-c; p.8-9, Tabelas III, V e VI"},
+      {"nome": "Correct (número de bugs com correção correta)", "definicao": "correspondência sintática com a correção do desenvolvedor ou, se não houver, consistência semântica determinada manualmente", "denominador": "835 (Tabela III), 100 (Tabela V), 100 (Tabela VI)", "localizador": "p.7, seção V-A-c; p.8-9, Tabelas III, IV, V e VI"},
+      {"nome": "Distribuição de correções por tipo (Single-line, Multi-line, Multi-file; SL/ML/MF)", "localizador": "p.8, Tabela IV; p.9, Tabelas V e VI"},
+      {"nome": "Tempo por bug (mediana, segundos)", "localizador": "p.9, seção V-C; p.10, Fig. 9a"},
+      {"nome": "Tokens consumidos por bug e custo monetário (US$, preços OpenAI de março de 2024); Cost($) na ablação", "localizador": "p.9, seção V-C e Tabela VI; p.10, Fig. 9b"},
+      {"nome": "Frequência de invocação de ferramentas (média por bug)", "localizador": "p.10, Fig. 10 e seção V-E"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {"categoria": "contaminacao", "descricao": "O GPT-3.5 pode ter visto partes dos projetos Java avaliados durante o treinamento; o estudo usa o GitBug-Java (bugs de 2023, após o corte de janeiro de 2022) para examinar o risco, sem afirmar contaminação efetiva.", "localizador": "p.11, seção VI-B (i); p.7, seção V-A-a"},
+      {"categoria": "correcao_funcional", "descricao": "Correções plausíveis passam todos os testes mas não são necessariamente corretas; o agente às vezes sugere correções complexas para bugs simples e, em bugs multi-linha e multi-arquivo, frequentemente edita só parte dos locais necessários.", "localizador": "p.7, seção V-A-c; p.8, seção V-B-1; p.11, seção VI-A"},
+      {"categoria": "correcao_funcional", "descricao": "Localização de falhas imprecisa pode levar a sugestões de reparo subótimas ou diagnósticos incorretos; ausência de casos de teste que revelem o erro em uso real (Defects4J sempre tem ao menos um teste falho).", "localizador": "p.11, seção VI-B (ii) e (iii)"},
+      {"categoria": "alucinacao", "descricao": "O LLM pode produzir respostas fora do formato esperado por alucinações ou erros sintáticos, e LLMs tendem a alucinar chamadas de métodos inexistentes no código.", "localizador": "p.7, seção III-E-1; p.5, seção III-D-2"},
+      {"categoria": "nao_determinismo", "descricao": "A natureza não determinística dos LLMs pode gerar resultados diferentes entre duas execuções consecutivas do RepairAgent.", "localizador": "p.11, seção VI-B (iv)"},
+      {"categoria": "custo", "descricao": "Variantes sem ferramentas de busca e com localização realista têm custo maior (Tabela VI: 28 e 29 dólares contra 16 do padrão; texto: 'doubles the costs' e 'a 81% increase in costs'); algumas tentativas de correção levam várias horas.", "localizador": "p.9, Tabela VI e seção V-C; p.10, 'Impact of fault localization'"},
+      {"categoria": "seguranca", "descricao": "Segurança operacional, não cibersegurança: execuções de ferramentas poderiam interferir no ambiente hospedeiro ou no próprio RepairAgent; patches que falham nos testes alterariam a base de código.", "localizador": "p.7, seção III-E-2; p.6, Tabela II (write_fix)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Avaliação adicional no GitBug-Java, com bugs descobertos e corrigidos após a data de corte do GPT-3.5 usado, para examinar vazamento de dados; não há comparação com condição sem a mitigação no mesmo conjunto.", "avaliada": "nao", "localizador": "p.7, seção V-A-a; p.9, Tabela V; p.11, seção VI-B (i)"},
+      {"descricao": "Grande número de bugs avaliados como mitigação do não determinismo e disponibilização dos logs de interação.", "avaliada": "nao", "localizador": "p.11, seção VI-B (iv)"},
+      {"descricao": "Execução dos comandos em ambiente isolado (Docker) e reversão automática das mudanças quando os testes falham.", "avaliada": "nao", "localizador": "p.7, seções III-E-2 e IV; p.6, Tabela II"},
+      {"descricao": "Correção heurística de saídas fora do formato (nomes de ferramentas, argumentos, caminhos) e aviso ao agente sobre comandos repetidos.", "avaliada": "nao", "localizador": "p.6-7, seção III-E-1"},
+      {"descricao": "Ferramenta find_similar_api_calls para reduzir chamadas de método alucinadas; a ablação 'No search tools' mede correções, não alucinações.", "avaliada": "nao", "localizador": "p.5, seção III-D-2; p.9, Tabela VI"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {"tecnica": "RepairAgent", "motivo": "O pacote completo não tem condição comparadora executada no estudo: as linhas de base da Tabela III vêm de patches fornecidos por seus autores e ITER e SelfAPR não são prompting. As extrações cobrem apenas componentes da ablação (Tabela VI)."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Tabela III: a soma das 17 linhas de projeto na coluna Bugs é 834 (cálculo próprio), enquanto o Total impresso é 835 e Defects4Jv1.2 + Defects4Jv2 = 395 + 440 = 835.", "localizador": "p.8, Tabela III"},
+      {"descricao": "Tabela III: a soma das linhas de projeto na coluna Plausible é 177 (cálculo próprio), enquanto o Total impresso é 186 (96 + 90). A coluna Correct soma 164, igual ao Total.", "localizador": "p.8, Tabela III"},
+      {"descricao": "Tabela III: a coluna ITER soma 48 nas linhas de projeto (cálculo próprio), contra Defects4Jv1.2 = 57 e Total = 57; na Tabela IV, ITER soma 36 + 14 + 4 = 54 (cálculo próprio), também diferente de 57.", "localizador": "p.8, Tabelas III e IV"},
+      {"descricao": "Resumo e introdução falam em custo médio ('average cost') de 270,000 tokens por bug; a seção RQ2 relata mediana ('median consumption') de aproximadamente 270,000 tokens.", "localizador": "p.1 (Abstract); p.2 (Introdução); p.9, seção V-C"},
+      {"descricao": "Comparação com linhas de base não executadas: os resultados de ChatRepair, ITER e SelfAPR vêm de patches fornecidos pelos autores; o custo de ChatRepair (42 centavos) é ajustado pelos preços atuais para 14 centavos; o tempo mediano de ITER (4,57 h) vem do artigo original, com hardware e software diferentes, como os próprios autores reconhecem.", "localizador": "p.7, seção V-A-b; p.9, 'Comparison to prior work'"},
+      {"descricao": "Inversões contra ChatRepair (não executado): RepairAgent corrige 115 bugs single-line contra 133 do ChatRepair (Tabela IV) e 74 bugs em Defects4Jv1.2 contra 114 (Tabela III); o estudo reconhece que falha em bugs single-line simples corrigidos pelo ChatRepair.", "localizador": "p.8, Tabelas III e IV; p.11, seção VI-A"},
+      {"descricao": "No GitBug-Java, o RepairAgent corrige 9 de 19 bugs single-line, mas só 4 corretos entre 81 bugs multi-linha e multi-arquivo (0 de 17 multi-file). A conclusão de que não é fortemente afetado por vazamento de dados se apoia em comparação entre conjuntos de complexidade diferente.", "localizador": "p.9, Tabela V e texto; p.8-9, seção V-B-4"},
+      {"descricao": "Narrativa da ablação diz que sem ferramentas de busca os custos dobram ('doubles the costs'); a Tabela VI mostra 28 contra 16 dólares (razão 1,75, cálculo próprio): aparente inconsistência, sem critério de arredondamento informado.", "localizador": "p.9, Tabela VI e parágrafo 'Importance of search tools'"},
+      {"descricao": "Narrativa da localização realista fala em queda de 25% na capacidade de correção; a Tabela VI mostra 16 contra 21 corretos (queda de cerca de 23,8%, cálculo próprio): aparente inconsistência, sem critério de arredondamento informado. A variante foi executada sem ciclos adicionais.", "localizador": "p.10, 'Impact of fault localization'; p.9, Tabela VI"},
+      {"descricao": "A ablação usa um subconjunto de 100 bugs, no qual o RepairAgent completo corrige 21; os números não são diretamente comparáveis aos 164 de 835 da avaliação completa. O número de execuções por configuração não é informado.", "localizador": "p.9, seção V-D e Tabela VI"}
+    ],
+    "observacoes": [
+      {"descricao": "Componentes do sistema: agente LLM, 14 ferramentas (leitura, busca e geração de código, testes e patches, controle) e middleware; construído sobre o framework AutoGPT, Python 3.10, ANTLR e Docker.", "localizador": "p.2; p.6, Tabela II; p.7, seção IV"},
+      {"descricao": "Ablação que não é de prompting: 'Realistic localization' (GZoltar) contra localização perfeita: Plausible 16, Correct 16, Cost($) 29 contra 23, 21 e 16 do padrão.", "localizador": "p.9, Tabela VI; p.10"},
+      {"descricao": "A correção é verificada por correspondência sintática automática ou, caso contrário, por determinação manual de consistência semântica; o estudo não informa quem fez a verificação manual nem quantos avaliadores. 116 correções são idênticas às do desenvolvedor e 48 semanticamente consistentes.", "localizador": "p.7, seção V-A-c; p.8, seção V-B-1"},
+      {"descricao": "A ferramenta generate_method_body consulta outro LLM com consulta independente do prompt dinâmico; na avaliação é o mesmo LLM do agente.", "localizador": "p.5, seção III-D-2"},
+      {"descricao": "ITER e SelfAPR são linhas de base com modelos autotreinados (não prompting) e não entram em tecnicas.", "localizador": "p.9, 'Comparison to prior work'; p.7"},
+      {"descricao": "Uso de ferramentas: média de 35 invocações por bug; write_fix é a mais chamada (média de 6 chamadas em bugs corrigidos e 17 em não corrigidos); cerca de 7% das invocações em bugs não corrigidos produzem patches plausíveis contra 44% em corrigidos.", "localizador": "p.10, seção V-E e Fig. 10"},
+      {"descricao": "Custos: tempo mediano de 920 segundos por bug, 99% do tempo em execução de ferramentas; tokens de bugs corrigidos (21,000) menores que de não corrigidos (315,000).", "localizador": "p.9, seção V-C"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper introduces RepairAgent, the first work to address the program repair challenge through an autonomous agent based on a large language model (LLM).", "localizador": "p.1, Abstract"},
+      {"trecho": "Key contributions that enable RepairAgent include a set of tools that are useful for program repair, a dynamically updated prompt format that allows the LLM to interact with these tools, and a finite state machine that guides the agent in invoking the tools.", "localizador": "p.1, Abstract"},
+      {"trecho": "This section of the prompt defines the agent’s area of expertise, which is to resolve bugs in Java code, and outlines the agent’s primary objective: understanding and fixing bugs.", "localizador": "p.3, seção III-C-1"},
+      {"trecho": "For each pattern, we provide a short natural language description and an example of buggy and fixed code.", "localizador": "p.3, seção III-C-3"},
+      {"trecho": "On the one hand, the comments allow the model to explain its reasoning, which has been shown to enhance the reasoning abilities of LLMs [32].", "localizador": "p.3, seção III-C-3"},
+      {"trecho": "Specifically, we specify a maximum number of cycles (40 by default).", "localizador": "p.3, seção III-C-3"},
+      {"trecho": "To guide the LLM agent toward using the available tools in an effective and meaningful way, we define a finite state machine that constrains which tools are available at a given point in time.", "localizador": "p.4, seção III-C-4"},
+      {"trecho": "Intuitively, this section of the prompt serves as a memory for the agent, allowing it to recall information from previous cycles.", "localizador": "p.4, seção III-C-6"},
+      {"trecho": "To enable the middleware to parse the response, we specify the expected output format (Figure 3).", "localizador": "p.4, seção III-C-7"},
+      {"trecho": "Without such a tool, LLMs tend to hallucinate method calls that do not exist in the code base [34].", "localizador": "p.5, seção III-D-2"},
+      {"trecho": "As common in the field of program repair, we assume perfect fault localization as the default.", "localizador": "p.5, seção III-D-3"},
+      {"trecho": "Motivated by the observation that some fix attempts are almost correct, the write_fix tool requests the LLM to sample multiple variants of the suggested fix.", "localizador": "p.6, seção III-D-3"},
+      {"trecho": "By default, RepairAgent samples 30 variants at max.", "localizador": "p.6, seção III-D-3"},
+      {"trecho": "In practice, the LLM may produce responses that deviate from the expected format, e.g., due to hallucinations or syntactic errors.", "localizador": "p.7, seção III-E-1"},
+      {"trecho": "To prevent tool executions to interfere with the host environment or RepairAgent itself, the middleware executes the command in an isolated environment.", "localizador": "p.7, seção III-E-2"},
+      {"trecho": "RepairAgent is built on top of the AutoGPT framework and GPT-3.5-0125 from OpenAI.", "localizador": "p.7, seção IV"},
+      {"trecho": "We compare against the baselines based on patches provided by the authors of the respective approaches.", "localizador": "p.7, seção V-A-b"},
+      {"trecho": "A fix is plausible if it passes all test cases, but is not necessarily correct.", "localizador": "p.7, seção V-A-c"},
+      {"trecho": "The monetary costs of ITER [21] and SelfAPR [38] are not reported, as these approaches use self-trained models.", "localizador": "p.9, 'Comparison to prior work'"},
+      {"trecho": "Due to budget limitations, the ablations are done on a randomly selected set of 100 bugs of the entire Defects4J (same 100 for all configurations), out of which the full RepairAgent approach fixes 21 bugs.", "localizador": "p.9, seção V-D"},
+      {"trecho": "The absence of search tools also causes the agent to read long sequences of code more frequently, which saturates the prompt quickly and doubles the costs.", "localizador": "p.9, 'Importance of search tools'"},
+      {"trecho": "In total, RepairAgent fixes 16 bugs for 29 dollars which is a 25% drop in fixing capability and a 81% increase in costs.", "localizador": "p.10, 'Impact of fault localization'"},
+      {"trecho": "(i) Data leakage: GPT-3.5 may have seen parts of the Java projects we evaluate on during training.", "localizador": "p.11, seção VI-B"},
+      {"trecho": "(iii) Fault localization: Inaccurate or imprecise fault localization could lead to suboptimal repair suggestions or incorrect diagnoses.", "localizador": "p.11, seção VI-B"},
+      {"trecho": "(iv) Non-deterministic output of LLMs: The inherently non-deterministic nature of LLMs may result in different outcomes between two consecutive runs of RepairAgent.", "localizador": "p.11, seção VI-B"},
+      {"trecho": "The large number of bugs we evaluate on mitigates this risk.", "localizador": "p.11, seção VI-B"},
+      {"trecho": "We observe that the agent sometimes suggests complex fixes for bugs that only require simple modifications.", "localizador": "p.11, seção VI-A"},
+      {"trecho": "Interacting with the LLM imposes an average cost of 270,000 tokens per bug, which, under the current pricing of OpenAI’s GPT-3.5 model, translates to 14 cents per bug.", "localizador": "p.1, Abstract"},
+      {"trecho": "Analyzing the costs imposed by the LLM, we find a median consumption of approximately 270,000 tokens, equating to around 14 cents (US dollars).", "localizador": "p.9, seção V-C"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "search tools (RepairAgent (default))",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "No search tools",
+      "modelo": "GPT-3.5-0125",
+      "benchmark": "Defects4J (subconjunto aleatório de 100 bugs, o mesmo para todas as configurações)",
+      "metrica": "Plausible",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 14, "intervencao": 23},
+      "denominador": "100 bugs",
+      "condicoes": "Ablação de componente da Tabela VI; intervenção = RepairAgent (default), comparador = variante sem ferramentas de busca. Configuração padrão descrita no estudo: até 40 ciclos, localização de falhas perfeita, até 30 variantes amostradas por write_fix; o estudo não informa se a ablação alterou esses parâmetros. Número de execuções por configuração: nao_informado. Na mesma linha, Correct 11 contra 21 e Cost($) 28 contra 16. Não se sabe se generate_method_body foi retirada junto. O ganho é do ingrediente ferramentas de busca dentro do pacote RepairAgent. Conferido na imagem da p.9.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca 164 bugs corrigidos e 39 não corrigidos por três técnicas anteriores, sem um comparador único, e esses comparadores não foram executados (patches fornecidos pelos autores; ITER e SelfAPR não são prompting). Tabelas I e II são descritivas; Tabelas III e IV trazem só comparadores não executados; Tabela V não tem comparador. A Tabela VI é a primeira tabela com contraste executado de prompting; primeira linha ('No search tools') e primeira métrica (Plausible).",
+      "derivacao": "direta",
+      "localizador": "p.9 (PDF), Tabela VI, linhas 'No search tools' e 'RepairAgent (default)', coluna Plausible",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "No search tools 14 11 28 11 0 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "RepairAgent (default) 23 21 16 16 5 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "Without the search tools, RepairAgent fixes half of the bugs fixed by default.", "localizador": "p.9, 'Importance of search tools'"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "state machine (RepairAgent (default))",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+      "comparador": "No state machine",
+      "modelo": "GPT-3.5-0125",
+      "benchmark": "Defects4J (subconjunto aleatório de 100 bugs, o mesmo para todas as configurações)",
+      "metrica": "Plausible",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 18, "intervencao": 23},
+      "denominador": "100 bugs",
+      "condicoes": "Ablação de componente da Tabela VI; intervenção = RepairAgent (default), comparador = variante sem a máquina de estados. Mesmas condições padrão descritas para a primeira extração; número de execuções: nao_informado. Na mesma linha, Correct 14 contra 21 e Cost($) 31 contra 16. Conferido na imagem da p.9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: segunda linha da tabela de ablação (Tabela VI), na ordem da tabela; primeira métrica (Plausible).",
+      "derivacao": "direta",
+      "localizador": "p.9 (PDF), Tabela VI, linhas 'No state machine' e 'RepairAgent (default)', coluna Plausible",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "No state machine 18 14 31 9 5 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "RepairAgent (default) 23 21 16 16 5 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "Without guidance by the state machine (Figure 2), the agent also fixes fewer bugs and has higher costs.", "localizador": "p.9, 'Importance of state machine'"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "long-term memory (RepairAgent (default))",
+      "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "contexto", "feedback", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Single-cycle memory",
+      "modelo": "GPT-3.5-0125",
+      "benchmark": "Defects4J (subconjunto aleatório de 100 bugs, o mesmo para todas as configurações)",
+      "metrica": "Plausible",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 9, "intervencao": 23},
+      "denominador": "100 bugs",
+      "condicoes": "Ablação de componente da Tabela VI; intervenção = RepairAgent (default), que acumula toda a informação coletada; comparador = variante que mantém informação nova por um único ciclo. Mesmas condições padrão descritas para a primeira extração; número de execuções: nao_informado. Na mesma linha, Correct 6 contra 21 e Cost($) 8 contra 16. Conferido na imagem da p.9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: terceira linha da tabela de ablação (Tabela VI), na ordem da tabela; primeira métrica (Plausible).",
+      "derivacao": "direta",
+      "localizador": "p.9 (PDF), Tabela VI, linhas 'Single-cycle memory' e 'RepairAgent (default)', coluna Plausible; descrição na p.9-10",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Single-cycle memory 9 6 8 5 1 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "RepairAgent (default) 23 21 16 16 5 0", "localizador": "p.9, Tabela VI, colunas Project | Plausible | Correct | Cost($) | SL | ML | MF"},
+        {"trecho": "Again, the bug fixing effectiveness suffers significantly.", "localizador": "p.10, 'Importance of long-term memory'"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas sobre efetividade, custos, influência dos componentes e uso das ferramentas.", "localizador": "p.7, seção V (RQ1-RQ4)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Abordagem, prompt, ferramentas, conjuntos de dados, amostragem do GitBug-Java e da ablação são descritos; não são informados o número de execuções por configuração nem quem fez a verificação manual de consistência semântica.", "localizador": "p.3-7, seções III-V-A; p.9, seção V-D"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "A ablação executa variantes nos mesmos 100 bugs, mas a comparação principal usa patches fornecidos pelos autores das linhas de base (não executadas), duas delas modelos autotreinados, e custos e tempos de outros artigos.", "localizador": "p.7, seção V-A-b; p.9, 'Comparison to prior work' e Tabela VI"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Plausible e Correct são definidos e os denominadores são informados (835, 100, 100), mas as linhas da Tabela III não somam os totais em Bugs (834 contra 835), Plausible (177 contra 186) e ITER (48 contra 57), ITER difere entre Tabelas III e IV, e o custo de tokens é chamado de média no resumo e de mediana no corpo.", "localizador": "p.7, seção V-A-c; p.8, Tabelas III e IV; p.1 e p.9"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças discute vazamento de dados, ausência de testes, localização de falhas e não determinismo, além de limitações qualitativas.", "localizador": "p.11, seções VI-A e VI-B"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa snapshot GPT-3.5-0125, parâmetros padrão (40 ciclos, 30 variantes, limites de tokens) e Docker, mas apenas promete liberar a implementação e diz que os logs estão disponíveis sem indicar onde no texto; sementes e número de execuções não informados.", "localizador": "p.2; p.3; p.5-7; p.11"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Reconhece o risco e avalia uma amostra de 100 bugs posteriores ao corte do modelo, mas a conclusão de baixo efeito se apoia em comparação entre conjuntos de complexidade diferente.", "localizador": "p.7, seção V-A-a; p.9, Tabela V; p.11, seção VI-B (i)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas": [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "observacao": "Texto extraído lido integralmente; o PDF não tem numeração impressa nas páginas vistas, por isso os localizadores usam a posição no arquivo."
+  }
+}

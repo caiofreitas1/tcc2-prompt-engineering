@@ -1,0 +1,383 @@
+{
+  "estudo": "S1195",
+  "texto_fonte": "fontes/textos/lote/S1195.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Origin Code Generation (Baseline)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, seção 4.2; p. 16, seção D.2; p. 17, Tabela 10",
+        "observacao": "Prompt base one-shot: persona de programador Java especialista (instrucao), um exemplo completo de assinatura, documentação e implementação (exemplos) e restrições de formato (uma única função, sem métodos auxiliares, só código Java) (restricoes). A entrada da tarefa é a assinatura com o docstring reescrito. É a linha de base de todas as comparações; não há condição sem ela."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG) — BM25 (Sparse)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, seção 4.2; p. 16, seção D.2; p. 18, Tabela 11; p. 16, Tabela 6",
+        "observacao": "O prompt RAG (Tabela 11) é o prompt origin (Tabela 10) acrescido do bloco «RELEVANT CODE FOR YOUR TASK» com trechos recuperados do repositório; as demais partes são iguais na comparação visual das p. 17–18. O estudo chama os trechos de «code examples» (p. 14), mas eles são funções do repositório e não exemplos resolvidos da tarefa; a categoria exemplos já está no prompt base. Número de trechos recuperados não informado. O recuperador BM25 em si é registrado em componentes_fora_escopo."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG) — RLCoder (Dense)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, seção 4.2; p. 18, Tabela 11; p. 16, Tabela 6",
+        "observacao": "Mesmo template RAG da Tabela 11, com trechos recuperados por recuperador denso (RLCoder). O estudo apresenta os três recuperadores como métodos RAG distintos avaliados em linhas separadas da Tabela 6; por isso são registrados como técnicas distintas. Número de trechos não informado."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG) — SAST-based (Dataflow)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5, seção 4.2; p. 18, Tabela 11; p. 16, Tabela 6",
+        "observacao": "Mesmo template RAG, com funções envolvidas no caminho da vulnerabilidade identificadas por análise de fluxo de dados do CodeQL. Número de trechos não informado."
+      },
+      {
+        "nome_original": "Security Guideline-Informed Generation (security-guideline)",
+        "mecanismos": ["instrucao", "exemplos", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5, seção 4.2; p. 12, Tabela 3 e Apêndice A; p. 16, seção D.2; p. 18, Tabela 12; p. 16, Tabela 7",
+        "observacao": "Acrescenta a seção «Secure Coding Guideline» com cinco diretrizes derivadas da OWASP (diretrizes em linguagem natural → instrucao; restrições de segurança → restricoes); as duas categorias já estavam presentes no prompt base. O template da Tabela 12 não difere só nas diretrizes: o exemplo esperado aparece abreviado («@param ... */» e «... }»), faltam o cabeçalho «### EXAMPLE» e o separador, e a instrução 1 muda para «follow the provided format and structure». Por isso o contraste com origin é tratado como pacote e o efeito não se atribui só às diretrizes."
+      },
+      {
+        "nome_original": "security-guided rag",
+        "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto", "instrucao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 14, seção C.3; p. 16, Tabela 7; p. 8, Figura 6",
+        "observacao": "Configuração descrita apenas como combinação de RAG com as diretrizes; o template não é apresentado e o recuperador usado não é informado. Comparada com origin na Tabela 7; não há comparação analisada com security-guideline isolada ou com cada RAG isolado nas mesmas condições declaradas."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature 0.7, top-p 1.0, context window of 4096 tokens",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de geração padronizados em todos os experimentos; não variados.",
+        "localizador": "p. 4–5, seção 4.1"
+      },
+      {
+        "nome_original": "BM25 (Sparse), RLCoder (Dense), SAST-based (Dataflow) retrievers",
+        "natureza": "outro",
+        "descricao": "Algoritmos de recuperação (lexical, denso treinado por aprendizado por reforço no trabalho citado, e análise de fluxo de dados com CodeQL) que escolhem os trechos inseridos no prompt; o recuperador em si não é prompting, só a inserção do contexto.",
+        "localizador": "p. 5, seção 4.2"
+      },
+      {
+        "nome_original": "Multi-LLM Adjudication (Voter LLMs + Final-Judge)",
+        "natureza": "outro",
+        "descricao": "Pipeline de avaliação que reclassifica alertas do CodeQL como falsos positivos; faz parte da métrica Secure@k, não da geração. Modelos usados como votantes e juiz não informados.",
+        "localizador": "p. 5, seção 4.3; p. 6, Tabela 1; p. 15–17, seção D.1, Tabelas 8 e 9"
+      },
+      {
+        "nome_original": "Instance Standardization via Docstring Rewriting",
+        "natureza": "outro",
+        "descricao": "Reescrita dos docstrings por LLM, validada por programadores, na construção do benchmark; não é condição experimental de prompting.",
+        "localizador": "p. 3, seção 2.2"
+      }
+    ],
+    "modelos": [
+      {"nome": "gpt-4.1-mini", "versao": "nao_informado", "observacao": "Referência a OpenAI 2025b; snapshot não informado."},
+      {"nome": "gpt-4.1", "versao": "nao_informado", "observacao": "Também usado na construção do benchmark para classificar falsos positivos (p. 3); snapshot não informado."},
+      {"nome": "Claude-3.7-Sonnet", "versao": "nao_informado", "observacao": "Snapshot não informado."},
+      {"nome": "Deepseek-V3", "versao": "nao_informado", "observacao": "Snapshot não informado."},
+      {"nome": "Qwen3-235B", "versao": "nao_informado", "observacao": "235B indica tamanho; variante/snapshot não informados."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "RealSec-bench",
+        "versao": "nao_informado",
+        "quantidade": "105 instâncias de 30 repositórios Java, 19 tipos de CWE",
+        "observacao": "Proposto pelo próprio estudo. Distribuição por categoria na Tabela 2 (64 + 18 + 14 + 5 + 4 = 105) e por saltos na Tabela 5 (37 + 25 + 14 + 29 = 105). Número de amostras geradas por tarefa não informado; as legendas das Tabelas 2 e 5 informam o denominador (tarefas da linha), mas as Tabelas 6 e 7 não informam denominador."
+      }
+    ],
+    "metricas": [
+      {"nome": "Pass@k", "definicao": "Probabilidade de que ao menos uma de k amostras independentes passe nos testes unitários; as legendas das Tabelas 2 e 5 dizem que os percentuais são tarefas aprovadas divididas pelo total de tarefas da linha. Estimador e número n de amostras não informados.", "localizador": "p. 5, seção 4.3; p. 7, legenda da Tabela 2"},
+      {"nome": "Secure@k", "definicao": "Probabilidade de ao menos uma de k amostras ser considerada segura (sem alerta do CodeQL ou alerta julgado falso positivo pelo juiz LLM com escore > 0,5).", "localizador": "p. 5, seção 4.3"},
+      {"nome": "SecurePass@k", "definicao": "Probabilidade de ao menos uma de k amostras passar em todos os testes e na avaliação de segurança em dois estágios.", "localizador": "p. 5, seção 4.3"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Os modelos geram com frequência código que passa nos testes funcionais mas mantém vulnerabilidades; SecurePass@1 geral entre 3,81% e 5,71% por modelo (Tabela 2).",
+        "localizador": "p. 8, seção 7; p. 7, Tabela 2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "As diretrizes de segurança no prompt podem prejudicar a correção funcional (Pass@1 do Claude-3.7-Sonnet de 16,19% para 9,52%); o resumo fala em falhas de compilação, sem contagem de falhas de compilação relatada.",
+        "localizador": "p. 1, resumo; p. 7, seção 5.3; p. 16, Tabela 7"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O recuperador por fluxo de dados, focado no caminho da vulnerabilidade, omite contexto funcional (funções utilitárias, hierarquias de classe) necessário para soluções válidas e compiláveis.",
+        "localizador": "p. 7, seção 5.2; p. 14, seção C.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à validade interna da avaliação: falsos positivos do SAST afetam a medida de segurança, e o julgamento multi-LLM fica aquém de anotação manual especializada.",
+        "localizador": "p. 9, Limitations"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O estudo declara prevenir vazamento de dados («data leakage») ao reescrever os docstrings; não discute contaminação por pré-treinamento dos repositórios públicos populares usados.",
+        "localizador": "p. 3, seção 2.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Julgamento multi-LLM (três votantes + juiz final) para reduzir falsos positivos do CodeQL na métrica Secure@k; comparado ao SAST sem julgamento em 89 alertas revisados manualmente (precisão 44,9% → 81,7%).",
+        "avaliada": "sim",
+        "localizador": "p. 6, seção 4.4 e Tabela 1"
+      },
+      {
+        "descricao": "Diretrizes de codificação segura no prompt como mitigação de vulnerabilidades, comparadas à condição origin.",
+        "avaliada": "sim",
+        "localizador": "p. 16, Tabela 7; p. 7, seção 5.3"
+      },
+      {
+        "descricao": "Reescrita dos docstrings por LLM em descrições neutras quanto à segurança, validadas por programadores e revisão final por especialistas, para padronizar tarefas e prevenir vazamento.",
+        "avaliada": "nao",
+        "localizador": "p. 3, seção 2.2"
+      },
+      {
+        "descricao": "Validação dos rótulos de vulnerabilidade/CWE por dois engenheiros de segurança independentes, com resolução colaborativa de discordâncias.",
+        "avaliada": "nao",
+        "localizador": "p. 3, seção 2.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Origin Code Generation (Baseline), executada com os mesmos cinco modelos (Tabelas 6 e 7)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa do apêndice diverge da Tabela 6: a seção C.2 diz que o recuperador dense deu SecurePass@1 de 10,48% ao Claude-3.7-Sonnet, mas a Tabela 6 imprime 7,62% (a seção 5.2 diz 7,6%, compatível com a tabela).",
+        "localizador": "p. 14, seção C.2; p. 16, Tabela 6; p. 7, seção 5.2"
+      },
+      {
+        "descricao": "A seção C.2 diz que bm25 levou o GPT-4.1-mini a SecurePass@1 de 8,57%; a Tabela 6 imprime 6,67% para GPT-4.1-mini/bm25. A seção 5.2 atribui o melhor resultado do BM25 a outro modelo (Qwen3-235B, 7,6%; tabela: 7,62%).",
+        "localizador": "p. 14, seção C.2; p. 7, seção 5.2; p. 16, Tabela 6"
+      },
+      {
+        "descricao": "A seção C.3 diz que security-guideline aumenta o SecurePass@1 de 4,76% para 8,57% (Deepseek-V3) e de 6,67% para 9,52% (GPT-4.1); a Tabela 7 imprime 3,81% → 6,67% (Deepseek-V3) e 5,71% → 8,57% (GPT-4.1).",
+        "localizador": "p. 14, seção C.3; p. 16, Tabela 7"
+      },
+      {
+        "descricao": "A seção C.3 afirma degradação da métrica composta para GPT-4.1-mini com as diretrizes, mas a Tabela 7 imprime SecurePass@1 de 5,71% em origin e em security-guideline para esse modelo.",
+        "localizador": "p. 14, seção C.3; p. 16, Tabela 7"
+      },
+      {
+        "descricao": "As seções 5.2 e C.2 afirmam que o SecurePass@1 do GPT-4.1 fica inalterado qualquer que seja o recuperador, mas a Tabela 6 imprime 5,71% (origin, bm25, dataflow) e 3,81% (dense).",
+        "localizador": "p. 7, seção 5.2; p. 14, seção C.2; p. 16, Tabela 6"
+      },
+      {
+        "descricao": "Resultados por saltos no texto divergem da Tabela 5: a seção 5.1 diz que o GPT-4.1 atinge SecurePass@1 de 5,7% em 0 saltos, e a C.1 diz 16,22% para o Claude-3.7-Sonnet; a Tabela 5 imprime SP@1 em 0 saltos de 13,51% (GPT-4.1) e 8,11% (Claude). Para 2 saltos, a 5.1 diz 1,9% (Qwen3-235B) e a C.1 diz 21,43% (Qwen3-235B e Claude); a Tabela 5 imprime SP@1 de 14,29% (Qwen3-235B) e 7,14% (Claude). A Figura 4 não foi lida numericamente.",
+        "localizador": "p. 6, seção 5.1 e Figura 4; p. 14, seção C.1; p. 15, Tabela 5"
+      },
+      {
+        "descricao": "O resumo diz que as diretrizes de segurança «often» levam a falhas de compilação; o estudo não relata contagem de falhas de compilação, e na Tabela 7 o Pass@1 cai com as diretrizes em Claude-3.7-Sonnet (16,19% → 9,52%) e GPT-4.1-mini (13,33% → 12,38%), fica igual em Qwen3-235B (11,43%) e sobe em Deepseek-V3 (8,57% → 12,38%) e GPT-4.1 (15,24% → 16,19%).",
+        "localizador": "p. 1, resumo; p. 16, Tabela 7"
+      },
+      {
+        "descricao": "O estudo descreve ganhos e ausência de ganhos como «significantly»/«no significant improvement», sem teste estatístico relatado; a média impressa de SecurePass@1 de security-guideline (5,71%) é maior que a de origin (5,14%), e a do RAG dataflow (4,76%) é menor.",
+        "localizador": "p. 7, seções 5.2 e 5.3; p. 14, seções C.2 e C.3; p. 16, Tabelas 6 e 7"
+      },
+      {
+        "descricao": "As contribuições afirmam taxa de sucesso de 0,00% em criptografia; na Tabela 2 isso vale para SP@1, mas em Crypto & Web Security o GPT-4.1 tem SP@3 e SP@5 de 5,56%.",
+        "localizador": "p. 2, contribuições; p. 7, Tabela 2"
+      },
+      {
+        "descricao": "Divergência de definição de Pass@k: a seção 4.3 define probabilidade de ao menos uma de k amostras passar, e as legendas das Tabelas 2 e 5 dizem que os percentuais são tarefas aprovadas sobre o total de tarefas; número de amostras por tarefa e estimador não informados. As Tabelas 6 e 7 só informam k=1.",
+        "localizador": "p. 5, seção 4.3; p. 7, legenda da Tabela 2; p. 15, legenda da Tabela 5"
+      },
+      {
+        "descricao": "Limitação de validade externa declarada: benchmark restrito a repositórios Java open-source baseados em Maven.",
+        "localizador": "p. 9, Limitations"
+      },
+      {
+        "descricao": "Número de execuções e variabilidade entre execuções não informados, com temperatura 0,7; o template e o recuperador de security-guided rag não são apresentados.",
+        "localizador": "p. 4–5, seção 4.1; p. 14, seção C.3"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Os prompts de votante e juiz (Tabelas 8 e 9) são instrumentos de avaliação da métrica Secure@k, não técnicas de geração avaliadas; a Tabela 1 é ablação desse pipeline de avaliação, não de prompting.", "localizador": "p. 6, Tabela 1; p. 16–17, Tabelas 8 e 9"},
+      {"descricao": "A construção do benchmark usa GPT-4.1 para eliminar falsos positivos, dois engenheiros de segurança para validar rótulos e programadores para validar docstrings (esforço manual descrito).", "localizador": "p. 3, seção 2.2"},
+      {"descricao": "A Tabela 7 é chamada de «Ablation study», mas compara estratégias completas com origin; as Figuras 5 e 6 apresentam os mesmos experimentos em gráficos radiais ilegíveis na resolução das páginas, por isso os valores foram extraídos das Tabelas 6 e 7.", "localizador": "p. 8, Figuras 5 e 6; p. 16, Tabelas 6 e 7"},
+      {"descricao": "Os modelos usados como votantes e juiz na métrica Secure@k e o número de votantes ({num_voters}) não são informados além de «Three Voter» na Tabela 1.", "localizador": "p. 5, seção 4.3; p. 6, Tabela 1; p. 17, Tabela 9"},
+      {"descricao": "Código e dados declarados disponíveis em repositório GitHub; o pacote não foi acessado nem validado.", "localizador": "p. 1, resumo"}
+    ],
+    "citacoes": [
+      {"trecho": "We assess the models using three distinct prompting strategies aimed at enhancing security:", "localizador": "p. 5, seção 4.2"},
+      {"trecho": "We employ a one-shot, security-agnostic strategy.", "localizador": "p. 5, seção 4.2"},
+      {"trecho": "The prompt instructs the model to act as a Java expert and provides a single comprehensive example (signature, documentation, and implementation) to define the output format, without including any specific security constraints or warnings.", "localizador": "p. 5, seção 4.2"},
+      {"trecho": "To determine if external knowledge improves security, we inject relevant code context into the prompt using three retriever types:", "localizador": "p. 5, seção 4.2"},
+      {"trecho": "We embed universal secure coding principles into the prompt to serve as implicit reminders.", "localizador": "p. 5, seção 4.2"},
+      {"trecho": "To ensure testability, we enforce rigid constraints that prohibit the generation of helper methods, private functions, or explanatory text, requiring the model to output only the single requested function body.", "localizador": "p. 16, seção D.2"},
+      {"trecho": "This observation is further complicated by the security-guided rag configuration, which combines RAG with the guidelines and produced yet another distinct set of outcomes.", "localizador": "p. 14, seção C.3"},
+      {"trecho": "Across all experiments, we standardize the generation parameters with a temperature of 0.7, a top-p value of 1.0, and a context window of 4096 tokens.", "localizador": "p. 4–5, seção 4.1"},
+      {"trecho": "The evaluation results reveal that current models exhibit significant challenges in producing secure code, often generating solutions that pass functional tests while retaining critical vulnerabilities.", "localizador": "p. 8, seção 7"},
+      {"trecho": "Furthermore, explicitly prompting models with general security guidelines often leads to compilation failures, harming functional correctness without reliably preventing vulnerabilities.", "localizador": "p. 1, resumo"},
+      {"trecho": "Despite its design as a high-precision oracle based on SAST taint analysis, its narrow focus on vulnerability paths often omits broader functional contexts—such as utility functions and class hierarchies—required for generating valid, compilable solutions.", "localizador": "p. 7, seção 5.2"},
+      {"trecho": "First, regarding internal validity, our reliance on SAST tools introduces the risk of false positives, which can affect the accuracy of the security assessment.", "localizador": "p. 9, Limitations"},
+      {"trecho": "Although we implemented a multi-LLM voting mechanism to adjudicate these alerts, the accuracy remains constrained by current LLM performance and falls short of manual expert annotation.", "localizador": "p. 9, Limitations"},
+      {"trecho": "We standardize tasks and prevent data leakage by utilizing LLMs to rewrite docstrings.", "localizador": "p. 3, seção 2.2"},
+      {"trecho": "This configuration reduces false positives by 77.6% raising precision to 81.7% and restores recall to 98.0%.", "localizador": "p. 6, seção 4.4"},
+      {"trecho": "The LLM identifies genuine vulnerabilities and assigns CWE identifiers, which are subsequently validated by two independent security engineers.", "localizador": "p. 3, seção 2.2"},
+      {"trecho": "Notably, the Pass@1 of Claude-3.7-Sonnet drops from 16.2% to 9.5%, indicating a detrimental trade-off where added security constraints hamper functional correctness.", "localizador": "p. 7, seção 5.3"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG) — BM25 (Sparse)",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Origin Code Generation (Baseline) (origin)",
+      "modelo": "Claude-3.7-Sonnet",
+      "benchmark": "RealSec-bench",
+      "metrica": "Pass@1 (definida como probabilidade de ao menos uma de k amostras passar nos testes; legendas das Tabelas 2 e 5 descrevem tarefas aprovadas sobre total de tarefas; a Tabela 6 não repete a definição)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.19, "intervencao": 20.00},
+      "denominador": "nao_informado na Tabela 6; o valor origin coincide com a linha Overall da Tabela 2, cujo denominador é 105 tarefas",
+      "condicoes": "k=1; temperatura 0,7, top-p 1,0, janela de contexto 4096 tokens; prompt one-shot; número de trechos recuperados, número de amostras por tarefa e número de execuções não informados. Conferido no PDF (p. 16, Tabela 6).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca RAG e diretrizes de segurança e três métricas. As Tabelas 1 (pipeline de avaliação), 2 e 5 (só origin), 3 e 4 (descritivas) não contêm o contraste; a Tabela 6 é a primeira com contraste de prompting. Primeira métrica (Pass@1), primeiro modelo (Claude-3.7-Sonnet), primeira linha de base (origin) e primeira técnica listada (bm25).",
+      "derivacao": "direta",
+      "localizador": "p. 16 (impressa 16), Tabela 6, linhas origin e bm25, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "origin | Claude-3.7-Sonnet | 16.19% | 4.76% | 4.76%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"},
+        {"trecho": "bm25 | Claude-3.7-Sonnet | 20.00% | 5.71% | 5.71%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG) — RLCoder (Dense)",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Origin Code Generation (Baseline) (origin)",
+      "modelo": "Claude-3.7-Sonnet",
+      "benchmark": "RealSec-bench",
+      "metrica": "Pass@1 (mesma divergência de definição registrada na primeira extração)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.19, "intervencao": 20.00},
+      "denominador": "nao_informado na Tabela 6",
+      "condicoes": "k=1; temperatura 0,7, top-p 1,0; recuperador denso RLCoder; número de trechos, amostras por tarefa e execuções não informados. Conferido no PDF (p. 16, Tabela 6).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal distinta (método RAG avaliado em linha própria) ainda não representada; mesma regra de ordem na Tabela 6. Exceção ao alvo de três para cobrir técnicas focais.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (impressa 16), Tabela 6, linhas origin e dense, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "origin | Claude-3.7-Sonnet | 16.19% | 4.76% | 4.76%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"},
+        {"trecho": "dense | Claude-3.7-Sonnet | 20.00% | 7.62% | 7.62%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Retrieval-Augmented Generation (RAG) — SAST-based (Dataflow)",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Origin Code Generation (Baseline) (origin)",
+      "modelo": "Claude-3.7-Sonnet",
+      "benchmark": "RealSec-bench",
+      "metrica": "Pass@1 (mesma divergência de definição registrada na primeira extração)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.19, "intervencao": 17.14},
+      "denominador": "nao_informado na Tabela 6",
+      "condicoes": "k=1; temperatura 0,7, top-p 1,0; recuperação por fluxo de dados interprocedural do CodeQL; número de trechos, amostras por tarefa e execuções não informados. Conferido no PDF (p. 16, Tabela 6).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal distinta (método RAG avaliado em linha própria) ainda não representada; mesma regra de ordem na Tabela 6. Exceção ao alvo de três para cobrir técnicas focais.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (impressa 16), Tabela 6, linhas origin e dataflow, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "origin | Claude-3.7-Sonnet | 16.19% | 4.76% | 4.76%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"},
+        {"trecho": "dataflow | Claude-3.7-Sonnet | 17.14% | 5.71% | 4.76%", "localizador": "p. 16, Tabela 6, colunas Method | Model | Pass@1 | Secure@1 | SecurePass@1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Security Guideline-Informed Generation (security-guideline)",
+      "mecanismos": ["instrucao", "exemplos", "restricoes"],
+      "mecanismos_acrescentados": ["instrucao", "restricoes"],
+      "comparador": "Origin Code Generation (Baseline) (origin)",
+      "modelo": "Claude-3.7-Sonnet",
+      "benchmark": "RealSec-bench",
+      "metrica": "Pass@1 (mesma divergência de definição registrada na primeira extração)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.19, "intervencao": 9.52},
+      "denominador": "nao_informado na Tabela 7",
+      "condicoes": "k=1 («All metrics are evaluated at k=1»); temperatura 0,7, top-p 1,0; cinco diretrizes OWASP; o template da condição também abrevia o exemplo one-shot (pacote, não só as diretrizes); amostras por tarefa e execuções não informadas. Conferido no PDF (p. 16, Tabela 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; a Tabela 7 é a primeira tabela com o contraste; primeira métrica (Pass@1), primeiro modelo (Claude-3.7-Sonnet), linha de base origin. Exceção ao alvo de três para cobrir técnicas focais.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (impressa 16), Tabela 7, linhas origin e security-guideline, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "origin | Claude-3.7-Sonnet | 16.19% | 4.76% | 4.76%", "localizador": "p. 16, Tabela 7, colunas Configuration | Model | Pass@1 | Secure@1 | SecurePass@1"},
+        {"trecho": "security-guideline | Claude-3.7-Sonnet | 9.52% | 2.86% | 2.86%", "localizador": "p. 16, Tabela 7, colunas Configuration | Model | Pass@1 | Secure@1 | SecurePass@1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "security-guided rag",
+      "mecanismos": ["instrucao", "exemplos", "restricoes", "contexto"],
+      "mecanismos_acrescentados": ["contexto", "instrucao", "restricoes"],
+      "comparador": "Origin Code Generation (Baseline) (origin)",
+      "modelo": "Claude-3.7-Sonnet",
+      "benchmark": "RealSec-bench",
+      "metrica": "Pass@1 (mesma divergência de definição registrada na primeira extração)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 16.19, "intervencao": 16.19},
+      "denominador": "nao_informado na Tabela 7",
+      "condicoes": "k=1; temperatura 0,7, top-p 1,0; combinação de RAG com diretrizes; recuperador e template não informados; amostras por tarefa e execuções não informadas. Conferido no PDF (p. 16, Tabela 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; mesma regra de ordem na Tabela 7. Exceção ao alvo de três para cobrir técnicas focais.",
+      "derivacao": "direta",
+      "localizador": "p. 16 (impressa 16), Tabela 7, linhas origin e security-guided rag, coluna Pass@1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "origin | Claude-3.7-Sonnet | 16.19% | 4.76% | 4.76%", "localizador": "p. 16, Tabela 7, colunas Configuration | Model | Pass@1 | Secure@1 | SecurePass@1"},
+        {"trecho": "security-guided rag | Claude-3.7-Sonnet | 16.19% | 7.62% | 6.67%", "localizador": "p. 16, Tabela 7, colunas Configuration | Model | Pass@1 | Secure@1 | SecurePass@1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: construir um benchmark de geração segura em repositórios reais e avaliar LLMs, RAG e prompts com diretrizes de segurança.", "localizador": "p. 1, resumo; p. 2, contribuições"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção do benchmark, estratégias e templates de prompt descritos (Tabelas 10–12), mas faltam número de amostras por tarefa, número de trechos recuperados, template e recuperador de security-guided rag e modelos do julgamento multi-LLM.", "localizador": "p. 3–5, seções 2 e 4; p. 16–18, seção D.2 e Tabelas 10–12"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Linha de base origin executada com os mesmos modelos e parâmetros; o prompt RAG difere só no bloco de código recuperado, mas o prompt de diretrizes também abrevia o exemplo one-shot e altera a instrução de formato.", "localizador": "p. 16, Tabelas 6 e 7; p. 17–18, Tabelas 10–12"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@k, Secure@k e SecurePass@k definidos e denominador por linha informado nas Tabelas 2 e 5, mas não nas Tabelas 6 e 7; estimador e número de amostras de pass@k não informados; Secure@k depende de juiz LLM (precisão 81,7% em 89 alertas); vários valores citados no texto divergem das Tabelas 5, 6 e 7.", "localizador": "p. 5, seção 4.3; p. 6, Tabela 1; p. 14, seções C.1–C.3; p. 15–16, Tabelas 5–7"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de limitações trata falsos positivos do SAST e generalização para outras linguagens e software proprietário; não discute não determinismo (temperatura 0,7, sem repetições informadas) nem contaminação por pré-treinamento.", "localizador": "p. 9, Limitations"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Templates de prompt, parâmetros de geração e link para código e dados informados (pacote não verificado); faltam snapshots dos modelos, número de amostras, configuração dos recuperadores e modelos do julgamento.", "localizador": "p. 1, resumo; p. 4–5, seção 4.1; p. 16–18, Tabelas 8–12"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo menciona prevenir vazamento de dados reescrevendo docstrings, mas não discute a possibilidade de os repositórios públicos populares estarem no pré-treinamento dos modelos.", "localizador": "p. 3, seção 2.2; p. 2, seção 2.1"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1–1075). Páginas do PDF abertas visualmente: 5, 6, 7, 8, 13, 14, 15, 16, 17, 18. As Figuras 4, 5, 6 e 7 estão ilegíveis numericamente na resolução das imagens; nenhum valor foi extraído delas."
+  }
+}

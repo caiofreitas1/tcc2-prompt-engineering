@@ -1,0 +1,272 @@
+{
+  "estudo": "S1943",
+  "texto_fonte": "fontes/textos/lote/S1943.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RetypeR (context-aware repair prompts)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 3 e 5 (impressas 201 e 203), Seções III-A e III-D, Fig. 1 e Fig. 3; contrafactual na Tabela II, PDF p. 8 (impressa 206)",
+        "observacao": "Pacote focal: prompt de preenchimento (infill) para CodeT5-large com cinco partes (informação externa = template de correção recuperado e aplicado à linha defeituosa com o marcador <INFILL>; informação interna = comentário 'use [DONOR] in the next line:' com um identificador doador recuperado do mesmo arquivo; linha defeituosa como comentário; contexto antes e depois). contexto = linha defeituosa, contexto circundante, template recuperado e identificador doador; restricoes = template aplicado que fixa a forma e o local da edição (<INFILL>); instrucao = diretiva em linguagem natural 'use [DONOR] in the next line'; amostragem = vários prompts (um por identificador entre os top-5), 5.000 amostras por erro e seleção por validação com testes. Contrafactual de pacote: 'No Retrieval' (só o LLM base) contra o sistema completo na Tabela II. Pacote híbrido: inclui recuperação por BM-25 e CoCoSoDa, filtragem por análise estática (Pylint/Pyright), validação por testes e orçamento de 5.000 amostras/5 h; o ganho não é atribuível a um único mecanismo. Os acrescentados são relativos a 'No Retrieval', cujo prompt não é descrito no artigo."
+      },
+      {
+        "nome_original": "External retrieval stage (fix pattern / fix template)",
+        "mecanismos": ["contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 4 (impressa 202), Seção III-B; resultado na Tabela II, PDF p. 8 (impressa 206), linha 'External'",
+        "observacao": "Recupera templates de correção do banco minerado por TypeFix (10.981 correções do GitHub) via estratégia baseada em AST e aplica o template à linha defeituosa com <INFILL>. Contraste: 'No Retrieval' versus 'No Retrieval' + etapa externa (sem etapa interna), na adição incremental da Tabela II; só a diferença (+31 corretos, +32 plausíveis) é impressa. amostragem listada porque a condição é contada em patches plausíveis, o que pressupõe a validação por testes do pipeline; o número de amostras das condições de ablação é nao_informado."
+      },
+      {
+        "nome_original": "Internal retrieval stage (fix ingredient retriever / donor code identifiers)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao", "contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 4-5 (impressas 202-203), Seção III-C, Algoritmo 1; resultado na Tabela II, PDF p. 8 (impressa 206), linha 'Internal'",
+        "observacao": "Recupera, no mesmo arquivo, linhas semelhantes à linha defeituosa (BM-25 + CoCoSoDa, fundidos por RRF), extrai identificadores, remove comuns e filtra por análise estática; insere um identificador doador por prompt no comentário 'use [DONOR] in the next line:'. Contraste: condição com etapa externa sem interna versus sistema completo (Tabela II, adição incremental; só +11 corretos e +20 plausíveis impressos para o passo). A etapa interna também multiplica os prompts (top-5 identificadores) que dividem o orçamento de 5.000 amostras. Configurações alternativas (Top 1, Top 10, Top 20, escopo de projeto) avaliadas só no projeto pandas (Tabela III)."
+      },
+      {
+        "nome_original": "No Retrieval (base LLM)",
+        "mecanismos": ["amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7-8 (impressas 205-206), Seção V-B e Tabela II",
+        "observacao": "Condição de ablação em que as duas etapas de recuperação são retiradas e 'only the base LLM is used'. A composição do prompt não é descrita (contexto nao_informado); amostragem listada porque o resultado é contado em patches plausíveis, validados por testes, com número de amostras nao_informado."
+      },
+      {
+        "nome_original": "TypeFix",
+        "mecanismos": ["contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (impressa 204), Seção IV-C; PDF p. 9 (impressa 207), Seção VI-A; Tabelas I e IV",
+        "observacao": "Ferramenta anterior que minera templates de correção e os aplica como conhecimento de domínio na geração de patches; mesmo ingrediente da etapa externa de RetypeR (por isso contexto e restricoes). Modelo usado pelo TypeFix, número de amostras e origem dos valores (reexecução ou valores relatados) nao_informado neste artigo. Sistema comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "ChatGPT (gpt-3.5-turbo) com o prompt de [12]",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (impressa 204), Seções IV-C e IV-E; Tabelas I e IV",
+        "observacao": "Invocado 'using the same prompt from the prior work [12]'; o conteúdo do prompt não é descrito neste artigo, por isso os mecanismos não são classificados (nao_informado). Modelo diferente do usado por RetypeR."
+      },
+      {
+        "nome_original": "Codex (code-davinci-002) com o prompt de [12]",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (impressa 204), Seções IV-C e IV-E; Tabelas I e IV",
+        "observacao": "Mesmo prompt de [12], não descrito neste artigo (mecanismos nao_informado). Modelo diferente do usado por RetypeR."
+      },
+      {
+        "nome_original": "AlphaRepair",
+        "mecanismos": ["contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (impressa 204), Seção IV-C; PDF p. 9 (impressa 207), Seção VI-A; Tabela I",
+        "observacao": "Reformula o reparo como preenchimento de lacunas com CodeBERT e 'relies on generic templates'; restricoes pelo template de preenchimento, contexto pelo código defeituoso de entrada descrito para abordagens baseadas em LLM. Avaliado só no TypeBugs (ausente da Tabela IV)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Sampling 5,000 times / five-hour timeout",
+        "natureza": "orcamento",
+        "descricao": "Orçamento de 5.000 amostras do modelo e limite de cinco horas por erro, seguindo [13]; a etapa interna divide esse orçamento entre os prompts. Parâmetros de decodificação (temperatura, top-p) nao_informado.",
+        "localizador": "PDF p. 6 (impressa 204), Seção IV-E; PDF p. 8 (impressa 206)"
+      },
+      {
+        "nome_original": "CodeT5-large",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelo base escolhido para implementar RetypeR (entrada limitada a 512 tokens), sem ajuste fino; não alterna modelos nos experimentos.",
+        "localizador": "PDF p. 2 (impressa 200); PDF p. 6 (impressa 204), Seções III-D e IV-E"
+      },
+      {
+        "nome_original": "Patch validation (test suites) and manual inspection",
+        "natureza": "outro",
+        "descricao": "Filtragem de patches com erro de sintaxe e execução das suítes de teste para obter patches plausíveis; inspeção manual pelos autores para decidir os corretos. A seleção por testes é contada como amostragem no pacote; a inspeção manual é procedimento de avaliação, não prompting.",
+        "localizador": "PDF p. 6 (impressa 204), Seções III-E e IV-D"
+      }
+    ],
+    "modelos": [
+      {"nome": "CodeT5-large (Hugging Face)", "versao": "nao_informado", "uso": "modelo de RetypeR e das condições de ablação"},
+      {"nome": "ChatGPT", "versao": "gpt-3.5-turbo", "uso": "baseline via OpenAI API"},
+      {"nome": "Codex", "versao": "code-davinci-002", "uso": "baseline via OpenAI API"},
+      {"nome": "CodeBERT", "versao": "nao_informado", "uso": "modelo do baseline AlphaRepair"},
+      {"nome": "CoCoSoDa", "versao": "nao_informado", "uso": "recuperação densa na etapa interna (não gera patches)"},
+      {"nome": "Modelo do TypeFix", "versao": "nao_informado", "uso": "não identificado neste artigo"}
+    ],
+    "benchmarks": [
+      {"nome": "TypeBugs", "quantidade": "109 type errors (após dividir arquivos com vários erros), de 15 projetos open source", "observacao": "Denominador informado no texto (55 out of 109 para TypeFix). Ablação (Tabela II) no TypeBugs; configurações internas (Tabela III) só no projeto pandas (27/42 corretos/plausíveis na configuração padrão)."},
+      {"nome": "BugsInPy", "quantidade": "54 type errors considerados, de um total de 493 bugs", "observacao": "Selecionados os bugs que levantam exceções de erro de tipo; 9 projetos na Tabela IV."},
+      {"nome": "Dados de treinamento do TypeFix (banco de padrões)", "quantidade": "10,981 fixes", "observacao": "Usado só para a etapa externa (banco de templates), não para avaliação; sobreposição com os benchmarks não informada."}
+    ],
+    "metricas": [
+      {"nome": "#Correct / correct patches", "definicao": "patch semanticamente idêntico à correção original do desenvolvedor, decidido por avaliação manual dos patches plausíveis pelos autores", "denominador": "109 (TypeBugs), 54 (BugsInPy); 42 erros do pandas não informado explicitamente para a Tabela III"},
+      {"nome": "#Plausible / plausible patches", "definicao": "patch que passa todas as suítes de teste existentes", "denominador": "109 (TypeBugs), 54 (BugsInPy)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Patches plausíveis (que passam nos testes) não são necessariamente corretos; o estudo distingue as duas métricas e exige inspeção manual (por exemplo, 62 corretos de 93 plausíveis para RetypeR no TypeBugs).", "localizador": "PDF p. 6 (impressa 204), Seção IV-D; Tabela I, PDF p. 8 (impressa 206)"},
+      {"categoria": "correcao_funcional", "descricao": "Ao recuperar identificadores do projeto inteiro, identificadores não relacionados ao reparo podem ficar bem ranqueados, introduzindo ruído que pode confundir o modelo (menos patches corretos e plausíveis na configuração 'Project').", "localizador": "PDF p. 8 (impressa 206), Seção V-B, Tabela III"},
+      {"categoria": "custo", "descricao": "O alto custo do APR levou a restringir a análise de configurações internas ao projeto pandas, e a limitação de recursos computacionais restringiu a exploração de módulos de recuperação; custo não quantificado.", "localizador": "PDF p. 7 (impressa 205), Seção V-B; PDF p. 10 (impressa 208), Seção VII"},
+      {"categoria": "outro", "descricao": "Limite de 5.000 amostras por erro: gerar mais prompts reduz as amostras por prompt, o que o estudo usa para explicar a ausência de ganho com top 10 e top 20 identificadores.", "localizador": "PDF p. 8 (impressa 206), Seção V-B"},
+      {"categoria": "outro", "descricao": "Ameaças declaradas: desenho do recuperador (outros módulos poderiam dar resultados diferentes), configuração de hiperparâmetros e generalização a outros conjuntos de dados.", "localizador": "PDF p. 10 (impressa 208), Seção VII"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Parâmetros definidos conforme estudos anteriores e avaliação de configurações alternativas da etapa interna (Tabela III).", "avaliada": "nao", "localizador": "PDF p. 10 (impressa 208), Seção VII; PDF p. 8 (impressa 206), Tabela III"},
+      {"descricao": "Avaliação em dois benchmarks (TypeBugs e BugsInPy) para mitigar a limitação de generalização.", "avaliada": "nao", "localizador": "PDF p. 10 (impressa 208), Seção VII"},
+      {"descricao": "Manutenção das demais configurações iguais às de trabalhos anteriores e uso do mesmo prompt de [12] para ChatGPT e Codex, para justiça da comparação.", "avaliada": "nao", "localizador": "PDF p. 6 (impressa 204), Seção IV-E"},
+      {"descricao": "Avaliação manual de cada patch plausível para decidir se é correto.", "avaliada": "nao", "localizador": "PDF p. 6 (impressa 204), Seção IV-D"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Totais das Tabelas I e IV conferidos por cálculo próprio: as somas das linhas por projeto batem com as linhas 'Total' em todas as colunas (corretos e plausíveis). Tabela II: 20 + 31 + 11 = 62 e 41 + 32 + 20 = 93 (cálculo próprio), coerentes com o total de RetypeR na Tabela I. A configuração 'Default' da Tabela III (27/42) coincide com a linha pandas de RetypeR na Tabela I.", "localizador": "PDF p. 8 (impressa 206), Tabelas I, II e III; PDF p. 9 (impressa 207), Tabela IV"},
+      {"descricao": "Inversões por projeto no TypeBugs: RetypeR tem menos corretos que TypeFix em requests (3/4 vs 4/4) e salt (3/8 vs 5/8), menos que PyTER em requests (4/4), salt (5/5) e sanic (2/2 vs 1/2), e menos que AlphaRepair em luigi (0/2 vs 1/2).", "localizador": "PDF p. 8 (impressa 206), Tabela I"},
+      {"descricao": "Na Tabela III (só pandas), nenhuma configuração alternativa supera a padrão (27 corretos): Top 1 = 26, Top 10 = 25, Top 20 = 25, Project = 24; Top 10 tem mais plausíveis (41) que Top 1 (39) com menos corretos.", "localizador": "PDF p. 8 (impressa 206), Tabela III"},
+      {"descricao": "A ablação é incremental (externa primeiro, depois interna): os valores das condições intermediárias não são impressos, a etapa interna sem a externa não é testada, e a contribuição atribuída a cada etapa depende da ordem de adição.", "localizador": "PDF p. 7-8 (impressas 205-206), Seção V-B, Tabela II"},
+      {"descricao": "Comparações com baselines confundem técnica e modelo: RetypeR usa CodeT5-large (512 tokens), ChatGPT e Codex usam o prompt de [12], AlphaRepair usa CodeBERT, e o modelo do TypeFix não é informado. A origem dos valores dos baselines (reexecução ou valores relatados) não é declarada; o texto diz apenas manter as configurações de trabalhos anteriores.", "localizador": "PDF p. 6 (impressa 204), Seções IV-C e IV-E"},
+      {"descricao": "AlphaRepair aparece na Tabela I (TypeBugs) mas não na Tabela IV (BugsInPy), sem justificativa.", "localizador": "PDF p. 8 (impressa 206), Tabela I; PDF p. 9 (impressa 207), Tabela IV"},
+      {"descricao": "Os ganhos do resumo (12,73% e 11,54%) são variações relativas no número de erros corrigidos (7/55 e 3/26, cálculo próprio confere), não pontos percentuais; desempenho no BugsInPy é menor que no TypeBugs para TypeFix (48,1% vs 50,5%) e Codex (31,5% vs 35,8%).", "localizador": "PDF p. 1 (impressa 199), resumo; PDF p. 7 e 9 (impressas 205 e 207)"},
+      {"descricao": "A definição de patch correto varia entre seções: 'semantically identical to the developer's original fix' (IV-D) e 'semantically equivalent ... disregarding I/O side effects such as print statement outputs' (III-E). A avaliação é feita pelos autores, sem número de avaliadores nem concordância informados.", "localizador": "PDF p. 6 (impressa 204), Seções III-E e IV-D"},
+      {"descricao": "O estudo afirma que os resultados 'reflect the lower bound' da abordagem e poderiam melhorar com otimização de hiperparâmetros, sem teste dessa afirmação.", "localizador": "PDF p. 10 (impressa 208), Seção VII"},
+      {"descricao": "Não há repetições de execução, variância nem teste estatístico; número de execuções nao_informado.", "localizador": "PDF p. 6-9 (impressas 204-207), Seções IV e V"}
+    ],
+    "observacoes": [
+      {"descricao": "PyTER (regras e templates manuais) e CoCoNuT (tradução neural treinada) são baselines que não são prompting; aparecem nas Tabelas I e IV, mas não entram em tecnicas nem em extracoes.", "localizador": "PDF p. 6 (impressa 204), Seção IV-C"},
+      {"descricao": "Componentes do recuperador interno: BM-25 (lexical), CoCoSoDa (semântico), fusão RRF com p = 60, remoção de identificadores comuns e filtragem por Pylint/Pyright; não há ablação separada desses componentes, só das etapas externa e interna e das configurações da Tabela III.", "localizador": "PDF p. 4-6 (impressas 202-204), Seções III-C e IV-E"},
+      {"descricao": "Diagramas de Venn (Fig. 4) indicam 6 erros corrigidos só por RetypeR entre as abordagens baseadas em LLM e 26 únicos frente a PyTER e CoCoNuT; não usados em extracoes.", "localizador": "PDF p. 7 (impressa 205), Fig. 4"},
+      {"descricao": "Pacote de replicação anunciado em link anônimo; não acessado nem validado.", "localizador": "PDF p. 10 (impressa 208), Seção VIII"}
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we introduce RetypeR, an integrated retrieval-based framework to repair Python type errors automatically.", "localizador": "PDF p. 1 (impressa 199), resumo"},
+      {"trecho": "To integrate the information retrieved from the aforementioned external and internal stages, RetypeR constructs context-aware repair prompts for LLMs to guide them in generating correct patches for type errors.", "localizador": "PDF p. 1 (impressa 199), resumo"},
+      {"trecho": "The context-aware repair prompts include five parts: the external information, the internal information, the buggy line, the context before and the context after the buggy line, as shown in Figure 3.", "localizador": "PDF p. 5 (impressa 203), Seção III-D"},
+      {"trecho": "The placeholder token <INFILL> signals to the model the precise location where new code should be generated according to the applied template.", "localizador": "PDF p. 5 (impressa 203), Seção III-D"},
+      {"trecho": "Each repair prompt includes only one donor code identifier.", "localizador": "PDF p. 5 (impressa 203), Seção III-D"},
+      {"trecho": "To repair each bug, we sample the model 5,000 times and set a five-hour timeout limit following previous study [13].", "localizador": "PDF p. 6 (impressa 204), Seção IV-E"},
+      {"trecho": "Subsequently, it executes the test suites on each patch to identify the plausible patches that successfully pass all the test suites.", "localizador": "PDF p. 6 (impressa 204), Seção III-E"},
+      {"trecho": "Following common APR practice, we conduct thorough manual evaluations of each plausible patch to determine its accuracy as a correct patch.", "localizador": "PDF p. 6 (impressa 204), Seção IV-D"},
+      {"trecho": "We use the OpenAI API of ChatGPT (gpt-3.5-turbo) and Codex (code-davinci-002) for evaluation, invoking these models using the same prompt from the prior work [12].", "localizador": "PDF p. 6 (impressa 204), Seção IV-E"},
+      {"trecho": "Specifically, we begin with a scenario where no retrieval stage is applied, meaning both the external and internal retrieval stages of RetypeR are ablated, and only the base LLM is used.", "localizador": "PDF p. 7 (impressa 205), Seção V-B"},
+      {"trecho": "Moreover, when considering the entire project, some identifier tokens unrelated to the repair may achieve high rankings, introducing more noise [16].", "localizador": "PDF p. 8 (impressa 206), Seção V-B"},
+      {"trecho": "Following prior work [16], and due to the high cost of APR, we focus on the pandas project within the TypeBugs benchmark which has the largest number of type errors.", "localizador": "PDF p. 7 (impressa 205), Seção V-B"},
+      {"trecho": "Due to the limitation of computational resources, we only explored the case of directly fusing the retrieval ranking results of lexical-aware and semantic-aware retrieval modules employing the RRF strategy.", "localizador": "PDF p. 10 (impressa 208), Seção VII"},
+      {"trecho": "To mitigate this concern, we conduct experiments on two different benchmarks, TypeBugs and BugsInPy, and demonstrate that RetypeR achieves state-of-the-art results on both benchmarks.", "localizador": "PDF p. 10 (impressa 208), Seção VII"},
+      {"trecho": "TypeFix [12] is the state-of-the-art approach for fixing Python type errors, which mines fix templates by hierarchical clustering and applies these templates as domain knowledge for patch generation.", "localizador": "PDF p. 9 (impressa 207), Seção VI-A"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "RetypeR",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["instrucao", "contexto"],
+      "comparador": "TypeFix",
+      "modelo": "RetypeR: CodeT5-large (versão nao_informado); TypeFix: modelo nao_informado neste artigo",
+      "benchmark": "TypeBugs",
+      "metrica": "Correct patches (#Correct; primeiro valor do formato Correct/Plausible)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 55, "intervencao": 62},
+      "denominador": "109 type errors",
+      "condicoes": "Tabela I, linha Total, formato Correct/Plausible (RetypeR 62/93; TypeFix 55/76). RetypeR: top-5 identificadores doadores, 5.000 amostras e limite de 5 h por erro, validação por testes e julgamento manual de corretude pelos autores. Configuração do TypeFix (modelo, amostras) e origem do valor (reexecução ou relatado em [12]) nao_informado. Acrescentados relativos ao TypeFix, de que deriva a etapa externa; diferenças de modelo e orçamento podem confundir o contraste. Número de execuções nao_informado. Conferido visualmente no PDF p. 8.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo, contribuições e RQ1 destacam uma técnica (RetypeR), o número de erros corretamente corrigidos e o melhor baseline (TypeFix, 'current state-of-the-art tool'); sem agregado entre benchmarks, usa-se o primeiro na ordem das tabelas (Tabela I, TypeBugs). A regra de desempate levaria ao mesmo contraste (primeira tabela, primeira métrica Correct, primeiro baseline de prompting listado).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 206), Tabela I, linha Total, colunas RetypeR e TypeFix; texto em PDF p. 7 (impressa 205), Seção V-A",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Total 62/93 55/76 41/59 31/50 39/46 19/46 5/21", "localizador": "PDF p. 8 (impressa 206), Tabela I, linha Total; colunas Project, RetypeR, TypeFix, PyTER, ChatGPT, Codex, AlphaRepair, CoCoNuT"},
+        {"trecho": "RetypeR is able to generate correct patches for 62 real-world type errors, 12.73% (7 bugs) more than the current state-of-the-art tool TypeFix.", "localizador": "PDF p. 7 (impressa 205), Seção V-A"},
+        {"trecho": "In total, we consider 109 type errors from TypeBugs and an additional 54 type errors from BugsInPy.", "localizador": "PDF p. 6 (impressa 204), Seção IV-B"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "External retrieval stage",
+      "mecanismos": ["contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "No Retrieval (base LLM)",
+      "modelo": "CodeT5-large (versão nao_informado)",
+      "benchmark": "TypeBugs",
+      "metrica": "#Correct",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 20, "intervencao": null},
+      "denominador": "109 type errors (denominador do TypeBugs; a Tabela II não o repete)",
+      "condicoes": "Tabela II imprime 'No Retrieval' = 20 corretos (41 plausíveis) e o incremento 'External' = +31 corretos (+32 plausíveis) ao aplicar a etapa externa sobre o LLM base, sem a etapa interna. O valor absoluto da condição com etapa externa não é impresso e não foi calculado (intervencao = null). Orçamento de amostras e composição do prompt das condições de ablação nao_informado. Número de execuções nao_informado. Conferido visualmente no PDF p. 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente isolado da tabela de ablação (primeira linha após o comparador), incluído para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 206), Tabela II, linhas 'No Retrieval' e 'External', coluna #Correct; texto em PDF p. 7 (impressa 205), Seção V-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "No Retrieval 20 41", "localizador": "PDF p. 8 (impressa 206), Tabela II; colunas Method, #Correct, #Plausible"},
+        {"trecho": "External +31 +32", "localizador": "PDF p. 8 (impressa 206), Tabela II; colunas Method, #Correct, #Plausible"},
+        {"trecho": "Specifically, when the external retrieval stage is applied on top of the base LLM, the numbers of correct and plausible patches increase by 31 and 32, respectively.", "localizador": "PDF p. 7 (impressa 205), Seção V-B"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Internal retrieval stage",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["instrucao", "contexto"],
+      "comparador": "No Retrieval + External retrieval stage (sem etapa interna)",
+      "modelo": "CodeT5-large (versão nao_informado)",
+      "benchmark": "TypeBugs",
+      "metrica": "#Correct",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": null, "intervencao": 62},
+      "denominador": "109 type errors (denominador do TypeBugs; a Tabela II não o repete)",
+      "condicoes": "Tabela II imprime o incremento 'Internal' = +11 corretos (+20 plausíveis) ao aplicar a etapa interna depois da externa, e o 'Total' = 62 corretos (93 plausíveis), que corresponde ao RetypeR completo. O valor da condição sem a etapa interna não é impresso e não foi calculado (baseline = null). Etapa interna com top-5 identificadores, um por prompt, dividindo o orçamento de 5.000 amostras. Número de execuções nao_informado. Conferido visualmente no PDF p. 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente isolado da tabela de ablação, na ordem da tabela, para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8 (impressa 206), Tabela II, linhas 'Internal' e 'Total', coluna #Correct; texto em PDF p. 7 (impressa 205), Seção V-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Internal +11 +20", "localizador": "PDF p. 8 (impressa 206), Tabela II; colunas Method, #Correct, #Plausible"},
+        {"trecho": "Total 62 93", "localizador": "PDF p. 8 (impressa 206), Tabela II; colunas Method, #Correct, #Plausible"},
+        {"trecho": "After applying the internal retrieval stage, the numbers of correct and plausible patches further increase by 11 and 20, respectively.", "localizador": "PDF p. 7 (impressa 205), Seção V-B"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Três questões de pesquisa explícitas (efetividade, componentes, generalização) ligadas aos experimentos.", "localizador": "PDF p. 6 (impressa 204), Seção IV-A"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "O pipeline (recuperação externa e interna, construção do prompt, orçamento, validação) é descrito, mas o prompt da condição 'No Retrieval', a configuração dos baselines e o protocolo da avaliação manual de corretude não são detalhados.", "localizador": "PDF p. 3-7 (impressas 201-205), Seções III, IV-E e V-B"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há seis baselines e ablação incremental, mas os baselines usam modelos diferentes (ou não informados, no caso do TypeFix), a origem dos valores não é declarada e a ablação não testa a etapa interna sem a externa.", "localizador": "PDF p. 6 (impressa 204), Seções IV-C e IV-E; PDF p. 8 (impressa 206), Tabela II"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Patches plausíveis e corretos são definidos, os denominadores (109 e 54) são informados e os valores coincidem entre tabelas (Tabela III Default = pandas na Tabela I; Tabela II = Total da Tabela I). Porém a corretude é julgada manualmente pelos autores sem número de avaliadores nem concordância, e a definição de correto varia entre as Seções III-E e IV-D.", "localizador": "PDF p. 6 (impressa 204), Seções III-E, IV-B e IV-D; PDF p. 8 (impressa 206)"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "A Seção VII discute desenho do recuperador, hiperparâmetros e generalização entre conjuntos de dados, mas não trata da avaliação manual, do não determinismo da amostragem nem de contaminação.", "localizador": "PDF p. 10 (impressa 208), Seção VII"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa modelos, top-5 identificadores, 5.000 amostras, limite de 5 h, ferramentas de análise estática e pacote de replicação anônimo (não acessado); parâmetros de decodificação, snapshot do CodeT5-large e prompts dos baselines não são informados.", "localizador": "PDF p. 6 (impressa 204), Seção IV-E; PDF p. 10 (impressa 208), Seção VIII"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo não discute possível presença de TypeBugs ou BugsInPy no pré-treinamento dos modelos nem sobreposição entre as 10.981 correções do banco de templates e os benchmarks.", "localizador": "PDF p. 6 (impressa 204), Seção IV-B; PDF p. 10 (impressa 208), Seção VII"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-05", "p-07", "p-08", "p-09"],
+    "observacao": "Texto completo lido (incluindo referências). Abertas visualmente: p-05 (Algoritmo 1 e Fig. 3, prompt), p-07 (Fig. 4 e Seção V-B), p-08 (Tabelas I, II e III) e p-09 (Tabela IV)."
+  }
+}

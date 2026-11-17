@@ -1,0 +1,148 @@
+{
+  "estudo": "S1831",
+  "texto_fonte": "fontes/textos/lote/S1831.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "DDL representation (zero-shot, instruction-based prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (impressa 463), seções II.A e II.B; Tabelas II–IV, PDF p. 3–4 (impressas 464–465)",
+        "observacao": "Prompt zero-shot em estilo de instrução ('Create a complete and ready-to-run RESTful API program based on this SQL DDL...') → instrucao; esquema SQL DDL do banco Chinook fornecido como insumo → contexto; framework ExpressJS, MySQL, entrega em ZIP e, no Experimento 3, 'Each resource is created in a separate file' → restricoes. O estudo compara diretamente duas representações alternativas do mesmo esquema (DDL e JSON) com o mesmo prompt; não há condição sem artefato de esquema nem prompt base do qual a representação derive, por isso não há condição com e sem a técnica e nenhum mecanismo é isolado. O contraste DDL × JSON difere só na representação do artefato e na menção a ela no prompt ('this SQL DDL' / 'this JSON file that contain structured SQL database information'); as duas condições recebem as mesmas categorias de mecanismo."
+      },
+      {
+        "nome_original": "JSON representation (zero-shot, instruction-based prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (impressa 463), seções II.A e II.B; Tabelas II–IV, PDF p. 3–4 (impressas 464–465)",
+        "observacao": "Mesmo prompt zero-shot em estilo de instrução, com arquivo JSON construído manualmente a partir do DDL original (tabelas, atributos, tipos, chaves primárias e relacionamentos) como insumo → contexto; mesmas restrições de framework, SGBD e formato de entrega → restricoes. Mesma observação sobre a ausência de condição sem a técnica: a comparação é entre representações alternativas, não com e sem a técnica."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Chinook-7 / Chinook-11 (schema complexity)",
+        "natureza": "outro",
+        "descricao": "Variação do conjunto de dados (7 ou 11 tabelas do banco Chinook) para aumentar a complexidade do esquema; não é técnica de prompting. No Experimento 3 muda junto com o conjunto de consultas e com a instrução de arquivo separado por recurso.",
+        "localizador": "PDF p. 2 (impressa 463), seção II.A; Tabela I"
+      }
+    ],
+    "modelos": [
+      {"nome": "ChatGPT 5.2", "versao": "5.2 (snapshot nao_informado)", "observacao": "Acesso pela interface web, com as configurações padrão da plataforma; parâmetros de decodificação não informados. Único modelo usado em todos os experimentos."}
+    ],
+    "benchmarks": [
+      {"nome": "Chinook database — Chinook-7", "quantidade": "7 tabelas (Artist, Album, Playlist, PlaylistTrack, Track, MediaType, Genre)", "observacao": "Usado nos Experimentos 1 (CRUD de cada tabela) e 2 (CRUD mais 10 consultas de informação com junção de duas tabelas).", "localizador": "PDF p. 2 (impressa 463), seção II.A, Tabela I; PDF p. 3 (impressa 464), seção II.B"},
+      {"nome": "Chinook database — Chinook-11", "quantidade": "11 tabelas (Chinook-7 mais Employee, Customer, Invoice, InvoiceLine)", "observacao": "Usado no Experimento 3 (CRUD mais 10 consultas mais complexas com várias junções). Não há conjunto de casos de teste de referência publicado no artigo; os testes funcionais foram executados manualmente no Postman.", "localizador": "PDF p. 2 (impressa 463), Tabela I; PDF p. 3 (impressa 464), seção II.B e Tabela IV"}
+    ],
+    "metricas": [
+      {"nome": "Completeness (%)", "descricao": "Verifica se todas as funcionalidades pedidas foram geradas (operações CRUD, endpoints e consultas de informação). A Tabela V registra por recurso 'v' (as cinco operações geradas), 'x' (recurso não gerado) ou o número de operações que falharam; a Fig. 2 traz o percentual por experimento e representação. A fórmula do percentual e o denominador não são informados.", "localizador": "PDF p. 3 (impressa 464), seção II.D; Tabela V e Fig. 2, PDF p. 4 (impressa 465)"},
+      {"nome": "Code complexity (CodeMetric)", "descricao": "Complexidade estrutural do fluxo de controle, calculada por função com o plugin CodeMetric do Visual Studio Code e somada por recurso (Tabela VI) e por experimento (Fig. 3). O tipo exato de complexidade calculada pelo plugin não é nomeado.", "localizador": "PDF p. 5 (impressa 466), seção III.B; Tabela VI e Fig. 3"},
+      {"nome": "Functional testing result", "descricao": "Execução manual de requisições HTTP no Postman contra o banco Chinook; 'v' = endpoints executam corretamente, número = erros ou funcionalidade não correspondente, 'x' = recurso não gerado.", "localizador": "PDF p. 3 (impressa 464), seção II.E; PDF p. 6 (impressa 467), seção III.C e Tabela VII"}
+    ],
+    "linguagens": ["ExpressJS (framework pedido no prompt; a linguagem não é nomeada, as Listagens 1–3 estão em sintaxe JavaScript)", "SQL DDL / MySQL (artefato de entrada e SGBD)", "JSON (artefato de entrada)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Geração incompleta: operações CRUD e recursos inteiros não gerados, sobretudo para a tabela PlaylistTrack (relacionamento muitos-para-muitos) e para JSON no Experimento 3, em que só 5 recursos foram gerados por completo.", "localizador": "PDF p. 4 (impressa 465), seção III.A, Tabela V e Fig. 2"},
+      {"categoria": "correcao_funcional", "descricao": "Erros em tempo de execução: três endpoints do recurso PlaylistTracks gerado com DDL no Experimento 3 falharam no teste funcional, em consultas relacionais; os autores dizem que a confiabilidade cai com o aumento da complexidade estrutural e de requisitos.", "localizador": "PDF p. 6 (impressa 467), seção III.C e Tabela VII"},
+      {"categoria": "outro", "descricao": "Com o aumento da complexidade do esquema e do prompt, o LLM simplifica o código, reduzindo lógica interna e tratamento de erros; no Experimento 3 o código do exemplo não tem tratamento de erro (Listagem 3). Risco de robustez apresentado pelos autores como compromisso, não como falha medida.", "localizador": "PDF p. 5 (impressa 466), seção III.B; Listagens 1–3, PDF p. 6 (impressa 467)"},
+      {"categoria": "manutenibilidade", "descricao": "Os autores associam a representação DDL a maior complexidade estrutural do código ('at the cost of higher structural complexity') e a JSON a código mais simples e legível; a legibilidade não é medida diretamente.", "localizador": "PDF p. 5 (impressa 466), seção III.B; seção IV, PDF p. 6–7 (impressas 467–468)"},
+      {"categoria": "nao_determinismo", "descricao": "Variações de nomes de recursos (caixa e plural) e de prefixos de endpoint entre execuções; os autores dizem que, sem especificação explícita no prompt, o LLM pode aplicar nomes e prefixos diferentes, sem efeito na funcionalidade. Número de execuções não informado.", "localizador": "PDF p. 4–5 (impressas 465–466), seção III.A"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Mesma estratégia de prompt aplicada às duas representações para manter a equidade experimental.", "avaliada": "nao", "localizador": "PDF p. 3 (impressa 464), seção II.B"},
+      {"descricao": "As duas representações contêm a mesma informação do banco (JSON convertido do DDL original), para atribuir as diferenças à representação e não ao esquema.", "avaliada": "nao", "localizador": "PDF p. 2 (impressa 463), seção II.A"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Inversão conforme o experimento: o resumo diz que DDL alcança maior completude (86.2–97.8%), mas no Experimento 1 a Fig. 2 mostra JSON 100 e DDL 94.3; DDL só supera JSON nos Experimentos 2 (97.8 × 93.4) e 3 (86.2 × 46.2).", "localizador": "Resumo, PDF p. 1 (impressa 462); Fig. 2, PDF p. 4 (impressa 465)"},
+      {"descricao": "Na Tabela VI, linha playlistTracks do Experimento 2, DDL = 19 e JSON = 6, mas a coluna DIFFS traz 11; cálculo próprio: 19 − 6 = 13. Os totais da Fig. 3 (229 e 146) são compatíveis com 19 e 6 (cálculo próprio da soma das linhas do Experimento 2), o que localiza a divergência na coluna DIFFS.", "localizador": "Tabela VI e Fig. 3, PDF p. 5 (impressa 466)"},
+      {"descricao": "A fórmula e o denominador do percentual de completude não são informados. Cálculo próprio, como hipótese: contar 5 operações por recurso CRUD mais 10 consultas de informação nos Experimentos 2 e 3 reproduz 94.3, 100, 97.8, 86.2 e 46.2, mas dá 93.3 (42/45) para JSON no Experimento 2, contra 93.4 impresso; aparente inconsistência sob essa hipótese, que o artigo não confirma.", "localizador": "Seção III.A, Tabela V e Fig. 2, PDF p. 4 (impressa 465)"},
+      {"descricao": "A narrativa diz que entradas DDL 'consistently lead to more complex code structures', mas a Tabela VI mostra exceções: no Experimento 1, playlistTracks (14 × 27) e tracks (29 × 39) têm complexidade maior com JSON; no Experimento 3, reports tem 2 com DDL e 10 com JSON. Os autores discutem as duas exceções do Experimento 1.", "localizador": "Seção III.B e Tabela VI, PDF p. 5 (impressa 466)"},
+      {"descricao": "O resumo e a conclusão dizem que JSON produz código 'more readable', mas o estudo mede complexidade (CodeMetric), não legibilidade.", "localizador": "Resumo, PDF p. 1; seção IV, PDF p. 6 (impressa 467)"},
+      {"descricao": "Os experimentos variam vários fatores ao mesmo tempo: o Experimento 3 muda o esquema (Chinook-11), as consultas e acrescenta a instrução de arquivo separado por recurso; as diferenças entre experimentos não podem ser atribuídas a um único fator. O contraste DDL × JSON é feito dentro de cada experimento.", "localizador": "Seção II.B, PDF p. 3 (impressa 464); Tabelas II–IV"},
+      {"descricao": "Número de execuções por condição não informado (o texto menciona 'different experimental runs'), modelo único, sem teste estatístico nem medida de variabilidade; geração pela interface web com configurações padrão.", "localizador": "Seção II.C, PDF p. 3 (impressa 464); seção III.A, PDF p. 4 (impressa 465); seção III.D, PDF p. 6 (impressa 467)"},
+      {"descricao": "O recurso report do DDL no Experimento 3 tem '8' na Tabela V (número de operações com falha) e 'v' na Tabela VII (endpoints executam corretamente); a Tabela VII considera só os endpoints gerados, mas o artigo não diz quantos endpoints de report foram testados.", "localizador": "Tabela V, PDF p. 4 (impressa 465); Tabela VII, PDF p. 6 (impressa 467)"}
+    ],
+    "observacoes": [
+      {"descricao": "Os três níveis de prompt (baseline, intermediate, advanced) variam os requisitos da tarefa (consultas adicionais) e o esquema, não a técnica de prompting; todos os prompts são zero-shot em estilo de instrução. Por isso não são tratados como técnicas.", "localizador": "Seção II.B, PDF p. 2–3 (impressas 463–464)"},
+      {"descricao": "A representação JSON foi construída manualmente a partir do DDL original; o teste funcional foi feito manualmente no Postman (esforço manual descrito pelo estudo).", "localizador": "Seção II.A, PDF p. 2 (impressa 463); seção II.E, PDF p. 3 (impressa 464)"},
+      {"descricao": "Os prompts dos Experimentos 2 e 3 repetem a frase 'The Database is provided in our system using MySQL RDBMS.' duas vezes, nas versões DDL e JSON.", "localizador": "Tabelas III e IV, PDF p. 3–4 (impressas 464–465)"},
+      {"descricao": "O artigo informa um repositório com os prompts ([23], GitHub); o pacote não foi acessado nesta extração.", "localizador": "Seção II.B, PDF p. 2 (impressa 463); referência [23], PDF p. 7 (impressa 468)"},
+      {"descricao": "A introdução cita estudos anteriores segundo os quais a entrada pode levar a alucinações; o estudo não mede alucinação.", "localizador": "Seção I, PDF p. 1 (impressa 462)"},
+      {"descricao": "Os autores reconhecem que só usaram prompting zero-shot em estilo de instrução e sugerem few-shot e chain-of-thought como trabalho futuro.", "localizador": "Seção III.D, PDF p. 6 (impressa 467); seção IV, PDF p. 7 (impressa 468)"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper evaluates two database-related representations, JSON and Data Definition Language (DDL), on LLM for RESTful API code generation.", "localizador": "Resumo, PDF p. 1 (impressa 462)"},
+      {"trecho": "DDL achieves higher completeness (86.2–97.8%) and better handles more complex relational schemas, while JSON produces simpler, more readable code, but completeness degrades (to 46%) under complex scenarios.", "localizador": "Resumo, PDF p. 1 (impressa 462)"},
+      {"trecho": "This research aims to evaluate how different artefact representations affect LLM-generated outputs and to analyze the specific impacts of DDL and JSON inputs.", "localizador": "Seção I, PDF p. 2 (impressa 463)"},
+      {"trecho": "This DDL is the original representation of the Chinook database.", "localizador": "Seção II.A, PDF p. 2 (impressa 463)"},
+      {"trecho": "JSON representation was obtained by converting the original Chinook DDL representation [18].", "localizador": "Seção II.A, PDF p. 2 (impressa 463)"},
+      {"trecho": "Both representations contain the same database information to ensure that any observed differences in generated code can be attributed to the input artefact representation rather than to the schema difference.", "localizador": "Seção II.A, PDF p. 2 (impressa 463)"},
+      {"trecho": "Prompt type that uses zero-shot [21] with instruction-based style [22].", "localizador": "Seção II.B, PDF p. 2 (impressa 463)"},
+      {"trecho": "The same prompting strategy is applied consistently to both DDL and JSON input artefacts to maintain experimental fairness.", "localizador": "Seção II.B, PDF p. 3 (impressa 464)"},
+      {"trecho": "Each constructed prompt and its corresponding input artefact are submitted to ChatGPT 5.2 trough web interface with default configurations settings by its platform.", "localizador": "Seção II.C, PDF p. 3 (impressa 464)"},
+      {"trecho": "Create a complete and ready-to-run RESTful API program based on this SQL DDL.", "localizador": "Tabela II, prompt para DDL, PDF p. 3 (impressa 464)"},
+      {"trecho": "The framework to be used is ExpressJS.", "localizador": "Tabela II, prompt para DDL, PDF p. 3 (impressa 464)"},
+      {"trecho": "The results reveal that the PlaylistTrack resource exhibits the highest number of generation failures across all experiments (Table V).", "localizador": "Seção III.A, PDF p. 4 (impressa 465)"},
+      {"trecho": "This degradation occurs most often for the JSON input artefact representation, where only 5 resources are fully generated (46.2% complete) in experiment 3.", "localizador": "Seção III.A, PDF p. 4 (impressa 465)"},
+      {"trecho": "Minor variations are observed in the naming of generated resources across different experimental runs.", "localizador": "Seção III.A, PDF p. 4 (impressa 465)"},
+      {"trecho": "These variations do not affect functionality but indicate that, in the absence of explicit prompting, the LLM may apply different naming and endpoint prefixes during code generation.", "localizador": "Seção III.A, PDF p. 5 (impressa 466)"},
+      {"trecho": "As schema and prompt complexity increase, the LLM tends to simplify generated code by reducing internal logic and error handling.", "localizador": "Seção III.B, PDF p. 5 (impressa 466)"},
+      {"trecho": "DDL inputs consistently lead to more complex code structures, but JSON inputs result in simpler implementations with lower complexity.", "localizador": "Seção III.B, PDF p. 5 (impressa 466)"},
+      {"trecho": "playlistTracks 14 27 13 19 6 11 4 0 4", "localizador": "Tabela VI, linha playlistTracks; colunas DDL, JSON, DIFFS dos Experimentos 1, 2 e 3; PDF p. 5 (impressa 466)"},
+      {"trecho": "However, three endpoints fail during runtime execution.", "localizador": "Seção III.C, PDF p. 6 (impressa 467)"},
+      {"trecho": "These failures occur in Experiment 3 for the PlaylistTracks resource generated using the DDL artefact.", "localizador": "Seção III.C, PDF p. 6 (impressa 467)"},
+      {"trecho": "First, only one proprietary LLM was used in all experiments, so the results may different to other models.", "localizador": "Seção III.D, PDF p. 6 (impressa 467)"},
+      {"trecho": "Second, all experiments used zero-shot prompting with an instruction-based style.", "localizador": "Seção III.D, PDF p. 6 (impressa 467)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "JSON representation (zero-shot, instruction-based prompt)",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": "DDL representation (zero-shot, instruction-based prompt)",
+      "modelo": "ChatGPT 5.2 (interface web, configurações padrão; snapshot nao_informado)",
+      "benchmark": "Chinook-7, Experimento 1 (Baseline Prompt: CRUD de cada uma das 7 tabelas)",
+      "metrica": "Completeness (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 94.3, "intervencao": 100},
+      "denominador": "nao_informado",
+      "condicoes": "Valores da Fig. 2 (Exp1), conferidos na imagem da PDF p. 4 e repetidos no texto da seção III.A. A Tabela V, primeira tabela com o contraste, registra a completude por recurso com marcas qualitativas (no Experimento 1, DDL tem 2 operações com falha em playlistTracks e JSON tem todas as operações geradas); a Fig. 2 é o percentual agregado impresso sobre os recursos do mesmo experimento, mesma métrica e mesmas condições. Não se agregaram experimentos (esquemas e prompts diferentes). Fórmula e denominador do percentual não informados. Número de execuções não informado; modelo único; prompt zero-shot em estilo de instrução idêntico nas duas condições, exceto a menção ao tipo de artefato. Comparação entre representações alternativas, sem condição sem a técnica: o resultado não é efeito isolado de um mecanismo de prompting. Nos Experimentos 2 e 3 a ordem se inverte (DDL 97.8 e 86.2; JSON 93.4 e 46.2).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca três métricas (completude, complexidade e correção funcional) sem que uma prevaleça e compara duas representações sem identificar uma como técnica e a outra como comparador. Primeira tabela com o contraste: Tabela V (Tabela I é descritiva; Tabelas II–IV trazem os prompts); primeira métrica (completude), único modelo, primeiro experimento; agregado impresso compatível na Fig. 2. DDL é a primeira coluna e a representação original da qual o JSON foi derivado, por isso é tratada como comparador. Sem cobertura adicional: as duas técnicas focais já estão no mesmo contraste, e complexidade e teste funcional são outras métricas da mesma técnica e tarefa.",
+      "derivacao": "direta",
+      "localizador": "Fig. 2 e Tabela V, PDF p. 4 (impressa 465); seção III.A",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "In contrast, the DDL input maintains a higher level of completeness under the same conditions (94.3%, 97.8%, and 86.2% for experiments 1-3, respectively).", "localizador": "Seção III.A, PDF p. 4 (impressa 465)"},
+        {"trecho": "This observation indicates that while JSON representations are effective for simpler scenarios, which can 100% complete in experiment 1, their performance may decline as schema complexity and query requirements increase.", "localizador": "Seção III.A, PDF p. 4 (impressa 465)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: avaliar como as representações DDL e JSON afetam o código RESTful gerado; contribuições declaradas.", "localizador": "Seção I, PDF p. 2 (impressa 463)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Prompts completos, conjuntos de dados, ferramentas de análise e fluxo descritos; faltam número de execuções, parâmetros de geração (interface web com padrões da plataforma), fórmula de completude e critérios detalhados do teste manual no Postman.", "localizador": "Seção II, PDF p. 2–3 (impressas 463–464); Tabelas II–IV"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "As duas representações são executadas com o mesmo prompt, modelo e esquema em cada experimento, com a mesma informação de banco; a comparação é entre alternativas, sem condição sem artefato.", "localizador": "Seções II.A e II.B, PDF p. 2–3 (impressas 463–464)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Completude, complexidade e teste funcional são descritos, mas a fórmula e o denominador do percentual de completude não são informados, o tipo de complexidade do CodeMetric não é nomeado, a coluna DIFFS da Tabela VI diverge da diferença das colunas em uma linha e a legibilidade alegada não é medida.", "localizador": "Seções II.D, III.A e III.B; Tabela V e Fig. 2, PDF p. 4; Tabela VI, PDF p. 5"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de limitações com duas limitações (modelo único e só prompting zero-shot); não discute número de execuções, variabilidade, avaliação manual nem confusão de fatores entre experimentos.", "localizador": "Seção III.D, PDF p. 6 (impressa 467)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Prompts impressos e repositório de prompts indicado (não acessado); geração pela interface web do ChatGPT com configurações padrão, sem snapshot nem número de execuções, e teste funcional manual.", "localizador": "Seções II.B e II.C, PDF p. 2–3; referência [23], PDF p. 7"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O banco Chinook é descrito como amplamente adotado em pesquisa, mas o artigo não discute possível presença do esquema ou de APIs semelhantes nos dados de treino do modelo.", "localizador": "Seção II.A, PDF p. 2 (impressa 463)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (7 páginas). Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04, p-05 e p-06. Fig. 2 (valores de completude) e Tabela V conferidas na p-04; Tabela VI e Fig. 3 na p-05; Tabela VII na p-06."
+  }
+}

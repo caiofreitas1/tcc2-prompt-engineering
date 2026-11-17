@@ -1,0 +1,390 @@
+{
+  "estudo": "S613",
+  "texto_fonte": "fontes/textos/lote/S613.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "DSrepair",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1 (resumo), p. 2-4 (Seção II, Fig. 1 e Fig. 4), p. 7-9 (Tabela 2 e Tabela 4); páginas impressas iguais às do PDF",
+        "observacao": "Prompt de reparo estruturado (inspirado no CO-STAR) com descrição do problema, código incorreto, stderr, API Knowledge (expressão completa das APIs invocadas, recuperada do DS-KG por SPARQL e verbalizada), Bug Knowledge (caso de teste, último nó AST executável com valor e primeiro nó não executável), fact-checking e formato de resposta. Categorias: contexto (código incorreto e conhecimento de API recuperado), feedback (stderr e bug knowledge derivados da execução dos testes), restricoes (formato de resposta) e instrucao (estrutura do prompt e componente de fact-checking, cujo texto exato não está no artigo). Mecanismos acrescentados em relação ao prompt base 'DSrepair w/o API&Bug' (Tabela 4): os dois ingredientes acrescentados (API knowledge → contexto; bug knowledge → feedback), embora ambas as categorias já existam no prompt base por outros ingredientes (código incorreto e stderr). Contrafactual de pacote: DSrepair contra 'DSrepair w/o API&Bug' (Tabela 4); o 'sim' vale para o pacote de conhecimento e não autoriza atribuir o ganho a um único mecanismo. Pacote híbrido: inclui infraestrutura que não é prompting (construção do DS-KG, consultas SPARQL, execução e análise de AST), registrada em componentes_fora_escopo. Contra os cinco baselines (Tabela 2) a comparação é entre pacotes distintos, não isolamento."
+      },
+      {
+        "nome_original": "API knowledge (knowledge graph-based RAG; full API expression)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3 (Seção II-B), p. 7-8 (Seção IV-D), p. 9 (Tabela 4)",
+        "observacao": "Ablação RQ4: DSrepair contra 'DSrepair w/o API' (mantém bug knowledge) e 'DSrepair w/o Bug' contra 'DSrepair w/o API&Bug' (Tabela 4). Por padrão só a expressão completa da API entra no prompt (p. 3)."
+      },
+      {
+        "nome_original": "Bug knowledge (AST-node level bug knowledge enrichment)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 3-4 (Seção II-C, Fig. 3), p. 7-8 (Seção IV-D), p. 9 (Tabela 4)",
+        "observacao": "Ablação RQ4: DSrepair contra 'DSrepair w/o Bug' (mantém API knowledge) e 'DSrepair w/o API' contra 'DSrepair w/o API&Bug' (Tabela 4). Usa só os testes de exemplo da descrição da tarefa (p. 3)."
+      },
+      {
+        "nome_original": "Knowledge Graph (knowledge retrieval through KG)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8-9 (Seção IV-E, Tabela 5)",
+        "observacao": "RQ5 substitui a fonte do conhecimento de API (KG contra texto simples, janela de 50 tokens por palavra-chave), mantendo as demais configurações (p. 9). O contrafactual é de substituição, não de retirada: ambas as condições têm a mesma categoria (contexto), por isso nenhuma categoria acrescentada."
+      },
+      {
+        "nome_original": "Plain Text (knowledge retrieval through plain-text searching)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 8-9 (Seção IV-E, Tabela 5)",
+        "observacao": "Condição de comparação da RQ5; recupera janela de texto de 50 tokens por nome de API invocada."
+      },
+      {
+        "nome_original": "stderr information",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Seção II-D)",
+        "observacao": "Mensagem de erro limpa (sem caminhos locais e avisos); presente em todas as condições da ablação, sem contrafactual. Categoria: feedback."
+      },
+      {
+        "nome_original": "fact-checking",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Seção II-D, Fig. 4)",
+        "observacao": "Componente que redireciona a atenção do LLM aos requisitos da descrição; classificado como instrucao, mas o texto exato está só na página do projeto (não acessada). Sem contrafactual."
+      },
+      {
+        "nome_original": "response format (Return Format)",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Seção II-D, Fig. 4)",
+        "observacao": "Instrução de formato de saída (restricoes). O estudo relata que LLMs de código nem sempre a seguem (p. 7). Sem contrafactual."
+      },
+      {
+        "nome_original": "DSrepair+explanation",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9-10 (Seção IV-F, Tabela 6)",
+        "observacao": "Acrescenta explicações das APIs invocadas ao API knowledge do DSrepair; contraste com DSrepair na Tabela 6."
+      },
+      {
+        "nome_original": "DSrepair+parameter&return",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9-10 (Seção IV-F, Tabela 6)",
+        "observacao": "Acrescenta parâmetros e retornos das funções ao API knowledge; contraste com DSrepair na Tabela 6."
+      },
+      {
+        "nome_original": "DSrepair+explanation+parameter&return",
+        "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 9-10 (Seção IV-F, Tabela 6)",
+        "observacao": "Combina explicação e parâmetros/retornos; contraste com DSrepair na Tabela 6."
+      },
+      {
+        "nome_original": "Code-Search",
+        "mecanismos": ["contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção III-C)",
+        "observacao": "Busca código semelhante (Lucene sobre PyTorrent, consulta = descrição do problema) e o insere no prompt como sugestão (contexto e exemplos de código). O texto não detalha a instrução de reparo nem se há resultado de execução. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Chat-Repair",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção III-C)",
+        "observacao": "Incorpora os resultados de execução dos testes no prompt. Contexto = código incorreto a reparar, inferido da descrição da abordagem; o prompt não é reproduzido. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-Debugging-S",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção III-C)",
+        "observacao": "Só uma frase de correção (exemplo: 'The generated code is incorrect. Please fix the code.'). Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-Debugging-E",
+        "mecanismos": ["instrucao", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção III-C)",
+        "observacao": "Primeiro pede explicação linha a linha da execução do código gerado e depois regenera com base nela. O texto não diz se resultados de testes entram no prompt (feedback não registrado). Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Self-Repair",
+        "mecanismos": ["instrucao", "contexto", "feedback", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção III-C)",
+        "observacao": "Usa a informação de erro da execução dos testes para gerar explicação curta da falha e a inclui no prompt de melhoria do código. Mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature 0",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de todos os LLMs fixada em 0 para controlar a aleatoriedade.",
+        "localizador": "PDF p. 5 (Seção III-D)"
+      },
+      {
+        "nome_original": "DS-KG (Data Science Knowledge Graph) construction, SPARQL query and triple verbalization",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de conhecimento: ontologia projetada manualmente, triplas RDF extraídas da documentação de sete bibliotecas, consultas SPARQL e verbalização das triplas. Produz o conteúdo que entra no prompt (contexto), mas a construção do grafo não é prompting.",
+        "localizador": "PDF p. 2-3 (Seções II-A e II-B, Fig. 2)"
+      },
+      {
+        "nome_original": "AST-based bug localization by test execution",
+        "natureza": "outro",
+        "descricao": "Análise de programa: conversão do código em AST e execução nó a nó com os testes de exemplo para localizar o erro; o resultado entra no prompt como bug knowledge (feedback), mas o localizador em si não é prompting.",
+        "localizador": "PDF p. 3-4 (Seção II-C, Fig. 3)"
+      },
+      {
+        "nome_original": "Lucene search over PyTorrent (Code-Search)",
+        "natureza": "outro",
+        "descricao": "Motor de busca e base de código usados pelo baseline Code-Search para recuperar código semelhante.",
+        "localizador": "PDF p. 5 (Seção III-C)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5-turbo", "versao": "GPT-3.5-turbo-0125", "observacao": "LLM de reparo (Tabela 1)."},
+      {"nome": "GPT-4o-mini", "versao": "GPT-4o-mini-2024-07-18", "observacao": "LLM de reparo (Tabela 1)."},
+      {"nome": "DeepSeek-Coder", "versao": "DeepSeek-Coder-V2", "observacao": "LLM de reparo (Tabela 1); só três execuções porque a API deixou de estar disponível após 2024/09/05 (nota 3, p. 5)."},
+      {"nome": "Codestral", "versao": "Codestral-2405", "observacao": "LLM de reparo (Tabela 1)."},
+      {"nome": "GPT-3.5-turbo (geração inicial do código com defeito)", "versao": "nao_informado", "observacao": "O texto diz que o GPT-3.5-turbo gerou o código inicial para as 1000 tarefas (p. 5), mas a versão da Tabela 1 é dada para os LLMs da avaliação; a versão do gerador inicial não é declarada separadamente."}
+    ],
+    "benchmarks": [
+      {
+        "nome": "DS-1000",
+        "versao": "nao_informado",
+        "quantidade": "1000 problemas de ciência de dados (StackOverflow), sete bibliotecas Python; 562 programas gerados pelo GPT-3.5-turbo falham nos testes e são os alvos de reparo",
+        "observacao": "Os mesmos 562 alvos (gerados pelo GPT-3.5-turbo) são reparados pelos quatro LLMs. Por cálculo próprio de consistência, os FR da Tabela 2 correspondem a ANF/562 e as colunas por biblioteca a denominadores 108, 189, 60, 74, 60, 44 e 27 (soma 562), não impressos. Média de 1,6 testes por problema no DS-1000 (p. 3). Versões das bibliotecas só na página do projeto (p. 5)."
+      }
+    ],
+    "metricas": [
+      {"nome": "Absolute Number of Fixes (ANF)", "definicao": "número absoluto de tarefas cujo código é corrigido com sucesso; verificação manual por dois autores contra patches sobreajustados", "localizador": "PDF p. 5 (Seção III-E)"},
+      {"nome": "Fix Rate (FR)", "definicao": "razão entre ANF e todos os trechos de código com defeito (562 alvos)", "localizador": "PDF p. 5 (Seção III-E)"},
+      {"nome": "Token Usage (TU)", "definicao": "uso total de tokens (entrada + saída) para concluir uma requisição completa, em média", "localizador": "PDF p. 5-6 (Seção III-E)"},
+      {"nome": "Money Spent (MS)", "definicao": "custo em dólares calculado pelos tokens de entrada e saída e preços da Tabela 1", "localizador": "PDF p. 6 (Seção III-E)"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Patches que passam nos testes mas são incorretos (sobreajuste): dois patches do GPT-4o-mini foram removidos após checagem manual; código que passa nos testes dados ainda pode falhar na avaliação real.", "localizador": "PDF p. 6 (Seção IV-A, nota 4)"},
+      {"categoria": "correcao_funcional", "descricao": "O reparo pode introduzir ou disparar novos erros (por exemplo, código que passa a executar e falha em asserção); múltiplos erros ocultos não são resolvidos numa única requisição.", "localizador": "PDF p. 6 (Seção IV-A); p. 10 (Seção V-B)"},
+      {"categoria": "correcao_funcional", "descricao": "Sem casos de teste de qualidade, o API knowledge pode reforçar o uso de APIs incorretas ou irrelevantes do código original e levar a código que espelha o incorreto.", "localizador": "PDF p. 10 (Seção V-B)"},
+      {"categoria": "custo", "descricao": "Custo medido em tokens e dólares por abordagem (Tabela 3); respostas de LLMs de código que não seguem o formato pedido aumentam os tokens e os custos.", "localizador": "PDF p. 7-8 (Seção IV-C, Tabela 3)"},
+      {"categoria": "custo", "descricao": "Sobrecarga de tempo da recuperação pelo DS-KG: em média 51,49% mais tempo (aproximadamente 0,06 s) por tarefa em relação à busca em texto simples.", "localizador": "PDF p. 10 (Seção V-B)"},
+      {"categoria": "outro", "descricao": "Manutenção do DS-KG: o grafo reflete uma versão específica das APIs, e mantê-lo atualizado exige esforço e recursos substanciais; conhecimento desatualizado pode afetar a precisão dos reparos (apresentado como limitação, não quantificado).", "localizador": "PDF p. 10 (Seção V-B)"},
+      {"categoria": "outro", "descricao": "Testes insuficientes na descrição da tarefa limitam a eficácia do reparo; algumas descrições não têm casos de teste.", "localizador": "PDF p. 6 (Seção IV-A)"},
+      {"categoria": "nao_determinismo", "descricao": "Aleatoriedade inerente dos LLMs pode afetar os resultados; estudada na RQ7 com média e desvio padrão de dez execuções.", "localizador": "PDF p. 5 (Seção III-D); p. 9-11 (Seção IV-G, Tabela 7)"},
+      {"categoria": "contaminacao", "descricao": "Possível vazamento de dados/memorização das soluções no pré-treinamento; o estudo usa o DS-1000, construído com perturbações para mitigar esse risco (controle descrito pelo benchmark, não verificado pelo estudo).", "localizador": "PDF p. 5 (Seção III-B); p. 10 (Seção V-A)"},
+      {"categoria": "seguranca", "descricao": "Privacidade do ambiente do usuário nas mensagens de erro (caminhos locais de arquivos); não é cibersegurança em sentido estrito, mas exposição de informação do sistema operacional.", "localizador": "PDF p. 4 (Seção II-D)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Dez execuções por abordagem, com seleção do resultado de desempenho mediano (três execuções para DeepSeek-Coder-V2).", "avaliada": "nao", "localizador": "PDF p. 5 (Seção III-D, nota 3); p. 10 (Seção V-A)"},
+      {"descricao": "Temperatura 0 em todos os LLMs.", "avaliada": "nao", "localizador": "PDF p. 5 (Seção III-D)"},
+      {"descricao": "Verificação manual por dois autores da correção dos patches para excluir sobreajuste (dois patches removidos).", "avaliada": "nao", "localizador": "PDF p. 5 (Seção III-E); p. 6 (Seção IV-A)"},
+      {"descricao": "Uso do DS-1000, com perturbação de texto e semântica, para mitigar vazamento de dados.", "avaliada": "nao", "localizador": "PDF p. 5 (Seção III-B)"},
+      {"descricao": "Limpeza das mensagens de erro (remoção de caminhos locais e avisos).", "avaliada": "nao", "localizador": "PDF p. 4 (Seção II-D)"},
+      {"descricao": "Uso de quatro LLMs para reduzir viés de modelo e desenho do prompt segundo o CO-STAR para reduzir ameaça interna.", "avaliada": "nao", "localizador": "PDF p. 10 (Seção V-A)"},
+      {"descricao": "Proposta de atualizar o DS-KG com notas de versão e logs de desenvolvimento das bibliotecas (não executada).", "avaliada": "nao", "localizador": "PDF p. 10 (Seção V-B)"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Cinco abordagens de reparo baseadas em LLM executadas pelo estudo (Code-Search, Chat-Repair, Self-Debugging-S, Self-Debugging-E, Self-Repair) e variantes de ablação do DSrepair (Tabelas 2, 4, 5 e 6).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "A legenda da Tabela 7 diz que os valores são ANF médio ± desvio padrão, mas o texto chama os mesmos valores de 'mean FR (Fix Rate)' e 'mean Fix Rates' (101.80 ± 6.71, 142.90 ± 6.44, 163.67 ± 1.25, 137.80 ± 4.60), que estão na escala de ANF, não de percentual.", "localizador": "PDF p. 9-10 (Seção IV-G, Resposta RQ7); p. 11 (Tabela 7)"},
+      {"descricao": "A Resposta à RQ7 afirma 'greater stability across multiple trials', mas na Tabela 7 o desvio padrão do DSrepair é o maior da coluna para GPT-3.5-turbo (6.71 contra no máximo 6.18) e para GPT-4o-mini (6.44 contra no máximo 6.16) — leitura própria da tabela.", "localizador": "PDF p. 10 (Resposta RQ7); p. 11 (Tabela 7)"},
+      {"descricao": "Na RQ2 o texto diz que a sobreposição com os baselines é 'less than 55%' das correções do DSrepair e que 'about half' não seria corrigida pelos baselines, enquanto a Resposta à RQ2 diz que o DSrepair corrige com exclusividade 'approximately 55%'; as duas formulações não são equivalentes. O texto também fala em 'six baselines', quando o estudo tem cinco baselines mais o DSrepair.", "localizador": "PDF p. 7 (Seção IV-B, Resposta RQ2, Fig. 6 na p. 8)"},
+      {"descricao": "Na RQ3 o texto compara os tokens do DSrepair com os do Self-Repair nos quatro LLMs, mas as economias declaradas (17.49%, 34.24%, 24.71%, 17.59%) correspondem, por cálculo próprio, ao segundo melhor baseline em ANF de cada LLM, que é Self-Debugging-E (2410.03) no GPT-4o-mini e Code-Search (1707.45) no Codestral. Além disso, Chat-Repair e Self-Debugging-S usam menos tokens que o DSrepair em todos os LLMs (Tabela 3).", "localizador": "PDF p. 1 (resumo); p. 7 (Seção IV-C, Resposta RQ3); p. 8 (Tabela 3)"},
+      {"descricao": "Os percentuais do resumo (44.4%, 14.2%, 20.6%, 32.1%) são variação relativa de ANF contra o segundo melhor baseline, que muda por LLM (por cálculo próprio: Self-Repair 72, Self-Debugging-E 127, Self-Repair 136, Code-Search 106), não diferença em p.p. de FR.", "localizador": "PDF p. 1 (resumo); p. 6-7 (Seção IV-A, Tabela 2)"},
+      {"descricao": "Ablação (RQ4): a versão sem os dois conhecimentos supera variantes parciais em vários LLMs — GPT-3.5-turbo w/o Bug 83 (14.77%) < w/o API&Bug 85 (15.12%); GPT-4o-mini w/o API 124 e w/o Bug 132 < w/o API&Bug 133; DeepSeek-Coder w/o API 157 < w/o API&Bug 160. No Codestral as diferenças entre DSrepair e as variantes parciais são pequenas (140, 139, 137 ANF). O estudo reconhece as quedas.", "localizador": "PDF p. 8 (Seção IV-D); p. 9 (Tabela 4)"},
+      {"descricao": "RQ6: acrescentar explicação, parâmetros/retornos ou ambos ao API knowledge reduz o FR em relação ao DSrepair nos quatro LLMs (por exemplo, GPT-3.5-turbo 15.84%, 14.95%, 15.30% contra 18.51%).", "localizador": "PDF p. 9 (Seção IV-F); p. 10 (Tabela 6)"},
+      {"descricao": "O resumo afirma que o DSrepair supera os cinco baselines, o que vale para o total; por biblioteca há inversões na Tabela 2, por exemplo GPT-3.5-turbo Pandas (17 contra 19 do Self-Debugging-E) e TensorFlow (3 contra 4), GPT-4o-mini Pandas (20 contra 33 do Self-Debugging-E), DeepSeek-Coder Scipy (10 contra 12 do Self-Repair) e Codestral TensorFlow (3 contra 6 do Code-Search). O texto reconhece que o DSrepair é melhor 'for most libraries'.", "localizador": "PDF p. 1 (resumo); p. 6 (Seção IV-A); p. 7 (Tabela 2)"},
+      {"descricao": "A verificação manual de sobreajuste é descrita para os 555 patches do DSrepair (dois removidos); o artigo não informa se os patches dos baselines e das variantes de ablação passaram pela mesma verificação, o que afeta a comparabilidade do ANF.", "localizador": "PDF p. 5 (Seção III-E); p. 6 (Seção IV-A)"},
+      {"descricao": "Número de execuções diferente entre LLMs: dez para GPT-3.5-turbo, GPT-4o-mini e Codestral, três para DeepSeek-Coder-V2; o resultado mediano do DeepSeek-Coder vem de três execuções.", "localizador": "PDF p. 5 (Seção III-D, nota 3)"},
+      {"descricao": "Os 562 alvos de reparo foram gerados pelo GPT-3.5-turbo; para GPT-4o-mini, DeepSeek-Coder e Codestral o LLM repara código produzido por outro modelo.", "localizador": "PDF p. 3 (Seção II); p. 5 (Seção III-B)"},
+      {"descricao": "Aparente inconsistência na comparação KG contra texto simples: a janela de 50 tokens foi escolhida para igualar o tamanho médio dos resultados de recuperação do DS-KG por palavra-chave, mas o DSrepair inclui por padrão só a expressão completa da API; o artigo não informa se os tokens de conhecimento no prompt ficaram equiparados (TU do texto simples é maior em todos os LLMs, Tabela 5).", "localizador": "PDF p. 3 (Seção II-B); p. 9 (Seção IV-E, Tabela 5)"},
+      {"descricao": "O resumo apresenta o DSrepair como mais eficiente (tokens), mas a Seção V-B relata sobrecarga de tempo de recuperação de 51,49% em relação à busca em texto simples.", "localizador": "PDF p. 1 (resumo); p. 10 (Seção V-B)"}
+    ],
+    "observacoes": [
+      {"descricao": "Componentes do sistema: construção do DS-KG para NumPy, Pandas, SciPy, Scikit-learn, Matplotlib, PyTorch e TensorFlow; extração de chamadas de API por expressões regulares; resolução de prefixos (np → numpy); verbalização de triplas.", "localizador": "PDF p. 2-3 (Seções II-A e II-B)"},
+      {"descricao": "Esforço manual descrito: ontologia projetada manualmente e verificação manual dos patches por dois autores.", "localizador": "PDF p. 2 (Seção II-A); p. 5 (Seção III-E)"},
+      {"descricao": "Reparo em uma única requisição após a falha nos testes; não há iteração múltipla. Trabalho futuro propõe framework multiagente com feedback interativo (não executado).", "localizador": "PDF p. 3 (Seção II); p. 6 (Seção IV-A); p. 11 (Seção VII)"},
+      {"descricao": "Prompts completos, versões das bibliotecas, código, dados e dump do KG declarados na página do projeto (github.com/ShuyinOuyang/DSrepair); não acessados nem validados nesta extração.", "localizador": "PDF p. 2, 4, 5; referência [28] p. 12"},
+      {"descricao": "RQ2 (Fig. 6) traz análise de sobreposição de correções entre DSrepair e cada baseline; por exemplo, 34 correções comuns entre DSrepair e Self-Repair no GPT-3.5-turbo.", "localizador": "PDF p. 7 (Seção IV-B); p. 8 (Fig. 6)"},
+      {"descricao": "Valores da Tabela 3 com precisão de impressão diferente (DeepSeek-Coder, Self-Debugging-E: '$0.0003').", "localizador": "PDF p. 8 (Tabela 3)"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper introduces DSrepair, a knowledge-enhanced program repair approach designed to repair the buggy code generated by LLMs in the data science domain.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "DSrepair uses knowledge graph based RAG for API knowledge retrieval and bug knowledge enrichment to construct repair prompts for LLMs.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "As shown in Fig 4, the final prompt includes the following components: problem description, incorrect code, stderr information, API knowledge, bug knowledge, fact-checking, and response format.", "localizador": "PDF p. 4, Seção II-D"},
+      {"trecho": "Thus, by default, DSrepair includes the full API expression in the prompt.", "localizador": "PDF p. 3, Seção II-B"},
+      {"trecho": "Therefore, different from traditional approaches, DSrepair uses AST-node level bug information to provide LLMs with more fine-grained bug information.", "localizador": "PDF p. 3, Seção II-C"},
+      {"trecho": "The fact-checking component identifies where the existing code logic violates the corresponding requirements outlined in the problem description.", "localizador": "PDF p. 4, Seção II-D"},
+      {"trecho": "In DSrepair, there are two key components, i.e., API knowledge and bug knowledge.", "localizador": "PDF p. 7, Seção IV-D"},
+      {"trecho": "We use ‘DSrepair w/o API&Bug’, ‘DSrepair w/o Bug’, and ‘DSrepair w/o API’ to represent ‘No knowledge’, ‘API Knowledge only’, and ‘Bug Knowledge only’ for short.", "localizador": "PDF p. 8, Seção IV-D"},
+      {"trecho": "All other experimental settings are kept consistent with those used in DSrepair.", "localizador": "PDF p. 9, Seção IV-E"},
+      {"trecho": "Code-Search guides code repair by searching for similar code in the code base and adding the search result as a suggestion to the prompt.", "localizador": "PDF p. 5, Seção III-C"},
+      {"trecho": "If the code cannot pass the test cases, Chat-Repair incorporates the execution results in the prompt, to provide richer information for code debugging.", "localizador": "PDF p. 5, Seção III-C"},
+      {"trecho": "Self-Debugging-S (S represents Simple) enriches the prompt with the simplest information, a sentence that indicates the code’s correctness without more detailed information.", "localizador": "PDF p. 5, Seção III-C"},
+      {"trecho": "Self-Debugging-E (E represents Explanation) first requests LLM to generate a line-by-line explanation about intermediate execution steps of the generated code.", "localizador": "PDF p. 5, Seção III-C"},
+      {"trecho": "Self-Repair first leverages error information produced by test execution to make LLM produce a short explanation of why the code failed.", "localizador": "PDF p. 5, Seção III-C"},
+      {"trecho": "To control the randomness, we set the temperature of all the LLMs to 0.", "localizador": "PDF p. 5, Seção III-D"},
+      {"trecho": "We repeat experiments for Deepseek-Coder-V2 three times only, because the API is no longer available after 2024/09/05.", "localizador": "PDF p. 5, nota 3"},
+      {"trecho": "In our experiments, we let GPT-3.5-turbo generates code for each of the 1000 coding tasks in DS-1000, 562 of the generated programs fail to pass the test cases, and are regarded as repair targets of DSrepair.", "localizador": "PDF p. 5, Seção III-B"},
+      {"trecho": "For ANF, two of the authors conduct manual verification on the correctness of the patches to make sure that the reported fixes are not overfitted.", "localizador": "PDF p. 5, Seção III-E"},
+      {"trecho": "The DS-1000 benchmark was specifically constructed to mitigate concerns about data leakage.", "localizador": "PDF p. 5, Seção III-B"},
+      {"trecho": "However, this repair process can sometimes introduce or trigger new errors.", "localizador": "PDF p. 10, Seção V-B"},
+      {"trecho": "This occurs because the LLMs are provided with API knowledge that can inadvertently reinforce the use of incorrect or irrelevant APIs present in the original code.", "localizador": "PDF p. 10, Seção V-B"},
+      {"trecho": "When compared to plain text searching, retrieval using the DS-KG incurs a significant time overhead, averaging 51.49% more time (approximately 0.06 seconds) per task.", "localizador": "PDF p. 10, Seção V-B"},
+      {"trecho": "Consequently, keeping the DS-KG up-to-date demands substantial effort and resources.", "localizador": "PDF p. 10, Seção V-B"},
+      {"trecho": "The responses typically contain more information, such as line-by-line code comments, natural language explanation of the code, and an analysis of why the first generated code is incorrect, all of which contribute to extra costs.", "localizador": "PDF p. 7, Seção IV-C"},
+      {"trecho": "To some extent, this action protects the privacy of users’ operation system environment and ensures that only relevant error information is included, focusing on critical errors that hinder code execution.", "localizador": "PDF p. 4, Seção II-D"},
+      {"trecho": "Secondly, the insufficiency of information provided from the test cases in the description limits the repair effectiveness.", "localizador": "PDF p. 6, Seção IV-A"},
+      {"trecho": "Table 7 shows the mean FR (Fix Rate) and the standard deviation of code repair results.", "localizador": "PDF p. 9, Seção IV-G"},
+      {"trecho": "Despite the randomness of LLMs, DSrepair consistently outperforms the baselines with greater stability across multiple trials.", "localizador": "PDF p. 10, Resposta RQ7"},
+      {"trecho": "DSrepair uniquely fixes approximately 55% of buggy code snippets that baselines are unable to fix.", "localizador": "PDF p. 7, Resposta RQ2"},
+      {"trecho": "Interestingly, we observe that the FR declines in DSrepair w/o Bug (GPT-3.5-turbo), DSrepair w/o Bug and w/o API (GPT-4o-mini) and DSrepair w/o API (DeepSeek-Coder) compared with DSrepair w/o API&Bug.", "localizador": "PDF p. 8, Seção IV-D"},
+      {"trecho": "This suggests that the additional information may complicate the prompt without necessarily improving the effectiveness of the repair.", "localizador": "PDF p. 9, Seção IV-F"},
+      {"trecho": "We release our data, code, KG data dump, and results at our homepage [28].", "localizador": "PDF p. 2, Seção I"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "DSrepair",
+      "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["contexto", "feedback"],
+      "comparador": "Code-Search",
+      "modelo": "GPT-3.5-turbo (GPT-3.5-turbo-0125)",
+      "benchmark": "DS-1000 (562 programas com falha gerados pelo GPT-3.5-turbo)",
+      "metrica": "Absolute Number of Fixes (ANF)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 26, "intervencao": 104},
+      "denominador": "562 trechos de código com defeito (alvos de reparo, p. 5); a Tabela 2 imprime FR 4.63% (Code-Search) e 18.51% (DSrepair) na mesma célula",
+      "condicoes": "Coluna Total da Tabela 2 (agregado impresso sobre as sete bibliotecas do mesmo benchmark, mesma técnica, métrica e comparador). Temperatura 0; dez execuções por abordagem, resultado de desempenho mediano. ANF do DSrepair após remoção manual de patches sobreajustados (nenhum removido no GPT-3.5-turbo segundo o texto, que só cita dois do GPT-4o-mini); não informado se os patches do Code-Search passaram pela mesma verificação. Code-Search busca código semelhante com Lucene no PyTorrent. Mecanismos acrescentados referem-se ao prompt base do DSrepair ('DSrepair w/o API&Bug'), não ao Code-Search, do qual o DSrepair não deriva. Comparação entre pacotes distintos; o ganho é do pacote DSrepair (híbrido, com DS-KG e análise AST). conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 7.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca o DSrepair, mas contra o 'second-best baseline', que muda por LLM, e com várias métricas (correções e tokens). A Tabela 1 é descritiva; a Tabela 2 é a primeira com contraste de prompting; primeira métrica impressa (ANF, formato 'ANF (FR)'), primeiro modelo (GPT-3.5-turbo), primeira linha de base (Code-Search), agregado impresso Total.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 7 (impressa 7), Tabela 2, bloco GPT-3.5-turbo, coluna Total",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Code-Search 5 (4.63%) 4 (2.12%) 2 (3.33%) 11 (14.86%) 0 (0.00%) 2 (4.55%) 2 (7.41%) 26 (4.63%)", "localizador": "PDF p. 7, Tabela 2, Model GPT-3.5-turbo; colunas Approach, Numpy, Pandas, Scipy, Sklearn, Matplotlib, PyTorch, TensorFlow, Total; valores no formato ANF (FR)"},
+        {"trecho": "DSrepair 24 (22.22%) 17 (8.99%) 15 (25.00%) 20 (27.03%) 10 (16.67%) 15 (34.09%) 3 (11.11%) 104 (18.51%)", "localizador": "PDF p. 7, Tabela 2, Model GPT-3.5-turbo; colunas Approach, Numpy, Pandas, Scipy, Sklearn, Matplotlib, PyTorch, TensorFlow, Total; valores no formato ANF (FR)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "API knowledge (knowledge graph-based RAG; full API expression)",
+      "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "DSrepair w/o API",
+      "modelo": "GPT-3.5-turbo (GPT-3.5-turbo-0125)",
+      "benchmark": "DS-1000 (562 programas com falha gerados pelo GPT-3.5-turbo)",
+      "metrica": "Absolute Number of Fixes (ANF)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 94, "intervencao": 104},
+      "denominador": "562 trechos de código com defeito (p. 5); a Tabela 4 imprime FR 16.73% (w/o API) e 18.51% (DSrepair)",
+      "condicoes": "Ablação RQ4: DSrepair (com API knowledge e bug knowledge) contra 'DSrepair w/o API' (prompt sem API knowledge, mantendo bug knowledge e os demais componentes). Temperatura 0; dez execuções, resultado mediano. Não informado se os patches da variante de ablação passaram pela verificação manual de sobreajuste. conferido_pdf: valores e legenda conferidos na imagem da p. 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componentes isolados completam o alvo de três, primeiro os da tabela de ablação na ordem da tabela (Tabela 4: 'DSrepair w/o API' é a primeira linha); primeiro modelo (GPT-3.5-turbo), primeira métrica (ANF).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9 (impressa 9), Tabela 4, bloco GPT-3.5-turbo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "DSrepair w/o API 94 16.73%", "localizador": "PDF p. 9, Tabela 4, Model GPT-3.5-turbo; colunas Prompt, ANF, FR"},
+        {"trecho": "DSrepair 104 18.51%", "localizador": "PDF p. 9, Tabela 4, Model GPT-3.5-turbo; colunas Prompt, ANF, FR"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Bug knowledge (AST-node level bug knowledge enrichment)",
+      "mecanismos": ["instrucao", "contexto", "feedback", "restricoes"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "DSrepair w/o Bug",
+      "modelo": "GPT-3.5-turbo (GPT-3.5-turbo-0125)",
+      "benchmark": "DS-1000 (562 programas com falha gerados pelo GPT-3.5-turbo)",
+      "metrica": "Absolute Number of Fixes (ANF)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 83, "intervencao": 104},
+      "denominador": "562 trechos de código com defeito (p. 5); a Tabela 4 imprime FR 14.77% (w/o Bug) e 18.51% (DSrepair)",
+      "condicoes": "Ablação RQ4: DSrepair contra 'DSrepair w/o Bug' (prompt sem bug knowledge fornecido pelos testes, mantendo API knowledge, stderr e os demais componentes). Temperatura 0; dez execuções, resultado mediano. Na mesma tabela, 'DSrepair w/o Bug' (83) fica abaixo de 'DSrepair w/o API&Bug' (85) no GPT-3.5-turbo. conferido_pdf: valores e legenda conferidos na imagem da p. 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação na ordem da tabela (Tabela 4: 'DSrepair w/o Bug' é a segunda linha), para completar o alvo de três; primeiro modelo (GPT-3.5-turbo), primeira métrica (ANF).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9 (impressa 9), Tabela 4, bloco GPT-3.5-turbo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "DSrepair w/o Bug 83 14.77%", "localizador": "PDF p. 9, Tabela 4, Model GPT-3.5-turbo; colunas Prompt, ANF, FR"},
+        {"trecho": "DSrepair 104 18.51%", "localizador": "PDF p. 9, Tabela 4, Model GPT-3.5-turbo; colunas Prompt, ANF, FR"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo (reparo de código de ciência de dados gerado por LLMs) e sete questões de pesquisa explícitas.", "localizador": "PDF p. 1-2 (Seção I); p. 4-5 (Seção III-A)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Pipeline, benchmark, alvos de reparo, baselines, modelos, temperatura e número de execuções descritos; porém os prompts completos estão só na página do projeto, a adaptação dos baselines é descrita brevemente e a verificação manual de sobreajuste é relatada só para os patches do DSrepair.", "localizador": "PDF p. 2-5 (Seções II e III); p. 6 (Seção IV-A)"},
+    {"criterio": "comparador", "julgamento": "atende", "justificativa": "Cinco baselines de reparo executados com os mesmos quatro LLMs e alvos, além de ablações (RQ4), comparação de recuperação (RQ5) e de riqueza do conhecimento (RQ6).", "localizador": "PDF p. 5 (Seção III-C); p. 7-10 (Tabelas 2, 4, 5 e 6)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "ANF, FR, TU e MS definidos; FR tem denominador declarado (todos os trechos com defeito, 562) e os valores de FR do DSrepair coincidem entre as Tabelas 2, 4, 5 e 6. Os denominadores por biblioteca não são impressos, e a Tabela 7 é rotulada como ANF na legenda e como FR no texto.", "localizador": "PDF p. 5-6 (Seção III-E); p. 7, 9, 10, 11 (Tabelas 2, 4-7)"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças à validade interna e externa e de limitações (novos erros, dependência de testes, manutenção do KG, sobrecarga de tempo).", "localizador": "PDF p. 10 (Seções V-A e V-B)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Versões dos modelos, preços, temperatura e número de execuções informados; dados, código, prompts e dump do KG declarados na página do projeto (não verificada aqui). A API do DeepSeek-Coder-V2 deixou de estar disponível (só três execuções), e a versão do modelo que gerou os alvos de reparo não é declarada separadamente.", "localizador": "PDF p. 2 (Seção I); p. 5 (Seção III-D, Tabela 1, nota 3)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo discute vazamento de dados e se apoia nas perturbações do DS-1000 para mitigá-lo, sem verificação própria; não discute possível vazamento pela base de código recuperada pelo Code-Search.", "localizador": "PDF p. 5 (Seção III-B); p. 10 (Seção V-A)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (858 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [4, 5, 7, 8, 9, 10, 11]
+  }
+}

@@ -1,0 +1,719 @@
+{
+  "estudo": "S715",
+  "texto_fonte": "fontes/textos/lote/S715.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Haque, Babkin, Farmahinifarahani, Veloso. Towards Effectively Leveraging Execution Traces for Program Repair with Code LLMs. arXiv:2505.04441v1 [cs.LG], 7 May 2025 (versão lida: v1, conforme carimbo na p. 1 do PDF). O PDF não tem páginas impressas numeradas; os localizadores usam a posição da página no arquivo.",
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Trace Prompt",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 do PDF, seção 3.1, parágrafo «Prompt Types»; resultados na Tabela 1 (p. 4 do PDF)",
+        "observacao": "Modelo de instrução para geração da função completa de Xia et al. (2023) com o programa defeituoso, o caso de teste que falha e o trace de execução real (PySnooper, com pós-processamento). O trace é um insumo de execução fornecido em passo único, sem iteração; por isso foi classificado como contexto, não como feedback. O contrafactual é o Error Prompt, que difere apenas pela ausência do trace (RQ1, Tabela 1), nos mesmos modelos, conjuntos e número de fixes por conjunto."
+      },
+      {
+        "nome_original": "Error Prompt",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF, seção 3.1, «Prompt Types»; Apêndice A (p. 10 do PDF)",
+        "observacao": "Modelo de instrução de Xia et al. (2023) com o programa defeituoso e um caso de teste que falha. O acréscimo em relação ao prompt só com o programa (o caso de teste com a mensagem de falha, classificado como contexto) foi comparado apenas em experimento preliminar não reportado em tabela (Apêndice A); por isso não há contrafactual no estudo."
+      },
+      {
+        "nome_original": "Self-Debug",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "raciocinio"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 do PDF, seção 3.1, parágrafo «Baseline»; resultados na Tabela 1 (p. 4 do PDF)",
+        "observacao": "Linha de base adaptada do passo de explicação de Self-Debugging (Chen et al., 2023): o prompt fornece o programa e o retorno do caso de teste e pede ao LLM que percorra a execução (trace gerado pelo próprio modelo), determine a correção e corrija a função. O raciocínio acrescentado é contado em relação ao Error Prompt apenas de forma aproximada, porque o estudo diz que os prompts foram adaptados de Self-Debugging, não derivados do modelo de Xia et al.; os mecanismos não são isolados. [D108, correção registrada] Pacote avaliado contra Error Prompt (Tabela 1, p. 4; GPT-3.5, Refactory, CFA: base 0.525 × comparador 0.421), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "Collated Trace",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "pp. 5-6 do PDF, seção 4.1, «Collated Execution Traces»; resultados na Tabela 2 (p. 7 do PDF); discussão na p. 7 do PDF",
+        "observacao": "Cada entrada do trace é colocada como comentário inline na linha de código correspondente. Não acrescenta categoria nova: reorganiza o contexto (trace) já presente no Trace Prompt. O estudo analisa o contraste com o Trace Prompt (p. 7: «collated trace prompts disappointingly do not provide an improvement over trace prompts»), usando os valores da Tabela 1 para o Trace Prompt e da Tabela 2 para o Collated Trace; o truncamento pode atingir também o programa nesta variante (p. 7)."
+      },
+      {
+        "nome_original": "OPT Trace (LLM-Optimized Execution Traces, OPT)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 6 do PDF, seção 4.1, «LLM-Optimized Execution Traces (OPT)»; resultados na Tabela 2 (p. 7 do PDF)",
+        "observacao": "Um GPT4-32k recebe o trace determinístico e uma instrução para gerar uma versão mais curta, otimizada para o reparo; o trace condensado substitui o original no prompt de reparo. Classificado como otimizacao_prompt (reescrita automática, por LLM, de um componente do próprio prompt); é passada única, sem busca nem avaliação iterativa, e uma leitura alternativa seria etapa encadeada (decomposicao). O estudo compara OPT com «RQ1 Best» e com as outras estratégias, não diretamente com o Trace Prompt; o par que difere apenas no trace (determinístico vs otimizado) é Trace Prompt (Tabela 1, p. 4) vs OPT Trace (Tabela 2, p. 7), nos mesmos modelos e conjuntos."
+      },
+      {
+        "nome_original": "Conf OPT Trace (Confidence Based Prompt Selection)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 do PDF, seção 4.1, «Confidence Based Prompt Selection (Conf OPT)» e Figura 3; resultados na Tabela 2 (p. 7 do PDF)",
+        "observacao": "Roteamento entre prompts: o LLM é consultado antes, com escala Likert de 1 a 5, sobre a confiança em reparar com o trace determinístico; com confiança menor que 3, usa-se o trace otimizado por LLM. A seleção automática do prompt foi classificada como otimizacao_prompt. O estudo compara com as condições de ramo fixo (Trace Prompt e OPT Trace) e diz que o desempenho é pior que o de OPT «on average» (p. 6), sem imprimir essa média."
+      },
+      {
+        "nome_original": "TRL OPT Trace (EP)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 do PDF, seção 4.1, «Trace-length Based Prompt Selection (TRL OPT)»; resultados na Tabela 2 (p. 7 do PDF) e Figuras 6 e 7 (apêndice)",
+        "observacao": "Roteamento heurístico pelo comprimento do trace: abaixo de N usa o Trace Prompt; caso contrário, o Error Prompt. N testado em 25, 30, 35, 40, 45 e 50; a Tabela 2 traz só o melhor resultado. Tratada como técnica distinta de TRL OPT Trace (OPT) porque o estudo a avalia em linha própria. O estudo compara o roteamento com os prompts individuais (p. 7)."
+      },
+      {
+        "nome_original": "TRL OPT Trace (OPT)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "otimizacao_prompt"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6 do PDF, seção 4.1, «Trace-length Based Prompt Selection (TRL OPT)»; resultados na Tabela 2 (p. 7 do PDF) e Figuras 6 e 7 (apêndice)",
+        "observacao": "Roteamento heurístico pelo comprimento do trace: abaixo de N usa o Trace Prompt; caso contrário, o prompt com trace otimizado por LLM (OPT). Mesmos valores de N e mesma regra de relatar só o melhor resultado. Linha própria na Tabela 2."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Finetuning deepseek-coder-1.3b-instruct (inspirado em TraceFixer)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino de modelo pequeno com programa defeituoso, resultado do teste que falha e traces, comparado com as técnicas de prompting na Figura 4 (seção 5.1). Não é prompting e não entra em extracoes.",
+        "localizador": "p. 7 do PDF, seção 5.1; Figura 4 (p. 8 do PDF)"
+      },
+      {
+        "nome_original": "Truncamento do prompt acima de 200 linhas",
+        "natureza": "orcamento",
+        "descricao": "Limite de tamanho do prompt para caber no contexto do GPT; 5% (Refactory) e quase 10% (RunBugRun) dos trace prompts foram truncados (nota 1).",
+        "localizador": "p. 3 do PDF, seção 3.1, «Prompt Types»; nota de rodapé 1, p. 5 do PDF"
+      },
+      {
+        "nome_original": "Geração de traces com PySnooper e pós-processamento",
+        "natureza": "outro",
+        "descricao": "Instrumentação da execução que produz o insumo dos Trace Prompts (registro de mudanças de estado; remoção de timestamps e de sequências de formatação do terminal). É ferramenta de execução, não ingrediente de prompting. Para Java, a ferramenta de geração de traces não é descrita (nao_informado).",
+        "localizador": "p. 3 do PDF, seção 3.1, «Execution Traces Generation»"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5 Turbo",
+        "versao": "nao_informado",
+        "uso": "reparo com todos os prompts"
+      },
+      {
+        "nome": "GPT-4",
+        "versao": "nao_informado",
+        "uso": "reparo com todos os prompts; estudos de sondagem (seção 5.2)"
+      },
+      {
+        "nome": "GPT4-32k",
+        "versao": "nao_informado",
+        "uso": "geração dos traces otimizados (OPT)"
+      },
+      {
+        "nome": "deepseek-coder-1.3b-instruct",
+        "versao": "nao_informado",
+        "uso": "ajuste fino (fora do escopo)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Refactory",
+        "quantidade": "corpus descrito com «nearly 2000 faulty Python programs»; Tabela 1: 138 programas defeituosos (# FPs) e 579 fixes (# Fixes)",
+        "observacao": "O estudo não explica como os 138 programas foram obtidos a partir do corpus; 34 programas de referência e 38 com falha (subconjuntos) na sondagem (Tabela 3, apêndice)."
+      },
+      {
+        "nome": "HumanEval-Java",
+        "quantidade": "Tabela 1: 157 programas defeituosos e 634 fixes",
+        "observacao": "Bugs sintéticos injetados (p. 3)."
+      },
+      {
+        "nome": "RunBugRun",
+        "quantidade": "amostra descrita como «1000 Python bugs»; Tabela 1: 456 programas defeituosos e 559 fixes",
+        "observacao": "O estudo não liga a amostra de 1000 bugs aos 456 programas da Tabela 1."
+      },
+      {
+        "nome": "Geeks for geeks",
+        "quantidade": "300 prompts (Tabela 3, apêndice)",
+        "observacao": "Usado só nos estudos de sondagem (seção 5.2), não no reparo."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Correct Fix Accuracy (CFA)",
+        "definicao": "percentual de fixes que passam em todos os casos de teste; impresso como proporção nas tabelas",
+        "denominador": "# Fixes na Tabela 1 (579, 634, 559), igual para todos os prompts de um conjunto; não informado na Tabela 2"
+      },
+      {
+        "nome": "Correct Program Accuracy (CPA)",
+        "definicao": "percentual de programas com pelo menos um fix correto; impresso como proporção",
+        "denominador": "# FPs na Tabela 1 (138, 157, 456); não informado na Tabela 2"
+      },
+      {
+        "nome": "exact match rate (trace collating / trace prediction)",
+        "definicao": "taxa de coincidência exata após pós-processamento leve, nos estudos de sondagem",
+        "denominador": "número de prompts por partição (Tabela 3)"
+      }
+    ],
+    "linguagens": [
+      "Python (Refactory, RunBugRun)",
+      "Java (HumanEval-Java)"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Na linha de base Self-Debug, o trace gerado pelo próprio LLM pode introduzir alucinação e prejudicar os fixes.",
+        "localizador": "p. 4 do PDF, seção 3.2"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Prompts com traces mais longos e com mais modificações de variáveis têm menor chance de produzir fix correto (RQ2); no Refactory a tendência do comprimento é contrária.",
+        "localizador": "p. 5 do PDF, seção 3.3 e resumo de RQ2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Truncamento de prompts: parte dos trace prompts foi truncada (5% no Refactory, quase 10% no RunBugRun); com traces colados, o truncamento pode excluir também parte do problema original.",
+        "localizador": "nota de rodapé 1, p. 5 do PDF; p. 7 do PDF, discussão de Collated Trace"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Nos estudos de sondagem, o estudo menciona a possibilidade de «prompt leakage» com programas do Refactory e diz que o conjunto Geeks for geeks a elimina. O termo não é definido; não há discussão de contaminação para a avaliação de reparo.",
+        "localizador": "p. 8 do PDF, seção 5.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Traces otimizados por LLM (OPT) para condensar traces longos, motivados pelo achado de RQ2; avaliados contra condições sem a otimização (RQ1 Best na Tabela 2; Trace Prompt na Tabela 1).",
+        "avaliada": "sim",
+        "localizador": "p. 6 do PDF, seção 4.1; Tabela 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "Truncamento do prompt acima de 200 linhas para caber no contexto do modelo; procedimento sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF, seção 3.1"
+      },
+      {
+        "descricao": "Uso do conjunto Geeks for geeks na sondagem, descrito como eliminando a possibilidade de prompt leakage; procedimento sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 8 do PDF, seção 5.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O resumo diz que incluir traces melhora sobre as linhas de base sem trace em «only 2 out of 6» configurações, sem identificar quais. Comparação própria dos valores da Tabela 1: o Trace Prompt supera o Error Prompt em CFA em 2 de 6 configurações (GPT-4 HumanEval-Java 0.511 vs 0.493; GPT-4 RunBugRun 0.558 vs 0.529) e em CPA em 3 de 6 (GPT-3.5 HumanEval-Java 0.547 vs 0.541; GPT-4 HumanEval-Java 0.713 vs 0.662; GPT-4 RunBugRun 0.583 vs 0.578); no GPT-4 RunBugRun, o Self-Debug (0.602 / 0.629) supera o Trace Prompt. A correspondência do «2 out of 6» com uma métrica ou com um comparador não é informada.",
+        "localizador": "p. 1 do PDF (Abstract); Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que o Self-Debug tem o pior desempenho exceto em uma configuração (GPT-4, RunBugRun), mas na Tabela 1, em CPA, o Self-Debug supera o Trace Prompt no GPT-4 Refactory (0.847 vs 0.818) e o Error Prompt no GPT-4 HumanEval-Java (0.668 vs 0.662).",
+        "localizador": "p. 4 do PDF, seção 3.2; Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "O texto afirma que, em dois de três conjuntos, os prompts com trace melhoram «significantly» o GPT-4, mas o estudo não relata teste estatístico nem variabilidade; o termo «significantly» também é usado para Conf OPT e TRL OPT sem teste. No RunBugRun, um dos dois conjuntos, o Self-Debug (CFA 0.602, CPA 0.629) fica acima do Trace Prompt (0.558, 0.583).",
+        "localizador": "p. 4 do PDF, seção 3.2; p. 6-7 do PDF, seção 4.2; Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "Na Tabela 1, a linha GPT-4 / RunBugRun / Trace Prompt (312, 266, 0.558, 0.583) está em itálico, sem explicação na legenda ou no texto.",
+        "localizador": "Tabela 1, p. 4 do PDF (conferido na imagem da página)"
+      },
+      {
+        "descricao": "Tamanho do corpus e denominadores não ligados: o Refactory é descrito com quase 2000 programas defeituosos e o RunBugRun com amostra de 1000 bugs Python, mas a Tabela 1 usa 138 e 456 programas defeituosos, sem descrição do filtro.",
+        "localizador": "p. 3 do PDF, seção 3.1; Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "CFA e CPA são definidos como percentuais, mas impressos como proporções. Cálculo próprio: os valores da Tabela 1 coincidem com # CF / # Fixes e # CP / # FPs truncados (não arredondados) em três casas, por exemplo 337/559 = 0,6029 impresso como 0.602 e 296/559 = 0,5295 impresso como 0.529; a regra de arredondamento não é informada.",
+        "localizador": "p. 3 do PDF, seção 3.1 (Metrics); Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "O texto diz que o OPT tem o melhor CFA em três de seis pares e é o segundo nos outros três, mas na Tabela 2, GPT-4 RunBugRun, o OPT Trace (0.570) fica abaixo de RQ1 Best (0.602) e de TRL OPT Trace (OPT) (0.574), isto é, em terceiro.",
+        "localizador": "p. 6 do PDF, seção 4.2; Tabela 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "Aparente inconsistência: o texto diz que, em CPA, o OPT está entre as três melhores técnicas em todos os pares, mas na Tabela 2, GPT-3.5 Refactory, o OPT Trace (0.601) fica abaixo de RQ1 Best (0.659), TRL OPT Trace (EP) (0.623) e TRL OPT Trace (OPT) (0.623); é a quarta linha, ou o terceiro valor distinto se o empate for contado como uma posição. O estudo não diz como trata empates.",
+        "localizador": "p. 6 do PDF, seção 4.2; Tabela 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "O comparador «RQ1 Best» da Tabela 2 é composto: corresponde a métodos diferentes conforme a configuração e a métrica (por exemplo, GPT-3.5 HumanEval-Java: CFA 0.380 = Error Prompt e CPA 0.547 = Trace Prompt; GPT-4 RunBugRun: 0.602 e 0.629 = Self-Debug, segundo a Tabela 1). Os valores de RQ1 Best coincidem com os da Tabela 1.",
+        "localizador": "p. 6 do PDF, seção 4.2; Tabela 2, p. 7 do PDF; Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "Narrativa parcialmente contradita: o texto diz que os prompts com trace colado não melhoram sobre os Trace Prompts, mas em CFA o Collated Trace (Tabela 2) fica acima do Trace Prompt (Tabela 1) no GPT-3.5 HumanEval-Java (0.391 vs 0.334) e no GPT-4 HumanEval-Java (0.531 vs 0.511); nas demais células de CFA e em todas as de CPA, fica abaixo (por exemplo, GPT-4 RunBugRun CFA 0.483 vs 0.558). Comparação própria entre tabelas.",
+        "localizador": "p. 7 do PDF, discussão de Collated Trace; Tabela 2, p. 7 do PDF; Tabela 1, p. 4 do PDF"
+      },
+      {
+        "descricao": "Para TRL OPT, a Tabela 2 relata só o melhor resultado entre seis valores de N, escolhido nos mesmos dados de avaliação (não há conjunto de validação descrito), o que pode favorecer essas linhas; o estudo conclui que não há resultado forte a favor do roteamento por comprimento.",
+        "localizador": "p. 6-7 do PDF, seção 4.2; Figuras 6 e 7 (apêndice)"
+      },
+      {
+        "descricao": "Condição discrepante: Conf OPT Trace no GPT-3.5 Refactory tem CPA 0.384 e CFA 0.368, bem abaixo das demais linhas da mesma coluna (CPA 0.587 a 0.659; CFA 0.452 a 0.525); o estudo atribui o pior desempenho no GPT-3.5 à qualidade dos escores de confiança.",
+        "localizador": "Tabela 2, p. 7 do PDF; p. 6 do PDF, seção 4.2"
+      },
+      {
+        "descricao": "Inversão em RQ2: no Refactory, a mediana do comprimento do trace foi menor para fixes que falharam do que para os corretos, ao contrário de HumanEval-Java e RunBugRun e da hipótese dos autores.",
+        "localizador": "p. 5 do PDF, seção 3.3 e Figura 2"
+      },
+      {
+        "descricao": "Figura 4 (ajuste fino vs prompting) traz uma linha do Refactory, embora a seção 5.1 descreva dados de treino extraídos só de HumanEval-Java e RunBugRun; o modelo usado nas técnicas de prompting da Figura 4 não é informado.",
+        "localizador": "p. 7 do PDF, seção 5.1; Figura 4, p. 8 do PDF"
+      },
+      {
+        "descricao": "Uma predição por prompt específico de caso de teste, sem repetições; o número de execuções, a temperatura e a variabilidade entre execuções não são informados.",
+        "localizador": "p. 3 do PDF, seção 3.1 (Metrics)"
+      },
+      {
+        "descricao": "O estudo descreve PySnooper para Python, mas usa também HumanEval-Java; a forma de gerar os traces de Java não é descrita.",
+        "localizador": "p. 3 do PDF, seção 3.1; p. 5-6 do PDF, seção 4.1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Apêndice A: em experimento preliminar não tabelado, prompts com erro superaram prompts só com o programa; incluir todos os casos de teste que falham não melhorou sobre um único caso; few-shot foi descartado por aumentar o prompt e poder exceder a janela de 8k.",
+        "localizador": "p. 10 do PDF, Apêndice A"
+      },
+      {
+        "descricao": "Estudos de sondagem com GPT-4 (alinhar programa e trace; prever o trace a partir do programa) em subconjuntos do Refactory e no Geeks for geeks, com taxa de coincidência exata (Tabela 3); não são comparações de técnicas de reparo e não entram em extracoes.",
+        "localizador": "p. 8 do PDF, seção 5.2; Tabela 3 (Apêndice A.1)"
+      },
+      {
+        "descricao": "Ajuste fino: 80% dos problemas de cada conjunto sorteados para treino; o texto diz que isso corresponde a 459 amostras do RunBugRun e 517 do HumanEval-Java, sem esclarecer se são de treino ou de teste. O estudo diz não ter tido acesso ao código do TraceFixer e ter implementado seu próprio pipeline.",
+        "localizador": "p. 7 do PDF, seção 5.1"
+      },
+      {
+        "descricao": "O texto de prompts não é apresentado no artigo; não há link para código ou dados do estudo.",
+        "localizador": "texto completo (busca); pp. 3 e 10 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Inspired by knowledge-augmented NLP, in this work, we aim to remedy this potential blind spot by augmenting standard APR prompts with program execution traces.",
+        "localizador": "p. 1 do PDF, Abstract"
+      },
+      {
+        "trecho": "We follow the instruction template for complete function generation used by Xia et al. (2023), expanding it with two additional types of information, namely, a failing test case (henceforth, referred to as Error Prompts) and a program execution trace (referred as Trace Prompts).",
+        "localizador": "p. 3 do PDF, seção 3.1, Prompt Types"
+      },
+      {
+        "trecho": "We tailored Self-Debugging’s prompts to fit our usecase: in our prompts, we provide LLMs with a program and a test case feedback, and ask them to trace through the execution of the program and determine the needed fix, and correct the function accordingly.",
+        "localizador": "p. 3 do PDF, seção 3.1, Baseline"
+      },
+      {
+        "trecho": "In order to thoroughly ablate trace format, we experimented with combining the two by placing each trace entry directly to its corresponding line of code as an inline comment.",
+        "localizador": "p. 6 do PDF, seção 4.1, Collated Execution Traces (marcador da nota 2 omitido)"
+      },
+      {
+        "trecho": "To optimize execution traces, we prompt a long context GPT4-32k model with the deterministic execution trace and an instruction to generate a shorter version of it, optimized for downstream APR.",
+        "localizador": "p. 6 do PDF, seção 4.1, LLM-Optimized Execution Traces (OPT)"
+      },
+      {
+        "trecho": "If the confidence level is low, we fallback onto using an LLM-optimized trace instead.",
+        "localizador": "p. 6 do PDF, seção 4.1, Confidence Based Prompt Selection (Conf OPT)"
+      },
+      {
+        "trecho": "If the trace length is less than N, we use trace prompt, or we use OPT prompt or error prompt based on the setting.",
+        "localizador": "p. 6 do PDF, seção 4.1, Trace-length Based Prompt Selection (TRL OPT)"
+      },
+      {
+        "trecho": "For trace length-based prompt selection, we only report the best results in the table.",
+        "localizador": "p. 6 do PDF, seção 4.2"
+      },
+      {
+        "trecho": "This general outcome is unsurprising as having the LLM generate an execution trace could introduce hallucination and thus undermine the resulting fixes.",
+        "localizador": "p. 4 do PDF, seção 3.2"
+      },
+      {
+        "trecho": "The prompts having longer execution traces have a lower chance of generating a correct fix.",
+        "localizador": "p. 5 do PDF, RQ2 Summary"
+      },
+      {
+        "trecho": "Additionally, a significant number of trace prompts got truncated (5% for Refactory and almost 10% for RunBugRun).",
+        "localizador": "p. 5 do PDF, nota de rodapé 1"
+      },
+      {
+        "trecho": "Finally, the problem of truncation becomes more severe with collated traces, as not just the trace but also part of the original problem could be excluded from the prompt.",
+        "localizador": "p. 7 do PDF, discussão de Collated Trace"
+      },
+      {
+        "trecho": "Furthermore, on the more diverse Geeks for geeks dataset, which also eliminates the possibility of prompt leakage, collating performance sharply decreases to just 45%.",
+        "localizador": "p. 8 do PDF, seção 5.2"
+      },
+      {
+        "trecho": "To ensure the prompt and response fit within the GPT model context size, we truncate the content of the prompt if the number of lines exceeds 200.",
+        "localizador": "p. 3 do PDF, seção 3.1"
+      },
+      {
+        "trecho": "The key metrics are Correct Fix Accuracy (CFA), the percentage of fixes passing all test cases, and Correct Program Accuracy (CPA), the percentage of programs with at least one correct fix.",
+        "localizador": "p. 3 do PDF, seção 3.1, Metrics"
+      },
+      {
+        "trecho": "Rather than aggregating predictions from multiple samples, we generate a single prediction per test case-specific prompt and aggregate across prompts when computing metrics.",
+        "localizador": "p. 3 do PDF, seção 3.1, Metrics"
+      },
+      {
+        "trecho": "Across the board, the Self-Debug baseline performs the worst except in one configuration using GPT-4 on the RunBugRun dataset.",
+        "localizador": "p. 4 do PDF, seção 3.2"
+      },
+      {
+        "trecho": "The CFA values for OPT are even more commendable, whereas, for three out of six model-dataset pairs, OPT has the best CFA (second best in the other three).",
+        "localizador": "p. 6 do PDF, seção 4.2"
+      },
+      {
+        "trecho": "With respect to CPA, for all dataset and model pairs, OPT is among the top three performing prompting techniques.",
+        "localizador": "p. 6 do PDF, seção 4.2"
+      },
+      {
+        "trecho": "Lastly, collated trace prompts disappointingly do not provide an improvement over trace prompts.",
+        "localizador": "p. 7 do PDF, seção 4.2"
+      },
+      {
+        "trecho": "Our findings suggest that simply incorporating execution traces into the prompt provides a limited performance improvement over trace-free baselines, in only 2 out of 6 tested dataset / model configurations.",
+        "localizador": "p. 1 do PDF, Abstract"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Trace Prompt",
+      "mecanismos": [
+        "instrucao",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "Self-Debug",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado)",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.421,
+        "intervencao": 0.509
+      },
+      "denominador": "579 fixes (coluna # Fixes da Tabela 1, igual para todos os prompts do conjunto); 138 programas defeituosos",
+      "condicoes": "Uma predição por prompt específico de caso de teste que falha; prompt truncado acima de 200 linhas; número de execuções e temperatura nao_informado. O contraste com Self-Debug difere em mais de um ingrediente (trace real vs trace inferido pelo LLM; modelo de prompt adaptado de Self-Debugging), portanto não isola o trace; o contraste que isola o trace é com o Error Prompt (0.525 na mesma célula). CFA é definido como percentual, mas impresso como proporção. Conferido na imagem da p. 4 do PDF.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as RQs destacam duas linhas de base sem trace (Error Prompt e Self-Debug) e duas métricas principais (CFA e CPA). Primeira tabela com o contraste (Tabela 1); primeira métrica pertinente na ordem das colunas (CFA, antes de CPA; # CF e # CP são contagens que as compõem); primeiro modelo (GPT-3.5) e primeiro conjunto (Refactory); primeira linha de base de prompting listada (Self-Debug).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 4 do PDF (Model GPT-3.5, Dataset Refactory; colunas # FPs, # Fixes, # CF, # CP, CFA, CPA)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Self-Debug 244 73 0.421 0.529",
+          "localizador": "Tabela 1, p. 4 do PDF, linha GPT-3.5 / Refactory / Self-Debug; colunas # CF, # CP, CFA, CPA"
+        },
+        {
+          "trecho": "Trace Prompt 295 87 0.509 0.630",
+          "localizador": "Tabela 1, p. 4 do PDF, linha GPT-3.5 / Refactory / Trace Prompt; colunas # CF, # CP, CFA, CPA"
+        },
+        {
+          "trecho": "Error Prompt 138 579 304 91 0.525 0.659",
+          "localizador": "Tabela 1, p. 4 do PDF, linha GPT-3.5 / Refactory / Error Prompt; colunas # FPs, # Fixes, # CF, # CP, CFA, CPA"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Collated Trace",
+      "mecanismos": [
+        "instrucao",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [],
+      "comparador": "RQ1 Best (nesta célula, Error Prompt: 0.525 na Tabela 1)",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado)",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.525,
+        "intervencao": 0.452
+      },
+      "denominador": "nao_informado na Tabela 2 (a Tabela 1 informa 579 fixes para o Refactory, mas a Tabela 2 não liga seus valores a um denominador)",
+      "condicoes": "RQ1 Best é o melhor método de RQ1 por configuração e métrica; nesta célula coincide com o Error Prompt (0.525, Tabela 1), que não tem trace, logo o contraste difere em mais de um ingrediente (presença e formato do trace). O contraste que isola o formato colado é com o Trace Prompt (0.509, Tabela 1), discutido no texto. Número de execuções e temperatura nao_informado. Conferido nas imagens das pp. 4 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal de RQ3 ainda não representada; primeira linha da Tabela 2 (primeira tabela com a técnica e uma linha de base); primeira métrica (CFA), primeiro modelo (GPT-3.5), primeiro conjunto (Refactory) e única linha de base listada (RQ1 Best). Exceção ao alvo de três: cobertura de técnicas focais distintas (cinco variantes de RQ3 em linhas próprias).",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (Metric CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun; GPT-4 Refactory, HumanEval-Java, RunBugRun)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Collated Trace 0.452 0.391 0.381 0.656 0.531 0.483",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun, GPT-4 Refactory, HumanEval-Java, RunBugRun"
+        },
+        {
+          "trecho": "RQ1 Best 0.525 0.380 0.465 0.791 0.511 0.602",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "OPT Trace",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "otimizacao_prompt"
+      ],
+      "comparador": "RQ1 Best (nesta célula, Error Prompt: 0.525 na Tabela 1)",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado); traces otimizados por GPT4-32k",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.525,
+        "intervencao": 0.502
+      },
+      "denominador": "nao_informado na Tabela 2",
+      "condicoes": "O trace é condensado por um GPT4-32k antes do prompt de reparo. O comparador RQ1 Best coincide aqui com o Error Prompt (sem trace), diferindo em mais de um ingrediente; o par que difere só na otimização do trace é Trace Prompt (0.509, Tabela 1) vs OPT Trace. Número de execuções e temperatura nao_informado. Conferido nas imagens das pp. 4 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal de RQ3 ainda não representada, na ordem da Tabela 2; mesma regra de ordem (CFA, GPT-3.5, Refactory, RQ1 Best). Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (Metric CFA; colunas GPT-3.5 Refactory ... GPT-4 RunBugRun)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "OPT Trace 0.502 0.430 0.472 0.753 0.572 0.570",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun, GPT-4 Refactory, HumanEval-Java, RunBugRun"
+        },
+        {
+          "trecho": "RQ1 Best 0.525 0.380 0.465 0.791 0.511 0.602",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Conf OPT Trace",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "otimizacao_prompt"
+      ],
+      "comparador": "RQ1 Best (nesta célula, Error Prompt: 0.525 na Tabela 1)",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado)",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.525,
+        "intervencao": 0.368
+      },
+      "denominador": "nao_informado na Tabela 2",
+      "condicoes": "Roteamento por escore de confiança em escala Likert 1-5 (limiar: menor que 3 usa o trace otimizado). O comparador RQ1 Best coincide aqui com o Error Prompt, diferindo em mais de um ingrediente. Número de execuções e temperatura nao_informado. Conferido nas imagens das pp. 4, 6 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal de RQ3 ainda não representada, na ordem da Tabela 2; mesma regra de ordem. Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (Metric CFA)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Conf OPT Trace 0.368 0.380 0.429 0.735 0.549 0.527",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun, GPT-4 Refactory, HumanEval-Java, RunBugRun"
+        },
+        {
+          "trecho": "RQ1 Best 0.525 0.380 0.465 0.791 0.511 0.602",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "TRL OPT Trace (EP)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "otimizacao_prompt"
+      ],
+      "comparador": "RQ1 Best (nesta célula, Error Prompt: 0.525 na Tabela 1)",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado)",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.525,
+        "intervencao": 0.49
+      },
+      "denominador": "nao_informado na Tabela 2",
+      "condicoes": "Roteamento entre Trace Prompt e Error Prompt pelo comprimento do trace (limiar N em 25, 30, 35, 40, 45, 50); a tabela traz só o melhor resultado entre os N, e o N correspondente não é informado na Tabela 2. Um dos ramos é o próprio Error Prompt que coincide com RQ1 Best nesta célula. Número de execuções e temperatura nao_informado. Conferido nas imagens das pp. 4, 6 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante focal avaliada em linha própria na Tabela 2 e ainda não representada; mesma regra de ordem. Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (Metric CFA)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "TRL OPT Trace (EP) 0.490 0.312 0.457 0.742 0.492 0.549",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun, GPT-4 Refactory, HumanEval-Java, RunBugRun"
+        },
+        {
+          "trecho": "RQ1 Best 0.525 0.380 0.465 0.791 0.511 0.602",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "TRL OPT Trace (OPT)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "otimizacao_prompt"
+      ],
+      "mecanismos_acrescentados": [
+        "otimizacao_prompt"
+      ],
+      "comparador": "RQ1 Best (nesta célula, Error Prompt: 0.525 na Tabela 1)",
+      "modelo": "GPT-3.5 (GPT-3.5 Turbo; versão nao_informado); traces otimizados por GPT4-32k no ramo OPT",
+      "benchmark": "Refactory",
+      "metrica": "CFA (Correct Fix Accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.525,
+        "intervencao": 0.493
+      },
+      "denominador": "nao_informado na Tabela 2",
+      "condicoes": "Roteamento entre Trace Prompt e OPT Trace pelo comprimento do trace (N em 25, 30, 35, 40, 45, 50); só o melhor resultado é relatado e o N correspondente não é informado na Tabela 2. Comparador RQ1 Best coincide aqui com o Error Prompt. Número de execuções e temperatura nao_informado. Conferido nas imagens das pp. 4, 6 e 7 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante focal avaliada em linha própria na Tabela 2 e ainda não representada; mesma regra de ordem. Exceção ao alvo de três para cobrir técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF (Metric CFA)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "TRL OPT Trace (OPT) 0.493 0.353 0.466 0.737 0.473 0.574",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; colunas GPT-3.5 Refactory, HumanEval-Java, RunBugRun, GPT-4 Refactory, HumanEval-Java, RunBugRun"
+        },
+        {
+          "trecho": "RQ1 Best 0.525 0.380 0.465 0.791 0.511 0.602",
+          "localizador": "Tabela 2, p. 7 do PDF, bloco CFA; mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (RQ1 efeito do trace no prompt; RQ2 complexidade do trace; RQ3 formatos modificados), retomadas nos resumos de cada seção.",
+      "localizador": "p. 1-2 do PDF (Introdução); p. 3 e 5 do PDF (RQ1-RQ3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Conjuntos, modelos, geração de traces (PySnooper), regra de truncamento, tipos de prompt e limiares de roteamento são descritos; faltam o critério que leva dos corpora descritos (quase 2000 e 1000 bugs) aos 138 e 456 programas avaliados, o texto dos prompts, a geração de traces para Java, parâmetros de decodificação e a separação entre ajuste de N e avaliação.",
+      "localizador": "pp. 3, 5-6 do PDF; Tabela 1, p. 4; Apêndice A, p. 10"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Error Prompt (difere só pela ausência do trace) e Self-Debug são executados nos mesmos modelos e conjuntos (Tabela 1). Na Tabela 2, porém, o comparador é o composto «RQ1 Best», que muda de método conforme a configuração.",
+      "localizador": "p. 3 do PDF (Baseline); Tabela 1, p. 4; Tabela 2, p. 7"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "CFA e CPA são definidos e seus denominadores aparecem na Tabela 1 (# Fixes, # FPs), com valores de RQ1 Best coincidentes entre as Tabelas 1 e 2; mas são definidos como percentuais e impressos como proporções, a Tabela 2 não informa denominadores, não há testes estatísticos nem variabilidade, apesar do uso de «significantly», e parte da narrativa diverge das tabelas.",
+      "localizador": "p. 3 do PDF (Metrics); Tabelas 1 e 2, pp. 4 e 7; pp. 4 e 6 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Não há seção de ameaças; o texto discute limitações dispersas (truncamento, só dois modelos comerciais, dados de ajuste fino limitados, resultados não explicados no Refactory), sem tratar validade estatística, não determinismo ou seleção do melhor N.",
+      "localizador": "p. 3 do PDF (Models); p. 4 do PDF; nota 1, p. 5; pp. 7-8 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Ferramenta de trace, modelo de prompt de origem (Xia et al.), limiares e conjuntos são nomeados; versões dos modelos, temperatura, texto dos prompts, critério de amostragem dos programas e código ou dados do estudo não são informados.",
+      "localizador": "pp. 3 e 6 do PDF; Apêndice A, p. 10; busca no texto completo"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo só menciona «prompt leakage» nos estudos de sondagem e usa o Geeks for geeks para eliminá-lo; para a avaliação de reparo em conjuntos públicos (Refactory, RunBugRun, HumanEval-Java) com modelos GPT, não discute contaminação.",
+      "localizador": "p. 8 do PDF, seção 5.2"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (artigo, referências e apêndices). Páginas do PDF abertas visualmente: p. 3 (configuração e métricas), p. 4 (Tabela 1), p. 5 (Figura 2 e nota 1), p. 6 (técnicas de RQ3 e Figura 3), p. 7 (Tabela 2 e seção 5.1), p. 8 (Figura 4 e seção 5.2), p. 10 (Apêndice A). As Figuras 5-7 e a Tabela 3 foram lidas só no texto extraído, porque nenhum valor delas foi usado em extracoes ou heterogeneidade."
+  }
+}

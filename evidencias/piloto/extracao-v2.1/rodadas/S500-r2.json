@@ -1,0 +1,131 @@
+{
+  "estudo_id": "S500",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "DemoCraft (latent concept-based demonstration selection)",
+        "mecanismos": ["exemplos", "contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "PDF p. 2, seção II e seção III; PDF p. 3, seções III.C e III.D; PDF p. 4, seção IV.C",
+        "observacao": "Seleção dos top k pares prompt-resposta (demonstrações resolvidas) de um conjunto D, pré-anexados ao prompt final (aprendizado em contexto). A pontuação de seleção usa concept tokens treináveis (soft prompt, fora do escopo; ver componentes_fora_escopo). A comparação contra seleção aleatória e seleção por similaridade semântica, com o mesmo modelo, varia o método de seleção; o artigo não informa explicitamente o número de demonstrações k, o número de amostras n nem os parâmetros de decodificação de cada condição, de modo que a comparabilidade é a descrita pelo estudo. O efeito medido é de um sistema híbrido (seleção de exemplos por prompting apoiada em embeddings aprendidos) e não é efeito isolado de prompting. Não há condição zero-shot."
+      },
+      {
+        "nome_original": "Semantic Selection",
+        "mecanismos": ["exemplos", "contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 4, seção IV.C, item 1",
+        "observacao": "Linha de base: top k demonstrações pela similaridade (distância de edição da NLTK) entre o prompt e os prompts do conjunto. É comparador; não há condição sem demonstrações que isole seu efeito."
+      },
+      {
+        "nome_original": "Random Selection",
+        "mecanismos": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "localizador": "PDF p. 4, seção IV.C, item 2",
+        "observacao": "Linha de base de controle: k demonstrações escolhidas aleatoriamente do conjunto D. Não há condição zero-shot que isole o efeito das demonstrações."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Latent Concept Learning (concept tokens, trainable embeddings, following Lester et al. [3])",
+        "natureza": "embeddings_aprendidos",
+        "localizador": "PDF p. 1, resumo; PDF p. 2, seção III.A e Fig. 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "SantaCoder", "versao": "nao_informado", "detalhes": "1,1 bilhão de parâmetros, pré-treinado em código de várias linguagens, incluindo Python e C++; único modelo avaliado, por restrição de recursos; execução em GPU T4 do Google Colab", "localizador": "PDF p. 4, seção IV.B"}
+    ],
+    "benchmarks": [
+      {"nome": "MBPP (Mostly Basic Python Problems)", "quantidade": "427 problemas (como impresso)", "detalhes": "cada problema com descrição em linguagem natural, solução e três testes unitários; o subconjunto/partição usado não é informado", "localizador": "PDF p. 4, seção IV.B, item 1"},
+      {"nome": "HumanEval", "quantidade": "164 tarefas (como impresso)", "detalhes": "assinatura de função e docstring; o artigo afirma que as soluções são escritas em C++ e que cada problema tem aproximadamente sete testes unitários", "localizador": "PDF p. 4, seção IV.B, item 2"}
+    ],
+    "metricas": [
+      {"nome": "pass@k", "detalhes": "k = 1, 10, 100; estimador com n amostras por problema (n não informado)", "localizador": "PDF p. 4, seção IV.A, item 1, Eq. (5)"},
+      {"nome": "correctness@k", "detalhes": "média de c/k por prompt, com k = 5, 20, 100; métrica proposta pelos autores", "localizador": "PDF p. 4, seção IV.A, item 2, Eq. (6)"},
+      {"nome": "similarity@k", "detalhes": "similaridade média entre códigos que passam nos testes e a solução de referência, calculada com distância de edição da NLTK; k = 5, 20, 100; métrica proposta pelos autores", "localizador": "PDF p. 4, seção IV.A, item 3, Eq. (7)"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "localizador": "PDF p. 4, seção IV.B, item 1 (MBPP)"},
+      {"nome": "C++", "localizador": "PDF p. 4, seção IV.B, item 2 (HumanEval, como afirmado pelo artigo)"}
+    ],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Demonstrações semanticamente semelhantes podem induzir o modelo a erro, por coincidirem na linguagem sem fornecer o procedimento algorítmico adequado.", "localizador": "PDF p. 2, coluna esquerda, primeiro parágrafo"},
+      {"categoria": "correcao_funcional", "descricao": "Desafios citados para geração de código: linguagem ambígua ou imprecisa e garantia de que o código gerado seja correto e eficiente.", "localizador": "PDF p. 1, seção I"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Seleção de demonstrações por conceito latente (DemoCraft) em lugar da seleção por similaridade semântica, para priorizar demonstrações com a mesma estratégia algorítmica.", "avaliada": "sim", "localizador": "PDF p. 2, seção II (proposta); PDF p. 5, Tabelas I e II (comparação contra Semantic e Random Selection)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "O resumo declara aumento aproximado de 2x em pass@k e de quase 3x em correctness@k e similarity@k, sem especificar linha de base, k ou conjunto. Nas Tabelas I e II as razões variam muito conforme k e linha de base (cálculo próprio: MBPP pass@100, 27,0% vs. 20% Semantic ≈ 1,35x; MBPP pass@1, 4,0% vs. 0,6% ≈ 6,7x; HumanEval correctness@100, 1,0% vs. 0,008% = 125x). A síntese do resumo não corresponde a um valor único das tabelas.", "localizador": "PDF p. 1, resumo; PDF p. 5, Tabelas I e II"},
+      {"descricao": "Inversão entre as linhas de base no HumanEval: Random supera Semantic em correctness@5 (0,2% vs. 0,1%) e pass@1 (0,4% vs. 0,3%), enquanto nas demais linhas e no MBPP Semantic supera Random.", "localizador": "PDF p. 5, Tabela II e Fig. 10"},
+      {"descricao": "A Fig. 9 tem título 'Similarity@k Results from MBPP Dataset', mas o eixo vertical está rotulado 'Pass@k (%)'.", "localizador": "PDF p. 5, Fig. 9"},
+      {"descricao": "similarity@k é definida com a distância de edição da NLTK, mas é reportada em percentual e tratada como maior-melhor; o artigo não informa como a distância é convertida em similaridade nem a normalização usada.", "localizador": "PDF p. 4, seção IV.A, item 3; PDF p. 5, Tabelas I e II"},
+      {"descricao": "Cálculo próprio: com 164 tarefas e 100 saídas por prompt, o menor valor positivo possível de correctness@100 seria 1/16400 ≈ 0,0061%; a Tabela II imprime 0,005% para Random, valor abaixo desse mínimo, o que sugere inconsistência ou procedimento não descrito (por exemplo, várias execuções ou outro denominador). O mesmo cálculo para correctness@20 Semantic (0,04%) e correctness@100 Semantic (0,008%) resulta em número não inteiro de saídas corretas. Não se escolhe valor substituto.", "localizador": "PDF p. 5, Tabela II; PDF p. 4, Eq. (6) e seção IV.B"},
+      {"descricao": "O artigo afirma que as soluções do HumanEval são escritas em C++, citando Chen et al. [5]; a linguagem declarada não foi conferida contra essa fonte e não há descrição de adaptação do benchmark.", "localizador": "PDF p. 4, seção IV.B, item 2"},
+      {"descricao": "Avaliação com um único modelo pequeno (SantaCoder, 1,1B), por restrição de recursos, com valores absolutos baixos (pass@1 de 4,0% no MBPP e 2,0% no HumanEval para DemoCraft), sem repetições, variância ou testes estatísticos informados.", "localizador": "PDF p. 4, seção IV.B; PDF p. 5, Tabelas I e II"},
+      {"descricao": "Parâmetros não informados: número de demonstrações k no prompt (a letra k é usada também para as métricas e para o número de tipos de tarefa θ1...θk), número de amostras n, parâmetros de decodificação, número c de concept tokens, conjuntos usados para treinar os concept tokens e composição do conjunto D de demonstrações (incluindo eventual sobreposição com os problemas de teste).", "localizador": "PDF p. 2, seção III.A; PDF p. 3, seções III.C e III.D; PDF p. 4, seções IV.A a IV.C"},
+      {"descricao": "Na introdução, os números do AlphaCode (rating 1238) e de um survey (pass@1 de cerca de 30%) são de outros artigos, usados para contraste, e não constituem comparador executado.", "localizador": "PDF p. 1, seção I"}
+    ],
+    "observacoes": [
+      {"descricao": "Sistema com três componentes: Latent Concept Learning (concept tokens treinados com perda de entropia cruzada, demais parâmetros congelados), Task Concept Probability Calculation (o LLM calcula P_M(θ | Y_i, X_i) por Bayes, sem novo ajuste) e Demonstration Selector (top k pares por essa probabilidade, maximizada sobre θ_i e pares). Não há ablação dos componentes.", "localizador": "PDF p. 2, seção III e III.A; PDF p. 3, seções III.B a III.D; PDF p. 4, Fig. 7"},
+      {"descricao": "Os valores das Figs. 8 a 11 coincidem visualmente com as Tabelas I e II; a extração usa a tabela.", "localizador": "PDF p. 5"},
+      {"descricao": "O artigo não informa disponibilização de código ou dados.", "localizador": "texto completo, PDF p. 1-6"}
+    ],
+    "citacoes": [
+      {"trecho": "To address these issues, we propose a system called DemoCraft, which enhances code generation by leveraging in-context learning and demonstration selection, combined with latent concept learning.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "Latent concept learning introduces additional concept tokens, which are trainable embeddings that capture task-specific knowledge.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "Our experimental results demonstrate that the proposed system achieves an approximate 2x increase in the pass@k metric compared to baseline models.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "In-context learning operates by pre-pending a series of demonstrations—examples of prompts and corresponding answers—before the final prompt that the model needs to solve.", "localizador": "PDF p. 1, seção II"},
+      {"trecho": "As a result, semantically similar demonstrations might mislead the model, offering examples that match the language but fail to provide the right procedural insights.", "localizador": "PDF p. 2, coluna esquerda"},
+      {"trecho": "Key challenges include handling ambiguous or imprecise language, ensuring the generated code is both correct and efficient, and covering a wide range of programming scenarios and languages.", "localizador": "PDF p. 1, seção I"},
+      {"trecho": "The embeddings of these new tokens, E_new(θ̂_d), are fine-tuned specifically for the task while keeping the rest of the language model's parameters frozen.", "localizador": "PDF p. 2, seção III.A"},
+      {"trecho": "We rank all demonstration pairs based on their computed task concept probabilities and select the top k pairs with the highest values of P_M(θ | Y_i, X_i).", "localizador": "PDF p. 3, seção III.C"},
+      {"trecho": "In this baseline, we randomly select k demonstrations from the dataset D without considering their relevance to the given prompt x.", "localizador": "PDF p. 4, seção IV.C, item 2"},
+      {"trecho": "This method serves as a control to evaluate the impact of demonstration selection strategies on the model's performance.", "localizador": "PDF p. 4, seção IV.C, item 2"},
+      {"trecho": "Due to resource constraints, we evaluated the performance of our system using the SantaCoder model.", "localizador": "PDF p. 4, seção IV.B"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "DemoCraft (latent concept-based demonstration selection)",
+      "mecanismos": ["exemplos", "contexto"],
+      "comparador": "Semantic Selection",
+      "modelo": "SantaCoder (1,1B)",
+      "benchmark": "MBPP",
+      "metrica": "pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0.6, "intervencao": 4.0},
+      "denominador": "427 problemas (como impresso); número de amostras n por problema não informado",
+      "condicoes": "Mesmo modelo nas condições; número de demonstrações k, n, temperatura e demais parâmetros de decodificação não informados; sem repetições ou variância informadas. O principal declarado (pass@k, resumo) abrange dois conjuntos e três valores de k sem agregado impresso; usado o primeiro na ordem de apresentação (Tabela I, MBPP, primeira linha de pass@k) e a primeira linha de base listada (Semantic). O efeito inclui o componente de concept tokens treináveis (fora do escopo). Conferido na imagem da p. 5 do PDF.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo declara como resultado principal o aumento em pass@k em relação às linhas de base; sem agregado, primeiro conjunto (MBPP, Tabela I), primeiro k (pass@1) e primeira linha de base (Semantic). Não há outra técnica focal nem outra tarefa a cobrir; Random Selection é outro comparador da mesma técnica e o HumanEval é outro benchmark, o que não constitui cobertura.",
+      "localizador": "PDF p. 5, Tabela I (linha pass@1); PDF p. 1, resumo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "pass@1 0.6% 4.0% 0.2%", "localizador": "PDF p. 5, Tabela I (colunas Semantic, DemoCraft, Random)"},
+        {"trecho": "Our experimental results demonstrate that the proposed system achieves an approximate 2x increase in the pass@k metric compared to baseline models.", "localizador": "PDF p. 1, resumo"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "O objetivo de melhorar a geração de código por seleção de demonstrações com aprendizado de conceito latente é declarado no resumo e na seção II.", "localizador": "PDF p. 1, resumo; PDF p. 2, seção II"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Os componentes do sistema e as equações são descritos, mas faltam o número de demonstrações k, o número c de concept tokens, os dados usados para treinar os tokens, a composição do conjunto de demonstrações, o número de amostras n e a decodificação.", "localizador": "PDF p. 2-4, seções III e IV"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Duas linhas de base executadas com o mesmo modelo (seleção semântica e aleatória), mas sem condição zero-shot e sem declaração explícita de que k e demais parâmetros são iguais entre as condições.", "localizador": "PDF p. 4, seção IV.C"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "pass@k é métrica de execução definida; correctness@k e similarity@k são definidas, mas a conversão da distância de edição em similaridade percentual não é explicada, a Fig. 9 tem rótulo de eixo incoerente e não há variância ou teste estatístico.", "localizador": "PDF p. 4, seção IV.A; PDF p. 5, Fig. 9 e Tabelas I e II"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Não há discussão de ameaças à validade; o artigo apenas reconhece a restrição de recursos que levou ao uso de um único modelo pequeno e menciona trabalho futuro com modelos maiores.", "localizador": "PDF p. 4, seção IV.B; PDF p. 5, seção VI"},
+    {"criterio": "reprodutibilidade", "julgamento": "nao_atende", "justificativa": "Além do modelo e do hardware, faltam parâmetros essenciais (k, n, c, decodificação, dados de treino dos tokens, conjunto de demonstrações) e não há menção a código ou dados disponibilizados.", "localizador": "PDF p. 2-5, seções III a V"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura do texto completo, não há discussão sobre exposição do SantaCoder ao MBPP ou HumanEval nem sobre sobreposição entre o conjunto de demonstrações e os problemas de teste.", "localizador": "texto completo, PDF p. 1-6"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5],
+    "observacao": "Texto extraído lido integralmente; páginas 1 a 5 abertas visualmente (Tabelas I e II e Figs. 8-11 na p. 5). A p. 6 (referências, conforme o texto extraído) não foi aberta visualmente."
+  }
+}

@@ -1,0 +1,535 @@
+{
+  "estudo": "S902",
+  "texto_fonte": "fontes/textos/lote/S902.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_resumida": "Li, Chen, Cao e Cheung (2026). What Makes In-Context Examples Effective for Code Generation? Proc. ACM Softw. Eng. 3, ISSTA, Article ISSTA184. DOI 10.1145/3832275 (texto lido: versão arXiv:2508.06414v2, 23 Sep 2026, com cabeçalho da publicação ISSTA184; páginas do PDF coincidem com as impressas ISSTA184:1–26).",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Retrieval-augmented ICL (RAG-ICL) com retrievers BM25, Embedding Models (gist-large, jina-v2-code, codesage-small) e Algorithm Tag, k=5",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (RQ1); p. 5–7 (Seção 3.1 e 3.2.1); p. 6 (Fig. 1 e Fig. 2); p. 10 (Tabela 1)",
+        "observacao": "O prompt base (Zero Shot) já contém descrição da tarefa, instruções de formato e código inicial (starter code/input code), daí instrucao, restricoes e contexto na condição. A técnica acrescenta a seção de demonstração: no LeetCode, pares (questão semelhante, solução correta) recuperados, precedidos de uma dica em linguagem natural; no DevEval, trechos de código do mesmo repositório (funções, métodos, classes) precedidos de instrução para consultá-los. Recuperação que traz exemplos resolvidos → contexto e exemplos; a dica → instrucao. Contraste com Zero Shot na Tabela 1 (mesmo modelo, benchmark e métrica) isola o pacote (exemplos recuperados + dica), não cada ingrediente. Os retrievers são configurações da mesma técnica; Algorithm Tag só existe para LeetCode."
+      },
+      {
+        "nome_original": "Ground Truth (GT)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 7 (Seção 3.2.1, baselines); p. 10 (Tabela 1)",
+        "observacao": "Linha de base de limite superior: insere no prompt a solução de referência da própria tarefa-alvo (oráculo), no mesmo template de ICL. Também é a condição Origin do LeetCode em RQ2 e RQ3. Contraste com Zero Shot na Tabela 1."
+      },
+      {
+        "nome_original": "Random",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 7 (Seção 3.2.1); p. 10 (Tabela 1)",
+        "observacao": "Documentos recuperados aleatoriamente no mesmo template de ICL, usados como linha de base para isolar o efeito da qualidade do conteúdo; contraste com Zero Shot na Tabela 1."
+      },
+      {
+        "nome_original": "Zero Shot (ZS)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 6 (Fig. 1); p. 7 (Seção 3.2.1); p. 10, 15, 17 (Tabelas 1, 5 e 6)",
+        "observacao": "Prompt oficial de LiveCodeBench/DevEval sem demonstrações: descrição da tarefa (instrucao), instruções de formato de resposta (restricoes) e starter code ou código de entrada com docstring (contexto). É a condição base sem a técnica."
+      },
+      {
+        "nome_original": "BM25 + unittest/func/var (aumento do conteúdo RAG do BM25 com testes unitários-alvo e nomes de funções/variáveis requeridas; no LeetCode, BM25 + func/var)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 12 (texto e Tabela 2); p. 13 (Tabela 4 e Seção 4.1.2); p. 14",
+        "observacao": "No DevEval, variáveis, funções e atributos de classe extraídos manualmente da solução de referência são inseridos em JSON com breve instrução (instrucao, contexto) e um teste unitário da tarefa é servido como exemplo de código ICL (exemplos, contexto); comparação BM25 vs. BM25 aumentado nas mesmas 586 tarefas (Tabela 2). O teste unitário e as informações de função/variável são acrescentados juntos e não são separados. A informação vem do oráculo (solução de referência). No LeetCode (Tabela 4), só funções/variáveis requeridas são acrescentadas, sem testes; o estudo apresenta isso como a mesma informação contextual aplicada a outro benchmark, por isso é registrada nesta mesma entrada."
+      },
+      {
+        "nome_original": "Namespace information (w/ vs. w/o) no conteúdo RAG",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 13 (Tabela 3 e parágrafo Repository Architecture-Related Information)",
+        "observacao": "Metadados explícitos de namespace acrescentados ao conteúdo recuperado por BM25 e por gist-large; comparação sem/com namespace mantendo o retriever."
+      },
+      {
+        "nome_original": "Naming features dos exemplos ICL, eliminadas por Function Ordered Erosion (FOE), Variable Ordered Erosion (VOE) e Function & Variable Ordered Erosion (FVE)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 7–8 (Seção 3.2.2); p. 15 (Tabela 5)",
+        "observacao": "Atributo dos exemplos de código do pacote ICL (Origin = GT no LeetCode; melhor retriever por embeddings no DevEval), isolado por ablação controlada: Origin vs. exemplo com identificadores substituídos por nomes simbólicos ordenados, com preservação do comportamento verificada por execução. O próprio estudo chama essas propriedades de componentes de ICL; não há proposta de técnica nova."
+      },
+      {
+        "nome_original": "Format features dos exemplos ICL, eliminadas por Indentation Removal (INR), Line Separation Removal (LSR) e Tokenization (TOK)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8 (Seção 3.2.2); p. 15 (Tabela 5)",
+        "observacao": "Ablação Origin vs. exemplo sem informação de formatação (mantidos os tokens não brancos)."
+      },
+      {
+        "nome_original": "Implementation details dos exemplos ICL, perturbados por Natural Language Representation (NL) e Loop Transformation (LT)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8 (Seção 3.2.2); p. 15 (Tabela 5)",
+        "observacao": "Ablação Origin vs. exemplo convertido em linguagem natural (NL) ou com laços for/while trocados (LT)."
+      },
+      {
+        "nome_original": "Estilos de nomeação nos exemplos ICL: Concise Name (CN), Verbose Name (VN), VOE, Variable High-Frequency Replacement (VHR), Variable Multi-Word Replacement (VMR)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8–9 (Seção 3.2.3); p. 17 (Tabela 6)",
+        "observacao": "Variação do componente nomeação dos exemplos: Origin vs. nomes reescritos em outro estilo, com estrutura AST e comportamento verificados. O contraste é de substituição de estilo, não de presença/ausência de exemplos. CN e VN foram gerados com Qwen2.5-Coder-32B-Instruct (ver componentes_fora_escopo)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature=0 e max_tokens=8000",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetros de decodificação fixos para todos os LLMs; contexto máximo padrão (128K GPT-4o-mini e Qwen; 32K DS-Coder).",
+        "localizador": "PDF p. 10 (Seção 3.3)"
+      },
+      {
+        "nome_original": "Qwen2.5-Coder-32B-Instruct como renomeador (CN e VN)",
+        "natureza": "outro",
+        "descricao": "LLM auxiliar usado para construir as variantes de nomeação dos exemplos; ferramenta de preparação das condições experimentais, não modelo avaliado nem técnica de prompting avaliada.",
+        "localizador": "PDF p. 9 (Seção 3.2.3)"
+      },
+      {
+        "nome_original": "Ferramenta de extração estática com tree-sitter",
+        "natureza": "outro",
+        "descricao": "Infraestrutura que extrai funções, métodos e classes dos repositórios do DevEval para a base de recuperação.",
+        "localizador": "PDF p. 6–7 (Seção 3.2.1)"
+      }
+    ],
+    "modelos": [
+      "GPT-4o-mini (versão/snapshot nao_informado; acessado via API)",
+      "Qwen2.5-7B-Instruct (Qwen-7B)",
+      "Qwen2.5-32B-Instruct (Qwen-32B)",
+      "DeepSeek-Coder-V2-Lite-Instruct (DS-Coder)",
+      "Modelos de embedding usados como retrievers: gist-large, jina-v2-code, codesage-small (versões além do nome nao_informado)",
+      "Auxiliar: Qwen2.5-Coder-32B-Instruct (somente para renomear identificadores em CN/VN)"
+    ],
+    "benchmarks": [
+      "LeetCode questions do LiveCodeBench-v5 (maio de 2023 a janeiro de 2025): 362 de 381 questões adotadas (excluídas as cuja solução de referência falha nos testes); avaliadas em Python e em Java (ambiente Java construído pelos autores)",
+      "DevEval: benchmark de geração de código em nível de repositório com 115 repositórios de 10 domínios; 1427 de 1825 tarefas adotadas",
+      "Subconjunto de 586 tarefas DevEval com pelo menos dois testes unitários (Tabela 2); o texto não diz explicitamente que é subconjunto das 1427 adotadas",
+      "Bases de recuperação: questões públicas do LeetCode com soluções (kamyu104/LeetCode-Solutions para Python; allenhung1025/leetcode no Hugging Face para Java); funções, métodos e classes dos repositórios do DevEval",
+      "Denominadores por célula das Tabelas 1, 3, 4, 5 e 6 não são impressos; 362 e 1427 são tamanhos do corpus adotado"
+    ],
+    "metricas": [
+      "Pass@1 (métrica de avaliação em todas as RQs)",
+      "CodeBLEU entre código gerado e exemplos recuperados (análise de influência, Seção 4.1.2)",
+      "Recall de testes unitários e de variáveis/funções/classes requeridas no conteúdo recuperado (Seção 4.1.1)",
+      "Similaridade cosseno média entre embeddings BERT de identificadores (Seção 4.3)",
+      "Testes: Wilcoxon signed-rank, paired t-test, Linear Mixed Model, correção de Holm-Bonferroni, IC bootstrap; correlação de Spearman (análise de contaminação)"
+    ],
+    "linguagens": ["Python (LeetCode e DevEval)", "Java (somente LeetCode)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Conteúdo RAG com funções de nome idêntico ao alvo leva o LLM a copiá-las equivocadamente como solução; omissão de namespaces necessários.",
+        "localizador": "PDF p. 12 (Namespace-related errors)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Sem informação de funções e atributos requeridos, o Qwen-32B alucina uma classe inexistente em Zero Shot (Fig. 5).",
+        "localizador": "PDF p. 11–12 (Missing essential demonstrations; Fig. 5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Nomes ruidosos e enganosos nos exemplos causam degradação significativa; nomes verbosos podem distrair o modelo e levar a código incorreto (Fig. 8); modelos mais fracos são mais afetados por exemplos parcialmente relevantes.",
+        "localizador": "PDF p. 3; p. 14; p. 18 (Fig. 8 na p. 17)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível exposição dos benchmarks no treinamento dos LLMs; o estudo afirma que só parte do LiveCodeBench-v5 e nenhuma tarefa DevEval podem ter sido incluídas.",
+        "localizador": "PDF p. 19 (Seção 5.2)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Vazamento da resposta pelo prompt: documentos de ground truth no corpus de recuperação e, no aumento com testes unitários, sobreajuste do LLM aos testes visíveis no prompt.",
+        "localizador": "PDF p. 7 (exclusão do ground truth); p. 12 (seleção de 586 tarefas)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Aleatoriedade das respostas dos LLMs, que o estudo procura minimizar com temperatura 0; número de execuções nao_informado.",
+        "localizador": "PDF p. 10 (Seção 3.3)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Exclusão de documentos de ground truth do corpus de recuperação (mesmo question_id no LeetCode; trechos sobrepostos à função-alvo no DevEval).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 7"
+      },
+      {
+        "descricao": "Uso apenas de tarefas DevEval com pelo menos dois testes unitários, garantindo testes ocultos quando um teste é posto no prompt.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "descricao": "Partição das questões LeetCode por data de corte de conhecimento de cada LLM e correlação de Spearman do Pass@1 por cenário entre antes do corte, depois do corte e conjunto completo.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 19"
+      },
+      {
+        "descricao": "Temperatura 0 para minimizar a aleatoriedade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 10"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resultado nulo no LeetCode: RAG-ICL com BM25, embeddings e Algorithm Tag não supera Zero Shot nem Random; diferenças não significativas (p>0,05; pHB=1,0; nenhum IC bootstrap acima de zero). Em várias células o Zero Shot fica acima de todos os retrievers (por exemplo, GPT-4o-mini LC-J: ZS 41.71 vs. retrievers 38.67–39.78; Qwen-7B LC-P: ZS 38.40 vs. 31.22–37.02).",
+        "localizador": "PDF p. 10 (Tabela 1); p. 11"
+      },
+      {
+        "descricao": "Inversão entre benchmarks: o acréscimo de funções/variáveis requeridas, benéfico no DevEval (Tabela 2), não melhora o LeetCode; em várias células BM25+func/var fica abaixo de BM25 (GPT-4o-mini Java 37.85 vs. 39.78; Qwen-32B Python 53.59 vs. 54.97 e Java 49.17 vs. 51.38; DS-Coder 27.35 vs. 28.18 e 29.56 vs. 31.22); p>0,1, pHB>0,6.",
+        "localizador": "PDF p. 13 (Tabela 4); p. 14"
+      },
+      {
+        "descricao": "Denominadores diferentes entre tabelas: a linha BM25 da Tabela 2 (GPT-4o-mini 19.62) difere da coluna DE de BM25 na Tabela 1 e na Tabela 3 (25.16) porque a Tabela 2 usa 586 tarefas com pelo menos dois testes; os valores w/o da Tabela 3 coincidem com a Tabela 1, mas a Tabela 3 não informa o denominador.",
+        "localizador": "PDF p. 10 (Tabela 1); p. 12 (Tabela 2); p. 13 (Tabela 3)"
+      },
+      {
+        "descricao": "Condição Origin diferente por benchmark em RQ2/RQ3: no LeetCode é o Ground Truth (solução da própria tarefa, oráculo), no DevEval é o melhor retriever por embeddings de cada LLM (gist-large para Qwen; codesage-small para GPT-4o-mini e DS-Coder); os efeitos das mutações nos dois benchmarks partem de exemplos de natureza distinta.",
+        "localizador": "PDF p. 5 (Seção 3.1); p. 14 (Seção 4.2)"
+      },
+      {
+        "descricao": "Narrativa vs. tabela (aparente): a resposta à RQ2 diz que modelos maiores ou especializados (Qwen-32B, DS-Coder) são mais robustos à eliminação de características, mas na Tabela 5 o DS-Coder cai de 63.54 (Origin) para 41.44 (VOE) e 42.54 (FVE) em LC-P e de 26.70 para 16.26 (FVE) em DE; ao mesmo tempo, mutações de formato elevam o DS-Coder acima do Origin em LC-P (LSR 73.20; TOK 79.01).",
+        "localizador": "PDF p. 15 (Tabela 5); p. 16; p. 17 (Answer to RQ2)"
+      },
+      {
+        "descricao": "Inversões em que a mutação supera o Origin na Tabela 5: GPT-4o-mini INR LC-J 87.02 vs. 84.81 e NL LC-P 79.01 vs. 78.45; Qwen-32B FOE LC-J 97.51 vs. 97.24; DS-Coder INR, LSR, TOK e NL em LC-P e LC-J.",
+        "localizador": "PDF p. 15 (Tabela 5)"
+      },
+      {
+        "descricao": "Narrativa vs. tabela: o texto afirma que, no LeetCode e no DevEval, CN e VN têm desempenho substancialmente maior que VHR e VMR nos quatro LLMs, mas na coluna DE da Tabela 6 CN fica abaixo de VMR para Qwen-7B (17.52 vs. 18.08), Qwen-32B (27.05 vs. 27.33) e DS-Coder (11.07 vs. 14.86).",
+        "localizador": "PDF p. 17 (Tabela 6 e Impact of Semantic Information in Identifier Names)"
+      },
+      {
+        "descricao": "Exceção à afirmação de degradação de VHR e VMR em relação a VOE nos dois benchmarks: Qwen-7B LC-J VHR 65.47 vs. VOE 63.54.",
+        "localizador": "PDF p. 17 (Tabela 6); p. 18 (Impact of Different Naming Conventions)"
+      },
+      {
+        "descricao": "Exemplos ICL mutados abaixo do Zero Shot: DS-Coder DE com CN 11.07 e VHR 10.37 vs. ZS 12.89.",
+        "localizador": "PDF p. 17 (Tabela 6)"
+      },
+      {
+        "descricao": "Pressupostos estatísticos violados: normalidade das diferenças e dos resíduos do LMM rejeitada em todas as células; simetria e homocedasticidade frequentemente rejeitadas; o estudo apoia as conclusões no Wilcoxon com IC bootstrap e trata t pareado e LMM só como checagem de concordância.",
+        "localizador": "PDF p. 18–19 (Seção 5.1, Tabela 7)"
+      },
+      {
+        "descricao": "O aumento da Tabela 2 usa informação extraída manualmente da solução de referência e um teste da própria tarefa, informação de oráculo não disponível no uso real; os autores o usam para testar hipótese causal sobre a lacuna do BM25.",
+        "localizador": "PDF p. 12"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Resultados das ablações de características de código (Tabela 5) e de estilos de nomeação (Tabela 6) foram classificados como componentes e não extraídos porque o alvo de três comparações foi preenchido por técnica focal e cobertura; a constatação do estudo de queda de até 30 p.p. (Qwen-7B, FVE, LeetCode) consta só aqui e em heterogeneidade.",
+        "localizador": "PDF p. 1 (resumo); p. 15 (Tabela 5); p. 17 (Tabela 6)"
+      },
+      {
+        "descricao": "Recall do conteúdo recuperado: testes unitários 2,38% com BM25 vs. 51,93%–66,92% com embeddings; BM25 cobre 48,7% das variáveis e 38,9% das funções/classes do ground truth vs. 61%–66% com embeddings.",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "descricao": "Análise CodeBLEU entre saídas e exemplos recuperados no LeetCode (com vs. sem ICL): sem diferença significativa (p ≥ 0,99 em todas as configurações).",
+        "localizador": "PDF p. 13 (Seção 4.1.2)"
+      },
+      {
+        "descricao": "Esforço manual descrito: aumento manual do conteúdo BM25 com testes e informações de função/variável extraídas da solução de referência.",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "descricao": "Similaridade de identificadores com o Origin (cosseno de embeddings BERT): LeetCode Python CN 0,70 vs. VN 0,45; DevEval CN 0,46 vs. VN 0,52.",
+        "localizador": "PDF p. 18"
+      },
+      {
+        "descricao": "Tamanho máximo dos prompts com k=5: cerca de 11K tokens (LeetCode) e 27K (DevEval); k é parâmetro configurável no artefato.",
+        "localizador": "PDF p. 10"
+      },
+      {
+        "descricao": "Artefato de replicação com DOI 10.6084/m9.figshare.32835674 impresso; não acessado nem validado nesta extração.",
+        "localizador": "PDF p. 21 (Data Availability)"
+      },
+      {
+        "descricao": "Verificações das mutações: execução do código mutado nos testes originais e comparação de estrutura AST (RQ3).",
+        "localizador": "PDF p. 8–9"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper systematically investigates the impact of different sources and internal features of code examples on ICL for code generation through controlled experiments on contest-style programming questions and repository-level tasks.",
+        "localizador": "PDF p. 1 (resumo)"
+      },
+      {
+        "trecho": "We construct retrieval-augmented ICL (RAG-ICL) systems for both scenarios, retrieve documents via multiple similarity metrics (sparse, dense, and tag-based retrievers), and embed the retrieved documents into prompts as ICL content.",
+        "localizador": "PDF p. 2 (RQ1)"
+      },
+      {
+        "trecho": "### Hint: There are some other questions using similar algorithms. You can read their problem statements as well as their correct solutions.",
+        "localizador": "PDF p. 6 (Fig. 1a, LeetCode Prompt Template)"
+      },
+      {
+        "trecho": "### Format: You will use the following starter code to write the solution to the problem and enclose your code within delimiters.",
+        "localizador": "PDF p. 6 (Fig. 1a, LeetCode Prompt Template)"
+      },
+      {
+        "trecho": "Ground Truth (GT): Incorporates the ground truth for the target task directly, which is found meaningful to reveal the upper-bound performance of ICL when the database is ideally broad and adequate [77].",
+        "localizador": "PDF p. 7 (Seção 3.2.1)"
+      },
+      {
+        "trecho": "Zero Shot (ZS): Provides the target task and starter code shown in Figure 1 only, without any ICL demonstration examples, indicating LLMs’ native parametric capabilities.",
+        "localizador": "PDF p. 7 (Seção 3.2.1)"
+      },
+      {
+        "trecho": "Random: Following existing work [48], we include randomly retrieved documents as a baseline to isolate the effect of ICL content quality.",
+        "localizador": "PDF p. 7 (Seção 3.2.1)"
+      },
+      {
+        "trecho": "Specifically, we manually retrieve the ground truth solution, extract all the variables, functions, and class attributes that appear, then incorporate them into the prompt using JSON format with a brief instruction.",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "trecho": "We also randomly retrieve one unittest function marked by DevEval and serve it as an ICL code example.",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "trecho": "To assess the importance of repository structure, we incorporate explicit namespace metadata into RAG content for BM25, as well as the top-performing Embedding Model configuration (gist-large).",
+        "localizador": "PDF p. 13"
+      },
+      {
+        "trecho": "Specifically, we augment BM25-retrieved content with the required functions and variables extracted from ground-truth solutions.",
+        "localizador": "PDF p. 13 (Seção 4.1.2)"
+      },
+      {
+        "trecho": "We conduct a controlled ablation study to investigate the effect of each code feature on ICL separately.",
+        "localizador": "PDF p. 7 (Seção 3.2.2)"
+      },
+      {
+        "trecho": "We include the VOE mutation used in RQ2 that yields code incorporating the ordered variable names, and develop four additional operators to synthesize identifier names in different styles.",
+        "localizador": "PDF p. 8 (Seção 3.2.3)"
+      },
+      {
+        "trecho": "(2) The RAG content includes functions with identical names as the target, causing the LLM to mistakenly copy them as ground truth.",
+        "localizador": "PDF p. 12 (Namespace-related errors)"
+      },
+      {
+        "trecho": "(2) The RAG content lacks helper functions or class attributes required by the target function, leaving the LLM unaware of their usage (as shown in Figure 5, where Qwen-32B hallucinates a non-existing class under Zero Shot, but effectively learns the required functions and class attributes from ICL examples).",
+        "localizador": "PDF p. 11–12"
+      },
+      {
+        "trecho": "Moreover, our experiments reveal that LLMs prefer semantically meaningful identifier names, while noisy and misleading names may cause significant performance degradation, especially in Python.",
+        "localizador": "PDF p. 3"
+      },
+      {
+        "trecho": "Comparative results across models further show that weaker LLMs (e.g., Qwen-7B) are more easily affected by partially relevant examples.",
+        "localizador": "PDF p. 14"
+      },
+      {
+        "trecho": "As demonstrated in Figure 8, verbose variable names may distract the model and prevent it from recognizing the usefulness of the code example.",
+        "localizador": "PDF p. 18"
+      },
+      {
+        "trecho": "Additionally, potential data contamination issues may arise from the exposure of benchmarks in the training process of LLMs.",
+        "localizador": "PDF p. 19 (Seção 5.2)"
+      },
+      {
+        "trecho": "This prevents inadvertent data leakage and ensures retrieved examples represent only external knowledge available to the model.",
+        "localizador": "PDF p. 7"
+      },
+      {
+        "trecho": "To avoid LLMs overfitting to visible test cases, we select 586 DevEval tasks with at least two unittests, ensuring the existence of hidden test cases and fair comparison.",
+        "localizador": "PDF p. 12"
+      },
+      {
+        "trecho": "To further substantiate that our findings are not driven by potential data contamination, we partitioned the LeetCode questions into two subsets for each model according to the knowledge cutoff date of each LLM: questions released before the cutoff (potentially seen during pre-training) and after the cutoff (guaranteed unseen).",
+        "localizador": "PDF p. 19"
+      },
+      {
+        "trecho": "For all LLMs, we adopt temperature=0 to minimize the randomness of LLMs and max_tokens=8000 to prevent the responses from being pruned due to the length limitation.",
+        "localizador": "PDF p. 10 (Seção 3.3)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "RAG-ICL com retriever BM25 (k=5)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+      "comparador": "Zero Shot (ZS)",
+      "modelo": "GPT-4o-mini",
+      "benchmark": "LeetCode questions do LiveCodeBench-v5, Python (LC-P)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 39.78, "intervencao": 40.33},
+      "denominador": "nao_informado por célula; corpus adotado de 362 questões LeetCode",
+      "condicoes": "Top-5 documentos (pares questão semelhante/solução correta) recuperados por BM25, ordenados por similaridade com o mais similar junto à questão-alvo; soluções da própria questão excluídas do corpus; temperatura 0, max_tokens=8000; número de execuções nao_informado. O teste do estudo (Retrieval − Zero Shot, Wilcoxon, t pareado, LMM, Holm-Bonferroni, IC bootstrap) não encontrou diferença significativa para nenhum modelo e configuração no LeetCode (p>0,05; pHB=1,0). Conferido no PDF, p. 10, Tabela 1.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo e contribuições destacam várias propriedades (informação contextual explícita, nomeação de identificadores, estilos de nomeação) sem uma técnica e um comparador únicos. Primeira tabela com contraste elegível: Tabela 1; métrica única Pass@1; primeiro modelo GPT-4o-mini; primeira coluna LC-P; primeira linha de retriever BM25. Comparador: Zero Shot é a condição sem a técnica; GT (oráculo com a solução da própria tarefa, limite superior) e Random (ICL com documentos aleatórios, controle da qualidade do conteúdo) são condições de ICL e não linha de base sem a técnica; os testes do estudo comparam Retrieval − Zero Shot.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 10, Tabela 1 (linhas BM25 e ZS, coluna GPT-4o-mini LC-P); p. 11 (testes)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "BM25 40.33 39.78 25.16 34.53 28.45 18.57 54.97 51.38 26.70 28.18 31.22 20.11",
+          "localizador": "PDF p. 10, Tabela 1, linha BM25; colunas GPT-4o-mini (LC-P, LC-J, DE), Qwen-7B (LC-P, LC-J, DE), Qwen-32B (LC-P, LC-J, DE), DS-Coder (LC-P, LC-J, DE)"
+        },
+        {
+          "trecho": "ZS 39.78 41.71 14.86 38.40 33.43 11.42 55.25 54.97 15.21 30.94 34.81 12.89",
+          "localizador": "PDF p. 10, Tabela 1, linha ZS; mesmas colunas"
+        },
+        {
+          "trecho": "The results show that the differences are not statistically significant (p>0.05; pHB=1.0 and no Bootstrap CI above zero for all models and configurations).",
+          "localizador": "PDF p. 11"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "BM25 + unittest/func/var",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["instrucao", "contexto", "exemplos"],
+      "comparador": "BM25 (RAG-ICL sem aumento)",
+      "modelo": "GPT-4o-mini",
+      "benchmark": "DevEval (subconjunto de tarefas com pelo menos dois testes unitários)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 19.62, "intervencao": 27.65},
+      "denominador": "586 tarefas DevEval com pelo menos dois testes unitários",
+      "condicoes": "Conteúdo recuperado por BM25 (k=5) acrescido de variáveis, funções e atributos de classe extraídos manualmente da solução de referência (em JSON, com breve instrução, texto não impresso) e de um teste unitário da tarefa escolhido aleatoriamente como exemplo ICL; testes e informações de função/variável acrescentados juntos, sem separação; temperatura 0; número de execuções nao_informado. Testes do estudo: p<10^-10, pHB<10^-10 e IC bootstrap acima de zero para todos os modelos. Conferido no PDF, p. 12, Tabela 2.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (aumento do conteúdo RAG com informação contextual explícita); primeira tabela com o contraste: Tabela 2; primeiro modelo GPT-4o-mini; comparador BM25 sem aumento listado na tabela.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 12, Tabela 2 (linhas BM25 e BM25 + unittest/func/var, coluna GPT-4o-mini); p. 13 (testes)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "BM25 19.62 16.04 22.18 16.89",
+          "localizador": "PDF p. 12, Tabela 2, linha BM25; colunas GPT-4o-mini, Qwen-7B, Qwen-32B, DS-Coder"
+        },
+        {
+          "trecho": "BM25 + unittest/func/var 27.65 20.48 28.67 23.04",
+          "localizador": "PDF p. 12, Tabela 2, linha BM25 + unittest/func/var; mesmas colunas"
+        },
+        {
+          "trecho": "As shown in Table 2, augmenting BM25 retrievals with unittests and required function/variable information (Row 3) yields substantial performance gains (p<10−10; pHB<10−10 and all Bootstrap CI above zero for all models), achieving results comparable to embedding-based retrievers.",
+          "localizador": "PDF p. 13"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Namespace information no conteúdo RAG (w/)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "BM25 sem informação de namespace (w/o)",
+      "modelo": "GPT-4o-mini",
+      "benchmark": "DevEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 25.16, "intervencao": 26.14},
+      "denominador": "nao_informado na Tabela 3; corpus DevEval adotado de 1427 tarefas",
+      "condicoes": "Retriever BM25 (k=5) com e sem metadados explícitos de namespace no conteúdo recuperado; temperatura 0; número de execuções nao_informado. Os valores w/o coincidem com a coluna DE de BM25 na Tabela 1. Testes do estudo relatados para todos os modelos estudados: p<0,05, pHB<0,05 e IC bootstrap acima de zero. Conferido no PDF, p. 13, Tabela 3.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada (informação de arquitetura do repositório); primeira tabela com o contraste: Tabela 3; primeiro retriever BM25; primeiro modelo GPT-4o-mini; comparador w/o.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 13, Tabela 3 (linha BM25, colunas GPT-4o-mini w/o e w/)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "BM25 25.16 26.14 18.57 20.81 26.70 30.34 20.11 23.13",
+          "localizador": "PDF p. 13, Tabela 3, linha BM25; colunas GPT-4o-mini (w/o, w/), Qwen-7B (w/o, w/), Qwen-32B (w/o, w/), DS-Coder (w/o, w/)"
+        },
+        {
+          "trecho": "As shown in Table 3, augmenting ICL code examples with namespace information consistently improves code generation performance across all studied models (p<0.05; pHB<0.05 and all Bootstrap CI above zero), confirming that beyond example content, structural cues such as namespaces and file hierarchies are also essential for effective repository-level code generation.",
+          "localizador": "PDF p. 13"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas sobre informação, características de código e estilos de nomeação em exemplos ICL para geração de código.",
+      "localizador": "PDF p. 2–3 (Introdução, RQ1–RQ3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Benchmarks, filtragem de tarefas, construção da base de recuperação, retrievers, k=5, ordem dos exemplos, templates de prompt, operadores de mutação e verificações de preservação de comportamento descritos; lacunas pontuais: texto da breve instrução do aumento manual não impresso e número de execuções não informado.",
+      "localizador": "PDF p. 4–10 (Seção 3); p. 12"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Zero Shot, Random e Ground Truth executados nas mesmas condições; Origin como referência das mutações; contrastes sem/com aumento e sem/com namespace no mesmo conjunto de tarefas.",
+      "localizador": "PDF p. 7–8; p. 10, 12, 13, 15, 17 (Tabelas 1–6)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "atende",
+      "justificativa": "Pass@1 é a métrica única de desempenho, com justificativa; tamanhos do corpus (362 e 1427) e do subconjunto da Tabela 2 (586) informados; valores de mesma condição coincidem entre Tabelas 1, 3, 5 e 6; o denominador por célula não é impresso e a Tabela 3 não informa explicitamente seu conjunto.",
+      "localizador": "PDF p. 5; p. 10 (Seção 3.4); p. 12–13"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção de ameaças à validade (representatividade dos operadores e dos benchmarks, contaminação) e verificação explícita de pressupostos estatísticos com escolha justificada dos testes.",
+      "localizador": "PDF p. 18–19 (Seções 5.1 e 5.2)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos, parâmetros de decodificação, templates, k e artefato com DOI informados (artefato não acessado); versão/snapshot do GPT-4o-mini e data das chamadas não informados, número de execuções não informado e instrução do aumento manual não impressa.",
+      "localizador": "PDF p. 9–10 (Seção 3.3); p. 12; p. 21 (Data Availability)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "atende",
+      "justificativa": "Exclusão do ground truth do corpus de recuperação, discussão da exposição dos benchmarks no pré-treinamento e análise por partição antes/depois da data de corte com correlação de Spearman.",
+      "localizador": "PDF p. 7; p. 19"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1305 linhas, incluindo referências). Páginas do PDF abertas visualmente: 6, 10, 11, 12, 13, 15, 17, 19."
+  }
+}

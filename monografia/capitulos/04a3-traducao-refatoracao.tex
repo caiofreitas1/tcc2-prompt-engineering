@@ -1,0 +1,122 @@
+\subsubsection{Tradução}
+
+A síntese parcial de tradução cobre 25 estudos de tradução de código, e os 2 incluídos depois estão no fim desta
+parte; nenhum deles registra também a tarefa de refatoração. As fichas que sustentam esta subseção foram extraídas por IA e conferidas pelo autor só numa amostra; as afirmações foram conferidas no original. Contando cada estudo uma vez por tipo de contrafactual, com sobreposição entre os tipos, 17 dos 25 estudos avaliam ao menos um pacote, 12 isolam algum ingrediente, 6 têm desenho cumulativo e 3 (S1010, S1220 e S1836) não têm contrafactual. Os conjuntos mais frequentes são CodeNet (6 dos 25 estudos), TransCoder/GeeksforGeeks (5) e AVATAR (5). Pelo mecanismo acrescentado ao prompt, os estudos formam seis agrupamentos:
+\begin{itemize}
+  \item reparo com retorno de compilação, execução ou testes (11 estudos);
+  \item exemplos, em quantidade, seleção ou recuperação (6);
+  \item explicação, raciocínio e representação intermediária (2);
+  \item instruções, restrições e contexto orientados a requisitos (6);
+  \item otimização automática de prompt (2, dos quais 1 com comparação de tradução);
+  \item sistemas híbridos e estudos sem contrafactual (4).
+\end{itemize}
+
+\textbf{Reparo com retorno da execução.} Em 9 dos 11 estudos, a técnica focal é avaliada como pacote; apenas S329 e S1727 isolam ingredientes por ablação.
+% AFIRMACAO: A25
+Entre os pacotes, a acurácia computacional (CA) passou de 54\% para 80\% no S732 (GPT-4o, de C para Rust), a aprovação de sintaxe passou de 51,9\% para 75,0\% no S1132 e a aprovação passou de 80\% para 97\% no S2118, contra um agente sem análise de compilador, embora neste último a mediana de \textit{speedup} do pacote tenha sido 0,76$\times$, contra 0,88$\times$ da condição sem análise (S732-C1; S1132-C1; S2118-C1; S2118).
+% AFIRMACAO: A26
+Em sentido contrário, no S2051 com CodeLlama-70b, a taxa de aprovação foi de 29,71\% (pass@3 inicial) para 16,57\% depois da primeira iteração de reparo, apurações que não são equivalentes, e a seleção da melhor versão entre as iniciais e as reparadas chegou a 39,97\% (S2051-C1; S2051). No S919, o Pass foi de 89,5\% para 89,2\% (S919-C3), e no S1163 a compilação ficou no teto nas duas condições na célula nanoXOR sem contexto adicional (S1163-C1).
+
+% AFIRMACAO: A27
+No S329, com LLaMA-7B, o pacote elevou a CA de 22,74\% para 28,45\%; nas ablações, os casos de teste no prompt levaram a CA de 22,74\% para 27,43\%, e o reparo guiado por execução, acrescentado a eles, de 27,43\% para 28,45\% (S329-C1; S329-C2; S329-C3).
+Uma leitura possível é que, nesse modelo e conjunto, a maior parte da diferença do pacote acompanha o acréscimo dos testes, e não o reparo. Os estudos também diferem no número de rodadas (até três no S1727, até cinco no S732 e até dez no S1132), e nenhum mede custo, embora o número de chamadas ao modelo varie entre eles.
+
+\textbf{Exemplos.} Os seis estudos comparam \textit{few-shot}, \textit{many-shot} e seleção de exemplos por similaridade ou estrutura.
+% AFIRMACAO: A28
+Com exemplos, a CA passou de 61,28\% para 64,28\% no S674 (Qwen2-7B), com seleção estrutural contra aleatória e cinco exemplos nas duas condições, o BLEU passou de 12,14 para 12,58 no S1032 com cinco exemplos e a aprovação de sintaxe passou de 51,9\% para 60,0\% no S1132 com recuperação simples de exemplos (S674-C1; S1032-C1; S1132-C3).
+% AFIRMACAO: A29
+Em sentido contrário, o prompt com um exemplo reduziu a taxa de compilação de 0,49 para 0,43 no S964 com LLaMA-3.3-70B (S964-C1), e no S409, em outra métrica (CodeBLEU), o StarCoder 15.5B não variou (delta de 0,000) com um, dois ou três exemplos (S409).
+Esses resultados sugerem, sem isolar o fator, dependência do modelo e do critério de seleção. Além disso, S409 e S1032 usam métricas de superfície (BLEU e CodeBLEU), que não medem correção funcional.
+
+\textbf{Explicação e raciocínio.}
+% AFIRMACAO: A30
+No S193, com GPT-3.5 de Python para JavaScript, as três variantes de explicação antes da tradução tiveram pass@1 de 84,8\%, 84,3\% e 83,2\%, contra 85,5\% da tradução direta, embora a introdução do estudo afirme melhora consistente (S193-C1; S193-C2; S193-C3; S193).
+% AFIRMACAO: A31
+No S836 (Open GPT4 8X7B, CodeNet), os prompts \textit{one-shot} com raciocínio elevaram a taxa de sucesso de 28,6\% para valores entre 32,2\% e 42,4\%, ao passo que as quatro abordagens \textit{zero-shot} em duas etapas (código, depois linguagem natural ou AST, depois linguagem-alvo) a reduziram para 10,7\%, 2,6\%, 9,0\% e 11,2\% (S836-C1; S836-C4; S836-C7; S836-C8; S836-C2; S836-C3; S836-C5; S836-C6).
+Como as condições com raciocínio também acrescentam um exemplo, esse ganho é de pacote e não pode ser atribuído ao raciocínio.
+
+\textbf{Instruções e requisitos.}
+% AFIRMACAO: A32
+No S304, com CodeLlama 7B e a mesma expressão regular nas duas condições, a restrição de formato elevou a taxa de extração da saída (MSR) de 6,6\% para 94,2\%, mas no Mixtral a relação se inverteu (MSR de 60,4\% contra 82,20\%; CA de 0\% contra 35,60\%) (S304-C1; S304).
+A MSR mede a extração da resposta, e não sua correção.
+% AFIRMACAO: A33
+No S951, com GPT4omini em 67 amostras, a métrica VIR (menor é melhor) foi de 100,0\% na linha de base, 74,6\% com requisitos de segurança e 67,2\% com recuperação de casos vulneráveis, sem explicação para a linha de base de 100\% e com a funcionalidade medida em outro conjunto (S951-C1; S951-C2; S951).
+Esse resultado em 67 amostras não demonstra segurança em uso real.
+
+\textbf{Otimização de prompt e sistemas híbridos.}
+% AFIRMACAO: A34
+No S650, com GPT-3.5, a otimização automática de prompt elevou o Pass@1 de 60,5\% para 73,0\% de Java para Python no CodeNet, com um caso de teste por tarefa, e a ablação da iteração foi feita apenas em uma tarefa de geração (S650-C2).
+O S50 inclui componentes fora do escopo, e S1220 e S1836 são descritivos.
+
+\textbf{Lacunas.} A evidência é insuficiente nos seguintes pontos:
+\begin{itemize}
+  \item nenhuma comparação extraída isola o raciocínio do exemplo; S193 isola a explicação, mas com um modelo e um par de linguagens;
+  \item a otimização de prompt para tradução tem 1 estudo com 1 comparação (S650);
+  \item a segurança tem 1 estudo (S951), com um modelo nas comparações extraídas;
+  \item a migração de versões e domínios (Java 8 para 11, Python para Spark, SQL, VHDL, Triton) só aparece em estudos sem contrafactual, cumulativos ou com conjunto interno (S1220, S1836, S1803, S1132);
+  \item nenhuma comparação de tradução mede custo ou número de chamadas.
+\end{itemize}
+
+\textbf{Estudos extraídos depois da síntese parcial.}
+% AFIRMACAO: A115
+Em S1713, com Claude-2 na tradução de 569 programas C++ para Rust, o \textit{few-shot} elevou de 240 para 539 os
+programas que compilam. Os contraexemplos não acrescentaram nada além do \textit{few-shot} (539), e o pacote inclui
+reparo por regras manuais (S1713-C1 a S1713-C3).
+% AFIRMACAO: A116
+Em S1807, com Llama 3.1 70B traduzindo programas C do CodeNet, o \textit{zero-shot} curado mudou a taxa de
+traduções que não compilam de 14,91\% para 14,79\%, e o CoT a elevou para 21,36\% (S1807-C1; S1807-C2).
+
+\subsubsection{Refatoração}
+
+A síntese parcial de refatoração cobre 19 estudos de refatoração, e o incluído depois está no fim desta parte. Com sobreposição entre os tipos, 12 dos 19 estudos avaliam ao menos um pacote, 9 isolam algum ingrediente, 1 tem desenho cumulativo (S2155) e 4 não têm contrafactual (S739, S1368, S1698 e S1706). No S958, a linha de base é o código humano do LeetCode, e não outra condição de prompting. Quinze dos 19 estudos usam conjuntos próprios ou projetos específicos, e a contaminação consta como não informada em 13 dos 19. Os agrupamentos são:
+\begin{itemize}
+  \item exemplos e recuperação de exemplos (6 estudos);
+  \item especificação da transformação e conhecimento de domínio (6);
+  \item raciocínio explícito (2);
+  \item retorno de testes ou compilação, autorreparo e iteração (5);
+  \item estudos sem contrafactual (4).
+\end{itemize}
+
+\textbf{Exemplos.}
+% AFIRMACAO: A35
+Com exemplos e o mesmo modelo nas duas condições, a aprovação em testes passou de 28,36\% para 34,51\% no S4 (StarCoder2-15B, \textit{one-shot}), o Pass@1 passou de 87,44\% para 91,11\% no S202 (gpt-3.5-turbo-0301) e a correção passou de 87,33\% para 90,0\% no S1822 com um exemplo recuperado (DeepSeek-V3), na linha de distorções de estrutura D1 (S4-C2; S202-C1; S1822-C1).
+% AFIRMACAO: A36
+Há também efeitos colaterais ou nulos: no S202, a compilabilidade caiu de 99,99\% para 99,93\% e a complexidade ciclomática do \textit{one-shot} piorou; no S1685, as compilações passaram de 31 para 32 em 37 amostras, sem teste estatístico; e no S958 o tempo de execução foi de 0,00606 para 0,00617 ms, em comparação com o código humano (S202; S1685-C2; S958-C4).
+
+\textbf{Especificação da transformação.} Os seis estudos nomeiam o tipo de refatoração ou injetam esquemas, \textit{changelogs}, taxonomias, regras ou definições; S466, S511, S799 e S2122 isolam ingredientes.
+% AFIRMACAO: A37
+No S511, com GPT-4 em 180 casos, em estágios cumulativos, especificar o tipo de refatoração elevou o \textit{recall} de 15,6\% para 52,2\%, acrescentar subcategoria e exemplo o elevou para 66,7\%, e limitar o espaço de busca o levou de 66,7\% para 86,7\%, valor que a conclusão do estudo registra como 86,1\% (S511-C1; S511-C2; S511-C3; S511).
+% AFIRMACAO: A38
+No S2122, o pacote elevou o Pass@1 de 4\% para 76\% com Mistral-Large, e com LLaMA-4-Maverick retirar o esquema da API ou os \textit{changelogs} deu 56\% e 60\%, contra 76\% do pacote, mas o CrystalBLEU caiu de 0,78 para 0,66 enquanto o Pass@1 subia (S2122-C1; S2122-C2; S2122-C3; S2122).
+% AFIRMACAO: A39
+No S466, a redução de \textit{smells} passou de 55\% para 89\%, e no S799 os verdadeiros positivos passaram de 10 para 12 em 25 trechos, com uma invocação; o ganho da DSL de regras no S466 (de 67\% para 89\%) foi relatado só em prosa, com modelo não informado (S466-C1; S466-C2; S799-C1).
+% AFIRMACAO: A40
+Em sentido contrário, no S362 uma linha de base por regras (RIdiom) teve precisão maior que a abordagem do estudo em oito dos nove padrões idiomáticos de Python, por 0,8 a 6,2 p.p. (Figura 6c) (S362-C1; S362).
+Uma leitura possível é que os maiores ganhos aparecem quando a linha de base é muito baixa e a tarefa depende de conhecimento de versão (S511-C2; S2122-C1).
+
+\textbf{Raciocínio explícito.}
+% AFIRMACAO: A41
+O raciocínio explícito elevou a aprovação de 28,36\% para 32,22\% no S4, avaliado como pacote, e no S958 a energia foi de 1,7122 para 1,7112 mWh em comparação com o código humano, o que o próprio estudo descreve como consumo quase igual (S4-C1; S958-C1; S958).
+A medição de energia em \textit{benchmark} não demonstra redução de custo operacional.
+
+\textbf{Retorno e iteração.}
+% AFIRMACAO: A42
+Entre os resultados favoráveis, a proporção TPP passou de 0,503 para 0,638 no S1054 (CodeQwen-1.5), com um comparador que difere também no exemplo e com narrativa que contradiz a tabela, a validade sintática passou de 86,1\% para 92,4\% no S2183 e as compilações passaram de 23 para 32 no S1685, contra o GPT com prompt não descrito (S1054-C1; S2183-C1; S1685-C1).
+% AFIRMACAO: A43
+Há também inversões: no S1685, a condição sem o retorno do RefactoringMiner teve mais compilações (34 contra 32 do pacote), e no S2164, com GPT-4, a segunda rodada elevou a aceitação em Python no LeetCode de 72\% para 73,53\%, enquanto, no subconjunto Easy Before, pedir otimização aumentou o tempo de 86,24 ms para 90,53 ms (S1685-C3; S2164-C2; S2164-C1).
+% AFIRMACAO: A44
+No S739, após 10 iterações com GPT-4o sem intervenção humana, os totais de vulnerabilidades observados ao longo das iterações foram 124 na estratégia de eficiência, 158 na de funcionalidade, 67 na de melhoria genérica e 38 na de segurança; o estudo compara as estratégias entre si, sem um controle sem melhoria iterativa (S739-C1; S739-C2; S739-C3).
+No S1685, o modelo não é informado e a reprodutibilidade não é atendida; no S739, as comparações são entre estratégias, e não contra uma condição sem a técnica.
+
+\textbf{Lacunas.} A evidência é insuficiente nos seguintes pontos:
+\begin{itemize}
+  \item o raciocínio isolado: os 2 estudos o avaliam como pacote ou contra código humano;
+  \item testes, arquitetura, Terraform, SQL e código descompilado, com 1 estudo cada (S466, S1775, S2122, S2183 e S1822);
+  \item a adoção por desenvolvedores, tratada apenas pelo S1368, que é descritivo.
+\end{itemize}
+
+\textbf{Estudo extraído depois da síntese parcial.}
+% AFIRMACAO: A117
+S1883 relata ganhos médios de velocidade de 2, 2,95 e 3,7 vezes em 2, 4 e 8 nós ao converter, com GPT-4o, os 100
+códigos seriais mais demorados para execução distribuída, em comparação com a execução serial. O resultado é de um
+sistema que combina prompting e ambiente de execução, e não há comparador que isole o prompting (S1883-C1).

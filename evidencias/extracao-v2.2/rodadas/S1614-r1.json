@@ -1,0 +1,262 @@
+{
+  "id_estudo": "S1614",
+  "texto_fonte": "fontes/textos/lote/S1614.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Multistage Bug Fixer (MBF), coluna «MBF» da Tabela 1 (sem informação de testes unitários no prompt)",
+        "mecanismos": ["instrucao", "contexto", "raciocinio", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (impressa 34), resumo e seção 2; p. 2 do PDF (impressa 35), Algoritmo 1, Tabela 1 e seção 3 («Multistage Bug Fixer»)",
+        "observacao": "Versão do Tree of Thoughts (BFS de profundidade 2, b = 1): fase 1 gera m = 5 hipóteses sobre localização e explicação do defeito (raciocinio) e o LLM vota (k = 5 votos, prompt de voto zero-shot) para escolher E*; fase 2 gera n = 5 propostas de correção a partir de E* e do código defeituoso e o LLM vota de novo (amostragem); as duas fases encadeadas → decomposicao; o código defeituoso fornecido como insumo → contexto; instruções zero-shot em cada etapa → instrucao. Os prompts exatos estão só no repositório (não acessado). O estudo não informa se, nesta coluna, o prompt traz a explicação do comportamento esperado presente no BBF (por isso restricoes não foi atribuída). Contrafactual de pacote: MBF contra BBF, mesmo GPT-4 e mesmos três casos em que o BBF falhou; ressalvas: casos escolhidos a posteriori pela falha do BBF em uma única tentativa, número de tentativas do MBF não informado e possível diferença de insumo (explicação do comportamento esperado). O ganho é do pacote, não de um mecanismo isolado."
+      },
+      {
+        "nome_original": "MBF w/UT (MBF com informação de testes unitários no prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "raciocinio", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (impressa 34), seção 2; p. 2 do PDF (impressa 35), Tabela 1 (coluna «MBF w/UT») e seção 3",
+        "observacao": "Configuração de avaliação descrita na seção 2: nos passos 1a e 2a o prompt recebe, além do código defeituoso, detalhes da expectativa (testes unitários, entradas da rotina, saída esperada e saída obtida) → contexto e restricoes (mesma categorização dada ao ingrediente no BBF com testes). Mecanismos acrescentados em relação ao comparador de que deriva (BBF com informação de testes unitários). Contrafactual de pacote: o contraste com o BBF com testes unitários (mesmo ingrediente de teste, 2 sucessos em 15 tentativas) está só em prosa; na Tabela 1 o comparador listado é o BBF sem testes. Número de tentativas do MBF w/UT não informado."
+      },
+      {
+        "nome_original": "Unit test information in the prompt (inputs of the routine, expected output and actual output)",
+        "mecanismos": ["contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 1 do PDF (impressa 34), seção 2; p. 2 do PDF (impressa 35), legenda e colunas «MBF» e «MBF w/UT» da Tabela 1 e seção 3",
+        "observacao": "Ingrediente de prompt: dados dos testes unitários (saída obtida → contexto de execução, fornecido uma única vez, sem ciclo de retorno, por isso não é feedback; saída esperada → restricoes como especificação). As categorias contexto e restricoes já podem estar presentes no prompt base (código defeituoso; explicação do comportamento esperado no BBF), mas o ingrediente é novo. Contraste com e sem o ingrediente dentro do MBF na Tabela 1 (mesmos três casos, mesmo modelo). Há também contraste em prosa no BBF (BBF com testes: 2 sucessos em 15 tentativas; BBF sem testes: uma tentativa por caso), com número de tentativas diferente."
+      },
+      {
+        "nome_original": "Baseline Bug Fixer (BBF)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 do PDF (impressa 35), seção 2 («Baseline Bug Fixer») e seção 3; Tabela 1 (coluna «BBF»)",
+        "observacao": "Prompt zero-shot único com o código defeituoso (contexto) e uma explicação do comportamento esperado do programa (restricoes, como especificação), pedindo a correção (instrucao). Uma tentativa por caso; sem informação de testes unitários. Modelo de prompt só no repositório (não acessado). Comparador sem mecanismos isolados."
+      },
+      {
+        "nome_original": "BBF with unit test information («Adding unit test information to BBF input»)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 do PDF (impressa 35), seção 3 (parágrafo «GPT-3.5 and Baseline Bug Fixer»)",
+        "observacao": "Variante do BBF relatada só em prosa, aplicada aos três casos em que o BBF falhou: 2 sucessos em 15 tentativas. Os mecanismos acrescentados correspondem ao ingrediente de testes unitários (mesma categorização usada no MBF w/UT). Comparador sem mecanismos isolados como técnica; o contraste com o BBF sem testes existe, mas com número de tentativas diferente (uma tentativa por caso contra 15 tentativas no total)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "GPT-3.5 (ChatGPT) vs GPT-4",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação da capacidade de correção do ChatGPT (GPT-3.5) e do GPT-4 com a mesma configuração do BBF; os resultados do GPT-3.5 são os relatados em [10] (jan. 2023), não executados neste estudo. Troca de modelo sem alterar o prompt.",
+        "localizador": "p. 1 do PDF (impressa 34), introdução; p. 2 do PDF (impressa 35), seção 3"
+      },
+      {
+        "nome_original": "Implementação do ToT a partir do código de [11]",
+        "natureza": "outro",
+        "descricao": "A implementação reaproveita o código que acompanha o artigo do Tree of Thoughts; é infraestrutura de orquestração, não ingrediente de prompt.",
+        "localizador": "p. 2 do PDF (impressa 35), seção 2"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4", "versao": "nao_informado (snapshot não informado; o estudo indica «July/August 2023», acesso via Azure OpenAI Services API pela SAP BTP)", "observacao": "modelo usado no BBF e no MBF"},
+      {"nome": "GPT-3.5 (ChatGPT)", "versao": "nao_informado", "observacao": "não executado neste estudo; resultados citados de [10], de jan. 2023"}
+    ],
+    "benchmarks": [
+      {"nome": "QuixBugs (Python)", "quantidade": "40 arquivos Python defeituosos", "observacao": "A Tabela 1 lista 9 casos que, segundo [10], o GPT-3.5 não resolve; os demais 31 aparecem só na contagem global do texto."},
+      {"nome": "arithm_expr_eval.py (de [3], com defeito introduzido manualmente)", "quantidade": "1 caso", "observacao": "Último caso da Tabela 1 (modificado)."},
+      {"nome": "Subconjunto do MBF", "quantidade": "3 casos (wrap, topological-ordering, arithm expr eval)", "observacao": "Casos em que o BBF falhou; o MBF só foi avaliado nesses casos. Denominador das tentativas do MBF não informado; o BBF com testes usa 15 tentativas no total nesses casos."}
+    ],
+    "metricas": [
+      {"nome": "Solved / Total (correção por caso, ✓/×)", "observacao": "Tabela 1: BBF 7/10, MBF -/3, MBF w/UT 3/3; o critério de sucesso é aprovação nos testes (o texto fala em falha de teste), sem definição formal."},
+      {"nome": "Sucessos por tentativas", "observacao": "Só em prosa: BBF com testes 2 sucessos em 15 tentativas; MBF sem testes «about 50% of the trials» nos casos wrap e topological-ordering, sem número de tentativas."},
+      {"nome": "Casos corrigidos no conjunto completo", "observacao": "BBF corrigiu 38 de 41 casos (uma tentativa por caso)."}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "QuixBugs (versão Python) e arithm_expr_eval.py"}
+    ],
+    "riscos": [
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O estudo afirma que os resultados não são determinísticos ou são instáveis; na coluna MBF os resultados são marcados como aleatórios («random»).",
+        "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3 («Discussion of the results»)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Penalidades de desempenho e de custo das abordagens baseadas em ToT, porque são necessárias várias interações por defeito; não quantificado.",
+        "localizador": "p. 2 do PDF (impressa 35), seção 3 («Discussion of the results»)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No caso arithm_expr_eval.py, o BBF corrigiu o defeito inserido manualmente mas introduziu outro defeito, que causou falha em teste; o estudo também afirma que o prompting zero-shot pode falhar em defeitos mais intrincados.",
+        "localizador": "p. 1 do PDF (impressa 34), introdução; p. 2 do PDF (impressa 35), seção 3"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Trabalho futuro (não executado): acrescentar informação de validação e rastreamento da execução (valores de variáveis em testes que falham e passam) e explorar resultados de testes para gerar mais hipóteses e tentativas em casos difíceis; usar ctags para projetos grandes.", "avaliada": "nao", "localizador": "p. 2 do PDF (impressa 35), seção 4"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Os três casos avaliados com o MBF foram escolhidos a posteriori por terem falhado no BBF em uma única tentativa por caso, num contexto que o próprio estudo descreve como não determinístico; o MBF não foi avaliado nos casos em que o BBF acertou.",
+        "localizador": "p. 2 do PDF (impressa 35), seção 3 («GPT-3.5 and Baseline Bug Fixer», «Multistage Bug Fixer», «Discussion of the results»)"
+      },
+      {
+        "descricao": "Número de tentativas diferente ou não informado entre condições: BBF com uma tentativa por caso; BBF com testes com 15 tentativas no total; MBF sem testes com sucesso em «about 50% of the trials» sem número de tentativas; MBF w/UT com sucesso «in all cases» sem número de tentativas.",
+        "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3"
+      },
+      {
+        "descricao": "Resultado nulo/inversão parcial: sem informação de testes unitários, o MBF sempre falhou em arithm expr eval (mesmo resultado que o BBF) e o total da coluna MBF é impresso como «-/3», sem contagem; o ganho do MBF aparece de forma consistente só com a informação de testes. O BBF com testes também não melhorou significativamente (2 sucessos em 15 tentativas).",
+        "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3"
+      },
+      {
+        "descricao": "O contraste com o GPT-3.5 usa números de outro artigo ([10], jan. 2023), descrito como «essentially the same setup», mas não executado neste estudo; não constitui comparador executado.",
+        "localizador": "p. 2 do PDF (impressa 35), seção 3 («GPT-3.5 and Baseline Bug Fixer»)"
+      },
+      {
+        "descricao": "Insumo possivelmente diferente entre comparador e técnica: o BBF recebe uma explicação do comportamento esperado, enquanto a seção 2 afirma que o MBF recebe na avaliação detalhes da expectativa (testes unitários), mas a Tabela 1 traz uma coluna MBF sem testes cujo insumo exato não é descrito.",
+        "localizador": "p. 1 do PDF (impressa 34), seção 2; p. 2 do PDF (impressa 35), seção 2 («Baseline Bug Fixer») e legenda da Tabela 1"
+      },
+      {
+        "descricao": "Notação divergente: o texto da seção 2 chama as propostas de correção de F1,...,Fm, enquanto o Algoritmo 1 usa F1,...,Fn; o estudo usa m = n = 5.",
+        "localizador": "p. 1 do PDF (impressa 34), seção 2; p. 2 do PDF (impressa 35), Algoritmo 1"
+      },
+      {
+        "descricao": "O resumo fala em defeitos não resolvidos pelo GPT-4 «even with prompt engineering» e a introdução em «traditional prompt engineering», mas as condições de prompt sem ToT executadas são apenas o BBF zero-shot e o BBF com testes unitários; o estudo se apresenta como avaliação preliminar de escopo limitado.",
+        "localizador": "p. 1 do PDF (impressa 34), resumo e introdução; p. 2 do PDF (impressa 35), seção 4"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Coerência conferida (cálculo próprio, sem discrepância): a Tabela 1 mostra 7 ✓ nos 10 casos do BBF, igual ao total impresso 7/10 e aos 7 de 9 casos do texto; 38 de 41 casos no conjunto completo, com 3 falhas, coincidem com os 3 × da Tabela 1.", "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3"},
+      {"descricao": "Prompts, logs de exemplo (evaluation/bbf, evaluation/mbf) e código estão no repositório GitHub cujo link está impresso; o repositório não foi acessado nesta extração.", "localizador": "p. 1 do PDF (impressa 34), nota 1; p. 2 do PDF (impressa 35), seções 2 e 3"},
+      {"descricao": "O resumo afirma, com base na literatura, que o GPT-4 tem desempenho comparável a abordagens de aprendizado profundo como CoCoNut; o estudo não executa essa comparação.", "localizador": "p. 1 do PDF (impressa 34), resumo"},
+      {"descricao": "Parâmetros de decodificação (temperatura etc.) não são informados.", "localizador": "p. 1-2 do PDF (impressas 34-35), seções 2 e 3"}
+    ],
+    "citacoes": [
+      {"trecho": "Specifically, we ask a LLM to propose multiple hypotheses about the location of a bug, and based on the aggregated response we prompt for bug fixing suggestions.", "localizador": "p. 1 do PDF (impressa 34), resumo"},
+      {"trecho": "A preliminary evaluation shows that our approach is able to fix multiple complex bugs previously unsolved by GPT-4 even with prompt engineering.", "localizador": "p. 1 do PDF (impressa 34), resumo"},
+      {"trecho": "In phase 1, we ask LLM for multiple hypotheses E1,...,Em about fault location and explanation and then let LLM vote on its own solutions.", "localizador": "p. 1 do PDF (impressa 34), seção 2"},
+      {"trecho": "In phase 2, we ask LLM to generate multiple bug fix proposals F1,...,Fm given the highest voted explanation E∗ and the buggy code.", "localizador": "p. 1 do PDF (impressa 34), seção 2"},
+      {"trecho": "Note that in the evaluation we provide as input in Steps 1a and 2a not only buggy code but also details of the expectation, for example, the unit tests, or specifically the inputs of the routine, expected output and the actual output.", "localizador": "p. 1 do PDF (impressa 34), seção 2"},
+      {"trecho": "We used m = 5 and n = 5 as the number of explanations and the number of bug fixes, respectively.", "localizador": "p. 1 do PDF (impressa 34), seção 2"},
+      {"trecho": "A simple zero-shot vote prompt was used to sample k = 5 votes at both Steps 1b and 2b.", "localizador": "p. 2 do PDF (impressa 35), seção 2"},
+      {"trecho": "Here, the LLM is asked for a code fix via a single prompt containing buggy code and an explanation of the expected program behavior.", "localizador": "p. 2 do PDF (impressa 35), seção 2 («Baseline Bug Fixer»)"},
+      {"trecho": "We use GPT-4 (July/August 2023) with Azure OpenAI Services API via SAP Business Technology Platform (SAP BTP).", "localizador": "p. 2 do PDF (impressa 35), seção 3"},
+      {"trecho": "As for arithm_expr_eval.py, BBF could correct the manually inserted bug but introduced another bug leading to a test failure.", "localizador": "p. 2 do PDF (impressa 35), seção 3"},
+      {"trecho": "Overall, BBF could fix 38 out of 41 cases with a simple zero-shot prompting, and failed for 3 cases.", "localizador": "p. 2 do PDF (impressa 35), seção 3"},
+      {"trecho": "Adding unit test information to BBF input did not help significantly for these 3 unsuccessful cases (only 2 successes in 15 trials).", "localizador": "p. 2 do PDF (impressa 35), seção 3"},
+      {"trecho": "Table 1 shows that MBF succeeded in all cases if the unit test information was added (last column).", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Multistage Bug Fixer»)"},
+      {"trecho": "Without this information, results were less impressive and random: arithm_expr_eval always failed, and the other cases succeeded in about 50% of the trials.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Multistage Bug Fixer»)"},
+      {"trecho": "However, note that the results are not deterministic or unstable [2], and it seems to be significant to provide additional information like unit test details.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Discussion of the results»)"},
+      {"trecho": "There are also performance and cost penalties of ToT-based approaches since multiple interactions per issue are needed.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Discussion of the results»)"},
+      {"trecho": "The latter study has essentially the same setup as BBF but obviously uses GPT-3.5 (results in [10] are from Jan. 2023, prior to availability of GPT-4).", "localizador": "p. 2 do PDF (impressa 35), seção 3"},
+      {"trecho": "However, zero-shot prompting can fail to handle more intricate bug cases, as shown in this work.", "localizador": "p. 1 do PDF (impressa 34), introdução"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Multistage Bug Fixer (MBF), coluna «MBF» da Tabela 1 (sem informação de testes unitários no prompt)",
+      "mecanismos": ["instrucao", "contexto", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem"],
+      "comparador": "Baseline Bug Fixer (BBF)",
+      "modelo": "GPT-4 (July/August 2023; snapshot nao_informado)",
+      "benchmark": "QuixBugs (wrap, topological-ordering) e arithm_expr_eval.py de [3] — os 3 casos em que o BBF falhou",
+      "metrica": "Solved / Total (marca ✓/× por caso; sucesso associado à aprovação nos testes, sem definição formal)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": null,
+      "denominador": "3 casos; número de tentativas do MBF nao_informado",
+      "condicoes": "Resultado não numérico na fonte, por isso null: na Tabela 1, o BBF tem × nos três casos (o total impresso da coluna BBF, 7/10, refere-se aos 10 casos da tabela, outro denominador); o MBF tem «(random)» em wrap e topological-ordering, × em arithm expr eval e total impresso «-/3». O texto informa que, sem testes unitários, arithm_expr_eval sempre falhou e os outros casos tiveram sucesso em cerca de 50% das tentativas (número de tentativas não informado). BBF com uma tentativa por caso; MBF com m = 5 explicações, n = 5 correções e k = 5 votos por etapa; decodificação não informada. Casos escolhidos a posteriori pela falha do BBF. Ganho, se houver, é do pacote MBF. Conferido na imagem da p. 2 do PDF: cabeçalhos, legenda, marcas e totais legíveis.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca «our approach» contra o GPT-4 «even with prompt engineering», sem identificar qual variante do MBF (com ou sem testes unitários) nem qual comparador (BBF com ou sem testes). A Tabela 1 é a primeira (e única) tabela com contraste elegível; primeira métrica (Solved / Total), único modelo (GPT-4), primeira linha de base (BBF) e primeira técnica listada (coluna MBF).",
+      "derivacao": "direta",
+      "localizador": "p. 2 do PDF (impressa 35), Tabela 1, colunas «BBF» e «MBF», linhas wrap, topological-ordering, arithm expr eval e Solved / Total; seção 3 («Multistage Bug Fixer»)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Solved / Total 7/10 -/3 3/3", "localizador": "p. 2 do PDF (impressa 35), Tabela 1, linha Solved / Total; colunas BBF, MBF, MBF w/UT"},
+        {"trecho": "wrap × (random) ✓", "localizador": "p. 2 do PDF (impressa 35), Tabela 1, linha wrap; colunas BBF, MBF, MBF w/UT (marca ✓ conferida na imagem)"},
+        {"trecho": "Without this information, results were less impressive and random: arithm_expr_eval always failed, and the other cases succeeded in about 50% of the trials.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Multistage Bug Fixer»)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "MBF w/UT (MBF com informação de testes unitários no prompt)",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["raciocinio", "decomposicao", "amostragem"],
+      "comparador": "Baseline Bug Fixer (BBF)",
+      "modelo": "GPT-4 (July/August 2023; snapshot nao_informado)",
+      "benchmark": "QuixBugs (wrap, topological-ordering) e arithm_expr_eval.py de [3] — os 3 casos em que o BBF falhou",
+      "metrica": "Solved / Total (marca ✓/× por caso; sucesso associado à aprovação nos testes, sem definição formal)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": null, "intervencao": 3},
+      "denominador": "3 casos (Solved / Total impresso «3/3»); número de tentativas do MBF w/UT nao_informado",
+      "condicoes": "Baseline null: o BBF tem × nos três casos e o único total impresso da coluna BBF (7/10) refere-se a 10 casos, outro denominador. O BBF não recebe testes unitários (uma tentativa por caso), enquanto o MBF w/UT recebe; portanto o contraste mistura o pacote ToT e o ingrediente de testes. Contraste em prosa com o BBF com testes unitários: 2 sucessos em 15 tentativas nos mesmos três casos. Casos escolhidos a posteriori pela falha do BBF. Conferido na imagem da p. 2 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "O estudo apresenta MBF e MBF w/UT em colunas separadas da Tabela 1; a variante com testes é técnica focal ainda não representada. Mesma ordem: Tabela 1, Solved / Total, GPT-4, primeira linha de base listada (BBF).",
+      "derivacao": "direta",
+      "localizador": "p. 2 do PDF (impressa 35), Tabela 1, colunas «BBF» e «MBF w/UT», linhas wrap, topological-ordering, arithm expr eval e Solved / Total; seção 3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Solved / Total 7/10 -/3 3/3", "localizador": "p. 2 do PDF (impressa 35), Tabela 1, linha Solved / Total; colunas BBF, MBF, MBF w/UT"},
+        {"trecho": "Table 1 shows that MBF succeeded in all cases if the unit test information was added (last column).", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Multistage Bug Fixer»)"},
+        {"trecho": "Adding unit test information to BBF input did not help significantly for these 3 unsuccessful cases (only 2 successes in 15 trials).", "localizador": "p. 2 do PDF (impressa 35), seção 3"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Unit test information in the prompt (inputs of the routine, expected output and actual output)",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "Multistage Bug Fixer (MBF), coluna «MBF» da Tabela 1 (sem informação de testes unitários no prompt)",
+      "modelo": "GPT-4 (July/August 2023; snapshot nao_informado)",
+      "benchmark": "QuixBugs (wrap, topological-ordering) e arithm_expr_eval.py de [3] — os 3 casos em que o BBF falhou",
+      "metrica": "Solved / Total (marca ✓/× por caso; sucesso associado à aprovação nos testes, sem definição formal)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": null, "intervencao": 3},
+      "denominador": "3 casos; número de tentativas nao_informado nas duas condições",
+      "condicoes": "Baseline null: o total da coluna MBF é impresso como «-/3», sem contagem (wrap e topological-ordering «(random)», arithm expr eval ×; no texto, cerca de 50% das tentativas nos dois primeiros casos e falha sempre no terceiro). Intervenção: MBF w/UT com 3/3. Demais ingredientes do MBF mantidos (m = n = k = 5, mesmo GPT-4). Mecanismos listados são os da condição de intervenção (MBF w/UT). Conferido na imagem da p. 2 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente de prompting isolado na Tabela 1, que funciona como ablação (colunas MBF sem e com testes unitários); entra por cobertura para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "p. 2 do PDF (impressa 35), legenda e colunas «MBF» e «MBF w/UT» da Tabela 1; seção 3 («Multistage Bug Fixer»)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Column ”MBF” shows MBF results without unit test information in the prompt, and the last column with this information.", "localizador": "p. 2 do PDF (impressa 35), legenda da Tabela 1"},
+        {"trecho": "Solved / Total 7/10 -/3 3/3", "localizador": "p. 2 do PDF (impressa 35), Tabela 1, linha Solved / Total; colunas BBF, MBF, MBF w/UT"},
+        {"trecho": "Table 1 shows that MBF succeeded in all cases if the unit test information was added (last column).", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Multistage Bug Fixer»)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito: estender o reparo de programas baseado em LLM com a técnica Tree of Thoughts (MBF) e comparar a capacidade de correção de GPT-3.5 e GPT-4 no QuixBugs.", "localizador": "p. 1 do PDF (impressa 34), resumo e introdução"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Descreve as fases do MBF, o Algoritmo 1, os parâmetros m, n, k e b, o BBF, o conjunto de dados e o modelo; porém os prompts exatos ficam só no repositório, o número de tentativas do MBF não é informado, o insumo da coluna MBF sem testes não é detalhado e a decodificação não é informada.", "localizador": "p. 1-2 do PDF (impressas 34-35), seções 2 e 3"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "O BBF é executado com o mesmo modelo, mas o MBF só é avaliado nos três casos em que o BBF falhou numa única tentativa, com número de tentativas diferente; a comparação com GPT-3.5 usa resultados de outro artigo.", "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Sucesso por caso (✓/×) e totais Solved / Total, ligados à aprovação nos testes, sem definição formal; a coluna MBF não tem contagem («-/3») e a taxa «about 50% of the trials» não informa denominador. Os valores que se repetem entre texto e tabela coincidem (7 de 9; 38 de 41).", "localizador": "p. 2 do PDF (impressa 35), Tabela 1 e seção 3"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Reconhece não determinismo, custo e desempenho das abordagens ToT e escopo limitado, mas não discute viés da seleção dos casos, tamanho da amostra nem validade externa.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Discussion of the results») e seção 4"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Repositório público com código, prompts e logs indicado (não acessado nesta extração) e período de uso do GPT-4 informado; faltam snapshot do modelo, parâmetros de decodificação e número de tentativas do MBF.", "localizador": "p. 1 do PDF (impressa 34), nota 1; p. 2 do PDF (impressa 35), seções 2 e 3"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute possível presença do QuixBugs no pré-treinamento do GPT-4; o caso arithm_expr_eval.py tem defeito introduzido manualmente, mas o estudo não o justifica como controle de contaminação.", "localizador": "p. 2 do PDF (impressa 35), seção 3 («Experimental settings»)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (160 linhas, incluindo referências). Páginas do PDF abertas visualmente: p-01 (resumo, introdução, seção 2) e p-02 (Algoritmo 1, Tabela 1, seções 3 e 4). As marcas ✓ da Tabela 1, ausentes no texto extraído, foram conferidas na imagem. Página do PDF 1 = impressa 34; 2 = 35; 3 = 36 (referências)."
+  }
+}

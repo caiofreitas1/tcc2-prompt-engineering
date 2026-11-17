@@ -1,0 +1,698 @@
+{
+  "estudo": "S1415",
+  "texto_fonte": "fontes/textos/lote/S1415.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "Author version, October 2026; arXiv:2605.31478v2 [cs.SE] 7 Oct 2026; publicado em Advanced Engineering Informatics 77 (2027), 105328 (doi:10.1016/j.aei.2026.105328). Localizadores: página do PDF (posição no arquivo); nas páginas abertas, a página impressa coincide com a do PDF.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "A (no proactive injection, baseline)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Sec. 5.1, códigos de condição, p. 12; Sec. S6.1, tabela de configuração (linha System prompt), p. 38",
+        "observacao": "Prompt base: papel para a biblioteca-alvo, instrução de quatro passos (carregar a rede, aplicar as modificações, executar a análise, imprimir o valor numérico final) e regra de saída somente com código. A instrução de quatro passos foi classificada como instrucao, não como decomposicao, porque o código é gerado num único passo, sem etapas executadas separadamente. O texto verbatim do prompt está apenas no repositório (docs/PROMPTS.md), não acessado."
+      },
+      {
+        "nome_original": "C (profile-conditioned, demand-aware layer allocation: the full proactive method)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Sec. 4.4, p. 10-11; Sec. 5.1, p. 12; Tabela 3(a), p. 14; Tabela 4, p. 16",
+        "observacao": "Pacote proativo aplicado no Round 0: trechos de documentação por camada (L0 nome/propósito, L1 assinatura, L2 contrato de parâmetros/retorno, L3 exemplo compacto de uso) e boundary cards (contratos de esquema de DataFrame), selecionados por demanda estimada da consulta e por perfil de sondas do modelo e anexados ao prompt sob orçamento de tokens. Contraste C vs A (Tabelas 3 e 4) isola o pacote completo; é pacote híbrido, pois inclui componentes fora do escopo (ranqueador de demanda treinado e adaptado, perfil de sondas L0-L3, orçamento e empacotador guloso). O ganho não se atribui a um único ingrediente; o próprio estudo afirma que o ganho de primeira passagem e o resultado de 41% do custo de prompt pertencem ao pipeline seletivo completo (p. 17)."
+      },
+      {
+        "nome_original": "Profile conditioning (model-specific deficit r_M,ℓ(f)) versus constant-deficit control",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 4.4, p. 11; Sec. 5.4, p. 17; Sec. S5.3 (Profile-conditioning isolation), p. 36",
+        "observacao": "Isolamento com mesmo orçamento nominal: mantém estimativas de demanda, artefatos, renderizador, poda de camadas e empacotador, e troca o déficit específico do modelo pela constante 1. O componente só muda quais trechos de documentação entram (mesmas categorias), por isso não acrescenta categoria. Resultado nulo relatado: diferença de no máximo 1,2 ponto e todos os intervalos pareados incluem zero (três modelos, 400 itens)."
+      },
+      {
+        "nome_original": "B (function-name-only injection, L0-only ablation)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 5.1, p. 12; Tabela 4, p. 16; Sec. 5.4, p. 16-17",
+        "observacao": "Ablação que injeta só nomes de funções; B vs A (Tabela 4) difere apenas nessa injeção. Reduz a acurácia em modelos fortes (ver heterogeneidade)."
+      },
+      {
+        "nome_original": "X (demand-only allocation of all available L0–L3 layers under the full-context budget: demand-hit full-layer reference)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Sec. 4.4, p. 11; Sec. 5.1, p. 13; Tabela 4, p. 16; Tabela 5, p. 17; Tabela 6, p. 18",
+        "observacao": "Referência de alto contexto, agnóstica ao modelo, que expõe todas as camadas (inclui L3, exemplo de uso) das funções com acerto de demanda. Há contraste X vs A na Tabela 4, mas os mecanismos do comparador não são isolados."
+      },
+      {
+        "nome_original": "R (vanilla BM25 retrieval over the raw API documentation: off-the-shelf RAG baseline)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Sec. 5.1, p. 13; Tabela 4, p. 16; Sec. S6.2, p. 39",
+        "observacao": "Top-10 funções por BM25Okapi, renderizadas pelo mesmo construtor de trechos de C e X, sem boundary cards, âncoras nem perfil. O campo de exemplos é excluído da indexação; o texto não informa explicitamente se os trechos renderizados contêm exemplos L3, por isso exemplos não foi marcado. Mecanismos do comparador não isolados."
+      },
+      {
+        "nome_original": "R_sem (vanilla dense retrieval, SBERT cosine) e R_semB (dense retrieval at C-matched measured cost)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Sec. 5.1, p. 13; Tabela 4, p. 16; Sec. S5.4, p. 36-38; Tabela 9, p. 21; Tabela S18, p. 47",
+        "observacao": "Idêntico a R, exceto pelo ranqueador (all-MiniLM-L6-v2, sem reranking). R_semB só altera o orçamento nominal (B* = 600) para igualar o custo medido de C; a mudança de orçamento é fora do escopo (orcamento). Mesma observação de R quanto a exemplos. Mecanismos do comparador não isolados."
+      },
+      {
+        "nome_original": "FX (plain fix loop with execution feedback only, no documentation: standard self-debug baseline)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Sec. 4.5, p. 11-12; Sec. 5.1, p. 13; Tabela 3(a), p. 14; Tabela 5, p. 17; Tabela S7, p. 34",
+        "observacao": "Mecanismos registrados para a composição com a base C (C+FX); com a base A, o pacote é instrucao, restricoes e feedback. Até K=3 rodadas com prompt de usuário estruturado (tarefa, código anterior, falha) e prompt de sistema de depurador. A contribuição é medida por rodada (R0 para R3) sobre o mesmo instantâneo de Round 0, sem condição paralela sem a técnica."
+      },
+      {
+        "nome_original": "FD (always-document fix at static depth, no routing)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 5.1, p. 13; Tabela 5, p. 17; Tabela 6, p. 18; Tabela S8, p. 35",
+        "observacao": "Acrescenta documentação em toda rodada de reparo em relação a FX; contraste FD–FX impresso na Tabela 5 e na Tabela S8. Mecanismos para a base C. A categoria contexto já existe na base C; aqui ela designa o ingrediente acrescentado (documentação nas rodadas de reparo)."
+      },
+      {
+        "nome_original": "FDR (reference-free routed repair from execution feedback, no value-error branch)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 4.5, p. 11-12; Sec. 5.1, p. 12-13; Tabela 3(a), p. 14; Tabela 5, p. 17; Tabela 6, p. 18; Sec. S3.2, p. 30",
+        "observacao": "Variante própria do reparo reativo (endpoint reference-free), avaliada em coluna separada. Roteia por classe de exceção e linha com falha para basic fix (sem documentação), API contract (contrato L2) ou boundary card. Deriva de FD (mesmos ingredientes; muda só quando e qual documentação entra), por isso não acrescenta categoria em relação a FD; em relação a C, acrescenta feedback e documentação nas rodadas. Contraste FDR–FD (Tabela 5) isola o roteamento."
+      },
+      {
+        "nome_original": "FDRS (FDR with validation-triggered value-error repair and function-output contracts: the full reactive method)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": ["feedback", "contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 4.5, p. 11-12; Sec. 5.1, p. 12-13; Tabela 3(a), p. 14; Tabela 5, p. 17; Sec. S3.2, p. 30",
+        "observacao": "Acrescenta a FDR o ramo de erro de valor: aviso de divergência disparado por sinal de validação (feedback), contratos de interface e de saída de função net.res_* a partir de traço AST (contexto) e instrução de formato de saída de um único escalar (restricoes). O contraste FDRS–FDR remove o ramo inteiro; o ganho não se atribui a um único desses ingredientes. No benchmark, o sinal de validação vem do casamento escalar com a referência, sem incluir o valor de referência no prompt. Composto com C, forma o endpoint C+FDRS."
+      },
+      {
+        "nome_original": "C-recal (single-change recalibration of C: name and signature priority floor)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Sec. 5.6, p. 21; Tabela 9(b), p. 21; Sec. S9.2, p. 46",
+        "observacao": "Ajuste de calibração definido no piloto OpenDSS (90 itens): dá piso de prioridade à documentação de nome e assinatura das funções demandadas. C-recal vs C difere apenas nesse ajuste. Não é a proposta principal do estudo; não recebeu extração porque o alvo de três foi preenchido por técnicas focais."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Query-side demand estimator (hybrid TF–IDF ranker with supervised pairwise logistic regression) and role-frequency reweighting",
+        "natureza": "outro",
+        "descricao": "Treinamento supervisionado (6.312 pares) e adaptação transdutiva por reponderação de papéis de um ranqueador de recuperação; não altera pesos do LLM. A documentação que ele seleciona entra nas técnicas como contexto; o ganho da adaptação (3,2 p.p. adicionais sobre C não adaptado) não é efeito de prompting.",
+        "localizador": "Sec. 4.3, p. 9-10; Sec. 5.5, p. 19; Sec. S4, p. 31-32; Sec. S6.3, p. 39"
+      },
+      {
+        "nome_original": "Documentation-driven L0–L3 probes and per-model knowledge profile ρ_M(f)",
+        "natureza": "outro",
+        "descricao": "Medição diagnóstica por 2.080 sondas sobre 275 entradas da API; o perfil condiciona a alocação de documentação, mas as sondas não fazem parte do prompt de geração.",
+        "localizador": "Sec. 4.2, p. 7-9; Tabela S3, p. 29"
+      },
+      {
+        "nome_original": "Token budget B and greedy budgeted packer; R_semB budget calibration",
+        "natureza": "orcamento",
+        "descricao": "Alocação de tokens de documentação: orçamento nominal de 2.000 (C realiza cerca de 1.450 tokens) e B* = 600 para R_semB; limite de exemplos L3 por consulta.",
+        "localizador": "Sec. 4.4, p. 11; Sec. S5.4, p. 36-38"
+      },
+      {
+        "nome_original": "Greedy decoding (temperature 0), max new tokens 4,096 (first pass) and 2,048 (fix rounds)",
+        "natureza": "decodificacao",
+        "descricao": "Configuração fixa em todas as condições; não é intervenção comparada.",
+        "localizador": "Sec. 5.1, p. 12; Sec. S6.1, p. 38"
+      },
+      {
+        "nome_original": "Reasoning-tier endpoints (GPT-5.4-mini reasoning_effort=high; DeepSeek-Reasoner)",
+        "natureza": "selecao_modelo",
+        "descricao": "Modo de raciocínio do fornecedor ou endpoint distinto, sem alterar o prompt; avaliado em subconjunto de 200 itens.",
+        "localizador": "Sec. 5.5, Tabela 8, p. 20"
+      },
+      {
+        "nome_original": "Workload-aware model-tier selection (deployment guidance)",
+        "natureza": "selecao_modelo",
+        "descricao": "Recomendação de escolha de nível de modelo por carga de trabalho e recursos de serviço; modos são recomendações, não condições medidas.",
+        "localizador": "Tabela 12, p. 25; Sec. 6.1, p. 22"
+      },
+      {
+        "nome_original": "Execution harness (sandbox working directory, mocks, timeouts, watchdog)",
+        "natureza": "outro",
+        "descricao": "Infraestrutura de execução e avaliação; não constitui fronteira de segurança segundo o estudo.",
+        "localizador": "Sec. 6.2, p. 22-24; Sec. S6.1, p. 38-39"
+      },
+      {
+        "nome_original": "Stricter numerical comparison and automatic program checks (Table 10)",
+        "natureza": "outro",
+        "descricao": "Controles de validação de saídas aceitas (tolerância dez vezes mais estrita; cinco verificações por reexecução) aplicados após a geração.",
+        "localizador": "Tabela 10, p. 22; Tabela S13, p. 41"
+      }
+    ],
+    "modelos": [
+      "Qwen2.5-Coder-1.5B (Qwen/Qwen2.5-Coder-1.5B-Instruct; referência de limite inferior)",
+      "Qwen2.5-Coder-7B (Qwen/Qwen2.5-Coder-7B-Instruct)",
+      "Qwen2.5-Coder-14B (Qwen/Qwen2.5-Coder-14B-Instruct)",
+      "Qwen2.5-Coder-32B (Qwen/Qwen2.5-Coder-32B-Instruct)",
+      "Qwen3-Coder-Next (Qwen/Qwen3-Coder-Next; MoE, 80B)",
+      "Qwen3-Coder-480B (Qwen/Qwen3-Coder-480B-A35B-Instruct; 480B total/35B ativos)",
+      "Llama-3.1-8B (meta-llama/Llama-3.1-8B-Instruct)",
+      "Llama-3.1-70B (meta-llama/Llama-3.1-70B-Instruct)",
+      "Llama-3.1-405B (meta-llama/Llama-3.1-405B-Instruct)",
+      "GPT-OSS-120B (openai/gpt-oss-120b)",
+      "Claude-Haiku-4-5 (claude-haiku-4-5; snapshot nao_informado; janela de acesso 6-10 maio 2026)",
+      "Gemini-2.5-Flash (gemini-2.5-flash; snapshot nao_informado; janela de acesso 6-10 maio 2026)",
+      "GPT-5.4-mini (gpt-5.4-mini; snapshot nao_informado; janela de acesso 6-10 maio 2026)",
+      "DeepSeek-V4-Flash (deepseek-v4-flash; snapshot nao_informado; janela 6-10 maio 2026; células do piloto de transferência 26-27 julho 2026)",
+      "GPT-5.4-mini com reasoning_effort=high (só subconjunto de 200 itens)",
+      "DeepSeek-Reasoner (identificador e versão nao_informado; só subconjunto de 200 itens)",
+      "Qwen2.5-Coder-0.5B (Qwen/Qwen2.5-Coder-0.5B-Instruct; só medição de serviço, fora do painel de acurácia)",
+      "Modelos auxiliares do estimador de demanda (não geram código): all-MiniLM-L6-v2 (SBERT) e cross-encoder/ms-marco-MiniLM-L-12-v2"
+    ],
+    "benchmarks": [
+      "PowerCodeBench, versão congelada de 2.000 itens (pandapower 3.4.0): D1/D2/D3/D4 = 600/600/400/400; 15 famílias de tarefas; 39 redes; 54 chaves de template; alvos 1.848 float, 108 inteiros, 44 booleanos",
+      "Holdout de 80 consultas escritas por humanos sobre os mesmos cenários (só modelos open-weight ≥7B, A e C+FDRS)",
+      "Subconjunto estratificado de 200 itens (verificação de modos de raciocínio)",
+      "Subconjunto estratificado de 400 itens (variância com 10 seeds; isolamento do condicionamento por perfil)",
+      "Subconjunto estratificado de 300 itens (medições de serviço; âncoras 405B/480B em 100 itens)",
+      "Minibenchmarks congelados de 90 itens para OpenDSS e para PyPSA (5 famílias × 18 itens, D1_basic e D3_semantic)",
+      "Conjuntos externos de consultas para o estimador de demanda (84 reescritas da comunidade, 10 multiplataforma, 20 escritas por engenheiros) — avaliam só a recuperação, não a geração",
+      "Amostras de auditoria: 610 saídas aceitas (estratificada), 170 pares no suporte comum (340 saídas, 10 das quais também pertencem à amostra de 610), 100 falhas (taxonomia), 100 saídas executadas e rejeitadas"
+    ],
+    "metricas": [
+      "Acc (result accuracy): fração cujo escalar impresso coincide com a referência sob a tolerância (exato para inteiro/booleano; absoluta 10^-3 e relativa 10^-2 para float); endpoints R0 (Pass@1) e R3 (após até K=3 rodadas), ambos declarados primários; denominador 2.000 itens no benchmark completo",
+      "ExecRate e Acc|Exec (Round 0, condição A)",
+      "Custo de tokens de prompt (por item, por sucesso; por tentativa de reparo)",
+      "recall@10 e hit@10 do estimador de demanda",
+      "Escores de sondas L0-L3 e correlação de Spearman (ρs)",
+      "False-acceptance rate (FAR) da auditoria de validade de engenharia",
+      "Medidas de serviço: throughput (tok/s), energia (kJ/sucesso), VRAM, latência (TTFT, TPOT, e2e)"
+    ],
+    "linguagens": [
+      "Python (pandapower 3.4.0; Python 3.11)",
+      "Python com OpenDSSDirect (opendssdirect 0.9.4) — piloto",
+      "Python com PyPSA (pypsa 1.2.3) — piloto"
+    ],
+    "riscos": [
+      {
+        "categoria": "alucinacao",
+        "descricao": "Na amostra de 100 falhas com dupla revisão, quase metade chama função, atributo ou caminho de importação inexistente (C1, 47-48 casos); outros 11-13 usam mal parâmetro ou tabela de resultados reais (C2).",
+        "localizador": "Sec. 5.3, p. 14-15; Fig. 5, p. 15"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Casamento numérico não garante a análise pedida: na amostra que representa a configuração open-weight implantada, cerca de um em cada cinco resultados aceitos chegou ao número esperado por fluxo de trabalho infiel (81,5% realizaram a análise pedida).",
+        "localizador": "Sec. 5.7, p. 21; Tabela S14, p. 42"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O prompt pode induzir falha: injeção só de nomes reduz a acurácia nos modelos mais fortes; no OpenDSS, o perfil superestimou o conhecimento do Qwen2.5-32B, o alocador reteve documentação e 17 de 18 saídas assistidas seletivamente falharam por chamar membros inexistentes (6 sob recuperação ampla).",
+        "localizador": "Sec. 5.4, p. 16-17; Sec. 5.6, p. 20; Tabela S19, p. 47"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "O programa gerado é Python arbitrário executado com os privilégios do ambiente; o harness não é fronteira de segurança (sem isolamento de rede, allowlist de sistema de arquivos ou cotas); efeitos colaterais no sistema de arquivos e no processo.",
+        "localizador": "Sec. 6.2, p. 22 e 24"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Documentação recuperada entra no prompt; fonte comprometida ou desatualizada é canal de injeção de prompt.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Uso operacional indevido (não é cibersegurança): saída aceita pode analisar rede, estado de modificação ou ponto de operação errados e alimentar decisão operacional incorreta.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O reparo habilitado por validação (C+FDRS) usa cerca de 5-15 vezes a energia da passagem única nos níveis ≥7B medidos; o estudo trata isso como custo do reparo. Tokens de documentação também são tratados como custo (Tabela 6).",
+        "localizador": "Sec. 6.1, p. 22; Tabela 6, p. 18; Tabela S16, p. 45"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Temperatura 0 não torna o serviço paralelo em GPU bit a bit determinístico; desvio-padrão mediano por célula de 0,20 p.p. em 10 seeds (pior célula 2,75 p.p.); APIs fechadas excluídas da checagem por não exporem seeds.",
+        "localizador": "Sec. 5.1, p. 12; Sec. S5.3, p. 36; Sec. S6.1, p. 39"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Sobreposição entre o corpus de treino do estimador de demanda e as funções do benchmark: 35 das 50 funções usadas pelas soluções de referência também ocorrem no treino. O estudo não discute exposição dos LLMs ao benchmark no pré-treinamento.",
+        "localizador": "Sec. 4.3, p. 10; Sec. S4.1, p. 31"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Desalinhamento entre documentação e versão da biblioteca (documentação defasada, APIs omitidas) não foi variado nas ablações; deriva da demanda: a adaptação por papéis pode prejudicar tráfego dominado por construção.",
+        "localizador": "Sec. 6.3, p. 24; Sec. 5.5, p. 19"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Harness confina o código a diretório sandbox, redireciona saídas de arquivos, substitui chamadas de exibição por mocks, remove chamadas que encerram o interpretador e limita cada execução por timeout (60 s) e watchdog (75 s).",
+        "avaliada": "nao",
+        "localizador": "Sec. 6.2, p. 22; Sec. S6.1, p. 38-39"
+      },
+      {
+        "descricao": "Recomendações para produção: contêiner ou VM sem rede por padrão, allowlist de escrita, cotas, filtro estático de chamadas fora da API documentada, revisão especializada graduada e registro de proveniência dos trechos injetados.",
+        "avaliada": "nao",
+        "localizador": "Sec. 6.2, p. 24"
+      },
+      {
+        "descricao": "Comparação numérica dez vezes mais estrita sobre resultados registrados: filtra cerca de dois em cada cinco programas que chegaram ao número por análise errada e perde menos de dois em cada cem casamentos fiéis (comparação com a tolerância padrão).",
+        "avaliada": "sim",
+        "localizador": "Tabela 10, p. 22; Tabela S13(b), p. 41"
+      },
+      {
+        "descricao": "Cinco verificações automáticas por reexecução para priorizar revisão: detectam cerca de nove em cada dez falsas aceitações, mas menos da metade dos sinalizados é confirmada; desempenho medido contra as decisões da auditoria.",
+        "avaliada": "sim",
+        "localizador": "Tabela 10, p. 22; Tabela S13(a), p. 41"
+      },
+      {
+        "descricao": "Controle de vazamento no estimador de demanda: divisão por grupo de paráfrases e auditoria de sobreposição lexical (Jaccard máximo 0,41; nenhum par acima de 0,5).",
+        "avaliada": "nao",
+        "localizador": "Sec. 4.3, p. 10; Sec. S4.1, p. 31"
+      },
+      {
+        "descricao": "Reexecução das células open-weight em subconjunto de 400 itens com 10 seeds e bootstrap por cluster de template para delimitar ruído.",
+        "avaliada": "nao",
+        "localizador": "Sec. 5.1, p. 12"
+      },
+      {
+        "descricao": "Saídas persistentemente falhas retornam para revisão de engenharia; saídas críticas exigem revisão especializada.",
+        "avaliada": "nao",
+        "localizador": "Sec. 1, p. 2; Sec. 5.7, p. 21"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão da ablação B: injeção só de nomes reduz a acurácia R0 abaixo de A em Llama-405B (B 4.20 vs A 13.45) e GPT-OSS-120B (B 9.65 vs A 14.05), embora ajude modelos Qwen de porte médio.",
+        "localizador": "Tabela 4, p. 16; Sec. 5.4, p. 16-17"
+      },
+      {
+        "descricao": "A vantagem de X sobre C muda de sinal entre modelos: Llama-405B tem X 47.45 abaixo de C 51.45, enquanto na média X 38.13 supera C 36.74; após o reparo, C supera X levemente (∆(X–C) negativo em FX, FD, FDR e FDRS).",
+        "localizador": "Tabela 4, p. 16; Tabela 5, p. 17"
+      },
+      {
+        "descricao": "Resultado nulo do condicionamento por perfil: diferença de acurácia em relação ao controle de déficit constante de no máximo 1,2 ponto, com todos os intervalos pareados incluindo zero.",
+        "localizador": "Sec. 5.4, p. 17; Sec. S5.3, p. 36"
+      },
+      {
+        "descricao": "Resultado nulo do roteamento: na base C, ∆(FDR–FD) = −0.07 (IC 95% [−0.44, +0.32]); por modelo, deltas negativos em Llama-405B (−1.70), Qwen3-480B (−1.70) e GPT-OSS-120B (−1.45).",
+        "localizador": "Tabela 5 e texto, p. 17; Tabela S8, p. 35"
+      },
+      {
+        "descricao": "Na Tabela 3(a), C+FDR fica igual ou ligeiramente abaixo de C+FX em vários modelos: GPT-5.4-mini 61.15 vs 61.25; Qwen3-480B 63.75 vs 63.80; GPT-OSS-120B 58.35 vs 58.40; iguais em Claude-Haiku (61.10), DeepSeek-Flash (47.30) e Llama-405B (64.75).",
+        "localizador": "Tabela 3(a), p. 14"
+      },
+      {
+        "descricao": "Ramo de erro de valor sem efeito em Qwen2.5-32B: C+FDR 52.75 e C+FDRS 52.75 (∆FDRS–FDR +0.00).",
+        "localizador": "Tabela 3(a), p. 14; Tabela S8, p. 35"
+      },
+      {
+        "descricao": "O mesmo valor difere entre tabela e figura: ∆(X–C) na coluna FD é −1.02 na Tabela 5 e −1.01 na Fig. 7(c). Aparente inconsistência de arredondamento; a fonte não informa se a figura usa valores não arredondados.",
+        "localizador": "Tabela 5, p. 17; Fig. 7(c), p. 18"
+      },
+      {
+        "descricao": "Os sucessos reativos da Tabela 6 são medidos em relação ao instantâneo de Round 0 de cada execução de reparo, que pode diferir ligeiramente das execuções proativas isoladas.",
+        "localizador": "Nota da Tabela 6, p. 18"
+      },
+      {
+        "descricao": "O endpoint FDRS depende de sinal externo de validação que, no benchmark, vem do casamento escalar com a referência (o valor não entra no prompt); o endpoint sem referência é FDR. Os ganhos de 32-56 p.p. destacados no resumo usam o endpoint habilitado por validação.",
+        "localizador": "Sec. 4.5, p. 11-12; Resumo, p. 1"
+      },
+      {
+        "descricao": "Equivalências TOST (±5 p.p.) da Tabela 3(b) valem só sob reamostragem por item; a reamostragem por cluster de template não estabelece equivalência. GPT-OSS-120B vs Claude-Haiku: −3.50 [−5.55, −1.45], não equivalente.",
+        "localizador": "Sec. 5.1, p. 12; Tabela 3(b) e texto, p. 14"
+      },
+      {
+        "descricao": "No holdout de 80 consultas escritas por humanos, os endpoints C+FDRS ficam em média 6,8 pontos abaixo do benchmark completo e os endpoints sem assistência 5,8 pontos acima.",
+        "localizador": "Sec. 5.5, p. 19"
+      },
+      {
+        "descricao": "Com raciocínio pago, o ganho R0→C+FDRS do GPT-5.4-mini cai de +34.50 (vanilla) para +27.50 (reasoning_effort=high), no subconjunto de 200 itens.",
+        "localizador": "Tabela 8, p. 20"
+      },
+      {
+        "descricao": "Transferência a frio: C não supera a recuperação ampla; no OpenDSS, Qwen2.5-32B tem C 15.6 abaixo de A 17.8 (∆ −2.2 [−10.0, +5.6]); C fica abaixo de R_sem em quatro células, e duas células OpenDSS seguem favorecendo a recuperação com orçamento igualado.",
+        "localizador": "Tabela 9(a), p. 21; Sec. 5.6, p. 20; Tabela S18, p. 47"
+      },
+      {
+        "descricao": "A adaptação do estimador de demanda não é uniformemente benéfica: recall@10 adaptado menos não adaptado de −1.6 p.p. no conjunto da comunidade e −14.7 p.p. no suplemento multiplataforma (n=10).",
+        "localizador": "Tabela 7, p. 19"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Classificação da tarefa: as rodadas de reparo corrigem o próprio código gerado dentro do pipeline de geração de código a partir de linguagem natural; não há programas defeituosos fornecidos como entrada. Por isso a tarefa registrada é geracao e o reparo entra como mecanismo feedback.",
+        "localizador": "Sec. 3.1, p. 5; Sec. 4.5, p. 11-12"
+      },
+      {
+        "descricao": "Critério de mecanismos_acrescentados: registra a categoria do ingrediente acrescentado mesmo quando a categoria já existe no prompt base por outro ingrediente (por exemplo, documentação nas rodadas de reparo como contexto em FD; instrução de formato como restricoes em FDRS).",
+        "localizador": "Sec. 5.1, p. 12-13"
+      },
+      {
+        "descricao": "Os prompts verbatim (sistema, turnos de usuário por condição e template de reparo) não estão no artigo; estão em docs/PROMPTS.md do repositório, não acessado nem validado.",
+        "localizador": "Sec. S6, p. 38; Sec. S3.2, p. 30"
+      },
+      {
+        "descricao": "Resultados diagnósticos das sondas (não comparações de prompting): oito de nove modelos open-weight implantáveis acima de 0,90 em L2, nenhum open-weight atinge 0,50 em L3; L1 tem ρs = 0,93 com a acurácia de primeira passagem (n=10).",
+        "localizador": "Sec. 4.2, p. 9; Tabela S3, p. 29"
+      },
+      {
+        "descricao": "Taxonomia de falhas (100 casos) e auditoria de validade rotuladas por dois engenheiros de sistemas de potência (κ = 0,955 na taxonomia); na auditoria pareada de 170 pares, 87,6% (C+FDRS) vs 65,9% (A+FX) realizaram a análise pedida. Rotulagem humana descrita pelo estudo, não executada nesta revisão.",
+        "localizador": "Sec. 5.3, p. 15; Sec. 5.7, p. 21; Tabela S15, p. 43"
+      },
+      {
+        "descricao": "Sem adaptação por papéis, C ainda ganha 27,8 p.p. sobre A; a adaptação acrescenta 3,2 p.p. (componente fora do escopo).",
+        "localizador": "Sec. 5.5, p. 19; Sec. S5.3, p. 36"
+      },
+      {
+        "descricao": "Comparações diretas com modelos ajustados finamente, agentes multietapa e estimadores de demanda mais recentes ficam como trabalho futuro.",
+        "localizador": "Sec. 6.3, p. 25"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Given a natural-language query q and a target library (here, pandapower), a large language model M generates Python code C = M(q).",
+        "localizador": "Sec. 3.1, p. 5"
+      },
+      {
+        "trecho": "Both endpoints are primary metrics: R0 isolates proactive injection at generation time, R3 captures the full reactive correction loop.",
+        "localizador": "Sec. 3.1, p. 5"
+      },
+      {
+        "trecho": "A role statement for the target library, a four-step instruction (load the network, apply the modifications, run the analysis, print the final numeric value), and an output-only-code rule.",
+        "localizador": "Sec. S6.1, tabela Setting/Value, linha System prompt, p. 38"
+      },
+      {
+        "trecho": "C profile-conditioned, demand-aware layer allocation: the full proactive method.",
+        "localizador": "Sec. 5.1, códigos de condição, p. 12"
+      },
+      {
+        "trecho": "It stores function snippets generated from the structured API specification, one rendering per documentation layer (L0 short name/purpose hint, L1 call signature, L2 parameter/return contract, L3 compact usage example); anchors and intent signals, compact backend-facing lexical patterns tying a query phrase to a specific API or to one of the mutually exclusive time-series, short-circuit, contingency, OPF, and DC-power-flow workflow executors; and boundary cards, short DataFrame schema contracts for recurrent table conventions that span multiple APIs (e.g. result-table columns or OPF cost extraction).",
+        "localizador": "Sec. 4.4, p. 10"
+      },
+      {
+        "trecho": "The selected snippets are prepended to the generation prompt as a targeted API-reference section.",
+        "localizador": "Sec. 4.4, p. 11"
+      },
+      {
+        "trecho": "The panel-mean accuracy difference from the constant-deficit control (rM,ℓ(f) = 1, maximal deficit) was at most 1.2 points, and every paired confidence interval included zero.",
+        "localizador": "Sec. 5.4, p. 17"
+      },
+      {
+        "trecho": "B function-name-only injection (L0-only ablation).",
+        "localizador": "Sec. 5.1, códigos de condição, p. 12"
+      },
+      {
+        "trecho": "X demand-only allocation of all available L0–L3 layers under the full-context budget: the model-agnostic demand-hit full-layer reference (it inherits the demand predictor’s recall errors, Sec. 4.4).",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "R vanilla BM25 retrieval (a standard keyword-frequency ranker) over the raw API documentation [24, 57]: off-the-shelf RAG baseline.",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "FX plain fix loop with execution feedback only, no documentation: standard self-debug baseline [31, 32].",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "FD always-document fix at static depth (no routing).",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "FDR reference-free routed repair from execution feedback (no value-error branch).",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "FDRS FDR with validation-triggered value-error repair and function-output contracts: the full reactive method when an external acceptance signal is available.",
+        "localizador": "Sec. 5.1, códigos de condição, p. 13"
+      },
+      {
+        "trecho": "The reactive fix prompt is a structured user-turn template preserving the original task, the previous code, the failure description, and any router-selected documentation, with the system prompt retained unchanged across fix rounds.",
+        "localizador": "Sec. 4.5, p. 12"
+      },
+      {
+        "trecho": "The output-format sub-path is a short library-agnostic instruction, emitted when the printed payload will not parse as the expected scalar, that the last line must print exactly one numeric scalar.",
+        "localizador": "Sec. S3.2, p. 30"
+      },
+      {
+        "trecho": "In the benchmark this signal is provided by scalar matching against the reference.",
+        "localizador": "Sec. 4.5, p. 11"
+      },
+      {
+        "trecho": "The signal triggers repair but is not included as a target value in the repair prompt.",
+        "localizador": "Sec. 4.5, p. 12"
+      },
+      {
+        "trecho": "It changes condition C in one respect only: the name- and signature-layer deficits of demand-hit functions receive a fixed minimum, which raises the priority of the corresponding documentation during packing.",
+        "localizador": "Sec. S9.2, p. 46"
+      },
+      {
+        "trecho": "Nearly half call a nonexistent function, attribute, or import path (C1, 47–48 cases), and a further 11–13 misuse a real parameter or result table (C2).",
+        "localizador": "Sec. 5.3, p. 14"
+      },
+      {
+        "trecho": "Put more plainly, roughly one in five still reached the expected number through an unfaithful workflow.",
+        "localizador": "Sec. 5.7, p. 21"
+      },
+      {
+        "trecho": "Names without semantic context can therefore do harm.",
+        "localizador": "Sec. 5.4, p. 16-17"
+      },
+      {
+        "trecho": "In complete control-device programs, however, 17 of 18 selectively assisted outputs fail because they call members that do not exist, compared with six under broad retrieval.",
+        "localizador": "Sec. 5.6, p. 20"
+      },
+      {
+        "trecho": "First, the generated program is arbitrary Python, and running it confers the privileges of the execution environment.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "trecho": "Fourth, under the injection conditions the retrieved documentation becomes part of the prompt, so a compromised or stale documentation source is a prompt-injection channel (addressed by the provenance recommendation below).",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "trecho": "Such a workflow may still match the scalar and feed an incorrect operating decision downstream.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "trecho": "Across the measured tiers of at least 7B, repair adds 8–23 percentage points of accuracy but uses about 5–15 times the single-pass energy because it may execute three repair rounds.",
+        "localizador": "Sec. 6.1, p. 22"
+      },
+      {
+        "trecho": "Temperature 0 removes stochastic sampling but does not make parallel GPU serving bitwise deterministic; the independent-run spread is reported in Sec. S5.3.",
+        "localizador": "Sec. S6.1, p. 39"
+      },
+      {
+        "trecho": "Of the 50 functions used by benchmark reference solutions, 35 (70%) also occur in training, mainly analysis routines.",
+        "localizador": "Sec. 4.3, p. 10"
+      },
+      {
+        "trecho": "The pairs are generated by API traversal, labelled through AST verification, and split by group to prevent paraphrase leakage.",
+        "localizador": "Sec. 4.3, p. 10"
+      },
+      {
+        "trecho": "Robustness to such source errors is not varied in the present ablations.",
+        "localizador": "Sec. 6.3, p. 24"
+      },
+      {
+        "trecho": "Against the first two surfaces, the harness confines generated code to a sandbox working directory and redirects file outputs there.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "trecho": "These mechanisms protect the evaluation process, but they do not form a security boundary.",
+        "localizador": "Sec. 6.2, p. 22"
+      },
+      {
+        "trecho": "Generated code should execute inside a container or virtual machine, with network access disabled by default.",
+        "localizador": "Sec. 6.2, p. 24"
+      },
+      {
+        "trecho": "When recorded results are rescored with a tenfold tighter tolerance, about two in five programs that reached a matching number through the wrong analysis are filtered out, while fewer than two in one hundred faithful matches are lost.",
+        "localizador": "Tabela 10, coluna What the evidence supports, linha Stricter numerical comparison, p. 22"
+      },
+      {
+        "trecho": "The five re-execution checks detect about nine in ten cases in which a matching number came from the wrong analysis, but fewer than half of their flags are confirmed as errors.",
+        "localizador": "Tabela 10, coluna What the evidence supports, linha Automatic program checks, p. 22"
+      },
+      {
+        "trecho": "To bound seed effects, we re-ran every open-weight panel cell on a stratified 400-item subset across 10 vLLM generation seeds.",
+        "localizador": "Sec. 5.1, p. 12"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "C (profile-conditioned, demand-aware layer allocation: the full proactive method)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "A (no proactive injection, baseline), Round 0",
+      "modelo": "GPT-5.4-mini (gpt-5.4-mini; snapshot nao_informado)",
+      "benchmark": "PowerCodeBench, versão congelada de 2.000 itens (pandapower 3.4.0)",
+      "metrica": "Acc (result accuracy, casamento escalar sob tolerância) no Round 0 — colunas A (R0) e C (R0) da Tabela 3(a), Endpoint accuracies",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 24.25, "intervencao": 50.45},
+      "denominador": "2.000 itens (benchmark completo, sem filtragem de subconjunto)",
+      "condicoes": "Primeira passagem (R0), sem reparo. API fechada no regime matched no-tool: temperatura 0, sem chamadas de ferramenta, sem modo de raciocínio explícito; máximo de 4.096 tokens novos. C usa o preditor de demanda adaptado ao cenário (transdutivo) e orçamento nominal de 2.000 tokens de documentação (C realiza cerca de 1.450 tokens na média por modelo do painel open-weight; o valor realizado para GPT-5.4-mini é nao_informado). Número de execuções: nao_informado para APIs fechadas (a checagem com 10 seeds cobre só modelos open-weight). Contraste de pacote híbrido (inclui ranqueador treinado, perfil de sondas e orçamento); o ganho não se atribui a um ingrediente isolado. Valores conferidos na imagem da p. 14.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: a seção de método declara R0 e R3 como métricas primárias, e o resumo destaca vários resultados (C+FDRS com 32-56 p.p., injeção seletiva com 41% dos tokens, auditoria 88% vs 66%). Tabelas 1 e 2 são descritivas; a primeira tabela com contraste elegível é a Tabela 3(a). Primeiro contraste da tabela: C (R0) vs A (R0); primeira métrica: acurácia; primeiro modelo listado: GPT-5.4-mini; primeira linha de base: A (R0).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3(a), p. 14 do PDF (p. 14 impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT-5.4-mini 24.25 50.45 61.25 61.15 62.15 +37.90",
+          "localizador": "Tabela 3(a), linha GPT-5.4-mini; colunas Model, A (R0), C (R0), C+FX, C+FDR, C+FDRS, ∆ FDRS–A; p. 14"
+        },
+        {
+          "trecho": "Table 3: Cross-vendor evaluation on the full 2,000-item PowerCodeBench benchmark.",
+          "localizador": "Legenda da Tabela 3, p. 14"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "C+FDR (reference-free routed repair from execution feedback, composed with proactive condition C)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "feedback"],
+      "comparador": "A (no proactive injection, baseline), Round 0",
+      "modelo": "GPT-5.4-mini (gpt-5.4-mini; snapshot nao_informado)",
+      "benchmark": "PowerCodeBench, versão congelada de 2.000 itens (pandapower 3.4.0)",
+      "metrica": "Acc (result accuracy) — endpoint C+FDR após até três rodadas de reparo (R3) versus A (R0), colunas da Tabela 3(a), Endpoint accuracies",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 24.25, "intervencao": 61.15},
+      "denominador": "2.000 itens (benchmark completo)",
+      "condicoes": "Contraste de pacote: C no Round 0 mais até K=3 rodadas de reparo roteado só por evidência de execução (sem ramo de erro de valor), contra A na primeira passagem; confunde a injeção proativa, as rodadas de reparo e o roteamento. O isolamento do roteamento no estudo é FDR–FD na base C (Tabela 5, média do painel open-weight, −0.07 p.p.), não disponível por modelo para as APIs. Temperatura 0, sem ferramentas e sem modo de raciocínio; máximo de 2.048 tokens novos nas rodadas de reparo. Número de execuções nao_informado para APIs fechadas. Valores conferidos na imagem da p. 14.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal distinta (endpoint reference-free do reparo reativo, avaliado em coluna própria) ainda não representada. Pela mesma regra de ordem: primeira tabela com o contraste (Tabela 3(a)), primeira métrica (acurácia), primeiro modelo listado (GPT-5.4-mini) e primeira linha de base listada (A (R0)).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3(a), p. 14 do PDF (p. 14 impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT-5.4-mini 24.25 50.45 61.25 61.15 62.15 +37.90",
+          "localizador": "Tabela 3(a), linha GPT-5.4-mini; colunas Model, A (R0), C (R0), C+FX, C+FDR, C+FDRS, ∆ FDRS–A; p. 14"
+        },
+        {
+          "trecho": "FDR reference-free routed repair from execution feedback (no value-error branch).",
+          "localizador": "Sec. 5.1, códigos de condição, p. 13"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "C+FDRS (proactive condition C composed with the full reactive method: FDR with validation-triggered value-error repair and function-output contracts)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "feedback", "restricoes"],
+      "comparador": "A (no proactive injection, baseline), Round 0",
+      "modelo": "GPT-5.4-mini (gpt-5.4-mini; snapshot nao_informado)",
+      "benchmark": "PowerCodeBench, versão congelada de 2.000 itens (pandapower 3.4.0)",
+      "metrica": "Acc (result accuracy) — endpoint C+FDRS após até três rodadas de reparo (R3) versus A (R0), colunas da Tabela 3(a), Endpoint accuracies",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 24.25, "intervencao": 62.15},
+      "denominador": "2.000 itens (benchmark completo)",
+      "condicoes": "Diferença impressa na tabela: ∆ FDRS–A = +37.90. Contraste de pacote (C + reparo roteado + ramo de erro de valor) contra A na primeira passagem; o ganho é do pacote. O ramo de erro de valor é disparado por sinal externo de validação que, no benchmark, vem do casamento escalar com a referência; o valor de referência não entra no prompt. Até K=3 rodadas; temperatura 0, sem ferramentas e sem modo de raciocínio. A Tabela 3(a) imprime IC só para Claude-Haiku e Llama-405B; para GPT-5.4-mini não há IC. Número de execuções nao_informado para APIs fechadas. Valores conferidos na imagem da p. 14.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal distinta (método reativo completo, endpoint habilitado por validação, em coluna própria) ainda não representada. Pela mesma regra de ordem: Tabela 3(a), acurácia, GPT-5.4-mini e linha de base A (R0), que é também a linha de base da coluna ∆ FDRS–A impressa.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3(a), p. 14 do PDF (p. 14 impressa)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT-5.4-mini 24.25 50.45 61.25 61.15 62.15 +37.90",
+          "localizador": "Tabela 3(a), linha GPT-5.4-mini; colunas Model, A (R0), C (R0), C+FX, C+FDR, C+FDRS, ∆ FDRS–A; p. 14"
+        },
+        {
+          "trecho": "FDRS FDR with validation-triggered value-error repair and function-output contracts: the full reactive method when an external acceptance signal is available.",
+          "localizador": "Sec. 5.1, códigos de condição, p. 13"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas (camada de ruptura do conhecimento da API, conciliação entre perfil do modelo e demanda da consulta, níveis locais que alcançam APIs de nível médio) e contribuições enumeradas.",
+      "localizador": "Sec. 1, p. 2-3"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Condições proativas e reativas definidas por código, decodificação, protocolo de duas fases, K=3, tolerância de casamento, constantes do injetor e regras do roteador descritas; prompts verbatim só no repositório.",
+      "localizador": "Sec. 3.1-3.4, p. 5-7; Sec. 4.4-4.5, p. 10-12; Sec. 5.1, p. 12-13; Sec. S3, p. 29-30; Sec. S6, p. 38-40"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Linhas de base executadas no mesmo benchmark e métrica: sem injeção (A), só nomes (B), referência de camadas completas (X), RAG BM25 e denso (R, R_sem, R_semB com custo igualado) e reparo simples, sempre documentado e roteado (FX, FD, FDR). Comparações com ajuste fino e agentes não foram feitas (declarado).",
+      "localizador": "Sec. 5.1, p. 12-13; Tabelas 3-6, p. 14-18; Sec. 6.3, p. 25"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "atende",
+      "justificativa": "Acc, ExecRate e Acc|Exec definidas, com tolerâncias e denominador de 2.000 itens; custos de tokens com base de cálculo descrita. Valores coincidem entre Tabela 3, Tabela 5 e Tabela S8 (por exemplo, médias 45.27/47.10/47.03/49.19); diferença de arredondamento entre Tabela 5 (−1.02) e Fig. 7(c) (−1.01).",
+      "localizador": "Sec. 5.1, p. 12; Tabela 3, p. 14; Tabela 5, p. 17; Fig. 7, p. 18; Tabela S8, p. 35"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Limitações discutidas (uma biblioteca principal, saídas escalares, benchmark gerado por templates, calibração entre APIs, risco residual após casamento numérico, deriva de documentação e de demanda, escopo do painel), variância por seeds, bootstrap por cluster de template e auditoria de validade de engenharia.",
+      "localizador": "Sec. 5.1, p. 12; Sec. 5.7, p. 21; Sec. 6.2-6.3, p. 22-25"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "atende",
+      "justificativa": "Identificadores exatos de modelos, seeds, versões de software, hardware, orçamentos, timeouts e janelas de acesso informados; benchmark e código declarados disponíveis em repositório (CC BY 4.0), não acessado nem validado nesta extração. APIs fechadas não expõem seeds.",
+      "localizador": "Data Availability, p. 26; Sec. S6, p. 38-40; Tabela S12, p. 39"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo controla vazamento no estimador de demanda (divisão por grupo, auditoria de sobreposição lexical), afirma que nenhum artefato lê a resposta de referência e que o sinal de validação não entra no prompt; não discute exposição dos LLMs ao benchmark ou às soluções de referência no pré-treinamento.",
+      "localizador": "Sec. 4.3, p. 10; Sec. 4.4, p. 10; Sec. 4.5, p. 12; Sec. S4.1, p. 31"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "motivo": "Texto extraído lido integralmente (2.806 linhas: artigo principal, material suplementar e referências).",
+    "paginas_pdf_abertas": [12, 14, 16, 17, 18, 19, 20, 21, 35, 38, 47]
+  }
+}

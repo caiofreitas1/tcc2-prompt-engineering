@@ -1,0 +1,551 @@
+{
+  "estudo": "S176",
+  "texto_fonte": "fontes/textos/lote/S176.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "w/ API (Ours)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "outro"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos", "decomposicao", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (Resumo); p. 2 (§1); p. 5-6 (§3.2-§3.4); p. 6 (§4.3, Tabela 2); p. 12 (Figura 8)",
+        "observacao": "Framework completo: prompt few-shot (5 exemplos para WikiTQ, HiTab e Spider; 8 para AIT-QA) com instrução (Figura 8: «Generate Python code given the table and a question about it.»), diretrizes de uso das APIs (instrucao), exemplos de solução com e sem APIs (exemplos), título, cabeçalhos multi-índice, 3 linhas de exemplo e pergunta (contexto), sub-perguntas geradas pelo programa e respondidas pelo LLM via QA API (decomposicao) e representação hierárquica multi-índice da tabela no prompt (outro). Acrescentados em relação ao comparador CODEX (few-shot sem estrutura multi-índice e sem APIs): diretrizes e exemplos de uso das APIs, sub-perguntas da QA API e a representação multi-índice. Contrafactual de pacote: Tabela 2 compara Ours com CODEX few-shot. Pacote híbrido: inclui funções Python executadas pelo interpretador (compare_larger, compare_smaller, table_qa), a chamada a um LLM em tempo de execução e o data frame multi-índice sobre o qual o código é executado (ver componentes_fora_escopo); o ganho não é atribuível a um único mecanismo de prompting."
+      },
+      {
+        "nome_original": "Codex (ablated version that only uses few-shot prompting)",
+        "mecanismos": ["exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 do PDF (§4.3, Tabela 2); p. 7 (Tabela 5, linha ✗ ✗, coluna w/o MI)",
+        "observacao": "Linha de base de prompting executada pelos autores: few-shot do modelo de código, sem estrutura multi-índice e sem funções API; nas ablações, sem MI corresponde à tabela achatada (Figura 7) inserida no prompt (contexto). O estudo não informa se a linha de instrução do template está presente nessa condição; por isso instrucao não foi listada. Não há condição sem exemplos (zero-shot), logo sem contrafactual para o próprio few-shot."
+      },
+      {
+        "nome_original": "QA API",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos", "decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 do PDF (§3.3, Figura 5); p. 6 (§3.4); p. 7 (Tabela 5); p. 8 (§5.1)",
+        "observacao": "Parte de prompting: diretrizes e exemplos de uso da QA API no prompt (§3.4); o programa gerado cria sub-perguntas e, para cada valor da coluna, o LLM é consultado novamente com o prompt «Answer question with True or False. {q}» (Figura 5), tratado como decomposicao. Ablação na Tabela 5 (linha ✓ ✗ contra ✗ ✗), nas colunas w/o MI e w/ MI. Ingrediente híbrido: a função table_qa/question_answering é código executado pelo interpretador e chama um LLM em tempo de execução (ver componentes_fora_escopo). Na coluna w/ MI a condição herda também a representação multi-índice (outro). Componente do sistema proposto, não técnica focal autônoma."
+      },
+      {
+        "nome_original": "Operation APIs (compare_larger, compare_smaller)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao", "exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 do PDF (§3.3, Figura 4); p. 6 (§3.4); p. 7 (Tabela 5); p. 8 (§5.1)",
+        "observacao": "Parte de prompting: diretrizes e exemplos de uso das APIs de comparação no prompt. Ablação na Tabela 5 (linha ✓ ✓ contra ✓ ✗), acrescentada sobre a QA API, que permanece (por isso decomposicao está entre os mecanismos herdados). Ingrediente híbrido: as funções compare_larger e compare_smaller são código Python executado pelo interpretador (ver componentes_fora_escopo). Na coluna w/ MI a condição herda também a representação multi-índice (outro)."
+      },
+      {
+        "nome_original": "Multi-index parsing (w/ MI)",
+        "mecanismos": ["exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3-4 do PDF (§3.1, Figura 2c, Algoritmo 1); p. 7 (Tabela 5); p. 8 (§5.2, Figura 7); p. 12 (Figura 8)",
+        "observacao": "outro = representação hierárquica da tabela no prompt como listas de tuplas de cabeçalho (top_root, left_root) e construção de pd.DataFrame com índice multi-nível (Figura 8), em vez do cabeçalho achatado (Figura 7). Ablação na Tabela 5 (coluna w/ MI contra w/o MI em cada linha de APIs); nas linhas com APIs a condição herda também instrucao e decomposicao. Ingrediente híbrido: a mesma transformação define o data frame sobre o qual o código é executado (ver componentes_fora_escopo), de modo que o efeito não é só de prompting."
+      },
+      {
+        "nome_original": "SQL w/ API (SQL querying API of the pandasql extension library)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 do PDF (§1); p. 7 (§4.5, Figura 6, Tabela 4); p. 12 (Apêndice C); p. 13 (Figura 9)",
+        "observacao": "Variante que o estudo apresenta como formulação própria (introdução: combinação da API SQL do Pandas com a representação multi-índice e as APIs) e avalia em colunas separadas da Tabela 4; tratada como técnica distinta (D102). Prompt SQL (Figura 6, Figura 9): persona e instrução para escrever SQL (instrucao), [FEW SHOTS] (exemplos), CREATE TABLE com esquema, 3 linhas de exemplo e pergunta (contexto), «Please make sure all outputs are dataframes.» e conversão de tipos (restricoes); as funções API são mantidas (decomposicao herdada da QA API). Acrescentados em relação à variante Python w/ API de que deriva: a instrução para gerar SQL e as restrições de saída. O estudo diz manter a representação multi-índice, mas o prompt de WikiTQ mostra esquema CREATE TABLE; outro não foi listado. Contrafactual de pacote: Python e Python w/ API contra SQL e SQL w/ API (troca do template de prompt e da linguagem intermediária), só em WikiTQ. Execução via pandasql/SQLite é componente fora do escopo."
+      },
+      {
+        "nome_original": "BINDER",
+        "mecanismos": ["exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 do PDF (Tabela 2, nota 3); p. 8 (§6)",
+        "observacao": "Linha de base de WikiTQ na Tabela 2 (54.8). Nota 3: os autores usam 5-shot para BINDER em vez de 12-shot, o que reduz o desempenho em relação ao artigo original; não fica claro se o valor foi obtido por execução própria. O estudo não descreve os demais mecanismos do BINDER além de acrescentar capacidades de QA textual a programas (§6); mecanismos não isolados."
+      },
+      {
+        "nome_original": "DIN-SQL",
+        "mecanismos": ["exemplos", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 do PDF (Tabela 2 e legenda); p. 11 (referência Pourreza e Rafiei, 2023)",
+        "observacao": "Linha de base de Spider na Tabela 2 (61.5), apresentada como estado da arte de trabalho anterior. O estudo não descreve o método; os mecanismos foram registrados apenas a partir do título impresso na referência («Decomposed in-context learning of text-to-sql with self-correction»). Origem do valor (execução própria ou artigo original) e conjunto avaliado não informados; mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Multi-index parsing (Algorithm 1, Pandas MultiIndex)",
+        "natureza": "outro",
+        "descricao": "Pré-processamento que converte a tabela em árvore bidimensional e em objeto multi-índice do Pandas sobre o qual o programa gerado é executado. A parte que aparece no prompt (cabeçalhos em tuplas) está em tecnicas como componente.",
+        "localizador": "p. 3-4 do PDF (§3.1, Figura 2c, Algoritmo 1); p. 13 (Figura 10)"
+      },
+      {
+        "nome_original": "Operation APIs (implementação de compare_larger e compare_smaller)",
+        "natureza": "outro",
+        "descricao": "Funções Python auxiliares executadas pelo interpretador quando chamadas pelo programa gerado; as instruções e exemplos de uso no prompt estão em tecnicas.",
+        "localizador": "p. 5 do PDF (§3.3, Figura 4)"
+      },
+      {
+        "nome_original": "QA API (implementação de table_qa e question_answering)",
+        "natureza": "outro",
+        "descricao": "Função executada pelo interpretador que chama um modelo generativo (call_generative_model_api) em tempo de execução para obter conhecimento externo; proposta por Cheng et al. (2023). O modelo usado nessa chamada só é indicado no exemplo da Figura 11 (Codex).",
+        "localizador": "p. 5 do PDF (§3.3, Figura 5); p. 13 (Figura 11)"
+      },
+      {
+        "nome_original": "Sampling temperature 0.7; five model predictions; highest log probability",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura de amostragem 0,7 para os dois modelos; cinco predições por pergunta e seleção do candidato com maior log-probabilidade, aplicadas a todas as condições. Tratado como decodificação (seleção pela verossimilhança do modelo, sem prompting), não como amostragem de prompting.",
+        "localizador": "p. 6 do PDF (§4.1)"
+      },
+      {
+        "nome_original": "Robustness to Code Generation Model (STARCODER em vez de CODEX)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo de código; o estudo não descreve alteração do prompt.",
+        "localizador": "p. 7 do PDF (§4.4, Tabela 3)"
+      },
+      {
+        "nome_original": "pandasql (execução das consultas SQL)",
+        "natureza": "outro",
+        "descricao": "As consultas SQL geradas são envolvidas em consultas pandasql e executadas com ferramentas SQLite do Python, retornando data frames sobre os quais as APIs atuam.",
+        "localizador": "p. 7 do PDF (§4.5); p. 12 (Apêndice C)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "CODEX",
+        "versao": "code-davinci-002",
+        "observacao": "Acessado pela API da OpenAI; §3.2 descreve «DAVINCI-002 with 175B parameters» e §4.1/§4.3 «code-davinci-002» (p. 5-6)."
+      },
+      {
+        "nome": "STARCODER",
+        "versao": "nao_informado",
+        "observacao": "Tamanho impresso de forma divergente: «15B» (§3.2, p. 5) e «16B» (§4.1, p. 6; §4.4, p. 7). Snapshot não informado."
+      },
+      {
+        "nome": "LLM chamado pela QA API",
+        "versao": "nao_informado",
+        "observacao": "§3.3 diz apenas que a QA API faz chamadas a um LLM; a Figura 11 (p. 13) descreve a chamada da QA API ao Codex em um exemplo."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "WikiTableQuestions (WikiTQ)",
+        "versao": "nao_informado",
+        "quantidade": "dev 2,381; test 4,344 (Tabela 1)",
+        "observacao": "Tabelas relacionais simples. O texto diz usar «the standard validation set and test set with 2,381 and 4,344 samples» (p. 3); o conjunto que serve de denominador às Tabelas 2, 3, 4 e 6 não é informado."
+      },
+      {
+        "nome": "HiTab",
+        "versao": "nao_informado",
+        "quantidade": "dev 1,671; test 1,584 (Tabela 1); avaliação no teste com 1,584 amostras",
+        "observacao": "Tabelas hierárquicas matriciais (3,597 tabelas, 10,672 perguntas no total). As ablações (Tabela 5) são em HiTab, mas o conjunto usado nelas não é explicitado."
+      },
+      {
+        "nome": "AIT-QA",
+        "versao": "nao_informado",
+        "quantidade": "515 perguntas em 116 tabelas, todas usadas como teste",
+        "observacao": "Domínio de linhas aéreas, cabeçalhos hierárquicos."
+      },
+      {
+        "nome": "Spider",
+        "versao": "nao_informado",
+        "quantidade": "validação com 1,034 perguntas",
+        "observacao": "Multi-tabela relacional (200 bancos de dados, 138 domínios); o teste oculto só aceita SQL, por isso foi usada a validação. Avaliado só com CODEX (Tabela 2)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Execution Accuracy (EA)",
+        "definicao": "Percentual de perguntas para as quais o método produz programas que retornam respostas corretas (p. 6, §4.2).",
+        "denominador": "Perguntas do conjunto avaliado; o conjunto exato não é informado para WikiTQ e para as ablações em HiTab."
+      }
+    ],
+    "linguagens": ["Python (Pandas)", "SQL (pandasql/SQLite)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Componentes do framework aplicados isoladamente pioram o desempenho em certos conjuntos (por exemplo, na Tabela 5 a QA API sem MI e o MI sem APIs reduzem a EA).",
+        "localizador": "p. 9 do PDF (Limitations); p. 7 (Tabela 5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Perguntas que exigem conhecimento externo ausente da tabela: no exemplo da Figura 11 nenhum método testado sem a QA API dá a resposta correta.",
+        "localizador": "p. 13 do PDF (Figura 11); p. 5 (§3.3)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização: a definição manual das funções API pode não se estender a conjuntos com estruturas de tabela diferentes ou a cenários com fundamentação mais rica.",
+        "localizador": "p. 9 do PDF (Limitations)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Avaliação: exact matching pode gerar falsos negativos quando o parser gera estruturas sintáticas novas, e os conjuntos não trazem consultas-ouro em Python.",
+        "localizador": "p. 6 do PDF (§4.2)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso de Execution Accuracy em vez de exact matching para evitar falsos negativos.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (§4.2)"
+      },
+      {
+        "descricao": "QA API para trazer conhecimento externo às respostas; a ablação da Tabela 5 compara condições com e sem a QA API, mas mede a EA geral em HiTab, não especificamente as perguntas que exigem conhecimento externo.",
+        "avaliada": "sim",
+        "localizador": "p. 5 do PDF (§3.3); p. 7 (Tabela 5); p. 8 (§5.1)"
+      },
+      {
+        "descricao": "Uso de 5-shot para BINDER, em vez de 12-shot, para comparação justa com o mesmo número de exemplos.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (nota 3)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resumo/introdução contra corpo: a introdução informa melhoria absoluta de 24.5% sobre o estado da arte em HiTab, enquanto §4.3 informa 28.6% sobre MAPO; pela Tabela 2, 69.3 − 40.7 = 28.6 (cálculo próprio). Para AIT-QA (26.2) e Spider (2.3) os valores da introdução coincidem com as diferenças da Tabela 2 (cálculo próprio).",
+        "localizador": "p. 2 do PDF (§1); p. 6 (§4.3, Tabela 2)"
+      },
+      {
+        "descricao": "A introdução chama as linhas de base de «state-of-the-art few-shot baselines», mas §4.3 descreve MAPO (linha de base de HiTab) como método baseado em treinamento.",
+        "localizador": "p. 2 do PDF (§1); p. 6 (§4.3)"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: o sistema completo em HiTab com CODEX aparece como 69.3 na Tabela 2 e na Tabela 6 (5 shots), mas como 69.4 na Tabela 5 (✓ ✓, w/ MI). O estudo não explica a diferença.",
+        "localizador": "p. 6 do PDF (Tabela 2); p. 7 (Tabela 5); p. 12 (Tabela 6)"
+      },
+      {
+        "descricao": "Mesmo resultado diferente entre tabelas: na Tabela 3, STARCODER em WikiTQ tem 22.4 (base) e 23.2 (w/ API), valores iguais às colunas SQL e SQL w/ API da Tabela 4; na Tabela 4, Python e Python w/ API com STARCODER têm 15.6 e 15.6. A Tabela 3 é apresentada como geração de programas Python pelo STARCODER, sem indicar SQL.",
+        "localizador": "p. 7 do PDF (Tabela 3, Tabela 4, §4.4)"
+      },
+      {
+        "descricao": "Resultado nulo contra narrativa: §4.4 afirma melhoria das APIs «across all settings» com STARCODER, mas na Tabela 4 Python e Python w/ API com STARCODER têm o mesmo valor (15.6). §4.5 fala em melhoria «in nearly all settings».",
+        "localizador": "p. 7 do PDF (§4.4, §4.5, Tabela 4)"
+      },
+      {
+        "descricao": "Inversão: na Tabela 5, coluna w/o MI, acrescentar a QA API reduz a EA de 59.6 para 57.4, e o sistema com as duas APIs (59.1) fica abaixo da condição sem APIs (59.6); a afirmação de que ambas as APIs ajudam e os ganhos de 2.7% e 10.7% em §5.1 correspondem à coluna w/ MI (56.0, 58.7, 69.4). As Limitations reconhecem componentes que pioram o desempenho isoladamente.",
+        "localizador": "p. 7 do PDF (Tabela 5); p. 8 (§5.1); p. 9 (Limitations)"
+      },
+      {
+        "descricao": "Inversão: sem APIs, a representação multi-índice tem EA menor que o achatamento (56.0 contra 59.6, queda de 3.6% relatada pelo estudo); com as duas APIs, a relação se inverte (69.4 contra 59.1).",
+        "localizador": "p. 7 do PDF (Tabela 5); p. 8 (§5.2)"
+      },
+      {
+        "descricao": "Inversão em relação a linha de base externa: em WikiTQ o método (42.4) fica abaixo de BINDER (54.8). BINDER foi rodado com 5-shot em vez de 12-shot, o que, segundo o estudo, reduz seu desempenho em relação ao artigo original. A nota 3 cita «Binder et al. (2022)», cuja referência é um artigo de mineração de argumentação, e não o BINDER (Cheng et al., 2023): aparente erro de citação.",
+        "localizador": "p. 6 do PDF (Tabela 2, §4.3, nota 3); p. 9 (referência Binder et al., 2022)"
+      },
+      {
+        "descricao": "A introdução afirma melhoria de 3.7–7.6% «on relational datasets» com a API SQL, mas a Tabela 4 só reporta WikiTQ. O intervalo não é ligado a contrastes específicos; pelas diferenças da Tabela 4 (cálculo próprio), 3.7 corresponde a SQL contra Python com CODEX (45.4 − 41.7) e 7.6 a SQL w/ API contra Python com STARCODER (23.2 − 15.6), isto é, a contrastes com e sem APIs: aparente mistura de condições.",
+        "localizador": "p. 2 do PDF (§1); p. 7 (Tabela 4)"
+      },
+      {
+        "descricao": "Condições discrepantes entre modelos: em AIT-QA as APIs elevam STARCODER de 4.0 para 26.1 (Tabela 3), enquanto com CODEX passam de 77.8 para 78.0 (Tabela 2).",
+        "localizador": "p. 6 do PDF (Tabela 2); p. 7 (Tabela 3)"
+      },
+      {
+        "descricao": "Linhas de base de estado da arte (MAPO, DIN-SQL, RCI, BINDER) vêm de trabalhos anteriores, com representações próprias de cada conjunto e, no caso de MAPO, treinamento; a origem de cada valor e o conjunto avaliado não são informados, exceto a alteração para 5-shot em BINDER.",
+        "localizador": "p. 6 do PDF (§4.3, Tabela 2, nota 3)"
+      },
+      {
+        "descricao": "Inconsistências de relato: STARCODER descrito como 15B (§3.2) e 16B (§4.1, §4.4); a legenda da Tabela 3 menciona quatro conjuntos, mas a tabela traz três; a legenda da Tabela 6 fala em número de prompts para a variação do número de shots.",
+        "localizador": "p. 5 do PDF (§3.2); p. 6 (§4.1); p. 7 (§4.4, Tabela 3); p. 12 (Tabela 6)"
+      },
+      {
+        "descricao": "As ablações de APIs e de multi-índice são feitas só em HiTab com CODEX; o contraste Python contra SQL só em WikiTQ; a variação de shots (5 contra 12) só em HiTab e WikiTQ.",
+        "localizador": "p. 7 do PDF (§5, Tabela 4); p. 12 (Tabela 6)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Variação do número de exemplos (Tabela 6): HiTab 69.3 (5 shots) e 70.0 (12 shots); WikiTQ 42.4 e 42.8. Não há condição sem exemplos.",
+        "localizador": "p. 12 do PDF (Apêndice A, Tabela 6)"
+      },
+      {
+        "descricao": "O prompt mistura exemplos que usam as APIs e exemplos que resolvem a pergunta diretamente com Pandas, para estimular o uso das APIs sem dependência excessiva; os templates completos aparecem com marcadores [FEW SHOTS] e [3 EXAMPLE ROWS], sem os exemplos efetivos.",
+        "localizador": "p. 6 do PDF (§3.4); p. 12 (Figura 8); p. 13 (Figura 9)"
+      },
+      {
+        "descricao": "MAPO (método baseado em treinamento, segundo §4.3) e RCI (Glass et al., 2021, não descrito no estudo) são linhas de base da Tabela 2 que não são técnicas de prompting e por isso não entram em tecnicas.",
+        "localizador": "p. 6 do PDF (Tabela 2 e legenda, §4.3)"
+      },
+      {
+        "descricao": "Trabalho futuro proposto, não executado: framework interativo que, com feedback de desempenho, construa automaticamente novas funções API.",
+        "localizador": "p. 9 do PDF (Limitations)"
+      },
+      {
+        "descricao": "O texto não informa número de execuções independentes, variância ou testes estatísticos; as cinco predições por pergunta são amostragem para seleção, não repetições do experimento. Não há link para código ou pacote de replicação no texto.",
+        "localizador": "p. 6 do PDF (§4.1); texto completo"
+      },
+      {
+        "descricao": "A tarefa é geração de programas Python (ou SQL) a partir de perguntas em linguagem natural sobre tabelas; o desempenho é medido pela correção da resposta obtida ao executar o programa.",
+        "localizador": "p. 2 do PDF (§2.1); p. 6 (§4.2)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In response, this paper introduces a unified TableQA framework that: (1) provides a unified representation for structured tables as multi-index Pandas data frames, (2) uses Python as a powerful querying language, and (3) uses few-shot prompting to translate NL questions into Python programs, which are executable on Pandas data frames.",
+        "localizador": "p. 1 do PDF, Resumo"
+      },
+      {
+        "trecho": "Specifically, we use a few-shot paradigm where we provide the multi-index headers of the table, a few rows of the table in textual form, the question, and exemplar program annotations.",
+        "localizador": "p. 2 do PDF, §1"
+      },
+      {
+        "trecho": "Our LM prompt is designed to be a mixture of instructions and solution examples. The instructions specify API usage guidelines and scenarios in which it should be used.",
+        "localizador": "p. 6 do PDF, §3.4"
+      },
+      {
+        "trecho": "With this diversity of input examples, we aim to encourage the usage of the assistant APIs in the code generated by the LMs, while avoiding over-reliance on some APIs.",
+        "localizador": "p. 6 do PDF, §3.4"
+      },
+      {
+        "trecho": "These generated questions will direct the code parsing program to call the QA API function.",
+        "localizador": "p. 5 do PDF, §3.3"
+      },
+      {
+        "trecho": "For each value in the questioned column, we insert the value into the generated question and prompt the model again to give an answer to this question.",
+        "localizador": "p. 5 do PDF, §3.3"
+      },
+      {
+        "trecho": "For demonstration, we employ two simple comparison APIs in this paper.",
+        "localizador": "p. 5 do PDF, §3.3"
+      },
+      {
+        "trecho": "Generate Python code given the table and a question about it.",
+        "localizador": "p. 12 do PDF, Figura 8"
+      },
+      {
+        "trecho": "We compare our full method (Ours) with an ablated version (CODEX) that only uses few-shot prompting of the code LM, without including our multi-index structure and API functions (see §5.2 for details and more ablations).",
+        "localizador": "p. 6 do PDF, §4.3"
+      },
+      {
+        "trecho": "We set the sampling temperature to 0.7 for both models. For every question, we generate five model predictions and select the candidate with the highest log probability.",
+        "localizador": "p. 6 do PDF, §4.1"
+      },
+      {
+        "trecho": "We include five shots in the prompt for WikiTQ, HiTab, and Spider datasets, and eight shots for the AIT dataset.",
+        "localizador": "p. 6 do PDF, §4.1"
+      },
+      {
+        "trecho": "Similarly to the in-context learning configuration introduced in §3.2, we adapt our input to prompt the model to generate SQL queries.",
+        "localizador": "p. 7 do PDF, §4.5"
+      },
+      {
+        "trecho": "The generated SQL queries are executed on Pandas data frames and return Python objects, hence, we can still retain our same API functions and multi-index data frame representation.",
+        "localizador": "p. 7 do PDF, §4.5"
+      },
+      {
+        "trecho": "Please make sure all outputs are dataframes.",
+        "localizador": "p. 7 do PDF, Figura 6 (WikiTQ SQL Prompt)"
+      },
+      {
+        "trecho": "In comparison to the base setting in which neither type of API is utilized, we add one type of API at a time to examine their gains.",
+        "localizador": "p. 8 do PDF, §5.1"
+      },
+      {
+        "trecho": "We note that though our general framework consistently improves performance across datasets, we identify through ablations components in our framework that, individually applied, adversely affect performance on particular datasets.",
+        "localizador": "p. 9 do PDF, Limitations"
+      },
+      {
+        "trecho": "One limitation of our current framework is its manual definition of API functions, which may not extend to other datasets with disparate table structures, or involve richer grounded settings.",
+        "localizador": "p. 9 do PDF, Limitations"
+      },
+      {
+        "trecho": "However, the information that Winnipeg is a city of Manitoba is not included in the table itself.",
+        "localizador": "p. 13 do PDF, legenda da Figura 11"
+      },
+      {
+        "trecho": "We did not include exact matching (EM) as the measure to determine if the predicted query is equivalent to the gold query, since it can lead to false negative evaluations when the semantic parser generates novel syntax structures (Pourreza and Rafiei, 2023; Yu et al., 2018).",
+        "localizador": "p. 6 do PDF, §4.2"
+      },
+      {
+        "trecho": "For a fair comparison with our approach, we use 5-shot prompting for BINDER rather than the 12-shot experiments in Binder et al. (2022), which decreases performance compared to the results in their paper.",
+        "localizador": "p. 6 do PDF, nota 3"
+      },
+      {
+        "trecho": "We find that our framework surpasses the state-of-the-art few-shot baselines on the HiTab, AIT, and Spider datasets, achieving absolute improvements of 24.5%, 26.2%, and 2.3%, respectively, while retaining non-trivial performance on WikiTQ.",
+        "localizador": "p. 2 do PDF, §1"
+      },
+      {
+        "trecho": "In particular, our approach obtains an improvement of 28.6% over the past state-of-the-art training-based method (Liang et al., 2018), and a 9.7% improvement on plain few-shot prompted Codex models for the HiTab dataset.",
+        "localizador": "p. 6 do PDF, §4.3"
+      },
+      {
+        "trecho": "While the base model performance with STARCODER is lower than CODEX, we still observe an improvement from our generated API across all settings, with a substantial improvement on the AIT-QA dataset, presumably because a large portion of the questions in AIT-QA can be more easily solved using our API functions.",
+        "localizador": "p. 7 do PDF, §4.4"
+      },
+      {
+        "trecho": "For example, we show that combining Pandas' SQL interface API with our multi-index representation and APIs improves performance by 3.7–7.6% on relational datasets.",
+        "localizador": "p. 2 do PDF, §1"
+      },
+      {
+        "trecho": "In particular, adding the QA API increases performance by 2.7%, while further adding the operation APIs improves by another 10.7%, compared to the full system without APIs.",
+        "localizador": "p. 8 do PDF, §5.1"
+      },
+      {
+        "trecho": "As shown in Table 5, the execution accuracy decreases by 3.6% with the multi-index approach compared to the table flattening approach when no API is included.",
+        "localizador": "p. 8 do PDF, §5.2"
+      },
+      {
+        "trecho": "STARCODER is an open-source 15B code LM, which at the time of this writing achieved top performance among open-source models on many code generation benchmarks such as HumanEval (Li et al., 2023).",
+        "localizador": "p. 5 do PDF, §3.2"
+      },
+      {
+        "trecho": "We use the STARCODER 16B and code-davinci-002 (CODEX) models to generate Python programs.",
+        "localizador": "p. 6 do PDF, §4.1"
+      },
+      {
+        "trecho": "Since our method does not require any training, we use the standard validation set and test set with 2,381 and 4,344 samples.",
+        "localizador": "p. 3 do PDF, §2.2 (WikiTQ)"
+      },
+      {
+        "trecho": "We conduct ablation analyses on the HiTab dataset to examine the improvements brought by assistant API functions (§5.1) and multi-index parsing (§5.2).",
+        "localizador": "p. 7 do PDF, §5"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "w/ API (Ours)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "outro"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "decomposicao", "outro"],
+      "comparador": "Codex (ablated version that only uses few-shot prompting of the code LM, without including our multi-index structure and API functions)",
+      "modelo": "CODEX (code-davinci-002)",
+      "benchmark": "HiTab",
+      "metrica": "Execution Accuracy (EA)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 59.6, "intervencao": 69.3},
+      "denominador": "nao_informado na Tabela 2; o estudo diz avaliar HiTab no conjunto de teste com 1,584 amostras (p. 3)",
+      "condicoes": "Temperatura 0,7; cinco predições por pergunta com seleção pela maior log-probabilidade; 5 exemplos no prompt para HiTab. Número de execuções independentes nao_informado. Comparador executado pelos autores como ablação (equivale à linha ✗ ✗, w/o MI, da Tabela 5: 59.6). Pacote híbrido: o ganho é do pacote (representação multi-índice no prompt e no data frame, instruções e exemplos de APIs, funções executadas e chamada a LLM pela QA API), não de um ingrediente. O mesmo sistema aparece como 69.4 na Tabela 5 (w/ MI, ✓ ✓). conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 6.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo, introdução e conclusão destacam vários conjuntos e dois tipos de comparador (estado da arte e modelo só com few-shot) sem que um prevaleça. Primeira tabela com contraste elegível de prompting: Tabela 2; primeira métrica: EA; único modelo: CODEX; primeira coluna: HiTab. A primeira linha de base listada nessa coluna (MAPO) é baseada em treinamento, não em prompting; a primeira linha de base de prompting é CODEX.",
+      "derivacao": "direta",
+      "localizador": "p. 6 do PDF, Tabela 2 (coluna HiTab; linhas Codex e w/ API (Ours)); §4.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Codex | 59.6 | 61.2 | 77.8 | 41.7", "localizador": "p. 6 do PDF, Tabela 2, linha Codex; colunas HiTab | Spider | AIT-QA | WikiTQ"},
+        {"trecho": "w/ API (Ours) | 69.3 | 63.8 | 78.0 | 42.4", "localizador": "p. 6 do PDF, Tabela 2, linha w/ API (Ours); colunas HiTab | Spider | AIT-QA | WikiTQ"},
+        {"trecho": "Table 2: Execution accuracy on four TableQA dataset with CODEX generated programs, in comparison to state-of-the-art baselines: the MAPO (Liang et al., 2018) baseline from HiTab (Cheng et al., 2022), DIN-SQL (Pourreza and Rafiei, 2023) for Spider, RCI (Glass et al., 2021) for AIT-QA, and BINDER (Cheng et al., 2023).", "localizador": "p. 6 do PDF, legenda da Tabela 2"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SQL w/ API (SQL querying API of the pandasql extension library)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "restricoes", "decomposicao"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "restricoes", "decomposicao"],
+      "comparador": "Python (geração de programas Python sem APIs)",
+      "modelo": "STARCODER (16B segundo §4.1 e §4.4; 15B segundo §3.2)",
+      "benchmark": "WikiTQ",
+      "metrica": "Execution accuracy",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 15.6, "intervencao": 23.2},
+      "denominador": "nao_informado (o estudo cita validação com 2,381 e teste com 4,344 amostras, sem dizer qual foi usado na Tabela 4)",
+      "condicoes": "Acrescentados em relação ao comparador Python: instrução e persona para gerar SQL, restrições de saída (data frames, conversão de tipos) e as APIs mantidas (instruções e exemplos de uso; sub-perguntas da QA API). O contraste muda ao mesmo tempo o template de prompt, a linguagem intermediária e a presença das APIs; a coluna Python w/ API também tem 15.6 com STARCODER. Execução via pandasql/SQLite. Temperatura 0,7; cinco predições por pergunta com seleção pela maior log-probabilidade; 5 exemplos para WikiTQ. Número de execuções nao_informado. A Tabela 3 traz para STARCODER em WikiTQ os valores 22.4 e 23.2, iguais às colunas SQL desta tabela. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 7.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada: variante SQL que o estudo apresenta como formulação própria na introdução e avalia em colunas separadas (D102). Primeira tabela com o contraste: Tabela 4; primeiro modelo listado: STARCODER; primeira linha de base de prompting listada: coluna Python.",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF, Tabela 4 (linha STARCODER; colunas Python e SQL w/ API); §4.5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "STARCODER | 15.6 | 15.6 | 22.4 | 23.2", "localizador": "p. 7 do PDF, Tabela 4, linha STARCODER; colunas Query Language: Python | w/ API | SQL | w/ API"},
+        {"trecho": "Table 4: Execution accuracy on WikiTQ when generating Python and SQL programs.", "localizador": "p. 7 do PDF, legenda da Tabela 4"},
+        {"trecho": "We see that SQL outperforms Python on the WikiTQ dataset, which we suspect is because this relational dataset affords short SQL queries, which are easier to generate than long Python functions for code LMs trained on sufficient amounts of SQL.", "localizador": "p. 7 do PDF, §4.5"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "QA API",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao"],
+      "mecanismos_acrescentados": ["instrucao", "exemplos", "decomposicao"],
+      "comparador": "Sem QA API e sem Operation APIs (✗ ✗), w/o MI (tabela achatada)",
+      "modelo": "CODEX (code-davinci-002)",
+      "benchmark": "HiTab",
+      "metrica": "Execution accuracy",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 59.6, "intervencao": 57.4},
+      "denominador": "nao_informado (conjunto de HiTab usado nas ablações não explicitado)",
+      "condicoes": "Ablação que acrescenta só a QA API (instruções e exemplos de uso no prompt e a função que chama o LLM em tempo de execução), mantendo a tabela achatada (Figura 7) sem multi-índice. Ingrediente híbrido: inclui código executado e chamada a LLM. Temperatura 0,7; cinco predições por pergunta com seleção pela maior log-probabilidade; 5 exemplos. Número de execuções nao_informado. A narrativa de §5.1 (ganho de 2.7%) refere-se à coluna w/ MI; aqui foi usada a primeira coluna da tabela. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 7.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado, usado só para completar o alvo de três: primeiro componente da tabela de ablação (Tabela 5, coluna QA), na primeira coluna de condição (w/o MI), linha ✓ ✗ contra ✗ ✗.",
+      "derivacao": "direta",
+      "localizador": "p. 7 do PDF, Tabela 5 (linhas ✗ ✗ e ✓ ✗; coluna w/o MI); p. 8, §5.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "✗ ✗ 59.6 56.0", "localizador": "p. 7 do PDF, Tabela 5, primeira linha; colunas API Functions: QA | Operation; Multi-Index: w/o MI | w/ MI"},
+        {"trecho": "✓ ✗ 57.4 58.7", "localizador": "p. 7 do PDF, Tabela 5, segunda linha; colunas API Functions: QA | Operation; Multi-Index: w/o MI | w/ MI"},
+        {"trecho": "Table 5: Comparing CODEX execution accuracy on HiTab by removing multi-index parsing or helper API functions.", "localizador": "p. 7 do PDF, legenda da Tabela 5"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de um framework unificado de TableQA por geração de programas Python, com representação multi-índice e APIs auxiliares, é explícito no resumo e na introdução.",
+      "localizador": "p. 1 do PDF (Resumo); p. 1-2 (§1)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Modelos, temperatura, número de amostras, critério de seleção e número de shots são informados, e há templates de prompt; mas os exemplos efetivos do prompt não são mostrados (marcadores [FEW SHOTS]), o conjunto de WikiTQ e o das ablações não são explicitados, e a origem dos valores das linhas de base de estado da arte não é descrita.",
+      "localizador": "p. 3 (§2.2); p. 6 (§3.4, §4.1, §4.3); p. 12-13 (Figuras 8 e 9)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linha de base de prompting executada nas mesmas condições (CODEX few-shot) e ablações de APIs e multi-índice; as linhas de base de estado da arte vêm de trabalhos anteriores, com métodos treinados ou configurações diferentes (BINDER reduzido a 5-shot), e as ablações cobrem só HiTab.",
+      "localizador": "p. 6 (§4.3, Tabela 2, nota 3); p. 7 (Tabela 5)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "EA é definida e justificada frente a EM, mas o denominador não é explicitado para WikiTQ nem para as ablações, e o mesmo resultado diverge entre tabelas (69.3 na Tabela 2 contra 69.4 na Tabela 5; STARCODER em WikiTQ 22.4/23.2 na Tabela 3 contra 15.6/15.6 em Python na Tabela 4).",
+      "localizador": "p. 6 (§4.2, Tabela 2); p. 7 (Tabelas 3, 4 e 5)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção Limitations discute componentes que pioram isoladamente e a definição manual de APIs; não discute variabilidade entre execuções, contaminação nem a comparabilidade das linhas de base externas.",
+      "localizador": "p. 9 (Limitations)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Há parâmetros de decodificação, número de shots, definições das APIs e templates de prompt, mas não há exemplos completos de prompt, número de execuções, nem link para código ou dados no texto.",
+      "localizador": "p. 5 (Figuras 4 e 5); p. 6 (§4.1); p. 12-13 (Apêndices B-D)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O texto completo não trata da possibilidade de os conjuntos de avaliação (públicos) estarem nos dados de pré-treinamento de CODEX ou STARCODER, nem da relação entre os exemplos do prompt e os itens de teste.",
+      "localizador": "texto completo (p. 1-13)"
+    }
+  ],
+  "leitura": {
+    "situacao": "completa",
+    "paginas_abertas_visualmente": [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13],
+    "observacao": "Texto extraído lido integralmente; a p. 10 (referências) foi lida apenas no texto extraído. Valores das Tabelas 2, 3, 4, 5 e 6 conferidos nas imagens das p. 6, 7 e 12."
+  }
+}

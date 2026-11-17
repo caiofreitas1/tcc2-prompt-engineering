@@ -1,0 +1,735 @@
+{
+  "estudo": "S855",
+  "texto_fonte": "fontes/textos/lote/S855.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Yang, Ren, Yin, Ren, Tian, Jin. Input Reduction Enhanced LLM-based Program Repair. arXiv:2507.15251v2 [cs.SE], 18 dez. 2025 (cabeçalho: ICSE'26, April 2026, Rio de Janeiro, Brazil). O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "ReduceFix (condição 'Reduced Test')",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "decomposicao"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "decomposicao"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1, Resumo; p. 2, Introdução e Contribuições; pp. 3-4, Seções 3.1-3.4, Algoritmo 1 e Listing 1; p. 7, Tabela 6; p. 8, Tabela 7; p. 9, Tabelas 9-11; p. 10, Tabela 13",
+        "observacao": "Pipeline de três etapas encadeadas (decomposicao): (i) geração de um redutor por prompt one-shot ao Qwen2.5-Plus, com a descrição da tarefa e um exemplo resolvido (ABC330D com seu reducer.py) (instrucao, exemplos, contexto); (ii) execução do redutor gerado (busca ddmin, fora do escopo) por até 60 s; (iii) prompt de reparo com descrição da tarefa, código com bug e par entrada-saída do contraexemplo reduzido (instrucao, contexto), com truncamento a um orçamento de L linhas. Comparada com 'Baseline (No Test)' e 'Origin Test' nos mesmos modelos e configurações (Tabelas 6, 7 e 13): contrafactual de pacote. Pacote híbrido: inclui a execução do algoritmo ddmin e o fallback para a entrada original quando a redução falha, que não são prompting; o ganho não se atribui a um mecanismo isolado. Mecanismos acrescentados tomados em relação ao Baseline (prompt base com enunciado e código) e ao Origin Test: o contraexemplo reduzido é contexto, categoria já presente na base. O redutor é sempre gerado pelo Qwen2.5-Plus, mesmo quando o modelo de reparo é outro. Na RQ-4, a mesma troca da entrada original pela reduzida é aplicada ao ChatRepair e ao CREF (pacote que então inclui também o feedback desses sistemas); na RQ-5 (OSS-Fuzz), o prompt de reparo inclui diagnósticos de crash, arquivos-fonte e formato SEARCH/REPLACE (contexto, restricoes), comuns às três condições. A geração de vários candidatos (N = 10) com validação pela suíte oculta é o procedimento de avaliação pass@k, igual em todas as condições, e não foi contada como amostragem."
+      },
+      {
+        "nome_original": "Reducer Generation (one-shot reducer prompt)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3, Seção 3.2; p. 4, Listing 1; p. 6, Tabela 2; p. 8, RQ-2 (prosa sobre ddmin-only)",
+        "observacao": "Componente do ReduceFix. O contraste com o baseline 'ddmin-only' de ponta a ponta (redução por ddmin genérico com espaços e quebras de linha como delimitadores, sem redutor gerado por LLM; demais configurações inalteradas) retira esse componente, relatado só em prosa para Qwen2.5-Coder-7B-instruct (p. 8). O componente mistura prompting (prompt one-shot) e o código do redutor gerado, que executa ddmin; o ganho é desse componente, não do exemplo one-shot isolado, que não tem contrafactual. O texto diz que o prompt junta 'a few I/O pairs from the current task', mas o Listing 1 não mostra pares de entrada-saída. Na RQ-1 o componente é avaliado também por taxa de sucesso e compressão da redução (Tabelas 3-5), desfecho que não é uma das quatro tarefas."
+      },
+      {
+        "nome_original": "Baseline (No Test)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Seção 5.1 (RQ-2); p. 7, Tabela 6; p. 8, Seção 5.4 e Tabela 7; p. 10, Tabela 13",
+        "observacao": "Prompt base com enunciado do problema e código com bug, sem entrada que induz a falha. O template literal do prompt de reparo não é reproduzido."
+      },
+      {
+        "nome_original": "Origin Test",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6, Seção 5.1; p. 7, Tabela 6; p. 8, Seção 5.4, Tabelas 7 e 8; p. 10, Tabela 13",
+        "observacao": "Prompt base acrescido da entrada completa que induz a falha (não reduzida); acrescenta conteúdo de contexto, categoria já presente na base, por isso sem mecanismo acrescentado. O estudo o descreve como condição que mantém o conteúdo informacional e isola o custo do comprimento extra. [D108, correção registrada] Pacote avaliado contra Baseline (No Test) (Tabela 6, p. 7; Qwen2.5-Coder-7B-instruct, LFTBench (Overall), pass@1 (%): base 4,6 × comparador 4,1), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados."
+      },
+      {
+        "nome_original": "Diff Lines",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Seção 5.4 e Tabela 8; p. 9, Tabela 9",
+        "observacao": "Variante de prompt da RQ-3 (análise de composição do prompt, chamada de ablação na conclusão): prompt base mais até dez linhas de saída divergentes, sem a entrada. Avaliada só com Qwen2.5-Coder-7B-instruct. Usada como comparador da extração por cobertura."
+      },
+      {
+        "nome_original": "Reduced + Origin (Reduced and Origin Test)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "exemplos",
+          "decomposicao"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "decomposicao"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8, Seção 5.4 e Tabela 8; p. 9, Tabela 9",
+        "observacao": "Variante da RQ-3 que concatena o teste reduzido pelo ReduceFix e o teste completo; recebe as mesmas categorias do ReduceFix porque usa o mesmo pipeline de redução (acrescentados em relação ao Baseline). Avaliada só com Qwen2.5-Coder-7B-instruct."
+      },
+      {
+        "nome_original": "ddmin-only (baseline de ponta a ponta)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "decomposicao"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Seção 5.2; p. 7, Seção 5.3 (Experimental Design); p. 8, RQ-2; p. 10, Tabela 12",
+        "observacao": "Usa a entrada reduzida por ddmin aplicado diretamente quando a redução tem sucesso e, caso contrário, a entrada original; decomposicao atribuída pelo encadeamento redução-reparo, como no ReduceFix. A redução ddmin em si não é prompting (ver componentes_fora_escopo). Resultados de reparo só em prosa (Qwen2.5-Coder-7B-instruct)."
+      },
+      {
+        "nome_original": "Pure LLM (pure-LLM reduction)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, Seção 5.2 e Tabelas 3-5; p. 7, Seção 5.2; p. 10, Tabela 12",
+        "observacao": "O LLM tenta gerar diretamente uma entrada menor, com a entrada longa no prompt ('in a one-shot setting', descrito também como 'in one pass'; não se informa se há exemplo). Avaliado só na redução de entradas (RQ-1, RQ-5), desfecho fora das quatro tarefas; sem extração."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9, Seção 5.5 e Tabela 10",
+        "observacao": "Sistema conversacional de terceiros: primeiro turno com descrição, programa C++ com bug e um teste falho; o veredito do harness volta como mensagem (MAX_RETRY = 1, length = 2 turnos). Comparado com 'ChatRepair + ReduceFix', que troca só o teste original pelo reduzido; os mecanismos do ChatRepair não são isolados. Modelo usado na RQ-4 não informado."
+      },
+      {
+        "nome_original": "CREF",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 9, Seção 5.5 e Tabela 11",
+        "observacao": "Variante de dois turnos adaptada pelos autores (sem a dica do tutor): editorial oficial do AtCoder como descrição de solução e, no segundo turno, o teste falho como feedback. Comparado com 'CREF + ReduceFix'; mecanismos do CREF não isolados. Modelo não informado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "ddmin (busca de redução executada pelo redutor e baseline ddmin-only)",
+        "natureza": "outro",
+        "descricao": "Algoritmo clássico de delta debugging que remove partes da entrada enquanto a saída do código com bug diverge da solução de referência; não é prompting.",
+        "localizador": "p. 4, Seção 3.3, Eq. (1); p. 6, Seção 5.2"
+      },
+      {
+        "nome_original": "Decoding temperature 0.0 (geração do redutor) e 0.8 (reparo)",
+        "natureza": "decodificacao",
+        "descricao": "Temperaturas fixas para todas as condições.",
+        "localizador": "p. 6, Tabela 2"
+      },
+      {
+        "nome_original": "Wall-clock limit (60 s por redução; 600 s no OSS-Fuzz), compilation timeout 10 s, execution timeout 5 s",
+        "natureza": "orcamento",
+        "descricao": "Limites de tempo da redução e da validação.",
+        "localizador": "p. 6, Tabela 2; p. 10, Seção 5.6"
+      },
+      {
+        "nome_original": "Fallback para a entrada original",
+        "natureza": "outro",
+        "descricao": "Se o redutor excede o tempo, falha ou não encurta a entrada, a entrada original segue para o reparo.",
+        "localizador": "p. 4, Algoritmo 1 e Seção 3.3"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Qwen2.5-Coder-7B-instruct",
+        "versao": "nao_informado",
+        "localizador": "p. 5, Seção 4.1",
+        "observacao": "Aberto, executado localmente. Único modelo da RQ-3 e do contraste com ddmin-only."
+      },
+      {
+        "nome": "GLM-4-9B-chat",
+        "versao": "nao_informado",
+        "localizador": "p. 5, Seção 4.1",
+        "observacao": "Aberto, executado localmente."
+      },
+      {
+        "nome": "Qwen2.5-Plus",
+        "versao": "nao_informado",
+        "localizador": "p. 5, Seção 4.1; p. 6, Tabela 2",
+        "observacao": "Pesos fechados, número de parâmetros não divulgado; também gera todos os redutores; modelo de reparo no LFTBench-Py e no OSS-Fuzz."
+      },
+      {
+        "nome": "DeepSeek-V3",
+        "versao": "nao_informado",
+        "localizador": "p. 5, Seção 4.1",
+        "observacao": "671B parâmetros, 37B ativos; versão chat padrão."
+      },
+      {
+        "nome": "Modelo da RQ-4 (ChatRepair e CREF)",
+        "versao": "nao_informado",
+        "localizador": "p. 9, Seção 5.5",
+        "observacao": "O texto não identifica o LLM usado nas Tabelas 10 e 11."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "LFTBench",
+        "quantidade": "200 bugs (submissões C++ com resposta errada) de 20 tarefas AtCoder ABC 361-377; 10 por tarefa; dificuldades C (60), D (80), E&F (60)",
+        "localizador": "p. 5, Seção 4.2 e Tabela 1; p. 6, Tabela 3",
+        "observacao": "Tarefas com maior arquivo de teste oficial ≥ 4 KB; submissões falhas anteriores a 1º jul. 2025; seis famílias de formato de entrada (Tabela 1). Mediana da entrada falha 'over 1 MB' (Seção 4.2) e '1 MB' no resumo; maior arquivo acima de 8 MB. As Tabelas 6 e 9 não imprimem n por linha; a Tabela 3 informa n por dificuldade."
+      },
+      {
+        "nome": "LFTBench-Py",
+        "quantidade": "20 bugs (uma submissão Python por tarefa)",
+        "localizador": "p. 5, Seção 4.2; p. 8, Tabela 7",
+        "observacao": "Espelha as 20 tarefas do LFTBench; o redutor teve sucesso em 18 de 20 casos."
+      },
+      {
+        "nome": "OSS-Fuzz (instâncias do ARVO)",
+        "quantidade": "12 instâncias de 5 projetos (FFmpeg 1, ImageMagick 1, MuPDF 5, PHP-src 1, Poppler 4)",
+        "localizador": "p. 10, Seção 5.6 e Tabelas 12-13",
+        "observacao": "Filtro: patch de referência em um arquivo e entrada > 1 KB; seleção das 12 com menor patch."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "pass@k (k = 1, 5, 10)",
+        "denominador": "Bugs do conjunto B (200 no LFTBench; 20 no LFTBench-Py; 12 no OSS-Fuzz), com n = 10 candidatos por bug gerados uma vez",
+        "localizador": "p. 5, Seção 4.3; p. 4, Seção 3.4",
+        "observacao": "Estimador sem reposição; um reparo é bem-sucedido quando um candidato passa na suíte completa."
+      },
+      {
+        "nome": "Success rate da redução",
+        "denominador": "Bugs por grupo (n nas Tabelas 3, 4 e 12)",
+        "localizador": "p. 5, Seção 4.3; p. 6, Tabelas 3-4; p. 10, Tabela 12",
+        "observacao": "Sucesso: termina no prazo, preserva a falha e retorna entrada estritamente menor."
+      },
+      {
+        "nome": "Compression rate (média/mediana)",
+        "denominador": "Somente reduções bem-sucedidas",
+        "localizador": "p. 4, Eq. (2); p. 6, Tabelas 3-4",
+        "observacao": "Denominador diferente do da taxa de sucesso."
+      },
+      {
+        "nome": "Input/Output tokens e custo (USD) da redução",
+        "denominador": "20 problemas",
+        "localizador": "p. 6, Tabela 5",
+        "observacao": "Compara Pure LLM e ReduceFix."
+      },
+      {
+        "nome": "Mean Lines e Mean KBs do prompt",
+        "denominador": "nao_informado",
+        "localizador": "p. 8, Tabela 8",
+        "observacao": "Comprimento médio por estratégia de prompt."
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "C++",
+        "observacao": "LFTBench.",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "nome": "Python",
+        "observacao": "LFTBench-Py; os redutores gerados também são scripts Python.",
+        "localizador": "p. 5, Seção 4.2; p. 4, Listing 1"
+      },
+      {
+        "nome": "C, C++ e Bash",
+        "observacao": "Código com bug do OSS-Fuzz, segundo o objetivo da RQ-5.",
+        "localizador": "p. 10, Seção 5.6"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Entradas de teste longas no prompt ('lost-in-the-middle') levam a patches incorretos; o prompt com a entrada não reduzida frequentemente piora o reparo, às vezes abaixo do prompt sem teste.",
+        "localizador": "p. 1, Resumo; p. 3, Seção 2; p. 8, RQ-2 e caixa [RQ-2] Findings"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O redutor gerado pode mascarar a falha: no caso ABC372E a renumeração de vértices tornou falso o predicado de interesse e o ddmin parou sem reduzir a entrada.",
+        "localizador": "p. 7, Failed Case Study"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "pass@k pode superestimar o sucesso quando o patch se ajusta a um conjunto parcial de testes.",
+        "localizador": "p. 11, Seção 6 (Construct validity)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Benchmarks antigos de projetos populares provavelmente vistos pelos modelos podem superestimar a acurácia; repositórios do OSS-Fuzz podem sobrepor-se a corpora de pré-treinamento.",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "A estocasticidade dos LLMs ameaça a validade interna.",
+        "localizador": "p. 11, Seção 6 (Internal validity)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Incluir a entrada longa no prompt infla o custo em tokens; quantificado só para a redução (Tabela 5: Pure LLM 5.687.356 tokens de entrada e US$ 0,632 contra 94.217 e US$ 0,017 do ReduceFix, 20 problemas). Custo do reparo não quantificado.",
+        "localizador": "p. 6, Tabela 5; p. 7, Seção 5.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Viés de seleção de problemas no conjunto de dados e possibilidade de o ganho não se transferir a outros frameworks de APR ou a outras linguagens e cenários.",
+        "localizador": "p. 11, Seção 6 (Construct e External validity)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A taxa de compressão frequentemente chega a 100%, o que esconde a variação entre dificuldades (limitação de métrica).",
+        "localizador": "p. 11, Seção 6 (Construct validity)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Tarefas do LFTBench de concursos ABC 361-377, declarados posteriores aos cortes de conhecimento dos quatro LLMs (datas de corte não informadas); exemplo one-shot (ABC330D) e execuções-piloto fora do benchmark.",
+        "avaliada": "nao",
+        "localizador": "p. 5, Seções 4.2 e 4.4; p. 3, Seção 3.2"
+      },
+      {
+        "descricao": "No OSS-Fuzz, LLM e instâncias mantidos fixos entre estratégias para preservar as diferenças relativas apesar de possível vazamento.",
+        "avaliada": "nao",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "descricao": "Temperatura 0 na geração do redutor e amostragem de k candidatos com pass@1/5/10 para controlar o ruído amostral.",
+        "avaliada": "nao",
+        "localizador": "p. 11, Seção 6 (Internal validity)"
+      },
+      {
+        "descricao": "Cada candidato é verificado contra o arquivo oficial completo de testes do AtCoder.",
+        "avaliada": "nao",
+        "localizador": "p. 11, Seção 6 (Construct validity); p. 4, Seção 3.4"
+      },
+      {
+        "descricao": "Inclusão de todos os problemas que satisfazem os filtros na janela de datas; no OSS-Fuzz, filtro e seleção pelas 12 menores correções para evitar escolha post hoc.",
+        "avaliada": "nao",
+        "localizador": "p. 11, Seção 6; p. 10, Seção 5.6"
+      },
+      {
+        "descricao": "Relato de média e mediana da compressão e publicação da distribuição.",
+        "avaliada": "nao",
+        "localizador": "p. 11, Seção 6 (Construct validity)"
+      },
+      {
+        "descricao": "Guarda proposta para o caso de renumeração (reexecutar o teste de interesse e reverter); descrita, sem medição do efeito.",
+        "avaliada": "nao",
+        "localizador": "p. 7, Failed Case Study"
+      },
+      {
+        "descricao": "Testes de Mann-Whitney-Wilcoxon bilaterais para verificar se a melhoria se deve ao acaso.",
+        "avaliada": "nao",
+        "localizador": "p. 8, RQ-2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que Reduced Test (25.5% pass@10) fica '5.5 points higher than the Origin Test'; na Tabela 6 o Origin Test do Qwen2.5-Coder-7B-instruct tem 19.0 de pass@10 no Overall (diferença de 6,5 p.p., cálculo próprio).",
+        "localizador": "p. 8, Seção 5.4 (Experimental Results); p. 7, Tabela 6"
+      },
+      {
+        "descricao": "A caixa [RQ-3] afirma que Diff Lines 'is consistently superior to Reduced + Origin', mas na linha D da Tabela 9 Diff Lines tem 17.7 (@5) e 25.0 (@10) contra 19.1 e 27.5 de Reduced + Origin. A diferença dita 'most pronounced on C' (26.7 vs 23.3) é igual, em p.p., à da linha E&F (6.7 vs 3.3), por cálculo próprio.",
+        "localizador": "p. 9, caixa [RQ-3] e Tabela 9"
+      },
+      {
+        "descricao": "A caixa [RQ-2] diz que ReduceFix é 'consistently better than Origin Test across all LLMs and difficulty groups', mas na Tabela 6 o DeepSeek-V3 tem pass@1 maior com Origin Test em C (56.7 vs 56.3), D (48.9 vs 48.1) e Overall (46.1 vs 45.9), e há empates (por exemplo, GLM-4-9B-chat C @10 5.0/5.0; Qwen2.5-Plus C @5 53.5/53.5).",
+        "localizador": "p. 8, caixa [RQ-2]; p. 7, Tabela 6"
+      },
+      {
+        "descricao": "Resultados por dificuldade em que Reduced Test fica abaixo do Baseline sem teste: Qwen2.5-Plus em C (37.3/60.3/68.3 contra 33.7/53.5/65.0), GLM-4-9B-chat em C (2.8/5.8/8.3 contra 2.2/4.1/5.0) e DeepSeek-V3 em E&F (35.0/53.2/58.3 contra 32.5/51.4/56.7). Os ganhos no Overall de pass@10 são pequenos para Qwen2.5-Plus (59.0 → 61.0) e DeepSeek-V3 (66.5 → 67.0).",
+        "localizador": "p. 7, Tabela 6"
+      },
+      {
+        "descricao": "No LFTBench-Py (20 bugs), a linha C tem 66.7 de pass@10 nas três condições e, em E&F, Reduced Test fica abaixo do Baseline em @1 e @5 (35.2 e 61.5 contra 35.8 e 66.7); a caixa [RQ-2] chama a melhoria de 'significant' sem relatar teste para esse conjunto, e o texto fala em 'Medium tasks', rótulo ausente da Tabela 7.",
+        "localizador": "p. 8, Tabela 7, texto da RQ-2 e caixa [RQ-2]"
+      },
+      {
+        "descricao": "O teste MWW é relatado de forma agregada ('based on 4 LLMs', p < 0.05) sem indicar a métrica (pass@1, @5 ou @10), a unidade de análise nem os p-valores por modelo; refere-se ao contraste ReduceFix vs Origin Test, não ao contraste com o Baseline.",
+        "localizador": "p. 8, RQ-2"
+      },
+      {
+        "descricao": "Comprimento do Origin Test: o texto dá 'about 30.6 KB', a Tabela 8 imprime 30.5 KB.",
+        "localizador": "p. 8, Seção 5.4 e Tabela 8"
+      },
+      {
+        "descricao": "Ambiguidade no número de chamadas: a RQ-3 diz que 'the LLM is called exactly once with each variant', mas o protocolo gera dez candidatos por bug; a Tabela 2 registra '# Samples per bug (pass@k) k = {1, 5, 10}' enquanto o texto fixa N = 10.",
+        "localizador": "p. 8, Seção 5.4; p. 6, Tabela 2; p. 4, Seção 3.4"
+      },
+      {
+        "descricao": "O redutor é descrito como gerado por tarefa e reutilizado (Tabela 5 'on 20 problems'), mas o texto também diz que o Qwen2.5-Plus produziu um reducer.py válido 'for all 200 buggy codes'. O texto diz que o prompt inclui pares de entrada-saída da tarefa, ausentes do Listing 1.",
+        "localizador": "p. 6, Tabela 5 e Experimental Results da RQ-1; p. 7, Seção 5.2; p. 3, Seção 3.2; p. 4, Listing 1"
+      },
+      {
+        "descricao": "A caixa [RQ-1] diz que as reduções eliminam '80%–97%' das entradas em média; a Tabela 4 imprime 76.8 de compressão média para 'Multiple sequences'. A compressão é média só das reduções bem-sucedidas (Pure LLM 99.8 de compressão com 40.0% de sucesso), denominador diferente da taxa de sucesso.",
+        "localizador": "p. 7, caixa [RQ-1]; p. 6, Tabelas 3-4"
+      },
+      {
+        "descricao": "Resumo informa mediana da entrada falha de '1 MB'; a Seção 4.2 diz 'over 1 MB'.",
+        "localizador": "p. 1, Resumo; p. 5, Seção 4.2"
+      },
+      {
+        "descricao": "OSS-Fuzz com 12 instâncias (1 a 5 por projeto): no MuPDF o Baseline tem pass@1 de 10.0 contra 4.0 do Reduced Test; Poppler fica em 25.0 nas três condições e ImageMagick em 0.0. Ganhos relativos grandes (por exemplo, +149.7%) vêm de bases pequenas.",
+        "localizador": "p. 10, Tabela 13 e Experimental Results da RQ-5"
+      },
+      {
+        "descricao": "Na RQ-4 o modelo não é informado e o CREF é executado numa variante de dois turnos adaptada pelos autores (sem a dica do tutor), diferente da configuração original.",
+        "localizador": "p. 9, Seção 5.5"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A RQ-1 (Tabelas 3-5, 12) avalia a redução de entradas (sucesso, compressão, custo em tokens) comparando ReduceFix, Pure LLM e ddmin-only; esse desfecho não é reparo e não foi extraído.",
+        "localizador": "p. 6, Seção 5.2 e Tabelas 3-5; p. 10, Tabela 12"
+      },
+      {
+        "descricao": "O estudo motiva a proposta pelo esforço manual de redutores baseados em gramática ou regras de domínio; não é risco das condições avaliadas.",
+        "localizador": "p. 1-2, Introdução"
+      },
+      {
+        "descricao": "Truncamento do contraexemplo reduzido quando excede um orçamento de L linhas (mantém as primeiras ⌈L/2⌉ e as últimas ⌊L/2⌋); o valor de L não é informado.",
+        "localizador": "p. 4, Seção 3.4"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (https://github.com/GLEAM-Lab/ReduceFix); não acessado nem validado nesta extração.",
+        "localizador": "p. 5, Seção 4.4"
+      },
+      {
+        "descricao": "A Tabela 8 (comprimento dos prompts) e a Tabela 9 formam a análise de composição da RQ-3; Baseline e Origin Test dessa análise vêm da Tabela 6 (mesmos valores do Qwen2.5-Coder-7B-instruct).",
+        "localizador": "p. 8, Tabela 8; p. 9, Tabela 9"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address this, we propose ReduceFix, an LLM-based APR approach with a built-in component that automatically reduces test inputs while retaining their failure-inducing behavior.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "ReduceFix prompts an LLM to generate a reducer that minimizes failure-inducing test inputs without human effort, and then feeds the reduced failure-inducing inputs to guide patch generation.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "On this benchmark, ReduceFix shrinks inputs by 89.1% on average and improves overall pass@10 by up to 53.8% relative to a prompt that includes the original test, and by 17.6% compared with omitting the test entirely.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "The overall process follows a three-stage pipeline: (i) reducer generation via a one-shot prompt with the problem description, (ii) time-bounded execution of the generated reducer to obtain the reduced input, and (iii) patch generation where the reduced input, buggy code, and problem description are jointly passed to the LLM.",
+        "localizador": "p. 2, Introdução"
+      },
+      {
+        "trecho": "Instead of directly reducing test inputs using LLMs, ReduceFix leverages one-shot learning to inject the knowledge of the ddmin algorithm [48] into the LLM.",
+        "localizador": "p. 3, Seção 3.2"
+      },
+      {
+        "trecho": "The prompt, as shown in Listing 1, is sent to Qwen2.5-Plus [6] with a temperature of 0 (greedy decoding).",
+        "localizador": "p. 3, Seção 3.2"
+      },
+      {
+        "trecho": "In our settings, the reducer runs reduction iteration for at most 60 seconds.",
+        "localizador": "p. 4, Seção 3.3"
+      },
+      {
+        "trecho": "During candidate patch sampling, ReduceFix utilizes the LLM to generate at most N = 10 candidate patches.",
+        "localizador": "p. 4, Seção 3.4"
+      },
+      {
+        "trecho": "Meanwhile, most of those benchmarks were released years ago and are drawn from popular open-source projects that large language models have almost certainly seen, which can overstate repair accuracy.",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "trecho": "Therefore, we select all the satisfied tasks from ABC contests numbered 361 to 377, a span entirely after the knowledge cut-offs of the 4 LLMs we evaluate.",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "trecho": "Although some OSS-Fuzz repositories may overlap with LLM pretraining corpora, we hold the LLM and evaluation instances fixed across strategies, so relative differences between prompt types remain valid despite potential data leakage.",
+        "localizador": "p. 5, Seção 4.2"
+      },
+      {
+        "trecho": "The pure LLM baseline must embed the entire long test case in the prompt, which greatly inflates the token cost.",
+        "localizador": "p. 7, Seção 5.2"
+      },
+      {
+        "trecho": "Because the defect depends on the absolute magnitude of vertex identifiers, this renumbering masked the failure, the interestingness predicate became false, and ddmin stopped without shrinking the input.",
+        "localizador": "p. 7, Failed Case Study"
+      },
+      {
+        "trecho": "We can resolve the issue by adding one simple guard.",
+        "localizador": "p. 7, Failed Case Study"
+      },
+      {
+        "trecho": "In contrast, prompting the unreduced test case often hampers performance.",
+        "localizador": "p. 8, RQ-2"
+      },
+      {
+        "trecho": "Supplying the full failing test often hurts repair accuracy; in multiple LLMs and difficulty levels, it performs worse than the no-test Baseline.",
+        "localizador": "p. 8, caixa [RQ-2] Findings"
+      },
+      {
+        "trecho": "To test whether the improvement is due to randomness, we leverage MWW tests [20, 35] to further confirm the improvement based on 4 LLMs, returning a two-sided p-value with < 0.05; therefore, the null hypothesis of equal success probabilities between ReduceFix and the “Origin Test” is rejected, establishing that the gain is statistically significant.",
+        "localizador": "p. 8, RQ-2"
+      },
+      {
+        "trecho": "The Baseline prompt contains only the problem statement and the buggy code.",
+        "localizador": "p. 8, Seção 5.4"
+      },
+      {
+        "trecho": "Diff Lines stays the same length but appends up to ten mismatched output lines, providing sparse evidence without increasing size.",
+        "localizador": "p. 8, Seção 5.4"
+      },
+      {
+        "trecho": "Reduced + Origin concatenates the reduced and full tests, introducing redundant information as well as maximum length.",
+        "localizador": "p. 8, Seção 5.4"
+      },
+      {
+        "trecho": "To isolate the effect of the initial prompt, we fix MAX_RETRY= 1 (one feedback round) and set the conversation window size to length=2 turns.",
+        "localizador": "p. 9, Seção 5.5"
+      },
+      {
+        "trecho": "The inherent stochasticity of LLMs may pose threats to internal validity.",
+        "localizador": "p. 11, Seção 6"
+      },
+      {
+        "trecho": "Second, pass@k may overstate success when a patch is tuned to a partial test set.",
+        "localizador": "p. 11, Seção 6"
+      },
+      {
+        "trecho": "Every candidate is thus checked against the full official AtCoder archive, rather than a hand-picked or regenerated subset.",
+        "localizador": "p. 11, Seção 6"
+      },
+      {
+        "trecho": "One concern is that ReduceFix might benefit only the pipeline evaluated in this study and fail to transfer to other APR frameworks.",
+        "localizador": "p. 11, Seção 6"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ReduceFix (Reduced Test)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "decomposicao"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "decomposicao"
+      ],
+      "comparador": "Baseline (No Test)",
+      "modelo": "Qwen2.5-Coder-7B-instruct (versão não informada); redutor gerado por Qwen2.5-Plus",
+      "benchmark": "LFTBench (C++)",
+      "metrica": "pass@1 (Tabela 6 'Pass@K (%) across 4 LLMs', coluna @1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 4.6,
+        "intervencao": 6.3
+      },
+      "denominador": "200 bugs do LFTBench (linha Overall; n não impresso na Tabela 6, informado na Seção 4.2 e na Tabela 3), n = 10 candidatos por bug",
+      "condicoes": "Temperatura de reparo 0.8, dez candidatos por bug gerados uma vez, timeout de compilação 10 s e de execução 5 s; redutor gerado com temperatura 0 e limite de 60 s, com fallback para a entrada original em 10 dos 200 bugs. Linha Overall é agregado impresso das dificuldades C, D e E&F do mesmo modelo, métrica e comparador. Número de execuções repetidas não informado. O teste MWW relatado refere-se ao contraste com Origin Test, não a este. Ganho do pacote (inclui ddmin, fora do escopo), não de um ingrediente. Conferido no PDF, p. 7, Tabela 6 (cabeçalhos Difficulty, Baseline (No Test), Origin Test, Reduced Test, @1 @5 @10).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo destaca pass@10 contra dois comparadores (prompt com teste original e prompt sem teste) e 'up to' entre modelos. Tabelas 3-5 tratam de redução, não de reparo; primeira tabela com o contraste de prompting para reparo é a Tabela 6; primeira métrica (@1), primeiro modelo (Qwen2.5-Coder-7B-instruct), primeira linha de base (Baseline (No Test)), agregado impresso Overall.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (PDF; sem paginação impressa), Tabela 6, bloco Qwen2.5-Coder-7B-instruct, linha Overall, colunas Baseline (No Test) @1 e Reduced Test @1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Overall 4.6 13.9 20.0 4.1 13.1 19.0 6.3 17.9 25.5",
+          "localizador": "p. 7, Tabela 6, bloco Qwen2.5-Coder-7B-instruct, linha Overall; colunas Difficulty, Baseline (No Test) @1 @5 @10, Origin Test @1 @5 @10, Reduced Test @1 @5 @10"
+        },
+        {
+          "trecho": "All other hyperparameters are fixed (temperature 0.8, k ∈ {1, 5, 10}, 10 candidate patches per bug), as shown in Table 2.",
+          "localizador": "p. 7, Seção 5.3 (Experimental Design)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ReduceFix (Reduced Test)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "decomposicao"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "decomposicao"
+      ],
+      "comparador": "Diff Lines",
+      "modelo": "Qwen2.5-Coder-7B-instruct (versão não informada)",
+      "benchmark": "LFTBench (C++)",
+      "metrica": "pass@1 (Tabela 9 'Pass@k (%) by difficulty under three prompt strategies', coluna @1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 5.1,
+        "intervencao": 6.3
+      },
+      "denominador": "200 bugs do LFTBench (linha Overall; n não impresso na Tabela 9), n = 10 candidatos por bug",
+      "condicoes": "Mesmas configurações da RQ-2 (temperatura 0.8, dez candidatos por bug). Diff Lines = prompt base mais até dez linhas de saída divergentes; Reduced Test = prompt base mais o par entrada-saída do contraexemplo reduzido. As condições diferem no tipo de evidência e no comprimento médio (132.6 contra 514.0 linhas, Tabela 8), não num único ingrediente. Valores de Reduced Test iguais aos da Tabela 6. Conferido no PDF, p. 9, Tabela 9 (cabeçalhos Difficulty, Reduced Test, Diff Lines, Reduced + Origin, @1 @5 @10).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente da análise de composição para completar o alvo de três, pela ordem da tabela de ablação (Tabela 9): primeira coluna comparadora (Diff Lines), primeira métrica (@1), linha Overall.",
+      "derivacao": "direta",
+      "localizador": "p. 9 (PDF), Tabela 9, linha Overall, colunas Reduced Test @1 e Diff Lines @1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Overall 6.3 17.9 25.5 5.1 14.8 20.0 4.0 13.3 19.0",
+          "localizador": "p. 9, Tabela 9, linha Overall; colunas Difficulty, Reduced Test @1 @5 @10, Diff Lines @1 @5 @10, Reduced + Origin @1 @5 @10"
+        },
+        {
+          "trecho": "Diff Lines stays the same length but appends up to ten mismatched output lines, providing sparse evidence without increasing size.",
+          "localizador": "p. 8, Seção 5.4 (Experimental Design)"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "ReduceFix (Reduced Test)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "exemplos",
+        "decomposicao"
+      ],
+      "mecanismos_acrescentados": [],
+      "comparador": "Reduced + Origin",
+      "modelo": "Qwen2.5-Coder-7B-instruct (versão não informada)",
+      "benchmark": "LFTBench (C++)",
+      "metrica": "pass@1 (Tabela 9 'Pass@k (%) by difficulty under three prompt strategies', coluna @1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 4.0,
+        "intervencao": 6.3
+      },
+      "denominador": "200 bugs do LFTBench (linha Overall; n não impresso na Tabela 9), n = 10 candidatos por bug",
+      "condicoes": "Mesmas configurações da RQ-2. Reduced + Origin concatena o teste reduzido e o completo; a diferença é a presença do teste original (informação redundante e comprimento médio de 2637.7 contra 514.0 linhas, Tabela 8), sem categoria de mecanismo diferente, por isso nenhum mecanismo acrescentado. Conferido no PDF, p. 9, Tabela 9.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente pela ordem da tabela de ablação (Tabela 9, coluna Reduced + Origin), para completar o alvo de três; primeira métrica (@1), linha Overall.",
+      "derivacao": "direta",
+      "localizador": "p. 9 (PDF), Tabela 9, linha Overall, colunas Reduced Test @1 e Reduced + Origin @1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Overall 6.3 17.9 25.5 5.1 14.8 20.0 4.0 13.3 19.0",
+          "localizador": "p. 9, Tabela 9, linha Overall; colunas Difficulty, Reduced Test @1 @5 @10, Diff Lines @1 @5 @10, Reduced + Origin @1 @5 @10"
+        },
+        {
+          "trecho": "Reduced + Origin concatenates the reduced and full tests, introducing redundant information as well as maximum length.",
+          "localizador": "p. 8, Seção 5.4 (Experimental Design)"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Proposta e contribuições explícitas; cinco questões de pesquisa (RQ-1 a RQ-5) com objetivo declarado em cada seção de resultados.",
+      "localizador": "p. 1, Resumo; p. 2, Contribuições; p. 6, Seção 5.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, algoritmo, prompt do redutor (Listing 1) e hiperparâmetros descritos; faltam o template do prompt de reparo, o valor do orçamento L de truncamento, o modelo da RQ-4, e há divergência entre o texto e o Listing 1 sobre pares de entrada-saída.",
+      "localizador": "pp. 3-4, Seções 3.2-3.4; p. 6, Tabela 2; p. 9, Seção 5.5"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Baseline sem teste, Origin Test, ddmin-only, Diff Lines, Reduced + Origin, ChatRepair e CREF executados com as mesmas configurações e modelos; a análise de composição separa comprimento e informação.",
+      "localizador": "p. 7, Seção 5.3; p. 8, Seção 5.4; p. 9, Seção 5.5"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "pass@k definido por fórmula, n por dificuldade informado para a redução, e os valores de Reduced Test coincidem entre as Tabelas 6 e 9; porém a narrativa diverge das tabelas (5.5 p.p. sobre Origin Test, 'consistently superior'), o teste MWW não identifica métrica nem unidade, e a compressão usa denominador diferente da taxa de sucesso.",
+      "localizador": "p. 5, Seção 4.3; p. 7, Tabela 6; p. 8, RQ-2 e Seção 5.4; p. 9, Tabela 9"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria discute validade interna (estocasticidade), de construto (métricas, viés de seleção) e externa (transferência a outros frameworks e linguagens), com as medidas adotadas.",
+      "localizador": "p. 11, Seção 6"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Hiperparâmetros (Tabela 2), prompt do redutor e link de artefato publicados; faltam snapshots dos modelos via API, template do prompt de reparo, valor de L e modelo da RQ-4. Artefato não acessado.",
+      "localizador": "p. 4, Listing 1; p. 5, Seção 4.4; p. 6, Tabela 2"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O benchmark foi construído com concursos declarados posteriores aos cortes de conhecimento e o exemplo one-shot fica fora do conjunto, mas as datas de corte não são informadas; para o OSS-Fuzz o risco é reconhecido e só se argumenta que diferenças relativas permanecem válidas.",
+      "localizador": "p. 5, Seção 4.2; p. 3, Seção 3.2"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [
+      "p-04",
+      "p-05",
+      "p-06",
+      "p-07",
+      "p-08",
+      "p-09",
+      "p-10",
+      "p-11"
+    ],
+    "observacao": "Texto extraído lido integralmente (721 linhas, incluindo referências). Tabelas 1-13, Algoritmo 1 e Listing 1 conferidos nas imagens das pp. 4-10; ameaças e conclusão na p. 11."
+  }
+}

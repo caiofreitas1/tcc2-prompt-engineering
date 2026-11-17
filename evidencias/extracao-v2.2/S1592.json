@@ -1,0 +1,649 @@
+{
+  "id_estudo": "S1592",
+  "texto_fonte": "fontes/textos/lote/S1592.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "TIPCODER-RL",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 (resumo); p. 5 (seção 2.4, ramos base e guiado por dica, Eq. 6); p. 6 (Baselines, Reward Model); p. 7 (Tabela 1); p. 15 (Figura 7, «Inference Workflow»)",
+        "observacao": "Pacote híbrido. Um Proposer (Qwen3-4B-Instruct-2507 ajustado por SFT e RL/GRPO, fora do escopo) recebe um prompt de sistema de «mentor de programação» e gera uma dica específica do problema (restrições, casos de borda, armadilhas) → instrucao; a dica é gerada numa etapa anterior e prefixada ao enunciado na etapa de síntese de código (pipeline Proposer → Generator → Evaluator) → decomposicao (etapas encadeadas); o modelo-alvo gera uma solução base e uma solução guiada pela dica e o AceCodeRM-32B seleciona entre as duas → amostragem. O enunciado original (instrucao) é herdado do Base. Acrescentados em relação ao Base: a dica (instrucao), a etapa encadeada de geração da dica (decomposicao) e a seleção entre dois candidatos (amostragem). A comparação com o Base isola o pacote inteiro, não um mecanismo; a comparação com Self-Hint, que usa o mesmo prompt de geração de dicas com modelo não treinado, isola o treinamento do Proposer (ajuste_fino, fora do escopo), não um ingrediente de prompting. Não se classificou como otimizacao_prompt: a dica é gerada por instância por um modelo treinado, sem busca sobre o prompt."
+      },
+      {
+        "nome_original": "TIPCODER-SFT",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 (seção 2.3, SFT); p. 6 (seção 3.2, «trained TIPCODER variants»); p. 7 (Tabela 1)",
+        "observacao": "Variante apresentada em linha própria da Tabela 1, com o Proposer apenas ajustado por SFT nas 2.126 duplas problema–dica (sem a etapa de RL). Mecanismos de prompting idênticos aos do TIPCODER-RL; a diferença entre as duas variantes é de treinamento (ajuste_fino, fora do escopo). Pacote híbrido; o contraste com o Base não isola mecanismo individual."
+      },
+      {
+        "nome_original": "Base",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 (Baselines); p. 7 (Tabela 1)",
+        "observacao": "Geração direta a partir da instrução original do benchmark, sem seleção por RM. O estudo não descreve o formato do prompt além de «original instruction»; não se atribuíram outros mecanismos. Linha de base sem mecanismo isolado."
+      },
+      {
+        "nome_original": "Best-of-2 (Best-of-N)",
+        "mecanismos": [
+          "instrucao",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "amostragem"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Baselines); p. 7 (Tabela 1); p. 9 (Tabela 2, N ∈ {1, 2, 4, 8, 16}); p. 11 (Figura 3)",
+        "observacao": "Amostra várias soluções da instrução original e seleciona com o AceCodeRM-32B (N = 2 na Tabela 1; N até 16 na Tabela 2). A temperatura de amostragem do modelo-alvo não é informada. Sistema comparador; o estudo não o trata como técnica isolada. [D108, correção registrada] Pacote avaliado contra Base (Tabela 1, p. 7; DeepSeek-Coder-7B, HumanEval+, Pass@1: base 62,40 × comparador 69,92), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "OPRO",
+        "mecanismos": [
+          "instrucao",
+          "otimizacao_prompt",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt",
+          "amostragem"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Baselines e Reward Model); p. 7 (Tabela 1)",
+        "observacao": "Otimização iterativa do prompt (otimizacao_prompt); o conjunto de candidatos é a solução base e a solução com o prompt otimizado, selecionada pelo AceCodeRM-32B (amostragem). O modelo otimizador, o número de iterações e o prompt resultante não são informados. Comparador sem mecanismos isolados. [D108, correção registrada] Pacote avaliado contra Base (Tabela 1, p. 7; DeepSeek-Coder-7B, HumanEval+, Pass@1: base 62,40 × comparador 65,85), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "GEPA",
+        "mecanismos": [
+          "instrucao",
+          "otimizacao_prompt",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "otimizacao_prompt",
+          "amostragem"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Baselines e Reward Model); p. 7 (Tabela 1)",
+        "observacao": "Evolução de prompts por feedback reflexivo; o feedback atua na otimização do prompt, não no código gerado, por isso registrado como otimizacao_prompt. Seleção entre base e candidato aumentado pelo AceCodeRM-32B (amostragem). Configuração (modelo refletor, orçamento) não informada. Comparador sem mecanismos isolados. [D108, correção registrada] Pacote avaliado contra Base (Tabela 1, p. 7; DeepSeek-Coder-7B, HumanEval+, Pass@1: base 62,40 × comparador 65,85), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "CTRL (CTRL-32B)",
+        "mecanismos": [
+          "instrucao",
+          "feedback",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback",
+          "amostragem"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Baselines e Reward Model); p. 7 (Tabela 1); p. 8 (Related Work)",
+        "observacao": "Modelo crítico (treinado por RL em outro trabalho, Xie et al., 2025) que produz orientação contextual para revisão do código → feedback (crítica seguida de revisão); seleção entre a solução base e a solução aumentada pelo AceCodeRM-32B (amostragem). O estudo não detalha como a crítica é integrada ao prompt nem o número de rodadas. Comparador sem mecanismos isolados; o crítico treinado é componente fora do escopo do comparador. [D108, correção registrada] Pacote avaliado contra Base (Tabela 1, p. 7; DeepSeek-Coder-7B, HumanEval+, Pass@1: base 62,40 × comparador 67,89), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      },
+      {
+        "nome_original": "Self-Hint",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "decomposicao",
+          "amostragem"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 6 (Baselines; seção 3.2); p. 7 (Tabela 1)",
+        "observacao": "Mesmo prompt de geração de dicas do TIPCODER, com um modelo de instrução não treinado no lugar do Proposer; o modelo-alvo gera o candidato guiado pela dica e o AceCodeRM-32B seleciona entre base e candidato guiado. Mesmas categorias atribuídas ao TIPCODER, pelo critério de consistência. O modelo não treinado usado não é identificado (nao_informado). Comparador sem mecanismos isolados. [D108, correção registrada] Pacote avaliado contra Base (Tabela 1, p. 7; DeepSeek-Coder-7B, HumanEval+, Pass@1: base 62,40 × comparador 69,92), no mesmo modelo, benchmark e métrica; os ingredientes não são isolados. Pacote híbrido: inclui componente fora do escopo de prompting."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Supervised Fine-Tuning (SFT) do Proposer com dicas destiladas de trajetórias de depuração",
+        "natureza": "ajuste_fino",
+        "descricao": "Qwen3-4B-Instruct-2507 ajustado em 2.126 duplas problema–dica, obtidas de trajetórias de depuração do AceCoder-87K com Gemini-3-Pro como professor, destilação mascarada e verificação iterativa (até duas rodadas de refinamento). Altera pesos do Proposer.",
+        "localizador": "p. 3-4 (seção 2.2); p. 4 (seção 2.3); p. 11-12 (apêndice C, Tabela 4)"
+      },
+      {
+        "nome_original": "Reinforcement Learning (GRPO) com recompensa de utilidade marginal e penalidade de tamanho",
+        "natureza": "ajuste_fino",
+        "descricao": "Otimização do Proposer por GRPO em 13.376 amostras do subconjunto difícil do AceCoder-87K, com ambiente Qwen2.5-7B-Coder-Instruct congelado, recompensa Δ de utilidade marginal em relação à geração base e penalidade de tamanho (L_th = 2000). Altera pesos; a diferença entre TIPCODER-SFT e TIPCODER-RL é desse tipo.",
+        "localizador": "p. 4 (seção 2.3); p. 5 (Proposer Training); p. 11-12 (apêndice C, Tabela 4)"
+      },
+      {
+        "nome_original": "Escolha do Reward Model (AceCodeRM-7B, AceCodeRM-32B, InternLM RM)",
+        "natureza": "selecao_modelo",
+        "descricao": "A Figura 2 varia apenas o modelo de recompensa usado como seletor, mantendo o conjunto de candidatos; não altera o prompt.",
+        "localizador": "p. 6 (seção 3.3); p. 8 (Figura 2)"
+      },
+      {
+        "nome_original": "Decodificação do Proposer e do ambiente",
+        "natureza": "decodificacao",
+        "descricao": "Ambiente de RL com temperatura 0; Proposer com temperatura 1,0 nos rollouts de treino e decodificação gulosa na avaliação; tamanhos máximos de prompt e geração 4096. A decodificação dos modelos-alvo na avaliação não é informada.",
+        "localizador": "p. 5 (Proposer Training); p. 12 (Tabela 4)"
+      },
+      {
+        "nome_original": "Quatro backbones-alvo",
+        "natureza": "selecao_modelo",
+        "descricao": "Variação do modelo gerador (Qwen2.5-Coder-7B, DeepSeek-Coder-7B, Qwen3-Coder-30B-A3B, DeepSeek-Coder-V2-Lite) com o mesmo Proposer, sem alterar o prompt; resultados relatados por modelo.",
+        "localizador": "p. 5-6 (Target Code LLMs); p. 7 (Tabela 1)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Qwen2.5-Coder-7B-Instruct",
+        "versao": "nao_informado (só o nome)",
+        "observacao": "modelo-alvo; também ambiente de RL (grafado Qwen2.5-7B-Coder-Instruct na seção de treino)"
+      },
+      {
+        "nome": "DeepSeek-Coder-7B-Instruct-v1.5",
+        "versao": "v1.5",
+        "observacao": "modelo-alvo"
+      },
+      {
+        "nome": "Qwen3-Coder-30B-A3B-Instruct",
+        "versao": "nao_informado (só o nome)",
+        "observacao": "modelo-alvo"
+      },
+      {
+        "nome": "DeepSeek-Coder-V2-Lite-Instruct",
+        "versao": "nao_informado (só o nome)",
+        "observacao": "modelo-alvo"
+      },
+      {
+        "nome": "Qwen3-4B-Instruct-2507",
+        "versao": "2507",
+        "observacao": "inicialização do Proposer (ajustado por SFT e RL)"
+      },
+      {
+        "nome": "Gemini-3-Pro",
+        "versao": "nao_informado",
+        "observacao": "professor na construção dos dados de dicas; não é modelo avaliado"
+      },
+      {
+        "nome": "AceCodeRM-32B",
+        "versao": "nao_informado",
+        "observacao": "Reward Model seletor de todos os métodos com seleção"
+      },
+      {
+        "nome": "AceCodeRM-7B; InternLM RM",
+        "versao": "nao_informado",
+        "observacao": "seletores alternativos apenas na Figura 2"
+      },
+      {
+        "nome": "CTRL-32B",
+        "versao": "nao_informado",
+        "observacao": "modelo crítico do comparador CTRL"
+      },
+      {
+        "nome": "Modelo de instrução não treinado do Self-Hint; modelos otimizadores de OPRO e GEPA; modelo «student» da filtragem de dados",
+        "versao": "nao_informado",
+        "observacao": "identidade não informada"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "HumanEval+ (EvalPlus)",
+        "quantidade": "nao_informado",
+        "observacao": "Tamanho não impresso; avaliação de Pass@1 com média±desvio de três execuções."
+      },
+      {
+        "nome": "MBPP+ (EvalPlus)",
+        "quantidade": "nao_informado",
+        "observacao": "Tamanho não impresso."
+      },
+      {
+        "nome": "BigCodeBench-Instruct (divisão instruction-following)",
+        "quantidade": "nao_informado",
+        "observacao": "Rotulado «BigCodeBench» na Tabela 1 e «BigCodeBench-full» na Tabela 2 e na seção 3.4, com valores idênticos."
+      },
+      {
+        "nome": "Subconjunto fixo de 100 problemas de cada benchmark",
+        "quantidade": "100 problemas por benchmark",
+        "observacao": "Usado só para a latência (wall-clock) da Tabela 2."
+      },
+      {
+        "nome": "Análise de dicas (Tabela 3)",
+        "quantidade": "6.504 instâncias avaliadas",
+        "observacao": "Três seeds × quatro modelos-alvo × HumanEval+/MBPP+; dicas selecionadas pelo AceCodeRM-32B; o RM escolhe o ramo guiado 2.187 vezes."
+      },
+      {
+        "nome": "AceCoder-87K (treinamento, não avaliação)",
+        "quantidade": "2.126 duplas para SFT; 13.376 amostras para RL",
+        "observacao": "Benchmarks de avaliação declarados fora do treinamento do Proposer."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Pass@1",
+        "observacao": "Métrica primária declarada; média±desvio padrão de três execuções independentes; denominadores (tamanhos dos benchmarks) não impressos. Avg. = média não ponderada das três médias de benchmark."
+      },
+      {
+        "nome": "Tokens e latência wall-clock (s)",
+        "observacao": "Tabela 2, só Qwen2.5-Coder-7B; latência medida em subconjunto de 100 problemas com uma NVIDIA A800."
+      },
+      {
+        "nome": "Oracle upper/lower bound, raw adoption e desempenho selecionado por RM",
+        "observacao": "Figura 2, sem valores impressos."
+      },
+      {
+        "nome": "Positive/Negative/Net e Positive rate among changed",
+        "observacao": "Tabela 3, por categoria de dica."
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "observacao": "«Across the evaluated Python code-generation benchmarks» (conclusão)."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Dicas podem corromper soluções base corretas: das 2.187 seleções do ramo guiado, 117 corrompem uma solução base correta (contra 310 reparos); dicas numéricas/de fórmula/precisão têm saldo negativo (14 positivas, 21 negativas); a dica de HumanEval/7 introduz suposição não sustentada e quebra uma solução correta; a adoção direta do ramo guiado pode selecionar candidatos prejudiciais.",
+        "localizador": "p. 6 (seção 3.3); p. 7 (seção 3.5); p. 8 (texto após a Figura 2); p. 9 (Tabela 3)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo adicional de inferência por gerar a dica e um candidato guiado antes da seleção por RM, declarado como limitação; quantificado em tokens e latência só para Qwen2.5-Coder-7B (por exemplo, HumanEval+: 2.812,13 tokens e 0,99 s contra 482,65 tokens e 0,36 s do Best-of-1).",
+        "localizador": "p. 9 (Limitations; Tabela 2)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Dependência da qualidade do Reward Model: dicas podem expor candidatos melhores, mas um seletor imperfeito pode não escolhê-los; seletores mais fracos podem não recuperar o ramo melhorado.",
+        "localizador": "p. 6 (seção 3.3); p. 9 (Limitations)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização: o Proposer é treinado com um ambiente de rollout e um pipeline de dados específicos, e suas dicas podem refletir os padrões de erro desse ambiente; extensão a outras famílias de modelos, linguagens e tarefas de repositório fica para trabalho futuro.",
+        "localizador": "p. 9 (Limitations)"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O estudo trata de vazamento de solução nas dicas destiladas (aplica destilação mascarada) e declara que os benchmarks de avaliação ficam fora do treinamento do Proposer e que os testes de avaliação não estão disponíveis na inferência; não discute possível presença de HumanEval/MBPP/BigCodeBench no pré-treinamento dos modelos-alvo nem afirma contaminação efetiva.",
+        "localizador": "p. 3 (seção 2.2, destilação mascarada); p. 5 (Datasets and Metrics; Proposer Training)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Seleção post-hoc por Reward Model entre a solução base e a guiada, para reduzir regressões de dicas desnecessárias; a Figura 2 compara a adoção direta do ramo adicional (sem seleção) com a seleção por diferentes RMs e com os limites de oráculo, mas sem valores impressos.",
+        "avaliada": "sim",
+        "localizador": "p. 5 (seção 2.4); p. 6 (seção 3.3); p. 8 (Figura 2)"
+      },
+      {
+        "descricao": "Destilação mascarada: blocos de código e detalhes específicos da solução são mascarados antes de o professor extrair a observação, para evitar vazamento de solução nas dicas.",
+        "avaliada": "nao",
+        "localizador": "p. 3 (seção 2.2)"
+      },
+      {
+        "descricao": "Benchmarks de avaliação fora do treinamento do Proposer; testes de avaliação usados só para relatar a correção final.",
+        "avaliada": "nao",
+        "localizador": "p. 5 (Datasets and Metrics; Proposer Training)"
+      },
+      {
+        "descricao": "Recompensa de utilidade marginal (subtrai o desempenho base) para penalizar dicas redundantes ou prejudiciais durante o RL.",
+        "avaliada": "nao",
+        "localizador": "p. 4 (seção 2.3)"
+      },
+      {
+        "descricao": "Mesmo seletor AceCodeRM-32B para todos os métodos, para que as diferenças reflitam o conjunto de candidatos; média±desvio de três execuções.",
+        "avaliada": "nao",
+        "localizador": "p. 6 (Reward Model); p. 7 (legenda da Tabela 1)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a Tabela 1: o texto afirma que as variantes treinadas do TIPCODER melhoram consistentemente sobre Self-Hint na média, mas TIPCODER-SFT tem Avg. menor que Self-Hint em DeepSeek-Coder-V2-Lite (63.54 vs 64.35) e Qwen2.5-Coder-7B (66.83 vs 67.14).",
+        "localizador": "p. 6 (seção 3.2); p. 7 (Tabela 1)"
+      },
+      {
+        "descricao": "Resultados nulos ou inversões: TIPCODER-SFT fica abaixo do Base em Qwen3-Coder-30B-A3B/BigCodeBench (47.98 vs 48.39); Self-Hint fica abaixo do Base em Qwen3-Coder-30B-A3B/BigCodeBench (46.29 vs 48.39) e na Avg. (69.60 vs 69.70); Best-of-2 fica abaixo do Base em BigCodeBench nos quatro backbones (por exemplo, 32.54 vs 37.43 em DeepSeek-Coder-7B) e na Avg. de Qwen3-Coder-30B-A3B (68.45 vs 69.70).",
+        "localizador": "p. 7 (Tabela 1); p. 6 (seção 3.2)"
+      },
+      {
+        "descricao": "Margens pequenas diante do desvio padrão e empates: a vantagem média do TIPCODER-RL sobre o melhor comparador é de 0.47 a 1.81 pontos (impressa no texto), com desvios de até ±1.86 nas células; em Qwen2.5-Coder-7B/MBPP+, TIPCODER-RL, OPRO e GEPA empatam em 73.81. O estudo não relata teste de significância.",
+        "localizador": "p. 6 (seção 3.2); p. 7 (Tabela 1)"
+      },
+      {
+        "descricao": "Aparente inconsistência (sem explicação no estudo): OPRO e GEPA têm valores idênticos em várias células (DeepSeek-Coder-7B HumanEval+ 65.85±0.00 e MBPP+ 68.25±0.00; Qwen2.5-Coder-7B HumanEval+ 85.57±0.35 e MBPP+ 73.81±0.00) e Best-of-2, descrito como amostragem estocástica, tem desvio ±0.00 em BigCodeBench nos quatro backbones. A decodificação dos modelos-alvo não é informada, o que impede julgar.",
+        "localizador": "p. 7 (Tabela 1); p. 6 (Baselines)"
+      },
+      {
+        "descricao": "Best-of-N não é monotônico em HumanEval+ (Qwen2.5-Coder-7B): Best-of-2 85.77, Best-of-4 83.54, Best-of-8 84.15 e Best-of-16 84.15; em BigCodeBench-full, Best-of-2 (36.32) fica abaixo de Best-of-1 (41.64).",
+        "localizador": "p. 9 (Tabela 2)"
+      },
+      {
+        "descricao": "Nomenclatura do terceiro benchmark diverge: a seção 3.1 diz avaliar a divisão instruction-following (BigCodeBench-Instruct) e não a de completion; a Tabela 1 usa «BigCodeBench» e a Tabela 2 e a seção 3.4 usam «BigCodeBench-full», com os mesmos valores (41.64, 36.32, 43.89 para Base/Best-of-1, Best-of-2 e TIPCODER-RL em Qwen2.5-Coder-7B).",
+        "localizador": "p. 5 (seção 3.1); p. 7 (Tabela 1; seção 3.4); p. 9 (Tabela 2)"
+      },
+      {
+        "descricao": "Condições discrepantes na Tabela 2: a latência é medida num subconjunto fixo de 100 problemas por benchmark, enquanto Pass@1 coincide com os valores da Tabela 1 (benchmark completo); o escopo da contagem de tokens não é explicitado. A comparação de custo é só para Qwen2.5-Coder-7B.",
+        "localizador": "p. 9 (legenda da Tabela 2); p. 7 (seção 3.4)"
+      },
+      {
+        "descricao": "O modelo usado como ambiente de RL (Qwen2.5-Coder-7B-Instruct) é também um dos quatro modelos-alvo; o estudo reconhece que ele não é o único alvo, mas a transferência não é sem sobreposição para esse backbone.",
+        "localizador": "p. 5 (Proposer Training; Target Code LLMs)"
+      },
+      {
+        "descricao": "Método e apêndice divergem: a seção 2.2 descreve só a destilação de trajetórias de depuração multi-turno, enquanto o apêndice E descreve dois mecanismos de construção de dados (contraste direto entre soluções incorreta e correta, Figura 5, e destilação de trajetórias, Figura 6), sem dizer qual gerou as 2.126 duplas.",
+        "localizador": "p. 3-4 (seção 2.2); p. 12 (apêndice E); p. 14 (Figuras 5 e 6)"
+      },
+      {
+        "descricao": "A Figura 2 não traz valores numéricos e não inclui Self-Hint; afirmações como «In many settings, TIPCODER-RL raises the oracle upper bound» e a comparação entre adoção direta e seleção por RM não podem ser conferidas numericamente. O mesmo vale para a Figura 3 (Best-of-N em MBPP+ para os quatro backbones).",
+        "localizador": "p. 6 (seção 3.3); p. 8 (Figura 2); p. 11 (Figura 3)"
+      },
+      {
+        "descricao": "A análise das dicas (Tabela 3) cobre só HumanEval+ e MBPP+ e só as dicas selecionadas pelo AceCodeRM-32B; a soma das linhas confere com o total (310, 117, +193; cálculo próprio) e o texto converte o saldo em 2.97 pontos de Pass@1 micro-média, que não é a métrica média da Tabela 1.",
+        "localizador": "p. 7 (seção 3.5); p. 9 (Tabela 3)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Todos os métodos com seleção (TIPCODER e comparadores, exceto Base) usam um conjunto de dois candidatos (solução base e solução aumentada) e o mesmo AceCodeRM-32B, sem acesso a feedback de execução ou testes ocultos na inferência.",
+        "localizador": "p. 6 (Reward Model); p. 7 (legenda da Tabela 1)"
+      },
+      {
+        "descricao": "A diferença entre TIPCODER-SFT e TIPCODER-RL é uma ablação de treinamento (com e sem RL), não de prompting.",
+        "localizador": "p. 4 (seção 2.3); p. 7 (Tabela 1)"
+      },
+      {
+        "descricao": "Estudo de caso (MBPP/142) ilustra uma dica que alerta para listas de tamanhos diferentes e leva a uma solução robusta; exemplo ilustrativo, não resultado agregado.",
+        "localizador": "p. 12 (apêndice D); p. 13 (Figura 4)"
+      },
+      {
+        "descricao": "O apêndice B justifica a verificação post-hoc em vez de recusa prévia do Proposer, citando risco de reward hacking; argumento não testado experimentalmente.",
+        "localizador": "p. 11 (apêndice B)"
+      },
+      {
+        "descricao": "Os autores declaram uso de assistentes de IA para clareza de escrita e automação de parte da coleta de dados experimentais.",
+        "localizador": "p. 12 (apêndice F)"
+      },
+      {
+        "descricao": "Link para dados e código impresso (github.com/Minkow/TipCoder); o repositório não foi acessado nesta extração.",
+        "localizador": "p. 1 (nota de rodapé)"
+      },
+      {
+        "descricao": "Infraestrutura de treinamento: 4 GPUs NVIDIA A800, OpenRLHF e vLLM; hiperparâmetros completos na Tabela 4.",
+        "localizador": "p. 5; p. 11-12 (apêndice C, Tabela 4)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address this, we propose TIPCODER, a test-time instruction proposer that generates problem-specific auxiliary tips before code synthesis.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "At inference time, it generates both a base solution and a tip-guided solution, and applies a Reward Model for post-hoc selection.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "We use Pass@1 as the primary metric.",
+        "localizador": "p. 5, seção 3.1"
+      },
+      {
+        "trecho": "Evaluation tests are used only for reporting final correctness and are not available to TIPCODER during inference.",
+        "localizador": "p. 5, seção 3.1"
+      },
+      {
+        "trecho": "The evaluation benchmarks are held out from Proposer training.",
+        "localizador": "p. 5, Proposer Training"
+      },
+      {
+        "trecho": "The environment Code LLM uses temperature 0 to provide deterministic execution feedback during RL, while the Proposer samples tips with temperature 1.0 during training rollouts and uses greedy decoding during evaluation.",
+        "localizador": "p. 5, Proposer Training"
+      },
+      {
+        "trecho": "Best-of-N samples multiple candidate solutions from the original instruction.",
+        "localizador": "p. 6, Baselines"
+      },
+      {
+        "trecho": "It uses the same tip-generation prompt as TIPCODER, but replaces the trained Proposer with an untrained instruction model to generate the auxiliary tip; the target Code LLM then generates a tip-guided candidate from the resulting augmented instruction.",
+        "localizador": "p. 6, Baselines"
+      },
+      {
+        "trecho": "To compare with generic prompt or context optimization, we include OPRO (Yang et al., 2024), which treats prompt design as an optimization problem and iteratively proposes improved prompts; GEPA (Agrawal et al., 2026), which evolves prompts through reflective feedback; and CTRL-32B (Xie et al., 2025), a critique-based model that produces contextual guidance for code revision.",
+        "localizador": "p. 6, Baselines"
+      },
+      {
+        "trecho": "For all baselines and TIPCODER, the candidate set consists of the base solution and the corresponding augmented solution.",
+        "localizador": "p. 6, Reward Model"
+      },
+      {
+        "trecho": "The trained TIPCODER variants consistently improve over Self-Hint in average performance, showing that the gains come not merely from adding auxiliary instructions, but from learning problem-specific tips aligned with downstream code correctness.",
+        "localizador": "p. 6, seção 3.2"
+      },
+      {
+        "trecho": "However, this potential is not automatically realized: raw adoption can select harmful candidates, and weaker selectors may fail to recover the improved branch.",
+        "localizador": "p. 6, seção 3.3"
+      },
+      {
+        "trecho": "The RM selects the guided branch 2,187 times: 310 selections repair a base failure, 117 corrupt a correct base solution, and 1,760 leave execution correctness unchanged.",
+        "localizador": "p. 7, seção 3.5"
+      },
+      {
+        "trecho": "For example, the tip for HumanEval/26 clarifies duplicate-removal semantics and repairs a failure, while the tip for HumanEval/7 introduces an unsupported case-insensitive-matching assumption and breaks a correct solution.",
+        "localizador": "p. 8, continuação da seção 3.5"
+      },
+      {
+        "trecho": "To prevent solution leakage, we apply masked distillation.",
+        "localizador": "p. 3, seção 2.2"
+      },
+      {
+        "trecho": "This filtering process yields 2,126 high-quality problem-tip pairs for supervised initialization.",
+        "localizador": "p. 4, seção 2.2"
+      },
+      {
+        "trecho": "We optimize this objective with Group Relative Policy Optimization (GRPO) (Shao et al., 2024).",
+        "localizador": "p. 4, seção 2.3"
+      },
+      {
+        "trecho": "First, it introduces additional inference cost by generating an auxiliary tip and a tip-guided code candidate before reward-model selection.",
+        "localizador": "p. 9, Limitations"
+      },
+      {
+        "trecho": "Second, its realized gains depend on the quality of the post-hoc Reward Model: learned tips may expose better candidates, but an imperfect selector may fail to choose them.",
+        "localizador": "p. 9, Limitations"
+      },
+      {
+        "trecho": "Third, although the Proposer transfers across multiple target Code LLMs in our experiments, it is trained with a specific rollout environment and debugging-data construction pipeline, so its guidance may still reflect the error patterns of the training environment.",
+        "localizador": "p. 9, Limitations"
+      },
+      {
+        "trecho": "Your only task is to provide tips to clarify the instruction and identify potential pitfalls, common mistakes, and key considerations during solving the problem.",
+        "localizador": "p. 15, Figura 7 («Inference Workflow», Step 1: Proposer)"
+      },
+      {
+        "trecho": "The tip is prepended to the user query as a hint.",
+        "localizador": "p. 15, Figura 7 («Inference Workflow», Step 2: Generator)"
+      },
+      {
+        "trecho": "For data construction we design two distinct mechanisms where the first employs direct contrast between incorrect and correct solutions to distill static tips while the second leverages multi-turn debugging trajectories to extract execution-based reasoning logic.",
+        "localizador": "p. 12, apêndice E"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "TIPCODER-RL",
+      "mecanismos": [
+        "instrucao",
+        "decomposicao",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "instrucao",
+        "decomposicao",
+        "amostragem"
+      ],
+      "comparador": "Base",
+      "modelo": "DeepSeek-Coder-7B-Instruct-v1.5",
+      "benchmark": "HumanEval+ (EvalPlus)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 62.4,
+        "intervencao": 72.36
+      },
+      "denominador": "nao_informado (tamanho do HumanEval+ não impresso)",
+      "condicoes": "Média±desvio de três execuções independentes: Base 62.40±1.86; TIPCODER-RL 72.36±1.76. TIPCODER-RL usa o Proposer ajustado por SFT+RL (decodificação gulosa na avaliação), gera candidato base e candidato guiado pela dica e seleciona com AceCodeRM-32B; o Base gera diretamente da instrução original, sem seleção. Pacote híbrido (ajuste fino do Proposer e seleção por RM): o ganho é do pacote, não de um mecanismo de prompting. Decodificação do modelo-alvo não informada. Conferido na imagem da p. 7: valores, cabeçalhos e legenda legíveis.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: Pass@1 é declarada métrica primária, mas o estudo destaca vários comparadores (geração base, amostragem estocástica e otimização genérica de prompt) sem que um prevaleça, e duas variantes do TIPCODER. Tabela 1 é a primeira com o contraste; primeira métrica pertinente (Pass@1, coluna HumanEval+), primeiro modelo (DeepSeek-Coder-7B) e primeira linha de base de prompting (Base). Escolheu-se TIPCODER-RL como a técnica proposta (título e resultados principais); a variante SFT entra por cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (PDF e impressa), Tabela 1, bloco DeepSeek-Coder-7B, linhas Base e TIPCODER-RL, coluna HumanEval+",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Base 62.40±1.86 61.55±2.12 37.43±0.05 53.79",
+          "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-7B, linha Base; colunas Method, HumanEval+, MBPP+, BigCodeBench, Avg."
+        },
+        {
+          "trecho": "TIPCODER-RL 72.36±1.76 71.16±1.15 40.00±0.05 61.17",
+          "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-7B, linha TIPCODER-RL; colunas Method, HumanEval+, MBPP+, BigCodeBench, Avg."
+        },
+        {
+          "trecho": "Results are reported as mean±std over three independent runs.",
+          "localizador": "p. 7, legenda da Tabela 1"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "TIPCODER-SFT",
+      "mecanismos": [
+        "instrucao",
+        "decomposicao",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "instrucao",
+        "decomposicao",
+        "amostragem"
+      ],
+      "comparador": "Base",
+      "modelo": "DeepSeek-Coder-7B-Instruct-v1.5",
+      "benchmark": "HumanEval+ (EvalPlus)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 62.4,
+        "intervencao": 71.34
+      },
+      "denominador": "nao_informado (tamanho do HumanEval+ não impresso)",
+      "condicoes": "Média±desvio de três execuções: Base 62.40±1.86; TIPCODER-SFT 71.34±0.00. Proposer ajustado só por SFT; mesmo protocolo de dois candidatos e seleção por AceCodeRM-32B. Pacote híbrido; a diferença em relação ao TIPCODER-RL é de treinamento (fora do escopo). Conferido na imagem da p. 7.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante que o estudo apresenta em linha própria da Tabela 1 e chama de «trained TIPCODER variants»; técnica focal ainda não representada. Mesma ordem: Tabela 1, Pass@1/HumanEval+, DeepSeek-Coder-7B, Base. Não há terceira extração: o estudo não tem tabela de ablação de componentes de prompting nem matriz de ingredientes que permita contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "p. 7 (PDF e impressa), Tabela 1, bloco DeepSeek-Coder-7B, linhas Base e TIPCODER-SFT, coluna HumanEval+",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Base 62.40±1.86 61.55±2.12 37.43±0.05 53.79",
+          "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-7B, linha Base; colunas Method, HumanEval+, MBPP+, BigCodeBench, Avg."
+        },
+        {
+          "trecho": "TIPCODER-SFT 71.34±0.00 71.08±0.81 39.44±0.05 60.62",
+          "localizador": "p. 7, Tabela 1, bloco DeepSeek-Coder-7B, linha TIPCODER-SFT; colunas Method, HumanEval+, MBPP+, BigCodeBench, Avg."
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Problema (falhas induzidas pela instrução original) e contribuições explícitas: exploração do espaço de instruções por instância, Proposer destilado de depuração e otimizado por RL, decomposição exploração–seleção.",
+      "localizador": "p. 1-2 (resumo, introdução e contribuições)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção dos dados, treinamento, hiperparâmetros, protocolo de inferência e templates de prompt são descritos; faltam a decodificação dos modelos-alvo na avaliação, a temperatura do Best-of-N, a configuração de OPRO e GEPA (modelo otimizador, iterações), a integração do CTRL, a identidade do modelo do Self-Hint e do «student model», e qual dos dois mecanismos de construção de dados gerou as duplas de SFT.",
+      "localizador": "p. 3-6 (seções 2-3.1); p. 11-12 (apêndices C e E); p. 15 (Figura 7)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Base, Best-of-2, OPRO, GEPA, CTRL e Self-Hint executados nos mesmos quatro backbones e três benchmarks, com o mesmo seletor AceCodeRM-32B; Self-Hint controla o efeito de acrescentar a dica sem treinamento; Tabela 2 compara orçamentos de Best-of-N.",
+      "localizador": "p. 6 (Baselines, Reward Model); p. 7 (Tabela 1); p. 9 (Tabela 2)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@1 declarada como métrica primária, com média±desvio de três execuções, e os valores coincidem entre as Tabelas 1 e 2; porém os tamanhos dos benchmarks (denominadores) não são impressos, não há teste de significância, o nome do terceiro benchmark varia entre seções e tabelas e a Figura 2 não traz valores.",
+      "localizador": "p. 5 (seção 3.1); p. 7 (Tabela 1); p. 8 (Figura 2); p. 9 (Tabela 2)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de limitações trata custo de inferência, dependência do Reward Model e transferência limitada pelo ambiente de treino; não discute validade estatística, sensibilidade a seeds, contaminação de pré-treinamento ou a sobreposição entre ambiente de RL e modelo-alvo.",
+      "localizador": "p. 9 (Limitations)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Link para dados e código (não acessado), hiperparâmetros completos (Tabela 4), templates de prompt (Figuras 5-7) e hardware informados; faltam configurações dos comparadores e a decodificação dos modelos-alvo, e versões de vários modelos aparecem só pelo nome.",
+      "localizador": "p. 1 (nota de rodapé); p. 5; p. 11-12 (apêndice C, Tabela 4); p. 14-15 (Figuras 5-7)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo declara benchmarks de avaliação fora do treinamento do Proposer, testes de avaliação indisponíveis na inferência e destilação mascarada contra vazamento de solução nas dicas; não discute possível presença dos benchmarks no pré-treinamento dos modelos-alvo, do professor ou do RM.",
+      "localizador": "p. 3 (seção 2.2); p. 5 (seção 3.1; Proposer Training)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (796 linhas, incluindo referências e apêndices A-F). Páginas do PDF abertas visualmente: p-01 (resumo), p-05 (seções 2.4 e 3.1), p-06 (baselines, seções 3.2-3.3), p-07 (Tabela 1, seções 3.4-3.5), p-08 (Figura 2), p-09 (Tabelas 2 e 3, limitações), p-11 (apêndices A-C, Figura 3), p-12 (Tabela 4, apêndices D-F), p-15 (Figura 7). As páginas não têm número impresso; os localizadores usam a posição no PDF."
+  }
+}

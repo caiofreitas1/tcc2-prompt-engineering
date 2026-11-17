@@ -1,0 +1,598 @@
+{
+  "estudo": "S695",
+  "texto_fonte": "fontes/textos/lote/S695.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2504.16429v1 [cs.CR], 23 Apr 2025 (impresso na margem da p. 1 do PDF); cabeçalho de modelo ACM «Conference’17, July 2017, Washington, DC, USA» com DOI de espaço reservado (10.1145/nnnnnnn.nnnnnnn); o PDF não imprime números de página, por isso os localizadores usam a posição no arquivo",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "CodeGuarder",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "exemplos", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4–6 do PDF (Seções 4.1–4.3); p. 15–16 do PDF (Prompts 1–3, Apêndice B); p. 8 do PDF (Tabela 4); p. 9 do PDF (Tabelas 5 e 6); p. 11 do PDF (Tabelas 8 e 9)",
+        "observacao": "Pacote de prompting aumentado por recuperação (security-augmented prompt P = P_ori + Σ(q_i + S'_qi)). Condição avaliada: o prompt RACG original (instrução do usuário + exemplos de código recuperados da base funcional K) acrescido de (a) lista de subtarefas obtidas por decomposição da consulta pelo LLM (DeepSeek-V3, Prompt 2) e (b) para cada uma das top-k subtarefas, conhecimento de segurança recuperado (funcionalidade, causa-raiz com descrição e exemplo de código vulnerável, padrão de correção com descrição e exemplo de código corrigido), precedidos da frase de enquadramento «For each, I provide potential vulnerabilities and corresponding mitigation strategies». Categorias: instrucao (consulta e enquadramento), contexto (exemplos de código recuperados e conhecimento de segurança recuperado), exemplos (exemplos de código do RACG e exemplos de código vulnerável/corrigido), decomposicao (subtarefas), restricoes (diretrizes de segurança, por exemplo «Use strncpy to ensure the string is copied safely»). Em mecanismos_acrescentados, contexto e exemplos já existem no prompt base RACG; foram listados porque o pacote acrescenta um ingrediente novo dessas categorias (conhecimento de segurança com exemplos de código), e não apenas mais do mesmo ingrediente. A seleção do conhecimento usa recuperação por similaridade de cosseno com jina-embeddings-v3 (top-k' = 2 por subtarefa) e reordenação/filtragem das subtarefas por pesos de prevalência de CWE retirados de estudo anterior [41] (top-k = 5). Contrafactual de pacote: mesmas condições (LLM, linguagem, cenário) com e sem CodeGuarder nas Tabelas 4, 5, 6, 8 e 9; o ganho é do pacote e não autoriza atribuição a um único mecanismo. Não há ajuste fino de pesos no pacote; a base de conhecimento é construída offline por prompting do DeepSeek-V3 (Prompt 1). No cenário sem recuperação funcional (Tabela 7) não há exemplos de código da base K no prompt e não há condição sem CodeGuarder (ver observacoes)."
+      },
+      {
+        "nome_original": "standard RACG (P_ori = Q + E; linhas sem «w. CodeGuarder»)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6 do PDF (Seção 4.3, P_ori = Q + E); p. 6 do PDF (Seção 5.1); p. 8 do PDF (Tabela 4); p. 9 do PDF (Tabelas 5 e 6); p. 16 do PDF (Prompt 3, bloco «Original RACG Prompt»)",
+        "observacao": "Prompt RACG convencional: a consulta do usuário (Q) e exemplos de implementação recuperados (E) da base funcional K por jina-embeddings-v3; nas condições de envenenamento, K inclui código vulnerável injetado (m = 5 no cenário I; p = 10% no cenário II). Os modelos seguem os formatos de prompt recomendados e templates de chat. É a linha de base dos contrastes de pacote; o estudo não compara RACG com geração sem recuperação, por isso o próprio RACG não é isolado. Número de exemplos de código recuperados por consulta: nao_informado."
+      },
+      {
+        "nome_original": "Query Decomposition (QD)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "p. 4 do PDF (Seção 4.2.1); p. 15 do PDF (Prompt 2); p. 12 do PDF (Seção 7.3; Tabela 11)",
+        "observacao": "O LLM decompõe a consulta em subtarefas; as subtarefas orientam a recuperação do conhecimento e entram no prompt. A ablação do estudo compara CodeGuarder com CodeGuarder-QD, mas, como o próprio estudo explica, desativar QD também desativa KRF; logo esse contraste retira dois componentes. O par da Tabela 11 que difere apenas em QD é CodeGuarder-KRF (com QD, sem KRF) contra CodeGuarder-QD (sem QD e, por consequência, sem KRF), com o mesmo número de entradas de conhecimento injetadas; esse par não é analisado pelo estudo. Matriz e resultados: p. 12 do PDF, Seção 7.3 e Tabela 11. Mecanismos listados são os da condição com o componente (CodeGuarder-KRF). Além de acrescentar subtarefas ao prompt, QD altera a granularidade da recuperação (consultas por subtarefa)."
+      },
+      {
+        "nome_original": "Knowledge Re-ranking and Filtering (KRF)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 5 do PDF (Seção 4.2.3; Tabela 1); p. 12 do PDF (Seção 7.3; Tabela 11)",
+        "observacao": "Reordena as subtarefas pela soma dos pesos de prevalência das CWEs das entradas recuperadas (Tabela 1, distribuição de violações em código gerado por 13 LLMs, de estudo anterior [41]; peso padrão 0.01 para CWEs ausentes) e mantém o conhecimento das top-k subtarefas. A ablação CodeGuarder-KRF fornece todo o conhecimento recuperado sem reordenar nem filtrar, mantendo o número de entradas injetadas igual entre variantes; difere da condição completa só em KRF. Categoria acrescentada: contexto, por ser seleção do contexto recuperado que entra no prompt (não é nova categoria em relação ao pacote sem KRF, que já tem contexto). Avaliado só com DS-V3."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Sven",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "Comparador da Tabela 7 (cenário sem recuperação funcional): prefix-tuning que orienta a geração para propriedades desejadas sem alterar os pesos do LLM. Implementado pelos autores a partir da implementação oficial em Mistral-7B e CodeLlama-7B.",
+        "localizador": "p. 10 do PDF (Seção 6.4.1, Baselines; Tabela 7)"
+      },
+      {
+        "nome_original": "SafeCoder",
+        "natureza": "ajuste_fino",
+        "descricao": "Comparador da Tabela 7: instruction tuning em conjunto curado para geração segura. O estudo reutilizou o modelo treinado fornecido pelos autores originais.",
+        "localizador": "p. 10 do PDF (Seção 6.4.1, Baselines e Experimental Results; Tabela 7)"
+      },
+      {
+        "nome_original": "Cosec",
+        "natureza": "decodificacao",
+        "descricao": "Comparador da Tabela 7: co-decodificação supervisionada que ajusta as distribuições de probabilidade dos tokens a cada passo da decodificação. Implementado pelos autores em Mistral-7B e CodeLlama-7B.",
+        "localizador": "p. 10 do PDF (Seção 6.4.1, Baselines; Tabela 7)"
+      },
+      {
+        "nome_original": "temperature 0; max_new_tokens 4096; context window 8192",
+        "natureza": "decodificacao",
+        "descricao": "Configuração comum de inferência: temperatura 0 para reduzir não determinismo, limite de 4096 novos tokens e janela de contexto de 8192 tokens, demais parâmetros nos padrões. Não é técnica comparada.",
+        "localizador": "p. 8 do PDF (Seção 5.6); p. 13 do PDF (Seção 7.5)"
+      },
+      {
+        "nome_original": "hiperparâmetros k' e k (número de entradas de conhecimento injetadas)",
+        "natureza": "orcamento",
+        "descricao": "Quantidade de conhecimento injetado: k' entradas por subtarefa e k subtarefas mantidas após a filtragem; avaliada em grade (k' = 1–3; k = 3, 5, 7, 9) com DS-V3 e CodeLlama-13B no cenário RACG padrão (Tabela 12); escolhidos k' = 2 e k = 5 para a avaliação principal. É variação da quantidade de contexto, não técnica distinta; registrada aqui como alocação de orçamento de contexto.",
+        "localizador": "p. 12 do PDF (Seção 7.4; Tabela 12)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o", "versao": "nao_informado (snapshot não informado; acesso por API)"},
+      {"nome": "DeepSeek-V3 (DS-V3)", "versao": "nao_informado (acesso por API; o texto menciona 671 bilhões de parâmetros)"},
+      {"nome": "CodeLlama-13B", "versao": "nao_informado (variante base ou instruct não informada; pesos do Hugging Face oficial)"},
+      {"nome": "DeepSeek-Coder-V2-16B (DS-Coder)", "versao": "nao_informado (pesos do Hugging Face oficial)"},
+      {"nome": "Mistral-7B", "versao": "nao_informado (usado só no cenário sem recuperação funcional, Tabela 7)"},
+      {"nome": "CodeLlama-7B", "versao": "nao_informado (usado só no cenário sem recuperação funcional, Tabela 7)"},
+      {"nome": "DeepSeek-V3 como backend do CodeGuarder (construção da base de conhecimento e decomposição da consulta)", "versao": "nao_informado"},
+      {"nome": "jina-embeddings-v3 (retriever de código e de conhecimento)", "versao": "nao_informado além do nome"},
+      {"nome": "text-embedding-3-large (retriever de envenenamento, usado pelo atacante simulado)", "versao": "nao_informado além do nome"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "CyberSecEval [43]",
+        "quantidade": "1,916 instâncias em 50 tipos de CWE (descrição do benchmark)",
+        "observacao": "Usado para SR e Sim nos cenários RACG padrão, envenenamento I e II (C, C++, Java, Python), no cenário sem recuperação funcional (C, C++, Python) e no cenário sem conhecimento da linguagem-alvo (C#, JavaScript, PHP, Rust). Número de instâncias por linguagem e denominador de cada célula das tabelas: nao_informado; o tamanho do benchmark não é ligado ao denominador do SR. Não tem casos de teste. As instâncias vulneráveis do próprio CyberSecEval formam a base vulnerável V usada para envenenar K."
+      },
+      {
+        "nome": "MBPP [2]",
+        "quantidade": "nao_informado",
+        "observacao": "Usado só para Pass@1 e Pass@5 na Tabela 9, com as configurações padrão do benchmark (não detalhadas)."
+      },
+      {
+        "nome": "HumanEval [6]",
+        "quantidade": "nao_informado",
+        "observacao": "Usado só para Pass@1 e Pass@5 na Tabela 9, com as configurações padrão do benchmark (não detalhadas)."
+      },
+      {
+        "nome": "Bases de conhecimento (não são benchmarks de avaliação)",
+        "quantidade": "Base funcional K: C 6,956; C++ 510; Java 2,810; Python 1,777. Base vulnerável V: C 227; C++ 259; Java 235; Python 229. Base de conhecimento de segurança S: C 8,861; C++ 644; Java 3,365; Python 2,217 (Tabela 2)",
+        "observacao": "K e S derivam do ReposVul (12,053 pares função vulnerável/corrigida em quatro linguagens; K usa as versões corrigidas); S excede o número de vulnerabilidades porque algumas têm várias causas-raiz. V deriva do CyberSecEval."
+      }
+    ],
+    "metricas": [
+      {"nome": "Security Rate (SR): percentual do código gerado verificado como seguro pelo Insecure Code Detector do CyberSecEval (precisão de 96% relatada)", "aplicacao": "Tabelas 4–8, 11 e 12", "localizador": "p. 7 do PDF (Seção 5.5)"},
+      {"nome": "Similarity (Sim): CodeBLEU entre código gerado e referência, «partial representative» de funcionalidade; escala não declarada", "aplicacao": "Tabelas 4, 5, 6, 7 e 11", "localizador": "p. 7 do PDF (Seção 5.5)"},
+      {"nome": "Pass@1 e Pass@5", "aplicacao": "MBPP e HumanEval (Tabela 9)", "localizador": "p. 11 do PDF (Seção 7.1; Tabela 9)"},
+      {"nome": "prevention percentage: proporção das vulnerabilidades presentes sem CodeGuarder que são mitigadas com CodeGuarder", "aplicacao": "CWEs do Top-25 do MITRE presentes no CyberSecEval, só DS-V3 (Tabela 10)", "localizador": "p. 11–12 do PDF (Seção 7.2; Tabela 10)"},
+      {"nome": "proporção de casos inseguros que passaram a seguros (por linguagem)", "aplicacao": "relatada só no texto das RQ1 e RQ2", "localizador": "p. 8–9 do PDF (Seções 6.2, 6.3.1 e 6.3.2)"}
+    ],
+    "linguagens": [
+      "C, C++, Java, Python (cenários RACG padrão e envenenamento I e II)",
+      "C, C++, Python (cenário sem recuperação funcional, Tabela 7)",
+      "C#, JavaScript, PHP, Rust (cenário sem conhecimento de segurança da linguagem-alvo, Tabela 8)",
+      "MBPP e HumanEval: linguagem nao_informado pelo estudo (Seção 7.1 não a declara)"
+    ],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Envenenamento da base de conhecimento do RACG com código vulnerável leva o LLM a gerar código inseguro (o estudo cita evidência anterior de que uma única amostra envenenada pode levar 48% do código gerado a conter vulnerabilidades; nas Tabelas 4 e 5, o SR médio cai de 60.84 no cenário padrão para 50.57 no cenário I). Cibersegurança do código gerado.",
+        "localizador": "p. 1–2 do PDF (resumo e Seção 1); p. 3 do PDF (Seção 3, Figura 1a); p. 9 do PDF (Seção 6.3.1)"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "A medida de segurança (Insecure Code Detector, conjunto de analisadores estáticos configurado para 50 CWEs) pode não capturar a segurança real do código, e o conjunto de 50 CWEs não cobre todas as falhas possíveis; vulnerabilidades fora dele não seriam detectadas.",
+        "localizador": "p. 12–13 do PDF (Seção 7.5, Validity of Security Measurement)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Não determinismo dos LLMs pode afetar confiabilidade e reprodutibilidade; mesmo com temperatura 0 o determinismo completo não é garantido, em particular em arquiteturas Mixture-of-Experts como DS-V3.",
+        "localizador": "p. 13 do PDF (Seção 7.5, Reliability and LLM Non-Determinism)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Sem casos de teste no CyberSecEval, o estudo não consegue avaliar diretamente se o CodeGuarder afeta a funcionalidade do código; Sim (CodeBLEU) é só representante parcial, e a correção funcional foi medida à parte em MBPP e HumanEval.",
+        "localizador": "p. 7–8 do PDF (Seção 5.5); p. 11 do PDF (Seção 7.1)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Prompts longos com muito conhecimento recuperado podem exceder a janela de entrada do LLM (truncamento ou perda de contexto crítico) e sofrer diluição de atenção; o estudo observa queda de desempenho com conhecimento excessivo, mais acentuada em modelos menores (Tabela 12).",
+        "localizador": "p. 5 do PDF (Seção 4.2.3); p. 12 do PDF (Seção 7.4; Tabela 12)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Eficácia limitada quando a base de conhecimento não tem conhecimento específico da linguagem-alvo: prevenção de CWE-79 de 4.76% em média (instâncias de JavaScript) e ganhos menores no cenário I sem conhecimento da linguagem.",
+        "localizador": "p. 11 do PDF (Seção 6.4.2); p. 11–12 do PDF (Seção 7.2; Tabela 10)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "CodeGuarder (injeção de conhecimento de segurança no prompt) como mitigação do envenenamento da base de conhecimento, medida com e sem CodeGuarder nos cenários I e II (Tabelas 5 e 6).",
+        "avaliada": "sim",
+        "localizador": "p. 9 do PDF (Seções 6.3.1 e 6.3.2; Tabelas 5 e 6)"
+      },
+      {
+        "descricao": "Reordenação e filtragem do conhecimento (KRF) para mitigar o excesso de janela e a diluição de atenção; a ablação mede SR e Sim sem KRF com o mesmo número de entradas injetadas, mas não mede truncamento ou diluição de atenção diretamente.",
+        "avaliada": "sim",
+        "localizador": "p. 5 do PDF (Seção 4.2.3); p. 12 do PDF (Seção 7.3; Tabela 11)"
+      },
+      {
+        "descricao": "Temperatura 0 em todas as inferências; variabilidade residual quantificada em cinco execuções independentes do DS-V3 no cenário padrão (desvio máximo de SR de 0.38%), sem comparação com outra temperatura.",
+        "avaliada": "nao",
+        "localizador": "p. 8 do PDF (Seção 5.6); p. 13 do PDF (Seção 7.5)"
+      },
+      {
+        "descricao": "Base funcional K construída com o código corrigido do ReposVul para evitar código vulnerável na base que enviesaria a avaliação do envenenamento.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção 5.2.2, Functional Code Base)"
+      },
+      {
+        "descricao": "Base vulnerável V construída a partir do CyberSecEval, e não do ReposVul (fonte de S), para evitar estratégias de correção sobrepostas que tornariam o envenenamento mais fácil de detectar.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF (Seção 5.2.2, Vulnerable Code Base)"
+      },
+      {
+        "descricao": "Aplicação consistente das mesmas ferramentas e critérios de detecção a todos os LLMs e cenários, apresentada como mitigação da ameaça de medida.",
+        "avaliada": "nao",
+        "localizador": "p. 13 do PDF (Seção 7.5)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "RACG padrão sem CodeGuarder, executado pelo estudo com os mesmos LLMs, linguagens, cenários, benchmark e métricas (Tabelas 4, 5, 6, 8 e 9, linhas sem «w. CodeGuarder»); ablações CodeGuarder-QD e CodeGuarder-KRF (Tabela 11). No cenário sem recuperação funcional (Tabela 7), os comparadores executados são Sven, SafeCoder e Cosec, intervenções fora do escopo de prompting, sem condição de prompt simples sem CodeGuarder.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O mesmo valor difere entre tabelas: o SR do CodeGuarder com DS-V3 no cenário RACG padrão é 76.36 na Tabela 11 (ablação) e na célula k' = 2, k = 5 da Tabela 12 (a configuração padrão declarada), mas 78.28 na Tabela 4 (DS-V3 w. CodeGuarder, coluna Average). Nos cenários I e II e em Sim os valores da Tabela 11 coincidem com as Tabelas 4–6 (Sim 25.56; SR I 70.22; SR II 76.42; Sim I 28.46; Sim II 22.39). O estudo não explica a diferença.",
+        "localizador": "p. 8 do PDF (Tabela 4, linha DS-V3 w. CodeGuarder, bloco SR); p. 12 do PDF (Tabela 11, linha CodeGuarder, coluna Standard; Tabela 12a, linha k' = 2, coluna k = 5); p. 9 do PDF (Tabelas 5 e 6)"
+      },
+      {
+        "descricao": "Narrativa diverge da tabela e do quadro de resposta da RQ1: o texto diz que a melhora média em Java é de aproximadamente 38.45% e em Python de 12.24%; a linha Average da Tabela 4 e o quadro «Answer to RQ1» trazem 47.72% (Java) e 12.35% (Python).",
+        "localizador": "p. 8 do PDF (Seção 6.2, parágrafo sobre linguagens; Tabela 4, linha Average/w. CodeGuarder, bloco SR; quadro Answer to RQ1)"
+      },
+      {
+        "descricao": "Narrativa troca os modelos: no cenário I o texto atribui 28.49% ao CodeLlama e 25.88% ao DS-Coder, mas a Tabela 5 mostra ↑25.88% para CodeLlama e ↑28.49% para DS-Coder na coluna Average.",
+        "localizador": "p. 9 do PDF (Seção 6.3.1; Tabela 5, bloco SR, coluna Average)"
+      },
+      {
+        "descricao": "Narrativa atribui ao Cosec um valor de outro comparador: o texto diz que Sim do CodeGuarder é 24.60% maior que o do CoSec «(18.90 → 23.55)» no Mistral-7B, mas na Tabela 7 o Sim médio de 18.90 é do SafeCoder; o do Cosec é 18.50.",
+        "localizador": "p. 10 do PDF (Seção 6.4.1, Experimental Results; Tabela 7, bloco Sim, Mistral-7B, coluna Average)"
+      },
+      {
+        "descricao": "Resumo/introdução divergem do corpo: a introdução afirma SR médio de 75.54% «across four languages», acima do SafeCoder (69.81%), no cenário sem recuperação funcional; a Tabela 7 cobre só três linguagens (C, C++, Python, por decisão declarada) e traz médias de 79.40 (Mistral-7B) e 77.06 (CodeLlama-7B) para CodeGuarder e 72.31 e 73.08 para SafeCoder; os valores 75.54 e 69.81 não aparecem na Tabela 7.",
+        "localizador": "p. 2 do PDF (Seção 1, último parágrafo antes das contribuições); p. 10 do PDF (Seção 6.4.1; Tabela 7)"
+      },
+      {
+        "descricao": "Unidades mistas na ablação (cálculo próprio): a queda sem QD, «approximately 10.1% (from 76.36% to 68.61%)», corresponde a variação relativa (7.75 p.p.); a queda sem KRF, «about 2.2% (from 76.36% to 74.13%)», corresponde à diferença em p.p. (2.23 p.p.; cerca de 2.9% em variação relativa). Os ganhos do resumo e das Tabelas 4–8 (por exemplo, 20.12%) são variações relativas, não p.p.",
+        "localizador": "p. 12 do PDF (Seção 7.3; Tabela 11); p. 1 do PDF (resumo); p. 8 do PDF (Tabela 4)"
+      },
+      {
+        "descricao": "Inversões em Sim, embora a narrativa diga que CodeGuarder mantém ou melhora levemente a similaridade: no cenário I, GPT-4o cai de 29.97 para 28.76 (média), em C de 25.89 para 24.16 e em Python de 28.73 para 28.16; DS-Coder cai em Python de 29.14 para 27.59; DS-V3 em Java de 32.89 para 32.71; CodeLlama em Java de 32.03 para 31.86.",
+        "localizador": "p. 9 do PDF (Tabela 5, bloco Sim; Seção 6.3.1)"
+      },
+      {
+        "descricao": "Resultados nulos e inversões de SR na Tabela 8, embora o texto diga que CodeGuarder melhora o SR de forma consistente: no cenário padrão, DS-V3 em Rust 53.92 → 53.92 e DS-Coder em Rust 56.37 → 55.39; no cenário I, DS-Coder em JavaScript 48.59 → 47.79 e em Rust 36.27 → 36.27; no cenário II, DS-V3 em Rust 55.39 → 54.9, CodeLlama em Rust 65.69 → 61.76 e DS-Coder em PHP 70.94 → 70.06.",
+        "localizador": "p. 11 do PDF (Tabela 8; Seção 6.4.2)"
+      },
+      {
+        "descricao": "Prevenção baixa ou nula em algumas CWEs (DS-V3, Tabela 10): CWE-79 0.00 no cenário padrão e no II (média 4.76); CWE-22 3.85 no cenário I (média 8.26); CWE-502 cai de 53.33 no padrão para 12.24 no I. O estudo atribui CWE-79 à falta de conhecimento específico de JavaScript.",
+        "localizador": "p. 12 do PDF (Tabela 10); p. 11–12 do PDF (Seção 7.2)"
+      },
+      {
+        "descricao": "Aparente inconsistência de configuração: a Seção 5.6 e as ameaças declaram temperatura 0 em todas as inferências, mas a Tabela 9 relata Pass@5, que pressupõe várias amostras por problema; a Seção 7.1 diz apenas «default benchmark settings», sem informar temperatura ou número de amostras para essa tabela.",
+        "localizador": "p. 8 do PDF (Seção 5.6); p. 13 do PDF (Seção 7.5); p. 11 do PDF (Seção 7.1; Tabela 9)"
+      },
+      {
+        "descricao": "Número de execuções dos resultados principais: nao_informado. Só há cinco execuções do DS-V3 no cenário padrão para quantificar variabilidade (desvio máximo de 0.38% em SR); não há teste estatístico nem intervalo de confiança, embora o texto use «significantly».",
+        "localizador": "p. 13 do PDF (Seção 7.5); p. 1 do PDF (resumo)"
+      },
+      {
+        "descricao": "Os hiperparâmetros k' e k foram ajustados avaliando combinações no cenário RACG padrão, e a configuração escolhida é usada na avaliação principal; o estudo não descreve conjunto de ajuste separado do conjunto de avaliação.",
+        "localizador": "p. 12 do PDF (Seção 7.4; Tabela 12)"
+      },
+      {
+        "descricao": "Denominadores ausentes: o número de instâncias do CyberSecEval por linguagem (oito linguagens nas Tabelas 4–8) não é informado; o SR é percentual, mas o denominador de cada célula não é ligado ao total de 1,916 instâncias.",
+        "localizador": "p. 6 do PDF (Seção 5.2.1); p. 7 do PDF (Seção 5.5)"
+      },
+      {
+        "descricao": "Infraestrutura ambígua: o texto diz que todos os experimentos rodaram num servidor A100 com Ollama, mas GPT-4o e DeepSeek-V3 são acessados por API.",
+        "localizador": "p. 7 do PDF (Seção 5.3); p. 8 do PDF (Seção 5.6)"
+      },
+      {
+        "descricao": "Comparadores da Tabela 7 com condições próprias: SafeCoder usa o modelo treinado fornecido pelos autores originais; Sven e Cosec foram reimplementados pelos autores em Mistral-7B e CodeLlama-7B; não há linha de modelo sem intervenção. O estudo nota que o SR obtido é menor que o relatado nos trabalhos anteriores e atribui a diferença ao escopo dos dados (166 casos em nove CWEs nos trabalhos anteriores contra 1,916 casos em 50 CWEs).",
+        "localizador": "p. 10 do PDF (Seção 6.4.1)"
+      },
+      {
+        "descricao": "Ablação e análise por CWE feitas só com DS-V3; a ablação não informa se o SR da Tabela 11 é média sobre as quatro linguagens.",
+        "localizador": "p. 11–12 do PDF (Seções 7.2 e 7.3; Tabelas 10 e 11)"
+      },
+      {
+        "descricao": "Comparação entre conjuntos de linguagens diferentes: o texto diz que a melhora no cenário I sem conhecimento da linguagem (21.26%, Tabela 8) é «significantly lower» que com conhecimento (31.53%, Tabela 5), comparando variações relativas médias de linguagens diferentes, sem teste estatístico.",
+        "localizador": "p. 11 do PDF (Seção 6.4.2)"
+      },
+      {
+        "descricao": "Erro de digitação na narrativa do cenário II: «DS-VS» por DS-V3 (31.97%, coerente com a Tabela 6).",
+        "localizador": "p. 9 do PDF (Seção 6.3.2; Tabela 6)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Cenário sem recuperação funcional (Tabela 7): CodeGuarder (decomposição + conhecimento de segurança, sem exemplos de código da base K) é comparado só com intervenções fora do escopo (Sven, SafeCoder, Cosec); não há condição de prompting sem CodeGuarder. Por isso nenhuma extração foi feita dessa tabela.",
+        "localizador": "p. 10 do PDF (Seção 6.4.1; Tabela 7)"
+      },
+      {
+        "descricao": "Construção offline da base de conhecimento por prompting do DeepSeek-V3 (Prompt 1): entrada com descrição da CVE, tipo de CWE e diff em nível de função; saída em JSON com funcionalidade, causa-raiz e padrão de correção. É etapa de preparação, não condição de geração de código comparada.",
+        "localizador": "p. 4 do PDF (Seções 4.1.1 e 4.1.2); p. 15 do PDF (Prompt 1; Figura 4)"
+      },
+      {
+        "descricao": "Cenários de envenenamento: no cenário I (intenções expostas) o atacante injeta em K os m = 5 exemplos vulneráveis mais similares à consulta, recuperados de V com retriever próprio (text-embedding-3-large); no cenário II (intenções não expostas) injeta as contrapartes vulneráveis dos 10% de exemplos mais representativos de K, escolhidos por agrupamento. O estudo reconhece que o desenho dá ao atacante um pouco mais de poder que no mundo real.",
+        "localizador": "p. 6 do PDF (Seções 5.1.2 e 5.1.3); p. 7 do PDF (Seção 5.2.2; Seção 5.4)"
+      },
+      {
+        "descricao": "Funcionalidade em benchmarks com testes (Tabela 9): Pass@1 e Pass@5 em MBPP e HumanEval sobem ou se mantêm com CodeGuarder nos quatro LLMs (por exemplo, GPT-4o MBPP Pass@1 72.8 → 73.2). Não selecionado para extração (fora da ordem de seleção). Se a configuração usada na Tabela 9 inclui recuperação funcional não é informado.",
+        "localizador": "p. 11 do PDF (Seção 7.1; Tabela 9)"
+      },
+      {
+        "descricao": "Proporção de casos inseguros que passaram a seguros, só no texto: RQ1 31.74% (C), 30.08% (C++), 32.82% (Java), 28.54% (Python); cenário I 41.61% (C++), 32.73% (Python), 30.19% (C), 28.27% (Java); cenário II 30.15%, 35.87%, 33.27% e 33.98% nas quatro linguagens. Denominadores não informados.",
+        "localizador": "p. 8 do PDF (Seção 6.2); p. 9 do PDF (Seções 6.3.1 e 6.3.2)"
+      },
+      {
+        "descricao": "Variação da quantidade de conhecimento (Tabela 12): o desempenho melhora com mais conhecimento até um ponto e depois cai; ótimo observado em (k' = 2, k = 7) para DS-V3 (77.26) e (k' = 2, k = 5) para CodeLlama-13B (69.74). Os autores escolheram (2, 5) como padrão.",
+        "localizador": "p. 12 do PDF (Seção 7.4; Tabela 12)"
+      },
+      {
+        "descricao": "O estudo não imprime endereço de código ou de pacote de replicação; os prompts de extração, decomposição e geração estão no Apêndice B.",
+        "localizador": "p. 15–16 do PDF (Apêndice B)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "To address this, we propose a security-hardening framework for RACG systems, CodeGuarder, that shifts the paradigm from retrieving only functional code examples to incorporating both functional code and security knowledge.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "For each code generation query, a retriever decomposes the query into fine-grained sub-tasks and fetches relevant security knowledge.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "To prioritize critical security guidance, we introduce a re-ranking and filtering mechanism by leveraging the LLMs’ susceptibility to different vulnerability types.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "This filtered security knowledge is seamlessly integrated into the generation prompt.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Our evaluation shows CodeGuarder significantly improves code security rates across various LLMs, achieving average improvements of 20.12% in standard RACG, and 31.53% and 21.91% under two distinct poisoning scenarios without compromising functional correctness.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Especially, the poisoning of malicious code into knowledge bases can mislead LLMs, resulting in the generation of insecure outputs, which poses a critical threat in modern software development.",
+        "localizador": "p. 1 do PDF, resumo"
+      },
+      {
+        "trecho": "Specifically, maliciously injected vulnerable code can significantly compromise the security of generated code, with empirical evidence showing that even a single poisoned sample can lead to 48% of generated code containing vulnerabilities.",
+        "localizador": "p. 2 do PDF, Seção 1"
+      },
+      {
+        "trecho": "Specifically, CodeGuarder achieves an average security rate of 75.54% across four languages, surpassing the state-of-the-art Safecoder [14] (69.81%).",
+        "localizador": "p. 2 do PDF, Seção 1"
+      },
+      {
+        "trecho": "In conventional RACG systems, LLMs generate code by leveraging both a user-provided query and external knowledge retrieved from the knowledge base, typically, code snippets.",
+        "localizador": "p. 6 do PDF, Seção 4.3"
+      },
+      {
+        "trecho": "To enhance the security of RACG systems, CodeGuarder injects security knowledge S_Q into the code generation prompt.",
+        "localizador": "p. 6 do PDF, Seção 4.3 (símbolo S_Q normalizado)"
+      },
+      {
+        "trecho": "For instance, if q_i involves “copy a string from input to destination”, S'_qi might include guidelines like “Use strncpy to ensure the string is copied safely”.",
+        "localizador": "p. 6 do PDF, Seção 4.3 (símbolos q_i e S'_qi normalizados)"
+      },
+      {
+        "trecho": "Leveraging this capability, we employ the LLM to decompose the query into smaller sub-tasks that represent the query’s semantics at a finer level.",
+        "localizador": "p. 4 do PDF, Seção 4.2.1"
+      },
+      {
+        "trecho": "We then re-rank all sub-tasks [q_1,...,q_n] based on weights w_qi in descending order.",
+        "localizador": "p. 5 do PDF, Seção 4.2.3 (símbolos normalizados)"
+      },
+      {
+        "trecho": "First, the input window size of the LLM may be exceeded, leading to truncation or loss of critical context [5, 26].",
+        "localizador": "p. 5 do PDF, Seção 4.2.3"
+      },
+      {
+        "trecho": "Second, LLMs often struggle with long, complex prompts due to attention dilution, reducing their ability to leverage external knowledge [48, 52].",
+        "localizador": "p. 5 do PDF, Seção 4.2.3"
+      },
+      {
+        "trecho": "The code generation process involves the following sub-tasks. For each, I provide potential vulnerabilities and corresponding mitigation strategies.",
+        "localizador": "p. 16 do PDF, Prompt 3 (bloco «Injected Security Knowledge»)"
+      },
+      {
+        "trecho": "Security Rate (SR): SR quantifies the likelihood of an LLM generating secure code, defined as the percentage of generated code verified as secure.",
+        "localizador": "p. 7 do PDF, Seção 5.5"
+      },
+      {
+        "trecho": "Due to the absence of test cases in the CyberSecEval dataset, we cannot directly evaluate whether CodeGuarder affects the functionality of LLM-generated code.",
+        "localizador": "p. 7 do PDF, Seção 5.5"
+      },
+      {
+        "trecho": "To ensure output consistency across LLMs, we set the temperature parameter to 0, minimizing non-determinism as recommended by prior work [33].",
+        "localizador": "p. 8 do PDF, Seção 5.6"
+      },
+      {
+        "trecho": "Specifically, CyberSecEval comprises 1,916 instances spanning 50 CWE types, exhibiting a lead over the second largest security evaluation benchmark [42], which includes only 150 instances across 18 CWE types.",
+        "localizador": "p. 6 do PDF, Seção 5.2.1"
+      },
+      {
+        "trecho": "To mitigate this, we construct K using the fixed code (i.e., the vulnerability-free code) from the ReposVul dataset, ensuring that all retrieved examples are functionally correct and security-vetted.",
+        "localizador": "p. 7 do PDF, Seção 5.2.2"
+      },
+      {
+        "trecho": "Using the same dataset for both the vulnerable code and the security knowledge base could lead to overlapping fix strategies, making poisoning attempts easier to detect and defend against, thereby undermining the realism of the poisoning simulation.",
+        "localizador": "p. 7 do PDF, Seção 5.2.2"
+      },
+      {
+        "trecho": "From a programming language perspective, CodeGuarder demonstrates the most significant security enhancement in Java, with an average improvement of approximately 38.45%.",
+        "localizador": "p. 8 do PDF, Seção 6.2"
+      },
+      {
+        "trecho": "Notably, DS-V3 exhibits the highest average improvement in SR (37.09%), followed by GPT-4o (34.67%), CodeLlama (28.49%), and DS-Coder (25.88%).",
+        "localizador": "p. 9 do PDF, Seção 6.3.1"
+      },
+      {
+        "trecho": "Additionally, the Sim metric of CodeGuarder is 24.60% higher than that of CoSec (18.90 → 23.55) on Mistral-7B.",
+        "localizador": "p. 10 do PDF, Seção 6.4.1"
+      },
+      {
+        "trecho": "It is crucial to note that the KRF module operates on the sub-tasks generated by QD; therefore, disabling QD inherently disables the KRF mechanism as well.",
+        "localizador": "p. 12 do PDF, Seção 7.3"
+      },
+      {
+        "trecho": "To ensure a fair comparison, we maintain consistency in the number of injected knowledge entries across all variants.",
+        "localizador": "p. 12 do PDF, Seção 7.3"
+      },
+      {
+        "trecho": "Removing QD led to a decrease in SR of approximately 10.1% (from 76.36% to 68.61%) and a drop in Sim from 25.56 to 23.04 in the standard scenario.",
+        "localizador": "p. 12 do PDF, Seção 7.3"
+      },
+      {
+        "trecho": "Removing only KRF (CodeGuarder-KRF) resulted in a smaller decrease in SR of about 2.2% (from 76.36% to 74.13%) and a reduction in Sim from 25.56 to 24.82 in the standard scenario.",
+        "localizador": "p. 12 do PDF, Seção 7.3"
+      },
+      {
+        "trecho": "A threat to validity arises because this measurement may not perfectly capture the true security posture of the generated code.",
+        "localizador": "p. 12 do PDF, Seção 7.5"
+      },
+      {
+        "trecho": "However, even at zero temperature, complete determinism is not assured, particularly for architectures like Mixture-of-Experts (e.g., DS-V3 used in this study) [35].",
+        "localizador": "p. 13 do PDF, Seção 7.5"
+      },
+      {
+        "trecho": "The maximum observed deviation in SR across these runs was 0.38%, indicating negligible influence on our findings.",
+        "localizador": "p. 13 do PDF, Seção 7.5"
+      },
+      {
+        "trecho": "We empirically tuned these hyperparameters by evaluating various (k′,k) combinations using DS-V3 (a larger model) and CodeLlama-13B (a smaller model) on the standard RACG scenario.",
+        "localizador": "p. 12 do PDF, Seção 7.4"
+      },
+      {
+        "trecho": "Regarding data reproduction, we reuse the trained model provided by the authors for SafeCoder.",
+        "localizador": "p. 10 do PDF, Seção 6.4.1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CodeGuarder",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "decomposicao", "restricoes"],
+      "comparador": "RACG padrão sem CodeGuarder (linha «Average» do bloco SR, sem «w. CodeGuarder»)",
+      "modelo": "linha «Average» impressa sobre GPT-4o, DeepSeek-V3, CodeLlama-13B e DeepSeek-Coder-V2-16B",
+      "benchmark": "CyberSecEval, cenário RACG padrão (sem envenenamento), coluna «Average» sobre C, C++, Java e Python",
+      "metrica": "Security Rate (SR)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 60.84, "intervencao": 73.08},
+      "denominador": "nao_informado (número de instâncias do CyberSecEval por linguagem não informado; o total de 1,916 instâncias não é ligado ao denominador do SR)",
+      "condicoes": "Agregado impresso pelo estudo (média sobre quatro LLMs e quatro linguagens) da mesma técnica, métrica e comparador; os modelos são heterogêneos (dois gerais acessados por API e dois de código com 13B e 16B), o que deve ser preservado na leitura. A tabela imprime ↑20.12%, variação relativa (não p.p.). Temperatura 0, max_new_tokens 4096, janela de contexto 8192; k' = 2 entradas por subtarefa e k = 5 subtarefas; recuperação por jina-embeddings-v3; base funcional K do ReposVul (versões corrigidas). Número de execuções: nao_informado para os resultados da tabela (há cinco execuções do DS-V3 só para medir variabilidade). Sem teste estatístico. Atenção: o valor do DS-V3 w. CodeGuarder nesta tabela (78.28) difere do da Tabela 11 (76.36) para a mesma condição aparente. Conferido visualmente na p. 8 do PDF (imagem de baixa resolução, mas números legíveis e coincidentes com o texto extraído).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo e as contribuições destacam uma técnica (CodeGuarder), uma métrica (SR, chamada de «primary metric» na Seção 7.5) e um comparador (RACG sem CodeGuarder). Os resultados abrangem vários modelos, linguagens e três cenários; não há agregado entre cenários, então usou-se a primeira tabela de resultados (Tabela 4, cenário padrão) e seu agregado impresso compatível (linha Average, coluna Average), que coincide com os 20.12% do resumo.",
+      "derivacao": "direta",
+      "localizador": "p. 8 do PDF, Tabela 4, bloco SR, linhas «Average» e «w. CodeGuarder», coluna «Average»; p. 1 do PDF, resumo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Average 53.86 76.26 43.45 69.80 60.84",
+          "localizador": "p. 8 do PDF, Tabela 4, bloco SR, linha Average; colunas C, C++, Java, Python, Average"
+        },
+        {
+          "trecho": "w. CodeGuarder 68.50 83.40 62.01 78.42 73.08",
+          "localizador": "p. 8 do PDF, Tabela 4, bloco SR, linha w. CodeGuarder abaixo de Average; colunas C, C++, Java, Python, Average"
+        },
+        {
+          "trecho": "(↑ 27.20%) (↑ 9.37%) (↑ 47.72%) (↑ 12.35%) (↑ 20.12%)",
+          "localizador": "p. 8 do PDF, Tabela 4, bloco SR, linha de variações sob Average/w. CodeGuarder; colunas C, C++, Java, Python, Average"
+        },
+        {
+          "trecho": "Our evaluation shows CodeGuarder significantly improves code security rates across various LLMs, achieving average improvements of 20.12% in standard RACG, and 31.53% and 21.91% under two distinct poisoning scenarios without compromising functional correctness.",
+          "localizador": "p. 1 do PDF, resumo"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Query Decomposition (QD)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "CodeGuarder-QD (sem QD e, por consequência, sem KRF)",
+      "modelo": "DeepSeek-V3 (DS-V3)",
+      "benchmark": "CyberSecEval, cenário RACG padrão (coluna «Standard»)",
+      "metrica": "SR",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 68.61, "intervencao": 74.13},
+      "denominador": "nao_informado",
+      "condicoes": "Contraste pareado na Tabela 11: a intervenção é CodeGuarder-KRF (com QD, sem KRF) e o comparador é CodeGuarder-QD (sem QD; sem KRF porque KRF depende das subtarefas do QD); as duas condições diferem só em QD e mantêm o mesmo número de entradas de conhecimento injetadas. O contraste analisado pelo estudo é outro: CodeGuarder completo (76.36) contra CodeGuarder-QD (68.61), que retira QD e KRF juntos e por isso não isola QD. A Tabela 11 não informa se o SR é média sobre as quatro linguagens. Só DS-V3; temperatura 0; número de execuções nao_informado. Conferido visualmente na p. 12 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas pela primeira extração; componentes isolados entram para completar o alvo de três, primeiro os da tabela de ablação (Tabela 11), na ordem da tabela: QD é o primeiro. Como a ablação do estudo para QD retira também KRF, usou-se o par da mesma tabela que difere só em QD; primeira métrica (SR) e primeira coluna (Standard).",
+      "derivacao": "contraste_pareado",
+      "localizador": "p. 12 do PDF, Tabela 11, bloco SR, linhas CodeGuarder-QD e CodeGuarder-KRF, coluna Standard; matriz de condições na Seção 7.3 (p. 12 do PDF)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeGuarder-QD 68.61 64.04 66.25",
+          "localizador": "p. 12 do PDF, Tabela 11, Metric SR, linha CodeGuarder-QD; colunas Standard, I, II"
+        },
+        {
+          "trecho": "CodeGuarder-KRF 74.13 68.29 74.87",
+          "localizador": "p. 12 do PDF, Tabela 11, Metric SR, linha CodeGuarder-KRF; colunas Standard, I, II"
+        },
+        {
+          "trecho": "It is crucial to note that the KRF module operates on the sub-tasks generated by QD; therefore, disabling QD inherently disables the KRF mechanism as well.",
+          "localizador": "p. 12 do PDF, Seção 7.3"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Knowledge Re-ranking and Filtering (KRF)",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "CodeGuarder-KRF (todo o conhecimento recuperado para as subtarefas, sem reordenação nem filtragem)",
+      "modelo": "DeepSeek-V3 (DS-V3)",
+      "benchmark": "CyberSecEval, cenário RACG padrão (coluna «Standard»)",
+      "metrica": "SR",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 74.13, "intervencao": 76.36},
+      "denominador": "nao_informado",
+      "condicoes": "Ablação direta do estudo: CodeGuarder completo contra a variante sem KRF, com o mesmo número de entradas de conhecimento injetadas. O texto descreve a queda como «about 2.2%», que corresponde à diferença em p.p. (cálculo próprio), enquanto a queda do QD é descrita em variação relativa. O valor 76.36 do CodeGuarder difere do SR do DS-V3 w. CodeGuarder na Tabela 4 (78.28). A Tabela 11 não informa se o SR é média sobre as quatro linguagens. Só DS-V3; temperatura 0; número de execuções nao_informado. Conferido visualmente na p. 12 do PDF.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação (Tabela 11), para completar o alvo de três; primeira métrica (SR) e primeira coluna (Standard).",
+      "derivacao": "direta",
+      "localizador": "p. 12 do PDF, Tabela 11, bloco SR, linhas CodeGuarder-KRF e CodeGuarder, coluna Standard; Seção 7.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "CodeGuarder 76.36 70.22 76.42",
+          "localizador": "p. 12 do PDF, Tabela 11, Metric SR, linha CodeGuarder; colunas Standard, I, II"
+        },
+        {
+          "trecho": "CodeGuarder-KRF 74.13 68.29 74.87",
+          "localizador": "p. 12 do PDF, Tabela 11, Metric SR, linha CodeGuarder-KRF; colunas Standard, I, II"
+        },
+        {
+          "trecho": "Removing only KRF (CodeGuarder-KRF) resulted in a smaller decrease in SR of about 2.2% (from 76.36% to 74.13%) and a reduction in Sim from 25.56 to 24.82 in the standard scenario.",
+          "localizador": "p. 12 do PDF, Seção 7.3"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três questões de pesquisa explícitas: desempenho no RACG padrão (RQ1), resiliência a envenenamento (RQ2) e generalização sem base funcional e sem conhecimento da linguagem-alvo (RQ3).",
+      "localizador": "p. 8 do PDF, Seção 6.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve cenários, construção das bases (com contagens), retrievers, modelos, parâmetros de inferência, hiperparâmetros e prompts (Apêndice B). Faltam número de instâncias por linguagem, número de execuções dos resultados principais, número de exemplos de código recuperados no RACG, configuração da Tabela 9 e a infraestrutura exata (Ollama em A100 versus API).",
+      "localizador": "p. 6–8 do PDF (Seções 5.1–5.6); p. 11 do PDF (Seção 7.1); p. 15–16 do PDF (Apêndice B)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Nas RQ1, RQ2 e RQ3 (sem conhecimento da linguagem), o RACG sem CodeGuarder é executado com os mesmos LLMs, linguagens, cenários e métricas; há ablação de dois componentes com número de entradas controlado. Ressalva: no cenário sem recuperação funcional, os comparadores (Sven, SafeCoder, Cosec) são intervenções fora do escopo, reimplementadas ou reutilizadas, sem condição de prompt simples.",
+      "localizador": "p. 8–9 do PDF (Tabelas 4–6); p. 11 do PDF (Tabela 8); p. 12 do PDF (Seção 7.3; Tabela 11); p. 10 do PDF (Seção 6.4.1)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "SR é definido e o detector tem precisão relatada (96%); Sim é reconhecido como representante parcial de funcionalidade e complementado por Pass@k em MBPP e HumanEval. Porém o denominador de cada célula não é informado, a escala de Sim não é declarada, o mesmo SR difere entre tabelas (76.36 na Tabela 11 contra 78.28 na Tabela 4), há divergências entre texto e tabelas (38.45% contra 47.72%; modelos trocados no cenário I; valor do SafeCoder atribuído ao Cosec) e os ganhos misturam variação relativa e p.p.",
+      "localizador": "p. 7 do PDF (Seção 5.5); p. 8 do PDF (Tabela 4; Seção 6.2); p. 9 do PDF (Seção 6.3.1); p. 10 do PDF (Seção 6.4.1); p. 12 do PDF (Tabelas 11 e 12; Seção 7.3)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de ameaças trata da validade da medida de segurança e do não determinismo (com cinco execuções do DS-V3); o texto também discute o poder do atacante simulado e a falta de testes no CyberSecEval. Não discute contaminação, ajuste de hiperparâmetros no mesmo cenário de avaliação, ausência de testes estatísticos nem generalização para além do CyberSecEval.",
+      "localizador": "p. 12–13 do PDF (Seção 7.5); p. 7 do PDF (Seção 5.2.2; Seção 5.5)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts completos de extração, decomposição e geração, parâmetros de inferência, modelos de embeddings, hiperparâmetros e estatísticas das bases são informados; não há endereço de código ou dados, os snapshots dos modelos (por exemplo, GPT-4o) não são informados e faltam número de execuções e tamanhos por linguagem.",
+      "localizador": "p. 7–8 do PDF (Seções 5.2–5.6); p. 12 do PDF (Seção 7.4); p. 15–16 do PDF (Apêndice B)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute contaminação do pré-treinamento pelo CyberSecEval, MBPP ou HumanEval nem verifica sobreposição entre a base de conhecimento (ReposVul) e as instâncias avaliadas. A separação entre as fontes de S (ReposVul) e V (CyberSecEval) é justificada pelo realismo do envenenamento, não como controle de contaminação.",
+      "localizador": "p. 7 do PDF (Seção 5.2.2); p. 12–13 do PDF (Seção 7.5)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "descricao": "Texto extraído lido integralmente (corpo, referências e apêndices). Valores das Tabelas 4, 5, 6, 7, 8, 9, 10, 11 e 12 usados em extracoes e heterogeneidade conferidos visualmente nas páginas do PDF; as imagens têm resolução baixa, mas os números são legíveis e coincidem com o texto extraído.",
+    "paginas_abertas": [2, 6, 7, 8, 9, 10, 11, 12, 13]
+  }
+}

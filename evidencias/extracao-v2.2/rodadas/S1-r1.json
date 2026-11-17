@@ -1,0 +1,512 @@
+{
+  "estudo": "S1",
+  "texto_fonte": "fontes/textos/lote/S1.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Self-planning",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "decomposicao", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, p. 1; seção 2, p. 3-4; seção 3.1.4, p. 6; Tabela 1, p. 7 (páginas do PDF coincidem com as impressas)",
+        "observacao": "Pacote de prompting em duas fases: fase de planejamento com prompt few-shot de 8 pares intenção-plano (HumanEval e MBPP, Apêndices E e F) e fase de implementação com o plano anexado à intenção. 'instrucao' = intenção do problema herdada do prompt base (Direct); 'exemplos' = pares intenção-plano; 'decomposicao' = plano em subtarefas e geração encadeada em duas fases; 'restricoes' = formato de lista numerada, induzido pelos exemplos e pelos princípios de redação dos planos. Mecanismos acrescentados calculados em relação a Direct (zero-shot só com a intenção). O 'sim' vale para o pacote contra Direct (Tabela 1); não autoriza atribuir o ganho a um único mecanismo. Pacote só de prompting (não híbrido). Se a fase de implementação também recebe exemplos: nao_informado."
+      },
+      {
+        "nome_original": "Direct",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.1.3, p. 6",
+        "observacao": "Linha de base zero-shot, só com a intenção e sem exemplos; serve de prompt base para os mecanismos acrescentados das demais técnicas."
+      },
+      {
+        "nome_original": "Few-shot",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 7; seção 3.1.4, p. 6",
+        "observacao": "Comparador com pares requisito-código no prompt (exemplos de código como demonstração → 'exemplos' e 'contexto'); construído com os mesmos problemas dos demais prompts. Comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Code CoT",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.1.3 e 3.1.4, p. 6; Apêndice B, p. 21-22; Apêndice G, p. 27",
+        "observacao": "Adaptação de CoT implementada pelos autores: 8 exemplos com passos detalhados (comentários gerados por LLM a partir do código de referência, revisados manualmente e adaptados ao formato de lista numerada), com a frase 'Let's think step by step.' na instância do prompt e geração em duas etapas (CoT e depois código, 'decomposicao'). O formato de lista numerada recebe 'restricoes', como na self-planning. O par Code CoT / Narrative Code CoT (Tabela 4) contrasta só esse formato dentro do comparador; o estudo não isola os demais mecanismos do comparador."
+      },
+      {
+        "nome_original": "Ground-truth Planning",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "contexto", "decomposicao", "restricoes"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.1.3 e 3.1.4, p. 6-7; Tabela 1, p. 7; Apêndice G, p. 27-28",
+        "observacao": "Condição-oráculo (limite superior): os planos são gerados por prompt few-shot (intenção, código de referência e plano) a partir do código de referência de cada problema e fornecidos diretamente à fase de implementação. Usa informação da solução de referência; não é técnica aplicável sem essa solução. Os autores relatam validação manual no HumanEval, com cerca de 3% de planos com passos mal descritos."
+      },
+      {
+        "nome_original": "Planning",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["exemplos", "decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4.2, p. 8; Tabela 3, p. 8",
+        "observacao": "Variante da RQ2: plano gerado por code-davinci-002 (configuração 4-shot) aplicado à fase de implementação de outros modelos; comparado com Direct do mesmo modelo de implementação (pacote completo). A diferença em relação à coluna Self-planning do mesmo modelo é o modelo planejador (seleção de modelo, fora do escopo de prompting), não um ingrediente de prompting."
+      },
+      {
+        "nome_original": "Multi-turn",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Fig. 2 e Tabela 4, p. 10",
+        "observacao": "Esquema de planejamento e implementação introduzido por CodeGen: cada passo do plano gera um trecho de código, iterativamente. Difere da self-planning em duas fases no esquema de geração, sem contraste de um único ingrediente do dicionário. Número de exemplos: nao_informado."
+      },
+      {
+        "nome_original": "One-phase",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Fig. 2 e Tabela 4, p. 10; Apêndice G, p. 28-29",
+        "observacao": "Gera plano e código em uma única chamada; exige plano e código correspondente nos exemplos do prompt. Em relação à self-planning em duas fases difere em dois ingredientes (separação das fases e exemplos de código), por isso não isola a geração em duas fases."
+      },
+      {
+        "nome_original": "Zero-shot CoT",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Instrução 'Let's think step by step' para produzir passos intermediários e código em uma única geração. Comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Zero-shot CoT (Two-phase)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Linha de base construída pelo estudo para eliminar o efeito do método de geração: igual ao Zero-shot CoT, mas com geração em duas fases. O par Zero-shot CoT / Zero-shot CoT (Two-phase) isola a geração em duas fases ('decomposicao') sobre a base Zero-shot CoT, não dentro da self-planning."
+      },
+      {
+        "nome_original": "Two-phase",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Componente da self-planning (separação entre fase de planejamento e fase de implementação). Isolado apenas na base Zero-shot CoT (Zero-shot CoT vs Zero-shot CoT (Two-phase)); os mecanismos listados são os da condição em que o isolamento ocorre. Dentro da self-planning, o contraste One-phase vs Two-phase muda também os exemplos de código e não isola o componente."
+      },
+      {
+        "nome_original": "Narrative Code CoT",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Ablação do Code CoT que retira o formato de lista numerada (forma do CoT original). Com o Code CoT forma o par que contrasta o formato no comparador; não é técnica focal. Número de exemplos: nao_informado."
+      },
+      {
+        "nome_original": "Narrative Plan",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Ablação do plano proposto sem a forma de lista numerada (texto narrativo). É a condição sem o componente 'form of a numbered list'; o isolamento está registrado na entrada desse componente. Número de exemplos: nao_informado."
+      },
+      {
+        "nome_original": "form of a numbered list",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 2, p. 4 (princípio 1); seção 4.3, p. 9; Tabela 4, p. 10",
+        "observacao": "Formato de lista numerada do plano (formato estruturado → 'restricoes'), induzido pelos exemplos e pelo princípio 1 de redação. Isolado pela ablação Narrative Plan vs Self-Planning (Two-phase, 8-shot) na Tabela 4. A Tabela 4 não informa o número de exemplos do Narrative Plan."
+      },
+      {
+        "nome_original": "Extremely Concise Plan",
+        "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10; Apêndice G, p. 27",
+        "observacao": "Versão extremamente concisa do plano (só palavras-chave), mantida a lista numerada. Varia o nível de detalhe do plano sem retirar ou acrescentar categoria do dicionário; não há contraste de ingrediente."
+      },
+      {
+        "nome_original": "Plan2CoT",
+        "mecanismos": ["instrucao", "exemplos", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10; seção 4.3, p. 11",
+        "observacao": "Variante que gera primeiro o plano, depois um Code CoT e por fim o código; difere da self-planning pela etapa de Code CoT ('raciocinio') acrescentada. Variante exploratória da RQ3, não parte do método proposto. Número de exemplos: nao_informado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "greedy search / sampling settings",
+        "natureza": "decodificacao",
+        "descricao": "Pass@1, AvgPassRatio e CodeBLEU com busca gulosa (temperatura 0, top p 1, um código); Pass@k (k≥2) com 10 amostras por problema, temperatura 0.8 e top p 0.95; comprimento máximo de geração 300; um único plano por busca gulosa.",
+        "localizador": "Seção 3.1.4, p. 7"
+      },
+      {
+        "nome_original": "different LLMs (RQ2) and code pre-trained models",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre modelos-base da família OpenAI (Tabela 3) e entre modelos pré-treinados em código (AlphaCode, Incoder, CodeGeeX, CodeGen, PaLM Coder) na Tabela 1, sem alteração do prompt; as linhas de modelos pré-treinados não são linhas de base de prompting e a origem desses valores (execução própria ou relato de outros artigos) não é informada.",
+        "localizador": "Seção 4.1, p. 7; Tabela 1, p. 7; seção 4.2 e Tabela 3, p. 8"
+      },
+      {
+        "nome_original": "GPT-4 difficulty scoring",
+        "natureza": "outro",
+        "descricao": "Instrumento de análise, não intervenção: GPT-4 pontua a dificuldade dos problemas do HumanEval (com revisão manual completa) para estratificar os resultados em três níveis.",
+        "localizador": "Seção 4.5, p. 12"
+      }
+    ],
+    "modelos": [
+      {"nome": "code-davinci-002", "versao": "175B (Tabela 3); snapshot nao_informado", "observacao": "Modelo-base de todas as linhas de base básicas e planejador na coluna Planning da Tabela 3"},
+      {"nome": "text-davinci-003", "versao": "175B; snapshot nao_informado"},
+      {"nome": "text-davinci-002", "versao": "175B; snapshot nao_informado"},
+      {"nome": "code-cushman-001", "versao": "13B; snapshot nao_informado"},
+      {"nome": "text-curie-001", "versao": "6.7B; snapshot nao_informado"},
+      {"nome": "text-babbage-001", "versao": "1B; snapshot nao_informado"},
+      {"nome": "text-ada-001", "versao": "350M; snapshot nao_informado"},
+      {"nome": "GPT-4", "versao": "nao_informado", "observacao": "Usado só para pontuar a dificuldade dos problemas"},
+      {"nome": "AlphaCode", "versao": "1.1B", "observacao": "Linha de modelo pré-treinado na Tabela 1; origem dos valores nao_informado"},
+      {"nome": "Incoder", "versao": "6.7B", "observacao": "Tabela 1"},
+      {"nome": "CodeGeeX", "versao": "13B", "observacao": "Tabela 1"},
+      {"nome": "CodeGen-Mono", "versao": "16.1B", "observacao": "Rotulado 'CodeGen (16.1B)' na Tabela 1"},
+      {"nome": "PaLM Coder", "versao": "560B", "observacao": "Tabela 1"}
+    ],
+    "benchmarks": [
+      {"nome": "HumanEval", "quantidade": "164 problemas, média de 7.7 testes por problema", "observacao": "8 problemas amostrados do HumanEval compõem o prompt e são excluídos da avaliação; o denominador final de cada métrica não é informado (nao_informado). Na seção 4.5 os níveis de dificuldade somam 67, 47 e 43 questões."},
+      {"nome": "HumanEval-ET", "quantidade": "mais de 100 casos de teste adicionais por tarefa", "observacao": "Versão expandida do HumanEval"},
+      {"nome": "MBPP-sanitized", "quantidade": "427 problemas, 3 casos de teste automatizados por problema", "observacao": "Exemplos do prompt amostrados do pequeno conjunto de treino do MBPP; denominador de avaliação nao_informado"},
+      {"nome": "MBPP-ET", "quantidade": "mais de 100 casos de teste adicionais por tarefa", "observacao": "Versão expandida do MBPP"},
+      {"nome": "HumanEval-X", "quantidade": "820 amostras (Java, JavaScript, Go, etc.)", "observacao": "Usado para Python, Java, JavaScript e Go na Tabela 5; denominador por linguagem nao_informado"}
+    ],
+    "metricas": [
+      {"nome": "Pass@k (Pass@1, Pass@2, Pass@5, Pass@10)", "observacao": "Versão não enviesada (Apêndice C); Pass@1 com um código por busca gulosa"},
+      {"nome": "AvgPassRatio", "observacao": "Proporção média de casos de teste aprovados (Apêndice C)"},
+      {"nome": "CodeBLEU", "observacao": "Métrica de similaridade com o código de referência (Apêndice C)"},
+      {"nome": "Avg. Num. of I/O/I+O Tokens", "observacao": "Tabela 4"},
+      {"nome": "Avaliação humana (Correctness, Readability, Robustness)", "observacao": "Escores inteiros de 0 a 4; Fig. 3 sem valores numéricos impressos"},
+      {"nome": "Número de subfunções geradas e de problemas multiobjetivo corretos", "observacao": "Apêndice D"}
+    ],
+    "linguagens": ["Python", "Java", "JavaScript", "Go"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O esquema Multi-turn costuma não gerar código correto, atribuído a problemas de truncamento da saída do LLM.",
+        "localizador": "Seção 4.3, p. 10"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Níveis excessivos de abstração (Plan2CoT) podem aumentar a probabilidade de erros, segundo hipótese dos autores.",
+        "localizador": "Seção 4.3, p. 11"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Na geração direta e no Code CoT o código aborda só parte da intenção, o que frequentemente resulta em código incorreto; no exemplo da Fig. 1, o modelo copiou os casos de teste públicos fornecidos como entrada.",
+        "localizador": "Seção 2, p. 5, nota 5; seção 5, p. 14"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Os passos excessivamente detalhados do Code CoT podem ficar desatualizados após modificações do código e prejudicar a manutenibilidade.",
+        "localizador": "Seção 5, p. 14"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo mede o número médio de tokens de entrada e saída das variantes para relacionar desempenho e possível aumento de custo; custo quantificado em tokens (Tabela 4), não em dinheiro ou tempo.",
+        "localizador": "Seção 4.3, p. 9; Tabela 4, p. 10; seção 4.3, p. 11"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível sobreposição entre exemplos do prompt e problemas de avaliação, controlada pela exclusão dos exemplos selecionados do conjunto avaliado. O estudo não discute contaminação no pré-treinamento.",
+        "localizador": "Seção 3.1.4, p. 6"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sensibilidade dos LLMs ao prompt: a seleção de exemplos e a redação dos planos podem afetar o grau de melhoria (ameaça à validade).",
+        "localizador": "Seção 6, p. 15"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização dos resultados experimentais apontada como segunda ameaça à validade.",
+        "localizador": "Seção 6, p. 15"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação: elaboração manual dos prompts (esforço manual apresentado como limitação, não como custo).",
+        "localizador": "Seção 8, p. 16"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Exclusão da avaliação dos exemplos selecionados para o prompt.", "avaliada": "nao", "localizador": "Seção 3.1.4, p. 6"},
+      {"descricao": "Seleção dos problemas do prompt por amostragem aleatória com semente fixa e uso dos mesmos problemas para todos os prompts (técnica e linhas de base). Valor da semente nao_informado.", "avaliada": "nao", "localizador": "Seção 3.1.4, p. 6"},
+      {"descricao": "Revisão manual dos prompts de Code CoT gerados por LLM e adaptação ao mesmo formato de lista numerada, para evitar viés por erros e inconsistência de estilo.", "avaliada": "nao", "localizador": "Seção 3.1.4, p. 6"},
+      {"descricao": "Validação manual dos planos de referência gerados para o HumanEval.", "avaliada": "nao", "localizador": "Seção 3.1.4, p. 6-7"},
+      {"descricao": "Uso das versões ET com casos de teste de borda adicionais para aumentar a solidez da avaliação.", "avaliada": "nao", "localizador": "Seção 3.1.1, p. 6"},
+      {"descricao": "Uso da versão não enviesada de Pass@k para diminuir erros de avaliação decorrentes da amostragem.", "avaliada": "nao", "localizador": "Seção 6, p. 15"},
+      {"descricao": "Revisão manual completa das pontuações de dificuldade atribuídas pelo GPT-4.", "avaliada": "nao", "localizador": "Seção 4.5, p. 12"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Direct, Few-shot, Code CoT e Ground-truth Planning executados com code-davinci-002 (Tabela 1); Zero-shot CoT, Zero-shot CoT (Two-phase), Narrative Code CoT e demais variantes na Tabela 4",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Divergência entre resumo e corpo: o resumo destaca melhorias relativas máximas ('up to 25.4%' sobre Direct e 'up to 11.9%' sobre CoT). As setas da Tabela 1 são relativas a Direct; o valor de 11.9% não está impresso nas tabelas (cálculo próprio: 60.3/53.9 ≈ 1.119 no HumanEval). Nos demais conjuntos da Tabela 1 a diferença para Code CoT é menor (HumanEval-ET 46.2 vs 45.5; MBPP-sanitized 55.7 vs 54.5; MBPP-ET 41.9 vs 39.6).",
+        "localizador": "Resumo, p. 1; Tabela 1, p. 7"
+      },
+      {
+        "descricao": "Inversão em CodeBLEU: Self-planning tem CodeBLEU menor que Code CoT no HumanEval (28.6 vs 30.4) e menor que Direct, Few-shot e Code CoT no MBPP-sanitized (24.9 vs 25.6, 26.1 e 26.4); os autores reconhecem o desempenho ligeiramente inferior nessa métrica.",
+        "localizador": "Tabela 1 e seção 4.1, p. 7"
+      },
+      {
+        "descricao": "Inversão em Pass@k: Code CoT tem Pass@5 (63.5) e Pass@10 (68.6) menores que Direct (64.7 e 75.0) no HumanEval.",
+        "localizador": "Tabela 2 e seção 4.1, p. 8"
+      },
+      {
+        "descricao": "Resultados nulos ou inversões entre modelos: em code-cushman-001 Self-planning tem Pass@1 30.1 contra 34.0 de Direct; em text-babbage-001, 0.0 contra 0.6; em text-curie-001 e text-ada-001 o Pass@1 é 0.0 nas três condições. O valor de Self-planning para code-davinci-002 na Tabela 3 (59.0, configuração 4-shot) difere do da Tabela 1 (60.3, 8-shot), por diferença de configuração declarada na nota da Tabela 3.",
+        "localizador": "Tabela 3 e notas, p. 8"
+      },
+      {
+        "descricao": "Variantes com Pass@1 maior que a self-planning proposta: One-phase 62.8 e Extremely Concise Plan 61.5 contra 60.3 de Self-Planning (Two-phase, 8-shot); os autores a declaram escolha ótima com base em critérios não relacionados ao desempenho (código no prompt e convenções de escrita humana).",
+        "localizador": "Tabela 4, p. 10; seção 4.3, p. 11"
+      },
+      {
+        "descricao": "Tabela 5: Code CoT abaixo de Direct em JavaScript (52.6 vs 53.2, impresso '↑ −1.1%'). A narrativa diz que a self-planning tem resultados positivos em todas as linguagens frente a Direct e Code CoT, o que vale para Pass@1, mas em CodeBLEU a self-planning fica abaixo de Direct e Code CoT em JavaScript (25.6 vs 26.7 e 27.0), abaixo de Code CoT em Go (26.5 vs 27.1) e empata com Code CoT em Java (39.0).",
+        "localizador": "Tabela 5 e seção 4.4, p. 11"
+      },
+      {
+        "descricao": "Narrativa vs tabelas: a seção 3.1.3 afirma que Direct, Code CoT e Ground-truth Planning são linhas de base 'in all experiments', mas a Tabela 3 não traz Code CoT nem Ground-truth Planning e a Tabela 6 não traz Ground-truth Planning.",
+        "localizador": "Seção 3.1.3, p. 6; Tabela 3, p. 8; Tabela 6, p. 12"
+      },
+      {
+        "descricao": "O texto anuncia 'four representative categories' de problemas do MBPP, mas lista cinco (string processing, numerical calculations, number theory problems, data structure manipulations, geometric computations).",
+        "localizador": "Seção 3.1.4, p. 6"
+      },
+      {
+        "descricao": "Aparente inconsistência de contagem: os níveis de dificuldade somam 157 questões (67 + 47 + 43, cálculo próprio), contra 164 problemas do HumanEval e 8 problemas usados no prompt e excluídos da avaliação (164 − 8 = 156, cálculo próprio). A função de segmentação define o nível 1 para 0 < score ≤ 2 e não cobre score = 0. O estudo não explica a diferença.",
+        "localizador": "Seção 3.1.1, p. 5; seção 3.1.4, p. 6; seção 4.5, p. 12"
+      },
+      {
+        "descricao": "Aparente inconsistência na Tabela 6: com Pass@1 por busca gulosa (um código por problema, seção 3.1.4) e os tamanhos impressos dos níveis, os valores deveriam ser múltiplos de 1/n. Cálculo próprio: no nível 3 (43 questões), 50.2 de Self-planning e 31.1 de Direct não correspondem a contagens inteiras (21/43 ≈ 48.8%, 22/43 ≈ 51.2%; 13/43 ≈ 30.2%, 14/43 ≈ 32.6%); no nível 1 (67 questões), 65.2 de Direct também não (43/67 ≈ 64.2%, 44/67 ≈ 65.7%). Os valores do nível 2 são compatíveis com 47 questões. O estudo não liga explicitamente o denominador de cada nível ao tamanho impresso nem informa exclusões; falta essa informação para concluir.",
+        "localizador": "Tabela 6 e seção 4.5, p. 12; seção 3.1.4, p. 7"
+      },
+      {
+        "descricao": "Narrativa contraditória na avaliação humana: em Correctness a self-planning 'falls short of Ground-truth planning and Ground-truth', mas a conclusão da seção afirma que sua correção e robustez estão 'on par with' Ground-truth Planning. A Fig. 3 não traz valores numéricos e não é relatada medida de concordância entre avaliadores.",
+        "localizador": "Seção 5, p. 13-14; Fig. 3, p. 13"
+      },
+      {
+        "descricao": "A avaliação humana pede escores 'on five aspects from the criteria', mas só três critérios são definidos e exibidos na Fig. 3; o eixo da Fig. 3 vai de −1 a 5, embora os escores sejam inteiros de 0 a 4 (estimativa de densidade).",
+        "localizador": "Seção 5, p. 12-13; Fig. 3, p. 13"
+      },
+      {
+        "descricao": "Ground-truth Planning é descrito como 'underestimated upper bound' (p. 7) e como limite superior aproximado 'which is actually low' (p. 8); trata-se de condição-oráculo derivada do código de referência, não de técnica aplicável.",
+        "localizador": "Seção 4.1, p. 7-8"
+      },
+      {
+        "descricao": "A seção 4.2 lista a família como 'ada, cabbage, curie, cushman, and davinci', enquanto a Tabela 3 traz text-babbage-001 (aparente erro tipográfico).",
+        "localizador": "Seção 4.2 e Tabela 3, p. 8"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Número de exemplos da self-planning (Tabela 4, HumanEval, Pass@1): 1-shot 53.2, 2-shot 54.8, 4-shot 59.0 e 8-shot 60.3; varia a quantidade de exemplos sem condição sem exemplos, por isso não é tratado como isolamento de componente. Os autores recomendam 8-shot ou 4-shot considerando o limite de entrada.", "localizador": "Tabela 4, p. 10; seção 4.3, p. 10"},
+      {"descricao": "Os autores afirmam que a variante One-phase melhora ligeiramente o desempenho 'at the cost of the increased complexity of crafting prompts' (escrita adicional de exemplos de código) e que exige código no prompt, barreira para quem não programa; é esforço manual descrito como desvantagem, não quantificado.", "localizador": "Seção 4.3, p. 10-11"},
+      {"descricao": "Apêndice D: Direct, Code CoT e Self-planning geram 1, 9 e 37 subfunções no HumanEval; em 58 problemas multiobjetivo, acertam 11, 18 e 40, respectivamente.", "localizador": "Apêndice D, p. 22-23"},
+      {"descricao": "Avaliação humana: 50 tarefas do HumanEval, cinco códigos por tarefa, 10 desenvolvedores com 2-5 anos de experiência em Python em dois grupos, questionário anônimo, escores de 0 a 4; resultados apenas em gráfico de violino.", "localizador": "Seção 5, p. 12-13; Apêndice H, p. 30"},
+      {"descricao": "Os planos de referência (Ground-truth Planning) são gerados a partir do código de referência e validados manualmente no HumanEval; cerca de 3% têm passos mal descritos.", "localizador": "Seção 3.1.4, p. 6-7"},
+      {"descricao": "Número de execuções ou repetições dos experimentos: nao_informado (o k de Pass@k é parâmetro da métrica). Nenhum pacote de replicação é mencionado no texto.", "localizador": "Seção 3.1.4, p. 7; texto completo"}
+    ],
+    "citacoes": [
+      {"trecho": "This paper proposes a self-planning code generation approach with large language models, which consists of two phases, namely planning phase and implementation phase.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Experimental results show that self-planning code generation achieves a relative improvement of up to 25.4% in Pass@1 compared to direct code generation, and up to 11.9% compared to Chain-of-Thought code generation.", "localizador": "Resumo, p. 1"},
+      {"trecho": "We take advantage of the ability of LLM to perform planning through few-shot prompting.", "localizador": "Seção 2, p. 3"},
+      {"trecho": "1. The plan is organized in the form of a numbered list, where each item in the list represents a step.", "localizador": "Seção 2, p. 4"},
+      {"trecho": "Then entering the implementation phase, we append the plan to the intent and feed it to LLM.", "localizador": "Seção 2, p. 5"},
+      {"trecho": "Direct generates code using LLMs in a zero-shot setting, implying only intent and no examples are available in the prompt.", "localizador": "Seção 3.1.3, p. 6"},
+      {"trecho": "Code CoT generates a chain of thought for each question by using Code CoT prompt (described in Crafting Prompt) and then generates the corresponding code.", "localizador": "Seção 3.1.3, p. 6"},
+      {"trecho": "Ground-truth Planning is set to investigate the maximum potential of the planning approach in code generation, we directly supply the model with ground-truth plans to perform the implementation phase, skipping the planning phase.", "localizador": "Seção 3.1.3, p. 6"},
+      {"trecho": "To avoid bias caused by errors in LLMs generation and inconsistencies in style, the generated Code CoT prompts are manually reviewed and adapted to the same numbered list format as the self-planning prompts.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "The examples selected from the dataset for prompting will be excluded from the evaluation.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "We employ a simple method to select the questions used to construct the prompts, i.e., random sampling with fixing a seed.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "Prompts for our approach and all baselines are constructed utilizing the same problems.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "To mitigate this concern, we utilize the existing ground-truth code to inversely generate a plan, which we then adopt as the ground-truth plan in our experiments.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "Second, we establish code-davinci-002 [5] as our base model and compare self-planning approach with Direct, Few-shot, and Code CoT to demonstrate the effectiveness of our approach, where the Few-shot approach uses the requirements and code pairs as prompt.", "localizador": "Seção 4.1, p. 7"},
+      {"trecho": "Furthermore, we apply the plan generated by code-davinci-002 during the planning phase to the implementation phase of other models, aiming to investigate the impact of planning for models with varying scales.", "localizador": "Seção 4.2, p. 8"},
+      {"trecho": "The Multi-turn approach involves the iterative use of solution steps of plan to generate the corresponding code snippets that eventually compose the entire code, which is introduced by CodeGen [33].", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "Note that the one-phase approach requires labeling both the plan and the corresponding code in the prompt, as demonstrated in ‘Instance of Self-planning Prompt (One-phase)’ in Appendix G.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "Zero-shot CoT uses the instruction ’Let’s think step by step’ [23] to produce intermediate steps and code.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "To eliminate the effect of the generation method, we also establish the baseline Zero-shot CoT (Two-phase) for comparison, using the two-phase generation method consistent with our approach.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "The Narrative Plan is an ablation of our proposed plan, i.e., it removes the form of a numbered list and is presented as narrative text.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "The Narrative Code CoT is also an ablation, which makes the Code CoT the same in form as the original CoT.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "Plan2CoT means incorporate both the plan and the Code CoT during code generation, i.e., we first generate a plan and then generate a Code CoT, ultimately resulting in code.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "This approach helps understand the possible performance improvement in relation to possible cost increases.", "localizador": "Seção 4.3, p. 9"},
+      {"trecho": "In the result of the group Schemes of Planning and Implementation, we find that the multi-turn usually fails to generate correct codes.", "localizador": "Seção 4.3, p. 10"},
+      {"trecho": "Relatively, excessive levels of abstraction may increase the probability of errors.", "localizador": "Seção 4.3, p. 11"},
+      {"trecho": "In terms of cost, self-planning has a lower token usage compared to other few-shot prompting approaches.", "localizador": "Seção 4.3, p. 11"},
+      {"trecho": "This is related to the fact that the benchmark HumanEval provided five public test cases as additional input, and the model copied them.", "localizador": "Nota 5, p. 5"},
+      {"trecho": "In these cases, the direct and Code CoT code generation approach only addresses a limited aspect of intent, which often results in incorrect code generation.", "localizador": "Seção 5, p. 14"},
+      {"trecho": "This can adversely affect code maintainability if the solution steps do not accurately represent the current state.", "localizador": "Seção 5, p. 14"},
+      {"trecho": "Considering the inherent sensitivity of LLMs to prompts, the primary threat comes from crafting prompts, as the example selection and plan writing in this operation can affect the degree of improvement achievable by our approach.", "localizador": "Seção 6, p. 15"},
+      {"trecho": "The second major threat to our study pertains to the generalizability of experimental results.", "localizador": "Seção 6, p. 15"},
+      {"trecho": "Additionally, we utilized the unbiased version of Pass@k [5] to diminish evaluation errors that arise from sampling.", "localizador": "Seção 6, p. 15"},
+      {"trecho": "When discussing the limitations of self-planning code generation, a major limitation may be the manual crafting of prompts.", "localizador": "Seção 8, p. 16"},
+      {"trecho": "We manually validated the generated ground-truth plans on HumanEval dataset.", "localizador": "Seção 3.1.4, p. 6"},
+      {"trecho": "This updated version includes edge test cases that enhance the soundness of code evaluation in comparison to the original benchmark.", "localizador": "Seção 3.1.1, p. 6"},
+      {"trecho": "Thereafter, we perform a full manual review of the scoring results.", "localizador": "Seção 4.5, p. 12"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-planning",
+      "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["exemplos", "decomposicao", "restricoes"],
+      "comparador": "Direct",
+      "modelo": "code-davinci-002",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 48.1, "intervencao": 60.3},
+      "denominador": "nao_informado (HumanEval tem 164 problemas; os 8 problemas usados no prompt são excluídos da avaliação, mas o denominador final não é informado)",
+      "condicoes": "Self-planning em duas fases com 8 exemplos intenção-plano amostrados do HumanEval; Direct zero-shot só com a intenção. Busca gulosa (temperatura 0, top p 1), um código por problema, comprimento máximo de geração 300, um único plano por busca gulosa. Número de execuções/repetições: nao_informado. Melhoria relativa impressa: ↑ 25.4% em relação a Direct. Conferido no PDF, Tabela 1, p. 7: valores, cabeçalho (HumanEval / Pass@1) e legenda.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O resumo destaca uma técnica (self-planning) e uma métrica (Pass@1), mas dois comparadores (direct code generation e Chain-of-Thought) sem que um prevaleça; não há principal declarado. Primeira tabela com o contraste elegível: Tabela 1; primeira métrica pertinente: Pass@1 do HumanEval; modelo: code-davinci-002 (modelo-base das linhas de prompting); primeira linha de base de prompting listada: Direct (as linhas de modelos pré-treinados em código não são linhas de base de prompting).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 7 (PDF e impressa), colunas HumanEval / Pass@1, linhas Direct e Self-planning",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Direct 48.1 24.0 63.2 37.2 62.7 49.8 25.6 54.8 37.7 46.4", "localizador": "Tabela 1, p. 7, linha Direct; colunas HumanEval (Pass@1, CodeBLEU, AvgPassRatio), HumanEval-ET (Pass@1, AvgPassRatio), MBPP-sanitized (Pass@1, CodeBLEU, AvgPassRatio), MBPP-ET (Pass@1, AvgPassRatio)"},
+        {"trecho": "Self-planning 60.3 (↑ 25.4%) 28.6 80.8 46.2 (↑ 24.1%) 76.4 55.7 (↑ 11.8%) 24.9 59.6 41.9 (↑ 11.2%) 51.0", "localizador": "Tabela 1, p. 7, linha Self-planning; mesmas colunas"},
+        {"trecho": "For the matrics Pass@1, AvgPassRatio, and CodeBLEU, we use the greedy search setting with temperature 0 and top p 1 to generate one code.", "localizador": "Seção 3.1.4, p. 7"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Zero-shot CoT (Two-phase)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "Zero-shot CoT",
+      "modelo": "nao_informado (a Tabela 4 e a seção 4.3 não nomeiam o modelo; as linhas Direct, Code CoT e Self-Planning da Tabela 4 repetem os valores obtidos com code-davinci-002 na Tabela 1)",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.0, "intervencao": 50.6},
+      "denominador": "nao_informado",
+      "condicoes": "Componente isolado: geração em duas fases (componente da self-planning), isolado sobre a base Zero-shot CoT; ambas as condições usam a instrução 'Let's think step by step' sem exemplos. O contraste não está dentro da self-planning e não autoriza atribuir efeito ao componente na self-planning. Parâmetros de decodificação para Pass@1 descritos em geral na seção 3.1.4 (busca gulosa); a Tabela 4 não os repete. Número de execuções: nao_informado. Tokens médios I/O/I+O: 276.8 / 78.8 / 355.6 (Zero-shot CoT) e 505.5 / 381.8 / 887.3 (Two-phase). Conferido no PDF, Tabela 4, p. 10.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal e tarefa já cobertas pela primeira extração; componentes isolados entram para completar o alvo de três, pela ordem da tabela de variantes e ablações (Tabela 4). Multi-turn e One-phase não isolam um único ingrediente (One-phase também acrescenta exemplos de código); 1-, 2- e 4-shot variam a quantidade de exemplos sem condição sem exemplos. O primeiro componente da self-planning isolado na tabela é a geração em duas fases, no par Zero-shot CoT / Zero-shot CoT (Two-phase), construído pelo estudo para eliminar o efeito do método de geração.",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, p. 10 (PDF e impressa), grupo Configurations of Intermediate Step, coluna Pass@1; seção 4.3, p. 9",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Zero-shot CoT 18.0 12.6 37.6 276.8 / 78.8 / 355.6", "localizador": "Tabela 4, p. 10, linha Zero-shot CoT; colunas Pass@1, CodeBLEU, AvgPassRatio, Avg. Num. of I/O/I+O Tokens"},
+        {"trecho": "Zero-shot CoT (Two-phase) 50.6 23.8 70.9 505.5 / 381.8 / 887.3", "localizador": "Tabela 4, p. 10, linha Zero-shot CoT (Two-phase); mesmas colunas"},
+        {"trecho": "To eliminate the effect of the generation method, we also establish the baseline Zero-shot CoT (Two-phase) for comparison, using the two-phase generation method consistent with our approach.", "localizador": "Seção 4.3, p. 9"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-Planning (Two-phase, 8-shot)",
+      "mecanismos": ["instrucao", "exemplos", "decomposicao", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "Narrative Plan",
+      "modelo": "nao_informado (a Tabela 4 e a seção 4.3 não nomeiam o modelo; a linha Self-Planning repete os valores obtidos com code-davinci-002 na Tabela 1)",
+      "benchmark": "HumanEval",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 55.8, "intervencao": 60.3},
+      "denominador": "nao_informado",
+      "condicoes": "Componente isolado: forma de lista numerada do plano ('restricoes'), retirada na ablação Narrative Plan (plano em texto narrativo). Self-Planning em duas fases, 8-shot; número de exemplos do Narrative Plan: nao_informado. Parâmetros de decodificação descritos em geral na seção 3.1.4; a Tabela 4 não os repete. Número de execuções: nao_informado. Tokens médios I/O/I+O: 1779.1 / 115.8 / 1894.9 (Narrative Plan) e 1885.3 / 110.9 / 1996.2 (Self-Planning). Conferido no PDF, Tabela 4, p. 10.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da self-planning isolado na ordem da Tabela 4, para completar o alvo de três: a forma de lista numerada, retirada na ablação Narrative Plan, que o estudo descreve como ablação do plano proposto. O par Code CoT / Narrative Code CoT, anterior na tabela, contrasta o mesmo formato, mas no comparador; usou-se o contraste dentro da técnica focal.",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, p. 10 (PDF e impressa), linhas Narrative Plan e Self-Planning (Two-phase, 8-shot), coluna Pass@1; seção 4.3, p. 9",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Narrative Plan 55.8 27.7 73.6 1779.1 / 115.8 / 1894.9", "localizador": "Tabela 4, p. 10, linha Narrative Plan; colunas Pass@1, CodeBLEU, AvgPassRatio, Avg. Num. of I/O/I+O Tokens"},
+        {"trecho": "Self-Planning (Two-phase, 8-shot) 60.3 28.6 80.8 1885.3 / 110.9 / 1996.2", "localizador": "Tabela 4, p. 10, linha Self-Planning (Two-phase, 8-shot); mesmas colunas"},
+        {"trecho": "The Narrative Plan is an ablation of our proposed plan, i.e., it removes the form of a numbered list and is presented as narrative text.", "localizador": "Seção 4.3, p. 9"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Proposta e cinco questões de pesquisa explícitas (RQ1 a RQ5) sobre desempenho frente a linhas de base, diferentes LLMs, desenho ótimo, geração multilíngue e complexidade.",
+      "localizador": "Resumo, p. 1; seção 3, p. 5"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Construção dos prompts, seleção dos exemplos, parâmetros de decodificação e prompts completos (Apêndices E a G) são descritos; faltam o número de exemplos das variantes da Tabela 4, o modelo usado nas Tabelas 4 e 6, o valor da semente, detalhes do prompt da fase de implementação e o número de repetições; há incoerência na descrição das categorias do MBPP.",
+      "localizador": "Seção 3.1.4, p. 6-7; seção 4.3, p. 9-10; Apêndices E-G, p. 23-29"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Direct, Few-shot, Code CoT e Ground-truth Planning executados com o mesmo modelo-base e prompts construídos com os mesmos problemas; variantes e ablações na Tabela 4. A origem dos valores dos modelos pré-treinados da Tabela 1 não é informada, mas eles não são linhas de base de prompting.",
+      "localizador": "Seção 3.1.3 e 3.1.4, p. 6; seção 4.1 e Tabela 1, p. 7; Tabela 4, p. 10"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Pass@k (não enviesado), AvgPassRatio e CodeBLEU são definidos, e os valores repetidos coincidem entre Tabelas 1, 2, 4 e 5 (por exemplo, 48.1 e 60.3 no HumanEval). Porém o denominador de cada métrica não é informado após a exclusão dos exemplos do prompt, os níveis de dificuldade somam 157 questões e vários valores da Tabela 6 são aparentemente incompatíveis com os tamanhos impressos; a avaliação humana não relata valores nem concordância.",
+      "localizador": "Seção 3.1.2, p. 6; Apêndice C, p. 21-22; Tabelas 1, 2, 4, 5 e 6, p. 7-12; seção 5, p. 13"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças discute sensibilidade ao prompt e generalização, e a seção 8 aponta a elaboração manual de prompts; não discute contaminação no pré-treinamento, variabilidade entre execuções nem confiabilidade da avaliação humana.",
+      "localizador": "Seção 6, p. 15; seção 8, p. 16"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts da self-planning e instâncias dos prompts de linhas de base estão nos apêndices, com parâmetros de decodificação e nomes dos modelos; não há menção a código ou pacote de replicação, a semente não é informada e os snapshots dos modelos não são datados.",
+      "localizador": "Seção 3.1.4, p. 6-7; Apêndices E-G, p. 23-29"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo exclui da avaliação os exemplos usados no prompt (controle de sobreposição prompt-teste), mas não discute possível presença de HumanEval ou MBPP nos dados de pré-treinamento dos modelos.",
+      "localizador": "Seção 3.1.4, p. 6"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "detalhe": "Texto extraído lido integralmente (linhas 1-1364, incluindo referências e apêndices A-H). Páginas do PDF abertas visualmente: p-01, p-05, p-06, p-07, p-08, p-10, p-11, p-12, p-13, p-15, p-22, p-23. Numeração do PDF coincide com a impressa."
+  }
+}

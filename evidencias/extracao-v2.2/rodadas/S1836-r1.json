@@ -1,0 +1,218 @@
+{
+  "estudo": "S1836",
+  "texto_fonte": "fontes/textos/lote/S1836.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot setting with task-specific instructions (SCoT completion)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (sem paginação impressa), seção V.A 'Subjects'; Tabela I, PDF p. 5; Tabela II, PDF p. 6",
+        "observacao": "Única condição de prompting aplicada aos dez LLMs avaliados: instruções específicas da tarefa em zero-shot → instrucao; a tarefa consiste em completar uma SCoT da qual foram removidos blocos semânticos, de modo que os blocos restantes da SCoT de referência são fornecidos como insumo → contexto (os autores atribuem o desempenho à dependência desse 'local context'). O texto do prompt não é publicado; não se informa se o programa Python ou o traço de prova Dafny entram no prompt nem se há formato de saída imposto. O objeto de investigação é a capacidade dos LLMs sob essa condição, não uma técnica de prompting; não há outra condição de prompting executada, por isso não há contrafactual. Papel focal por ser a condição avaliada no estudo."
+      },
+      {
+        "nome_original": "SCoT-Lift",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "decomposicao", "feedback", "multiagente", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2–4, seção III (A–F); Listagem 3, PDF p. 3",
+        "observacao": "Framework proposto pelo estudo: pipeline de LLMs que converte o traço de prova Dafny do PyPrep em passos de síntese em nível Spark (SCoT), usado para construir a referência do SCoT-Bench. Etapas: Synthesis Transformer (decomposicao), quatro agentes Synthesis Checker (lemma, invariante, pós-condição, comutatividade) em laço com o Transformer (multiagente, feedback), Synthesis Pruner e Synthesis Repair, que executa o código Spark em modo de verificação sintática do PySpark e devolve as mensagens de erro (feedback). Hierarquia de regras de prova que 'steers LLM attention' e filtro de abstração que instrui os checkers a ignorar passos triviais → instrucao; programa Python e prova Dafny como insumo e gramática do PySpark no prompt do agente de reparo → contexto; exemplos de reparo curados no prompt de sistema → exemplos (e contexto); mapeamento explícito obrigação→passo como saída estruturada dos checkers e regras de gramática → restricoes. Avaliado só por validação humana de uma amostra, sem condição sem o pacote; pacote híbrido (inclui a escolha de famílias de modelos por etapa, fora do escopo). Sem prompt base identificável, por isso mecanismos_acrescentados vazio."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "PyPrep (Python preprocessor)",
+        "natureza": "outro",
+        "descricao": "Pré-processador formal dos autores (trabalho anterior) que traduz Python sequencial para PySpark por análise estática, síntese de programas e verificação com Dafny; não usa prompting. Fornece as traduções verificadas e os traços de prova a partir dos quais a SCoT de referência é construída, e é o contraponto ('correct by construction (100%)') no subconjunto expressível na IR.",
+        "localizador": "PDF p. 2, seção II; PDF p. 5, achado F3"
+      },
+      {
+        "nome_original": "Qwen 3 thinking / non-thinking modes",
+        "natureza": "outro",
+        "descricao": "Modo de inferência do modelo (variante com e sem 'thinking'), apresentado como variante do modelo; o estudo não descreve alteração do prompt para ativá-lo. Por isso não é tratado como técnica de raciocínio por prompting.",
+        "localizador": "PDF p. 5, seção V.A; Tabela I, PDF p. 5; achado F4, PDF p. 6"
+      },
+      {
+        "nome_original": "Atribuição de famílias de modelos às etapas do SCoT-Lift",
+        "natureza": "selecao_modelo",
+        "descricao": "Transformer e Pruner com Claude Sonnet 4.5; Checkers e Repair com GPT-5.2, para reduzir a propagação de pontos cegos de um único modelo para a referência.",
+        "localizador": "PDF p. 3, 'Models used inside SCoT-Lift'"
+      },
+      {
+        "nome_original": "LLM judge (Gemini 3)",
+        "natureza": "outro",
+        "descricao": "Instrumento de avaliação: juiz LLM guiado por rubricas e exemplos curados que atribui a cada predição um de quatro níveis usados na Overall Accuracy; calibrado contra rótulos de dois autores em 200 tarefas.",
+        "localizador": "PDF p. 5, seção V.A 'Evaluation Metrics' e 'LLM-judge calibration'"
+      },
+      {
+        "nome_original": "Oracle abstain",
+        "natureza": "outro",
+        "descricao": "Reavaliação pós-hoc em que o modelo pode recusar a tarefa quando a confiança autorrelatada fica abaixo de limiar ajustado por modelo em conjunto separado; relatam-se precisão nas tentativas e cobertura. Protocolo de pontuação, não condição de prompting comparada.",
+        "localizador": "PDF p. 5–6, achado F3"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-5.2", "versao": "nao_informado", "observacao": "Avaliado e também usado nos Checkers e no Repair do SCoT-Lift; snapshot não informado."},
+      {"nome": "GPT-5-mini", "versao": "nao_informado", "observacao": "Avaliado."},
+      {"nome": "Claude Sonnet 4.5", "versao": "nao_informado", "observacao": "Avaliado e também usado no Transformer e no Pruner do SCoT-Lift; snapshot não informado."},
+      {"nome": "Claude Haiku 4.5", "versao": "nao_informado", "observacao": "Avaliado."},
+      {"nome": "Gemini 3", "versao": "nao_informado", "observacao": "Avaliado e também usado como juiz LLM."},
+      {"nome": "Gemini 3 Flash", "versao": "nao_informado", "observacao": "Avaliado."},
+      {"nome": "DeepSeek V3.2", "versao": "nao_informado", "observacao": "685B parâmetros, segundo o texto."},
+      {"nome": "DeepSeek R1", "versao": "nao_informado", "observacao": "685B parâmetros, segundo o texto."},
+      {"nome": "Qwen 3", "versao": "nao_informado", "observacao": "8B parâmetros, avaliado nos modos thinking e non-thinking (duas linhas nas tabelas)."},
+      {"nome": "CodeOSS-20B", "versao": "nao_informado", "observacao": "Descrito apenas como 'a 20B open-source coding model'; identidade e versão não informadas."}
+    ],
+    "benchmarks": [
+      {"nome": "SCoT-Bench-Org", "quantidade": "120 programas Python verificados; 113 na referência após exclusão de 7 SCoTs reprovadas", "observacao": "Programas usados na avaliação do PyPrep, acrescidos de programas de suítes de processamento de dados [20], [21]. Subconjunto expressível na IR do PyPrep: 94/113 programas (cobertura impressa 78,6%). Ver inconsistências em heterogeneidade.", "localizador": "PDF p. 4, seções III.F e IV.A; PDF p. 5, achado F3"},
+      {"nome": "SCoT-Bench (total)", "quantidade": "1.652 tarefas de completamento de SCoT", "observacao": "Soma dos três sub-benchmarks (967 + 371 + 314 = 1.652, cálculo próprio de conferência).", "localizador": "PDF p. 4, seção IV.C; resumo, PDF p. 1"},
+      {"nome": "SCoT-Bench-Ratio", "quantidade": "967 tarefas", "observacao": "Para cada programa com N blocos, N variantes com remoção de 1 a N blocos. A Tabela I mostra cinco níveis 'representativos' (10%, 25%, 40%, 70%, 100%) e a média; o número de tarefas por nível não é informado.", "localizador": "PDF p. 4, seção IV.C; Tabela I, PDF p. 5"},
+      {"nome": "SCoT-Bench-Type", "quantidade": "371 tarefas", "observacao": "Até três variantes por programa (remoção de todos os blocos lambda, de invariante ou de asserção).", "localizador": "PDF p. 4, seção IV.C; Tabela II, PDF p. 6"},
+      {"nome": "SCoT-Bench-Loc", "quantidade": "314 tarefas", "observacao": "Três zonas de remoção: Front (primeiros 33%), Middle (33%–66%) e End (últimos 33%).", "localizador": "PDF p. 4, seção IV.C; Tabela II, PDF p. 6"},
+      {"nome": "Amostra de validação humana do SCoT-Lift", "quantidade": "50 SCoTs, 419 passos de síntese", "observacao": "Amostra estratificada por domínio, tamanho da SCoT e tipo de construção, retirada dos 120 programas.", "localizador": "PDF p. 4, seção III.F"},
+      {"nome": "Conjunto de calibração do juiz LLM", "quantidade": "200 tarefas", "observacao": "Estratificado por tipo de construção, local de remoção e nível-alvo; inclui 50 pares adversariais com cadeias alternativas válidas. O texto diz 'twice the original 100' sem descrever o conjunto original.", "localizador": "PDF p. 5, 'LLM-judge calibration'"}
+    ],
+    "metricas": [
+      {"nome": "Syntactic Accuracy (SynAcc)", "descricao": "Verificada executando o código Spark gerado em modo só de sintaxe; não é relatada separadamente nas tabelas.", "localizador": "PDF p. 5, seção V.A"},
+      {"nome": "Semantic Accuracy (SemAcc)", "descricao": "Avaliada por juiz LLM (Gemini 3) com rubricas e exemplos curados; aceita blocos semanticamente equivalentes à referência; não é relatada separadamente nas tabelas.", "localizador": "PDF p. 5, seção V.A e 'Multiple valid reasoning chains'"},
+      {"nome": "Overall Accuracy (Acc)", "descricao": "Combinação ponderada: Acc = (N(3) + 0,5 N(2) + 0,25 N(1)) / N × 100%, com quatro níveis (3: semântica e sintaticamente correto; 2: semanticamente correto e sintaticamente incorreto; 1: sintaticamente correto e semanticamente incorreto; 0: ambos incorretos). Única métrica das Tabelas I e II. Denominador por célula não informado.", "localizador": "PDF p. 5, seção V.A, equação (1); Tabelas I e II, PDF p. 5–6"},
+      {"nome": "Precision on attempted translations e coverage (oracle abstain)", "descricao": "Precisão nas tarefas tentadas e cobertura sob recusa por limiar de confiança.", "localizador": "PDF p. 5–6, achado F3"},
+      {"nome": "Validação humana do SCoT-Lift (sound, complete, concise) e Cohen's κ", "descricao": "Proporção de passos sound e concise, proporção de SCoTs complete e aprovação conjunta por SCoT; concordância entre anotadores e entre juiz e humanos por κ.", "localizador": "PDF p. 4, seção III.F; PDF p. 5, 'LLM-judge calibration'"}
+    ],
+    "linguagens": ["Python (origem)", "PySpark / Apache Spark (destino)", "Dafny (provas usadas na construção da referência)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Avaliação só por equivalência funcional em suíte de testes finita não distingue um modelo com cadeia dedutiva correta de um que acerta por acaso.", "localizador": "PDF p. 1, introdução"},
+      {"categoria": "correcao_funcional", "descricao": "O desempenho dos LLMs no completamento de SCoT cai fortemente com a perda de contexto (por exemplo, Claude Sonnet 4.5 de 68,4% a 10% de remoção para 14,8% a 100%); os autores concluem que os modelos dependem de contexto sintático local e não constroem cadeias de tradução de vários passos.", "localizador": "PDF p. 5, achados F1 e F2; Tabela I, PDF p. 5"},
+      {"categoria": "alucinacao", "descricao": "O 'thinking' verboso pode introduzir operações alucinadas ou deriva semântica em traduções MapReduce que exigem chamadas de API precisas (explicação dos autores para o pior desempenho da variante thinking do Qwen 3).", "localizador": "PDF p. 6, achado F4"},
+      {"categoria": "alucinacao", "descricao": "Risco de alucinação dos agentes checkers do SCoT-Lift, motivação para exigir mapeamento explícito entre obrigações Dafny e passos Spark.", "localizador": "PDF p. 3, seção III.C"},
+      {"categoria": "correcao_funcional", "descricao": "A referência gerada pelo SCoT-Lift pode ser incompleta ou não sólida: 7 de 50 SCoTs da amostra falharam (aplicações de lema omitidas 4/7, invariantes repetidos 2/7, lambdas superabstraídos 1/7, este uma falta de solidez detectada pelo Repair só depois); pontos cegos de um modelo podem propagar-se para a referência.", "localizador": "PDF p. 4, seção III.F 'Failure modes'; PDF p. 3, 'Models used inside SCoT-Lift'"},
+      {"categoria": "outro", "descricao": "Validade da avaliação: viés compartilhado entre construção da referência e juiz, e discordância do juiz LLM com humanos entre os níveis 1 e 2, que afeta Acc em até ±1,4 ponto percentual na pior reatribuição; avaliação por correspondência literal penalizaria cadeias alternativas válidas.", "localizador": "PDF p. 5, 'LLM-judge calibration' e 'Multiple valid reasoning chains'"},
+      {"categoria": "outro", "descricao": "Validade da amostra: a acurácia a 100% de remoção é inflada porque programas de bloco único só aparecem nesse nível, enviesando a amostra para tarefas mais fáceis.", "localizador": "PDF p. 6, achado F5"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Checkers do SCoT-Lift fornecem mapeamento explícito obrigação Dafny→passo Spark, em vez de veredito binário, para reduzir alucinações e permitir validação humana.", "avaliada": "nao", "localizador": "PDF p. 3, seção III.C"},
+      {"descricao": "Uso de duas famílias de modelos no SCoT-Lift (Claude e GPT) para reduzir a propagação de pontos cegos de um modelo.", "avaliada": "nao", "localizador": "PDF p. 3, 'Models used inside SCoT-Lift'"},
+      {"descricao": "Validação humana por dois anotadores (um autor e um engenheiro externo) de 50 SCoTs, com κ de 0,81, 0,74 e 0,69, reconciliação por discussão e exclusão das 7 SCoTs reprovadas da referência.", "avaliada": "nao", "localizador": "PDF p. 4, seção III.F"},
+      {"descricao": "Juiz LLM de família distinta (Gemini 3) dos modelos usados no SCoT-Lift, para limitar o viés compartilhado.", "avaliada": "nao", "localizador": "PDF p. 5, seção V.A"},
+      {"descricao": "Calibração do juiz em 200 tarefas rotuladas por dois autores (concordância de 92,5%, 185/200, κ = 0,88; 47/50 nos pares adversariais).", "avaliada": "nao", "localizador": "PDF p. 5, 'LLM-judge calibration'"},
+      {"descricao": "Rubrica que aceita blocos semanticamente equivalentes (equivalência de lambdas, implicação mútua de invariantes, equivalência de asserções) em vez de correspondência token a token.", "avaliada": "nao", "localizador": "PDF p. 5, 'Multiple valid reasoning chains'"},
+      {"descricao": "Comparação com o PyPrep restrita ao subconjunto expressível na IR e reavaliação com oracle abstain para dar aos LLMs opção de recusa comparável.", "avaliada": "nao", "localizador": "PDF p. 5–6, achado F3"}
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [
+      {"tecnica": "SCoT-Lift", "motivo": "Avaliado só por validação humana de uma amostra de suas saídas, sem condição comparadora; as medidas (passos sound/concise, SCoTs complete, aprovação conjunta 43/50) qualificam a SCoT usada como referência do benchmark, não código traduzido para a tarefa, cuja tradução Spark vem do PyPrep. Números registrados em observacoes."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Narrativa que contradiz a tabela: o achado F5 afirma que 'most models show a slight accuracy uptick' a 100% de remoção, mas na Tabela I todas as 11 linhas caem de 70% para 100% (por exemplo, GPT-5.2 20,1 → 13,4; Claude S.4.5 22,6 → 14,8). A tabela mostra só cinco níveis 'representativos'.", "localizador": "PDF p. 6, achado F5; Tabela I, PDF p. 5"},
+      {"descricao": "Aparente inconsistência: '91.6% of SCoTs are complete' sobre uma amostra de 50 SCoTs corresponde a 45,8 SCoTs (cálculo próprio), valor não inteiro; o artigo não informa outro denominador.", "localizador": "PDF p. 4, seção III.F 'Results'"},
+      {"descricao": "Aparente inconsistência: excluídas as 7 SCoTs reprovadas da amostra, 'the remaining 113 programs' formam a referência, embora a mesma revisão aplicada ao restante do corpus tenha dado taxa de aprovação conjunta 'comparable 86%'; 120 − 7 = 113 (cálculo próprio) implica nenhuma exclusão entre os outros 70 programas. O artigo não explica.", "localizador": "PDF p. 4, seção III.F"},
+      {"descricao": "Aparente inconsistência: subconjunto expressível na IR '94/113 programs, 78.6% coverage'; 94/113 ≈ 83,2% e 94/120 ≈ 78,3% (cálculos próprios), nenhum igual a 78,6%. O artigo não diz o denominador da cobertura.", "localizador": "PDF p. 5, achado F3"},
+      {"descricao": "Aparente inconsistência: SCoT-Bench-Type gera 'up to three variants' por programa, mas tem 371 tarefas, mais que 3 × 113 = 339 e 3 × 120 = 360 (cálculos próprios). A soma 967 + 371 + 314 = 1.652 confere com o total impresso.", "localizador": "PDF p. 4, seção IV.C"},
+      {"descricao": "A coluna 'Avg' da Tabela I é chamada 'per-model average' sem definição; os valores conferidos coincidem com a média aritmética dos cinco níveis impressos (GPT-5.2: 37,38; Claude S.4.5: 40,46; Qwen 3 think: 16,96 — cálculos próprios), o que sugere média dos níveis representativos e não das 967 tarefas; o artigo não o declara.", "localizador": "Tabela I, PDF p. 5; seção VI.A, PDF p. 5"},
+      {"descricao": "O achado F2 da seção VI.B afirma que os blocos de invariante têm 'the highest accuracy', mas na Tabela II a coluna Inv não é a maior para GPT-5.2 (Lam 52,1 > Inv 51,3), GPT-5-mini, CodeOSS-20B e Qwen 3 think; e Asr não é a menor para GPT-5-mini, CodeOSS-20B e Qwen 3 think (o texto diz 'across most models' só para Asr). O 'gap' de 55,8% entre 65,2% e 9,4% é diferença em pontos percentuais.", "localizador": "PDF p. 6, seção VI.B, achados F1 e F2; Tabela II, PDF p. 6"},
+      {"descricao": "Na Tabela II, o valor Lam de Claude S.4.5 (49,6) está em negrito, embora GPT-5.2 tenha 52,1 na mesma coluna.", "localizador": "Tabela II, PDF p. 6"},
+      {"descricao": "Inversões relatadas pelos autores: a variante thinking do Qwen 3 tem desempenho inferior à non-thinking (Avg 17,0 contra 20,2) e Gemini 3 Flash supera Gemini 3 (Avg 35,5 contra 32,9); no SCoT-Bench-Loc, Gemini 3 Flash tem a maior acurácia no Middle (45,3) e modelos maiores não lideram consistentemente esse bloco.", "localizador": "PDF p. 6, achado F4 e seção VI.C F2; Tabelas I e II, PDF p. 5–6"},
+      {"descricao": "A comparação com o PyPrep confronta correção por construção (100%) de uma ferramenta formal que gera as traduções e os traços usados na referência com a acurácia de LLMs em completar SCoTs; não é contraste de prompting e as tarefas não são idênticas. Claude Sonnet 4.5 no subconjunto IR: 71,2% a 10% e 16,1% a 100%; oracle abstain: 81,4% de precisão a 62% de cobertura (Claude Sonnet 4.5) e 76,8% a 58% (GPT-5.2).", "localizador": "PDF p. 5–6, achado F3"},
+      {"descricao": "Claude Sonnet 4.5 e GPT-5.2, usados para construir a referência no SCoT-Lift, estão entre os modelos avaliados (Claude Sonnet 4.5 é o melhor na Tabela I); o artigo discute o viés entre referência e juiz, mas não essa sobreposição entre construtores da referência e modelos avaliados.", "localizador": "PDF p. 3, 'Models used inside SCoT-Lift'; PDF p. 5, seção V.A; Tabela I, PDF p. 5"},
+      {"descricao": "Numeração das referências inconsistente com o texto: o PyPrep é citado como 'our prior work [1]', mas a referência [1] é o artigo do Spark (Zaharia et al.) e o pré-processador dos autores é a [3]; 'Apache Spark—the leading MapReduce framework [3]' remete ao pré-processador.", "localizador": "PDF p. 1–2, introdução e seção II; lista de referências, PDF p. 7"},
+      {"descricao": "Composição do pipeline descrita de formas diferentes: a seção III.A lista Transformer, Checker, laço Transformer–Checker e Pruner com Repair como quatro estágios; a seção VII (N2) lista 'Transformer, Checker, Pruner, Repair'.", "localizador": "PDF p. 2–3, seção III.A; PDF p. 7, seção VII"},
+      {"descricao": "A calibração do juiz usa 200 tarefas, 'twice the original 100', sem que o conjunto original de 100 seja descrito no artigo.", "localizador": "PDF p. 5, 'LLM-judge calibration'"}
+    ],
+    "observacoes": [
+      {"descricao": "Validação humana do SCoT-Lift (amostra de 50 SCoTs, 419 passos): 96,4% dos passos sound, 91,6% das SCoTs complete, 88,3% dos passos concise; 43/50 (86%) aprovadas nos três critérios. κ entre anotadores: 0,81 (soundness), 0,74 (completeness), 0,69 (conciseness).", "localizador": "PDF p. 4, seção III.F"},
+      {"descricao": "SynAcc e SemAcc são definidas, mas só a Overall Accuracy é relatada nas tabelas; o número de tarefas por célula das Tabelas I e II não é informado.", "localizador": "PDF p. 5, seção V.A; Tabelas I e II, PDF p. 5–6"},
+      {"descricao": "Não informados: texto do prompt zero-shot, conteúdo exato fornecido ao modelo, temperatura e demais parâmetros de decodificação, número de execuções, snapshots dos modelos, disponibilidade de dados ou código.", "localizador": "PDF p. 5, seção V.A (busca no texto completo)"},
+      {"descricao": "O PyPrep exige esforço manual para ser estendido a novos padrões e só trata programas expressíveis na sua IR; essa limitação motiva o estudo dos LLMs como alternativa.", "localizador": "PDF p. 2, seção II"},
+      {"descricao": "Na média da Tabela I, a ordem é Claude S.4.5 (40,5), GPT-5.2 (37,4), Gemini 3 Flash (35,5); CodeOSS-20B tem 15,3. A comparação entre modelos é seleção de modelo, não contraste de prompting.", "localizador": "Tabela I, PDF p. 5"},
+      {"descricao": "Na calibração, a anotação foi feita por dois autores; na validação do SCoT-Lift, por um autor e um engenheiro externo. Essas revisões humanas são as relatadas pelo artigo.", "localizador": "PDF p. 4, seção III.F; PDF p. 5, 'LLM-judge calibration'"}
+    ],
+    "citacoes": [
+      {"trecho": "Leveraging SCoT-Lift, we introduce SCoT-Bench, a comprehensive benchmark of 1,652 SCoT completion tasks for rigorously evaluating LLMs on the Python-to-Spark translation process.", "localizador": "Resumo, PDF p. 1"},
+      {"trecho": "Evaluation of ten state-of-the-art LLMs reveals severe fragility, indicating that current LLMs fall well short of the reasoning capabilities exhibited by automated theorem provers, and lag significantly behind the correctness guarantees of our formal Python preprocessor.", "localizador": "Resumo, PDF p. 1"},
+      {"trecho": "Judging a model solely by functional equivalence on a finite test suite cannot distinguish a model that constructs a sound deductive chain (as PyPrep does) from one that succeeds by chance.", "localizador": "Introdução, PDF p. 1"},
+      {"trecho": "In our prior work [1], we developed a Python preprocessor (PyPrep) that automates this translation using program synthesis and formal verification.", "localizador": "Introdução, PDF p. 1"},
+      {"trecho": "However, despite its formal correctness guarantees, the tool is limited to programs expressible in its IR and requires manual effort to extend to new patterns.", "localizador": "Seção II, PDF p. 2"},
+      {"trecho": "SCoT-Lift operates as a four-stage pipeline.", "localizador": "Seção III.A, PDF p. 2"},
+      {"trecho": "To address this, we introduce a Dafny proof rule hierarchy that explicitly steers LLM attention towards steps more likely to be semantically informative.", "localizador": "Seção III.B, PDF p. 3"},
+      {"trecho": "For each category, a dedicated checker agent verifies whether the Synthesis Transformer has produced a corresponding Spark-level step.", "localizador": "Seção III.C, PDF p. 3"},
+      {"trecho": "To reduce hallucinations, each checker must provide an explicit mapping from each high-level Dafny obligation to the corresponding Spark synthesis step, rather than issuing a binary completeness verdict.", "localizador": "Seção III.C, PDF p. 3"},
+      {"trecho": "The Synthesis Transformer is instantiated with Claude Sonnet 4.5; the four Synthesis Checker agents (lemma, invariant, postcondition, commutativity) are instantiated with GPT-5.2; the Synthesis Pruner uses Claude Sonnet 4.5; and the Synthesis Repair agent uses GPT-5.2 with the PySpark grammar and curated repair examples in its system prompt.", "localizador": "Seção III, 'Models used inside SCoT-Lift', PDF p. 3"},
+      {"trecho": "Using two different model families across Transformer/Pruner versus Checkers/Repair reduces the chance that a single model’s blind spots silently propagate into the ground truth.", "localizador": "Seção III, 'Models used inside SCoT-Lift', PDF p. 3"},
+      {"trecho": "When a checker signals incompleteness, the transformer reprocesses the entire proof, naturally recovering additional missing steps beyond the checker’s limited scope.", "localizador": "Seção III.D, PDF p. 3"},
+      {"trecho": "The Synthesis Repair stage ensures soundness by executing the transformed Spark program in PySpark’s syntax-checking mode and feeding error messages back to a repair agent.", "localizador": "Seção III.E, PDF p. 3–4"},
+      {"trecho": "Disagreements were reconciled by discussion to produce a single consensus label per step, used in the analysis below.", "localizador": "Seção III.F, PDF p. 4"},
+      {"trecho": "On the consensus labels, 96.4% of steps are judged sound, 91.6% of SCoTs are complete (no high-level Dafny obligation missing), and 88.3% of steps are concise.", "localizador": "Seção III.F, PDF p. 4"},
+      {"trecho": "At the SCoT (program) level, 43/50 (86%) pass all three goals jointly; the remaining 7 contain at least one violation but are not globally wrong.", "localizador": "Seção III.F, PDF p. 4"},
+      {"trecho": "We exclude the 7 failing SCoTs from SCoT-Bench-Org’s reference set; the remaining 113 programs (after the same review applied to the rest of the corpus, which yielded a comparable 86% joint pass rate) form the ground truth used in Section V.", "localizador": "Seção III.F, PDF p. 4"},
+      {"trecho": "The collection comprises 120 verified Python programs across domains including data filtering, aggregation, join processing, string matching, and numerical computation.", "localizador": "Seção IV.A, PDF p. 4"},
+      {"trecho": "For each program containing N blocks, we generate N variants by removing between 1 and N blocks, yielding 967 SCoT completion tasks.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "For each program, we generate up to three variants: Lambda-removal (all lambda blocks removed), Invariant-removal (all loop invariant blocks), and Assertion-removal (all assertion blocks), yielding 371 tasks.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "We define three removal zones: Front (first 33% of the SCoT), Middle (33%–66%), and End (final 33%), yielding 314 tasks.", "localizador": "Seção IV.C, PDF p. 4"},
+      {"trecho": "All models are prompted in a zero-shot setting with task-specific instructions.", "localizador": "Seção V.A, PDF p. 5"},
+      {"trecho": "We employ three metrics: Syntactic Accuracy (SynAcc), checked by executing the generated Spark code in syntax-only mode; Semantic Accuracy (SemAcc), evaluated by a specialized LLM-based judge guided by detailed rubrics and curated examples; and Overall Accuracy (Acc), a weighted combination.", "localizador": "Seção V.A, PDF p. 5"},
+      {"trecho": "The LLM judge is instantiated with Gemini 3 (a model family disjoint from the GPT-5.2 / Claude Sonnet 4.5 mix used inside SCoT-Lift, to limit shared-model bias between ground-truth construction and evaluation).", "localizador": "Seção V.A, PDF p. 5"},
+      {"trecho": "Against this gold standard, the judge attains a raw four-class agreement of 92.5% (185/200) with Cohen’s κ = 0.88 (almost perfect).", "localizador": "Seção V.A, 'LLM-judge calibration', PDF p. 5"},
+      {"trecho": "The largest residual confusion is between Level 1 and Level 2 (8/15 misclassifications), i.e., the judge occasionally disagrees with humans on whether a syntactically clean but semantically suspect program should be marked semantically correct; this affects Acc by at most ±1.4 percentage points under a worst-case re-assignment.", "localizador": "Seção V.A, 'LLM-judge calibration', PDF p. 5"},
+      {"trecho": "To avoid measuring chain-imitation rather than translation competence, the judge does not compare the model’s output to the lifted SCoT token by token.", "localizador": "Seção V.A, 'Multiple valid reasoning chains', PDF p. 5"},
+      {"trecho": "Table I summarizes overall accuracy (%) at five representative removal levels and the per-model average; below the table we expand on five key findings.", "localizador": "Seção VI.A, PDF p. 5"},
+      {"trecho": "With only 10% of blocks missing, the best model, Claude Sonnet 4.5, achieves 68.4% accuracy, while the weakest, CodeOSS-20B, reaches only 29.7%.", "localizador": "Seção VI.A, F1, PDF p. 5"},
+      {"trecho": "We therefore restrict this finding to the IR-expressible subset of SCoT-Bench-Org (94/113 programs, 78.6% coverage on which PyPrep produces a verified Spark translation).", "localizador": "Seção VI.A, F3, PDF p. 5"},
+      {"trecho": "On this subset, PyPrep is correct by construction (100%), while the best LLM, Claude Sonnet 4.5, attains 71.2% Acc at 10% removal and 16.1% at 100% removal—only marginally above its full-benchmark numbers.", "localizador": "Seção VI.A, F3, PDF p. 5"},
+      {"trecho": "Under this oracle-abstain protocol Claude Sonnet 4.5 reaches 81.4% precision at 62% coverage and GPT-5.2 reaches 76.8% at 58% coverage, both still well below PyPrep’s 100% at 78.6% coverage on the same subset.", "localizador": "Seção VI.A, F3, PDF p. 6"},
+      {"trecho": "Counterintuitively, Qwen 3’s thinking variant underperforms the non-thinking variant, and Gemini 3 Flash outperforms Gemini 3 overall.", "localizador": "Seção VI.A, F4, PDF p. 6"},
+      {"trecho": "In MapReduce translation, where PySpark requires precise API calls and commutativity checks, verbose “thinking” can introduce hallucinated operations or semantic drift.", "localizador": "Seção VI.A, F4, PDF p. 6"},
+      {"trecho": "At 100% removal, most models show a slight accuracy uptick.", "localizador": "Seção VI.A, F5, PDF p. 6"},
+      {"trecho": "This arises because single-block programs appear only at 100% removal, skewing the sample toward easier tasks.", "localizador": "Seção VI.A, F5, PDF p. 6"},
+      {"trecho": "Loop invariant completion achieves the highest accuracy but also the widest spread across models (65.2% to 9.4%, a 55.8% gap), making it the most discriminative construct type.", "localizador": "Seção VI.B, F2, PDF p. 6"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "Zero-shot setting with task-specific instructions (SCoT completion)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "GPT-5.2 (snapshot nao_informado)",
+      "benchmark": "SCoT-Bench-Ratio (967 tarefas de completamento de SCoT, Python-to-Spark)",
+      "metrica": "Overall Accuracy (Acc), coluna 'Avg' da Tabela I",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 37.4},
+      "denominador": "nao_informado (o sub-benchmark tem 967 tarefas, mas o artigo não liga a coluna 'Avg' nem os níveis da Tabela I a esse total)",
+      "condicoes": "Extração descritiva, sem comparador executado: não descreve efeito da técnica. Zero-shot com instruções específicas da tarefa; texto do prompt, parâmetros de decodificação e número de execuções não informados. Acc é combinação ponderada de níveis atribuídos por juiz LLM (Gemini 3) calibrado contra rótulos de dois autores. 'Avg' é agregado impresso do mesmo modelo, técnica e métrica sobre os níveis de remoção; descrito apenas como 'per-model average'; coincide com a média dos cinco níveis representativos impressos (cálculo próprio de conferência: 37,38), não necessariamente com a média das 967 tarefas. Valores por nível para o mesmo modelo, como impressos: 10% = 64,7; 25% = 53,5; 40% = 35,2; 70% = 20,1; 100% = 13,4. Conferido na imagem da Tabela I (PDF p. 5).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca SCoT-Lift, SCoT-Bench e o estudo de dez LLMs, e a seção de método apresenta três métricas sem que uma prevaleça. Estudo sem comparador executado: primeira tabela com a condição avaliada (Tabela I), primeira métrica (Overall Accuracy), primeiro modelo listado (GPT-5.2), usando o agregado impresso 'Avg' sobre os níveis de remoção. Nenhuma cobertura adicional: SCoT-Lift está em so_classificadas e a Tabela II é outro benchmark da mesma técnica e tarefa.",
+      "derivacao": "direta",
+      "localizador": "Tabela I, PDF p. 5 (sem paginação impressa), cabeçalhos 'Model | 10% | 25% | 40% | 70% | 100% | Avg'; seção V.A, PDF p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "GPT-5.2 64.7 53.5 35.2 20.1 13.4 37.4", "localizador": "Tabela I ('Overall accuracy (%) on SCoT-Bench-Ratio across removal ratios'), PDF p. 5, linha GPT-5.2, colunas 10%, 25%, 40%, 70%, 100%, Avg"},
+        {"trecho": "All models are prompted in a zero-shot setting with task-specific instructions.", "localizador": "Seção V.A, PDF p. 5"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Questão explícita (se LLMs reconstroem a lógica da tradução Python-to-Spark ou apenas adivinham) e contribuições enumeradas (conceito SCoT, SCoT-Lift, SCoT-Bench, estudo de dez LLMs).", "localizador": "Resumo e introdução, PDF p. 1–2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção da referência, do benchmark e das métricas é descrita, mas o prompt zero-shot não é publicado, não se informa o que o modelo recebe além das instruções, nem decodificação, número de execuções e número de tarefas por nível; há contagens inconsistentes (113 programas, 371 tarefas, cobertura de 78,6%).", "localizador": "Seções III.F, IV.C e V.A, PDF p. 4–5"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Não há condição de prompting comparadora; os modelos são comparados entre si e com o PyPrep, ferramenta formal 'correct by construction' que gera a própria referência, contraste que os autores normalizam com o subconjunto IR e o oracle abstain, mas que não mede a mesma saída nas mesmas condições.", "localizador": "Seção VI.A, F3, PDF p. 5–6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Acc tem fórmula explícita e o juiz é calibrado (κ = 0,88), mas SynAcc e SemAcc não são relatadas, os denominadores por célula e a definição de 'Avg' não são informados, a narrativa F5 contradiz a Tabela I e 91,6% de 50 SCoTs não é inteiro.", "localizador": "Seção V.A e Tabela I, PDF p. 5; seção VI.A F5, PDF p. 6; seção III.F, PDF p. 4"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Sem seção de ameaças, mas o artigo discute falhas da referência gerada por LLM, viés e erro do juiz (±1,4 p.p.), cadeias alternativas válidas e inflação da acurácia a 100% de remoção; não discute não determinismo, contaminação nem a sobreposição entre modelos que constroem a referência e modelos avaliados.", "localizador": "Seção III.F, PDF p. 4; seção V.A, PDF p. 5; F5, PDF p. 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos nomeados e pipeline descrito, mas sem snapshots, sem texto dos prompts, sem parâmetros de decodificação e sem declaração de disponibilidade de dados, código ou benchmark.", "localizador": "Seções III e V.A, PDF p. 3–5 (busca no texto completo)"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O artigo não discute vazamento de dados de avaliação no pré-treinamento ou no prompt, embora parte dos programas venha de suítes de benchmark publicadas [20], [21].", "localizador": "Seção IV.A, PDF p. 4 (busca no texto completo)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (7 páginas, sem paginação impressa). Páginas do PDF abertas visualmente: p-01, p-03, p-04, p-05 (Tabela I) e p-06 (Tabela II)."
+  }
+}

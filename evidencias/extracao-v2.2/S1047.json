@@ -1,0 +1,577 @@
+{
+  "estudo": "S1047",
+  "texto_fonte": "fontes/textos/lote/S1047.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2510.22849v1 [cs.CL], 26 out. 2025; rodapé indica 39th Conference on Neural Information Processing Systems (NeurIPS 2025); páginas do PDF coincidem com as páginas impressas (p. 1-34)",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Per-Instance Program Synthesis (PIPS)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente", "outro"],
+        "mecanismos_acrescentados": ["raciocinio", "decomposicao", "feedback", "multiagente", "outro"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, p. 1; Seção 3 e Algoritmo 1, p. 5-6; Apêndice I (prompts), p. 31-33; Tabelas C.2-C.8, p. 24-28; Figura 5, p. 7",
+        "observacao": "Pacote completo: (1) seletor por instância entre CoT e síntese de programas, baseado em prompt de autoavaliação com dez critérios de confiança (instrucao; o prompt pede 'Explicitly reason through each criterion' → raciocinio; rota CoT → raciocinio; roteamento por confiança autoavaliada → outro); (2) gerador com diretrizes e plano ('You MUST always plan extensively') → instrucao, raciocinio; etapas encadeadas extração de símbolos em JSON → plano → programa `solve(symbols)` → execução → decomposicao; formato obrigatório (JSON em bloco markdown, função chamada `solve`, sem main, retornar e não imprimir, código não trivial) → restricoes; (3) avaliador composto por LLM e interpretador, cujo resumo de problemas e resultado de execução voltam ao gerador por até 30 iterações → feedback; o prompt do gerador apresenta o resumo como produzido 'by another model', papel distinto que interage com o gerador → multiagente. Acrescentados em relação a PoT (comparador de que deriva): raciocinio (rota CoT e planejamento), decomposicao, feedback, multiagente e outro; restricoes pode também ser acréscimo, mas o prompt de PoT não é reproduzido no artigo. Contrafactual: PIPS contra PoT, CoT e CI no mesmo modelo e conjuntos (Tabelas C.2-C.8); 'sim' vale para o pacote e não autoriza atribuir o ganho a um único mecanismo. Pacote híbrido: a decisão do seletor usa um classificador logístico treinado em 20% dos dados (calibração), e a execução é feita por interpretador Python (ver componentes_fora_escopo)."
+      },
+      {
+        "nome_original": "Synthesis Confidence Metric / switch (PIPS vs. PIPS (no switch))",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente", "outro"],
+        "mecanismos_acrescentados": ["instrucao", "raciocinio", "outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.1, p. 5; Seção 4.3, p. 8; Tabela 1, p. 8; Apêndice H, p. 25-31; Tabela H.11, p. 30",
+        "observacao": "Parte do sistema proposto (embora listada como contribuição), por isso componente. Acrescenta o prompt 'CoT or Synthesis Switch Criteria' (autoavaliação conservadora com dez probabilidades → instrucao; raciocínio explícito por critério → raciocinio; formato de saída como lista → já coberto por restricoes no pacote), a rota CoT (raciocinio) e o roteamento por confiança (outro). Contrafactual de ingrediente: Tabela 1, PIPS (20,8) contra PIPS (no switch) (18,3), demais componentes mantidos. Híbrido: no PIPS principal a decisão vem de classificador logístico treinado no conjunto de calibração; a variante ZS-Switch (Tabela H.11) usa só a resposta ao décimo critério, sem treino. A Tabela 1 não indica o modelo; o texto da RQ2 associa o resultado da Tabela 1 ao Gemini-2.0-Flash."
+      },
+      {
+        "nome_original": "Iterative synthesis loop with structural feedback (PIPS (no switch) vs. PIPS-0 (no switch))",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["feedback", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.2 e Algoritmo 1, p. 5-6; Seção 4.2, p. 7; Tabela 1, p. 8; Figura 6, p. 7; Apêndices G e I, p. 24-25 e 32-33",
+        "observacao": "Avaliador (LLM com oito critérios estruturais e interpretador Python) cujo resultado ('Return value', 'Standard output', 'Exceptions' e resumo de problemas) volta ao gerador, que pode revisar o programa e os símbolos, até 30 iterações (Apêndice J) → feedback; o avaliador é descrito ao gerador como 'another model' → multiagente. Contrafactual de ingrediente: Tabela 1, PIPS (no switch) (18,3) contra PIPS-0 (no switch) (12,9). O rótulo PIPS-0 não é definido explicitamente; o texto da RQ1 descreve k = 0 como a condição em que o avaliador não é usado. A Figura 6 mostra a escala com o número de iterações (sem condição sem a técnica além de k = 0/1)."
+      },
+      {
+        "nome_original": "Instance-specific symbolic extraction (PIPS-0 (no switch) vs. PIPS-0 (no switch, no symbols))",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes"],
+        "mecanismos_acrescentados": ["decomposicao", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.3, p. 6; Seção 4.5, p. 9; Tabela 1, p. 8; Apêndice I, p. 32",
+        "observacao": "Etapa prévia em que o LLM extrai entidades, atributos e relações em JSON com esquema ad hoc, passado como entrada `symbols` à função gerada → decomposicao (etapa encadeada) e restricoes (formato JSON estruturado). Contrafactual de ingrediente: Tabela 1, PIPS-0 (no switch) (12,9) contra PIPS-0 (no switch, no symbols) (4,3), em que é produzida uma função sem entrada. Não extraído em `extracoes` porque o alvo de três já foi atingido pelos componentes anteriores da tabela de ablação."
+      },
+      {
+        "nome_original": "Program of Thought (PoT)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1 (Baselines), p. 6-7; Tabelas C.2-C.8, p. 24-28",
+        "observacao": "Prompt para gerar código Python que resolve o problema, executado para obter a resposta, sem iteração. O prompt de PoT não é reproduzido no Apêndice I; a classificação se limita à descrição do texto. O artigo cita PoT como [4] na seção de baselines, referência que corresponde ao artigo de CoT (PoT é [19])."
+      },
+      {
+        "nome_original": "Chain of Thought (CoT)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1 (Baselines), p. 6; Tabelas C.2-C.8, p. 24-28",
+        "observacao": "Raciocínio em linguagem natural sem execução de código; prompt não reproduzido no Apêndice I."
+      },
+      {
+        "nome_original": "Gemini Code Interpreter (CI)",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 7; Tabela C.3, p. 25; Tabelas C.6-C.8, p. 27-28",
+        "observacao": "Ferramenta de API em que o modelo sintetiza e executa código de modo agêntico antes da resposta final (feedback de execução). Avaliado só com Gemini-2.0-Flash. Mecanismos internos não isolados nem descritos em detalhe; sistema de ferramenta do provedor."
+      },
+      {
+        "nome_original": "PoT-retries",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "Seção 4.1, p. 7; Apêndice D, p. 22; Tabela D.9, p. 29",
+        "observacao": "PoT que regenera o código até executar sem erros. O estudo não analisa o contraste, mas a Tabela D.9 (Gemini-2.0-Flash, BBEH) traz PoT (0,095) e PoT-retries (0,098), condições descritas como diferentes apenas na regeneração após erro de execução (p. 7 e 22)."
+      },
+      {
+        "nome_original": "CodeAct",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 7; Apêndices D e E, p. 22; Tabelas D.9 e E.10, p. 29",
+        "observacao": "Implementação da biblioteca smolagents; descrita como baseline agêntica e abordagem iterativa com execução de código. Mecanismos não isolados nem detalhados no artigo."
+      },
+      {
+        "nome_original": "Buffer-of-Thoughts (BoT)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.1, p. 7; Apêndices D e E, p. 22; Tabelas D.9 e E.10, p. 29",
+        "observacao": "Código de Yang et al. com correções de bugs feitas pelos autores. O artigo só o descreve como abordagem iterativa; não descreve seus ingredientes, por isso a classificação se limita a instrucao. Não suporta as tarefas multimodais."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Learned logistic classifier for the switch",
+        "natureza": "outro",
+        "descricao": "Classificador logístico treinado sobre as dez probabilidades autoavaliadas, com 20% dos dados de cada conjunto reservados para calibração; decide entre CoT e síntese. Não é prompting; torna o seletor e o PIPS completo pacotes híbridos. Coeficientes na Tabela H.12.",
+        "localizador": "Seção 3.1, p. 5; Seção 4.1, p. 6; Apêndice H.2, p. 27; Tabela H.12, p. 31"
+      },
+      {
+        "nome_original": "Temperature 0.0",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,0 para todos os modelos.",
+        "localizador": "Apêndice J, p. 33"
+      },
+      {
+        "nome_original": "Maximum of 30 iterations",
+        "natureza": "orcamento",
+        "descricao": "Limite de 30 iterações do laço de síntese do PIPS para todos os modelos.",
+        "localizador": "Apêndice J, p. 33"
+      },
+      {
+        "nome_original": "Python interpreter execution",
+        "natureza": "outro",
+        "descricao": "Execução do programa por interpretador Python, usada para obter a resposta (PIPS, PoT) e como insumo do avaliador; o retorno ao prompt é classificado como feedback, mas a execução em si não é prompting.",
+        "localizador": "Seção 3.2, p. 6; Apêndice I, p. 32-33"
+      }
+    ],
+    "modelos": [
+      "Gemini-2.0-Flash (versão/snapshot nao_informado)",
+      "GPT-4.1-mini (gpt-4.1-mini-2025-04-14, conforme legenda da Tabela C.4)",
+      "o4-mini (esforço 'medium' indicado no Apêndice K; snapshot nao_informado)",
+      "Qwen3-235B-A22B (só tarefas BBEH, Tabela C.5; versão nao_informado)",
+      "LLM do avaliador E: o artigo diz que E é composto por 'an LLM and a program interpreter' e o prompt cita 'another model'; modelo específico nao_informado",
+      "LLM do classificador de algoritmicidade (análise): modelo nao_informado"
+    ],
+    "benchmarks": [
+      "Big Bench Extra Hard (BBEH): 23 tarefas; número de instâncias por tarefa nao_informado",
+      "CLEVR (raciocínio visual); número de instâncias nao_informado",
+      "Leaf (raciocínio visual); número de instâncias nao_informado",
+      "CLUTRR (raciocínio relacional); número de instâncias nao_informado",
+      "Omni-MATH: quatro tarefas (Omnimath-1 a Omnimath-4); número de instâncias nao_informado",
+      "Total de 30 conjuntos; 20% de cada conjunto reservados para calibração do seletor e 80% para avaliação; o denominador de cada acurácia não é informado",
+      "Divisão algorítmico/não algorítmico (Tabela A.1): 17 conjuntos algorítmicos e 13 não algorítmicos (contagem própria das linhas da tabela)"
+    ],
+    "metricas": [
+      "Accuracy por conjunto (proporção)",
+      "Harmonic mean accuracy (HMean Accuracy), agregada sobre conjuntos, seguindo Kazemi et al.",
+      "Percentual de código não trivial (PoT Non-Trivial (%), PIPS Non-Trivial (%))",
+      "Fração de código com problemas: trivial, type, syntax, placeholders (Figura 3a, Figura 6b)",
+      "Performance Boost (Δ Acc %) e Samples Fixed (Tabela 2)",
+      "Taxa de seleção correta do seletor e curva de calibração (Seção 4.3, Figura 7)",
+      "Tokens médios de entrada e saída e custo em USD (Tabela E.10)",
+      "Percentual de código bem formado de PoT que usa OpenCV ou Pillow (Seção 2.3 e 4.5)"
+    ],
+    "linguagens": ["Python (programas gerados)", "JSON (entrada simbólica extraída)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Programas indesejáveis gerados por síntese por instância: programas triviais com resposta codificada diretamente, erros de sintaxe, tipo de retorno errado e placeholders. Na Figura 3a (Gemini-2.0-Flash, instâncias algorítmicas), PoT: trivial 54,1%, type 11,5%, syntax 6,3%, placeholders 8,1%; PIPS ainda apresenta trivial 18,9%, type 7,0%, syntax 0,9%, placeholders 5,1%.",
+        "localizador": "Seção 2.2, p. 4; Figura 3a, p. 3"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Programas de PoT que processam a imagem bruta com código (OpenCV/Pillow) em vez da percepção do LLM; exemplo em que a execução falha por referenciar arquivo inexistente. 12,7% do código bem formado de PoT em CLEVR e Leaf usa essas bibliotecas.",
+        "localizador": "Seção 2.3, p. 5; Figura 4b, p. 4; Seção 4.5, p. 9"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A extração simbólica feita pelo LLM pode introduzir erros ou omitir informação da entrada, e a conversão para forma simbólica não tem garantia de fidelidade.",
+        "localizador": "Seção 3.3, p. 6; Seção 6, p. 10"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Incentivar programas não triviais em problemas não algorítmicos reduz o desempenho (Gemini-2.0-Flash, conjuntos não algorítmicos: CoT 0,199; PoT 0,166; PIPS sem seletor 0,151).",
+        "localizador": "Seção 4.3, p. 8; Apêndice F, p. 24"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "PIPS é descrito como 3-4X mais caro que CoT ou PoT (Tabela E.10, Gemini-2.0-Flash: custo médio PIPS $0.0023, PoT $0.0006, CoT $0.0007; tokens médios de entrada 11.839,09 contra 1.115,96 e 1.099,77). Abordagens iterativas (CodeAct, BoT) aumentam o custo em mais de 10X.",
+        "localizador": "Apêndice E, p. 22 e 24; Tabela E.10, p. 29"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Infidelidade do raciocínio em CoT: a resposta final pode estar correta por razões erradas (risco apontado para métodos de raciocínio intermediário, motivação do estudo).",
+        "localizador": "Seção 1, p. 1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação: PIPS não trata de forma ótima problemas que seriam mais bem resolvidos em parte com CoT e em parte com síntese; o estudo considera só propriedades estruturais simples do código.",
+        "localizador": "Seção 6, p. 10"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Impactos amplos citados sem avaliação: propagação de viés dos modelos subjacentes, desafios para garantir robustez dos programas gerados dinamicamente e uso indevido.",
+        "localizador": "Apêndice L, p. 33-34"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Laço iterativo com feedback estrutural (avaliador LLM + interpretador) para rejeitar programas triviais, com erros de tipo, sintaxe ou execução.",
+        "avaliada": "sim",
+        "localizador": "Seção 3.2, p. 6; Tabela 1, p. 8 (PIPS (no switch) contra PIPS-0 (no switch)); Figura 6, p. 7"
+      },
+      {
+        "descricao": "Seletor por instância entre CoT e síntese para evitar programas triviais em instâncias não algorítmicas.",
+        "avaliada": "sim",
+        "localizador": "Seção 3.1, p. 5; Seção 4.3 e Tabela 1, p. 8; Tabela H.11, p. 30"
+      },
+      {
+        "descricao": "Extração simbólica explícita antes da síntese, para separar percepção e lógica e evitar processamento de dados brutos pelo código.",
+        "avaliada": "sim",
+        "localizador": "Seção 3.3, p. 6; Seção 4.5, p. 9; Tabela 1, p. 8 (PIPS-0 (no switch) contra PIPS-0 (no switch, no symbols))"
+      },
+      {
+        "descricao": "Na iteração inicial (k = 0), o prompt pede um programa sem os padrões indesejáveis (não só retornar a resposta nem raciocinar em comentários).",
+        "avaliada": "nao",
+        "localizador": "Seção 3.2, p. 6; Apêndice I, p. 32"
+      },
+      {
+        "descricao": "Instrução para que símbolos revisados contenham só informação presente na entrada original, mantendo o código ancorado no problema.",
+        "avaliada": "nao",
+        "localizador": "Apêndice I, p. 32"
+      },
+      {
+        "descricao": "Reserva de 20% de cada conjunto para calibrar o seletor e avaliação nos 80% restantes; avaliação adicional leave-one-dataset-out e seletor zero-shot.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.1, p. 6; Apêndice H.1, p. 25-26; Tabela H.11, p. 30"
+      },
+      {
+        "descricao": "Temperatura 0,0 para todos os modelos.",
+        "avaliada": "nao",
+        "localizador": "Apêndice J, p. 33"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "CoT, PoT e Gemini Code Interpreter (CI, só Gemini-2.0-Flash) executados nos 30 conjuntos; PoT-retries, CodeAct e BoT executados só com Gemini-2.0-Flash nas tarefas BBEH (Apêndice D)",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Contagem de conjuntos: a legenda da Figura 5 fala em 17 tarefas majoritariamente algorítmicas e 10 não algorítmicas (27), mas o total declarado é 30 e a Tabela A.1 lista 17 algorítmicos e 13 não algorítmicos (contagem própria das linhas). A legenda da Tabela A.1 descreve a divisão como 'of the BBEH datasets', embora inclua CLEVR, Leaf, CLUTRR e Omni-MATH.",
+        "localizador": "Figura 5, p. 7; Tabela A.1, p. 21"
+      },
+      {
+        "descricao": "Narrativa contra tabela no efeito do seletor: o texto da RQ2 atribui ao seletor ganho absoluto de 2.2% em harmonic mean accuracy (Table 1), mas a Tabela 1 traz PIPS 20,8 e PIPS (no switch) 18,3 (diferença de 2,5 p.p., cálculo próprio).",
+        "localizador": "Seção 4.3, p. 8; Tabela 1, p. 8"
+      },
+      {
+        "descricao": "Narrativa contra tabela na extração simbólica: o texto da RQ4 afirma melhoria de 4% em harmonic mean no BBEH pelas linhas inferiores da Tabela 1, mas a tabela traz PIPS-0 (no switch) 12,9 e PIPS-0 (no switch, no symbols) 4,3 (diferença de 8,6 p.p., cálculo próprio).",
+        "localizador": "Seção 4.5, p. 9; Tabela 1, p. 8"
+      },
+      {
+        "descricao": "Mesmo valor diferente entre tabelas: a Tabela 1 (BBEH, modelo não indicado; o texto da RQ2 a associa ao Gemini-2.0-Flash) traz PIPS 20,8%, enquanto a Tabela D.9 (BBEH, Gemini-2.0-Flash) traz PIPS 0.171. A Tabela H.11 traz PIPS 0.208 para Gemini-2.0-Flash 'over all 30 datasets', enquanto as Tabelas C.3 e C.6 trazem 0.201 para o mesmo modelo e conjunto; para o4-mini (0.397) e GPT-4.1-mini (0.305) a Tabela H.11 coincide com a C.6. O artigo não explica as diferenças.",
+        "localizador": "Tabela 1, p. 8; Tabela D.9, p. 29; Tabela H.11, p. 30; Tabela C.3, p. 25; Tabela C.6, p. 27"
+      },
+      {
+        "descricao": "Aparente inconsistência entre a Figura 3a e o texto da RQ3: com os valores impressos na figura (PoT/PIPS: trivial 54,1/18,9; type 11,5/7,0; syntax 6,3/0,9; placeholders 8,1/5,1), as reduções relativas calculadas são cerca de 65,1% (trivial), 39,1% (type), 85,7% (syntax) e 37,0% (placeholders) (cálculo próprio a partir de valores arredondados a uma casa), enquanto o texto informa 75,6%, 49,2%, 86,8% e 36,3%. As diferenças de syntax e placeholders podem decorrer de arredondamento; as de trivial e type não parecem explicáveis por arredondamento. O valor 65,1% coincide com o número que o resumo apresenta como redução de 'undesirable program generations' e as contribuições como melhoria de 'code utilization'.",
+        "localizador": "Figura 3a, p. 3; Seção 4.4, p. 9; Resumo, p. 1; Seção 1, p. 2"
+      },
+      {
+        "descricao": "Narrativa contra tabela nas tarefas não algorítmicas: o texto afirma que PIPS não degrada a acurácia nessas tarefas, mas na Tabela C.8 PIPS fica abaixo de CoT para Gemini-2.0-Flash (0.184 contra 0.199) e GPT-4.1-mini (0.248 contra 0.254); fica acima de PoT nos três modelos.",
+        "localizador": "Seção 4.2, p. 7; Seção 1, p. 2; Tabela C.8, p. 28"
+      },
+      {
+        "descricao": "Inversões por conjunto: PIPS abaixo de PoT ou CoT em várias tarefas, por exemplo Gemini-2.0-Flash Dyck languages (CoT 0.119, PoT 0.081, PIPS 0.050) e Shuffled objects (CI 0.537, PIPS 0.188); GPT-4.1-mini Time arithmetic (PoT 0.706, PIPS 0.463); Qwen3-235B-A22B Multistep arithmetic (CoT 0.550, PIPS 0.275). Com GPT-4.1-mini a diferença agregada sobre PoT é pequena (0.305 contra 0.297).",
+        "localizador": "Tabela C.3, p. 25; Tabela C.4, p. 26; Tabela C.5, p. 27; Tabela C.6, p. 27"
+      },
+      {
+        "descricao": "Representação de CI: a Tabela C.6 imprime 0.000 para CI com gpt-4.1-mini e o4-mini, enquanto as Tabelas C.7 e C.8 imprimem '-' para as mesmas células; o texto descreve CI como ferramenta do Gemini, o que sugere condição não executada, mas o artigo não esclarece.",
+        "localizador": "Tabela C.6, p. 27; Tabelas C.7-C.8, p. 28; Seção 4.1, p. 7"
+      },
+      {
+        "descricao": "Aparente inconsistência na linha Harmonic Mean das colunas de código não trivial: PIPS Non-Trivial 0.1% (Tabela C.2) e PoT Non-Trivial 0.3% (Tabela C.4), embora as colunas contenham linhas com 0.0%; o estimador usado para média harmônica com zeros não é informado.",
+        "localizador": "Tabela C.2, p. 24; Tabela C.4, p. 26"
+      },
+      {
+        "descricao": "Denominador ambíguo do custo: a Tabela E.10 é descrita como média sobre os 30 conjuntos com Gemini-2.0-flash, mas inclui Buffer of Thoughts, que segundo o Apêndice D não suporta as tarefas multimodais.",
+        "localizador": "Apêndice D e E, p. 22; Tabela E.10, p. 29"
+      },
+      {
+        "descricao": "O checklist afirma estudo com diferentes seeds e erro aproximado 'reported in Section 4', mas a Seção 4 e as tabelas não reportam erro, variância nem número de execuções.",
+        "localizador": "Checklist, item 7, p. 16; Seção 4, p. 6-9"
+      },
+      {
+        "descricao": "O Apêndice I declara incluir todos os prompts da avaliação, mas não reproduz os prompts de PoT e CoT.",
+        "localizador": "Apêndice I, p. 28-33"
+      },
+      {
+        "descricao": "Baselines agênticas adicionais com desempenho baixo (CodeAct 0.040, BoT 0.027, abaixo de PoT 0.095) e implementação de BoT corrigida pelos autores por alta taxa de falhas; comparação só com Gemini-2.0-Flash no BBEH.",
+        "localizador": "Apêndice D, p. 22; Tabela D.9, p. 29"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Os conjuntos são de raciocínio (lógica, visão, relações, matemática); a geração de código é o meio de resolução, e as métricas principais medem a resposta final, não a correção do programa por testes.",
+        "localizador": "Seção 4.1, p. 6"
+      },
+      {
+        "descricao": "Classificador de algoritmicidade baseado em LLM (prompt com dez critérios binários, limiar de 8 em 10) usado para analisar resultados e dividir conjuntos; não é condição avaliada.",
+        "localizador": "Seção 2.1, p. 3-4; Apêndice A, p. 21; Apêndice I, p. 28-29"
+      },
+      {
+        "descricao": "A Tabela 2 mede ganho de acurácia em amostras em que PIPS corrigiu erros de PoT (por exemplo, Syntax Errors 20.0 em 200 amostras; Hardcoded Answers 5.2 em 1138); não é contraste entre condições completas.",
+        "localizador": "Tabela 2, p. 9"
+      },
+      {
+        "descricao": "Análises do seletor: casos em que PIPS ou CoT acertam, mas não ambos, são 24,8% das amostras; o seletor escolhe o método correto em 65,3% desses casos (Gemini-2.0-Flash); curva de calibração na Figura 7; variantes ZS-Switch e LOO na Tabela H.11; coeficientes na Tabela H.12.",
+        "localizador": "Seção 4.3, p. 8; Figura 7, p. 8; Tabela H.11, p. 30; Tabela H.12, p. 31"
+      },
+      {
+        "descricao": "Com k = 0 (avaliador não usado), o texto afirma que PIPS supera PoT por 5.6% e CI por 3.7% em harmonic mean; o ponto de comparação não está em tabela.",
+        "localizador": "Seção 4.2, p. 7; Figura 6a, p. 7"
+      },
+      {
+        "descricao": "Custo total dos experimentos: $300 (Gemini-2.0-Flash), $70 (GPT-4.1-mini), $700 (o4-mini medium); servidor local usado para testes de modelos de pesos abertos.",
+        "localizador": "Apêndice K, p. 33"
+      },
+      {
+        "descricao": "Código e demonstração declarados em https://github.com/adaminsky/pips; o repositório não foi acessado nem validado nesta extração.",
+        "localizador": "Nota de rodapé 2, p. 1; Checklist, item 5, p. 15-16"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We introduce Per-Instance Program Synthesis (PIPS), a method that generates and refines programs at the instance-level using structural feedback without relying on task-specific guidance or explicit test cases.",
+        "localizador": "Resumo, p. 1"
+      },
+      {
+        "trecho": "To further improve performance, PIPS incorporates a confidence metric that dynamically chooses between direct inference and program synthesis on a per-instance basis.",
+        "localizador": "Resumo, p. 1"
+      },
+      {
+        "trecho": "It then iteratively generates and evaluates programs using feedback based on structural checks (e.g. non-triviality, syntax, type errors), specifically designed to avoid the collapse to trivial solutions and ensure well-formed computation.",
+        "localizador": "Seção 1, p. 2"
+      },
+      {
+        "trecho": "To handle unstructured input, PIPS explicitly performs instance-specific symbolic extraction before synthesis, decoupling program search from perceptual inference.",
+        "localizador": "Seção 1, p. 2"
+      },
+      {
+        "trecho": "Given the model’s own assessment of its abilities through these probing questions, the final switch decision can either be derived in a fully zero-shot manner, or a held-out calibration set can be used to derive the decision from a learned logistic classifier, enabling the switch to leverage problem solving experience for higher accuracy.",
+        "localizador": "Seção 3.1, p. 5"
+      },
+      {
+        "trecho": "If an issue is detected, E produces structural feedback to aid in fixing the problem.",
+        "localizador": "Seção 3.2, p. 6"
+      },
+      {
+        "trecho": "You MUST always plan extensively before outputting any symbols or code.",
+        "localizador": "Apêndice I, prompt PIPS Code Generator (Iteration 0), p. 32"
+      },
+      {
+        "trecho": "The JSON must be enclosed in a markdown code block and the Python function must be in a separate markdown code block and be called `solve` and accept a single input called `symbols` representing the JSON information extracted.",
+        "localizador": "Apêndice I, prompt PIPS Code Generator (Iteration 0), p. 32"
+      },
+      {
+        "trecho": "The following is the summary of issues found with the code or the extracted symbols by another model:",
+        "localizador": "Apêndice I, prompt PIPS Code Generator (Iteration > 0), p. 32"
+      },
+      {
+        "trecho": "PoT involves prompting an LLM to generate Python code to solve the problem and then executing the code to get a final answer.",
+        "localizador": "Seção 4.1, p. 6-7"
+      },
+      {
+        "trecho": "We evaluate another agentic baseline called PoT-retries which performs PoT, but regenerates the code until the code executes without any errors, as well as CodeAct [30], and Buffer-of-Thoughts [31] for Gemini-2.0-Flash in Appendix D.",
+        "localizador": "Seção 4.1, p. 7"
+      },
+      {
+        "trecho": "Figure 3a shows that over 50% of PoT’s outputs on algorithmic tasks fall into this category.",
+        "localizador": "Seção 2.2, p. 4"
+      },
+      {
+        "trecho": "Executing the program leads to an error caused by referencing a non-existent file.",
+        "localizador": "Seção 2.3, p. 5"
+      },
+      {
+        "trecho": "While allowing for an LLM to decide how to abstract the input into a structured form is highly general, this can lead to mistakes or missed information from the input in this step.",
+        "localizador": "Seção 3.3, p. 6"
+      },
+      {
+        "trecho": "Finally, while PIPS offers interpretable reasoning when using code, the conversion of the input to symbolic form still lacks faithfulness guarantees.",
+        "localizador": "Seção 6, p. 10"
+      },
+      {
+        "trecho": "We find that encouraging non-trivial programs for non-algorithmic problems leads to reduced performance.",
+        "localizador": "Apêndice F, p. 24"
+      },
+      {
+        "trecho": "We find that the iterative approaches (CodeAct and Buffer of Thoughts) increase cost by more than 10X compared to PoT or CoT, but PIPS is overall only 3-4X more expensive than CoT or PoT while achieving much greater accuracy.",
+        "localizador": "Apêndice E, p. 22 e 24"
+      },
+      {
+        "trecho": "Only include information in the JSON which is present in the original input to keep the code grounded in the specific problem.",
+        "localizador": "Apêndice I, prompt PIPS Code Generator (Iteration > 0), p. 32"
+      },
+      {
+        "trecho": "For all datasets, we reserve a random sample of 20% of the data for calibration of our confidence switch, and we evaluate on the remaining 80% of the data.",
+        "localizador": "Seção 4.1, p. 6"
+      },
+      {
+        "trecho": "For all models we used a temperature of 0.0.",
+        "localizador": "Apêndice J, p. 33"
+      },
+      {
+        "trecho": "These include the potential for bias propagation from underlying models, challenges in ensuring the complexity and robustness of dynamically generated programs, and concerns regarding misuse.",
+        "localizador": "Apêndice L, p. 33"
+      },
+      {
+        "trecho": "For Gemini-2.0-Flash, the switch selects the correct method 65.3% of the time, yielding a 2.2% absolute gain in harmonic mean accuracy (Table 1).",
+        "localizador": "Seção 4.3, p. 8"
+      },
+      {
+        "trecho": "We also perform an ablation as shown in the bottom two rows of Table 1, where we see that the use of explicit function inputs in PIPS leads to a 4% harmonic mean improvement on BBEH.",
+        "localizador": "Seção 4.5, p. 9"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Per-Instance Program Synthesis (PIPS)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente", "outro"],
+      "mecanismos_acrescentados": ["decomposicao", "restricoes", "feedback", "multiagente", "outro"],
+      "comparador": "Chain of Thought (CoT)",
+      "modelo": "o4-mini (esforço 'medium' segundo o Apêndice K)",
+      "benchmark": "Agregado Harmonic Mean sobre os 30 conjuntos (23 tarefas BBEH, CLEVR, Leaf, CLUTRR e quatro tarefas Omni-MATH)",
+      "metrica": "Accuracy (linha Harmonic Mean da Tabela C.2: harmonic mean accuracy)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.304, "intervencao": 0.397},
+      "denominador": "nao_informado (80% de cada conjunto, número de instâncias não informado)",
+      "condicoes": "Temperatura 0,0; até 30 iterações no PIPS; seletor treinado com 20% de cada conjunto e avaliação nos 80% restantes; número de execuções nao_informado (o checklist menciona seeds sem reportá-las). Agregado impresso da mesma técnica, métrica e comparador, no mesmo modelo, sobre os 30 conjuntos heterogêneos (raciocínio textual, visual, relacional e matemático); o mesmo par de valores consta na Tabela C.6. PIPS é pacote híbrido (classificador logístico do seletor, execução por interpretador); o resultado é do pacote, não de um mecanismo. As tarefas são de raciocínio em que o código é meio de resolução; a acurácia mede a resposta final. conferido_pdf: valores, cabeçalho e legenda conferidos na imagem da p. 24 e na Tabela C.6 da p. 27.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca dois comparadores (PoT e CoT) e duas métricas (harmonic mean accuracy e redução de programas indesejáveis), e as contribuições destacam 'code utilization' e harmonic mean accuracy. Pela ordem do PDF, a Tabela 1 (p. 8) é ablação de componentes do PIPS, sem linha de base de prompting, e a Tabela 2 (p. 9) traz só o ganho em amostras corrigidas, sem as duas condições; a primeira tabela com o contraste PIPS contra linha de base é a Tabela C.2 (p. 24, o4-mini). Primeira métrica: Accuracy; único modelo da tabela: o4-mini; primeira linha de base listada: CoT. Usado o agregado impresso Harmonic Mean da tabela.",
+      "derivacao": "direta",
+      "localizador": "Tabela C.2, p. 24 (linha Harmonic Mean; colunas CoT e PIPS); confirmação na Tabela C.6, p. 27",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Harmonic Mean 0.304 0.340 0.0% 0.397 0.1%",
+          "localizador": "Tabela C.2, p. 24; colunas Dataset | CoT | PoT | PoT Non-Trivial (%) | PIPS | PIPS Non-Trivial (%)"
+        },
+        {
+          "trecho": "Table C.2: Accuracy and non-trivial-code percentage for o4-mini.",
+          "localizador": "Legenda da Tabela C.2, p. 24"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Synthesis Confidence Metric / switch (PIPS vs. PIPS (no switch))",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente", "outro"],
+      "mecanismos_acrescentados": ["instrucao", "raciocinio", "outro"],
+      "comparador": "PIPS (no switch)",
+      "modelo": "Gemini-2.0-Flash (a Tabela 1 não indica o modelo; atribuição pelo texto da RQ2, p. 8, que cita a Tabela 1 para Gemini-2.0-Flash)",
+      "benchmark": "BBEH (tarefas BBEH, conforme legenda da Tabela 1)",
+      "metrica": "HMean Accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 18.3, "intervencao": 20.8},
+      "denominador": "nao_informado",
+      "condicoes": "Ablação que retira só o seletor, mantidos os demais componentes. O seletor é híbrido: prompt de autoavaliação mais classificador logístico treinado no conjunto de calibração (20%); o ganho não é efeito isolado de prompting. O texto da RQ2 informa ganho de 2.2%, que não coincide com os valores da tabela (ver heterogeneidade). O valor 20,8 do PIPS na Tabela 1 difere de PIPS 0.171 na Tabela D.9 (BBEH, Gemini-2.0-Flash) e coincide com PIPS 0.208 na Tabela H.11, cuja legenda diz 30 conjuntos. Temperatura 0,0; número de execuções nao_informado. conferido_pdf: valores e cabeçalho conferidos na imagem da p. 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componente isolado incluído para completar o alvo de três, primeiro componente da tabela de ablação (Tabela 1, linha 2 contra linha 1).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 8 (linhas PIPS e PIPS (no switch)); Seção 4.3, p. 8",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PIPS 20.8",
+          "localizador": "Tabela 1 (Ablation study for BBEH tasks), p. 8; colunas Method | HMean Accuracy (%)"
+        },
+        {
+          "trecho": "PIPS (no switch) 18.3",
+          "localizador": "Tabela 1 (Ablation study for BBEH tasks), p. 8; colunas Method | HMean Accuracy (%)"
+        },
+        {
+          "trecho": "For Gemini-2.0-Flash, the switch selects the correct method 65.3% of the time, yielding a 2.2% absolute gain in harmonic mean accuracy (Table 1).",
+          "localizador": "Seção 4.3, p. 8"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iterative synthesis loop with structural feedback (PIPS (no switch) vs. PIPS-0 (no switch))",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["feedback", "multiagente"],
+      "comparador": "PIPS-0 (no switch)",
+      "modelo": "Gemini-2.0-Flash (a Tabela 1 não indica o modelo; atribuição pelo texto da RQ2, p. 8)",
+      "benchmark": "BBEH (tarefas BBEH, conforme legenda da Tabela 1)",
+      "metrica": "HMean Accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 12.9, "intervencao": 18.3},
+      "denominador": "nao_informado",
+      "condicoes": "Ambas as condições sem seletor; diferem no laço de avaliação e revisão (até 30 iterações no PIPS, Apêndice J). O rótulo PIPS-0 não é definido explicitamente; o texto da RQ1 descreve k = 0 como a condição em que o avaliador não é usado. O avaliador combina LLM e execução por interpretador. Temperatura 0,0; número de execuções nao_informado. conferido_pdf: valores e cabeçalho conferidos na imagem da p. 8.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três, segundo componente na ordem da tabela de ablação (Tabela 1, linha 3 contra linha 2).",
+      "derivacao": "direta",
+      "localizador": "Tabela 1, p. 8 (linhas PIPS (no switch) e PIPS-0 (no switch)); Seção 4.2, p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "PIPS (no switch) 18.3",
+          "localizador": "Tabela 1 (Ablation study for BBEH tasks), p. 8; colunas Method | HMean Accuracy (%)"
+        },
+        {
+          "trecho": "PIPS-0 (no switch) 12.9",
+          "localizador": "Tabela 1 (Ablation study for BBEH tasks), p. 8; colunas Method | HMean Accuracy (%)"
+        },
+        {
+          "trecho": "Even at k = 0, meaning the evaluator is not used, PIPS outperforms PoT by a harmonic mean difference of 5.6% and CI by 3.7%.",
+          "localizador": "Seção 4.2, p. 7"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Três desafios explícitos (problemas não algorítmicos, ausência de especificação, entrada não estruturada) e quatro questões de pesquisa (RQ1-RQ4) ligadas a eles.",
+      "localizador": "Seção 2, p. 2-5; Seção 4, p. 6"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Algoritmo, prompts do PIPS, conjuntos, divisão 20/80, temperatura e limite de iterações descritos; faltam o número de instâncias por conjunto, os prompts de PoT e CoT, o modelo usado no avaliador e no classificador de algoritmicidade, e a definição explícita de PIPS-0.",
+      "localizador": "Seção 3, p. 5-6; Seção 4.1, p. 6-7; Apêndices I-J, p. 28-33"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "PoT, CoT e CI executados nos 30 conjuntos com os mesmos modelos (CI só no Gemini), mais PoT-retries, CodeAct e BoT no BBEH com Gemini-2.0-Flash, e ablações de componentes.",
+      "localizador": "Seção 4.1, p. 6-7; Tabelas C.2-C.8, p. 24-28; Tabela 1, p. 8; Tabela D.9, p. 29"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Acurácia e harmonic mean accuracy justificadas (Kazemi et al.) e métricas de qualidade de código definidas; porém o denominador de cada métrica não é informado e os mesmos valores divergem entre tabelas e texto (Tabela 1 contra D.9 e H.11 contra C.6; 2.2% e 4% no texto contra a Tabela 1; reduções da Figura 3a contra o texto).",
+      "localizador": "Seção 2.1, p. 4; Tabela 1, p. 8; Seção 4.3-4.5, p. 8-9; Tabelas C.6, D.9, H.11, p. 27-30"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações trata propriedades estruturais limitadas, problemas mistos CoT/síntese e falta de fidelidade da extração simbólica; não discute variabilidade entre execuções, contaminação nem generalização a outras tarefas.",
+      "localizador": "Seção 6, p. 10; Apêndice L, p. 33-34"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Código declarado em repositório público, prompts do PIPS, temperatura, iterações, modelos e custos informados; faltam prompts dos baselines, tamanhos das amostras, seeds e número de execuções (o checklist menciona seeds sem relatá-las). O repositório não foi verificado nesta extração.",
+      "localizador": "Nota de rodapé 2, p. 1; Apêndices I-K, p. 28-33; Checklist, itens 4-7, p. 15-16"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, o estudo não discute possível presença dos conjuntos no pré-treinamento dos modelos nem controles para isso.",
+      "localizador": "Texto completo, p. 1-34"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [3, 7, 8, 9, 21, 24, 25, 26, 27, 28, 29, 30],
+    "observacao": "Texto extraído lido integralmente (p. 1-34, incluindo checklist e apêndices). Páginas abertas visualmente para conferir Figura 3, Figuras 5-6, Tabela 1, Tabela 2, Tabela A.1, Tabelas C.2-C.8, D.9, E.10 e H.11."
+  }
+}

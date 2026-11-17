@@ -1,0 +1,357 @@
+{
+  "estudo": "S1894",
+  "texto_fonte": "fontes/textos/lote/S1894.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "KNSE-Code (Dynamic Prompt Injection and Inference; Group C)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 4, seção III.C (Dynamic Prompt Injection and Inference); Tabela II (linha Group C), PDF p. 5; Tabelas IV, V e VI, PDF p. 5-6 (o PDF não traz número de página impresso)",
+        "observacao": "Requisito em linguagem natural (herdado do prompt base, → instrucao) acrescido de regras do grafo de conhecimento (triplas head/relation/tail em JSON, derivadas de padrões de codificação, critérios de segurança e diretrizes internas) injetadas no prompt de sistema. As regras são conhecimento externo selecionado por pré-filtragem top-k por sobreposição de palavras-chave e similaridade semântica (→ contexto) e funcionam como regras de codificação e de segurança obrigatórias (→ restricoes). Contraste: Group C contra Group B (mesmo modelo Qwen3-30B, apenas o requisito, sem regras), nos mesmos três requisitos. O isolamento é do pacote: não há ablação da pré-filtragem, do formato JSON nem das regras individualmente. Pacote híbrido: a base de regras é construída offline por extração com LLM e revisão manual de especialistas de domínio (ver componentes_fora_escopo). Parâmetros de decodificação da geração, valor exato de k e número de execuções não informados. O texto descreve a seleção de regras de forma contraditória (ver heterogeneidade)."
+      },
+      {
+        "nome_original": "Direct LLM generation (Group B)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Tabela II (linha Group B), PDF p. 5",
+        "observacao": "Qwen3-30B local com apenas o requisito em linguagem natural, sem regras ou conhecimento injetado (instrução direta, zero-shot → instrucao). Linha de base de prompting do contraste com o KNSE-Code. O template exato do prompt não é apresentado."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Rule Extraction and Structuring",
+        "natureza": "outro",
+        "descricao": "Etapa offline de construção da base de conhecimento: Qwen3-30B local recebe documentos formais de engenharia (180 páginas de 8 documentos) com um template de prompt para extrair triplas (head, relation, tail, reason); não é geração de código nem condição avaliada no experimento. Resulta em grafo com 225 triplas validadas.",
+        "localizador": "PDF p. 3, seções III.A e III.B"
+      },
+      {
+        "nome_original": "Revisão manual das regras por especialistas de domínio",
+        "natureza": "outro",
+        "descricao": "Cada regra extraída é revisada manualmente por especialistas quanto à consistência com o documento original, clareza e executabilidade; regras ambíguas, redundantes ou não acionáveis são corrigidas ou removidas. Intervenção humana, não prompting.",
+        "localizador": "PDF p. 3, seção III.B"
+      },
+      {
+        "nome_original": "temperature parameter is set to 0.1",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,1 na inferência da extração de regras; o artigo não informa os parâmetros de decodificação da geração de código dos grupos B e C.",
+        "localizador": "PDF p. 3, seção III.B"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Qwen3-30B",
+        "versao": "nao_informado",
+        "observacao": "Implantado localmente em intranet; usado na extração de regras e na geração dos grupos B e C. Snapshot, quantização e variante não informados."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Três requisitos de software verificados em voo de um programa real de aeronave (Rq1 Control Logic, Rq2 Data Processing, Rq3 Mode Transition)",
+        "quantidade": "3 requisitos",
+        "observacao": "Requisitos internos, extraídos de subsistemas de dois modelos de aeronave, com relatórios de teste; não públicos. Uma referência de código manual de produção (Group A) por requisito. Número de códigos gerados por grupo e requisito não informado.",
+        "localizador": "Tabela I, PDF p. 4; seções IV e IV.A, PDF p. 4"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Functionality Match Rate",
+        "definicao": "Whether the code fully satisfies the requirement",
+        "observacao": "Definida como critério binário, mas relatada em percentuais (por exemplo, 95%, 85%, 75%); método de cálculo, avaliador e denominador não informados.",
+        "localizador": "Tabela III, PDF p. 5; Tabela IV, PDF p. 5"
+      },
+      {
+        "nome": "Safety Violation Count",
+        "definicao": "Contagem de padrões de alto risco (condições de corrida, aninhamento de interrupções, uso indevido de variáveis globais, falta de validação de entrada e de verificação de limites etc.)",
+        "observacao": "Quem identificou as violações e como (manual ou ferramenta) não informado.",
+        "localizador": "Tabela III, PDF p. 5; Tabela V, PDF p. 5"
+      },
+      {
+        "nome": "Static Analysis Issues",
+        "definicao": "Number of violations detected by the MISRA C:2012 rule set",
+        "observacao": "Definida como contagem, mas a Tabela VI ('Static Analysis Compliance Rates') apresenta percentuais idênticos aos da Tabela IV; as contagens aparecem só na narrativa (ver heterogeneidade). Análise com Cppcheck 202106.",
+        "localizador": "Tabela III, PDF p. 5; Tabela VI e seção V.C, PDF p. 6"
+      }
+    ],
+    "linguagens": ["C (código gerado e avaliado; o grafo de regras cobre padrões C/C++)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código gerado diretamente pelo LLM (Group B) fica funcionalmente incompleto: omite validação de estado de canal (Rq1), inversão de sinal e verificações de inconsistência (Rq2) e uma transição de modo (Rq3).",
+        "localizador": "Tabela IV e seção V.A, PDF p. 5"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Inserir todas as regras extraídas no prompt de sistema causou truncamento da entrada e degradação da qualidade do código nos experimentos iniciais (não quantificado).",
+        "localizador": "PDF p. 4, seção III.C"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Violações de regras de segurança em software crítico (segurança funcional/operacional em aviação, não apenas cibersegurança): falta de verificação de limites de arrays com risco de acesso fora dos limites e falta de validação de entrada (Group B); falta de validação de entrada de sinais críticos no código do KNSE-Code em Rq3, com possíveis transições de estado errôneas; uso de variáveis globais com risco de condição de corrida no código manual (Group A).",
+        "localizador": "Tabela V e seção V.B, PDF p. 5-6"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Violação da regra MISRA C-2012 12.1 no código do KNSE-Code (Rq2), por falta de parênteses em expressões condicionais, que pode levar a erros de manutenção (classificada como de baixa severidade).",
+        "localizador": "Seção V.C, PDF p. 6"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Aumento da latência de resposta ao inserir todas as regras no prompt de sistema; não quantificado.",
+        "localizador": "PDF p. 4, seção III.C"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falta de rastreabilidade do código gerado por LLM até os requisitos e falta de auditabilidade, apresentadas como limitações críticas para domínios de segurança.",
+        "localizador": "Resumo, PDF p. 1; seção II.A e II.E, PDF p. 2-3"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Injeção dinâmica de regras de engenharia do grafo de conhecimento no prompt (KNSE-Code) para reduzir violações de segurança e de conformidade.",
+        "avaliada": "sim",
+        "localizador": "Tabelas V e VI e seções V.B-V.C, PDF p. 5-6 (Group C contra Group B)"
+      },
+      {
+        "descricao": "Pré-filtragem das top-k regras mais relevantes (por exemplo, k = 40-60) para evitar truncamento, latência e degradação da qualidade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4, seção III.C"
+      },
+      {
+        "descricao": "Revisão manual das regras extraídas por especialistas de domínio.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3, seção III.B"
+      },
+      {
+        "descricao": "Comentários no código gerado indicando as cláusulas de regra atendidas, para auditoria manual e rastreamento por ferramenta.",
+        "avaliada": "nao",
+        "localizador": "Seção V.C, PDF p. 6"
+      },
+      {
+        "descricao": "Implantação local do modelo em intranet segura, sem comunicação externa, para segurança dos dados; temperatura 0,1 na extração para consistência.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 3, seção III.B"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Group B (Qwen3-30B com apenas o requisito em linguagem natural); também Group A (código manual de produção verificado em voo), que não é condição de prompting",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "A Tabela VI ('Static Analysis Compliance Rates') repete exatamente os valores da Tabela IV (A 100/100/100; B 95%/85%/75%; C 100/100/100), embora a métrica 'Static Analysis Issues' seja definida como número de violações MISRA C:2012. A narrativa da seção V.C dá contagens incompatíveis com a tabela: Group C tem uma violação em Rq2, mas a Tabela VI dá 100%; Group B tem sete violações em Rq1 (95%), oito em Rq2 (85%) e duas em Rq3 (75%), ordem inversa à das taxas. Não se escolhe um valor como verdadeiro.",
+        "localizador": "Tabela III, PDF p. 5; Tabela IV, PDF p. 5; Tabela VI e seção V.C, PDF p. 6"
+      },
+      {
+        "descricao": "Functionality Match Rate é definida como 'whether the code fully satisfies the requirement' (critério binário), mas é relatada em percentuais intermediários (95%, 85%, 75%) para o Group B; o texto de Rq2 fala em 'approximately 85% functionality completeness'. Método de cálculo e denominador não informados (aparente inconsistência).",
+        "localizador": "Tabela III, Tabela IV e seção V.A, PDF p. 5"
+      },
+      {
+        "descricao": "O resumo afirma redução de violações de segurança 'by up to 85%' em relação à geração direta, mas nenhum valor de 85% de redução é impresso na Tabela V (B: 2, 3, 7; C: 0, 0, 2). Cálculo próprio, só para registrar a discrepância: reduções por requisito de 100%, 100% e cerca de 71,4%, e redução no total de 12 para 2 de cerca de 83,3%. A origem dos 85% não é informada (aparente inconsistência).",
+        "localizador": "Resumo, PDF p. 1; Tabela V, PDF p. 5"
+      },
+      {
+        "descricao": "O resumo afirma que o KNSE-Code 'completely avoids high-severity violations', mas a Tabela V registra duas violações de segurança do Group C em Rq3 (falta de validação de entrada de sinais críticos), sem classificação de severidade; a severidade só é atribuída na narrativa de análise estática (duas de alta severidade no Group B em Rq1; uma de baixa severidade no Group C em Rq2).",
+        "localizador": "Resumo, PDF p. 1; Tabela V e seção V.B, PDF p. 5-6; seção V.C, PDF p. 6"
+      },
+      {
+        "descricao": "Introdução e conclusão afirmam melhoria substancial de eficiência de desenvolvimento e produtividade, mas nenhuma métrica de tempo, esforço ou eficiência é definida (Tabela III) ou relatada nos resultados.",
+        "localizador": "Seção I, PDF p. 2; Tabela III, PDF p. 5; seção VI, PDF p. 6"
+      },
+      {
+        "descricao": "Descrição contraditória da seleção de regras: o texto diz que o método adota 'a lightweight rule matching strategy based on keyword overlap and contextual alignment', depois que embute a biblioteca inteira e que 'the system performs no explicit rule matching or retrieval', e por fim introduz pré-filtragem top-k 'based on keyword overlap and semantic similarity' (embora afirme evitar 'complex semantic matching'). O valor de k usado no experimento não é informado ('e.g., k = 40–60').",
+        "localizador": "PDF p. 4, seção III.C"
+      },
+      {
+        "descricao": "Inversão em relação à referência humana: o código manual verificado em voo (Group A) tem violações de segurança (2, 1, 2), igual ou acima do Group C (0, 0, 2), embora passe na análise estática sem violações; o próprio estudo conclui que sucesso em voo não implica segurança do código. A afirmação de desempenho 'human-level' convive com Group C igual a A em Rq3 na Tabela V.",
+        "localizador": "Tabela V, PDF p. 5; seções V.C e VI, PDF p. 6"
+      },
+      {
+        "descricao": "Avaliação limitada a três requisitos, um modelo e número de execuções não informado; o estudo reconhece a limitação a três requisitos. Avaliadores da funcionalidade e da contagem de violações de segurança não informados.",
+        "localizador": "Seção VI, PDF p. 6; seção IV.D, PDF p. 5"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Group A é código manual de produção implantado em programas reais de aeronave, usado como referência ('All comparisons are made against Group A'); não é condição de prompting.",
+        "localizador": "Seção IV.B e Tabela II, PDF p. 4-5"
+      },
+      {
+        "descricao": "A base de conhecimento abrange 180 páginas de 8 documentos formais com mais de 500 regras distintas; o grafo final tem 225 triplas validadas após revisão. Os documentos não são usados para treinar o modelo.",
+        "localizador": "PDF p. 3, seções III.A-III.B"
+      },
+      {
+        "descricao": "Os experimentos usaram o mesmo hardware, compilação em VSCode 1.70.2 e análise com Cppcheck 202106. O código do KNSE-Code inclui comentários com as cláusulas de regra atendidas.",
+        "localizador": "PDF p. 5, após a Tabela II; seção V.C, PDF p. 6"
+      },
+      {
+        "descricao": "Os dados de uso do Tongyi Lingma (60,23% perguntas livres, taxa de aceitação de 32,94% das sugestões etc.) vêm de avaliação interna citada nos trabalhos relacionados e não fazem parte do experimento.",
+        "localizador": "Seção II.D, PDF p. 2"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "By dynamically injecting structured rules from a domain-specific knowledge graph into the prompts, the framework ensures that safety standards are inherently respected during code generation, rather than through post-hoc inspection.",
+        "localizador": "Resumo, PDF p. 1"
+      },
+      {
+        "trecho": "The essence of this module is to embed the entire rule library, which consists of 225 validated (head, relation, tail) triples in JSON format, directly into the system prompt as a unified context.",
+        "localizador": "Seção III.C, PDF p. 4"
+      },
+      {
+        "trecho": "Upon receiving a natural language requirement, the system performs no explicit rule matching or retrieval.",
+        "localizador": "Seção III.C, PDF p. 4"
+      },
+      {
+        "trecho": "However, the initial experiments revealed that embedding all the extracted rules directly into the system prompt led to input truncation, increased response latency, and degraded code quality.",
+        "localizador": "Seção III.C, PDF p. 4"
+      },
+      {
+        "trecho": "Before generation, the system selects the top-k most relevant rules (e.g., k = 40–60) based on keyword overlap and semantic similarity with the input.",
+        "localizador": "Seção III.C, PDF p. 4"
+      },
+      {
+        "trecho": "Generated using a locally deployed Qwen3-30B model, with only natural language requirements provided and no additional rules or knowledge injected",
+        "localizador": "Tabela II, linha Group B, coluna GENERATION METHOD, PDF p. 5"
+      },
+      {
+        "trecho": "Generated using the proposed KNSE-Code framework, where relevant rules from the knowledge graph are dynamically injected into the prompt to guide code generation",
+        "localizador": "Tabela II, linha Group C, coluna GENERATION METHOD, PDF p. 5"
+      },
+      {
+        "trecho": "Input the three types of natural language requirements into each comparative method, record the generated code and compilation results, and collect statistics for each evaluation metric.",
+        "localizador": "Seção IV.D, PDF p. 5"
+      },
+      {
+        "trecho": "Group B omits one channel’s state validation and lacks explicit state checking, resulting in incomplete logic.",
+        "localizador": "Seção V.A, PDF p. 5"
+      },
+      {
+        "trecho": "Group B’s function lacks array boundary checks, posing a potential out-of-bounds access risk.",
+        "localizador": "Seção V.B, PDF p. 5"
+      },
+      {
+        "trecho": "Group C, while structurally sound, lacks input validation for critical signals such as airspeed and command values, including boundary checks and validity verification, which may result in erroneous state transitions under invalid input conditions.",
+        "localizador": "Seção V.B, PDF p. 6"
+      },
+      {
+        "trecho": "Although the logic is correct, this may lead to maintenance errors and is classified as a low-severity issue, with no impact on functional correctness or safety.",
+        "localizador": "Seção V.C, PDF p. 6"
+      },
+      {
+        "trecho": "Furthermore, the generation process lacks transparency, there is no clear trace from requirement to code.",
+        "localizador": "Seção II.A, PDF p. 2"
+      },
+      {
+        "trecho": "After extraction, each rule is manually reviewed by domain experts for consistency with the original document, clarity, and executability.",
+        "localizador": "Seção III.B, PDF p. 3"
+      },
+      {
+        "trecho": "In addition, the code generated by KNSE-Code includes comments for key logic sections, indicating the rule clauses they comply with, supporting manual auditing and tool-based tracing.",
+        "localizador": "Seção V.C, PDF p. 6"
+      },
+      {
+        "trecho": "To ensure data security and full control, Qwen3-30B is deployed locally within a secure intranet environment, with no external communication.",
+        "localizador": "Seção III.B, PDF p. 3"
+      },
+      {
+        "trecho": "The results show that KNSE-Code matches 100% functional complete, reduces safety violations by up to 85% compared to direct LLM generation, and completely avoids high-severity violations.",
+        "localizador": "Resumo, PDF p. 1"
+      },
+      {
+        "trecho": "Although the evaluation is limited to three representative requirements, the framework was designed from the outset with the goal of cross-project and cross-model reusability.",
+        "localizador": "Seção VI, PDF p. 6"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "KNSE-Code (Group C)",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["contexto", "restricoes"],
+      "comparador": "Group B: geração direta com Qwen3-30B local, apenas requisito em linguagem natural, sem regras ou conhecimento injetado",
+      "modelo": "Qwen3-30B (versão/snapshot nao_informado)",
+      "benchmark": "Requisito Rq1 (Control Logic) de software crítico de aeronave",
+      "metrica": "Functionality Match Rate (definida como 'Whether the code fully satisfies the requirement', critério binário, mas relatada em percentual na Tabela IV, cujo título é 'Functional Completeness Comparison')",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 95, "intervencao": 100},
+      "denominador": "nao_informado",
+      "condicoes": "Um requisito (Rq1); referência humana Group A = 100%. Número de execuções/amostras por grupo, parâmetros de decodificação da geração, valor de k da pré-filtragem de regras e avaliador da funcionalidade nao_informado. Não há agregado impresso entre os três requisitos; aplicou-se a primeira linha da tabela. Valores conferidos visualmente na Tabela IV (PDF p. 5). O ganho é do pacote KNSE-Code (regras + pré-filtragem + base construída com revisão de especialistas), não de um ingrediente isolado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O resumo destaca várias métricas (completude funcional, redução de violações de segurança, ausência de violações de alta severidade) sem que uma prevaleça; Tabela IV é a primeira tabela com o contraste Group C x Group B; primeira métrica (Functionality Match Rate), único modelo, primeira linha (Rq1). Técnica focal única e tarefa única: não há cobertura adicional; não há ablação de componentes nem matriz de ingredientes para contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "Tabela IV, linha Rq1(Control Logic), colunas GROUP B e GROUP C, PDF p. 5; definição da métrica na Tabela III, PDF p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Rq1(Control Logic) 100% 95% 100%",
+          "localizador": "Tabela IV, linha Rq1(Control Logic), colunas Requirement | GROUP A | GROUP B | GROUP C, PDF p. 5"
+        },
+        {
+          "trecho": "Group B omits one channel’s state validation and lacks explicit state checking, resulting in incomplete logic.",
+          "localizador": "Seção V.A, PDF p. 5"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e contribuições explícitos: framework que injeta regras de engenharia validadas no prompt para gerar código de software aeronáutico crítico, avaliado em funcionalidade, segurança e conformidade.",
+      "localizador": "Resumo, PDF p. 1; seção I (contribuições), PDF p. 2"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Grupos, requisitos e métricas são descritos, mas o procedimento é sucinto: o template do prompt de geração, o k usado, os parâmetros de decodificação da geração, o número de execuções e quem avaliou funcionalidade e violações de segurança não são informados; a descrição da seleção de regras é contraditória.",
+      "localizador": "Seções III.C e IV.B-IV.D, PDF p. 4-5"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Há comparador de prompting executado com o mesmo modelo e os mesmos requisitos sem injeção de regras (Group B), além de referência de código manual de produção (Group A).",
+      "localizador": "Tabela II e seção IV.B, PDF p. 4-5"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "nao_atende",
+      "justificativa": "Functionality Match Rate é definida como binária mas relatada em percentuais intermediários sem denominador nem método de cálculo; Static Analysis Issues é definida como contagem, mas a Tabela VI apresenta taxas idênticas às da Tabela IV, incompatíveis com as contagens da narrativa; o procedimento de contagem de violações de segurança não é descrito.",
+      "localizador": "Tabela III, Tabela IV, PDF p. 5; Tabela VI e seção V.C, PDF p. 6"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Só reconhece a limitação a três requisitos representativos e a necessidade de validar generalização; não discute não determinismo, viés de avaliação, escolha de modelo ou validade das métricas.",
+      "localizador": "Seção VI, PDF p. 6"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa modelo (Qwen3-30B), temperatura da extração, VSCode 1.70.2 e Cppcheck 202106, mas os documentos, regras, requisitos completos, prompts e códigos são internos e não disponibilizados; prompt de geração, k e parâmetros de geração não informados; nenhum pacote de replicação mencionado.",
+      "localizador": "Seções III.A-III.C, PDF p. 3-4; seção IV.B, PDF p. 5"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos requisitos ou do código de referência no pré-treinamento do modelo; afirma apenas que os documentos de regras não foram usados para treinar o modelo, o que não trata de contaminação dos itens de avaliação.",
+      "localizador": "Seção III.A, PDF p. 3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente. Páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04 (Tabela I), p-05 (Tabelas II, III, IV e V) e p-06 (Tabela VI). O PDF não tem números de página impressos visíveis; os localizadores usam a posição no arquivo."
+  }
+}

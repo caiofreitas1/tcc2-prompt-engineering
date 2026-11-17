@@ -1,0 +1,627 @@
+{
+  "estudo_id": "S414",
+  "texto_fonte": "fontes/textos/lote/S414.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Tambon, F.; Nikanjam, A.; Zid, C.; Khomh, F.; Antoniol, G. TaskEval: Assessing Difficulty of Code Generation Tasks for Large Language Models. arXiv:2407.21227v3 [cs.SE], 24 out. 2025 (manuscrito submetido à ACM; metadados ACM com marcadores de modelo, ver heterogeneidade).",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Original Prompt (docstring original do HumanEval+; estratégia compositional do ClassEval)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Listing 1, Seção 2); PDF p. 12 (Seção 4.2)",
+        "observacao": "Prompt do próprio benchmark. No HumanEval+ a docstring original contém exemplos de entrada e saída (Listing 1, p. 4; Listing 6, p. 21) → exemplos; a assinatura da função e, no ClassEval, o contexto da classe (construtor e descrição) são fornecidos como insumo → contexto. Executado como comparador apenas nos exemplos motivadores de tarefas isoladas (Seção 2, p. 4); não há comparação sistemática do prompt original com os prompts gerados no corpus inteiro. Os exemplos do prompt original são removidos antes da geração dos prompts do TaskEval (p. 9)."
+      },
+      {
+        "nome_original": "Context Information — Level 1 (First level)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (Seção 3.2); PDF p. 8 (Listing 3); PDF p. 9",
+        "observacao": "Nível mínimo de informação (entradas/saídas e descrição de alto nível), gerado pelo GPT-4 a partir da docstring original, sem os exemplos do prompt original. Mantém a assinatura da função e, no ClassEval, o contexto da classe (contexto). Serve de referência (comparador) na validação por nível da Seção 5.1; não há condição sem ela. Componente do TaskEval, que é um arcabouço de avaliação e não uma técnica de prompting proposta."
+      },
+      {
+        "nome_original": "Context Information — Level 2 (Second level)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8 (Seção 3.2, Listing 3); PDF p. 17 (Seção 5.1)",
+        "observacao": "Acrescenta ao Level 1 uma descrição em linguagem natural da função-alvo derivada do código-oráculo, sem nomes de variáveis ou funções auxiliares; classificada como restricoes (especificação da implementação). Os níveis são gerados incrementalmente a partir do nível anterior (p. 7). A Seção 5.1 ajusta modelos IRT separados por nível e compara a dificuldade por tarefa entre níveis com teste de Wilcoxon (menor tamanho de efeito entre Level 1 e Level 2), mas não imprime a mediana de dificuldade do Level 2."
+      },
+      {
+        "nome_original": "Context Information — Level 3 (Third level)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8 (Seção 3.2, Listing 3); PDF p. 17 (Seção 5.1)",
+        "observacao": "Completa o Level 2 com referências diretas à função (nomes de variáveis e funções auxiliares), «similarly to a pseudo-algorithm but in natural language». Em relação ao Level 2 não acrescenta categoria nova (amplia contexto e restricoes já presentes); em relação ao Level 1 acrescenta restricoes. Isolamento por modelos IRT ajustados só com os escores de cada nível (Seção 5.1), mantidos as tarefas, os 8 CodeLLMs, as reformulações e a amostragem."
+      },
+      {
+        "nome_original": "Rephrasing",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 8–9 (Seção 3.2, Listing 4); PDF p. 4 (Listing 1); PDF p. 5",
+        "observacao": "Paráfrase do prompt de cada nível gerada pelo GPT-4 com meta-prompt (6 reformulações por nível, incluindo a base). Os mecanismos são os do nível ao qual a paráfrase se aplica (instrucao, contexto e, nos níveis 2 e 3, restricoes); a paráfrase em si não corresponde a categoria do dicionário e não é otimizacao_prompt (não há busca ou seleção do melhor prompt). Não há condição com e sem reformulação: o estudo relata apenas a variação entre reformulações (desvio-padrão do Pass@1 médio, p. 5) e um exemplo de tarefa isolada em que o prompt gerado difere do original em mais de um ingrediente (Listing 1, p. 4)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "β3-IRT (Birt-GD) — IRT Component",
+        "natureza": "outro",
+        "descricao": "Modelo de Teoria de Resposta ao Item ajustado por máxima verossimilhança com gradiente descendente para estimar dificuldade e discriminação das tarefas e habilidade dos CodeLLMs; é método de análise, não prompting.",
+        "localizador": "PDF p. 10–11 (Seção 3.4); PDF p. 13 (Seção 4.4)"
+      },
+      {
+        "nome_original": "Sampling generation (temperature 0.8; 5 code samples per prompt)",
+        "natureza": "decodificacao",
+        "descricao": "Geração por amostragem com temperatura 0,8 e 5 amostras de código por prompt, com sementes distintas; parâmetro de decodificação sem alteração do prompt.",
+        "localizador": "PDF p. 9 (Seção 3.3); PDF p. 12 (Seção 4.1); PDF p. 13 (Seção 4.3)"
+      },
+      {
+        "nome_original": "BERTopic topic modelling; AST/CodeBLEU analysis",
+        "natureza": "outro",
+        "descricao": "Agrupamento de tarefas em tópicos (BERTopic) e análise de construções de programa na AST dos códigos gerados filtrados por limiares de CodeBLEU; análises posteriores, não prompting.",
+        "localizador": "PDF p. 13–15 (Seção 4.5)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-4 (Prompt LLM, gera os prompts)",
+        "versao": "o texto chama de GPT-4 (p. 13) e de GPT-4 turbo (p. 29); referência [2] aponta para a página gpt-4-turbo-and-gpt-4; snapshot nao_informado"
+      },
+      {
+        "nome": "YiCoder-1.5B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "CodeLlama 7B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "MagiCoder 6.7B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "DeepSeekCoder 7B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "CodeGemma 7B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "QwenCoder-2.5 7B",
+        "versao": "versão instruction-tuned; snapshot nao_informado"
+      },
+      {
+        "nome": "GPT-3.5 (OpenAI API)",
+        "versao": "referência [1] aponta GPT-3.5 Turbo; snapshot e data de acesso nao_informado"
+      },
+      {
+        "nome": "DeepSeek-V3 (DeepSeek API)",
+        "versao": "snapshot e data de acesso nao_informado"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "HumanEval+",
+        "quantidade": "164 problemas Python (todas as tarefas usadas); 18 prompts por tarefa",
+        "observacao": "Docstring original usada como ponto de partida e como prompt original (p. 12)."
+      },
+      {
+        "nome": "ClassEval",
+        "quantidade": "100 classes, 400 métodos; amostra estratificada de 200 métodos (2 por classe); 18 prompts por tarefa",
+        "observacao": "Estratégia compositional: contexto da classe fornecido e um método a completar (p. 12)."
+      },
+      {
+        "nome": "Subconjunto para anotação humana (RQ4)",
+        "quantidade": "120 tarefas dos 364 das duas bases, sorteadas; 10 questionários de 12 avaliações (6 HumanEval+ e 6 ClassEval); 72 participantes",
+        "observacao": "Não é benchmark de geração; usado para comparar dificuldade humana e IRT (p. 16, p. 26–27)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Functional correctness (Func)",
+        "definicao": "1 se a amostra passa em todos os casos de teste, 0 caso contrário (Eq. 1, p. 9)"
+      },
+      {
+        "nome": "Task score",
+        "definicao": "média da correção funcional sobre todos os prompts e sementes de uma tarefa para um CodeLLM (Eq. 2, p. 10)"
+      },
+      {
+        "nome": "Pass@1 / Pass@k",
+        "definicao": "usado nos exemplos motivadores por tarefa e na variação entre reformulações (p. 4–5); denominador (número de amostras para o prompt original) nao_informado"
+      },
+      {
+        "nome": "Difficulty δ e discriminant a (β3-IRT)",
+        "definicao": "parâmetros de item estimados pelo modelo IRT; dificuldade em [0,1] na escala de habilidade (p. 10–11)"
+      },
+      {
+        "nome": "Expected probability E[p_ij|θ_i,δ_j,a_j]",
+        "definicao": "resposta esperada do modelo IRT (p. 10, p. 17)"
+      },
+      {
+        "nome": "Mean accuracy per topic",
+        "definicao": "média por tópico (Figura 5, p. 22)"
+      },
+      {
+        "nome": "Outras medidas de análise",
+        "definicao": "R² do ajuste IRT; BERTScore; testes de Wilcoxon, Anderson-Darling e Kendall-τ; CodeBLEU como filtro; Cohen-κ ponderado linear (p. 13–17, p. 27)"
+      }
+    ],
+    "linguagens": [
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A formulação do prompt altera de forma acentuada a correção por tarefa: o Pass@1 na mesma tarefa pode dobrar para 10% a 30% das tarefas do benchmark para um dado modelo, embora a média mude pouco.",
+        "localizador": "PDF p. 5 (Seção 2)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Prompts originais mal formulados induzem soluções erradas: em 7 das 9 tarefas do ClassEval e em 1 tarefa do HumanEval+ com discriminação negativa e baixa dificuldade, os autores encontraram problemas na formulação dos prompts originais (e nos prompts derivados deles).",
+        "localizador": "PDF p. 20 (Seção 5.2, Listing 5)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos mais capazes acrescentam suposições não pedidas e geram código desnecessariamente complexo (Listing 7); CodeLLMs fundem condições do enunciado e erram tarefas com várias condições (Listing 8).",
+        "localizador": "PDF p. 23–24 (Seção 5.3); PDF p. 28 (Seção 5.5)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "No exemplo do ClassEval, vários CodeLLMs alucinaram métodos não definidos.",
+        "localizador": "PDF p. 4 (Seção 2)"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Tarefas com discriminação negativa e alta dificuldade são atribuídas em parte ao não determinismo e ao pequeno número de CodeLLMs; usar subconjuntos de modelos aumentou a proporção dessas tarefas.",
+        "localizador": "PDF p. 19–20 (Seção 5.2); PDF p. 12"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os autores mencionam possível memorização como explicação de comportamentos (exemplo memorizado; uso de type vs isinstance) e citam contaminação de dados como limitação de benchmarks tradicionais. O estudo não afirma contaminação efetiva nem descreve controle.",
+        "localizador": "PDF p. 2 (Seção 1); PDF p. 12; PDF p. 21 (Seção 5.2)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Custo tratado na Discussão: geração de prompts com GPT-4 turbo de 50$ para ~6.500 prompts (0,007$/prompt); 5$ para cada modelo fechado (0,0002$/inferência); modelos abertos em uma GPU de 32 GB com menos de uma hora cada. A verificação manual dos prompts, descrita dentro da mesma subseção de custo, levou «several dozen hours of work» e é apontada como fator limitante da escalabilidade.",
+        "localizador": "PDF p. 29 (Seção 6, Cost and Scalability)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Viés de construção: usar o GPT-4 para gerar os prompts pode favorecer um modelo treinado de forma semelhante (GPT-3.5); a remoção dos exemplos dos prompts pode reduzir o desempenho e criar tarefas artificialmente difíceis; a dependência local entre prompts da mesma tarefa pode violar o pressuposto do IRT.",
+        "localizador": "PDF p. 9 (Seção 3.2); PDF p. 30–31 (Seção 8)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade da comparação humana: no piloto, participantes tenderam a usar LLMs apesar da proibição, o que levou a substituir a implementação por estimativa de esforço; a dificuldade humana reflete percepção subjetiva.",
+        "localizador": "PDF p. 15 (Seção 4.5); PDF p. 31 (Seção 8)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Verificação manual dos prompts após cada template, feita pelo primeiro autor e conferida de forma independente pelo segundo, para garantir níveis de informação e preservação da semântica.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9 (Seção 3.2)"
+      },
+      {
+        "descricao": "Validação dos prompts por BERTScore e teste de Wilcoxon (reformulações do mesmo nível mais próximas entre si) e por modelos IRT por nível.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 17 (Seção 5.1)"
+      },
+      {
+        "descricao": "GPT-4 não usado como CodeLLM para evitar viés, por ser o gerador dos prompts.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 13 (Seção 4.3)"
+      },
+      {
+        "descricao": "Agregação dos resultados dos prompts da mesma tarefa em «testlets» para atenuar a dependência local do IRT.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 31 (Seção 8)"
+      },
+      {
+        "descricao": "Remoção dos exemplos do prompt original para controlar a quantidade de informação injetada.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9 (Seção 3.2)"
+      },
+      {
+        "descricao": "Múltiplos limiares de CodeBLEU (0,4 a 0,8) com correção de Holm-Bonferroni para que a significância não dependa do limiar.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 15 (Seção 4.5)"
+      },
+      {
+        "descricao": "Estimativa de esforço em rodadas (Alhamed et al.), revisão manual das respostas dos participantes e filtro de experiência mínima de 3 anos.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 15–16 (Seção 4.5)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt original do benchmark nos exemplos motivadores de tarefas isoladas (Seção 2, p. 4); Level 1 como referência na validação por nível com modelos IRT separados (Seção 5.1, p. 17).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O objeto do estudo é um arcabouço de avaliação (TaskEval) e não uma técnica de prompting: as variações de prompt servem para estimar dificuldade de tarefas, e a comparação entre níveis de informação aparece como validação dos prompts. Os autores declaram fora do escopo avaliar a eficácia de técnicas adicionais como cadeia de raciocínio.",
+        "localizador": "PDF p. 8 (Seção 3.2); PDF p. 17 (Seção 5.1); PDF p. 30 (Seção 7)"
+      },
+      {
+        "descricao": "Contraste entre agregado e tarefa: a média do Pass@1 varia pouco entre reformulações (desvio-padrão de 0,01 a 0,03 no HumanEval+ e de 0,02 a 0,05 no ClassEval), mas o Pass@1 na mesma tarefa pode dobrar para 10% a 30% das tarefas para um dado modelo.",
+        "localizador": "PDF p. 5 (Seção 2)"
+      },
+      {
+        "descricao": "Os exemplos motivadores são tarefas isoladas escolhidas pelos autores; no Listing 1, o prompt gerado difere do original em mais de um ingrediente (remove exemplos e reformula a condição), e o texto relata que o exemplo do prompt original não ajudou, ao contrário da reformulação.",
+        "localizador": "PDF p. 4 (Seção 2, Listing 1)"
+      },
+      {
+        "descricao": "No segundo exemplo motivador, a métrica é chamada de Pass@1 para o prompt de menor informação e de Pass@k para o de maior informação, sem indicação de k.",
+        "localizador": "PDF p. 4 (Seção 2)"
+      },
+      {
+        "descricao": "A legenda do Listing 2 diz «Example of discrepancy on a SQL task», mas o exemplo é o método add_dish de uma classe de pedidos de restaurante; a legenda do Listing 4 repete «Example of different prompt levels» embora mostre reformulações (Rephrasing 1 a 5).",
+        "localizador": "PDF p. 5 (Listing 2); PDF p. 9 (Listing 4)"
+      },
+      {
+        "descricao": "Na Seção 5.1 só as medianas de dificuldade do Level 1 e do Level 3 são impressas (HumanEval+: 0,42 e 0,15; ClassEval: 0,27 e 0,05); a do Level 2 não é informada. O texto também não informa se as escalas dos modelos IRT ajustados separadamente por nível foram equalizadas antes da comparação.",
+        "localizador": "PDF p. 17 (Seção 5.1)"
+      },
+      {
+        "descricao": "Narrativa versus tabelas (aparente inconsistência): o texto diz que só as correlações de If (HumanEval+/ClassEval) e Op (ClassEval) são moderadas (> 0,26), mas a Tabela 1 traz Assign .26/.28 para DeepSeek-V3 e a Tabela 2 traz limites superiores acima de 0,26 para Subscript (.20/.31 DeepSeekCoder), Assign (.19/.29 GPT3.5) e comprehension (.17/.27 DeepSeekCoder). As tabelas dão o menor e o maior valor entre limiares, e o texto não diz qual valor usa no critério.",
+        "localizador": "PDF p. 25 (Seção 5.4, Tabela 1); PDF p. 26 (Tabela 2)"
+      },
+      {
+        "descricao": "Aparente inconsistência na interpretação do κ: «κ = 0.21 for HumanEval+ and a κ = 0.17 for ClassEval, resulting in low agreements, respectively a Slight and Fair agreement»; pela ordem, o valor maior recebe o rótulo inferior. A escala de [62] não é reproduzida no texto, o que impede conferir os limites.",
+        "localizador": "PDF p. 27 (Seção 5.5)"
+      },
+      {
+        "descricao": "O método declara seguir o procedimento até todas as tarefas atingirem concordância substancial, mas na segunda rodada uma tarefa ficou abaixo do limiar de 0,6 e foi aceita mesmo assim.",
+        "localizador": "PDF p. 16 (Seção 4.5); PDF p. 27 (Seção 5.5)"
+      },
+      {
+        "descricao": "Número de inferências impresso como «∼32,00», valor malformado; o número de inferências fica nao_informado.",
+        "localizador": "PDF p. 29 (Seção 6)"
+      },
+      {
+        "descricao": "O Prompt LLM é chamado de GPT-4 na Seção 4.3 e de GPT-4 turbo na Seção 6.",
+        "localizador": "PDF p. 13 (Seção 4.3); PDF p. 29 (Seção 6)"
+      },
+      {
+        "descricao": "A Seção 4.4 remete à «Section 2» para a coleta dos escores, que está descrita na Seção 3.3.",
+        "localizador": "PDF p. 13 (Seção 4.4)"
+      },
+      {
+        "descricao": "Metadados de modelo ACM não preenchidos: DOI «XXXXXXX.XXXXXXX», «J. ACM 37, 4, Article 111» e «Received 20 February 2007; revised 12 March 2009; accepted 5 June 2009»; a versão lida é o preprint arXiv v3.",
+        "localizador": "PDF p. 1; PDF p. 36"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "TaskEval tem três componentes: geração de prompts por transformações (Context Information e Rephrasing) com um Prompt LLM (GPT-4), geração e avaliação de código por 8 CodeLLMs, e ajuste IRT. São 3 níveis × 6 reformulações = 18 prompts por tarefa e 5 amostras por prompt.",
+        "localizador": "PDF p. 6 (Figura 1, Seção 3.1); PDF p. 12 (Seção 4.1)"
+      },
+      {
+        "descricao": "Esforço manual descrito: verificação manual dos prompts por dois autores, refinamento manual dos nomes dos tópicos e revisão manual das respostas dos participantes.",
+        "localizador": "PDF p. 9; PDF p. 14; PDF p. 16"
+      },
+      {
+        "descricao": "As perguntas de pesquisa tratam da dificuldade de tarefas (RQ1–RQ4); nenhuma compara técnicas de prompting. O único contraste sistemático entre condições de prompt é a validação por nível de informação (Seção 5.1).",
+        "localizador": "PDF p. 3 (Seção 1); PDF p. 17 (Seção 5.1)"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (github.com/FlowSs/TaskEval); não acessado nem validado nesta extração.",
+        "localizador": "PDF p. 3; referência [8]"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "TaskEval starts by generating a variety of prompts for each task on two well-known code generation benchmarks, HumanEval+ [16] and ClassEval [23], representing multiple possible formulations per task.",
+        "localizador": "PDF p. 2, Seção 1"
+      },
+      {
+        "trecho": "In our study, we focus on two transformations: Rephrasing and Context Information.",
+        "localizador": "PDF p. 6, Seção 3.1"
+      },
+      {
+        "trecho": "In our study, we instead propose to divide the information provided in the prompt into three levels.",
+        "localizador": "PDF p. 7, Seção 3.2"
+      },
+      {
+        "trecho": "Those three levels of prompts are generated incrementally using the previous level as the starting point.",
+        "localizador": "PDF p. 7, Seção 3.2"
+      },
+      {
+        "trecho": "First level: contains a minimal amount of information that is the inputs/outputs of the task, as well as a high-level description of what is intended.",
+        "localizador": "PDF p. 7, Seção 3.2"
+      },
+      {
+        "trecho": "Second level: further adds in the prompt a description of the targeted function in natural language using available oracle code.",
+        "localizador": "PDF p. 8, Seção 3.2"
+      },
+      {
+        "trecho": "Third level: complete the prompt with direct references to the function, such as variable names, and helper functions used similarly to a pseudo-algorithm but in natural language.",
+        "localizador": "PDF p. 8, Seção 3.2"
+      },
+      {
+        "trecho": "The second transformation used is Rephrasing, which is paraphrasing a given prompt.",
+        "localizador": "PDF p. 8, Seção 3.2"
+      },
+      {
+        "trecho": "Other techniques could be used to assist in rephrasing/information, such as Chains-Of-Thoughts [87], but assessing the effectiveness of additional techniques is out of the scope of this study.",
+        "localizador": "PDF p. 8, Seção 3.2"
+      },
+      {
+        "trecho": "In our case, we first remove the examples from the original prompt, if any, before using our templates with the Prompt LLM.",
+        "localizador": "PDF p. 9, Seção 3.2"
+      },
+      {
+        "trecho": "This is accomplished by the first author and cross-checked by the second author independently.",
+        "localizador": "PDF p. 9, Seção 3.2"
+      },
+      {
+        "trecho": "Both prompts also included the class constructor and description to provide the CodeLLMs with general context.",
+        "localizador": "PDF p. 4, Seção 2"
+      },
+      {
+        "trecho": "In our case, we use the compositional strategy, that is, providing the class context to the LLM and asking it to complete one method of the class, only modifying the docstring of the method to complete through our crafted prompts.",
+        "localizador": "PDF p. 12, Seção 4.2"
+      },
+      {
+        "trecho": "To have different prompts, we choose to generate 3 levels and 6 rephrasings per level.",
+        "localizador": "PDF p. 12, Seção 4.1"
+      },
+      {
+        "trecho": "For all code generation in TaskEval, since we are using sampling generation, we set the temperature hyperparameter to 0.8 as it is one of the temperature settings commonly used in other similar studies [16, 50, 52, 68].",
+        "localizador": "PDF p. 13, Seção 4.3"
+      },
+      {
+        "trecho": "We have not used GPT-4 as CodeLLM to avoid biases, as it is used to generate the prompts fed to the CodeLLM.",
+        "localizador": "PDF p. 13, Seção 4.3"
+      },
+      {
+        "trecho": "Several CodeLLMs struggled on multiple points: the implicit fact that, if the dish is added, the quantity should be lowered, hallucinating undefined methods, handling the non-required sales, etc.",
+        "localizador": "PDF p. 4, Seção 2"
+      },
+      {
+        "trecho": "More generally, if we were to compute the pass@1 per task for different rephrasing, while we would observe limited change in the average Pass@1 (0.01 to 0.03 standard deviation for HumanEval+ across models and rephrasing and 0.02 to 0.05 for ClassEval), the Pass@1 on the same task can double from 10% to 30% of the benchmarks tasks for a given model, that is the correctness can be drastically altered by the prompt formulation.",
+        "localizador": "PDF p. 5, Seção 2"
+      },
+      {
+        "trecho": "Among the 9 tasks from ClassEval and 1 task from HumanEval+, we found issues in the way the original prompts (and so our prompts generated from them) were formulated for 7 of them in ClassEval and 1 in HumanEval+.",
+        "localizador": "PDF p. 20, Seção 5.2"
+      },
+      {
+        "trecho": "In that case, this can be explained by both non-determinism in the prompts and the small number of CodeLLMs used.",
+        "localizador": "PDF p. 19, Seção 5.2"
+      },
+      {
+        "trecho": "This can be indicative of the specificity of the training dataset or, in the worst case, some form of memorisation.",
+        "localizador": "PDF p. 21, Seção 5.2"
+      },
+      {
+        "trecho": "Analysing the tasks within the topic, we observe that more capable models often infer additional assumptions about the task, leading to unnecessarily complex generated code.",
+        "localizador": "PDF p. 23, Seção 5.3"
+      },
+      {
+        "trecho": "Observing CodeLLMs’ codes, it is clear that the CodeLLMs struggle with handling the two conditions, especially the last one.",
+        "localizador": "PDF p. 28, Seção 5.5"
+      },
+      {
+        "trecho": "For the prompt generation, using GPT-4 turbo, this amounted to 50$ for all tasks and all levels (∼6,500 prompts), accounting for rerun when correcting them, resulting in 0.007$/prompt.",
+        "localizador": "PDF p. 29, Seção 6"
+      },
+      {
+        "trecho": "For the prompt verification, this had to be done manually, which translated to several dozen hours of work.",
+        "localizador": "PDF p. 29, Seção 6"
+      },
+      {
+        "trecho": "For the closed-source model (GPT3.5 and DeepSeek-V3), the cost was 5$ each, for all tasks and all prompts, resulting in 0.0002$/inference.",
+        "localizador": "PDF p. 29, Seção 6"
+      },
+      {
+        "trecho": "Choosing GPT4 for prompt generation might unintentionally bias the evaluation by benefiting a model trained similarly (GPT3.5).",
+        "localizador": "PDF p. 31, Seção 8"
+      },
+      {
+        "trecho": "This, as we mentioned, can decrease the performance of the models and so add artificially hard tasks.",
+        "localizador": "PDF p. 31, Seção 8"
+      },
+      {
+        "trecho": "To avoid a potential local dependence effect, we aggregate results of prompts for the same task, effectively building polytomous superitems or “testlets” [80, 81].",
+        "localizador": "PDF p. 31, Seção 8"
+      },
+      {
+        "trecho": "However, a pilot study with 10 developers for 12 tasks we conducted revealed that several participants are inclined to use LLMs to code for themselves, despite it being forbidden as advertised in the study.",
+        "localizador": "PDF p. 15, Seção 4.5"
+      },
+      {
+        "trecho": "We make the data and code used in our study publicly available for researchers to replicate our results [8].",
+        "localizador": "PDF p. 3, Seção 1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Rephrasing («One of our generated prompt», reformulação da condição com «occurs more than twice»)",
+      "mecanismos": [
+        "instrucao",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [],
+      "comparador": "Original Prompt (docstring original do HumanEval+, com exemplos)",
+      "modelo": "8 CodeLLMs (YiCoder-1.5B, CodeLlama 7B, MagiCoder 6.7B, DeepSeekCoder 7B, CodeGemma 7B, QwenCoder-2.5 7B, GPT-3.5, DeepSeek-V3); valores individuais da intervenção não impressos",
+      "benchmark": "HumanEval+ — uma única tarefa (is_sorted)",
+      "metrica": "Pass@1",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": null,
+      "denominador": "nao_informado (uma tarefa; o número de amostras usado para o prompt original não é informado)",
+      "condicoes": "Exemplo motivador de tarefa isolada, escolhido pelos autores (Seção 2). Valores impressos: prompt original com Pass@1 de 0 para todos os modelos, exceto DeepSeek-V3 (1.0) e QwenCoder (0.2); prompt gerado com Pass@1 «ranging from 0.6 to 1.0 for all models», sem valor por modelo. Por isso o resultado fica null: não há par baseline/intervenção impresso para um mesmo modelo e não se estimam valores. As condições diferem em mais de um ingrediente (o prompt gerado remove os exemplos e reformula a condição); o texto atribui a melhora à reformulação, mas não há contrafactual desse ingrediente. Temperatura 0,8 na geração do TaskEval (Seção 4.3); número de execuções para este exemplo nao_informado. conferido_pdf: valores conferidos visualmente em PDF p. 4.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado (o estudo não destaca técnica de prompting, métrica e comparador). Nenhuma tabela ou figura traz contraste de prompting (Tabelas 1–4 e Figuras 3–5 tratam de dificuldade, tópicos, construções de programa e anotação humana sobre o conjunto de prompts). O contraste está só em prosa; o primeiro pela ordem das seções é o exemplo do Listing 1 (Seção 2, p. 4).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 4 (impressa 4), Seção 2, Listing 1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Pass@1 on this prompt is 0 for all models except DeepSeek-V3 with 1.0 and QwenCoder with 0.2.",
+          "localizador": "PDF p. 4, Seção 2"
+        },
+        {
+          "trecho": "In that case, the Pass@1 improves drastically, ranging from 0.6 to 1.0 for all models.",
+          "localizador": "PDF p. 4, Seção 2"
+        },
+        {
+          "trecho": "Note that, in that case, having an example did not appear to have helped the CodeLLMs generate a correct code, contrary to reformulating the prompt.",
+          "localizador": "PDF p. 4, Seção 2"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Context Information — Level 3",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes"
+      ],
+      "comparador": "Context Information — Level 1",
+      "modelo": "Modelo IRT ajustado sobre os escores dos 8 CodeLLMs (YiCoder-1.5B, CodeLlama 7B, MagiCoder 6.7B, DeepSeekCoder 7B, CodeGemma 7B, QwenCoder-2.5 7B, GPT-3.5, DeepSeek-V3)",
+      "benchmark": "HumanEval+",
+      "metrica": "median difficulty of the tasks (dificuldade δ do β3-IRT, modelo ajustado só com os escores de um nível)",
+      "sentido": "menor_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.42,
+        "intervencao": 0.15
+      },
+      "denominador": "nao_informado (o HumanEval+ tem 164 tarefas, mas o texto não declara quantas tarefas entram em cada modelo IRT por nível)",
+      "condicoes": "Seis modelos IRT independentes (3 por base), cada um ajustado só com o escore agregado das amostras de um nível; cada nível agrega 6 reformulações × 5 amostras por prompt, temperatura 0,8 (Seções 4.1 e 4.3). A dificuldade é parâmetro latente em [0,1] na escala de habilidade, não proporção de acertos; menor dificuldade corresponde a maior resposta esperada. O valor do Level 2 não é impresso. No ClassEval, mediana de 0,27 (Level 1) para 0,05 (Level 3), não extraída por ser outro benchmark da mesma técnica. Wilcoxon por tarefa entre níveis: p < 0,01, tamanho de efeito de 0,25 a 0,64 (menor entre Level 1 e 2, maior entre Level 1 e 3), sem valor separado por base. O texto não informa se as escalas dos modelos IRT por nível foram equalizadas. O estudo apresenta o resultado como validação dos prompts, não como avaliação de técnica; o efeito é do acréscimo de informação de implementação derivada do oráculo. conferido_pdf: valores conferidos visualmente em PDF p. 17.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura de componente isolado para completar o alvo: Context Information é o único ingrediente com condição com e sem acréscimo de informação (modelos IRT por nível, Seção 5.1), que funciona como ablação relatada só em prosa. O contraste de Level 3 contra Level 1 é o único com os dois valores impressos. O exemplo motivador do Listing 2 (p. 4) também contrasta níveis de informação, mas para uma tarefa isolada, com faixas de valores e sem identificação do nível; não foi escolhido por não isolar o ingrediente nos níveis definidos pelo estudo.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 17 (impressa 17), Seção 5.1, segundo parágrafo",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "To further verify the validity of the prompts, we retrained independent IRT models for both datasets using only the aggregated score of code samples of a single level, resulting in 6 different IRT models (3 for each dataset).",
+          "localizador": "PDF p. 17, Seção 5.1"
+        },
+        {
+          "trecho": "For HumanEval+, we found that the median difficulty of the tasks went from 0.42 (Level 1) to 0.15 (Level 3).",
+          "localizador": "PDF p. 17, Seção 5.1"
+        },
+        {
+          "trecho": "Similarly, for ClassEval, the median difficulty of the tasks dropped from 0.27 (Level 1) to 0.05 (Level 3).",
+          "localizador": "PDF p. 17, Seção 5.1"
+        },
+        {
+          "trecho": "The lowest effect size was obtained when comparing the difficulty of tasks between Level 1 and Level 2, and the highest was obtained when comparing Level 1 and Level 3.",
+          "localizador": "PDF p. 17, Seção 5.1"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e quatro perguntas de pesquisa explícitos (características das tarefas, tópicos, construções de programa, comparação com anotadores humanos).",
+      "localizador": "PDF p. 2–3 (Seção 1)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "atende",
+      "justificativa": "Procedimento descrito em detalhe: transformações, níveis, número de reformulações e amostras, amostragem estratificada do ClassEval, ajuste IRT, filtros de CodeBLEU e protocolo de anotação humana.",
+      "localizador": "PDF p. 6–16 (Seções 3 e 4)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Para condições de prompting, há apenas o prompt original em exemplos de tarefas isoladas e o Level 1 como referência na validação por nível; não há comparação sistemática com o prompt original no corpus, porque o estudo não avalia técnicas de prompting.",
+      "localizador": "PDF p. 4 (Seção 2); PDF p. 17 (Seção 5.1)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Correção funcional, escore por tarefa e parâmetros IRT são definidos formalmente, mas os exemplos alternam Pass@1 e Pass@k sem indicar k nem o número de amostras do prompt original, a mediana do Level 2 não é impressa, o denominador dos modelos IRT por nível não é declarado e a narrativa sobre correlações moderadas não bate inteiramente com as Tabelas 1 e 2.",
+      "localizador": "PDF p. 4, 9–10, 17, 25–26"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria de ameaças à validade (construto, interna, externa, confiabilidade), cobrindo dependência local do IRT, viés do GPT-4, remoção de exemplos, escolha de modelos e bases e anotação humana.",
+      "localizador": "PDF p. 30–32 (Seção 8)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelos, temperatura, número de amostras, biblioteca IRT e pacote de replicação com prompts e códigos são indicados, mas snapshots e datas de acesso de GPT-3.5, DeepSeek-V3 e do GPT-4 gerador não são informados e o modelo gerador aparece com dois nomes; o pacote não foi acessado nesta extração.",
+      "localizador": "PDF p. 3, 12–13, 29; referência [8]"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo menciona contaminação como limitação de benchmarks e memorização como explicação possível de comportamentos, mas não descreve controle nem análise de contaminação para HumanEval+ e ClassEval.",
+      "localizador": "PDF p. 2 (Seção 1); PDF p. 12; PDF p. 21"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1–1605, incluindo referências).",
+    "paginas_pdf_abertas": [
+      1,
+      4,
+      5,
+      9,
+      12,
+      13,
+      17,
+      25,
+      26,
+      27,
+      29,
+      36
+    ]
+  }
+}

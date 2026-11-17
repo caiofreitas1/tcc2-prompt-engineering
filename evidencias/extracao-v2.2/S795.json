@@ -1,0 +1,428 @@
+{
+  "estudo": "S795",
+  "texto_fonte": "fontes/textos/lote/S795.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2506.13905v2 [cs.AR] 8 Sep 2025 (impresso na margem da p. 1 do PDF); páginas sem numeração impressa, localizadores pela posição no PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Spec2RTL-Agent",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 1 do PDF (resumo); p. 3–4 do PDF (Seção IV-A a IV-E; Fig. 3); p. 5 do PDF (Seção V-A, V-B; Tabela I, colunas Single-Shot e Spec2RTL-Agent)",
+        "observacao": "Sistema multiagente sobre GPT-4o (AutoGen) com quatro módulos: compreensão e raciocínio iterativos (sumarização, decomposição em subfunções, dicionário estruturado de informações revisado por um Verifier), codificação progressiva com otimização de prompt (pseudocódigo → Python → C++, Coder e Verifier, Prompt Optimizer Agent), reflexão adaptativa (Analysis Agent e Reflection Agent com quatro ações, inclusive pedido de intervenção humana) e otimização de código para HLS (Code Optimizer Agent com diretrizes extraídas do tutorial da ferramenta). O contrafactual de pacote é a linha de base Single-Shot (documento inteiro e geração do RTL em uma tentativa), executada pelo estudo. Pacote híbrido: inclui conversão C++ → RTL pela ferramenta comercial Stratus HLS, substituição de subfunções por regra, pré-processamento do PDF (PyPDF e capturas de tela) e intervenções humanas quando a reflexão escala o problema; o ganho é do pacote e não pode ser atribuído a um único mecanismo. Mecanismos acrescentados registrados por ingrediente em relação ao Single-Shot, que já contém instrução e o documento de especificação como contexto. A comparação com a linha de base Human mede substituição de trabalho humano, não um ingrediente de prompting."
+      },
+      {
+        "nome_original": "Single-Shot",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção V-A, Baselines (1); Seção V-B; Tabela I, coluna Single-Shot)",
+        "observacao": "Linha de base: o documento de especificação inteiro é dado ao LLM, que deve gerar o RTL alvo em uma única tentativa. O texto do prompt não é mostrado; a instrução é inferida da descrição «is tasked with generating the target RTL». Não há condição sem ela."
+      },
+      {
+        "nome_original": "Human",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 do PDF (Seção V-A, Baselines (2); Seção V-B; Tabela I, coluna Human)",
+        "observacao": "Linha de base com humano no ciclo, espelhando abordagens como a de [7]: um humano faz as fases de compreensão e reflexão e delega a implementação a um LLM com instruções fornecidas. Os prompts, o número de pessoas, sua experiência e a forma de contar intervenções não são descritos (nao_informado). Os valores da Tabela I são aproximados («∼20»). Não é condição de prompting comparável ingrediente a ingrediente; a diferença central é o trabalho humano."
+      },
+      {
+        "nome_original": "Iterative Understanding and Reasoning Module",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "feedback", "multiagente", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3–4 do PDF (Seção IV-B; Fig. 3); p. 5 do PDF (Seção V-A, Baselines (3); Seção V-C; Tabela I, colunas W/o Understand e Spec2RTL-Agent); p. 6 do PDF (Fig. 4)",
+        "observacao": "Três etapas: Summarization Agent (resumos por seção → contexto), Decomposer Agent (subfunções → decomposição) e Information Augmentation, em que o Description Agent organiza um dicionário estruturado (entradas, saídas, funcionalidade, referências ao documento → restrições de formato) revisado por um Verifier (feedback entre agentes). A Fig. 3 mostra também um Understanding Agent. Ablação W/o Understand: o documento inteiro vai direto ao módulo de codificação, mantidos os demais módulos. As três etapas internas não são isoladas entre si. Contexto, feedback e multiagente também existem em outros módulos; aqui são registrados por serem ingredientes que o módulo acrescenta (resumos e dicionário; ciclo Description Agent–Verifier)."
+      },
+      {
+        "nome_original": "Progressive Coding and Prompt Optimization Module",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "feedback", "multiagente", "otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 do PDF (Seção IV-C; Fig. 3); p. 5 do PDF (Seção V-A, Baselines (4); Seção V-C; Tabela I, colunas Naive Coding e Spec2RTL-Agent); p. 6 do PDF (Fig. 5)",
+        "observacao": "Módulo que reúne as duas técnicas Progressive Coding e Prompt Optimization. Ablação Naive Coding: substitui o módulo por um módulo C++ ingênuo que gera o C++ de cada subfunção com as informações fornecidas, sem melhorias iterativas nem otimizações; os demais módulos permanecem. As duas técnicas são retiradas juntas, por isso o contrafactual vale para o módulo e não para cada uma."
+      },
+      {
+        "nome_original": "Progressive Coding",
+        "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao", "feedback", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (Seção IV-C, Progressive Coding; Fig. 3)",
+        "observacao": "Geração sequencial de pseudocódigo, Python e C++ por subfunção, com o código de nível mais alto como referência para o de nível mais baixo (contexto; representações intermediárias encadeadas → decomposição). Um Coder redige e um Verifier avalia, sugerindo revisões ou regeneração (feedback, multiagente); o Verifier deriva casos de teste do documento ou do código de nível mais alto, ou faz autovalidação contra a especificação. Só é retirada junto com Prompt Optimization (Naive Coding); sem contrafactual próprio."
+      },
+      {
+        "nome_original": "Prompt Optimization (Prompt Optimizer Agent)",
+        "mecanismos": ["instrucao", "feedback", "otimizacao_prompt"],
+        "mecanismos_acrescentados": ["feedback", "otimizacao_prompt"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF (Seção IV-C, Prompt Optimization); p. 6 do PDF (Seção V-E, Prompt Optimization; Fig. 5)",
+        "observacao": "O agente analisa o registro de implementação da subfunção, extrai aprendizados e refina o prompt do Coder (Fig. 5: prompt de papel «You are a python coder» acrescido de dicas sobre formato e dimensão de entradas e saídas). A Fig. 5 é ilustração qualitativa de um caso (AddRoundKey()), sem medida. Só é retirada junto com Progressive Coding (Naive Coding); sem contrafactual próprio."
+      },
+      {
+        "nome_original": "Adaptive Reflection Module",
+        "mecanismos": ["instrucao", "contexto", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["feedback", "multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 do PDF (Seção IV-D; Fig. 3); p. 5 do PDF (Seção V-A, Baselines (5); Seção V-C; Tabela I, colunas W/o Reflection e Spec2RTL-Agent); p. 6 do PDF (Fig. 6)",
+        "observacao": "Analysis Agent revisa toda a trajetória de geração (contexto) e propõe onde está o erro; Reflection Agent escolhe entre regenerar a instrução, voltar a subfunções anteriores, regenerar a subfunção atual com feedback dirigido ou pedir intervenção humana. Ablação W/o Reflection: erros tratados só dentro da subfunção atual, sem revisitar subfunções anteriores ou instruções. A escalada para intervenção humana é parte não-prompting do módulo (híbrido)."
+      },
+      {
+        "nome_original": "Code Optimizer Agent",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF (Seção IV-A, item 4); p. 4–5 do PDF (Seção IV-E)",
+        "observacao": "Adapta o C++ às restrições da ferramenta HLS com base em diretrizes extraídas do tutorial dela (contexto; restrições de formato de dados e uso de memória estática). Sem ablação."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Stratus High-Level Synthesis (Stratus HLS)",
+        "natureza": "outro",
+        "descricao": "Ferramenta comercial de síntese de alto nível que converte o C++ gerado em RTL; não é prompting.",
+        "localizador": "p. 4–5 do PDF (Seção IV-E); p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "nome_original": "rule-based approach (substituição de subfunções no arquivo de código)",
+        "natureza": "outro",
+        "descricao": "Os agentes geram só a subfunção modificada, marcada com 20 asteriscos e rotulada com o nome da subfunção; uma regra localiza e substitui a subfunção correspondente no arquivo. A marcação é formato de saída pedido no prompt; a substituição por regra não é prompting.",
+        "localizador": "p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "nome_original": "PyPDF e capturas de tela de figuras e tabelas",
+        "natureza": "outro",
+        "descricao": "Pré-processamento da entrada: extração de texto do PDF com PyPDF e capturas de tela de figuras e tabelas, compiladas e fornecidas ao LLM.",
+        "localizador": "p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "nome_original": "AutoGen framework",
+        "natureza": "outro",
+        "descricao": "Arcabouço que gerencia as interações entre agentes e o uso de ferramentas.",
+        "localizador": "p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "nome_original": "Human intervention (Choice 4: Unclear Reason, Ask Human Intervention)",
+        "natureza": "outro",
+        "descricao": "Intervenção humana acionada pelo Reflection Agent quando a origem do erro é incerta; é contada pela métrica # Intervention e faz parte do pacote avaliado.",
+        "localizador": "p. 4 do PDF (Seção IV-D; Fig. 3); p. 6 do PDF (Fig. 6)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4o [43]", "versao": "nao_informado (snapshot não informado; a referência [43] aponta para a página do GPT-4, acessada em 04/10/2023); usado como núcleo de todos os agentes"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Subconjunto de três documentos FIPS do NIST: Advanced Encryption Standard (AES, FIPS PUB 197) [40], Digital Signature Standard (DSS, FIPS PUB 186-5) [41] e Keyed-Hash Message Authentication Code (HMAC, FIPS PUB 198-1) [42]",
+        "quantidade": "3 documentos de especificação; número de subfunções por documento: nao_informado",
+        "observacao": "Denominador de Correct: 3 documentos (impresso como x/3). # Coding é média por subfunção, mas o número de subfunções não é informado. # Intervention da Tabela I tem valores fracionários (por exemplo, 4.33), o que sugere média entre documentos, mas a forma de agregação não é declarada. A Tabela II rotula o terceiro documento como «HMCA»."
+      }
+    ],
+    "metricas": [
+      {"nome": "Correct (correção funcional da implementação RTL gerada; impressa como x/3)", "aplicacao": "Tabelas I e III", "localizador": "p. 5 do PDF (Evaluation Metrics; Tabelas I e III)"},
+      {"nome": "# Intervention (número de intervenções humanas para alcançar funcionalidade correta)", "aplicacao": "Tabelas I, II e III", "localizador": "p. 5 do PDF (Evaluation Metrics; Tabelas I, II e III)"},
+      {"nome": "# Coding (número médio de tentativas de geração e revisão de código por subfunção)", "aplicacao": "Tabelas I, II e III", "localizador": "p. 5 do PDF (Evaluation Metrics; Tabelas I, II e III)"},
+      {"nome": "latência, throughput e área do motor AES gerado (comparação qualitativa com implementações abertas modificadas; sem valores numéricos)", "aplicacao": "somente AES", "localizador": "p. 5 do PDF (Seção V-B); p. 6 do PDF (Performance Evaluation)"}
+    ],
+    "linguagens": [
+      "Entrada: documentos de especificação em linguagem natural com tabelas, figuras e equações",
+      "Representações intermediárias: pseudocódigo, Python e C++ (sintetizável para HLS)",
+      "Saída: RTL gerado pela Stratus HLS; linguagem de descrição de hardware: nao_informado"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Geração em uma única passada falha: a linha de base Single-Shot não produziu implementação correta em nenhum dos três documentos (0/3).",
+        "localizador": "p. 5 do PDF (Seção V-B; Tabela I)"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Propagação de erros entre subfunções: uma subfunção nova falha nos testes por erros em subfunções anteriores ou no plano inicial; a escassez de casos de teste por subfunção impede localizar o erro (cenário 2 da Fig. 6).",
+        "localizador": "p. 3 do PDF (Seção III-B, Challenge 3); p. 4 do PDF (Seção IV-D); p. 6 do PDF (Fig. 6; Human Intervention Scenarios)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de comprimento de saída: o código alvo completo excede o limite de geração dos LLMs, o que impede regenerar o arquivo inteiro a cada atualização.",
+        "localizador": "p. 3 do PDF (Seção III-B, Challenge 2); p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Dependência residual de intervenção humana, apresentada como limitação: alguma participação humana continua necessária, por exemplo quando a especificação contém descrição imprecisa (cenário 1 da Fig. 6) ou quando é preciso técnica de depuração mais avançada.",
+        "localizador": "p. 6 do PDF (Human Intervention Scenarios; Seção VI, item (1))"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Cerca de 10 iterações por subfunção consomem número não trivial de tokens e podem causar ineficiência; não quantificado em tokens ou dinheiro.",
+        "localizador": "p. 6 do PDF (Seção VI, item (2)); p. 4 do PDF (Seção IV-C, Prompt Optimization)"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Módulo de reflexão adaptativa para rastrear a origem de erros até subfunções anteriores ou instruções; medido contra W/o Reflection na Tabela I (# Intervention e # Coding; Correct igual nas duas condições).",
+        "avaliada": "sim",
+        "localizador": "p. 4 do PDF (Seção IV-D); p. 5 do PDF (Seção V-C; Tabela I)"
+      },
+      {
+        "descricao": "Prompt Optimizer Agent introduzido para reduzir ineficiência das iterações Coder–Verifier e aumentar o custo-efetividade; só é retirado junto com Progressive Coding (Naive Coding), sem medida isolada.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF (Seção IV-C); p. 5 do PDF (Tabela I)"
+      },
+      {
+        "descricao": "Geração apenas da subfunção modificada, marcada com 20 asteriscos, e substituição por regra no arquivo, para contornar o limite de comprimento de saída; sem comparação com e sem.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF (Implementation Details)"
+      },
+      {
+        "descricao": "Autovalidação do Verifier contra a especificação quando não há casos de teste externos, e uso de testes derivados do código de nível mais alto; sem comparação com e sem.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF (Seção IV-C, Progressive Coding)"
+      },
+      {
+        "descricao": "Escalada para intervenção humana com resumo da situação, observações, tentativas e perguntas quando a origem do erro é incerta; sem comparação com e sem.",
+        "avaliada": "nao",
+        "localizador": "p. 4 do PDF (Seção IV-D); p. 6 do PDF (Fig. 6)"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Single-Shot, Human e três ablações (W/o Understand, Naive Coding, W/o Reflection), executadas pelo estudo nos mesmos três documentos e métricas (Tabela I, p. 5 do PDF). Single-Shot não tem valores de # Intervention e # Coding («/»); Human tem valores aproximados («∼20»).",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa que contradiz a tabela (cálculo próprio): o texto atribui reduções de 51.9% e 31.6% em intervenções e de 47.8% e 31.0% em iterações de codificação a W/o Reflection e Naive Coding, «respectively». Pelos valores da Tabela I, (9.00−4.33)/9.00 ≈ 51.9% e (17.46−9.11)/17.46 ≈ 47.8% correspondem a Naive Coding, e (6.33−4.33)/6.33 ≈ 31.6% e (13.20−9.11)/13.20 ≈ 31.0% correspondem a W/o Reflection; a ordem do texto está invertida.",
+        "localizador": "p. 5 do PDF (Seção V-C; Tabela I, linhas # Intervention e # Coding)"
+      },
+      {
+        "descricao": "O resumo e as contribuições dizem «as much as 75% fewer human interventions compared to existing approaches/methods»; a Seção V-B diz «approximately 75%» em relação à linha de base Human, cujo valor impresso é aproximado («∼20»). Cálculo próprio com 20 e 4.33: ≈ 78%. A forma de contar intervenções na linha de base Human não é descrita, e a linha de base é uma reprodução do estilo de [7], não um sistema anterior executado.",
+        "localizador": "p. 1 do PDF (resumo); p. 2 do PDF (contribuições); p. 5 do PDF (Seção V-A, Baselines (2); Seção V-B; Tabela I)"
+      },
+      {
+        "descricao": "O resumo apresenta o sistema como «the first fully automated multi-agent system for RTL generation», mas a Tabela I registra 4.33 intervenções humanas para o Spec2RTL-Agent e a conclusão reconhece que alguma participação humana continua necessária.",
+        "localizador": "p. 1 do PDF (resumo); p. 5 do PDF (Tabela I); p. 6 do PDF (Seção VI)"
+      },
+      {
+        "descricao": "Resultado nulo em Correct: Naive Coding e W/o Reflection alcançam 3/3, como o sistema completo; só W/o Understand cai para 2/3. As diferenças das ablações aparecem em # Intervention e # Coding. Ainda assim, o texto conclui que os resultados «confirm the effectiveness of each module in improving code accuracy».",
+        "localizador": "p. 5 do PDF (Tabela I, linha Correct; Seção V-C)"
+      },
+      {
+        "descricao": "Amostra muito pequena e sem variabilidade relatada: três documentos, um único modelo (GPT-4o), número de execuções nao_informado, sem desvio padrão nem teste estatístico; os valores fracionários de # Intervention não têm forma de agregação declarada.",
+        "localizador": "p. 5 do PDF (Seção V-A; Tabelas I a III)"
+      },
+      {
+        "descricao": "Na Tabela III, o ruído na etapa de compreensão eleva # Intervention de 4.33 para 6.00 e # Coding de 9.11 para 11.42, enquanto o texto fala em «maintaining stable efficiency in #Intervention and #Coding metrics». Os valores da coluna None (3/3, 4.33, 9.11) coincidem com a coluna Spec2RTL-Agent da Tabela I.",
+        "localizador": "p. 5 do PDF (Seção V-D; Tabela III); p. 6 do PDF (continuação da Seção V-D)"
+      },
+      {
+        "descricao": "Conferência própria: as médias simples da Tabela II (intervenções 4, 6 e 3; # Coding 8.49, 9.31 e 9.52) dão ≈ 4.33 e ≈ 9.11, iguais aos valores do Spec2RTL-Agent na Tabela I. A Tabela II rotula o terceiro documento como «HMCA», enquanto o texto usa HMAC.",
+        "localizador": "p. 5 do PDF (Tabelas I e II; Seção V-A)"
+      },
+      {
+        "descricao": "A comparação de latência, throughput e área com implementações abertas de AES modificadas é relatada só como «comparable», sem valores, configurações ou número de configurações; restrita ao AES.",
+        "localizador": "p. 5 do PDF (Seção V-B); p. 6 do PDF (Performance Evaluation)"
+      },
+      {
+        "descricao": "Linha de base Single-Shot sem valores de # Intervention e # Coding («/» na Tabela I); a comparação com ela só é possível em Correct.",
+        "localizador": "p. 5 do PDF (Tabela I)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Ablação de robustez a ruído de geração (Tabela III): após cada etapa, o LLM é instruído a revisar a saída introduzindo um erro semântico sutil; avalia-se o efeito com ruído no plano e em pseudocódigo, Python e C++. É procedimento de avaliação, não técnica de prompting comparada.",
+        "localizador": "p. 5 do PDF (Seção V-D; Tabela III)"
+      },
+      {
+        "descricao": "Visualizações qualitativas: dicionário de informações gerado para subfunções da cifra AES (Fig. 4), prompt antes e depois da otimização para AddRoundKey() (Fig. 5) e dois cenários de intervenção humana com saída do Reflection Agent (Fig. 6). Não há medida associada.",
+        "localizador": "p. 6 do PDF (Seção V-E; Figs. 4, 5 e 6)"
+      },
+      {
+        "descricao": "Parâmetros de decodificação (temperatura, top-p, tamanho máximo), prompts completos dos agentes, critérios para contar uma intervenção humana, casos de teste usados para julgar Correct e número de execuções não são informados. O estudo não imprime endereço de código ou pacote de replicação.",
+        "localizador": "texto completo (busca sem ocorrência)"
+      },
+      {
+        "descricao": "A tarefa avaliada é geração de código (RTL a partir de especificações); a depuração ocorre como parte interna do pipeline (reflexão e revisão), não como tarefa de reparo avaliada separadamente.",
+        "localizador": "p. 3 do PDF (Seção III-A); p. 4 do PDF (Seção IV-D)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we address this gap by proposing an LLM agent system, termed Spec2RTL-Agent, designed to directly process complex specification documentation and generate corresponding RTL code implementations, advancing LLM-based RTL code generation toward more realistic application settings.", "localizador": "p. 1 do PDF, Abstract"},
+      {"trecho": "We evaluate Spec2RTL-Agent on a benchmark of three specification documents, demonstrating its effectiveness in generating accurate RTL code with as much as 75% fewer human interventions compared to existing approaches.", "localizador": "p. 1 do PDF, Abstract"},
+      {"trecho": "These results underscore Spec2RTL-Agent’s role as the first fully automated multi-agent system for RTL generation from unstructured specification documents, reducing the reliance on human effort and expertise in hardware design.", "localizador": "p. 1 do PDF, Abstract"},
+      {"trecho": "Notably, Spec2RTL-Agent achieves as much as 75% fewer human interventions compared to existing methods.", "localizador": "p. 2 do PDF, Seção I (contribuições)"},
+      {"trecho": "A Summarization Agent is employed to generate concise summaries for each section of the document, thereby simplifying the initial comprehension process and reducing the complexity for further processing.", "localizador": "p. 3 do PDF, Seção IV-B"},
+      {"trecho": "A Decomposer Agent receives both the summarized data and the original document, tasked with organizing the target implementation into a sequence of implementable sub-functions.", "localizador": "p. 3 do PDF, Seção IV-B"},
+      {"trecho": "The Description Agent uses the original document, the summaries provided, and specific sub-function requirements as inputs to collate and format the necessary information into a structured dictionary.", "localizador": "p. 4 do PDF, Seção IV-B"},
+      {"trecho": "The Verifier then reviews this dictionary, providing feedback to enhance the quality and accuracy of the information.", "localizador": "p. 4 do PDF, Seção IV-B"},
+      {"trecho": "The process involves sequentially generating pseudocode, Python, and C++ code.", "localizador": "p. 4 do PDF, Seção IV-C (Progressive Coding)"},
+      {"trecho": "For each sub-function, a Coder first drafts the code and a Verifier then assesses its accuracy, suggesting necessary revisions or a complete regeneration when needed.", "localizador": "p. 4 do PDF, Seção IV-C (Progressive Coding)"},
+      {"trecho": "In scenarios where external test cases are unavailable, the Verifier performs a self-validation by directly comparing the implementation against the original specifications.", "localizador": "p. 4 do PDF, Seção IV-C (Progressive Coding)"},
+      {"trecho": "To streamline this process and enhance cost-effectiveness, we introduce a Prompt Optimizer Agent.", "localizador": "p. 4 do PDF, Seção IV-C (Prompt Optimization)"},
+      {"trecho": "This agent analyzes the implementation log for the current sub-function, extracts learnings, and refines the prompts used by the Coder to enhance the accuracy and efficiency of subsequent coding attempts.", "localizador": "p. 4 do PDF, Seção IV-C (Prompt Optimization)"},
+      {"trecho": "This often results in scenarios where a newly implemented sub-function fails to pass test cases due to errors in previously implemented sub-functions.", "localizador": "p. 4 do PDF, Seção IV-D"},
+      {"trecho": "An Analysis Agent first reviews the entire generation trajectory to summarize the completed work and propose potential areas where errors may reside.", "localizador": "p. 4 do PDF, Seção IV-D"},
+      {"trecho": "If the error source remains unclear, the agent escalates the issue for human intervention, summarizing the situation and requesting guidance on corrective measures.", "localizador": "p. 4 do PDF, Seção IV-D"},
+      {"trecho": "This agent adapts the C++ code to meet the HLS tool’s constraints based on guidelines extracted from the tutorial of this HLS tool.", "localizador": "p. 4 do PDF, Seção IV-E"},
+      {"trecho": "(1) Single-Shot: The entire specification document is input into an LLM, which is tasked with generating the target RTL in a single attempt.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"},
+      {"trecho": "(2) Human: Mirroring approaches like that in [7], a human handles the understanding and reflection phases while delegating code implementation to an LLM based on provided instructions.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"},
+      {"trecho": "(3) W/o Understand: This variation of our pipeline omits the iterative understanding and reasoning module, directly feeding the entire document into the coding module to complete the implementation.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"},
+      {"trecho": "(4) Naive Coding: This configuration removes the progressive coding and prompt optimization module, replacing it with a naive C++ coding module.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"},
+      {"trecho": "(5) W/o Reflection: This configuration bypasses the adaptive reflection module.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"},
+      {"trecho": "In our study, we use GPT-4o [43] as the core architecture for all agents, with agent interactions and tool usage managed via the AutoGen framework [26].", "localizador": "p. 5 do PDF, Seção V-A (Implementation Details)"},
+      {"trecho": "During code generation, the full target code often exceeds LLMs’ generation limits, making it impractical to regenerate the entire file for every sub-function update.", "localizador": "p. 5 do PDF, Seção V-A (Implementation Details)"},
+      {"trecho": "To address this, agents generate only the modified sub-function, mark it with 20 asterisks (*), and label its start with the sub-function name.", "localizador": "p. 5 do PDF, Seção V-A (Implementation Details)"},
+      {"trecho": "The Single-Shot approach, which directly prompts LLMs to generate implementations, failed in all three test cases, underscoring the complexity of the task.", "localizador": "p. 5 do PDF, Seção V-B"},
+      {"trecho": "Specifically, Spec2RTL-Agent reduced human interventions by approximately 75%, easing the burden of RTL implementation and enhancing development efficiency.", "localizador": "p. 5 do PDF, Seção V-B"},
+      {"trecho": "Compared to W/o Reflection and Naive Coding, our full Spec2RTL-Agent reduced human interventions by 51.9% and 31.6%, and coding iterations by 47.8% and 31.0%, respectively.", "localizador": "p. 5 do PDF, Seção V-C"},
+      {"trecho": "These results confirm the effectiveness of each module in improving code accuracy.", "localizador": "p. 5 do PDF, Seção V-C"},
+      {"trecho": "You are a python coder, follow the provided instructions to generate the target sub function.", "localizador": "p. 6 do PDF, Fig. 5 (Original Prompt)"},
+      {"trecho": "Specifically, we observe that scenarios requiring human intervention typically fall into one of two categories: (1) an inaccurate description in the specification document (i.e., scenario 1 in Fig. 6) or (2) the need for a more advanced debugging technique, as the generated test case cannot effectively identify the error (i.e., scenario 2 in Fig. 6).", "localizador": "p. 6 do PDF, Seção V-E (Human Intervention Scenarios)"},
+      {"trecho": "Our generated code achieved comparable latency, throughput, and area under multiple HLS configurations.", "localizador": "p. 6 do PDF, Seção V-E (Performance Evaluation)"},
+      {"trecho": "Reducing Human Intervention: While it minimizes manual input, some involvement is still required for optimal RTL implementation (see Fig. 6).", "localizador": "p. 6 do PDF, Seção VI"},
+      {"trecho": "Improving Efficiency: Spec2RTL-Agent requires ∼10 iterations per sub-function, which consumes a nontrivial number of tokens and can cause inefficiencies.", "localizador": "p. 6 do PDF, Seção VI"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Spec2RTL-Agent",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+      "comparador": "Single-Shot",
+      "modelo": "GPT-4o",
+      "benchmark": "Três documentos FIPS do NIST (AES, DSS, HMAC)",
+      "metrica": "Correct (correção funcional da implementação RTL gerada)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 0, "intervencao": 3},
+      "denominador": "3 documentos de especificação (impresso como 0/3 e 3/3)",
+      "condicoes": "Mesmo modelo (GPT-4o) e mesmos três documentos; Single-Shot recebe o documento inteiro e gera o RTL em uma tentativa; Spec2RTL-Agent é pacote híbrido (conversão por Stratus HLS, substituição por regra, intervenções humanas: 4.33 em média na Tabela I), e o resultado é do pacote. Critério e casos de teste usados para julgar a correção, parâmetros de decodificação e número de execuções: nao_informado. Single-Shot não tem # Intervention nem # Coding («/»). Conferido no PDF (p. 5, Tabela I; fonte pequena, valores legíveis e iguais ao texto extraído).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: a declaração do resumo e das contribuições (75% menos intervenções) usa comparador plural e vago («existing approaches/methods»), identificado no corpo como a linha de base Human, que é condição com humano no ciclo e não contraste de prompting; o resumo também destaca «accurate RTL code». Primeira tabela com contraste elegível: Tabela I; primeira métrica (Correct), único modelo (GPT-4o) e primeira linha de base de prompting listada (Single-Shot; a coluna Human, anterior, foi pulada por ser condição de trabalho humano).",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela I, linha Correct, colunas Single-Shot e Spec2RTL-Agent; Seção V-B",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Correct 3/3 0/3 2/3 3/3 3/3 3/3", "localizador": "p. 5 do PDF, Tabela I; colunas Method, Human, Single-Shot, W/o Understand, Naive Coding, W/o Reflection, Spec2RTL-Agent"},
+        {"trecho": "The Single-Shot approach, which directly prompts LLMs to generate implementations, failed in all three test cases, underscoring the complexity of the task.", "localizador": "p. 5 do PDF, Seção V-B"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iterative Understanding and Reasoning Module",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["contexto", "decomposicao", "feedback", "multiagente", "restricoes"],
+      "comparador": "W/o Understand",
+      "modelo": "GPT-4o",
+      "benchmark": "Três documentos FIPS do NIST (AES, DSS, HMAC)",
+      "metrica": "Correct (correção funcional da implementação RTL gerada)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 2, "intervencao": 3},
+      "denominador": "3 documentos de especificação (impresso como 2/3 e 3/3)",
+      "condicoes": "Intervenção: Spec2RTL-Agent completo; comparador: mesmo pipeline sem o módulo de compreensão e raciocínio, com o documento inteiro dado ao módulo de codificação. Ablação de ingrediente (módulo inteiro; as etapas internas não são isoladas). Na mesma tabela, # Intervention 4.33 contra 18.67 e # Coding 9.11 contra 15.53. Número de execuções e critério de correção: nao_informado. Conferido no PDF (p. 5, Tabela I).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três; primeiro componente da ablação na ordem das colunas da Tabela I (W/o Understand), primeira métrica (Correct).",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela I, linha Correct, colunas W/o Understand e Spec2RTL-Agent; Seção V-C",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Correct 3/3 0/3 2/3 3/3 3/3 3/3", "localizador": "p. 5 do PDF, Tabela I; colunas Method, Human, Single-Shot, W/o Understand, Naive Coding, W/o Reflection, Spec2RTL-Agent"},
+        {"trecho": "As shown in Table I, removing the iterative understanding and reasoning module (W/o Understanding) led to a more than fourfold increase in human interventions, underscoring its importance in planning.", "localizador": "p. 5 do PDF, Seção V-C"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Progressive Coding and Prompt Optimization Module",
+      "mecanismos": ["instrucao", "contexto", "decomposicao", "feedback", "multiagente", "restricoes", "otimizacao_prompt"],
+      "mecanismos_acrescentados": ["contexto", "decomposicao", "feedback", "multiagente", "otimizacao_prompt"],
+      "comparador": "Naive Coding",
+      "modelo": "GPT-4o",
+      "benchmark": "Três documentos FIPS do NIST (AES, DSS, HMAC)",
+      "metrica": "Correct (correção funcional da implementação RTL gerada)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 3, "intervencao": 3},
+      "denominador": "3 documentos de especificação (impresso como 3/3 nas duas condições)",
+      "condicoes": "Intervenção: Spec2RTL-Agent completo; comparador: módulo substituído por geração direta de C++ por subfunção, sem melhorias iterativas nem otimizações, mantidos os demais módulos. Progressive Coding e Prompt Optimization são retirados juntos; o resultado não se atribui a nenhuma das duas isoladamente. Na mesma tabela, # Intervention 4.33 contra 9.00 e # Coding 9.11 contra 17.46. Número de execuções e critério de correção: nao_informado. Conferido no PDF (p. 5, Tabela I).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado incluído para completar o alvo de três; segundo componente da ablação na ordem das colunas da Tabela I (Naive Coding), primeira métrica (Correct).",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela I, linha Correct, colunas Naive Coding e Spec2RTL-Agent; Seção V-C",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Correct 3/3 0/3 2/3 3/3 3/3 3/3", "localizador": "p. 5 do PDF, Tabela I; colunas Method, Human, Single-Shot, W/o Understand, Naive Coding, W/o Reflection, Spec2RTL-Agent"},
+        {"trecho": "(4) Naive Coding: This configuration removes the progressive coding and prompt optimization module, replacing it with a naive C++ coding module.", "localizador": "p. 5 do PDF, Seção V-A (Baselines)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Problema definido com objetivo, entrada, saída e nível de automação esperado, além de três desafios explícitos e contribuições enumeradas.",
+      "localizador": "p. 2–3 do PDF (Seção I, contribuições; Seção III-A e III-B)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Os módulos, agentes e linhas de base são descritos, com um exemplo de prompt (Fig. 5); faltam os prompts completos, o número de subfunções por documento, a forma de contar intervenções, os casos de teste que definem a correção, parâmetros de decodificação e número de execuções.",
+      "localizador": "p. 3–5 do PDF (Seções IV e V-A); p. 6 do PDF (Fig. 5)"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Executa Single-Shot, Human e três ablações nos mesmos documentos e métricas; mas Single-Shot só tem Correct, Human tem valores aproximados («∼20») e procedimento pouco descrito, e nenhum sistema anterior é executado.",
+      "localizador": "p. 5 do PDF (Seção V-A, Baselines; Tabela I)"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "As três métricas são definidas e os valores do Spec2RTL-Agent coincidem entre as Tabelas I, II e III (médias da Tabela II conferidas por cálculo próprio); porém o denominador de # Coding (número de subfunções) e a agregação de # Intervention não são informados, a narrativa inverte as reduções percentuais das ablações e a avaliação de desempenho de hardware não traz números.",
+      "localizador": "p. 5 do PDF (Evaluation Metrics; Seção V-C; Tabelas I, II e III); p. 6 do PDF (Performance Evaluation)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A conclusão aponta limitações (intervenção humana residual, consumo de tokens) e a Seção V-E analisa casos de falha; não há discussão de ameaças à validade como tamanho da amostra (três documentos), modelo único, não determinismo ou contaminação.",
+      "localizador": "p. 6 do PDF (Seção V-E; Seção VI)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Modelo (GPT-4o), arcabouço (AutoGen), ferramenta HLS e documentos de entrada são identificados; não há código ou pacote de replicação impresso, snapshot do modelo, parâmetros de decodificação nem prompts completos, e a conversão depende de ferramenta comercial.",
+      "localizador": "p. 5 do PDF (Implementation Details); p. 7 do PDF (referências [39]–[43])"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos documentos FIPS ou de suas implementações nos dados de pré-treinamento do modelo.",
+      "localizador": "texto completo (busca sem ocorrência)"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [2, 3, 4, 5, 6]
+  }
+}

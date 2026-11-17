@@ -1,0 +1,116 @@
+\subsection{QP2: riscos e mitigações}\label{sec:qp2}
+
+Esta subseção sintetiza os riscos e as mitigações registrados nas fichas dos 332 estudos do corpus. As fichas foram extraídas por IA e conferidas pelo autor numa amostra de 67 estudos; fora dela, seguem sem conferência humana, salvo as afirmações verificadas uma a uma no original. Cada estudo entra uma vez em cada categoria que registra. Uma mitigação é avaliada apenas quando o estudo a compara com uma condição sem ela, o que não implica eficácia. As contagens do panorama e da Tabela~\ref{tab:riscos} incluem todas as fichas; as
+das subseções seguintes vêm das sínteses parciais, feitas antes da inclusão de S1610, S1617, S667 e dos estudos da última leva da etapa 3.
+
+\subsubsection{Panorama}
+
+% AFIRMACAO: A45
+A correção funcional é registrada em 314 dos 332 estudos, seguida de custo (156), contaminação (138), não determinismo (126), alucinação (99), segurança (90) e manutenibilidade (41); 275 estudos registram ao menos um risco classificado como «outro» (Tabela~\ref{tab:riscos}).
+% AFIRMACAO: A46
+Quase todos os estudos (328/332) registram ao menos uma mitigação, mas só 144/332 avaliam alguma delas; por tarefa, são 112/247 em geração, 25/62 em depuração, 12/27 em tradução e 7/20 em refatoração.
+
+\begin{table}[!t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Estudos distintos por categoria de risco e tarefa}
+\label{tab:riscos}
+\begin{tabular}{p{2.6cm}p{0.75cm}p{0.75cm}p{0.75cm}p{0.75cm}p{0.75cm}}
+\hline
+Categoria & Ger. & Dep. & Trad. & Ref. & Todas \\
+\hline
+Estudos (n) & 247 & 62 & 27 & 20 & 332 \\
+\hline
+Correção funcional & 232 & 58 & 27 & 18 & 314 \\
+Segurança & 72 & 15 & 6 & 6 & 90 \\
+Alucinação & 71 & 20 & 6 & 9 & 99 \\
+Contaminação & 96 & 31 & 13 & 6 & 138 \\
+Não determinismo & 89 & 26 & 13 & 10 & 126 \\
+Custo & 119 & 31 & 11 & 6 & 156 \\
+Manutenibilidade & 30 & 6 & 3 & 8 & 41 \\
+Outro & 202 & 54 & 22 & 16 & 275 \\
+\hline
+Com mitigação & 244 & 61 & 27 & 20 & 328 \\
+Com mitigação avaliada & 112 & 25 & 12 & 7 & 144 \\
+\hline
+\end{tabular}
+\par\smallskip
+\parbox{\columnwidth}{\scriptsize Ger.: geração; Dep.: depuração; Trad.: tradução; Ref.: refatoração. Um estudo pode ter mais de uma tarefa; as colunas de tarefa não somam o total. Contagem por script a partir de fichas extraídas por IA, conferidas por amostra. «Mitigação avaliada»: ao menos uma comparada com condição sem ela.}
+\end{table}
+
+\subsubsection{Síntese por categoria}
+
+\paragraph{Correção funcional}
+% AFIRMACAO: A47
+A aprovação em testes não equivale a correção: S1943 relata 62 \textit{patches} corretos entre 93 plausíveis (Tabela I), S303 relata 186 plausíveis e 164 corretos (Tabela III) e, em S1562, testes gerados pelo agente aprovaram código errado em 90,9\% das falhas do GPT (seção 4.5).
+% AFIRMACAO: A48
+A própria técnica de prompting pode piorar o desfecho medido, com registros para \textit{few-shot} (S6, seção 4.2; S1598, p. 4, taxa de aprovação de 0,108 contra 0,458 do \textit{zero-shot}), CoT em modelos pequenos (S319, seção 4.3; S1024, Tabela 5), RAG (S588, Fig. 5a), excesso de contexto ou de exemplos (S275, Figura 5; S1032, Fig. 3) e preâmbulos de segurança (S1693, seção V-B).
+% AFIRMACAO: A49
+Autocorreção e reparo também tornam incorretas respostas antes corretas: S759 relata $\Delta_{c \to i}$ de 8,4\% no Self-Refine com modelo pequeno (Tabela 1), em S1592, a seleção por modelo de recompensa entre a geração base e a guiada por pistas corrompeu 117 soluções corretas e reparou 310 (seção 3.3) e, em S2051, a taxa depois da primeira iteração de reparo ficou abaixo do pass@3 inicial, apurações que não são equivalentes, enquanto a seleção da melhor versão melhora o resultado (Tabela 8).
+
+Foram avaliados laços de \textit{feedback} de execução ou de compilador (S302, S1053, S1077, S1086, S1562), verificação externa (S1977), intervenções sobre o contexto recuperado (S670, S887) e controle do raciocínio conforme a dificuldade (S1133, S1034), parte deles por indicadores indiretos, como similaridade (S1155). Revisão humana e conferência manual de \textit{patches} plausíveis ficam como propostas (S1943, S2057).
+
+\paragraph{Segurança}
+A categoria reúne vulnerabilidades no código gerado, privacidade dos dados enviados ao modelo e segurança operacional (S2060).
+% AFIRMACAO: A50
+Quando medidas, as vulnerabilidades são frequentes: em tradução, de 28,6\% a 45,0\% das traduções de fontes corrigidas introduzem vulnerabilidades e de 61,4\% a 71,9\% das traduções de fontes vulneráveis as preservam (S951, Tabela IV), e iterações de «melhoria» acumularam 387 vulnerabilidades distintas, inclusive com prompts que pedem mais segurança (S739, Tabelas II e III).
+
+Foram avaliadas instruções de segurança no prompt (S397, S427, S604, S951, S1179, S1195, S1604, S1607, S1693, S1763), injeção de conhecimento de segurança (S695, S1894), reflexão com \textit{feedback} de detector (S1065) e pacotes sem isolamento de mecanismos (S391, S2129).
+% AFIRMACAO: A51
+Essas avaliações registram trocas com a correção funcional: diretrizes de segurança reduziram o Pass@1 do Claude-3.7-Sonnet de 16,19\% para 9,52\% (S1195, Tabela 7), o RCI reduziu o pass@1 no HumanEval (S604, seção V-C) e preâmbulos de segurança reduziram a correção (S1693, seção V-B); em S397, a CWE-78 pareceu não ser afetada pelas técnicas (seção 6.3.2).
+
+\textit{Sandbox} ou contêiner (S137, S1415, S1694), revisão humana entre iterações (S739) e implantação local do modelo (S1747, S1894) ficam como propostas.
+
+\paragraph{Alucinação}
+O termo não tem uso uniforme; S511, por exemplo, chama assim refatorações que alteram o comportamento.
+% AFIRMACAO: A52
+Um padrão recorrente é a referência a APIs, funções, atributos ou identificadores inexistentes: em S1415, 47 a 48 de 100 falhas revisadas têm essa natureza (Fig. 5), em S466, 22 casos, numa amostra descrita como de 100 cujas categorias somam 110 (seção 5.1), e em S109 ao menos um valor de hardware foi alucinado em 100\% dos programas do IMU com GPT-3.5 (seção 5.2).
+% AFIRMACAO: A53
+Poucas avaliações medem a própria alucinação: em S917, fornecer a lista de sinais no prompt eliminou os sinais inexistentes observados com o prompt de base, em uma única tarefa (Tabelas V a X), enquanto em S315 a inclusão dos \textit{imports} foi medida por pass@5 (0,233 sem e 0,271 com a instrução, em 10 \textit{bugs}) e em S1828, S1898 e S1977 as mitigações foram medidas por Pass@1 ou taxa de aprovação.
+
+\paragraph{Contaminação}
+% AFIRMACAO: A54
+Nos 128 estudos que a registram na síntese parcial (138 na contagem atual, Tabela~\ref{tab:riscos}), a contaminação aparece em geral como hipótese; indícios aparecem em S398 (no mínimo 43 ocorrências de cada prompt do HumanEval no GitHub, o que indica exposição, e não inclusão no treino de um modelo específico; seção 3.1), S412 (24 de 98 \textit{patches} corretos lexicalmente idênticos à referência, seção 6.1.1) e S2057 (122 de 522 \textit{bugs} nos dados de treino do StarCoder2, PDF p. 27).
+
+Os controles adotados (recorte temporal, \textit{benchmarks} novos, renomeação e filtros de similaridade) não são comparados com condições sem controle.
+% AFIRMACAO: A55
+Só dois estudos avaliam uma mitigação de contaminação contra uma condição sem ela: S137, por ablação com prompts ofuscados, cujo desfecho é o desempenho e não a contaminação (Apêndice M), e S2057, que compara tendências entre Defects4J e Defects4J-clean.
+
+\paragraph{Não determinismo}
+Repetições, sementes e temperatura 0 são adotadas como controle, em geral sem comparação.
+% AFIRMACAO: A56
+A temperatura 0 reduz, mas não elimina, a variação entre execuções (S124, Tabela 5; S1695, Tabela V), e S782 relata similaridade de 0,7 entre saídas do mesmo prompt com temperatura 0 (seção 4.2); S124 avaliou dois prompts: o \textit{concise prompt} tornou os candidatos mais determinísticos que o prompt de base em temperatura 0, e o CoT aumentou a aleatoriedade nessa condição (S124, Tabela 8).
+
+\paragraph{Custo}
+% AFIRMACAO: A57
+Técnicas de várias etapas acrescentam custo quando ele é medido: o MapCoder usa em média 16,7 chamadas e 21,25 mil \textit{tokens}, contra uma chamada e 0,64 mil \textit{tokens} do prompt direto (S344, Tabela 8), a técnica de S2140 custou US\$ 0,421 contra US\$ 0,017 do Default por 100 problemas (seção 7.1) e o reparo consumiu de 5 a 15 vezes a energia da passagem única (S1415, seção 6.1).
+
+As unidades e os objetos medidos diferem, o que impede agregar os valores; em alguns estudos, o custo é o da avaliação, e não do prompting (S892, S1024).
+% AFIRMACAO: A58
+As mitigações de custo avaliadas usam métricas distintas: a poda de candidatos reduziu o tempo de 110,1 para 13,2 s por pergunta (S195, Tabela 10), e o roteamento por dificuldade e o \textit{adaptive} CoT foram medidos em \textit{tokens} e em tempo de geração, respectivamente (S1133, Tabela 2; S1034, Tabela 2).
+
+\paragraph{Manutenibilidade}
+% AFIRMACAO: A59
+Quando medida, a manutenibilidade piora em alguns cenários: a condição C2C gerou 62 \textit{code smells} \textit{blocker} ou \textit{critical} (56 e 6) contra 17 (10 e 7) no \textit{ground truth} (S1708, Tabela VIII), a complexidade cresceu com as iterações em associação com as vulnerabilidades (r = 0,64; S739, seção IV-D) e o Zero-Verbosity chegou a complexidade ciclomática de 54 (S1606, Tabela I).
+
+Só duas mitigações avaliadas se ligam ao tema (S114, S2051).
+
+\paragraph{Temas de «outro»}
+Nas sínteses parciais, entre os 248 estudos que então registravam riscos da categoria «outro» (275 na contagem
+atual), predominam ameaças à validade dos próprios estudos: validade da medição e da avaliação (100 desses
+estudos) e validade externa (96). Aparecem ainda limites de contexto, comportamentos não solicitados (S1008) e fatores humanos e éticos.
+% AFIRMACAO: A60
+Nesses últimos, S62 relata participantes que aceitaram sem escrutínio o raciocínio de \textit{patches} incorretos (seção 5.4), e S140 registra que o \textit{few-shot} elevou o viés social (CBS) do GPT-4 de 59,88\% para 68,56\% (Tabela 7).
+
+\subsubsection{Lacunas}
+
+\begin{itemize}
+\item \textbf{Riscos sem avaliação.} Contaminação (138 estudos na contagem atual) tem duas avaliações de mitigação nas
+sínteses parciais, e não determinismo (126), uma única de prompting (S124). Uma leitura possível é que os controles funcionam como cuidado de desenho, sem verificar o efeito pretendido.
+\item \textbf{Desfecho diferente do risco.} Mitigações de alucinação são medidas, em geral, por Pass@k ou aprovação; o termo, como «segurança», cobre fenômenos distintos.
+\item \textbf{Trocas entre riscos.} Poucos estudos medem segurança e correção funcional em conjunto, e os que o fazem registram perdas.
+\item \textbf{Pacotes sem isolamento.} S1734, S2129 e S2140 não permitem atribuir o efeito a um componente do prompt.
+\item \textbf{Cobertura desigual.} Tradução (27) e refatoração (20) têm poucos estudos.
+\item \textbf{Conferência por amostra.} Contagens e localizadores dependem de fichas que, fora da amostra de 67 estudos, não foram conferidas por humano.
+\end{itemize}

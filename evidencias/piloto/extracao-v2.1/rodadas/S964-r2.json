@@ -1,0 +1,168 @@
+{
+  "estudo_id": "S964",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "zero-shot prompting (Instruction Prompt for Inference)",
+        "mecanismos": ["instrucao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "localizador": "p. 4 do PDF, seção V-A e Fig. 3",
+        "observacao": "Prompt com papel de sistema ('HPC expert') e instrução 'Translate the following code from {from_api} to {to_api}'. É a linha de base (0-shot) das comparações de few-shot e a condição 'Without agent' do pipeline agêntico; não há condição sem a instrução/persona."
+      },
+      {
+        "nome_original": "few-shot prompting (1-shot, 2-shot, 3-shot)",
+        "mecanismos": ["exemplos", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "p. 4-5 do PDF, seção V-B, Fig. 3 e Fig. 4",
+        "observacao": "Objeto da RQ1. Acrescenta n exemplos (fonte e tradução) do mesmo par de linguagens, retirados do conjunto de treino do ParaTrans, ao prompt zero-shot; comparação contrafactual 0-shot vs. 1/2/3-shot com os mesmos modelos e hiperparâmetros. Medida apenas a taxa de compilação; a taxa de validação não foi reportada para few-shot. Critério de seleção dos exemplos (além do mesmo par de linguagens) não informado."
+      },
+      {
+        "nome_original": "agentic pipeline with compiler feedback (Questioner, Compilation and Execution agents)",
+        "mecanismos": ["feedback", "multiagente", "instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "localizador": "p. 2 do PDF, Fig. 1; p. 6-7 do PDF, seção V-D, Fig. 6, Fig. 7 e Fig. 8",
+        "observacao": "Objeto da RQ3. Comparação com e sem o pipeline (Fig. 6 e 7). Os agentes de compilação e de execução usam GPT-4o-mini com até 3 tentativas cada, inclusive quando o Questioner é LLaMA; assim, a condição 'With agent' também acrescenta outro modelo, não só retorno de ferramentas. Os agentes de compilação e de execução não são isolados entre si; só as rodadas de reparo do agente de compilação são decompostas (Fig. 8). Prompts de reparo não são mostrados. O estudo apresenta UniPar como metodologia que unifica as estratégias, mas formula o pipeline como objeto de investigação próprio (RQ3)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {"nome_original": "hyperparameter optimization for decoding (temperature, top-p, max tokens)", "natureza": "decodificacao", "localizador": "p. 4 do PDF, seção IV-B (LLM Hyperparameters), seção V-A e Fig. 2"},
+      {"nome_original": "supervised fine-tuning (LLaMA-3.3-70B-Instruct no conjunto de treino do ParaTrans)", "natureza": "ajuste_fino", "localizador": "p. 5 do PDF, seção V-C e Fig. 5"},
+      {"nome_original": "LLM Quantization (8-bit na inferência; 16-bit no ajuste fino)", "natureza": "outro", "localizador": "p. 4 do PDF, seção IV-B (LLM Quantization); quantização numérica do modelo, não alteração de prompt"},
+      {"nome_original": "Ablation Study: Effectiveness of different Questioner Models (LLaMA base, GPT-4o-mini base, LLaMA FT)", "natureza": "selecao_modelo", "localizador": "p. 6-7 do PDF, seção V-D e Fig. 7"}
+    ],
+    "modelos": [
+      "GPT-4o-mini (via Azure OpenAI API; versão/data do modelo nao_informado)",
+      "LLaMA-3.3-70B-Instruct (inferência com quantização de 8 bits)",
+      "LLaMA-3.3-70B-Instruct ajustado no ParaTrans (FT; contexto de 16.384 tokens)",
+      "GPT-4o-mini como modelo dos agentes de compilação e de execução e como reparador de erros de compilação após troca da função main na validação"
+    ],
+    "benchmarks": [
+      "ParaTrans (construído pelos autores a partir do HeCBench): 898 pares de treino (Serial→OpenMP 235; Serial→CUDA 221; CUDA→OpenMP 221; OpenMP→CUDA 221) e 76 pares de teste (Serial→OpenMP 20; Serial→CUDA 19; CUDA→OpenMP 18; OpenMP→CUDA 19) (p. 3 do PDF, Table I)",
+      "HeCBench: 499 benchmarks, 1758 implementações; após filtros 406 códigos CUDA e 276 OpenMP; após corte de 7.500 tokens 380 CUDA e 258 OpenMP (p. 3 do PDF, seção III); três kernels não passaram na validação e foram removidos dos experimentos (p. 3)"
+    ],
+    "metricas": [
+      "compilation rate: percentual de programas gerados que compilam (p. 3 do PDF, seção IV-A)",
+      "validation rate: percentual de programas gerados cuja saída coincide com a saída esperada do kernel HeCBench, com a função main substituída pela do ground truth (p. 3 do PDF, seção IV-A)"
+    ],
+    "linguagens": [
+      "código serial (derivado das implementações OpenMP pela remoção dos pragmas; linguagem base não nomeada explicitamente; compilação com Clang++ citada)",
+      "OpenMP (HeCBench OpenMP-4.5)",
+      "CUDA (compilação com NVCC)"
+    ],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Modelos sem adaptação têm taxas baixas de compilação e de correção funcional (GPT-4o-mini: 46% de compilação e 15% de correção funcional, segundo o resumo).", "localizador": "p. 1 do PDF, Abstract"},
+      {"categoria": "correcao_funcional", "descricao": "Mesmo em amostras semelhantes ou idênticas ao exemplo do one-shot, LLaMA introduz erros sintáticos sutis e críticos; os autores suspeitam de diluição de contexto com prompts mais longos.", "localizador": "p. 5 do PDF, seção V-B"},
+      {"categoria": "nao_determinismo", "descricao": "Temperaturas mais altas (maior aleatoriedade na seleção de tokens) reduziram e tornaram menos consistentes as taxas de compilação, sobretudo com saídas longas.", "localizador": "p. 4 do PDF, seção V-A e Fig. 2"},
+      {"categoria": "outro", "descricao": "Desempenho de execução e escalabilidade do código traduzido não foram verificados, embora sejam importantes em HPC.", "localizador": "p. 7 do PDF, seção VI"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Pipeline agêntico com retorno de compilador e verificador de saída para reparar traduções.", "avaliada": "sim", "localizador": "p. 6-7 do PDF, seção V-D, Fig. 6 e Fig. 7"},
+      {"descricao": "Escolha de temperatura baixa (0,2) para maior validade sintática e consistência.", "avaliada": "sim", "localizador": "p. 4 do PDF, seção V-A e Fig. 2 (intervenção de decodificação, fora do escopo de prompting)"},
+      {"descricao": "Poda por contagem de tokens (corte de 7.500 tokens) para evitar degradação com entradas longas ou desbalanceadas.", "avaliada": "nao", "localizador": "p. 3 do PDF, seção III (Token Count Pruning)"},
+      {"descricao": "Validação automática do conjunto de dados (compilação e saída consistente com o ground truth), excluindo kernels que falharam.", "avaliada": "nao", "localizador": "p. 3 do PDF, seção III (Code Verification)"},
+      {"descricao": "Na validação, até 3 tentativas com GPT-4o-mini para reparar erros de compilação surgidos após a troca da função main, com verificação de que a funcionalidade do kernel não foi alterada.", "avaliada": "nao", "localizador": "p. 3 do PDF, seção IV-A"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Resultado nulo/inverso para few-shot: o estudo conclui que few-shot é ineficaz; a taxa de compilação fica praticamente inalterada e degrada com 3-shot (LLaMA, Avg: 0.49 com 0 shots, 0.43 com 1 shot, 0.48 com 2 shots, 0.29 com 3 shots, rótulos da Fig. 4).", "localizador": "p. 2 do PDF, Contributions 3; p. 5 do PDF, seção V-B e Fig. 4"},
+      {"descricao": "Narrativa parcialmente divergente da figura: o texto diz que as taxas permanecem praticamente inalteradas exceto em 3-shot, mas para LLaMA o 1-shot também cai em todas as direções (por exemplo, Avg 0.49 → 0.43); a legenda fala em degradação 'especially beyond 1-shot'.", "localizador": "p. 5 do PDF, seção V-B e legenda da Fig. 4"},
+      {"descricao": "O resumo e as contribuições atribuem 69% de compilação e 33% de correção à metodologia que combina ajuste fino, ajuste de hiperparâmetros e reparo guiado por compilador, mas esses valores coincidem com GPT-4o-mini base com agente (Fig. 6a Avg 0.69; Fig. 6b Avg 0.33), modelo que não foi ajustado; o resumo chama de 'default settings' a condição de 46%/15%, que nas figuras usa os hiperparâmetros ajustados (temperatura 0,2). Cálculo próprio: 0.46→0.69 é cerca de 1,5 vez e 0.15→0.33 cerca de 2,2 vezes; o 'up to 2X' não especifica a métrica.", "localizador": "p. 1 do PDF, Abstract; p. 2 do PDF, Contributions 3; p. 6 do PDF, Fig. 6"},
+      {"descricao": "Mesmo valor diferente entre figuras: taxa de validação média de LLaMA base sem agente é 0.13 na Fig. 6b (e na Fig. 5) e 0.18 na Fig. 7; GPT-4o-mini base com agente é 0.33 na Fig. 6b e 0.34 na Fig. 7.", "localizador": "p. 5 do PDF, Fig. 5; p. 6 do PDF, Fig. 6b; p. 7 do PDF, Fig. 7"},
+      {"descricao": "Taxa de compilação inicial de LLaMA por direção difere entre figuras: Fig. 8 (initial translation) mostra OMP→CUDA 0.44 e Serial→OMP 0.55, enquanto a Fig. 6a (without agent) mostra 0.39 e 0.65; a Fig. 4 (0-shot) mostra ainda 0.52, 0.47, 0.47 e 0.5 por direção, contra 0.65, 0.44, 0.39 e 0.53 na Fig. 6a, com médias próximas (0.49 vs. 0.5). A Fig. 5 (base) traz CUDA→OMP 0.5 contra 0.53 na Fig. 6a.", "localizador": "p. 5 do PDF, Fig. 4 e Fig. 5; p. 6 do PDF, Fig. 6a; p. 7 do PDF, Fig. 8"},
+      {"descricao": "Número de rodadas de reparo inconsistente: legenda da Fig. 1 e texto falam em até três rodadas/tentativas; a Fig. 8 decompõe só até duas tentativas de reparo.", "localizador": "p. 2 do PDF, Fig. 1; p. 6 do PDF, seção V-D; p. 7 do PDF, Fig. 8"},
+      {"descricao": "Configuração de top-p diverge: a exploração da Fig. 2 manteve top-p 0,8, enquanto os demais experimentos usaram 0,9; os valores de compilação com temperatura 0,2 e 15.000 tokens na Fig. 2 (LLaMA 0.52; GPT 0.44) diferem das médias zero-shot das Fig. 4 e 6 (0.49/0.5; 0.46).", "localizador": "p. 4 do PDF, seção IV-B, seção V-A e Fig. 2"},
+      {"descricao": "Narrativa do ajuste fino versus figura (cálculo próprio): o texto informa validação de 29,4% para CUDA e 38,2% para OpenMP; a média simples das direções para OpenMP na Fig. 5 (0.61 e 0.25) daria cerca de 0,43, não 0,382. Ajuste fino é fora do escopo de prompting.", "localizador": "p. 5 do PDF, seção V-C e Fig. 5"},
+      {"descricao": "Denominadores incertos (cálculo próprio): rótulos como 5.88·10^-2 equivalem a 1/17, incompatível com 19 pares de teste em Serial→CUDA e OMP→CUDA na Table I; o estudo informa a remoção de três kernels sem dizer de quais direções; não se informa se 'Avg' é média ponderada ou simples.", "localizador": "p. 3 do PDF, Table I e seção III; p. 5 do PDF, Fig. 5; p. 6 do PDF, Fig. 6b"},
+      {"descricao": "Ganho do pipeline não uniforme: a melhora de compilação é menor que a de validação; ganhos maiores onde o modelo base ia pior (OMP→CUDA em LLaMA, Serial→CUDA em GPT); o modelo ajustado tem ganho menor com agente.", "localizador": "p. 7 do PDF, seção V-D e legenda da Fig. 7"},
+      {"descricao": "A introdução fala em quatro modos de uso avaliados e as contribuições em três estratégias; o estudo se declara preliminar e adia ablação aprofundada e avaliação de escolhas de projeto.", "localizador": "p. 1-2 do PDF, Abstract e Contributions; p. 7 do PDF, seção VI"}
+    ],
+    "observacoes": [
+      {"descricao": "Validação com substituição da função main pela do ground truth e reparo por GPT-4o-mini (até 3 tentativas) quando a substituição quebrava a compilação; isso altera as saídas avaliadas em todas as condições.", "localizador": "p. 3 do PDF, seção IV-A"},
+      {"descricao": "Ablação das rodadas do agente de compilação (Fig. 8) impressa como barras empilhadas com incrementos por tentativa e sem total nem média; não extraída porque o resultado com reparo exigiria soma própria.", "localizador": "p. 7 do PDF, Fig. 8"},
+      {"descricao": "Fig. 4 inferior compara 0-shot e 1-shot por categoria do HeCBench (ML, Simulation, Bioinformatics, Computer vision, Data_Comp_Red, Language, Math).", "localizador": "p. 5 do PDF, Fig. 4"},
+      {"descricao": "Número de execuções por condição e variância não informados; hardware: 4 NVIDIA L40 para LLaMA, Azure OpenAI para GPT, 8 A100 para ajuste fino.", "localizador": "p. 4 do PDF, seção IV-B"},
+      {"descricao": "Código do UniPar e conjunto ParaTrans declarados disponíveis no GitHub; repositório não acessado nem validado nesta extração.", "localizador": "p. 1 do PDF, Abstract"},
+      {"descricao": "Documento é arXiv:2509.12136v1 (15 set. 2025); sem paginação impressa visível, localizadores usam a página do PDF.", "localizador": "p. 1 do PDF, margem"}
+    ],
+    "citacoes": [
+      {"trecho": "Specifically, in this work, we target translations between serial code, CUDA, and OpenMP.", "localizador": "p. 1 do PDF, Abstract"},
+      {"trecho": "We evaluated four major usage modes: hyperparameter optimization for decoding, zero- and few-shot prompting, supervised fine-tuning, and iterative feedback through compiler-based repair.", "localizador": "p. 1 do PDF, Abstract"},
+      {"trecho": "The results reveal that although few-shot prompting is ineffective for this problem, both task-specific fine-tuning and agentic framework with compiler feedback deliver considerable improvement to the performance of LLMs, by up to 2X (69% compilation and 33% correctness).", "localizador": "p. 2 do PDF, Contributions 3"},
+      {"trecho": "Each n-shot involved appending n additional examples for the same source–target language pair from the PARATRANS train set.", "localizador": "p. 4 do PDF, seção V-B"},
+      {"trecho": "System: You are an HPC expert specializing in translating between parallel programming APIs.", "localizador": "p. 4 do PDF, Fig. 3"},
+      {"trecho": "Compilation Agent: Attempts to compile the generated code. If the compilation fails, it extracts the error message and formulates a compilation repair prompt for its model.", "localizador": "p. 6 do PDF, seção V-D"},
+      {"trecho": "Execution Agent: Executes the code that passes compilation. If output verification fails, it produces an output-repair prompt containing the observed behavior and invokes its model for a correction.", "localizador": "p. 6 do PDF, seção V-D"},
+      {"trecho": "Both the Compilation and Execution agents used 3 rounds with GPT-4o-mini as their underlying LLM.", "localizador": "p. 6 do PDF, seção V-D"},
+      {"trecho": "While the exact cause of the poor LLM performance with the few-shot prompting would warrant further investigation, specific examples reveal that even on samples similar or identical to the one-shot prompt, LLaMA-3.3-70B-Instruct still introduces subtle but critical syntactic errors.", "localizador": "p. 5 do PDF, seção V-B"},
+      {"trecho": "This suggests that reduced randomness in the token selection process improves syntactic validity, especially when generating larger kernel codes, as supported by the findings in previous work [56], [57].", "localizador": "p. 4 do PDF, seção V-A"},
+      {"trecho": "Although we checked the syntax and the functional correctness of the translated code, we did not check its runtime performance or scalability – factors that are typically important for an HPC application – nor did we ask LLMs to optimize them.", "localizador": "p. 7 do PDF, seção VI"},
+      {"trecho": "In general, incorporating compiler and output verifier feedback significantly improves overall performance in terms of compilation and validation rate.", "localizador": "p. 6 do PDF, seção V-D"},
+      {"trecho": "In places where the code compiled successfully before the replacement but failed after the replacement, we used 3 attempts with GPT-4o-mini to repair the compilation error.", "localizador": "p. 3 do PDF, seção IV-A"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "few-shot prompting (1-shot)",
+      "mecanismos": ["exemplos", "instrucao"],
+      "comparador": "zero-shot prompting (0 shots)",
+      "modelo": "LLaMA-3.3-70B-Instruct",
+      "benchmark": "ParaTrans (conjunto de teste)",
+      "metrica": "compilation rate (Avg das quatro direções de tradução)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.49, "intervencao": 0.43},
+      "denominador": "76 pares de teste segundo a Table I; denominador efetivo e forma da média 'Avg' não informados (três kernels removidos)",
+      "condicoes": "Temperatura 0,2, top-p 0,9, máximo de 15.000 tokens; exemplos do mesmo par de linguagens retirados do conjunto de treino. Mesma figura: 2-shot 0.48 e 3-shot 0.29 (Avg, LLaMA). Conferido na imagem da p. 5: rótulos pequenos, lidos no PDF e coincidentes com o multiconjunto de valores do texto extraído do painel. Sem principal declarado com métrica única (resumo e contribuições dão compilação e correção juntas, sem prevalência) e sem tabela de resultados (Table I é descritiva); Fig. 2 compara só decodificação, logo a Fig. 4 é a primeira figura com resultado elegível de prompting.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Principal declarado com duas métricas sem prevalência; nenhuma tabela de resultados; primeira figura com comparação de prompting (Fig. 4), primeira métrica (compilação), primeiro modelo (LLaMA), linha de base 0-shot, agregado Avg impresso, primeira variante (1-shot).",
+      "localizador": "p. 5 do PDF, Fig. 4 (painel superior, LLaMA-3.3-70B-Instruct, grupo Avg); sem paginação impressa",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Increasing the number of prompt examples did not consistently improve the compilation rate and can lead to degradation, especially beyond 1-shot.", "localizador": "p. 5 do PDF, legenda da Fig. 4"},
+        {"trecho": "Rótulos impressos na Fig. 4, LLaMA-3.3-70B-Instruct, Avg: 0.49 (0 shots), 0.43 (1 shot), 0.48 (2 shots), 0.29 (3 shots).", "localizador": "p. 5 do PDF, Fig. 4 (rótulos de barras, não frase do texto)"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "agentic pipeline with compiler feedback (Compilation and Execution agents)",
+      "mecanismos": ["feedback", "multiagente", "instrucao"],
+      "comparador": "Without agent (zero-shot do Questioner sem os agentes de compilação e execução)",
+      "modelo": "LLaMA-3.3-70B-Instruct como Questioner (agentes de compilação e execução com GPT-4o-mini)",
+      "benchmark": "ParaTrans (conjunto de teste)",
+      "metrica": "compilation rate (Avg das quatro direções de tradução)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.5, "intervencao": 0.74},
+      "denominador": "76 pares de teste segundo a Table I; denominador efetivo e forma da média 'Avg' não informados",
+      "condicoes": "Temperatura 0,2, top-p 0,9, máximo de 15.000 tokens; até 3 tentativas por agente (compilação e execução), com GPT-4o-mini nos agentes; a condição com agente acrescenta outro modelo além do retorno de ferramentas. Na Fig. 7 o mesmo par aparece como 0.5 → 0.74. Na mesma figura, validação Avg de LLaMA: 0.13 → 0.33 (Fig. 6b), mas 0.18 → 0.33 na Fig. 7. Conferido na imagem da p. 6.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (RQ3) ainda não representada; primeira figura com a comparação (Fig. 6, painel a de compilação antes do b de validação), primeiro modelo (LLaMA), agregado Avg impresso.",
+      "localizador": "p. 6 do PDF, Fig. 6a (LLaMA-3.3-70B-Instruct, grupo Avg); sem paginação impressa",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Agent-based repair has a slight equalizing effect on results across translation directions as the variation in compilation rate shrinks.", "localizador": "p. 6 do PDF, legenda da Fig. 6a"},
+        {"trecho": "Rótulos impressos na Fig. 6a, LLaMA-3.3-70B-Instruct, Avg: 0.5 (Without agent), 0.74 (With agent).", "localizador": "p. 6 do PDF, Fig. 6a (rótulos de barras, não frase do texto)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo e três questões de pesquisa explícitas (RQ1 inferência zero/few-shot, RQ2 ajuste fino, RQ3 pipeline agêntico).", "localizador": "p. 2 do PDF, Research Questions"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção do ParaTrans, divisão treino/teste, prompt de inferência e hiperparâmetros descritos; prompts dos agentes de reparo, critério de escolha dos exemplos few-shot, número de execuções e denominadores efetivos (três kernels removidos) não informados.", "localizador": "p. 3-4 do PDF, seções III e IV; p. 6 do PDF, seção V-D"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há condições contrafactuais executadas (0-shot vs. n-shot; com e sem agente), mas a condição com agente para LLaMA acrescenta GPT-4o-mini como modelo de reparo, confundindo retorno de ferramentas e modelo; ferramentas de tradução existentes não foram executadas como comparador.", "localizador": "p. 5 do PDF, Fig. 4; p. 6 do PDF, seção V-D e Fig. 6"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Taxas de compilação e validação definidas e baseadas em execução com verificação de saída; porém a validação substitui a função main e usa GPT-4o-mini para reparar falhas de compilação decorrentes; few-shot só tem taxa de compilação; sem variância nem testes estatísticos.", "localizador": "p. 3 do PDF, seção IV-A; p. 5 do PDF, Fig. 4"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de trabalhos futuros reconhece ausência de avaliação de desempenho/escalabilidade, restrição a CUDA e OpenMP e ablação adiada; não discute ameaças como não determinismo, contaminação ou tamanho do conjunto de teste (76 pares).", "localizador": "p. 7 do PDF, seção VI"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Código e conjunto de dados declarados no GitHub (não verificados), modelos, hiperparâmetros e hardware informados; versão/data do GPT-4o-mini, prompts dos agentes e número de execuções não informados.", "localizador": "p. 1 do PDF, Abstract; p. 4 do PDF, seção IV-B"},
+    {"criterio": "contaminacao", "julgamento": "nao_atende", "justificativa": "Após busca no texto completo, não há menção a possível presença do HeCBench (suíte pública) nos dados de treino dos modelos nem medida para controlar contaminação.", "localizador": "p. 3 do PDF, seção III (uso do HeCBench); texto completo sem menção"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-02", "p-03", "p-04", "p-05", "p-06", "p-07"],
+    "observacao": "Texto extraído lido integralmente (incluindo referências); rótulos das figuras pequenos, conferidos nas imagens e cruzados com o texto extraído."
+  }
+}

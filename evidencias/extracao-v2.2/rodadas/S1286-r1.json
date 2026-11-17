@@ -1,0 +1,413 @@
+{
+  "estudo_id": "S1286",
+  "texto_fonte": "fontes/textos/lote/S1286.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "DePro",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "decomposicao", "feedback"],
+        "mecanismos_acrescentados": ["decomposicao", "feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1 (Abstract); p. 2 (Seção 1, parágrafo de proposta); p. 3 (Seção 2.1, Figura 1, Prompt 2; Seção 2.2); p. 4 (resultados, Figuras 2 e 3)",
+        "observacao": "Pacote híbrido: (1) geração, por prompt ao ChatGPT-5, de solução de força bruta a partir de um template com descrição do problema, restrições e especificação de entrada e saída (instrucao, contexto, restricoes); (2) stress testing com gerador aleatório de testes e comparação de saídas (componente que não é prompting, ver componentes_fora_escopo); (3) prompt de depuração com entrada falha, saída esperada e código original do usuário (Prompt 2), repetido após nova rodada de stress testing por até oito iterações (feedback). O encadeamento geração de referência, teste e depuração foi codificado como decomposicao (pipeline encadeado, D102). Se o prompt de depuração também traz a descrição do problema é nao_informado (Prompt 2 mostra só código, caso de teste e pergunta). Contrafactual executado: abordagem zero-shot com Prompt 1 nos mesmos 13 códigos e mesmo modelo (Figura 2, p. 3; texto p. 4). O isolamento é do pacote; o ganho não pode ser atribuído a um único mecanismo nem separado do stress testing. A definição de tentativa para o DePro (iteração do laço) não é explicitada e pode diferir da tentativa humana (submissão)."
+      },
+      {
+        "nome_original": "Zero-shot LLM debugging (Prompt 1: Debugging Feedback Extractor Prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (Seção 1.1.1, Prompt 1; Seção 1.1.2; Seção 1.1.3, Tabela 1); p. 4 (comparação na Figura 2)",
+        "observacao": "Prompt com enunciado do problema, limites de tempo e memória, especificação de entrada e saída, exemplo de entrada e saída do enunciado, código do usuário e o pedido de depuração. O exemplo de entrada e saída integra o enunciado e foi tratado como especificação, não como exemplo resolvido. Antes do prompt, os autores removem espaços, decompõem o problema em componentes e simplificam a notação matemática (Seção 1.1.2, p. 2). Como as tentativas posteriores do zero-shot são feitas não é inteiramente descrito: a RQ3 (p. 3) fala em comparação com «re-prompting without additional information», e o texto de resultados remete à abordagem «described in Section 2» (p. 4), seção que descreve o DePro. É linha de base sem isolamento de mecanismos; também é objeto do estudo empírico contra humanos (Tabela 1), contraste que não é de prompting."
+      },
+      {
+        "nome_original": "Supplying failing test cases (RQ3)",
+        "mecanismos": ["instrucao", "contexto", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (RQ3, coluna esquerda)",
+        "observacao": "Na RQ3, após o Prompt 1 e a submissão ao Codeforces, o caso de teste falho é fornecido com o código. O estudo declara em prosa que isso melhora significativamente o desempenho em relação a re-prompting sem informação adicional, mas não informa números, amostra, procedimento nem teste estatístico; não é possível verificar no texto a existência de condição contrafactual executada em condições comparáveis, por isso não é contada como isolada. É a observação que motiva o DePro."
+      },
+      {
+        "nome_original": "Initial Code Generation (brute-force reference solution)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (Seção 2.1, Initial Code Generation)",
+        "observacao": "Prompt ao modelo de raciocínio do ChatGPT-5 com template do problema (descrição, restrições, especificação de entrada e saída) e instrução para gerar solução de força bruta que priorize passar nos testes de exemplo. Parte do DePro sem ablação."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Stress Testing and Failure Detection (random test generator)",
+        "natureza": "outro",
+        "descricao": "Execução da solução de força bruta e do código do usuário sobre entradas geradas por script (casos de borda e valores limite), até encontrar divergência; é infraestrutura de teste, não prompting, e fornece o caso falho usado no feedback.",
+        "localizador": "PDF p. 3 (Seção 2.1, Stress Testing and Failure Detection); p. 3–4 (Seção 2.2, três arquivos C++)"
+      },
+      {
+        "nome_original": "batch script",
+        "natureza": "outro",
+        "descricao": "Script de lote que orquestra os três arquivos C++ do protótipo e exibe no terminal o caso de teste falho.",
+        "localizador": "PDF p. 4 (coluna esquerda, primeiro parágrafo)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "ChatGPT-5 / GPT-5 reasoning model",
+        "versao": "nao_informado",
+        "observacao": "O estudo usa «ChatGPT-5’s reasoning model» no protótipo e «GPT-5’s reasoning model» no estudo empírico, e afirma usar «the latest version of ChatGPT»; snapshot, data de acesso e parâmetros de decodificação são nao_informado."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Conjunto do estudo empírico (Codeforces)",
+        "versao": "nao_aplicavel",
+        "quantidade": "10 problems, 10 user codes each, 100 user codes",
+        "observacao": "Seleção própria de problemas e submissões com várias respostas erradas; códigos que falham na primeira submissão e em pontos diferentes dos testes. A distribuição por tipo e dificuldade no texto diverge da Tabela 1 (ver heterogeneidade). Localizador: PDF p. 2, Seção 1.1.1."
+      },
+      {
+        "nome": "Conjunto de avaliação do DePro (Codeforces)",
+        "versao": "nao_aplicavel",
+        "quantidade": "13 faulty user codes from 6 problems",
+        "observacao": "Selecionados entre casos em que o zero-shot precisou de 2 a 8 tentativas (média 4). Sobreposição com os 100 códigos do estudo empírico não descrita (nao_informado), embora os nomes de problemas nas Figuras 2 e 3 coincidam com nomes da Tabela 1. Os rótulos das Figuras 2 e 3 mostram 5 nomes de problemas distintos (leitura própria), não 6. Localizador: PDF p. 3, Seção 2.2; Figuras 2 e 3 (p. 3–4)."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Number of attempts",
+        "definicao": "«An attempt is defined as a single modified submission intended to correct the previous error» (p. 2); para o DePro, a contagem por iteração do laço não é definida explicitamente.",
+        "denominador": "Tabela 1: média por problema sobre 10 usuários (100 códigos); Figura 2: por código, 13 códigos"
+      },
+      {
+        "nome": "Reduction in number of attempts (%)",
+        "definicao": "Redução relativa média, máxima e mínima do DePro em relação ao zero-shot; o modo de cálculo (média das reduções por caso ou razão de médias) é nao_informado.",
+        "denominador": "13 faulty user codes"
+      },
+      {
+        "nome": "Debugging time (minutes)",
+        "definicao": "Tempo total de depuração; a forma de medir o tempo humano é nao_informado.",
+        "denominador": "13 user codes (Figura 3)"
+      },
+      {
+        "nome": "Similarity score (1 to 5)",
+        "definicao": "Média das notas de dois programadores competitivos sobre a semelhança entre as abordagens humana e do LLM.",
+        "denominador": "por problema (Tabela 1)"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "C++",
+        "observacao": "Protótipo do DePro com três arquivos C++, inclusive a solução do usuário (p. 3–4). Linguagem dos 100 códigos do estudo empírico: nao_informado."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os problemas avaliados podem estar nos dados de treinamento do LLM; o estudo não descreve controle.",
+        "localizador": "PDF p. 4, Seção 4, Internal Validity"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O LLM tende a edições localizadas em torno dos casos falhos e pode repetir correções ineficazes ou reintroduzir erros anteriores.",
+        "localizador": "PDF p. 2, RQ2"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Quando humanos usam heurísticas não convencionais, o LLM produz soluções alternativas sintaticamente corretas, mas por vezes menos eficientes, mais verbosas ou estruturalmente diferentes.",
+        "localizador": "PDF p. 2, RQ1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "O LLM tem dificuldade com problemas que admitem várias soluções válidas, pois converge para um único modelo de raciocínio.",
+        "localizador": "PDF p. 2, RQ1"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação do DePro: depende de solução de força bruta correta e de geração eficaz de testes, o que pode não escalar para espaços de entrada grandes ou problemas complexos.",
+        "localizador": "PDF p. 5, Seção 5, primeiro parágrafo"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Uso de prompt consistente em todas as avaliações para reduzir viés.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4, Seção 4, Conclusion Validity"
+      },
+      {
+        "descricao": "Anotações manuais validadas por revisão independente de dois programadores.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 4, Seção 4, Conclusion Validity; p. 2, Seção 1.2"
+      },
+      {
+        "descricao": "Seleção de códigos com pontos de falha diferentes para evitar viés para um único padrão de depuração.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 2, Seção 1.1.1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "Supplying failing test cases (RQ3)",
+        "motivo": "Resultado só qualitativo em prosa («significantly improves»), sem números, amostra ou procedimento informados (PDF p. 3, RQ3)."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "O resumo diz «reducing debugging attempts by up to 64%», enquanto o corpo diz que, em média, o DePro reduz as tentativas em 64%, com redução máxima de 75% e mínima de 50%.",
+        "localizador": "PDF p. 1 (Abstract) vs p. 4 (coluna esquerda, parágrafo da Figura 2)"
+      },
+      {
+        "descricao": "O resumo atribui as duas reduções a uma comparação «compared to human programmers and zero-shot LLM debugging», mas no corpo os 64% são relativos ao zero-shot e os 7,6 minutos são relativos aos «manual methods»; a Figura 3 só traz Manual Debugging e DePro.",
+        "localizador": "PDF p. 1 (Abstract) vs p. 4 (texto e Figura 3)"
+      },
+      {
+        "descricao": "O texto diz «13 faulty user codes from 6 problems» (também «13 cases drawn from 6 faulty Codeforces problems»), mas os rótulos das Figuras 2 e 3 mostram 5 nomes de problemas distintos (Flip Bits ou Flip The Bits, T-primes, Bobritto Bandito 1–5, Letter Home 1–2, Good Start 1–4). Contagem por leitura própria dos rótulos, em resolução baixa.",
+        "localizador": "PDF p. 2 (Seção 1, último parágrafo antes de 1.1); p. 3 (Seção 2.2, Figura 2); p. 4 (Figura 3)"
+      },
+      {
+        "descricao": "O texto descreve o conjunto como constructive algorithms (4), math (2), greedy (3) e implementation (1), com dificuldade easy (3) e intermediate (7); a Tabela 1 lista 2 problemas «Con. Algo.» e 8 «Implement», 1 «Easy» e 9 «Intrm» (contagem própria das linhas da tabela).",
+        "localizador": "PDF p. 2 (Seção 1.1.1) vs Tabela 1 (p. 2, colunas Dif e Type)"
+      },
+      {
+        "descricao": "O texto afirma que, nos 13 códigos, o DePro «consistently requires fewer attempts than both human solvers and zero-shot LLMs». A Figura 2 não imprime valores; na inspeção visual há categorias em que as barras parecem ter alturas iguais (por exemplo, Bobritto Bandito-2), o que poderia conflitar com a afirmação e com a redução mínima de 50%. Leitura insegura; nenhum valor foi estimado.",
+        "localizador": "PDF p. 3 (Figura 2) vs p. 4 (coluna esquerda)"
+      },
+      {
+        "descricao": "Os 13 códigos foram escolhidos entre casos em que o zero-shot precisou de pelo menos 2 tentativas (média 4, máximo 8, mínimo 2), enquanto no conjunto de 100 códigos o LLM teve média de 1,8 tentativa (Tabela 1). A redução de 64% refere-se a esse subconjunto selecionado, não ao conjunto do estudo empírico (observação própria sobre a seleção).",
+        "localizador": "PDF p. 3 (Seção 2.2); p. 2 (Seção 1.1.3, Tabela 1)"
+      },
+      {
+        "descricao": "O comparador zero-shot é descrito como «the zero-shot LLM approach described in Section 2», mas a Seção 2 descreve o DePro; o procedimento zero-shot está na Seção 1.1, e a RQ3 menciona tanto re-prompting sem informação adicional quanto fornecimento do caso falho após a submissão. Não fica claro se as tentativas do zero-shot na Figura 2 recebem algum retorno da submissão.",
+        "localizador": "PDF p. 4 (coluna esquerda); p. 2 (Seção 1.1); p. 3 (RQ3)"
+      },
+      {
+        "descricao": "Tentativa é definida como submissão modificada (humanos e zero-shot no Codeforces), mas no DePro a contagem corresponde, ao que parece, a iterações do laço de stress testing local; a equivalência das unidades não é explicitada.",
+        "localizador": "PDF p. 2 (Seção 1.1.1); p. 3 (Iterative Debugging with LLM)"
+      },
+      {
+        "descricao": "A RQ3 afirma melhora «significantly» com casos de teste falhos sem relatar números nem teste estatístico.",
+        "localizador": "PDF p. 3 (RQ3)"
+      },
+      {
+        "descricao": "As ameaças à validade externa invocam o conjunto de 100 submissões para defender generalização, mas a avaliação do DePro usa 13 códigos; número de execuções por caso é nao_informado.",
+        "localizador": "PDF p. 4 (Seção 4, External Validity); p. 3 (Seção 2.2)"
+      },
+      {
+        "descricao": "O tempo médio do DePro é dado como «6.5 minutes per problem», embora a Figura 3 apresente valores por código de usuário (13 casos); os valores da Figura 3 não são impressos, e a forma de medir o tempo humano não é informada.",
+        "localizador": "PDF p. 2 (Seção 1, último parágrafo); p. 4 (texto e Figura 3)"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Estudo empírico (Tabela 1): compara tentativas humanas (média 3,68) e do LLM zero-shot (média 1,8) em 10 problemas; é contraste humano contra prompting, não entre técnicas de prompting. As médias impressas coincidem com a soma das linhas da Tabela 1 dividida por 10 (cálculo próprio).",
+        "localizador": "PDF p. 2, Seção 1.1.3 e Tabela 1"
+      },
+      {
+        "descricao": "Estudo manual: dois programadores competitivos descrevem abordagens humana e do LLM e atribuem nota de similaridade de 1 a 5, cuja média aparece na Tabela 1; a Tabela 2 mostra só três linhas ilustrativas.",
+        "localizador": "PDF p. 2, Seção 1.2; p. 3, Tabela 2"
+      },
+      {
+        "descricao": "Comparação de tempo (Figura 3) é DePro contra depuração manual humana, sem comparador de prompting; não entra em extracoes.",
+        "localizador": "PDF p. 4, Figura 3 e texto"
+      },
+      {
+        "descricao": "Hardware do experimento: uma estação com Intel Core i7-1165G7, 16 GB de RAM e 2 GB de VRAM.",
+        "localizador": "PDF p. 4, coluna esquerda"
+      },
+      {
+        "descricao": "Os prompts são declarados publicamente disponíveis, mas o texto não traz link; pacote não acessado.",
+        "localizador": "PDF p. 4, Seção 4, Construct Validity"
+      },
+      {
+        "descricao": "Pré-processamento manual dos problemas antes do prompt: remoção de espaços, decomposição em componentes e simplificação da notação matemática.",
+        "localizador": "PDF p. 2, Seção 1.1.2"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Experiments on 13 faulty user submissions from Codeforces demonstrate that DePro consistently produces correct solutions, reducing debugging attempts by up to 64% and debugging time by an average of 7.6 minutes per problem compared to human programmers and zero-shot LLM debugging.",
+        "localizador": "PDF p. 1, Abstract"
+      },
+      {
+        "trecho": "DePro combines brute-force reference generation, stress testing, and iterative LLM-guided refinement to identify and resolve errors efficiently.",
+        "localizador": "PDF p. 1, Abstract"
+      },
+      {
+        "trecho": "The LLM is iteratively prompted with the failing input, expected output, and user code to suggest fixes, with each modification retested for up to eight iterations.",
+        "localizador": "PDF p. 2, coluna esquerda, primeiro parágrafo"
+      },
+      {
+        "trecho": "We test GPT-5’s reasoning model by providing the LLM with the problem statement, time complexity, memory complexity, input, and output before giving it the user’s code.",
+        "localizador": "PDF p. 2, Seção 1.1.1"
+      },
+      {
+        "trecho": "Task:Consider the given problem description. Here is my code for this problem. I got wrong answer. Can you debug my code?",
+        "localizador": "PDF p. 2, Prompt 1"
+      },
+      {
+        "trecho": "We find that supplying failing test cases significantly improves debugging performance compared to re-prompting without additional information.",
+        "localizador": "PDF p. 3, RQ3"
+      },
+      {
+        "trecho": "If the submission fails, the corresponding failing test case is provided along with the code.",
+        "localizador": "PDF p. 3, RQ3"
+      },
+      {
+        "trecho": "We instruct the LLM to generate a brute-force solution that prioritizes passing all sample test cases.",
+        "localizador": "PDF p. 3, Seção 2.1, Initial Code Generation"
+      },
+      {
+        "trecho": "After identifying a failing test case, we prompt the LLM with the failing input, the expected output, and the user’s original code.",
+        "localizador": "PDF p. 3, Seção 2.1, Iterative Debugging with LLM"
+      },
+      {
+        "trecho": "The loop of code modification and stress testing continues for up to eight iterations.",
+        "localizador": "PDF p. 3, Seção 2.1, Iterative Debugging with LLM"
+      },
+      {
+        "trecho": "Data contamination poses a significant threat to the internal validity of our study, as some of the problems we evaluate may already exist in the training data of the LLM.",
+        "localizador": "PDF p. 4, Seção 4, Internal Validity"
+      },
+      {
+        "trecho": "While this often fixes issues quickly, it can repeat ineffective fixes or reintroduce past errors.",
+        "localizador": "PDF p. 2, RQ2"
+      },
+      {
+        "trecho": "In contrast, when humans rely on unconventional heuristics, shortcuts, or domain-specific tricks, the LLM tends to diverge, producing alternative solutions that are syntactically correct but sometimes less efficient, more verbose, or structurally different.",
+        "localizador": "PDF p. 2, RQ1"
+      },
+      {
+        "trecho": "We also observe that the LLM struggles with problems that admit multiple valid solutions, as it usually converges on a single reasoning template rather than exploring diverse approaches.",
+        "localizador": "PDF p. 2, RQ1"
+      },
+      {
+        "trecho": "A key limitation is its dependence on a correct brute-force solution and effective test case generation, which may not scale to large input spaces or complex problems.",
+        "localizador": "PDF p. 5, Seção 5"
+      },
+      {
+        "trecho": "To reduce bias, all evaluations are conducted using a consistent prompt.",
+        "localizador": "PDF p. 4, Seção 4, Conclusion Validity"
+      },
+      {
+        "trecho": "Furthermore, manual data annotations are validated through independent review by two separate programmers.",
+        "localizador": "PDF p. 4, Seção 4, Conclusion Validity"
+      },
+      {
+        "trecho": "To ensure variety, we choose codes with different failure points across test cases (e.g., TC-2, TC-8, TC-15) rather than selecting codes that fail at the same point.",
+        "localizador": "PDF p. 2, Seção 1.1.1"
+      },
+      {
+        "trecho": "The problem set includes constructive algorithms (4), math (2), greedy (3) and implementation (1).",
+        "localizador": "PDF p. 2, Seção 1.1.1"
+      },
+      {
+        "trecho": "Their difficulty ranges from easy (3) to intermediate (7).",
+        "localizador": "PDF p. 2, Seção 1.1.1"
+      },
+      {
+        "trecho": "We implemented a prototype of DePro using ChatGPT-5’s reasoning model [4].",
+        "localizador": "PDF p. 3, Seção 2.2"
+      },
+      {
+        "trecho": "Additionally, we use the latest version of ChatGPT for our evaluation.",
+        "localizador": "PDF p. 4, Seção 4, External Validity"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "DePro",
+      "mecanismos": ["instrucao", "contexto", "restricoes", "decomposicao", "feedback"],
+      "mecanismos_acrescentados": ["decomposicao", "feedback"],
+      "comparador": "Zero-shot LLM debugging (Prompt 1)",
+      "modelo": "ChatGPT-5’s reasoning model (versão nao_informado)",
+      "benchmark": "13 faulty user codes from 6 Codeforces problems (seleção própria do estudo)",
+      "metrica": "Number of attempts",
+      "sentido": "menor_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 4,
+        "intervencao": null
+      },
+      "denominador": "13 faulty user codes",
+      "condicoes": "Média de tentativas do zero-shot nos 13 códigos: 4 (máximo 8, mínimo 2), impressa na Seção 2.2 (p. 3). A média de tentativas do DePro não é impressa: intervencao = null, sem cálculo. O estudo imprime a diferença como redução relativa média de 64% em relação ao zero-shot (máxima 75%, mínima 50%; p. 4), sem dizer como a média foi calculada. Os valores por código só aparecem em barras na Figura 2 (p. 3), sem rótulos numéricos; não foram estimados. DePro limitado a oito iterações de depuração; tentativa definida para submissões humanas, não explicitamente para o DePro. Número de execuções por caso e parâmetros de decodificação: nao_informado. Pacote híbrido com stress testing (não prompting); ganho do pacote. Conferido no PDF: texto p. 3–4 e Figura 2 (p. 3) abertos visualmente.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca duas métricas (tentativas e tempo) e dois comparadores (humanos e zero-shot). Nenhuma tabela traz o contraste DePro contra zero-shot (Tabela 1 compara LLM e humanos; Tabela 2 é descritiva). A primeira figura com o contraste elegível é a Figura 2 (métrica: número de tentativas; único modelo), mas ela não imprime valores; usou-se o valor impresso no texto para a mesma métrica, conjunto e comparador.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 3 (Seção 2.2; Figura 2); p. 4 (coluna esquerda, parágrafo sobre a Figura 2)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "We select 13 faulty user codes from 6 problems, for which the LLM requires an average of 4 attempts to debug, with a maximum of 8 attempts and a minimum of 2 attempts.",
+          "localizador": "PDF p. 3, Seção 2.2"
+        },
+        {
+          "trecho": "On average, DePro reduces the number of attempts by 64% compared to the zero-shot LLM approach described in Section 2, with a maximum reduction of 75% and a minimum of 50%.",
+          "localizador": "PDF p. 4, coluna esquerda"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e três questões de pesquisa explícitos (avaliar a depuração por LLM em programação competitiva e propor o DePro).",
+      "localizador": "PDF p. 1 (Abstract, Introdução); p. 2–3 (RQ1–RQ3)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Etapas do DePro e prompts são descritos, mas faltam detalhes do procedimento zero-shot após falha, da contagem de tentativas no DePro, da medição do tempo humano, dos critérios de escolha dos 13 códigos e do gerador de testes.",
+      "localizador": "PDF p. 2 (Seção 1.1); p. 3 (Seção 2.1, 2.2); p. 4"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparador zero-shot com o mesmo modelo e os mesmos 13 códigos, e comparação com humanos; porém o procedimento do zero-shot é ambíguo e as unidades de tentativa podem diferir entre condições.",
+      "localizador": "PDF p. 3 (RQ3, Figura 2); p. 4"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Tentativa é definida para submissões e o denominador (13 códigos) é informado, mas o cálculo da redução de 64% não é explicado, os valores por caso só aparecem em figuras sem números, o resumo e o corpo divergem (até 64% contra média de 64%) e a contagem de problemas (6) não coincide com os rótulos das figuras.",
+      "localizador": "PDF p. 1 (Abstract); p. 2 (Seção 1.1.1); p. 3–4 (Figuras 2 e 3)"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças cobre quatro tipos, mas é breve e defende generalização com o conjunto de 100 submissões, sem discutir o tamanho da avaliação do DePro (13 códigos) nem a não-determinação do modelo.",
+      "localizador": "PDF p. 4, Seção 4"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts exemplificados e hardware informado; prompts declarados públicos sem link no texto; versão do modelo, parâmetros, número de execuções e dados selecionados não informados.",
+      "localizador": "PDF p. 2–3 (Prompts 1 e 2); p. 4 (Seção 2.2, Seção 4)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Contaminação reconhecida como ameaça à validade interna, sem controle ou análise descritos.",
+      "localizador": "PDF p. 4, Seção 4, Internal Validity"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas": ["p-01", "p-02", "p-03", "p-04", "p-05"],
+    "observacao": "Texto extraído lido integralmente; páginas 1 a 5 do PDF abertas visualmente (Tabela 1 na p. 2; Tabela 2, Figura 2 e Prompt 2 na p. 3; Figura 3 na p. 4)."
+  }
+}

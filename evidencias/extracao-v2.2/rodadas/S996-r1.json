@@ -1,0 +1,168 @@
+{
+  "estudo": "S996",
+  "texto_fonte": "fontes/textos/lote/S996.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2509.23824v2 [cs.SE], 13 jan. 2026 (preprint); as páginas não têm numeração impressa, localizadores pela posição no PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Task input (context information + target contract framework + task prompt) do SolContractEval",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Resumo, p. 1; Seção III-A e Figura 2, p. 3; Seção III-B.3-4, p. 4-5",
+        "observacao": "Formato único de entrada do benchmark, aplicado igualmente aos seis LLMs; o estudo o apresenta como parte da proposta do benchmark, não como técnica comparada. Task prompt com instrução direta ('You task is to complete the smart contract ... strictly according to the provided context and description') → instrucao; context information (funções, variáveis e definições de contratos extraídas do arquivo-fonte por análise estática) e target contract framework (nome do contrato, variáveis de estado, construtor e assinaturas do código original) → contexto; versão do compilador, proibição de contratos ou dependências adicionais, entrega só do contrato-alvo, assinaturas preservadas e descrições NatSpec escritas por anotadores humanos como especificação → restricoes. Não há base identificável nem condição alternativa de prompt; o cenário function-level (Tabela III) muda a unidade de geração e a métrica, não a técnica de prompting (ver observacoes)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Nucleus sampling e greedy sampling",
+        "natureza": "decodificacao",
+        "descricao": "Nucleus sampling com cinco candidatas por tarefa (temperatura 0,2, top_p 0,95) para k > 1; greedy com uma completação determinística (temperatura 0) para k = 1.",
+        "localizador": "Seção IV-C, p. 6"
+      },
+      {
+        "nome_original": "Seis LLMs avaliados (e GPT-3.5 na comparação com ClassEval)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo com o mesmo formato de entrada; é o objeto principal da comparação do estudo (RQ1).",
+        "localizador": "Seção IV-A, p. 6; Tabela II, p. 7; Seção V-A, p. 7"
+      },
+      {
+        "nome_original": "Context extraction (Algorithm 1, Slither, function call graph)",
+        "natureza": "outro",
+        "descricao": "Pré-processamento por análise estática que seleciona as dependências mínimas (funções, variáveis, estruturas) do arquivo-fonte; produz o conteúdo do prompt, mas não é ele próprio prompting.",
+        "localizador": "Seção III-B.3 e Algoritmo 1, p. 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "gemini-2.0-flash-exp (Google DeepMind)", "versao": "nao_informado", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "qwen2.5-coder-32b-instruct (Alibaba)", "versao": "nao_informado", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "deepseek-R1 (DeepSeek-AI)", "versao": "nao_informado", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "gpt-4o (OpenAI)", "versao": "nao_informado", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "o4-mini (OpenAI)", "versao": "nao_informado", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "Claude-3.7-sonnet (Anthropic)", "versao": "claude-3-7-sonnet-20250219", "localizador": "Seção IV-A, p. 6; Tabela II, p. 7"},
+      {"nome": "GPT-3.5 (só na comparação com ClassEval)", "versao": "nao_informado", "localizador": "Seção V-A, p. 7"}
+    ],
+    "benchmarks": [
+      {"nome": "SolContractEval (proposto pelo estudo)", "quantidade": "124 tarefas de geração em nível de contrato, de contratos reais da Ethereum mainnet; ERC20 52, DeFi 28, ERC721 23, Others 21 (Tabela I); 1.000 transações históricas por teste; média de 11,47 funções por tarefa. Seleção: 4.640 arquivos → 1.278 após SimHash → até 50 por versão do compilador (50, 18, 20, 16 e 50 para 0.4.x a 0.8.x) → 124 contratos distintos após deduplicação. O resumo fala em 'nine major domains'; a Tabela I só detalha três categorias e 'Others'.", "localizador": "Resumo, p. 1; Tabela I, p. 3; Seção III-B.1-2, p. 4"},
+      {"nome": "ClassEval (Python, nível de classe; não executado pelo estudo, números do artigo original)", "quantidade": "100 tarefas de classe Python, segundo a descrição do estudo", "localizador": "Seção V-A, p. 7; Seção VII-A, p. 11"}
+    ],
+    "metricas": [
+      {"nome": "Compile@k (k = 1, 3, 5)", "definicao": "tarefa bem-sucedida se ao menos uma das top-k amostras compila; estimador não enviesado do HumanEval (Eq. 1), média sobre os problemas; k = 1 por greedy, k > 1 por nucleus com n = 5", "localizador": "Seção IV-B, p. 6; Seção IV-C, p. 6"},
+      {"nome": "Pass@k (k = 1, 3, 5)", "definicao": "tarefa bem-sucedida se ao menos uma das top-k amostras passa em todos os testes (replay das 1.000 primeiras transações, com consistência de estado de execução e retorno, eventos e armazenamento)", "localizador": "Seção III-B.5, p. 5-6; Seção IV-B, p. 6"},
+      {"nome": "Function Pass Rate (FPR_c / FPR_p)", "definicao": "P/M: funções compiladas (ou aprovadas nos testes) sobre o total de funções geradas no cenário function-level; equivale a Pass@1 por função", "localizador": "Seção IV-B, p. 6"},
+      {"nome": "Contract Full Pass Rate (CFPR_c / CFPR_p)", "definicao": "K/N: contratos cujas funções geradas independentemente, reintegradas, compilam (ou passam nos testes) sobre o total de contratos", "localizador": "Seção IV-B, p. 6"},
+      {"nome": "Proporções de erros de compilação e de teste", "definicao": "categorias por card sorting de 985 logs de erro de compilação (Tabela IV); proporções de inconsistências de retorno, armazenamento e eventos (denominador não informado)", "localizador": "Seção V-C, p. 8-9; Tabela IV, p. 9"}
+    ],
+    "linguagens": ["Solidity (compiladores 0.4.x a 0.8.x)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Contratos gerados compilam mas falham nos testes de replay: Pass@1 entre 25,97% e 40,65% contra Compile@1 entre 63,55% e 85,48%; inconsistências de valor de retorno (45,18%), estado de armazenamento (43,05%) e eventos (11,86%).", "localizador": "Tabela II, p. 7; Seção V-C.2, p. 9"},
+      {"categoria": "correcao_funcional", "descricao": "Erros de compilação dominados por ParserError, TypeError e DeclarationError, ligados a incompatibilidade de versão do compilador, sistema de tipos e dependências de contexto.", "localizador": "Seção V-C.1 e Tabela IV, p. 8-9"},
+      {"categoria": "correcao_funcional", "descricao": "Condições implícitas na descrição ignoradas (ajuste de casas decimais em mintNewDNC) e verificação de condição omitida (depreciateMint), permitindo chamadas repetidas.", "localizador": "Figuras 6-7, p. 9-10; Seção V-C.2, p. 10"},
+      {"categoria": "seguranca", "descricao": "Inconsistências de estado de armazenamento podem levar transações subsequentes a operar sobre dados incorretos ou a vulnerabilidades como reentrância ou acesso não autorizado (risco apontado, não medido).", "localizador": "Seção V-C.2, p. 9"},
+      {"categoria": "contaminacao", "descricao": "Risco de vazamento entre os dados do benchmark (contratos verificados e públicos no Etherscan) e os dados de treino dos modelos; os comentários originais poderiam ter sido memorizados.", "localizador": "Seção III-B.4, p. 5; Seção VI-C.1, p. 10"},
+      {"categoria": "outro", "descricao": "Erro de 'recitation' no Gemini-2.0-Flash-Exp em 12,54% dos testes (denominador não informado): o modelo interrompe a geração por sobreposição com conteúdo de treino, causando falhas de compilação.", "localizador": "Seção V-A, p. 7; Seção VI-A, p. 10"},
+      {"categoria": "outro", "descricao": "Ameaças externas: três tipos de contrato podem não representar a diversidade do ecossistema; seis LLMs, por restrições de tempo e custo, podem não representar todos os modelos.", "localizador": "Seção VI-C.2, p. 11"},
+      {"categoria": "outro", "descricao": "Comparação com ClassEval não controla desenho de tarefas nem distribuição de dados; deve ser lida como sugestiva.", "localizador": "Seção VI-C.1, p. 11"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Reescrita dos comentários originais em NatSpec por dois desenvolvedores, para reduzir memorização e vazamento de dados; não há condição com comentários originais para comparação.", "avaliada": "nao", "localizador": "Seção III-B.4, p. 5; Seção VI-C.1, p. 10"},
+      {"descricao": "Anotação dupla independente com verificação cruzada e resolução de divergências por discussão.", "avaliada": "nao", "localizador": "Seção III-B.4, p. 5; Seção VI-C.1, p. 10-11"},
+      {"descricao": "Extração das dependências de contexto mínimas para evitar referências indefinidas e falhas de compilação.", "avaliada": "nao", "localizador": "Seção III-B.3, p. 4"},
+      {"descricao": "Deduplicação por SimHash e verificação de unicidade para evitar viés estatístico.", "avaliada": "nao", "localizador": "Seção III-B.1-2, p. 4"},
+      {"descricao": "Estimador não enviesado do HumanEval para reduzir a variância da amostragem aleatória.", "avaliada": "nao", "localizador": "Seção IV-B, p. 6"},
+      {"descricao": "Reinício do estado do blockchain no Hardhat antes da execução para evitar interferência entre testes.", "avaliada": "nao", "localizador": "Seção III-B.5, p. 5-6"},
+      {"descricao": "Recomendações a desenvolvedores: revisão manual de dependências e estado, verificação de defeitos semânticos e não presumir correção pela compilação (propostas, não avaliadas).", "avaliada": "nao", "localizador": "Seção VI-B.2, p. 10"}
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "A narrativa diz que o Claude-3-7-Sonnet lidera Compile@1 e Compile@k 'at the function level', mas a Tabela II traz resultados do cenário contract-level.", "localizador": "Seção V-A e Tabela II, p. 7"},
+      {"descricao": "O benchmark é nomeado 'SolClassEval' no início dos resultados e 'SolContractBench' no título da Tabela II, em vez de SolContractEval.", "localizador": "Seção V-A, p. 6; Tabela II, p. 7"},
+      {"descricao": "'4.03% lower Compile@1' (o4-mini) e 'Pass@1 score 5.65% higher' (Claude) correspondem a diferenças em pontos percentuais (85,48 − 81,45 e 40,65 − 35,00; cálculos próprios), não a variações relativas.", "localizador": "Seção V-A e Tabela II, p. 7"},
+      {"descricao": "O texto diz que o o4-mini tem correção funcional 'only slightly better than GPT-4o'; vale em Pass@1 (35,00 vs. 33,39) e Pass@3 (42,18 vs. 42,10), mas inverte em Pass@5 (44,35 vs. 45,16).", "localizador": "Seção V-A e Tabela II, p. 7"},
+      {"descricao": "'FPR_p ... is higher than Pass@1 by 38.52% on average': com os valores da Tabela III, a diferença média é 39,60 p.p. (cálculo próprio). Aparente inconsistência; o estudo não informa se o valor é diferença absoluta ou relativa nem como foi calculado.", "localizador": "Seção V-A e Tabela III, p. 7"},
+      {"descricao": "Function-level vs. contract-level compara métricas de unidades diferentes (FPR por função, CFPR por contrato, Compile@1/Pass@1 por contrato) e entradas diferentes (no function-level as implementações das demais funções são preservadas); não é contraste de técnica de prompting.", "localizador": "Seções IV-B e V-A, p. 6-7; Tabela III, p. 7"},
+      {"descricao": "Comparação com ClassEval usa números do artigo original (GPT-3.5: 29,6%/34,9%/36,0% em Pass@1/3/5) contra GPT-3.5 no SolContractEval (12,1%/15,6%/16,9%); os resultados do GPT-3.5 não estão em tabela e versão e configuração do modelo não são informadas; os autores qualificam a comparação como sugestiva.", "localizador": "Seção V-A, p. 7; Seção VI-C.1, p. 11"},
+      {"descricao": "Texto: ERC20 com 'substantial increase of 6.5% in Pass@1' em relação ao geral; os rótulos da Figura 5 indicam ERC20 Pass@1 41,9 e Overall 32,3 (diferença de 9,6 p.p., cálculo próprio). Aparente inconsistência; rótulos lidos em imagem de baixa resolução. A queda de 3,8 em Compile@1 para DeFi bate com 72,6 − 68,8 (cálculo próprio).", "localizador": "Seção V-B e Figura 5, p. 8"},
+      {"descricao": "Os valores Overall da Figura 5 (Compile@1 72,6; Pass@1 32,3; Pass@3 39,0; Pass@5 41,4) coincidem com as médias dos seis modelos da Tabela II (cálculos próprios); o estudo diz apenas que usa a 'average performance' dos modelos, sem declarar que as categorias também são médias entre modelos.", "localizador": "Seção V-B e Figura 5, p. 8; Tabela II, p. 7"},
+      {"descricao": "Tabela IV: o subtotal 'Other Errors' é 2,33%, mas as subcategorias (2,33%, 1,55%, 0,78%) somam 4,66%; as quatro categorias principais somam 97,68% (cálculos próprios). O texto fala em '5 major types and 17 subcategories', mas a tabela mostra 4 categorias principais e 18 linhas de subcategoria.", "localizador": "Seção V-C.1, p. 8; Tabela IV, p. 9"},
+      {"descricao": "As proporções da Tabela IV são incompatíveis com 985 logs como denominador (37,21% de 985 = 366,5, não inteiro; cálculo próprio) e compatíveis com um denominador de 129 (cálculo próprio), que o estudo não informa. Aparente inconsistência; denominador real nao_informado.", "localizador": "Seção V-C.1, p. 8; Tabela IV, p. 9"},
+      {"descricao": "Erros por contexto insuficiente: o texto dá 20,15% (identificador indefinido + redefinição de variável) e a Findings 5 dá 21,71% (total de DeclarationError, que inclui 'Call to invisible function').", "localizador": "Seção V-C.1 e Findings 5, p. 9; Tabela IV, p. 9"},
+      {"descricao": "O resumo diz que as tarefas cobrem 'nine major domains'; as ameaças à validade dizem que a avaliação foca 'three widely used smart contract types'; a Tabela I detalha três categorias e 'Others' (21 tarefas).", "localizador": "Resumo, p. 1; Tabela I, p. 3; Seção VI-C.2, p. 11"},
+      {"descricao": "A recitation do Gemini afeta 12,54% dos testes sem denominador informado, e o estudo não diz como essas saídas entram em Compile@k e Pass@k; o desempenho do Gemini mistura capacidade de geração e bloqueio do fornecedor.", "localizador": "Seção V-A, p. 7; Seção VI-A, p. 10"},
+      {"descricao": "Proporções dos erros de teste (45,18%, 43,05%, 11,86%) sem denominador informado.", "localizador": "Seção V-C.2, p. 9"}
+    ],
+    "observacoes": [
+      {"descricao": "Cenário function-level: para cada contrato-alvo, cada função é gerada isoladamente, mascarando só o seu corpo e preservando as demais implementações; todos os modelos têm valores maiores nesse cenário (Tabela III). Tratado como variação da tarefa, não como técnica de prompting.", "localizador": "Seção V-A e Tabela III, p. 7"},
+      {"descricao": "Avaliação por replay das 1.000 primeiras transações históricas em Hardhat, comparando status e retornos, eventos e estado de armazenamento entre contrato original e gerado.", "localizador": "Seção III-B.5 e Figura 4, p. 5-6"},
+      {"descricao": "Esforço manual: dois desenvolvedores com pelo menos três anos de experiência escrevem as descrições NatSpec de todas as funções e contratos-alvo, com anotação dupla e verificação cruzada.", "localizador": "Seção III-B.4, p. 4-5"},
+      {"descricao": "Número de execuções repetidas nao_informado; k = 1 usa greedy com temperatura 0.", "localizador": "Seção IV-C, p. 6"},
+      {"descricao": "O texto do prompt é mostrado só por um exemplo (Figura 2); o estudo imprime link para código e dados (não acessado nem validado aqui).", "localizador": "Figura 2, p. 3; Seção I, p. 2; Data Availability, p. 11"},
+      {"descricao": "Implicações sugeridas (dados de treino com mais versões, restrições de decodificação, versão do compilador como sinal de controle) não são avaliadas no estudo.", "localizador": "Seção VI-B.1, p. 10"}
+    ],
+    "citacoes": [
+      {"trecho": "Each task input, consisting of complete context dependencies, a structured contract framework, and a concise task prompt, is independently annotated and cross-validated by experienced developers.", "localizador": "Resumo, p. 1"},
+      {"trecho": "To guide the large language model in generating realistic and functional contract code, each code generation task takes the following three components as input, as illustrated in Figure 2: (1) context information, which includes relevant functions, variables, and contract definitions extracted from real-world repositories; (2) target contract framework, a structured scaffold that outlines contract-level elements; (3) task prompt, which specifies the task requirements, including the desired contract name and the compiler version for deployment.", "localizador": "Seção III-A, p. 3"},
+      {"trecho": "// You task is to complete the smart contract {MerkleDistributor} strictly according to the provided context and description.", "localizador": "Figura 2 (Task Prompt), p. 3"},
+      {"trecho": "Note that the contract is deployed using compiler version {0.6.11}, and do not introduce any additional contracts, dependencies, or unrelated code.", "localizador": "Figura 2 (Task Prompt), p. 3"},
+      {"trecho": "To enforce this, we preserve the original function signatures and only leave the function bodies blank for the large language model to complete, while keeping all other structural elements intact.", "localizador": "Seção III-A, p. 3"},
+      {"trecho": "For both metrics, greedy sampling is used when k = 1, while nucleus sampling is applied when k > 1.", "localizador": "Seção IV-C, p. 6"},
+      {"trecho": "Storage state inconsistencies expose the model’s shortcomings in variable management, which may cause subsequent transactions to operate on incorrect data or even lead to security vulnerabilities, such as reentrancy attacks or unauthorized access.", "localizador": "Seção V-C.2, p. 9"},
+      {"trecho": "This oversight allows the function to be repeatedly called, leading to functional deviations.", "localizador": "Seção V-C.2, p. 10"},
+      {"trecho": "In our evaluation of the Gemini-2.0-Flash-Exp model, we observe a recitation error in 12.54% of the tests.", "localizador": "Seção VI-A, p. 10"},
+      {"trecho": "In constructing the benchmark dataset, we recognize the potential risk of data leakage between the benchmark data and the model’s training data.", "localizador": "Seção VI-C.1, p. 10"},
+      {"trecho": "To mitigate potential data leakage, two developers with three years of smart contract experience independently rewrite the original comments into structured NatSpec documentation, ensuring semantic accuracy while significantly differing from the source.", "localizador": "Seção VI-C.1, p. 10"},
+      {"trecho": "Thus, our comparison should be interpreted as suggestive rather than as a rigorous quantitative evaluation of task difficulty.", "localizador": "Seção VI-C.1, p. 11"},
+      {"trecho": "Additionally, due to time and cost constraints, this study evaluates six LLMs, so findings may not fully represent all models.", "localizador": "Seção VI-C.2, p. 11"},
+      {"trecho": "We implement this on the Hardhat [36] local testing network, resetting blockchain state before execution to avoid cross-test interference.", "localizador": "Seção III-B.5, p. 5-6"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Task input (context information + target contract framework + task prompt) do SolContractEval",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "gemini-2.0-flash-exp (versão nao_informado)",
+      "benchmark": "SolContractEval (124 tarefas, nível de contrato, Solidity)",
+      "metrica": "Compile@1 (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": null, "intervencao": 63.55},
+      "denominador": "nao_informado explicitamente para a Tabela II; a métrica é média sobre os problemas (Eq. 1) e o benchmark tem 124 tarefas (Tabela I); não se informa como entram as saídas bloqueadas por recitation",
+      "condicoes": "Extração descritiva, sem comparador de prompting executado; o valor não é efeito da técnica. k = 1 com greedy (uma completação, temperatura 0); mesmo formato de entrada para os seis modelos; número de execuções nao_informado. Gemini teve recitation em 12,54% dos testes (Seção VI-A). Valor conferido visualmente na Tabela II, p. 7.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca duas métricas (Compile@k e Pass@k) sem que uma prevaleça. Tabela II é a primeira tabela de resultados da condição avaliada; primeira métrica (Compile@1) e primeiro modelo listado (gemini-2.0-flash-exp). Estudo sem comparador executado, então a extração é descritiva. Não há outra técnica focal nem outra tarefa para cobertura.",
+      "derivacao": "direta",
+      "localizador": "Tabela II, p. 7 (PDF p. 7); Seção IV-C, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "gemini-2.0-flash-exp 63.55 69.66 72.03 29.03 32.66 33.87", "localizador": "Tabela II, p. 7; colunas Model, Compile@1(%), Compile@3(%), Compile@5(%), Pass@1(%), Pass@3(%), Pass@5(%)"},
+        {"trecho": "For both metrics, greedy sampling is used when k = 1, while nucleus sampling is applied when k > 1.", "localizador": "Seção IV-C, p. 6"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Lacuna (avaliações em nível de função e entradas sintéticas) e três questões de pesquisa explicitadas.", "localizador": "Seção I, p. 1-2; Seção IV, p. 6"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção do benchmark, extração de contexto, anotação, testes e parâmetros de amostragem descritos; porém o prompt é mostrado só por exemplo, a configuração do GPT-3.5 não é informada, o tratamento das saídas com recitation e a base das proporções de erros não são explicados.", "localizador": "Seções III-IV, p. 3-6; Seção V-A, p. 7; Seção V-C, p. 8-9"},
+    {"criterio": "comparador", "julgamento": "nao_atende", "justificativa": "Não há condição alternativa de prompting: os seis modelos recebem o mesmo formato de entrada; o contraste function-level muda a unidade de geração e a métrica; a comparação com ClassEval usa números de outro artigo e outro benchmark, reconhecida como sugestiva.", "localizador": "Seção V-A e Tabelas II-III, p. 7; Seção VI-C.1, p. 11"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Compile@k, Pass@k, FPR e CFPR definidos com fórmulas, e os valores de Compile@1 e Pass@1 coincidem entre as Tabelas II e III; mas o denominador das proporções de erros é incompatível com os 985 logs, o subtotal 'Other Errors' não bate com as linhas, a média '38.52%' e o '6.5%' não batem com tabela e figura (cálculos próprios), e há denominadores não informados (recitation, erros de teste).", "localizador": "Seção IV-B, p. 6; Tabelas II-III, p. 7; Figura 5, p. 8; Tabela IV, p. 9"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute vazamento de dados, limites da comparação com ClassEval e representatividade de categorias e modelos; não discute não determinismo nem número de execuções.", "localizador": "Seção VI-C, p. 10-11"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Informa temperaturas, top_p, número de amostras, hardware e link para código e dados (não validado); snapshot só para o Claude, demais modelos sem versão; prompt completo só por exemplo.", "localizador": "Seção IV-A e IV-C, p. 6; Tabela II, p. 7; Data Availability, p. 11"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Reconhece o risco de vazamento e reescreve os comentários para reduzir memorização, mas os contratos-alvo são públicos e verificados no Etherscan e não há verificação de sobreposição com o pré-treinamento; a recitation do Gemini indica sobreposição com dados de treino.", "localizador": "Seção III-B.4, p. 5; Seção VI-A e VI-C.1, p. 10"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [3, 6, 7, 8, 9, 10],
+    "observacao": "Texto extraído lido integralmente (730 linhas). Páginas abertas para conferir a Tabela I e a Figura 2 (p. 3), métricas e amostragem (p. 6), Tabelas II e III (p. 7), Figura 5 (p. 8; rótulos em baixa resolução), Tabela IV (p. 9) e discussão e ameaças (p. 10)."
+  }
+}

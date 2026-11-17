@@ -1,0 +1,424 @@
+{
+  "estudo": "S1740",
+  "texto_fonte": "fontes/textos/lote/S1740.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "parallel-aware prompting (curated prompt design com restrições de paralelismo)",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract e Introdução; p. 2 do PDF (impressa 82), seções III.A, III.B e III.C; p. 5 do PDF (impressa 85), seções V.B e VI. Conclusion",
+        "observacao": "Prompts de sistema e de usuário estruturados que enunciam a tarefa (problemas do MBPP ou kernels próprios) e enfatizam o paralelismo (instrucao), com três restrições explícitas: uso de NumPy para vetorização, paralelismo via multiprocessing ou concurrent.futures e assinatura de função exata (restricoes). O estudo só executa a condição com essas restrições; não há prompt sem as restrições nem outra técnica de prompting, por isso não há base identificável (mecanismos_acrescentados vazio) nem contrafactual. A comparação de tempo de execução é com implementações de referência escritas por humanos, não com outra condição de prompting. A Fig. 1 parece rotular um «Self-repair loop (k)» e «Code gen + Guards» (texto pequeno na imagem), mas o texto não descreve laço de autocorreção e a seção Future Work o apresenta como extensão futura; por isso feedback não foi atribuído."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Pós-processamento da saída bruta (Code Generation)",
+        "natureza": "outro",
+        "descricao": "Remoção de formatação markdown, extração de fragmentos de código e isolamento de trechos Python executáveis antes da validação; etapa automática de filtragem, não altera o prompt.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.C"
+      },
+      {
+        "nome_original": "Validation (filtro de correção antes do benchmarking)",
+        "natureza": "outro",
+        "descricao": "Comparação das saídas do código gerado com a implementação de referência otimizada em vários casos de teste e tamanhos de entrada; qualquer workload que falhe um teste é desqualificado do benchmarking. Componente de avaliação, não de prompting.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.D"
+      },
+      {
+        "nome_original": "Infraestrutura local Ollama com Qwen2.5-Coder (2B)",
+        "natureza": "selecao_modelo",
+        "descricao": "Escolha de modelo local e infraestrutura on-premise justificada por requisitos de proteção de propriedade intelectual; não há comparação entre modelos.",
+        "localizador": "p. 2 do PDF (impressa 82), seções II e III.A"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "Qwen2.5-Coder (2B), executado via Ollama",
+        "versao": "Qwen2.5-Coder (2B) (snapshot, quantização e versão do Ollama nao_informado)",
+        "observacao": "Único modelo usado. Parâmetros de decodificação (temperatura, top-p, sementes) e número de gerações por tarefa nao_informado; a Fig. 1 traz uma caixa «Config (model, seeds)» sem valores. O tamanho «2B» é registrado como impresso; não foi conferido contra a documentação do modelo.",
+        "localizador": "p. 2 do PDF (impressa 82), seções II e III.A e Fig. 1"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Kernel benchmarks próprios (custom-designed computational kernels)",
+        "quantidade": "10 kernels: GEMM, 1D FFT Batch, 2D Convolution, Reduction (Sum), Prefix Sum (Scan), Matrix-Vector Multiply, BFS, K-Means Assignment, Histogram Calculation, Monte Carlo π Estimation",
+        "observacao": "A Tabela I traz só 7 kernels (gemm, fft1d_batch, conv2d, reduce_sum, bfs com tempos; kmeans_assign «Tests fail»; histogram «Generated file missing»); Prefix Sum, Matrix-Vector Multiply e Monte Carlo π não aparecem nos resultados. Tamanhos de entrada nao_informado.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F; p. 4 do PDF (impressa 84), seção IV.A e Tabela I"
+      },
+      {
+        "nome": "MBPP (Mostly Basic Python Programming), amostra de problemas",
+        "quantidade": "10 problemas",
+        "observacao": "Critério de amostragem e identificadores dos problemas nao_informado; exemplos citados: fatorial, inversão de strings, geração de subconjuntos, filtragem de listas. Nenhum tempo de execução ou speedup dos problemas MBPP é reportado em tabela ou figura.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F; p. 4 do PDF (impressa 84), seção IV.B"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Correctness % by source (correctness rate)",
+        "definicao": "Percentual de correção por origem do workload (Kernels 70%, MBPP 80% na Fig. 2). A unidade contada (workload, caso de teste ou execução) e o denominador são nao_informado.",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A e Fig. 2"
+      },
+      {
+        "nome": "Runtime (baseline (sec) e generated (sec))",
+        "definicao": "Mediana do tempo de execução em ensaios repetidos, com uma iteração inicial de aquecimento; número de ensaios nao_informado.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E; p. 4 do PDF (impressa 84), Tabela I"
+      },
+      {
+        "nome": "Speedup (speedup ratio; median speedup na Fig. 3)",
+        "definicao": "Tempo da implementação de referência dividido pelo tempo da implementação gerada; maior que 1 indica código gerado mais rápido.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E; p. 4 do PDF (impressa 84), Tabela I e Fig. 3; p. 5 do PDF (impressa 85), seção V.B"
+      }
+    ],
+    "linguagens": ["Python (NumPy, multiprocessing, concurrent.futures)"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código gerado incorreto ou ausente: kmeans_assign falhou nos testes e o arquivo gerado de histogram não existia; alguns problemas MBPP falharam de forma intermitente por formatação ou casos-limite, e o estudo sugere que a engenharia de prompt sozinha pode não resolver lacunas semânticas do raciocínio do LLM. Correção de 70% (kernels) e 80% (MBPP) na Fig. 2, com denominador não informado.",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A, Tabela I e Fig. 2; p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Em problemas MBPP leves, o código paralelo gerado teve speedup desprezível ou nulo e, em alguns casos, ligeira lentidão, porque o custo da orquestração paralela (tempo de execução do código gerado) pode superar o benefício; não quantificado. Refere-se ao desempenho do código gerado, não ao custo de executar a técnica de prompting.",
+        "localizador": "p. 5 do PDF (impressa 85), seção V.B"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "O estudo afirma que pipelines de síntese automática de código precisam de salvaguardas contra vulnerabilidades e uso indevido e que pesquisas futuras devem tratar confiabilidade e segurança; o risco não é avaliado no estudo.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Variabilidade de medição e restrição de entradas: a contenção de CPU causou variabilidade de tempo em alguns experimentos e a memória limitada restringiu ocasionalmente o tamanho das entradas (máquina local única com poucos núcleos).",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F; p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: workloads limitados a kernels e tarefas MBPP; dependência de NumPy e multiprocessing exclui outros frameworks paralelos (PyTorch em GPU, Dask); máquina única sem GPU ou cluster.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Limitations"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Implementações de referência otimizadas (numpy.dot, numpy.fft.fft, algoritmos sequenciais idiomáticos) em vez de laços ingênuos, para não inflar os speedups; sem comparação com referências ingênuas.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (impressa 83), seções III.D e III.E"
+      },
+      {
+        "descricao": "Iteração de aquecimento e mediana de ensaios repetidos para suavizar a variabilidade de tempo; número de ensaios não informado.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E"
+      },
+      {
+        "descricao": "Validação por equivalência estrita com a referência otimizada em vários casos de teste e tamanhos de entrada, com desqualificação de qualquer workload que falhe um único teste antes do benchmarking.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.D"
+      },
+      {
+        "descricao": "Pós-processamento automático para extrair apenas código Python executável da saída do modelo.",
+        "avaliada": "nao",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.C"
+      },
+      {
+        "descricao": "Proposta futura de incorporar aprendizado por reforço ou mecanismos de autocorreção para melhorar a correção em tarefas MBPP ambíguas; não executada no estudo.",
+        "avaliada": "nao",
+        "localizador": "p. 6 do PDF (impressa 86), seção VI. Future Work"
+      }
+    ],
+    "sem_comparador": "sim",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Ausência de contrafactual de prompting com atribuição causal: o estudo afirma estabelecer a eficácia do parallel-aware prompting e atribui os ganhos a melhorias de paralelização, mas só executa a condição com as restrições; o speedup compara o código gerado com implementações de referência escritas por humanos, não com prompts sem as restrições. A frase de que a correção dos kernels foi «decent» depois que as restrições passaram a impor NumPy e multiprocessing sugere uma condição anterior, mas nenhum resultado dela é reportado.",
+        "localizador": "p. 1 do PDF (impressa 81), Introdução; p. 3 do PDF (impressa 83), seção III.E; p. 4 do PDF (impressa 84), seção V.A; p. 5 do PDF (impressa 85), seção V.B"
+      },
+      {
+        "descricao": "Cobertura incompleta dos workloads: o texto descreve 10 kernels e 10 problemas MBPP, mas a Tabela I traz 7 kernels (5 com tempos, kmeans_assign «Tests fail», histogram «Generated file missing»); Prefix Sum, Matrix-Vector Multiply e Monte Carlo π não aparecem, e nenhum tempo ou speedup dos 10 problemas MBPP é reportado.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F; p. 4 do PDF (impressa 84), seções IV.A e IV.B e Tabela I"
+      },
+      {
+        "descricao": "Aparente inconsistência entre a Fig. 2 e a Tabela I: a Fig. 2 indica 70% de correção para kernels, enquanto a Tabela I mostra 5 kernels com tempos e 2 com falha, sem informar o resultado de 3 kernels; o estudo não informa a unidade nem o denominador da taxa de correção, o que impede conciliar os valores.",
+        "localizador": "p. 4 do PDF (impressa 84), Fig. 2 e Tabela I"
+      },
+      {
+        "descricao": "Narrativa contraditória sobre correção: o texto diz que as tarefas MBPP «exhibited better correctness» (coerente com 80% contra 70% na Fig. 2), mas a mesma seção diz que a Fig. 2 destaca a «robustness of kernel tasks» e a «moderate variability of MBPP problems».",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A e Fig. 2"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: a conclusão afirma que GEMM, FFT e BFS tiveram as maiores melhorias, mas na Tabela I e na Fig. 3 BFS tem o menor speedup reportado (1.19) e reduce_sum (1.765) e conv2d (1.682) superam fft1d_batch (1.429); a seção V.B descreve o ganho de BFS como modesto.",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I, Fig. 3 e seção V.B; p. 5 do PDF (impressa 85), seção VI. Conclusion"
+      },
+      {
+        "descricao": "Mesmo valor com arredondamentos diferentes: speedup de reduce_sum é 1.765 na Tabela I, 1.76 no rótulo da Fig. 3 e 1.77× no texto; os demais valores coincidem após arredondamento (gemm 1.842/1.84, conv2d 1.682/1.68, fft1d_batch 1.429/1.43, bfs 1.19).",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I, Fig. 3 e seção V.B"
+      },
+      {
+        "descricao": "Conclusão sem dado reportado: o texto afirma que, no conjunto de workloads, a mediana do speedup superou a unidade e que o sistema produziu implementações que igualaram consistentemente a correção das referências nos 20 workloads; nenhuma mediana global é impressa, os problemas MBPP não têm speedup reportado (descritos com speedup desprezível, nulo ou ligeira lentidão) e há falhas de teste e arquivo ausente na Tabela I.",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I; p. 5 do PDF (impressa 85), seções V.B e VI. Conclusion"
+      },
+      {
+        "descricao": "Aparente tensão no procedimento de validação: o estudo diz que qualquer workload que falhe um único teste é desqualificado, mas descreve problemas MBPP que falharam de forma intermitente e mantém a afirmação de que a correção foi rigorosamente validada; não informa se esses problemas foram excluídos do benchmarking.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.D; p. 4 do PDF (impressa 84), seção V.A; p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "descricao": "A Fig. 1 parece incluir um «Self-repair loop (k)» no pipeline, mas o texto não descreve laço de autocorreção nem o valor de k, e a seção Future Work apresenta mecanismos de autocorreção como extensão futura.",
+        "localizador": "p. 2 do PDF (impressa 82), Fig. 1; p. 6 do PDF (impressa 86), seção VI. Future Work"
+      },
+      {
+        "descricao": "Reprodutibilidade declarada sem os elementos que a sustentem: o resumo e as observações-chave afirmam que os experimentos foram reprodutíveis, mas o artigo não informa número de gerações, parâmetros de decodificação, número de ensaios de tempo, tamanhos de entrada, configuração da máquina nem endereço do pipeline open-source; não há repetição de gerações reportada.",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract; p. 3 do PDF (impressa 83), seções III.E e III.F; p. 5 do PDF (impressa 85), seção V.C"
+      },
+      {
+        "descricao": "As referências são descritas ora como «sequential baselines» (resumo, introdução, comentário do Code Block 1), ora como implementações otimizadas escritas por humanos; o estudo não informa se as bibliotecas usadas pelas referências (por exemplo, numpy.dot) executam em múltiplas threads, o que condiciona a interpretação do speedup.",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract e Introdução; p. 2-3 do PDF (impressas 82-83), Code Block 1 e seções III.D e III.E"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Pipeline em cinco etapas (Prompt Curation, Code Generation, Validation, Benchmarking, Visualization); só a etapa de geração envolve prompting. Exemplo de prompt impresso para GEMM com a assinatura exigida; os prompts completos de sistema e de usuário não são reproduzidos.",
+        "localizador": "p. 2 do PDF (impressa 82), seções III.A, III.B e III.C e Fig. 1"
+      },
+      {
+        "descricao": "O estudo declara contribuir com um pipeline open-source, mas não imprime link, repositório ou DOI do pacote; nada foi acessado nesta extração.",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract e Introdução"
+      },
+      {
+        "descricao": "O speedup mede desempenho do código gerado em relação a referências humanas na máquina local; não demonstra produtividade, custo nem segurança, e não isola o efeito das restrições do prompt.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E; p. 4 do PDF (impressa 84), Tabela I"
+      },
+      {
+        "descricao": "As seções Limitations, Conclusion e Future Work aparecem todas numeradas como VI; os localizadores usam os títulos.",
+        "localizador": "p. 5-6 do PDF (impressas 85-86)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper introduces a framework for parallel-aware code generation and evaluation, built on local large language models (LLMs) orchestrated with open-source infrastructure.",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract"
+      },
+      {
+        "trecho": "Experiments on 20 workloads—10 kernel benchmarks (e.g., GEMM, FFT, Conv2D, BFS) and 10 MBPP tasks—demonstrate that correctness is preserved while measurable speedups are achieved, particularly for computationally intensive workloads.",
+        "localizador": "p. 1 do PDF (impressa 81), Abstract"
+      },
+      {
+        "trecho": "By embedding constraints for NumPy-based vectorization and multiprocessing-based CPU parallelism into prompts, the system enforces an emphasis on both correctness and performance.",
+        "localizador": "p. 1 do PDF (impressa 81), Introdução"
+      },
+      {
+        "trecho": "Finally, through empirical studies, the paper provides experimental results demonstrating measurable runtime improvements across a diverse set of algorithmic kernels, thereby establishing the effectiveness of parallel-aware prompting in real-world computational scenarios.",
+        "localizador": "p. 1 do PDF (impressa 81), Introdução"
+      },
+      {
+        "trecho": "Following this, the Code Generation stage leverages Ollama with the Qwen2.5-Coder (2B) model, guided by carefully engineered system prompts that explicitly emphasize parallelism.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.A"
+      },
+      {
+        "trecho": "Prompts are designed to enforce specific constraints on the generated code.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.B"
+      },
+      {
+        "trecho": "First, all implementations must rely on NumPy for vectorized operations, ensuring efficient mathematical computation.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.B"
+      },
+      {
+        "trecho": "Second, parallelism should be achieved using Python’s multiprocessing or concurrent.futures libraries, which provide robust ways to distribute work across multiple cores.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.B"
+      },
+      {
+        "trecho": "Finally, the generated code must follow the exact function signature provided, without deviation, to ensure compatibility with validation scripts.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.B"
+      },
+      {
+        "trecho": "Within the code generation pipeline, the system employs structured system and user prompts that are passed to the local LLM instance through controlled subprocess calls.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.C"
+      },
+      {
+        "trecho": "The raw output is then post-processed to ensure usability: markdown formatting is stripped, code fragments are extracted, and only executable Python snippets are isolated for further validation.",
+        "localizador": "p. 2 do PDF (impressa 82), seção III.C"
+      },
+      {
+        "trecho": "This ensured that the comparisons were not biased by artificially weak baselines.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.D"
+      },
+      {
+        "trecho": "Any workload that failed even a single correctness test was disqualified from subsequent benchmarking.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.D"
+      },
+      {
+        "trecho": "Runtime was measured across repeated trials with an initial warmup iteration, and the median runtime was recorded to smooth variability.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E"
+      },
+      {
+        "trecho": "From these measurements, the speedup ratio was calculated as the baseline runtime divided by the generated runtime.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E"
+      },
+      {
+        "trecho": "This methodology ensured that any speedup observed was genuinely attributable to improvements in parallelization or task decomposition, rather than the artificial contrast of optimized versus naive code.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.E"
+      },
+      {
+        "trecho": "A total of 20 workloads were employed, divided evenly between 10 kernel benchmarks and 10 MBPP tasks.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F"
+      },
+      {
+        "trecho": "However, these constraints also introduced challenges: limited memory capacity occasionally restricted the size of input datasets, and CPU contention meant that some experiments suffered variability in timing.",
+        "localizador": "p. 3 do PDF (impressa 83), seção III.F"
+      },
+      {
+        "trecho": "Complementing the kernel workloads, ten problems were sampled from the MBPP benchmark suite.",
+        "localizador": "p. 4 do PDF (impressa 84), seção IV.B"
+      },
+      {
+        "trecho": "The kernel benchmarks demonstrated decent correctness rates once the prompt constraints enforced explicit use of NumPy and multiprocessing.",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A"
+      },
+      {
+        "trecho": "The MBPP tasks, on the other hand, exhibited better correctness.",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A"
+      },
+      {
+        "trecho": "The corresponding correctness plot seen in Figure 2 illustrates these trends, highlighting the robustness of kernel tasks and the moderate variability of MBPP problems.",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.A"
+      },
+      {
+        "trecho": "gemm 0.7 0.38 1.842",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I (Runtime Results), linha gemm; colunas Kernel workload, baseline (sec), generated (sec), speedup"
+      },
+      {
+        "trecho": "kmeans_assign Tests fail",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I (Runtime Results), linha kmeans_assign; colunas Kernel workload e baseline/generated/speedup (célula mesclada)"
+      },
+      {
+        "trecho": "histogram Generated file missing",
+        "localizador": "p. 4 do PDF (impressa 84), Tabela I (Runtime Results), linha histogram; colunas Kernel workload e baseline/generated/speedup (célula mesclada)"
+      },
+      {
+        "trecho": "The results show clear runtime improvements for most workloads, with gemm and reduce_sum achieving the highest speedups (1.84× and 1.77×), followed by conv2d (1.68×) and fft1d_batch (1.43×).",
+        "localizador": "p. 4 do PDF (impressa 84), seção V.B"
+      },
+      {
+        "trecho": "On the other hand, lightweight MBPP tasks often yielded negligible or no speedup, and in some cases incurred slight slowdowns due to the overhead of multiprocessing.",
+        "localizador": "p. 5 do PDF (impressa 85), seção V.B"
+      },
+      {
+        "trecho": "This outcome is expected, as the cost of parallel orchestration can outweigh the benefits for small-scale problems.",
+        "localizador": "p. 5 do PDF (impressa 85), seção V.B"
+      },
+      {
+        "trecho": "Nevertheless, across the workload set, the median speedup exceeded unity, demonstrating that parallel-aware prompting consistently produced implementations that were at least competitive and often superior to optimized human baselines.",
+        "localizador": "p. 5 do PDF (impressa 85), seção V.B"
+      },
+      {
+        "trecho": "Across a diverse set of 20 workloads, the system consistently produced implementations that matched the functional correctness of reference solutions and, in many cases, outperformed them in runtime.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Conclusion"
+      },
+      {
+        "trecho": "The results showed that speedup is workload-dependent, with kernels such as GEMM, FFT, and BFS yielding the largest improvements, while lightweight MBPP problems benefited little due to the overhead of parallel orchestration.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Conclusion"
+      },
+      {
+        "trecho": "Second, although correctness was rigorously validated, some MBPP tasks exhibited intermittent failures on edge cases, suggesting that prompt engineering alone may not fully resolve semantic gaps in LLM reasoning.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "trecho": "As highlighted in prior work on generative AI for secure system development [18], automated code synthesis pipelines must incorporate safeguards against vulnerabilities and misuse.",
+        "localizador": "p. 5 do PDF (impressa 85), seção VI. Limitations"
+      },
+      {
+        "trecho": "Finally, incorporating reinforcement learning or self-correction mechanisms could help improve correctness rates on ambiguous MBPP tasks, ensuring that generated code not only executes faster but also generalizes more reliably across input variations.",
+        "localizador": "p. 6 do PDF (impressa 86), seção VI. Future Work"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "parallel-aware prompting",
+      "mecanismos": ["instrucao", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "Qwen2.5-Coder (2B) via Ollama",
+      "benchmark": "Kernel benchmarks próprios, workload gemm (General Matrix Multiply)",
+      "metrica": "generated (sec) — runtime da implementação gerada (mediana de ensaios repetidos)",
+      "sentido": "menor_melhor",
+      "unidade": "tempo",
+      "resultado": {
+        "baseline": null,
+        "intervencao": 0.38
+      },
+      "denominador": "nao_informado (um workload; número de ensaios de tempo e de gerações nao_informado)",
+      "condicoes": "Extração descritiva: o estudo só executa a condição com as restrições de paralelismo no prompt (sem_comparador = sim); o valor não é efeito da técnica. Na mesma linha da Tabela I, a implementação de referência escrita por humanos (otimizada com NumPy, Code Block 1) tem 0.7 s e o speedup impresso é 1.842 (referência dividida pelo gerado, definição do estudo); a referência não é condição de prompting e por isso não foi registrada como baseline. Tempo medido como mediana de ensaios repetidos após uma iteração de aquecimento; número de ensaios, tamanhos de entrada, parâmetros de decodificação, número de gerações por tarefa e configuração da máquina (PC local com CPU multi-core) nao_informado. Valores conferidos visualmente na Tabela I (p. 4 do PDF) e coincidem com a Fig. 3 (1.84).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca duas métricas (correção preservada e speedups) sem que uma prevaleça. Estudo sem comparador de prompting executado; a primeira tabela de resultados é a Tabela I. A primeira métrica da condição avaliada nessa tabela é o tempo da implementação gerada (a coluna baseline é a referência humana), e a primeira linha é gemm. Não há outra técnica focal nem outra tarefa do escopo para cobertura; correção (Fig. 2) e speedup são outras métricas da mesma técnica e tarefa e não contam como cobertura.",
+      "derivacao": "direta",
+      "localizador": "p. 4 do PDF (impressa 84), Tabela I (Runtime Results), linha gemm, coluna generated (sec); p. 3 do PDF (impressa 83), seção III.E",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "gemm 0.7 0.38 1.842",
+          "localizador": "p. 4 do PDF (impressa 84), Tabela I (Runtime Results), linha gemm; colunas Kernel workload, baseline (sec), generated (sec), speedup"
+        },
+        {
+          "trecho": "Runtime was measured across repeated trials with an initial warmup iteration, and the median runtime was recorded to smooth variability.",
+          "localizador": "p. 3 do PDF (impressa 83), seção III.E"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (framework de geração e avaliação de código Python paralelo com prompts que impõem vetorização e multiprocessing) e as três contribuições são declarados no resumo e na introdução.",
+      "localizador": "p. 1 do PDF (impressa 81), Abstract e Introdução"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As etapas do pipeline, as restrições do prompt, a validação e a medição de tempo são descritas, mas faltam os prompts completos, o critério de amostragem dos problemas MBPP, o número de gerações e de ensaios, os tamanhos de entrada, os parâmetros de decodificação e a configuração da máquina; a Fig. 1 mostra um laço de autocorreção não descrito no texto.",
+      "localizador": "p. 2-3 do PDF (impressas 82-83), seção III e Fig. 1; p. 4 do PDF (impressa 84), seção IV"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há referência executada para o tempo (implementações humanas otimizadas, escolhidas para não inflar o speedup), mas nenhuma condição de prompting comparadora (por exemplo, prompt sem as restrições), embora o estudo atribua os ganhos ao parallel-aware prompting.",
+      "localizador": "p. 3 do PDF (impressa 83), seções III.D e III.E; p. 5 do PDF (impressa 85), seção V.B"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Tempo mediano e speedup são definidos e conferem entre Tabela I, Fig. 3 e texto (exceto o arredondamento 1.765/1.76/1.77 de reduce_sum), mas a taxa de correção não tem unidade nem denominador informados, a Fig. 2 não se concilia com a Tabela I, 3 kernels e os 10 problemas MBPP não têm tempos reportados e a mediana global citada não é impressa.",
+      "localizador": "p. 3 do PDF (impressa 83), seção III.E; p. 4 do PDF (impressa 84), Fig. 2, Tabela I e Fig. 3; p. 5 do PDF (impressa 85), seção V.B"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações trata de máquina única, falhas intermitentes em casos-limite, escopo dos workloads, dependência de NumPy e multiprocessing e segurança, e a seção III.F menciona variabilidade de tempo; não discute modelo único, não determinismo das gerações, contaminação nem a ausência de condição de prompting comparadora.",
+      "localizador": "p. 3 do PDF (impressa 83), seção III.F; p. 5 do PDF (impressa 85), seção VI. Limitations"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "O modelo e a infraestrutura (Qwen2.5-Coder 2B via Ollama), um exemplo de prompt e uma implementação de referência são informados, mas o artigo não imprime endereço do pipeline declarado como open-source, nem prompts completos, parâmetros de decodificação, sementes, hardware, tamanhos de entrada e número de ensaios.",
+      "localizador": "p. 1 do PDF (impressa 81), Abstract; p. 2-3 do PDF (impressas 82-83), seções III.A a III.F"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, o estudo não discute a possível presença dos problemas MBPP ou de soluções dos kernels no pré-treinamento do modelo nem controle desse risco.",
+      "localizador": "p. 1-6 do PDF (impressas 81-86), texto completo"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (6 páginas; página do PDF = impressa − 80). Páginas do PDF abertas visualmente: p-01.png (Abstract), p-02.png (Fig. 1 e seções III.B e III.C), p-03.png (Code Block 1 e seções III.D a III.F), p-04.png (Fig. 2, Tabela I e Fig. 3) e p-05.png (resultados, limitações e conclusão). Os valores da extração e os números citados em heterogeneidade foram conferidos na Tabela I, Fig. 2 e Fig. 3 (p. 4 do PDF); os rótulos da Fig. 1 têm texto pequeno e foram registrados como leitura aparente."
+  }
+}

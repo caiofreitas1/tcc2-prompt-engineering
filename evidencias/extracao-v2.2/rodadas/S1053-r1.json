@@ -1,0 +1,299 @@
+{
+  "estudo": "S1053",
+  "texto_fonte": "fontes/textos/lote/S1053.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2510.25975v2 [cs.CL], 25 jan. 2026 (preprint); o PDF não traz numeração de página impressa, os localizadores usam a posição no PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "SymCode",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 3.1 e Listing 1, p. 4-5; Seção 4.2, p. 6; Tabela 3, p. 7",
+        "observacao": "Prompt único (Listing 1) que pede um script Python com SymPy como traço de raciocínio. Persona ('You are an expert mathematical reasoner.') e diretrizes numeradas (documentar variáveis, restrições e objetivos; verificar substituindo soluções e checando domínio) → instrucao; raciocínio passo a passo como comentários e etapas intermediárias comentadas → raciocinio; saída restrita a um único bloco de código Python, uso obrigatório de 'import sympy as sp' e resposta final impressa em formato \\boxed → restricoes. As etapas intermediárias são comentários dentro de um único script, não subtarefas executadas em etapas (não classificado como decomposicao). mecanismos_acrescentados vazio: o SymCode não deriva de um prompt base identificável e os prompts dos comparadores (CoT, ToT, Decomposition) não são apresentados. Contrafactual: SymCode contra CoT, ToT e Decomposition nos mesmos três modelos e três benchmarks (Tabela 3); 'sim' vale para o pacote. Pacote híbrido: o script gerado é executado em interpretador Python com a biblioteca SymPy (ver componentes_fora_escopo), de modo que o ganho não é efeito isolado do texto do prompt."
+      },
+      {
+        "nome_original": "SymCode+ (Self-Debugging Loops)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.2, p. 4-5; Tabela 3, p. 7; Figura 2, p. 7; Seção 5.6, p. 8; Tabela 4, p. 9",
+        "observacao": "Extensão do prompt SymCode com um 'agentic wrapper': se o script falha (exceção ou AssertionError), mensagem de erro e traceback são anexados ao histórico e o LLM recebe a instrução 'debug the following code based on the provided error message', até execução bem-sucedida ou limite de iterações ('e.g., 2–3 attempts'; limite exato nao_informado) → feedback. O estudo apresenta SymCode+ como formulação própria ('SymCode+ (ours)') em linhas separadas da Tabela 3, por isso é tratada como técnica focal distinta. Contrafactual de ingrediente: SymCode+ contra SymCode (mesmo prompt sem o laço) na Tabela 3 e SymCode+ contra 'No Self-Debug' na Tabela 4 (GPT-5-nano, AIME). Contra CoT, ToT e Decomposition, SymCode+ é comparado como pacote (híbrido, com execução em interpretador)."
+      },
+      {
+        "nome_original": "Verification and Filtering (assertions)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Listing 1 (item 5), p. 4; Seção 3.1, p. 5; Seção 5.6, p. 8; Tabela 4, p. 9",
+        "observacao": "Diretriz de verificação no prompt (substituir soluções nas equações originais, checar restrições de domínio, filtrar soluções inválidas); o texto afirma que o prompt exige asserts → instrucao. Ablação sequencial: 'No Verification' (58.5) é a versão já sem self-debug da qual se retira também o uso de assertions; o contraste com 'No Self-Debug' (61.7) difere só nesse ingrediente, mas condicionado à ausência do laço de self-debug. Como a condição 'No Verification' foi implementada (que trechos do prompt foram retirados) é nao_informado. Só GPT-5-nano e AIME."
+      },
+      {
+        "nome_original": "Symbolic Formulation (SymPy)",
+        "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Listing 1 (item 1), p. 4; Seção 3.1, p. 4; Seção 5.6, p. 8; Tabela 4, p. 9",
+        "observacao": "Instrução explícita 'import sympy as sp' (restrição de ferramenta/biblioteca) → restricoes. Ablação sequencial: 'No SymPy (Numeric Python)' (48.3) substitui SymPy por bibliotecas numéricas padrão na versão já sem self-debug e sem verificação; contraste com 'No Verification' (58.5). Ingrediente híbrido: a troca altera a instrução e também a biblioteca executada no interpretador (componente fora do escopo), de modo que o efeito não é só de prompting. Só GPT-5-nano e AIME."
+      },
+      {
+        "nome_original": "Interpretability (step-by-step reasoning as comments)",
+        "mecanismos": ["raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Listing 1 (itens 2 e 4), p. 4; Seção 3.1, p. 4-5",
+        "observacao": "Componente do prompt SymCode descrito pelo estudo; não há condição sem ele."
+      },
+      {
+        "nome_original": "Problem Scaffolding",
+        "mecanismos": ["instrucao", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Listing 1 (item 3), p. 4; Seção 3.1, p. 5",
+        "observacao": "Exigência de documentar variáveis, restrições e objetivos e de definir símbolos com suposições (por exemplo, positive=True, integer=True). O estudo afirma que reduz o espaço de busca, sem condição sem o componente."
+      },
+      {
+        "nome_original": "Chain of Thought (CoT)",
+        "mecanismos": ["instrucao", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, p. 6; Tabela 3, p. 7",
+        "observacao": "Prompt 'think step-by-step' com racional em prosa antes da resposta. O texto do prompt usado não é apresentado. Sistema comparador cujos mecanismos não são isolados."
+      },
+      {
+        "nome_original": "Tree of Thoughts (ToT)",
+        "mecanismos": ["instrucao", "raciocinio", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, p. 6; Tabela 1, p. 3; Tabela 3, p. 7; Apêndice C, p. 14-15",
+        "observacao": "Exploração de vários caminhos de raciocínio com avaliação e poda → raciocinio e amostragem (seleção entre alternativas). A implementação (número de ramos, chamadas separadas ou saída única, critério de avaliação) é nao_informado; o exemplo do Apêndice C mostra brainstorm de três abordagens, avaliação e execução numa saída. Sistema comparador sem isolamento de mecanismos."
+      },
+      {
+        "nome_original": "Decomposition",
+        "mecanismos": ["instrucao", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, p. 6; Tabela 3, p. 7",
+        "observacao": "Instrução para dividir o problema em subproblemas mais simples e resolvê-los sequencialmente (Khot et al., 2023). Se é uma única chamada ou chamadas encadeadas é nao_informado. Sistema comparador sem isolamento de mecanismos."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Execução em interpretador Python (sandbox) com SymPy",
+        "natureza": "outro",
+        "descricao": "O script gerado é executado em interpretador Python isolado com a biblioteca SymPy (sistema de álgebra computacional), que produz a resposta final e o sinal de sucesso/falha usado pelo laço de self-debug. Ferramenta externa, não prompting; torna SymCode e SymCode+ pacotes híbridos.",
+        "localizador": "Seção 1, p. 1; Figura 1, p. 2; Seção 3, p. 4"
+      },
+      {
+        "nome_original": "Limite de iterações do self-debugging",
+        "natureza": "orcamento",
+        "descricao": "Laço repetido até execução bem-sucedida ou limite pré-definido de iterações ('e.g., 2–3 attempts'); o valor exato usado nos experimentos não é informado.",
+        "localizador": "Seção 3.2, p. 5"
+      },
+      {
+        "nome_original": "Reasoning level 'high' do GPT-OSS (20B)",
+        "natureza": "outro",
+        "descricao": "Configuração de esforço de raciocínio do modelo GPT-OSS, aplicada a todos os métodos com esse modelo; não é alteração do prompt.",
+        "localizador": "Seção 4.2, p. 6"
+      }
+    ],
+    "modelos": [
+      {"nome": "Llama 3.2 (90B)", "versao": "nao_informado (além do tamanho 90B)", "localizador": "Seção 4.2, p. 6"},
+      {"nome": "GPT-5-nano", "versao": "nao_informado (snapshot não informado)", "localizador": "Seção 4.2, p. 6"},
+      {"nome": "GPT-OSS (20B), reasoning level 'high'", "versao": "nao_informado (além do tamanho 20B)", "localizador": "Seção 4.2, p. 6"}
+    ],
+    "benchmarks": [
+      {"nome": "MATH-500", "quantidade": "500 problemas (subconjunto do MATH); denominador da acurácia não declarado explicitamente", "localizador": "Seção 4.1, p. 5"},
+      {"nome": "OlympiadBench (text-only English)", "quantidade": "674 problemas como impresso; o denominador da acurácia não é declarado e os valores da Tabela 3 parecem incompatíveis com 674 (ver heterogeneidade)", "localizador": "Seção 4.1, p. 5; Tabela 3, p. 7"},
+      {"nome": "AIME 2024 & 2025", "quantidade": "60 problemas (30 de cada ano)", "localizador": "Seção 4.1, p. 5-6"}
+    ],
+    "metricas": [
+      {"nome": "Accuracy (%)", "definicao": "solução correta só se a resposta final numérica ou simbólica dentro de boxed{} coincide exatamente com a solução de referência, sem crédito parcial", "localizador": "Seção 4.3, p. 6; Tabelas 3-4, p. 7 e 9"},
+      {"nome": "Token Efficiency", "definicao": "média de tokens de saída gerados por problema; não inclui tokens de entrada; GPT-OSS inclui tokens de raciocínio interno, GPT-5-nano só tokens visíveis; em SymCode+ soma das tentativas; média sobre todos os problemas dos três benchmarks e dos três modelos", "localizador": "Seção 4.3, p. 6; Seção 5.3, p. 7-8; Apêndice B, p. 14"},
+      {"nome": "Qualitative Error Analysis", "definicao": "categorização manual dos tipos de falha (GPT-5-nano, AIME, ToT e SymCode); número de erros categorizados e quem categorizou nao_informado", "localizador": "Seção 4.3, p. 6; Seção 5.4, p. 8"},
+      {"nome": "Self-Debugging Activation Rate (%)", "definicao": "percentual de problemas em que a primeira tentativa falhou e houve nova tentativa; benchmark(s) e denominador nao_informado", "localizador": "Seção 4.3, p. 6; Seção 5.5 e Figura 3, p. 8"}
+    ],
+    "linguagens": ["Python (com a biblioteca SymPy)"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "A eficácia da verificação depende da qualidade das asserções geradas pelo LLM; ausência de falha não garante correção se as asserções forem fracas ou estiverem em caminho não executado.", "localizador": "Seção 3.1, p. 5"},
+      {"categoria": "correcao_funcional", "descricao": "Falhas do SymCode (GPT-5-nano, AIME): interpretação errada do problema (56.2%), uso incorreto da API (31.3%) e 12.5% de 'Other' (laços infinitos, falhas de verificação). Número de erros categorizados não informado.", "localizador": "Seção 5.4, p. 8; Apêndice C, p. 15"},
+      {"categoria": "correcao_funcional", "descricao": "A confiabilidade depende da correção do interpretador Python e da biblioteca SymPy, não verificados formalmente, que podem propagar erros raros.", "localizador": "Seção 7, p. 9"},
+      {"categoria": "correcao_funcional", "descricao": "Desempenho depende fortemente da proficiência em código do LLM base; o framework tem dificuldade com raciocínio abstrato (provas de geometria sintética, indução ou contradição, argumentos combinatórios) que resiste à formalização em SymPy.", "localizador": "Seção 7, p. 9"},
+      {"categoria": "alucinacao", "descricao": "Nos baselines em prosa (ToT, GPT-5-nano, AIME), parte dos erros 'Other' (24.1%) inclui restrições alucinadas; o Apêndice C mostra resposta justificada por 'apelo à autoridade', descrita como forma de alucinação. Risco atribuído aos comparadores, não ao SymCode.", "localizador": "Seção 5.4, p. 8; Apêndice C, p. 15"},
+      {"categoria": "custo", "descricao": "O laço de self-debugging eleva a média de tokens de saída de 699 (SymCode) para 890 (SymCode+), com sobrecarga maior no Llama 3.2. O estudo trata tokens como custo de inferência e latência; custo monetário não quantificado.", "localizador": "Seção 5.3, p. 7-8"},
+      {"categoria": "outro", "descricao": "Sensibilidade ao desenho do prompt: o SymCode depende de prompts cuidadosamente estruturados.", "localizador": "Seção 7, p. 9"},
+      {"categoria": "outro", "descricao": "Uso indevido para fraude acadêmica (tarefas e testes padronizados); não é segurança de código nem de sistema.", "localizador": "Seção 8, p. 9"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Laço de self-debugging (SymCode+) para corrigir erros de programa a partir do feedback do interpretador; comparado com SymCode sem o laço (Tabela 3) e na ablação (Tabela 4).", "avaliada": "sim", "localizador": "Seção 3.2, p. 5; Tabela 3, p. 7; Tabela 4, p. 9"},
+      {"descricao": "Asserções de verificação no código para filtrar soluções incorretas; avaliadas pela ablação 'No Verification' (sequencial, só GPT-5-nano e AIME).", "avaliada": "sim", "localizador": "Seção 3.1, p. 5; Seção 5.6, p. 8; Tabela 4, p. 9"},
+      {"descricao": "Execução do script em interpretador Python isolado (sandbox); sem comparação com condição sem sandbox.", "avaliada": "nao", "localizador": "Seção 1, p. 1"},
+      {"descricao": "Detectores de código gerado por IA e políticas educacionais focadas no processo de raciocínio, propostos contra o uso indevido.", "avaliada": "nao", "localizador": "Seção 8, p. 9"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "CoT, ToT e Decomposition executados pelos autores nos mesmos três modelos e três benchmarks (Tabela 3); PAL e métodos baseados em treinamento excluídos",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa contradiz a tabela: o texto atribui ao Llama 3.2 (90B) com SymCode+ '21.6% accuracy on AIME', mas a Tabela 3 registra 31.7 para Llama 3.2/SymCode+/AIME; 21.6 é o valor de GPT-OSS (20B)/SymCode+/AIME. O próprio texto adiante usa 31.7% para o Llama.", "localizador": "Seção 5.1, p. 6-7; Tabela 3, p. 7"},
+      {"descricao": "O valor '13.6 percentage points' é atribuído a contrastes diferentes: no resumo, ganho 'over baselines' sem identificar técnica ou comparador; nas contribuições, ganho do SymCode (16.8 com SymCode+) 'over traditional prompting baselines', compatível com GPT-5-nano/OlympiadBench contra CoT (76.8 − 63.2 = 13.6; 80.0 − 63.2 = 16.8, cálculos próprios); na Figura 2, 13.6 é o rótulo do ganho de SymCode+ sobre o melhor baseline para GPT-OSS no OlympiadBench (38.4 − 24.8 = 13.6, cálculo próprio).", "localizador": "Resumo, p. 1; Seção 1, p. 2; Figura 2, p. 7; Tabela 3, p. 7"},
+      {"descricao": "Inversões e resultados nulos na Tabela 3: SymCode abaixo do ToT com Llama 3.2 no OlympiadBench (31.2 vs. 36.8), SymCode+ empatado com ToT (36.8); com GPT-5-nano no MATH-500, CoT (93.4) supera SymCode (90.8) e SymCode+ (91.4); com Llama 3.2 no MATH-500, SymCode empata com Decomposition (64.4).", "localizador": "Tabela 3, p. 7; Figura 2, p. 7"},
+      {"descricao": "Aparente inconsistência entre o tamanho declarado do OlympiadBench (674) e os valores da Tabela 3: todos os valores dessa coluna são múltiplos de 0,8, e 76.8, 64.0 e 36.0 não correspondem a k/674 arredondado a uma casa (por exemplo, 517/674 ≈ 76,71% e 518/674 ≈ 76,85%; cálculos próprios). A fonte não informa denominador, número de execuções nem regra de arredondamento; não se conclui qual amostra foi usada.", "localizador": "Seção 4.1, p. 5; Tabela 3, p. 7"},
+      {"descricao": "Aparente inconsistência de arredondamento no AIME (60 problemas): 23.3, 21.7, 31.7, 61.7, 18.3 e 48.3 são compatíveis com k/60 arredondado, mas 51.6, 11.6 (duas vezes) e 21.6 só seriam compatíveis com truncamento (31/60, 7/60 e 13/60 ≈ 51,67%, 11,67% e 21,67%; cálculos próprios); na Tabela 4, 58.5 não corresponde a k/60 por arredondamento nem truncamento (35/60 ≈ 58,33%; 36/60 = 60%). Número de execuções e estimador não informados.", "localizador": "Tabela 3, p. 7; Tabela 4, p. 9"},
+      {"descricao": "Análise de erros: os percentuais do SymCode (56.2%, 31.3%, 12.5%) são compatíveis com 16 erros (9, 5 e 2; ou múltiplos de 16), mas a Tabela 3 implica 23 problemas errados para SymCode (61.7% de 60) ou 21 para SymCode+ (65.0%) com GPT-5-nano no AIME (cálculos próprios). Para ToT, 41.4%, 34.5% e 24.1% são compatíveis com 29 erros (= 60 − 31). O número de erros categorizados não é informado; aparente inconsistência.", "localizador": "Seção 5.4, p. 8; Tabela 3, p. 7"},
+      {"descricao": "Eficiência de tokens: médias agregadas sobre os três modelos com visibilidade diferente de tokens (GPT-OSS inclui tokens de raciocínio interno; GPT-5-nano só tokens visíveis; Llama sem canal oculto), sem decomposição por modelo ou benchmark. A redução de '60% to 77%' é variação relativa (1 − 699/1770 ≈ 60,5%; 1 − 699/2991 ≈ 76,6%, cálculos próprios). Tokens de saída não equivalem a custo monetário medido.", "localizador": "Seção 5.3, p. 7-8; Apêndice B, p. 14"},
+      {"descricao": "A conclusão afirma desempenho 'state-of-the-art', mas o estudo compara apenas com três baselines de prompting; métodos baseados em treinamento e PAL foram excluídos, a exclusão do PAL baseada em 'initial exploratory tests' cujos resultados não são relatados.", "localizador": "Seção 4.2, p. 6; Seção 6, p. 9"},
+      {"descricao": "O texto afirma que o prompt exige asserts ('The prompt requires the model to insert assert statements'), mas o Listing 1 não menciona 'assert'; pede substituir soluções, checar restrições de domínio e filtrar soluções inválidas.", "localizador": "Listing 1, p. 4; Seção 3.1, p. 5"},
+      {"descricao": "Ablação sequencial (cumulativa) restrita a um modelo (GPT-5-nano) e um benchmark (AIME); os efeitos de 'No Verification' e 'No SymPy' são condicionados à ausência prévia do self-debug e dos componentes anteriores.", "localizador": "Seção 5.6, p. 8; Tabela 4, p. 9"},
+      {"descricao": "Ganhos por subárea do OlympiadBench (maiores em combinatória e geometria, menores em álgebra) e por tipo de resposta (expressão vs. valor numérico) são afirmados sem números ou tabela.", "localizador": "Seção 5.4, p. 8"},
+      {"descricao": "Inversão entre modelos discutida pelo estudo: GPT-OSS supera Llama 3.2 no MATH-500 com SymCode+ (93.2 vs. 68.8), mas Llama 3.2 supera GPT-OSS no AIME (31.7 vs. 21.6); a explicação apresentada é conjectural ('A potential explanation').", "localizador": "Seção 5.1, p. 7; Tabela 3, p. 7"}
+    ],
+    "observacoes": [
+      {"descricao": "Número de execuções por combinação, temperatura e demais parâmetros de decodificação nao_informado. O Apêndice B define cada 'evaluated run' como uma instância × um modelo × um método para a contagem de tokens, mas não declara o número de repetições.", "localizador": "Seção 4, p. 5-6; Apêndice B, p. 14"},
+      {"descricao": "Os textos dos prompts CoT, ToT e Decomposition não são apresentados; só o template do SymCode (Listing 1).", "localizador": "Seção 4.2, p. 6; Listing 1, p. 4"},
+      {"descricao": "Taxa de ativação do self-debug (Figura 3): Llama 3.2 (90B) 28.5%, GPT-5-nano 9.3%, GPT-OSS (20B) 14.7%; benchmark e denominador não informados.", "localizador": "Seção 5.5 e Figura 3, p. 8"},
+      {"descricao": "Tokens médios de saída: SymCode 699, ToT 1770, Decomposition 1962, CoT 2991, SymCode+ 890 (arredondados).", "localizador": "Seção 5.3, p. 7-8"},
+      {"descricao": "A tarefa avaliada é resolução de problemas matemáticos por geração de código Python; a correção é medida pela resposta final, não por testes do código.", "localizador": "Seção 4.3, p. 6"},
+      {"descricao": "O estudo não menciona repositório ou pacote de replicação.", "localizador": "texto completo"},
+      {"descricao": "O Apêndice C remete à 'Section 5.3' para os tipos de erro, que estão na Seção 5.4.", "localizador": "Apêndice C, p. 14"}
+    ],
+    "citacoes": [
+      {"trecho": "Instead of prompting an LLM to describe its reasoning in prose, SymCode instructs it to construct a verifiable, executable Python script where the code serves as the reasoning trace.", "localizador": "Seção 1, p. 1"},
+      {"trecho": "Next, the generated script is executed in a sandboxed Python interpreter, which provides a deterministic pass/fail signal for programmatic verification.", "localizador": "Seção 1, p. 1"},
+      {"trecho": "We introduce and formalize SymCode, a prompt-based framework for advanced mathematical reasoning that transforms an LLM into a neurosymbolic reasoner generating self-contained, verifiable Python scripts.", "localizador": "Seção 1, p. 2"},
+      {"trecho": "To what extent does reframing mathematical reasoning as verifiable code generation improve a system’s accuracy on complex mathematical problems compared to established prose-based prompting techniques?", "localizador": "Seção 1, p. 2"},
+      {"trecho": "You are an expert mathematical reasoner. Your output must be ONLY a single Python code block fenced as ``` python ... ``` with no prose before or after.", "localizador": "Listing 1, p. 4"},
+      {"trecho": "2. Add explicit step-by-step reasoning as comments throughout your code", "localizador": "Listing 1, p. 4"},
+      {"trecho": "The explicit instruction to use import sympy as sp is critical.", "localizador": "Seção 3.1, p. 4"},
+      {"trecho": "The requirement to define symbols with appropriate assumptions (e.g., ‘sp.symbols(‘x’, positive=True, integer=True)’) forces the model to formalize the problem’s constraints upfront.", "localizador": "Seção 3.1, p. 5"},
+      {"trecho": "The prompt requires the model to insert assert statements into its generated code.", "localizador": "Seção 3.1, p. 5"},
+      {"trecho": "The effectiveness of this verification, however, is contingent on the quality of the assertions generated by the LLM; an absence of failure does not guarantee correctness if the assertions are weak or located in an unexecuted code path.", "localizador": "Seção 3.1, p. 5"},
+      {"trecho": "The captured error message and traceback are then appended to the prompt history, and the LLM is instructed to “debug the following code based on the provided error message.”", "localizador": "Seção 3.2, p. 5"},
+      {"trecho": "This cycle of execution, failure, and correction repeats until the script runs successfully or a preset iteration limit (e.g., 2–3 attempts) is reached.", "localizador": "Seção 3.2, p. 5"},
+      {"trecho": "Chain of Thought (CoT): A standard baseline where the model is prompted to “think step-by-step” to generate a prose-based rationale before giving the final answer (Wei et al., 2022).", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Tree of Thoughts (ToT): An advanced baseline where the model explores multiple reasoning paths, evaluating and pruning them to find the most promising solution (Yao et al., 2023).", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Decomposition: A baseline where the model is instructed to break the problem into smaller, simpler sub-problems and solve them sequentially (Khot et al., 2023).", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "Furthermore, our initial exploratory tests confirmed that PAL is of limited utility for the complex problems in our benchmarks, as it is primarily designed for numerical outputs and struggles significantly with problems requiring a final symbolic expression as the answer.", "localizador": "Seção 4.2, p. 6"},
+      {"trecho": "With Llama 3.2 (90B), a less code-optimized model, standard SymCode underperforms ToT on OlympiadBench, but SymCode+ closes this gap, achieving 21.6% accuracy on AIME.", "localizador": "Seção 5.1, p. 6"},
+      {"trecho": "The self-debugging loop in SymCode+ raises the average token count to 890.", "localizador": "Seção 5.3, p. 8"},
+      {"trecho": "In contrast, SymCode shifts failure modes toward the structured stage of problem setup, with most errors due to problem misinterpretation (56.2%) and incorrect API usage (31.3%).", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "The remaining 24.1% of “Other” errors primarily consist of incomplete solutions, where the model fails to finish the reasoning chain, or hallucinated constraints, where it invents details not present in the problem.", "localizador": "Seção 5.4, p. 8"},
+      {"trecho": "We evaluated three progressively degraded versions of our framework, removing one key feature at each step: the iterative self-debugging loop (No Self-Debug), the use of assertions (No Verification), and the symbolic SymPy library in favor of standard numerical libraries (No SymPy (Numeric Python)).", "localizador": "Seção 5.6, p. 8"},
+      {"trecho": "Its reliability also depends on the correctness of the Python interpreter and SymPy library, which, while mature, are not formally verified and may propagate rare errors.", "localizador": "Seção 7, p. 9"},
+      {"trecho": "Finally, SymCode relies on carefully structured prompts, making performance sensitive to prompt design and motivating future work on more robust instruction formats.", "localizador": "Seção 7, p. 9"},
+      {"trecho": "Such a tool could be misused to cheat on assignments or standardized tests, undermining the educational process.", "localizador": "Seção 8, p. 9"},
+      {"trecho": "Potential mitigation strategies include the development of specialized detectors for AI-generated code and promoting educational policies that focus on assessing the reasoning process rather than just the final answer.", "localizador": "Seção 8, p. 9"},
+      {"trecho": "Internal reasoning tokens are observable in the open-source setting; we include them in the token count for all methods under GPT-OSS.", "localizador": "Apêndice B, p. 14"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "SymCode",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes"],
+      "mecanismos_acrescentados": [],
+      "comparador": "Chain of Thought (CoT)",
+      "modelo": "Llama 3.2 (90B)",
+      "benchmark": "MATH-500",
+      "metrica": "Accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 61.2, "intervencao": 64.4},
+      "denominador": "nao_informado (corpus declarado de 500 problemas; o estudo não declara explicitamente o denominador da acurácia)",
+      "condicoes": "Pacote híbrido: prompt SymCode com execução do script em interpretador Python/SymPy, sem laço de self-debug. CoT com prompt 'think step-by-step' (texto completo não apresentado). Mesmo modelo e benchmark. Temperatura, número de execuções e parâmetros de decodificação nao_informado. Decomposition também obtém 64.4 neste modelo e benchmark. Valores conferidos visualmente na Tabela 3 (p. 7).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o estudo destaca duas variantes próprias (SymCode e SymCode+) e o resumo não identifica o comparador ('over baselines'). Tabelas 1 e 2 são descritivas; a Tabela 3 é a primeira com o contraste: métrica única (Accuracy), primeiro benchmark (MATH-500), primeiro modelo listado (Llama 3.2 (90B)) e primeira linha de base de prompting listada (CoT); SymCode é a primeira técnica focal listada.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 7 (PDF p. 7)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Llama 3.2 (90B) CoT 61.2 34.4 20.0", "localizador": "Tabela 3, p. 7; colunas Model, Method, MATH-500, OlympiadBench, AIME (24-25)"},
+        {"trecho": "SymCode (ours) 64.4 31.2 25.0", "localizador": "Tabela 3, p. 7; bloco Llama 3.2 (90B); colunas Method, MATH-500, OlympiadBench, AIME (24-25)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "SymCode+ (Self-Debugging Loops)",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "Chain of Thought (CoT)",
+      "modelo": "Llama 3.2 (90B)",
+      "benchmark": "MATH-500",
+      "metrica": "Accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 61.2, "intervencao": 68.8},
+      "denominador": "nao_informado (corpus declarado de 500 problemas; o estudo não declara explicitamente o denominador da acurácia)",
+      "condicoes": "Pacote híbrido: prompt SymCode + laço de self-debug com feedback do interpretador Python/SymPy, limite de iterações 'e.g., 2–3 attempts' (exato nao_informado); CoT executa uma única geração. Contra CoT o contraste é de pacote, não isola o laço (o contraste de ingrediente é SymCode+ vs. SymCode). Temperatura e número de execuções nao_informado. Valores conferidos visualmente na Tabela 3 (p. 7).",
+      "selecao": "cobertura",
+      "selecao_motivo": "SymCode+ é variante que o estudo apresenta como formulação própria ('SymCode+ (ours)') e avalia em linha separada; recebe cobertura como técnica focal distinta, pela mesma regra de ordem da Tabela 3 (primeiro benchmark, primeiro modelo, primeira linha de base de prompting).",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 7 (PDF p. 7)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Llama 3.2 (90B) CoT 61.2 34.4 20.0", "localizador": "Tabela 3, p. 7; colunas Model, Method, MATH-500, OlympiadBench, AIME (24-25)"},
+        {"trecho": "SymCode+ (ours) 68.8 36.8 31.7", "localizador": "Tabela 3, p. 7; bloco Llama 3.2 (90B); colunas Method, MATH-500, OlympiadBench, AIME (24-25)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Self-Debugging loop (ablação 'No Self-Debug')",
+      "mecanismos": ["instrucao", "raciocinio", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "No Self-Debug",
+      "modelo": "GPT-5-nano",
+      "benchmark": "AIME (24-25)",
+      "metrica": "AIME Accuracy (%)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 61.7, "intervencao": 65.0},
+      "denominador": "nao_informado (corpus declarado de 60 problemas; o estudo não declara explicitamente o denominador)",
+      "condicoes": "Ablação sequencial: SymCode+ completo contra a mesma versão sem o laço de self-debug; demais componentes (verificação, SymPy, execução em interpretador) mantidos. O valor 61.7 coincide com SymCode/GPT-5-nano/AIME na Tabela 3. Limite de iterações exato, temperatura e número de execuções nao_informado. Só um modelo e um benchmark. Valores conferidos visualmente na Tabela 4 (p. 9).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnicas focais e tarefa já representadas; componente isolado incluído para completar o alvo de três, a partir da tabela de ablação (Tabela 4), primeira linha de ablação ('No Self-Debug').",
+      "derivacao": "direta",
+      "localizador": "Tabela 4, p. 9 (PDF p. 9); Seção 5.6, p. 8",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "SymCode+ 65.0", "localizador": "Tabela 4, p. 9; colunas Method Variant, AIME Accuracy (%)"},
+        {"trecho": "No Self-Debug 61.7", "localizador": "Tabela 4, p. 9; colunas Method Variant, AIME Accuracy (%)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Duas questões de pesquisa explícitas (acurácia frente a técnicas de prompting em prosa; eficiência de tokens e natureza das falhas) e contribuições declaradas.", "localizador": "Seção 1, p. 2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Template do SymCode apresentado e laço de self-debug descrito, mas o limite de iterações é dado só como exemplo ('e.g., 2–3 attempts'), os prompts dos baselines e a implementação do ToT e do Decomposition não são apresentados, a implementação das condições de ablação não é descrita e o procedimento da análise manual de erros (quem categorizou, quantos erros) não é informado.", "localizador": "Seções 3.1-3.2, p. 4-5; Seção 4.2, p. 6; Seções 5.4 e 5.6, p. 8"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Três baselines de prompting (CoT, ToT, Decomposition) executados nos mesmos modelos e benchmarks, mas sem os prompts usados; PAL excluído com base em testes exploratórios não relatados; ablação só em um modelo e um benchmark.", "localizador": "Seção 4.2, p. 6; Tabela 3, p. 7; Tabela 4, p. 9"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Acurácia por correspondência exata e contagem de tokens definidas (Apêndice B), mas os denominadores não são declarados; os valores do OlympiadBench parecem incompatíveis com 674 problemas, há arredondamento inconsistente no AIME (51.6, 11.6, 21.6; 58.5 na Tabela 4); a narrativa atribui 21.6% ao Llama 3.2 contra 31.7 na tabela; os percentuais da análise de erros não batem com os erros implícitos na Tabela 3; a média de tokens mistura modelos com visibilidade diferente.", "localizador": "Seção 4.3, p. 6; Tabela 3, p. 7; Seções 5.1, 5.3 e 5.4, p. 6-8; Tabela 4, p. 9; Apêndice B, p. 14"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de limitações discute dependência da proficiência em código, problemas pouco formalizáveis, confiabilidade do interpretador/SymPy e sensibilidade ao prompt; não discute não determinismo, número de execuções, significância estatística nem contaminação.", "localizador": "Seção 7, p. 9"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Template do prompt e exemplo completo de geração disponíveis; modelos sem snapshot/versão, sem temperatura, sem número de execuções, sem prompts dos baselines e sem menção a código ou pacote de replicação.", "localizador": "Listing 1, p. 4; Seção 4.2, p. 6; Apêndice A, p. 13-14"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura completa, o estudo não discute possível presença de MATH-500, OlympiadBench ou AIME 2024/2025 no pré-treinamento dos modelos.", "localizador": "texto completo"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [2, 3, 4, 5, 6, 7, 8, 9, 13, 14],
+    "observacao": "Texto extraído lido integralmente (834 linhas, incluindo referências e Apêndices A-C). Páginas abertas para conferir Figura 1, Tabelas 1-4, Listing 1, Figuras 2-3 e Apêndices A-B."
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "estudo": "S1080",
+  "texto_fonte": "fontes/textos/lote/S1080.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "versao_fonte": "arXiv:2511.09122v2 [cs.SE], 16 jan. 2026 (preprint); o PDF não tem paginação impressa, os localizadores usam a página do PDF",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "RAG-enhanced coding assistant (configuração RAG; Azure RAG: GPT-4.1 with full retrieval)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+        "mecanismos_acrescentados": ["contexto", "exemplos", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, p. 1; Seção II, p. 3 (Figura 2); Seção III, p. 4; Tabela I e Seção IV, p. 5",
+        "observacao": "Pacote de prompt construído pelo sistema: regras do dialeto Mitsubishi em linguagem natural (instrucao); restrições rígidas do fornecedor (proibição de palavras reservadas, declaração antes do uso, vocabulário de tipos restrito, estrutura de POU) → restricoes; contexto recuperado de três segmentos da base (definições de function blocks, trechos de especificação, contexto auxiliar com exemplos de usuários) → contexto; programa canônico de exemplo, templates de POU/referência a dispositivos e 'examples of incorrect label usage' → exemplos (os exemplos recuperados da base também → exemplos); reparo guiado pelo diagnóstico do compilador GX Works3 (até 3 tentativas de compilação) → feedback. A mesma técnica é aplicada a quatro backbones na Tabela I (GPT-4.1, GPT-5, DeepSeek Coder v2 Lite ajustado e modelo local não ajustado); são condições da mesma técnica, não técnicas distintas. Contrafactual: cada configuração RAG contra a configuração 'Standard' do mesmo modelo (GPT-4.1 Standard = 'minimal prompt, no retrieval'). 'sim' vale para o pacote (recuperação + prompt abrangente com restrições, templates e exemplo canônico); não há ablação que separe recuperação, restrições, templates ou exemplo canônico, nem condição sem o reparo. Mecanismos acrescentados atribuídos em relação ao prompt mínimo do Standard, que não é mostrado; o feedback consta nas duas condições porque a Tabela I informa 'Repaired' também para as configurações Standard (ver heterogeneidade). Na versão local com RAG o prompt de sistema foi encurtado. Uso da expansão opcional de consulta na avaliação: nao_informado. O ajuste fino do modelo local é intervenção fora do escopo (componentes_fora_escopo); nas linhas Local Fine-tuned o contraste RAG vs. Standard mantém o mesmo modelo ajustado."
+      },
+      {
+        "nome_original": "Standard (non-RAG; Azure Standard: GPT-4.1, minimal prompt, no retrieval)",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção II, p. 3; Seção III, p. 4; Tabela I e Seção IV, p. 5",
+        "observacao": "Linha de base executada pelos autores com os mesmos modelos e as mesmas 100 consultas. O conteúdo do 'minimal prompt' não é mostrado. 'feedback' atribuído porque a Tabela I informa percentual 'Repaired' para as configurações Standard, embora a Seção II descreva o reparo iterativo só 'For Azure RAG responses' (aparente inconsistência). Para as configurações locais, o texto não diz se o 'Standard' usa o prompt abrangente sem recuperação ou um prompt mínimo (nao_informado)."
+      },
+      {
+        "nome_original": "Diagnostic-Guided Repair / Compiler-in-the-Loop (prompt-guided repair, max 3 iterations)",
+        "mecanismos": ["instrucao", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "Seção II e Figura 2, p. 3; Seção III, p. 4; Tabela I e Seção IV, p. 5",
+        "observacao": "A saída do último ciclo de compilação no GX Works3 é inserida literalmente numa instrução estruturada de reparo que orienta o modelo a tratar categorias de diagnóstico (variáveis não declaradas, palavras reservadas, tipos incompatíveis, instruções proibidas) preservando os segmentos validados; termina em sucesso, timeout do servidor ou esgotamento do orçamento (máximo de 3 tentativas). A coluna 'Repaired' da Tabela I e a frase 'of the 73% compiled code attempts, 50% did not need a repair, but 23% did need up to two repairs' dão só a contribuição da fase de reparo, sem condição executada sem o laço."
+      },
+      {
+        "nome_original": "Competitive multi-model approach (Competitive Model Layer)",
+        "mecanismos": ["amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Resumo, p. 1; Seção I, p. 2; Seção II e Figura 2, p. 3; Seção III, p. 4",
+        "observacao": "Três configurações (Azure RAG, Azure Standard, Local RAG) respondem em paralelo à consulta inicial e o usuário escolhe o modelo para os turnos seguintes (seleção humana entre respostas → amostragem). A Tabela I avalia cada configuração separadamente; o efeito da competição ou da seleção não é medido. O próprio estudo apresenta a camada competitiva como meio de comparar configurações para decisões de implantação."
+      },
+      {
+        "nome_original": "Optional Query Expansion (LLM Reasoning)",
+        "mecanismos": ["contexto", "raciocinio"],
+        "mecanismos_acrescentados": ["raciocinio"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Figura 2 e Seção II, p. 3",
+        "observacao": "Aparece só como caixa da Figura 2 ('Optional Query Expansion (LLM Reasoning)') e como opção da interface; o funcionamento não é descrito e não se informa se foi usada na avaliação da Tabela I. Categorias atribuídas a partir do rótulo da figura (expansão da consulta de recuperação por raciocínio do LLM)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Local Fine-tuned model (DeepSeek Coder v2 Lite Instruct fine-tuned on synthetic data)",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino do DeepSeek Coder v2 Lite com pares tarefa-solução sintéticos gerados pelo pipeline RAG com GPT-4.1 (mesmo prompt abrangente da inferência, personas de usuário e categorias de tarefa variadas), filtrados por compilação no GX Works3 e checagens estáticas. Diferenças entre as linhas 'Local Fine-tuned' e 'Local' da Tabela I não são efeito de prompting.",
+        "localizador": "Seção III, p. 4; Seção IV, p. 5"
+      },
+      {
+        "nome_original": "Quantized GGUF format",
+        "natureza": "outro",
+        "descricao": "Quantização do modelo local em GGUF para execução em hardware restrito (cerca de 10 GB de VRAM); intervenção de implantação, não de prompting.",
+        "localizador": "Seção III, p. 4; Seção IV, p. 5"
+      },
+      {
+        "nome_original": "Model configurations (Azure GPT-4.1, Azure GPT-5, local DeepSeek Coder v2 Lite)",
+        "natureza": "selecao_modelo",
+        "descricao": "Troca do modelo gerador (nuvem vs. local, GPT-4.1 vs. GPT-5) sem alterar o prompt; as diferenças entre modelos na Tabela I não são efeito de prompting.",
+        "localizador": "Seção II, p. 3; Tabela I e Seção IV, p. 5"
+      },
+      {
+        "nome_original": "GPT-5 'reasoning set to low'",
+        "natureza": "orcamento",
+        "descricao": "Parâmetro de inferência do GPT-5 fixado em raciocínio baixo; o estudo não descreve o parâmetro além dessa menção.",
+        "localizador": "Seção IV, p. 5"
+      },
+      {
+        "nome_original": "MCP server / GXWorks3 Compilation Server",
+        "natureza": "outro",
+        "descricao": "Servidor que analisa blocos VAR...END_VAR, importa o código no GX Works3 e devolve diagnósticos estruturados; infraestrutura de ferramenta que alimenta o feedback, não prompting em si.",
+        "localizador": "Seção II e Figura 2, p. 3; Seção III, p. 4"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-4.1 (Azure OpenAI)", "versao": "nao_informado (snapshot/deployment não informado)", "localizador": "Seção II, p. 3; Tabela I e Seção IV, p. 5"},
+      {"nome": "GPT-5 (Azure OpenAI), reasoning set to low", "versao": "nao_informado", "localizador": "Tabela I e Seção IV, p. 5"},
+      {"nome": "DeepSeek Coder v2 Lite Instruct, ajustado e quantizado em GGUF (16 bilhões de parâmetros, segundo o estudo)", "versao": "'deepseek-coder-v2-lite'; snapshot nao_informado", "localizador": "Seção III, p. 4; Seção IV, p. 5"},
+      {"nome": "Modelo local não ajustado das linhas 'Local RAG' e 'Local Standard'", "versao": "nao_informado; o estudo menciona 'further non-fine-tuned models' sem identificar o modelo dessas linhas", "localizador": "Tabela I e Seção IV, p. 5"},
+      {"nome": "OpenAI text-embedding-3-large (recuperação, auxiliar)", "versao": "nao_informado", "localizador": "Seção II, p. 3; Seção IV, p. 5"},
+      {"nome": "Versões anteriores do DeepSeek, CodeLlama e Qwen-3 Coder (testados, sem valores relatados)", "versao": "nao_informado", "localizador": "Seção IV, p. 5"}
+    ],
+    "benchmarks": [
+      {"nome": "Conjunto próprio de 100 consultas variadas (Mitsubishi Electric iQ-R ST, GX Works3)", "quantidade": "100 consultas, usadas para gerar 100 programas ST por composição de modelo; procedimento de criação das consultas e distribuição por tipo de tarefa nao_informado. As categorias de tarefa e personas descritas referem-se aos dados sintéticos de ajuste fino; sobreposição entre as consultas de avaliação e esses dados nao_informado.", "localizador": "Seção IV, p. 5"}
+    ],
+    "metricas": [
+      {"nome": "Compiled (%) — compilation success rate", "definicao": "percentual de programas que compilam no GX Works3; gerações que declaram function block ou função sem usá-los contam como falha ('not compiled'). Segundo o texto, inclui os programas que compilaram após até duas rodadas de reparo. Denominador: 100 programas por configuração (Seção IV); contagens absolutas não impressas.", "localizador": "Tabela I e Seção IV, p. 5"},
+      {"nome": "Repaired (%)", "definicao": "parcela das tentativas compiladas que precisou de reparo (até dois reparos), segundo o exemplo do texto para GPT-4.1 RAG (73% compilados = 50% sem reparo + 23% com reparo).", "localizador": "Tabela I e Seção IV, p. 5"},
+      {"nome": "Avaliação qualitativa de usuários (user ratings / expert assessments)", "definicao": "impressões qualitativas de usuários de parceiros industriais sobre estilo, explicações e coerência do código; sem escala, número de avaliadores, protocolo ou valores relatados.", "localizador": "Resumo e Seção I, p. 1-2; Seção IV, p. 5; Seção V, p. 6"}
+    ],
+    "linguagens": ["Structured Text (IEC 61131-3), dialeto Mitsubishi Electric iQ-R / MELSOFT GX Works3"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Código que compila não é necessariamente correto ou razoável: o modelo menor frequentemente produziu lógica incoerente, programas curtos e uso incorreto de funções (por exemplo, arrays vazios que compilam); a compilação é critério necessário, mas não suficiente, e a correção funcional não foi medida.", "localizador": "Seção IV, p. 5; Seção V, p. 6"},
+      {"categoria": "seguranca", "descricao": "Segurança operacional (não cibersegurança): lógica de controle defeituosa pode causar dano a equipamentos, parada de produção ou riscos à segurança de pessoas.", "localizador": "Seção V, p. 6"},
+      {"categoria": "seguranca", "descricao": "Confidencialidade de código proprietário: empresas e clientes não confiam em provedores de nuvem e operadores críticos proíbem ferramentas dependentes de nuvem que exponham inteligência operacional; motivação para a opção local.", "localizador": "Resumo e Seção I, p. 1"},
+      {"categoria": "custo", "descricao": "Tempo de execução: a versão local com RAG levou muito mais tempo para gerar código e o prompt de sistema teve de ser encurtado para respostas em menos de 1 minuto; não quantificado além desse limite.", "localizador": "Seção IV, p. 5"},
+      {"categoria": "outro", "descricao": "Comportamento 'specialist' do modelo local ajustado, com interpretações equivocadas ocasionais; o modelo 'desaprendeu' explicações e respostas só em texto após o ajuste fino.", "localizador": "Seção IV, p. 5; Seção V, p. 6"},
+      {"categoria": "outro", "descricao": "Contexto limitado do modelo local encurta o prompt de sistema; dados sintéticos de treinamento podem ter desvantagens ainda não visíveis.", "localizador": "Seção V, p. 6"},
+      {"categoria": "outro", "descricao": "Generalização limitada: escopo restrito ao ecossistema Mitsubishi Electric, cobertura de tarefas e avaliação humana em um único contexto organizacional; generalização entre fornecedores não validada.", "localizador": "Seção V, p. 6"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Laço de reparo guiado pelos diagnósticos do compilador (até 3 tentativas); a Tabela I mostra a parcela compilada após reparo, mas não há condição executada sem o laço.", "avaliada": "nao", "localizador": "Seção II, p. 3; Seção III, p. 4; Tabela I e Seção IV, p. 5"},
+      {"descricao": "Revisão obrigatória por engenheiros de automação qualificados e verificação de conformidade com normas de segurança antes da implantação; recomendação, não avaliada.", "avaliada": "nao", "localizador": "Seção V, p. 6"},
+      {"descricao": "Implantação local/on-premises com modelo ajustado e quantizado para evitar exposição de código à nuvem; chamadas externas restritas ao Azure OpenAI e ao servidor de compilação.", "avaliada": "nao", "localizador": "Seção II, p. 3-4; Seção III, p. 4; Seção V, p. 6"},
+      {"descricao": "Regra de avaliação: gerações que declaram function block ou função sem usá-los contam como falha de compilação.", "avaliada": "nao", "localizador": "Seção IV, p. 5"},
+      {"descricao": "Validação de arquivos enviados pelo usuário quanto a conteúdo binário e codificação.", "avaliada": "nao", "localizador": "Seção II, p. 3"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Configurações 'Standard' (sem RAG) executadas pelos autores com os mesmos modelos e as mesmas 100 consultas (Tabela I); para GPT-4.1: 'minimal prompt, no retrieval'",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Narrativa contra a tabela: 'the local fine-tuned RAG model performed best' (86%), mas a Tabela I traz Azure GPT-5 RAG com 87%; 'The second best is the fine-tuned local model without RAG' (73%), mas Azure GPT-4.1 RAG também tem 73% e GPT-5 RAG tem 87%. Possivelmente a narrativa antecede a inclusão do GPT-5, acrescentado após o fim do projeto; o estudo não o diz.", "localizador": "Seção IV, p. 5; Tabela I, p. 5"},
+      {"descricao": "Resultado quase nulo para RAG no modelo local não ajustado: Local RAG 25% vs. Local Standard 23% (Compiled), enquanto a Discussão afirma que 'Retrieval-augmented approaches substantially outperform non-RAG baselines' e a Seção IV afirma que 'fine-tuning and RAG approaches perform well'. Na mesma configuração local, 'Repaired' é menor com RAG (12%) que sem RAG (17%).", "localizador": "Tabela I e Seção IV, p. 5; Seção V, p. 5"},
+      {"descricao": "A Seção II descreve o reparo iterativo apenas 'For Azure RAG responses', mas a Tabela I informa 'Repaired' para todas as oito configurações, inclusive as Standard e as locais. Não está claro se todas as configurações tiveram o laço de reparo na avaliação.", "localizador": "Seção II, p. 3; Tabela I, p. 5"},
+      {"descricao": "Condições não equivalentes entre configurações: na versão local com RAG o prompt de sistema foi encurtado; o conteúdo do prompt 'Standard' não é mostrado e, para as configurações locais, não se diz se o Standard usa o prompt abrangente; o modelo das linhas 'Local RAG'/'Local Standard' não é identificado explicitamente; o uso da expansão opcional de consulta na avaliação não é informado. O contraste RAG vs. Standard é de pacote (recuperação + prompt abrangente).", "localizador": "Seção II, p. 3; Seção IV, p. 5; Seção V, p. 6"},
+      {"descricao": "O resumo anuncia avaliação com 'user ratings' e a contribuição (3) 'expert assessments', mas o artigo só relata impressões qualitativas, sem escala, número de avaliadores ou valores. A narrativa qualitativa (usuários preferiram o GPT maior) diverge da ordem quantitativa da Tabela I.", "localizador": "Resumo, p. 1; Seção I, p. 2; Seção IV, p. 5"},
+      {"descricao": "A Discussão atribui o 73% da linha Local Fine-tuned Standard a 'fine-tuning alone', mas os dados de ajuste fino foram gerados pelo próprio pipeline RAG com GPT-4.1 e o mesmo prompt abrangente; o conhecimento do prompt e da recuperação entra indiretamente nos pesos.", "localizador": "Seção III, p. 4; Seção IV, p. 5; Seção V, p. 5"},
+      {"descricao": "Avaliação com uma única rodada de 100 consultas por configuração, sem número de execuções, testes estatísticos, intervalos nem descrição de como as consultas foram geradas; decodificação (temperatura etc.) nao_informado. Qualidade medida só por compilação mais checagem estática.", "localizador": "Seção IV, p. 5; Seção V, p. 6"},
+      {"descricao": "Números de outros trabalhos citados no texto (Haag et al. 70% de compilação; Agents4PLC 68,8% de verificação formal; AutoPLC 60%; Spec2Control 94-96% de economia de trabalho) vêm de outras amostras, plataformas e métricas e não são comparadores executados.", "localizador": "Seção I, p. 1-2"}
+    ],
+    "observacoes": [
+      {"descricao": "Base de conhecimento em três segmentos com filtragem por metadados (function blocks do iQ-R, especificações dos manuais, contexto auxiliar), embeddings text-embedding-3-large e três recuperadores especializados. As descrições dos function blocks foram enriquecidas offline por um prompt estruturado que explica a semântica dos sufixos (P para borda de subida, _U para sem sinal); efeito não avaliado separadamente.", "localizador": "Seção II e Figura 2, p. 3; Seção III, p. 4"},
+      {"descricao": "Os autores optaram por arquitetura de prompt único abrangente em vez de orquestração multiagente por exigência de baixa latência; multiagente fica como trabalho futuro.", "localizador": "Seção III, p. 4; Seção V, p. 6"},
+      {"descricao": "Esforço manual/sobrecarga: foi necessário um 'overhead' para gerar dados de treinamento curados para o modelo ajustado; o estudo não o quantifica nem o trata como custo de prompting.", "localizador": "Seção IV, p. 5"},
+      {"descricao": "Afirmações de vantagem, não riscos: modelos locais evitam overhead de API e permitem iteração mais rápida ('preliminary observations'); engenharia de prompt seria 'cost-effective' por evitar campanhas de ajuste fino de meses; não quantificado.", "localizador": "Seção V, p. 6"},
+      {"descricao": "Interface com seleção de modelo, modo rascunho, upload de arquivos e persistência de chat; implantação em contêineres. Figura 1 mostra um exemplo de programa gerado pelo Azure RAG com compilação bem-sucedida (ilustrativo).", "localizador": "Figura 1, p. 2; Seção II, p. 3"},
+      {"descricao": "Os autores reconhecem a comparação desigual entre modelos de centenas de bilhões de parâmetros (GPT-4.1/GPT-5) e o DeepSeek Coder v2 (16 bilhões).", "localizador": "Seção IV, p. 5"}
+    ],
+    "citacoes": [
+      {"trecho": "We found that a Retrieval-Augmented Generation (RAG) supported coding assistant can work in low-data domains by using extensive prompt engineering and directed retrieval.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Our tool lets several AI models compete with each other, uses reasoning, corrects bugs automatically and checks code validity by compiling it directly in the chat interface.", "localizador": "Resumo, p. 1"},
+      {"trecho": "We support our approach with an extensive evaluation that comes with code compilation statistics and user ratings.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Moreover, companies like Mitsubishi Electric and their customers do not trust cloud providers.", "localizador": "Resumo, p. 1"},
+      {"trecho": "Prompt construction enforces vendor-specific hard constraints: reserved-word prohibition, declaration-before-use mandates, restricted datatype vocabulary aligned with GXWorks3 semantics, and explicit POU structure templates.", "localizador": "Seção II, p. 3"},
+      {"trecho": "Retrieved context from the knowledge base is concatenated with a canonical example program encoding compliant timer usage, state-machine logic, and edge-detection idioms.", "localizador": "Seção II, p. 3"},
+      {"trecho": "The system supports three model configurations executed concurrently on initial queries: (1) Azure RAG (GPT-4.1 with full retrieval), (2) Azure Standard (GPT-4.1, minimal prompt, no retrieval), and (3) Local RAG (fine-tuned quantized model with retrieval).", "localizador": "Seção II, p. 3"},
+      {"trecho": "Follow-up turns use a single user-selected model to preserve conversational coherence.", "localizador": "Seção II, p. 3"},
+      {"trecho": "For Azure RAG responses, the system performs bounded iterative repair (maximum 3 compilation attempts).", "localizador": "Seção II, p. 3"},
+      {"trecho": "Failures trigger targeted correction prompts addressing specific diagnostic categories—undeclared variables, reserved-word violations, type mismatches, disallowed instructions—while preserving validated segments.", "localizador": "Seção II, p. 3"},
+      {"trecho": "Given industrial requirements for low latency, we opted for a comprehensive single-prompt architecture rather than multi-agent orchestration.", "localizador": "Seção III, p. 4"},
+      {"trecho": "The prompt embeds critical Mitsubishi Electric rules: reserved word blacklists, VAR block semantics (e.g., VAR_INPUT available for FUNCTION), examples of incorrect label usage, and mandates that declared function blocks must be instantiated and invoked.", "localizador": "Seção III, p. 4"},
+      {"trecho": "The prompt explicitly instructs models to assume label pre-registration and provides templates demonstrating compliant device referencing patterns.", "localizador": "Seção III, p. 4"},
+      {"trecho": "Rather than implementing complex pattern-based diagnostic parsing, we adopted a prompt-guided approach: compiler feedback is extracted verbatim from the last compilation attempt and embedded into a structured repair instruction that directs the model to address common diagnostic categories (undeclared variables, reserved-word violations, type mismatches, disallowed instructions) while preserving validated code segments.", "localizador": "Seção III, p. 4"},
+      {"trecho": "However, to provide a structured and empirical evaluation, we generated 100 varied queries that were used to generate 100 ST programs with each model composition.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "We got access to GPT-5 after finishing the project, but we also included it in our evaluation experiments (using reasoning set to low).", "localizador": "Seção IV, p. 5"},
+      {"trecho": "As can be seen, the local fine-tuned RAG model performed best (DeepSeek Coder v2 Lite Instruct).", "localizador": "Seção IV, p. 5"},
+      {"trecho": "The second best is the fine-tuned local model without RAG that achieved a 73% compile rate compared to 86% for the RAG.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "The RAG version took much longer to generate code and we had to shorten the system prompt to achieve reasonable answer times (< 1 min).", "localizador": "Seção IV, p. 5"},
+      {"trecho": "Not all code that was compiled was reasonable, though.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "The smaller model often did not produce coherent logic, generated shorter programs and applied functions incorrectly.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "From Tab.I can be derived for sure that the fine-tuning and RAG approaches perform well, since standard models do not know Mitsubishi Electric ST style specifics.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "Those generations that set up a function block or function but did not make use of it were regarded as failed attempt (not compiled).", "localizador": "Seção IV, p. 5"},
+      {"trecho": "The number of repaired attempts shows that, e.g., of the 73% compiled code attempts, 50% did not need a repair, but 23% did need up to two repairs.", "localizador": "Seção IV, p. 5"},
+      {"trecho": "Local RAG 25% 12%", "localizador": "Tabela I, p. 5; colunas Model Configuration, Compiled, Repaired"},
+      {"trecho": "Local Standard 23% 17%", "localizador": "Tabela I, p. 5; colunas Model Configuration, Compiled, Repaired"},
+      {"trecho": "Azure GPT-5 RAG 87% 14%", "localizador": "Tabela I, p. 5; colunas Model Configuration, Compiled, Repaired"},
+      {"trecho": "Retrieval-augmented approaches substantially outperform non-RAG baselines.", "localizador": "Seção V, p. 5"},
+      {"trecho": "Limitations include said Mitsubishi Electric-only scope, task coverage and \"specialist\" local model behavior with occasional misinterpretation.", "localizador": "Seção V, p. 6"},
+      {"trecho": "Human evaluation from a single organizational context may limit generalizability; longitudinal deployment studies are needed to assess adoption barriers and real-world productivity impacts.", "localizador": "Seção V, p. 6"},
+      {"trecho": "The local model limits the available context and thus shortens the system prompt and synthetic training data may have downsides not yet visible.", "localizador": "Seção V, p. 6"},
+      {"trecho": "We acknowledge that compilation success is a necessary but not sufficient criterion for code quality.", "localizador": "Seção V, p. 6"},
+      {"trecho": "Faulty control logic could lead to equipment damage, production downtime, or safety hazards for personnel.", "localizador": "Seção V, p. 6"},
+      {"trecho": "All generated code must undergo a mandatory review by qualified automation engineers before deployment or simulation testing in vendor-provided environments.", "localizador": "Seção V, p. 6"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "RAG-enhanced coding assistant (configuração RAG; Azure RAG: GPT-4.1 with full retrieval)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos", "feedback"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "restricoes"],
+      "comparador": "Azure GPT-4.1 Standard (non-RAG; minimal prompt, no retrieval)",
+      "modelo": "GPT-4.1 (Azure OpenAI); versão nao_informado",
+      "benchmark": "Conjunto próprio de 100 consultas variadas (Mitsubishi Electric iQ-R ST, GX Works3)",
+      "metrica": "Compiled (%) — compilation success rate",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 38, "intervencao": 73},
+      "denominador": "100 programas ST por configuração (Seção IV); contagens absolutas não impressas",
+      "condicoes": "Compilação no GX Works3; gerações que declaram function block ou função sem usá-los contam como falha. 'Compiled' inclui programas que compilaram após reparo (até 3 tentativas de compilação): coluna 'Repaired' = 23% para RAG e 5% para Standard; o texto diz que dos 73% compilados com RAG, 50% não precisaram de reparo e 23% precisaram de até dois reparos. Embora a Seção II limite o reparo às respostas Azure RAG, a Tabela I informa 'Repaired' também para o Standard. Contraste de pacote: RAG = recuperação + prompt abrangente (restrições, templates, exemplo canônico); Standard = prompt mínimo, sem recuperação (prompt não mostrado). Uso da expansão opcional de consulta nao_informado. Número de execuções, decodificação e testes estatísticos nao_informado. Correção funcional não medida. Valores conferidos visualmente na Tabela I (PDF p. 5); o mesmo 73% aparece na narrativa da Seção IV.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo e as contribuições destacam a abordagem RAG e duas formas de avaliação (estatísticas de compilação e avaliação de usuários), e a Discussão fala em 'non-RAG baselines' no plural, aplicadas a quatro modelos, sem identificar um comparador. A Tabela I é a única tabela e contém o contraste RAG vs. Standard; primeira métrica pertinente (Compiled), primeiro modelo listado (Azure GPT-4.1) e primeira linha de base de prompting listada (Azure GPT-4.1 Standard). Única técnica focal e única tarefa; não há tabela de ablação nem matriz de ingredientes; o reparo só tem contribuição cumulativa, sem contrafactual, por isso não há extração de cobertura.",
+      "derivacao": "direta",
+      "localizador": "Tabela I, p. 5 (PDF p. 5); Seção IV, p. 5",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Azure GPT-4.1 RAG 73% 23%", "localizador": "Tabela I, p. 5; colunas Model Configuration, Compiled, Repaired"},
+        {"trecho": "Azure GPT-4.1 Standard 38% 5%", "localizador": "Tabela I, p. 5; colunas Model Configuration, Compiled, Repaired"},
+        {"trecho": "The number of repaired attempts shows that, e.g., of the 73% compiled code attempts, 50% did not need a repair, but 23% did need up to two repairs.", "localizador": "Seção IV, p. 5"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "parcial", "justificativa": "Lacuna (dialeto Mitsubishi, baixa disponibilidade de dados, restrições de nuvem) e contribuições explícitas; porém o objetivo é apresentar o sistema, sem questões de pesquisa ou hipóteses de avaliação formuladas.", "localizador": "Resumo e Seção I, p. 1-2"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Arquitetura, componentes do prompt, laço de reparo e configurações descritos; faltam o texto dos prompts (abrangente e mínimo), o procedimento de criação das 100 consultas, a identificação do modelo local não ajustado, a aplicação do reparo a cada configuração, o uso da expansão de consulta e os parâmetros de decodificação.", "localizador": "Seções II-III, p. 3-4; Seção IV, p. 5"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Configurações Standard (sem RAG) executadas com os mesmos modelos e consultas; mas o contraste mistura recuperação e prompt abrangente, o prompt local com RAG foi encurtado e não há ablação dos componentes nem condição sem reparo.", "localizador": "Seção II, p. 3; Tabela I e Seção IV, p. 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Taxa de compilação com regra de falha para function blocks não usados e denominador de 100 programas por configuração; porém 'Repaired' é definido só por exemplo e aparece para configurações nas quais o reparo não foi descrito, contagens absolutas não são impressas, a correção funcional não é medida e a avaliação de usuários anunciada não tem escala nem valores.", "localizador": "Tabela I e Seção IV, p. 5; Seção V, p. 6"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Discute escopo restrito ao fornecedor, avaliação humana de uma organização, insuficiência da compilação, dados sintéticos e riscos de segurança operacional; não discute não determinismo, número de execuções, contaminação nem sobreposição entre consultas de avaliação e dados de ajuste fino.", "localizador": "Seção V, p. 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Modelos nomeados, modelo de embeddings, número máximo de tentativas e categorias de restrições descritos; não há prompts completos, conjunto de consultas, dados sintéticos, snapshots, parâmetros de decodificação nem pacote de replicação mencionado; parte da base de conhecimento é proprietária.", "localizador": "Seções II-III, p. 3-4; Seção IV, p. 5"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "O estudo não discute contaminação de pré-treinamento nem se as 100 consultas de avaliação são disjuntas dos dados sintéticos de ajuste fino gerados pelo mesmo pipeline.", "localizador": "Seção IV, p. 5; Seção V, p. 6"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": [1, 2, 3, 4, 5, 6],
+    "observacao": "Texto extraído lido integralmente (373 linhas, até a referência [22]). Páginas 1-6 abertas para conferir a Tabela I, as Figuras 1-2, o resumo, a seção de limitações e os localizadores; a página com as referências [19]-[22] não foi aberta (sem valores usados)."
+  }
+}

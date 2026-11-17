@@ -1,0 +1,268 @@
+{
+  "estudo": "S1179",
+  "texto_fonte": "fontes/textos/lote/S1179.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia_lida": "Chen et al., HardSecBench: Benchmarking the Security Awareness of LLMs for Hardware Code Generation, arXiv:2601.13864v2 [cs.CR], 21 Jun 2026 (identificação impressa na p. 1 do PDF). O PDF não traz numeração de páginas impressa; localizadores usam a posição no arquivo.",
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Hint 0 (only functional requirements)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6, seção 6.3; p. 4, seção 4.1 (Single-Attempt Evaluation); p. 3, seção 3.1",
+        "observacao": "Prompt base: especificação estruturada com problema, especificação de portas de E/S e requisitos funcionais (R^f), sem os requisitos de segurança (→ instrucao e restricoes por ser especificação). O laço de até três rodadas de compilação e correção usando só mensagens do compilador está presente em todas as condições (→ feedback). O texto literal dos prompts não é reproduzido no artigo."
+      },
+      {
+        "nome_original": "Hint 1 (general security reminders)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, seção 6.3 e Figura 5; p. 7, Figuras 7 e 8",
+        "observacao": "Acrescenta lembretes gerais de segurança à especificação funcional (Hint 0), mantidos os demais ingredientes; classificado como instrucao (diretriz em linguagem natural) com base na descrição, pois o texto do lembrete não é impresso. Resultados apenas em figuras sem rótulos numéricos (Figuras 5, 6, 7 e 8)."
+      },
+      {
+        "nome_original": "Hint 2 (explicitly mentions specific vulnerability classes)",
+        "mecanismos": ["instrucao", "restricoes", "feedback"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 6, seção 6.3 e Figura 5; p. 7, Figuras 7 e 8",
+        "observacao": "Acrescenta à especificação funcional a menção explícita a classes específicas de vulnerabilidade; mesmo critério de Hint 1 (instrucao), já que o texto da dica não é impresso. Contrafactual contra Hint 0 (e contra Hint 1) nas mesmas figuras, sem rótulos numéricos."
+      },
+      {
+        "nome_original": "Iterative Refinement Evaluation (Collaborator functional feedback)",
+        "mecanismos": ["instrucao", "restricoes", "feedback", "multiagente"],
+        "mecanismos_acrescentados": ["feedback", "multiagente"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4, seção 4.1 (Iterative Refinement Evaluation) e Figura 3; p. 5, seção 5 e Tabela 1; p. 6, seção 6.2 (Effect of iterative refinement)",
+        "observacao": "Pacote: execução dos harnesses funcionais + agente Collaborator (GPT-5.1, temperatura 0,3) que comenta falhas funcionais e problemas de código, até 5 iterações; comparado com a avaliação de tentativa única (Tabela 1). O estudo o apresenta como cenário de avaliação investigado, não como técnica proposta; classificado como focal por ser objeto de análise própria (seção 6.2). O sim vale para o pacote, sem atribuir o efeito a um ingrediente. Contém componente fora do escopo (temperatura do Collaborator e limite de iterações), portanto é pacote híbrido. A correspondência entre a coluna «HSBench@1» da Tabela 1 e este cenário é inferida do texto (p. 6), pois a legenda só define HSBench1-attempt@1. O nível de dica usado não é informado."
+      },
+      {
+        "nome_original": "Compilation and fixing using only compiler error messages (up to 3 rounds)",
+        "mecanismos": ["feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção 4.1; p. 5, seção 5",
+        "observacao": "Presente em todas as condições para obter implementação compilável; não há condição sem ele."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Domain-specific fine-tuning (CodeV-R1, RTLCoder)",
+        "natureza": "ajuste_fino",
+        "descricao": "Comparação de modelos especializados em hardware com seus modelos base (Deepseek-Coder-6.7B → RTLCoder, RTLCoder v1.1; Qwen2.5-Coder-7B → CodeV-R1 Distill, CodeV-R1 RL) no subconjunto Verilog, sob Hint 0, 1 e 2.",
+        "localizador": "p. 6-7, seção 6.4 e Figura 7"
+      },
+      {
+        "nome_original": "Collaborator temperature 0.3",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura do agente Collaborator fixada em 0,3; parâmetros de decodificação dos modelos-alvo não informados.",
+        "localizador": "p. 5, seção 5"
+      },
+      {
+        "nome_original": "Refinement loop capped at 5 iterations",
+        "natureza": "orcamento",
+        "descricao": "Limite de 5 iterações no cenário de refinamento iterativo e de 3 rodadas de compilação e correção por candidato.",
+        "localizador": "p. 5, seção 5"
+      }
+    ],
+    "modelos": [
+      {"nome": "Claude-4.5-Opus", "versao": "nao_informado (apenas o nome impresso)", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Claude-4.5-Sonnet", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "GPT-5.1-medium", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "GPT-5-medium", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "o1", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Gemini-3-Pro-Preview", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo; também alimenta todos os agentes da construção do benchmark"},
+      {"nome": "Gemini-2.5-Pro", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Gemini-2.5-Flash", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Qwen3-Max", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "DeepSeek-V3.2", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Qwen3-Coder-480B-A35B", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "GLM-4.6", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Kimi-K2-Instruct-0905", "versao": "0905 (como impresso no nome)", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "GPT-OSS-120B", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Qwen3-Coder-30B-A3B", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Llama-4-Maverick-Instruct", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Llama-4-Scout-Instruct", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "Qwen3-14B", "versao": "nao_informado", "papel_no_estudo": "modelo-alvo"},
+      {"nome": "GPT-5.1", "versao": "nao_informado (nível de raciocínio não informado para o Collaborator)", "papel_no_estudo": "agentes auxiliares de feedback funcional (Collaborator)"},
+      {"nome": "Deepseek-Coder-6.7B, RTLCoder, RTLCoder v1.1, Qwen2.5-Coder-7B, CodeV-R1 Distill, CodeV-R1 RL", "versao": "nao_informado (rótulos da Figura 7)", "papel_no_estudo": "análise de ajuste fino (modelos base e especializados)"}
+    ],
+    "benchmarks": [
+      {"nome": "HardSecBench", "quantidade": "924 tarefas validadas (599 Verilog, 64,8%; 325 C, 35,2%), 4425 casos de teste, 76 entradas CWE; partiu de 1170 amostras e removeu 246", "observacao": "Construído pelo próprio estudo. O denominador das métricas é o conjunto de requisitos atômicos (soma de M_i,d), cujo total por tipo (Func., Sec.) não é informado; não confundir com as 924 tarefas nem com os 4425 casos de teste, que o estudo não liga explicitamente ao denominador.", "localizador": "p. 5, seção 6.1; p. 4, seção 4.2"},
+      {"nome": "HardSecBench, subconjunto Verilog", "quantidade": "nao_informado (presumivelmente as 599 tarefas Verilog, mas o estudo não o declara)", "observacao": "Usado na análise de ajuste fino.", "localizador": "p. 6, seção 6.4"},
+      {"nome": "VerilogEvalV2", "quantidade": "nao_informado", "observacao": "Executado pelos autores para medir capacidade de geração RTL (Pass@1, Pass@20).", "localizador": "p. 6, seção 6.2; p. 5, Tabela 1"},
+      {"nome": "SWE-bench Verified", "quantidade": "nao_informado", "observacao": "Resultados relatados por terceiros (não executados), usados como referência de capacidade geral; ausentes («-») para alguns modelos.", "localizador": "p. 6, seção 6.2; p. 5, Tabela 1"}
+    ],
+    "metricas": [
+      {"nome": "Functional Pass Rate (Func.)", "definicao": "taxa de aprovação dos requisitos funcionais atômicos, em %, via R_d@k (Eq. 1) com d = Func", "localizador": "p. 4, seção 4.2; p. 5, Tabela 1"},
+      {"nome": "Security Pass Rate (Sec.)", "definicao": "taxa de aprovação dos requisitos de segurança atômicos, em %, via R_d@k com d = Sec", "localizador": "p. 4, seção 4.2; p. 5, Tabela 1"},
+      {"nome": "Pass@k (R_d@k)", "definicao": "estimador sem reposição por requisito atômico, média sobre todos os requisitos atômicos do tipo d; n gerações por tarefa (n não informado); k = 1 e k = 5 relatados", "localizador": "p. 4, seção 4.2, Eq. 1"},
+      {"nome": "VerilogEvalV2 Pass@1 e Pass@20; SWE-bench (relatado)", "definicao": "medidas de capacidade geral", "localizador": "p. 5, Tabela 1"},
+      {"nome": "Code coverage rate e mutation detection rate/mutation score", "definicao": "métricas de qualidade dos harnesses (limiar 80% de cobertura; escore de mutação mínimo 50%)", "localizador": "p. 5, seção 6.1 e Figura 4"}
+    ],
+    "linguagens": ["Verilog (RTL)", "C (firmware)"],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Código gerado que passa nos testes funcionais pode conter vulnerabilidades de segurança de hardware (por exemplo, CWE-1224); os modelos frequentemente não implementam proteções quando recebem só requisitos funcionais.", "localizador": "p. 1, Figura 1 e resumo; p. 6, seção 6.2 (Key finding)"},
+      {"categoria": "seguranca", "descricao": "Refinamento iterativo guiado por falhas funcionais e amostragem maior (Pass@5) melhoram sobretudo a correção funcional; as fraquezas de segurança se repetem entre tentativas (falha sistemática).", "localizador": "p. 6, seção 6.2 (Effect of iterative refinement; Robustness under larger sampling budgets)"},
+      {"categoria": "correcao_funcional", "descricao": "Para RTLCoder, a orientação de segurança mais explícita (Hint 2) reduz o desempenho funcional e de segurança em relação a Hint 1; o estudo associa modelos mais fracos à dificuldade de seguir a especificação.", "localizador": "p. 7, seção 6.4 e Figura 7"},
+      {"categoria": "outro", "descricao": "Validade da avaliação: harnesses fracos podem não exercitar comportamentos relevantes e deixar implementações inseguras passarem; sem isolamento, harnesses podem codificar detalhes da implementação e inflar as taxas de aprovação.", "localizador": "p. 4, seção 3.4; p. 3, seção 3.2"},
+      {"categoria": "nao_determinismo", "descricao": "Verificadores LLM-as-a-judge sem evidência de simulação podem dar julgamentos não confiáveis e inconsistentes entre execuções (risco da avaliação, não do código gerado; motiva o desenho do benchmark).", "localizador": "p. 2, seção 1 (Unreliable security evaluation)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Orientação explícita de segurança no prompt (Hint 1, Hint 2) para ativar conhecimento de segurança; comparada com Hint 0.", "avaliada": "sim", "localizador": "p. 6, seção 6.3 e Figura 5; p. 2, seção 1"},
+      {"descricao": "Cenário de refinamento iterativo com feedback apenas funcional, para medir segurança sobre uma implementação funcionalmente correta e reduzir confusão com defeitos funcionais (procedimento de controle; não há medida do efeito sobre a confusão).", "avaliada": "nao", "localizador": "p. 2, seção 1; p. 4, seção 4.1"},
+      {"descricao": "Portão de qualidade por cobertura (≥80%) e mutação (≥50%) e auditoria manual de 100 tarefas por especialistas para reduzir falsos negativos dos harnesses.", "avaliada": "nao", "localizador": "p. 4, seção 3.4; p. 5, seção 6.1"},
+      {"descricao": "Isolamento de informação entre síntese da implementação de referência e dos harnesses, e correções de compilação sem revelar resultados dos harnesses.", "avaliada": "nao", "localizador": "p. 3, seção 3.2; p. 4, seção 4.1"},
+      {"descricao": "Ajuste fino específico de domínio (CodeV-R1, RTLCoder) comparado com os modelos base (não é prompting).", "avaliada": "sim", "localizador": "p. 6-7, seção 6.4 e Figura 7"}
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Hint 0 (só requisitos funcionais) para as dicas de segurança; avaliação de tentativa única (HSBench1-attempt@1) para o refinamento iterativo.",
+    "so_classificadas": [
+      {"tecnica": "Hint 1 (general security reminders)", "motivo": "Resultados só nas Figuras 5-8, sem rótulos numéricos; as extrações correspondentes registram resultado null (não se estima pela posição dos pontos)."},
+      {"tecnica": "Hint 2 (explicitly mentions specific vulnerability classes)", "motivo": "Resultados só nas Figuras 5-8, sem rótulos numéricos; extração com resultado null."}
+    ],
+    "heterogeneidade": [
+      {"descricao": "Nível de dica (Hint 0, 1 ou 2) usado na Tabela 1 não é informado; a legenda define apenas HSBench1-attempt@1 como tentativa única, e a associação das colunas HSBench@1 e HSBench@5 ao refinamento iterativo depende da frase da seção 6.2.", "localizador": "p. 5, Tabela 1 (legenda); p. 6, seção 6.2"},
+      {"descricao": "Rótulo da métrica difere entre figuras: Figura 5 usa «HardSecBench@1 (%)» (rótulo que na Tabela 1 designa o cenário iterativo), enquanto Figura 7 e seção 6.4 usam HSB1-attempt@1; o cenário (tentativa única ou iterativo) das Figuras 5, 6 e 8 não é declarado.", "localizador": "p. 6, Figura 5; p. 7, Figuras 7 e 8; p. 5, Tabela 1"},
+      {"descricao": "Narrativa diz que o refinamento iterativo «yields little gain in security performance», mas a Tabela 1 mostra Sec. maior no cenário HSBench@1 do que no de tentativa única em todas as linhas (por exemplo, Claude-4.5-Opus 37.45 → 42.91; diferença de 5,46 p.p. por cálculo próprio). A caracterização «pouco ganho» é interpretativa e não é acompanhada de teste.", "localizador": "p. 6, seção 6.2; p. 5, Tabela 1"},
+      {"descricao": "Aparente inconsistência: o texto informa 38.31% (C) e 44.93% (Verilog) e «a gap of 6.63 percentage points»; a diferença entre os valores impressos é 6,62 p.p. (cálculo próprio), compatível com arredondamento de valores não impressos. Também não se informa o cenário, o nível de dica nem o conjunto de modelos sobre o qual essas taxas foram calculadas.", "localizador": "p. 7, seção 6.5"},
+      {"descricao": "A introdução generaliza ganhos notáveis de segurança com lembretes genéricos para «these SOTA models», mas a seção 6.3 restringe os ganhos de Hint 1 a «several closed-source models» e relata que modelos open-source menores permanecem pouco responsivos mesmo sob Hint 2.", "localizador": "p. 2, seção 1; p. 6, seção 6.3"},
+      {"descricao": "Inversão: RTLCoder atinge o pico em Hint 1 e cai em Hint 2, com redução de desempenho funcional e de segurança, enquanto CodeV-R1 melhora de Hint 0 a Hint 2.", "localizador": "p. 7, seção 6.4 e Figura 7"},
+      {"descricao": "Afirmações de correlação «weak», «strong positive» e «no significant correlation» sem coeficientes, valores-p ou teste descritos; a Figura 6 mostra só dispersões e retas ajustadas.", "localizador": "p. 6, seções 6.2 e 6.3, Figura 6"},
+      {"descricao": "O número n de gerações independentes por tarefa não é informado, embora Pass@5 exija n ≥ 5; o número de execuções não é informado.", "localizador": "p. 4, seção 4.2; p. 5, seção 5"},
+      {"descricao": "Valores de SWE-bench são relatados de outras fontes (não executados) e faltam («-») para o1, Kimi-K2-Instruct-0905, Qwen3-Coder-30B-A3B e Qwen3-14B.", "localizador": "p. 6, seção 6.2; p. 5, Tabela 1"},
+      {"descricao": "O benchmark é sintetizado por agentes alimentados por Gemini-3-Pro-Preview, que também é avaliado como modelo-alvo e obtém o maior Sec. em tentativa única entre os closed-source (42.51); o estudo não discute esse possível viés.", "localizador": "p. 5, seção 5 e Tabela 1"}
+    ],
+    "observacoes": [
+      {"descricao": "Pipeline multiagente de construção do benchmark (Seed Generator, Architect, Expert, Tester, Arbiter), alimentado por Gemini-3-Pro-Preview, gera especificação, implementação de referência e harnesses; é ferramenta de construção, não técnica avaliada contra comparador, e por isso não entra em tecnicas.", "localizador": "p. 3, seções 3.1-3.3 e Figura 2; p. 5, seção 5"},
+      {"descricao": "Auditoria manual de 100 tarefas por especialistas relatada só qualitativamente («largely satisfy»), sem contagens.", "localizador": "p. 4, seção 3.4"},
+      {"descricao": "O estudo descreve construção de amostras de segurança por especialistas como cara («expensive to build and validate»), sem quantificar; não é risco do código gerado.", "localizador": "p. 1, seção 1"},
+      {"descricao": "Ambiente: Icarus Verilog v12.0 para RTL e gcc para C; modelos de API via OpenRouter e SiliconFlow; modelos locais em GPUs NVIDIA A100-40G. Dados e código anunciados em repositório GitHub (não acessado).", "localizador": "p. 5, seção 5; p. 1, resumo"},
+      {"descricao": "Resultados de cobertura média (92,5%) e escore médio de mutação (70,2%) referem-se à qualidade do benchmark, não a técnicas de prompting.", "localizador": "p. 5, seção 6.1"}
+    ],
+    "citacoes": [
+      {"trecho": "We also find that security results vary with prompting.", "localizador": "p. 1, resumo"},
+      {"trecho": "To explore the security potential of LLMs, we conduct a prompt sensitivity analysis and find that these SOTA models could yield notable security gains even with merely generic security reminders.", "localizador": "p. 2, seção 1"},
+      {"trecho": "Finally, HardSecBench reports results under single-attempt generation and iterative refinement, where a collaborator helps repair functional defects so security tests run on a correct functional baseline and reduce confounding.", "localizador": "p. 2, seção 1"},
+      {"trecho": "Hint 0 includes only functional requirements, Hint 1 adds general security reminders, and Hint 2 explicitly mentions specific vulnerability classes.", "localizador": "p. 6, seção 6.3"},
+      {"trecho": "If the initial output fails to compile, we allow up to three rounds of compilation and fixing using only compiler error messages, and we evaluate the first version that successfully compiles.", "localizador": "p. 4, seção 4.1"},
+      {"trecho": "The Collaborator provides functional-only feedback and does not comment on security.", "localizador": "p. 4, seção 4.1"},
+      {"trecho": "In the multi-iteration setting, the refinement loop is capped at 5 iterations.", "localizador": "p. 5, seção 5"},
+      {"trecho": "For the Collaborator agent, we set the temperature to 0.3 to keep its feedback stable.", "localizador": "p. 5, seção 5"},
+      {"trecho": "The LLM produces functionally correct code (b) from a design request (a), but the DMA interface fails to check the lock status, enabling attackers to bypass write-once protection (c).", "localizador": "p. 1, legenda da Figura 1"},
+      {"trecho": "Across models, functional pass rates are substantially higher than security pass rates.", "localizador": "p. 6, seção 6.2"},
+      {"trecho": "However, this rapid functional improvement yields little gain in security performance.", "localizador": "p. 6, seção 6.2"},
+      {"trecho": "Pass@5 mainly improves functional success rates, while security scores for most models increase only marginally.", "localizador": "p. 6, seção 6.2"},
+      {"trecho": "As security guidance becomes more explicit, the two model families diverge: CodeV-R1 exhibits consistent gains from Hint 0 through Hint 2 in both functional and security pass rates, while RTLCoder peaks at Hint 1 and drops at Hint 2, where highly explicit guidance reduces both functional and security performance.", "localizador": "p. 7, seção 6.4"},
+      {"trecho": "Without this gate, a harness may run but still miss security relevant behaviors, allowing insecure implementations to pass.", "localizador": "p. 4, seção 3.4"},
+      {"trecho": "Without isolation, harnesses may inadvertently encode implementation details, inflating pass rates and weakening diagnostic validity.", "localizador": "p. 3, seção 3.2"},
+      {"trecho": "Recent work also adopts LLM-as-a-judge verifiers, but without timing-accurate simulation evidence their judgments can be unreliable and inconsistent across runs [Bhatt et al., 2024].", "localizador": "p. 2, seção 1"},
+      {"trecho": "In addition to these automated checks, domain experts manually audited 100 randomly sampled tasks and found that the artifacts largely satisfy HardSecBench's quality criteria.", "localizador": "p. 4, seção 3.4"},
+      {"trecho": "On firmware vulnerabilities written in C, models achieve a security pass rate of 38.31%.", "localizador": "p. 7, seção 6.5"},
+      {"trecho": "On hardware tasks in Verilog, the security pass rate is 44.93%, a gap of 6.63 percentage points.", "localizador": "p. 7, seção 6.5"},
+      {"trecho": "We remove 246 samples that do not meet our thresholds, yielding 924 validated tasks with 4425 test cases.", "localizador": "p. 5, seção 6.1"},
+      {"trecho": "On HardSecBench, we report single-attempt scores to reflect initial security awareness, and we report iterative-refinement scores together with Pass@5 to measure robustness under repeated generations.", "localizador": "p. 6, seção 6.2"},
+      {"trecho": "We draw n independent generations for each task, where n is the number of sampled candidate solutions per task.", "localizador": "p. 4, seção 4.2"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Iterative Refinement Evaluation (Collaborator functional feedback)",
+      "mecanismos": ["instrucao", "restricoes", "feedback", "multiagente"],
+      "mecanismos_acrescentados": ["feedback", "multiagente"],
+      "comparador": "Single-Attempt Evaluation (HSBench1-attempt@1)",
+      "modelo": "Claude-4.5-Opus",
+      "benchmark": "HardSecBench",
+      "metrica": "Func. (functional pass rate, %)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 91.72, "intervencao": 97.11},
+      "denominador": "nao_informado (requisitos atômicos funcionais de 924 tarefas; total não informado)",
+      "condicoes": "Tabela 1: coluna HSBench1-attempt@1 Func. (tentativa única) contra coluna HSBench@1 Func., que o texto da seção 6.2 permite associar ao cenário de refinamento iterativo (associação inferida; a legenda não define HSBench@1). Refinamento: até 5 iterações com feedback funcional do Collaborator (GPT-5.1, temperatura 0,3); até 3 rodadas de compilação e correção por candidato em ambos os cenários. Nível de dica não informado. n de gerações e número de execuções não informados; k = 1 é parâmetro da métrica. Ganho do pacote (harness + Collaborator), não de um ingrediente. Conferido na imagem da p. 5 (Tabela 1).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o estudo destaca vários cenários e variantes (dicas Hint 1 e Hint 2, refinamento iterativo) e duas métricas (Func. e Sec.) sem que uma prevaleça. A Tabela 1 é a primeira tabela com contraste elegível de prompting (tentativa única x refinamento iterativo); primeira métrica pertinente: Func.; primeiro modelo: Claude-4.5-Opus; comparador: tentativa única.",
+      "derivacao": "direta",
+      "localizador": "p. 5, Tabela 1 (colunas HSBench1-attempt@1 Func. e HSBench@1 Func.); p. 6, seção 6.2; p. 4, seção 4.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Claude-4.5-Opus 74.40 85.26 91.03 91.72 37.45 97.11 42.91 98.01 45.66", "localizador": "p. 5, Tabela 1, linha Claude-4.5-Opus; colunas SWE-bench, VerilogEvalV2 Pass@1, Pass@20, HSBench1-attempt@1 Func., Sec., HSBench@1 Func., Sec., HSBench@5 Func., Sec."},
+        {"trecho": "Func. and Sec. denote functional and security pass rates (in %).", "localizador": "p. 5, legenda da Tabela 1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Hint 1 (general security reminders)",
+      "mecanismos": ["instrucao", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Hint 0 (only functional requirements)",
+      "modelo": "Claude Opus 4.5 (rótulo «Opus 4.5» da Figura 5a)",
+      "benchmark": "HardSecBench",
+      "metrica": "HardSecBench@1 (%) — security pass rate (rótulo do eixo da Figura 5; legenda: «Security pass rates»)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado",
+      "condicoes": "Figura 5a sem rótulos numéricos; valores não estimados pela posição dos pontos, por isso null. Cenário (tentativa única ou iterativo) não declarado para a figura. n de gerações e número de execuções não informados. Página 6 aberta visualmente para conferência.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal ainda não representada; sem tabela com o contraste, usa-se a primeira figura (Figura 5), primeiro modelo listado (Opus 4.5) e primeira linha de base de prompting (Hint 0).",
+      "derivacao": "direta",
+      "localizador": "p. 6, Figura 5a; p. 6, seção 6.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "For several closed-source models, Hint 1 yields noticeable gains, showing that even general security reminders can shift behavior toward safer outputs; Hint 2 delivers larger improvements, implying that security expertise is present in training but remains dormant when only functional requirements are provided.", "localizador": "p. 6, seção 6.3"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Hint 2 (explicitly mentions specific vulnerability classes)",
+      "mecanismos": ["instrucao", "restricoes", "feedback"],
+      "mecanismos_acrescentados": ["instrucao"],
+      "comparador": "Hint 0 (only functional requirements)",
+      "modelo": "Claude Opus 4.5 (rótulo «Opus 4.5» da Figura 5a)",
+      "benchmark": "HardSecBench",
+      "metrica": "HardSecBench@1 (%) — security pass rate (rótulo do eixo da Figura 5; legenda: «Security pass rates»)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": null,
+      "denominador": "nao_informado",
+      "condicoes": "Figura 5a sem rótulos numéricos; valores não estimados pela posição dos pontos, por isso null. Cenário não declarado para a figura. n de gerações e número de execuções não informados. Página 6 aberta visualmente para conferência.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda variante focal, tratada pelo estudo como nível de dica distinto e avaliada em linha separada; mesma regra de ordem (Figura 5, Opus 4.5, comparador Hint 0).",
+      "derivacao": "direta",
+      "localizador": "p. 6, Figura 5a; p. 6, seção 6.3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "By contrast, smaller open-source models remain weakly responsive even under Hint 2, suggesting that their security performance is primarily constrained by limited capability rather than unactivated knowledge.", "localizador": "p. 6, seção 6.3"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo explícito de avaliar a consciência de segurança de LLMs na geração de código de hardware, com contribuições enumeradas.", "localizador": "p. 1, resumo; p. 2, seção 1 (contribuições)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Cenários de avaliação, limites de iteração e de compilação, ferramentas e temperatura do Collaborator são descritos; faltam o texto dos prompts de Hint 0/1/2, parâmetros de decodificação dos modelos-alvo, o n de gerações e o nível de dica usado na Tabela 1.", "localizador": "p. 4, seção 4.1; p. 5, seção 5; p. 6, seção 6.3"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparadores executados (Hint 0; tentativa única), mas a correspondência das colunas da Tabela 1 com os cenários é só inferível e os resultados por dica aparecem apenas em figuras sem valores; SWE-bench é relatado de terceiros.", "localizador": "p. 5, Tabela 1; p. 6, seções 6.2-6.3 e Figura 5"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Pass@k por requisito atômico é definido formalmente, mas o número de requisitos atômicos (denominador) por tipo e o n não são informados; rótulos HardSecBench@1 e HSB1-attempt@1 variam entre tabela e figuras; diferença de 6.63 p.p. impressa contra 6,62 p.p. calculada a partir dos valores impressos (provável arredondamento).", "localizador": "p. 4, seção 4.2; p. 5, Tabela 1; p. 6-7, Figuras 5 e 7; p. 7, seção 6.5"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Sem seção de ameaças; o estudo trata riscos de validade da medição (harnesses fracos, acoplamento implementação-teste, confusão com defeitos funcionais) com portão de qualidade e auditoria, mas não discute viés da síntese por LLM, contaminação nem variabilidade entre execuções dos resultados.", "localizador": "p. 3, seção 3.2; p. 4, seção 3.4; p. 2, seção 1"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Dados e código anunciados em repositório (não acessado), ambiente e provedores descritos; faltam prompts, decodificação dos modelos-alvo, n e versões/snapshots além dos nomes.", "localizador": "p. 1, resumo; p. 5, seção 5"},
+    {"criterio": "contaminacao", "julgamento": "nao_informado", "justificativa": "Após leitura do texto completo, não há menção a contaminação dos dados de avaliação ou a possível sobreposição com pré-treinamento.", "localizador": "texto completo (p. 1-7)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (p. 1-9, incluindo referências). Páginas do PDF abertas visualmente: p-02, p-04, p-05 (Tabela 1, Figura 4), p-06 (Figuras 5 e 6), p-07 (Figuras 7 e 8, Tabela 2). As Figuras 5-8 não têm rótulos numéricos."
+  }
+}

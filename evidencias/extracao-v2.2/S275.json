@@ -1,0 +1,666 @@
+{
+  "estudo": "S275",
+  "texto_fonte": "fontes/textos/lote/S275.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "repository-level context extraction method (RLCE)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seções 3.1-3.3, p. 3-5 do PDF; Seção 4.3, p. 5-6; Tabela 2, p. 7",
+        "observacao": "Proposta do estudo: um recuperador baseado em análise estática da árvore de estrutura do repositório obtém quatro fontes de contexto (Definitions of EIF, Callers of EIF, Error Function, Callers of EF), e um compositor de prompt acrescenta assinatura e resumo das funções (gerados por LLM) e fatias de cinco linhas, combinando-os com modelos de prompt. Mecanismos listados para a condição RLCE One-shot, a única comparável aos baselines (ambos one-shot, legenda da Tabela 2): instrução Detail (papel de programador e diretriz de usar o contexto), um exemplo completo de reparo e o contexto recuperado mais a função com erro. O prompt base (Preliminary) já tem contexto (a função com erro); o RLCE acrescenta contexto de nível de repositório, da mesma categoria. O contraste RLCE contra Preliminary isola o pacote de contexto, não uma fonte de contexto específica. O RLCE também foi executado com Simple, Detail e CoT (Tabela 2)."
+      },
+      {
+        "nome_original": "Preliminary method",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.3, p. 5 do PDF; legenda da Tabela 2, p. 7",
+        "observacao": "Linha de base executada que fornece só a função onde está o erro como contexto, com a estratégia one-shot (legenda da Tabela 2). Função com erro fornecida como insumo conta como contexto (D102)."
+      },
+      {
+        "nome_original": "Slice-similarity method",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção 4.3, p. 6 do PDF; Tabela 2, p. 7",
+        "observacao": "Reprodução do modelo de recuperação do RepoCoder: janela de fatiamento 10, bag-of-words esparso, similaridade de Jaccard, cinco segmentos mais similares como contexto; estratégia one-shot (legenda da Tabela 2). Comparado na mesma tabela com o Preliminary, que não tem o contexto recuperado; o contraste isola o pacote de recuperação por similaridade, não seus parâmetros."
+      },
+      {
+        "nome_original": "Zero-shot (Simple)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, p. 5 do PDF; Figura 7, p. 10; Tabela 2, p. 7",
+        "observacao": "Estratégia de prompt aplicada ao RLCE: instrução muito concisa, sem exemplo, com o contexto do RLCE e a função com erro. É a formulação de menor conteúdo entre as estratégias; sem condição sem instrução."
+      },
+      {
+        "nome_original": "Zero-shot (Detail)",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "Seção 4.2, p. 5 do PDF; Figura 7, p. 10; Tabela 2, p. 7",
+        "observacao": "Instrução mais específica que pede ao modelo assumir o papel de programador e usar o contexto. Contraste pareado: RLCE Simple contra RLCE Detail (ambos zero-shot, mesmo contexto) diferem só no detalhamento da instrução (Figura 7, p. 10; resultados na Tabela 2, p. 7). O estudo não analisa esse contraste diretamente."
+      },
+      {
+        "nome_original": "One-shot",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "contraste_pareado",
+        "localizador": "Seção 4.2, p. 5 do PDF; Figura 7, p. 10; Tabela 2, p. 7",
+        "observacao": "Mesma instrução Detail mais um exemplo completo de reparo de outro repositório, segundo o texto. Contraste pareado: RLCE Detail contra RLCE One-shot (Figura 7, p. 10; Tabela 2, p. 7); a Figura 7 mostra pequenas diferenças de redação (posição da indicação {bug_line}), sem nova categoria. O estudo compara One-shot com Simple (Seção 5.2), condições que diferem em instrução e exemplo. Também é a estratégia usada nos baselines, na ablação (Tabela 3) e na análise de tamanho de prompt."
+      },
+      {
+        "nome_original": "CoT (zero-shot-CoT)",
+        "mecanismos": [
+          "instrucao",
+          "raciocinio",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "raciocinio"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 4.2, p. 5 do PDF; Figura 7, p. 10; Tabela 2, p. 7; Seção 5.3 e Figura 3, p. 6-7",
+        "observacao": "O estudo diz propor uma abordagem zero-shot-CoT que guia o modelo por três passos (causa do erro, solução, código corrigido) numa única resposta; classificado como raciocínio estruturado, não como decomposição em etapas executadas. O estudo compara diretamente CoT com Detail (Seção 5.3, Figura 3); ambas zero-shot com o mesmo contexto, mas a redação da instrução também muda além da indicação de raciocínio (Figura 7)."
+      },
+      {
+        "nome_original": "Definitions of EIF (with extra semantic information)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seções 3.2-3.3, p. 4-5 do PDF; Tabela 3, p. 7",
+        "observacao": "Fonte de contexto do RLCE: definições das funções chamadas na localização do erro. Na linha da ablação sem Definitions of EIF, a coluna Summarize aparece como «-», pois o resumo é anexado a essas definições; a retirada remove também a informação semântica. Ablação com GPT3.5 e GPT4, estratégia one-shot."
+      },
+      {
+        "nome_original": "Callers of EIF",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seções 3.2-3.3, p. 4-5 do PDF; Tabela 3, p. 7",
+        "observacao": "Fatias de cinco linhas antes e depois de outras chamadas às funções chamadas na localização do erro. Retirada isolada na primeira linha de cada modelo na Tabela 3."
+      },
+      {
+        "nome_original": "Callers of EF",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seções 3.2-3.3, p. 4-5 do PDF; Tabela 3, p. 7",
+        "observacao": "Fatias dos locais que chamam a função com erro. Retirada isolada na terceira linha de cada modelo na Tabela 3."
+      },
+      {
+        "nome_original": "Summarize (extra semantic information: function signature and function summary)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "contexto"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção 3.3, p. 5 do PDF; Tabela 3, p. 7",
+        "observacao": "Assinatura e resumo das funções gerados por um LLM e anexados às definições; o modelo e a versão usados para gerar os resumos não são informados. Retirada isolada na quarta linha de cada modelo na Tabela 3."
+      },
+      {
+        "nome_original": "Error Function (EF)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seções 3.2-3.3, p. 4-5 do PDF; Seção 5.4, p. 7",
+        "observacao": "A função com erro é incluída diretamente no prompt em todas as condições; excluída da ablação por conter a localização do erro."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature parameter",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura padronizada em 0 para todos os LLMs; parâmetro fixo, não variado como intervenção.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT3.5 (GPT-3.5 Turbo)",
+        "versao": "nao_informado",
+        "observacao": "Snapshot não informado; o estudo informa limite de 4K tokens e dados de treino até setembro de 2021 (Seção 4.1, p. 5 do PDF). Respostas obtidas por API."
+      },
+      {
+        "nome": "PaLM2",
+        "versao": "text bison-001",
+        "observacao": "Até 8K tokens de entrada e 1K de saída, corte de conhecimento em meados de 2021 (Seção 4.1, p. 5 do PDF)."
+      },
+      {
+        "nome": "GPT4",
+        "versao": "gpt-4-0613",
+        "observacao": "Até 8K tokens, dados de treino até setembro de 2021 (Seção 4.1, p. 5 do PDF)."
+      },
+      {
+        "nome": "LLM usado para gerar assinaturas e resumos de funções no RLCE",
+        "versao": "nao_informado",
+        "observacao": "O estudo diz apenas que escolhe «the LLMs» como modelo de geração (Seção 3.3, p. 5 do PDF); não informa qual modelo nem versão."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "RepoBugs",
+        "versao": "proposto no estudo",
+        "quantidade": "124 bugs de nível de repositório em 11 repositórios Python do GitHub",
+        "observacao": "Bugs de inconsistência de interface criados por perturbação manual de especialistas, cada um numa única linha, em seis tipos (NRV, NP, ORV, OP, CRV, CP); repositórios criados após 1 de outubro de 2021, até 1MB, ao menos 2.000 estrelas e 4 arquivos Python (Seções 2.1-2.2 e Tabela 1, p. 3 do PDF). A soma da coluna Sample da Tabela 1 (cálculo próprio) é 124, e a soma das contagens por tipo da Figura 4 (21+14+25+20+22+22, cálculo próprio) também é 124. A ablação (Tabela 3) e a análise por tipo de erro (Figura 4) usam só GPT3.5 e GPT4."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Related reply",
+        "definicao": "Resposta não vazia e relacionada à tarefa de reparo; marcada 1 ou 0 por avaliação manual.",
+        "denominador": "proporção sobre o total de amostras (legenda da Tabela 2); total do RepoBugs = 124",
+        "localizador": "Seção 4.4, p. 6 do PDF; Tabela 2, p. 7"
+      },
+      {
+        "nome": "Correct format",
+        "definicao": "Resposta no formato esperado, completa e sem conteúdo duplicado ou redundante.",
+        "denominador": "proporção sobre o total de amostras (legenda da Tabela 2); total do RepoBugs = 124",
+        "localizador": "Seção 4.4, p. 6 do PDF; Tabela 2, p. 7"
+      },
+      {
+        "nome": "Correct repair (repair rate)",
+        "definicao": "Resposta contém a correção certa do erro, julgada manualmente por dois especialistas com mais de 5 anos de Python, com discussão até consenso; não há execução de testes.",
+        "denominador": "proporção sobre o total de amostras (legenda da Tabela 2); total do RepoBugs = 124",
+        "localizador": "Seção 4.4, p. 6 do PDF; Tabela 2, p. 7"
+      },
+      {
+        "nome": "Correct explanation",
+        "definicao": "Só para CoT: resposta inclui explicação correta da causa do erro.",
+        "denominador": "proporção sobre o total de amostras (legenda da Tabela 2); total do RepoBugs = 124",
+        "localizador": "Seção 4.4, p. 6 do PDF; Tabela 2, p. 7"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "Python",
+        "observacao": "Linguagem do RepoBugs e de todos os experimentos quantitativos."
+      },
+      {
+        "nome": "Java",
+        "observacao": "Só um exemplo de caso no Apêndice A.2.2 (Figura 9, p. 11 do PDF), sem avaliação quantitativa."
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "contaminacao",
+        "descricao": "Conjuntos de dados antigos podem ter sido usados no treinamento dos LLMs; repositórios criados antes do corte de treino têm alta probabilidade de já terem sido aprendidos.",
+        "localizador": "Seção 1, p. 2 do PDF; Seção 6, p. 8"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No CoT, explicações incorretas podem introduzir interferência e levar a reparos errados (hipótese dos autores a partir da Figura 3).",
+        "localizador": "Seção 5.3, p. 6-7 do PDF"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Prompts mais longos podem distrair o modelo e aumentar a dificuldade do reparo; mais contexto não leva necessariamente a melhor resultado.",
+        "localizador": "Seção 5.6, p. 8 do PDF; Figura 5, p. 9"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Com contexto apenas da função, os LLMs não fornecem informação suficiente para reparar bugs de nível de repositório (baixa taxa do Preliminary).",
+        "localizador": "Seção 5.1, p. 6 do PDF"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Aumentar a temperatura torna as saídas instáveis e pode influenciar os resultados; o estudo fixa a temperatura em 0.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O aumento da escala e da complexidade dos repositórios pode elevar o custo e a dificuldade da recuperação de contexto; não quantificado.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de tamanho do prompt: o contexto de repositório completo pode exceder o limite de tokens dos LLMs (por exemplo, 4.096 tokens no ChatGPT) e trazer código redundante.",
+        "localizador": "Resumo, p. 1 do PDF; Seção 1, p. 2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sensibilidade do desempenho à estratégia de prompt (maior flutuação no GPT3.5), que aumenta a incerteza dos resultados de reparo; os custos de exploração de estratégias são mencionados sem quantificação.",
+        "localizador": "Seção 5.2, p. 6 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade: diferenças entre modelos (parâmetros, dados de treino, ajuste) podem afetar a taxa de reparo, e a generalização para outros tipos de erro além de inconsistência de interface pode variar.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Busca de repositórios restrita a datas posteriores a 1 de outubro de 2021 para reduzir o risco de vazamento para o treinamento dos LLMs.",
+        "avaliada": "nao",
+        "localizador": "Seção 2.1, p. 3 do PDF"
+      },
+      {
+        "descricao": "Temperatura fixada em 0 em todos os LLMs para estabilizar as saídas.",
+        "avaliada": "nao",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "descricao": "Avaliação manual por dois especialistas que discutem os critérios, avaliam independentemente e resolvem discrepâncias até resultado unânime.",
+        "avaliada": "nao",
+        "localizador": "Seção 4.4, p. 6 do PDF"
+      },
+      {
+        "descricao": "RLCE fornece contexto mais preciso (fatias e fontes selecionadas) em vez do repositório inteiro, para respeitar o limite do prompt e reduzir redundância; a taxa de reparo é comparada com o Preliminary e o Slice-similarity (Tabela 2) e por ablação (Tabela 3), mas o efeito sobre o tamanho do prompt e a redundância não é medido contra o repositório completo como contexto.",
+        "avaliada": "nao",
+        "localizador": "Seção 3, p. 3-5 do PDF; Tabelas 2 e 3, p. 7"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão do CoT: a taxa de Correct repair com CoT é menor que com Detail nos três modelos (GPT3.5 0.5161 contra 0.5645; PaLM2 0.2742 contra 0.3952; GPT4 0.75 contra 0.7581), com queda acentuada no PaLM2; o PaLM2 com CoT também tem Correct format bem menor (0.5242) que nas demais condições.",
+        "localizador": "Tabela 2, p. 7 do PDF; Seção 5.3, p. 6"
+      },
+      {
+        "descricao": "Narrativa contra tabela: o texto afirma melhoria acima de 100% sobre o Preliminary em todos os modelos, mas, para o PaLM2, a Tabela 2 traz Preliminary 0.2177, RLCE One-shot 0.4032 e melhor RLCE (Simple) 0.4272; por cálculo próprio, as variações relativas são cerca de 85,2% e 96,2%, abaixo de 100%.",
+        "localizador": "Seção 1, p. 2 do PDF; Seção 5.1, p. 6; Tabela 2, p. 7"
+      },
+      {
+        "descricao": "Mesmo valor diferente no texto: a taxa do Preliminary com GPT4 aparece como 41.43% na Seção 5.1, contra 41.13% na introdução e 0.4113 na Tabela 2.",
+        "localizador": "Seção 5.1, p. 6 do PDF; Seção 1, p. 2; Tabela 2, p. 7"
+      },
+      {
+        "descricao": "O resumo e o texto dão melhoria máxima de 160% (GPT3.5); por cálculo próprio com a Tabela 2 (Preliminary 0.2258, RLCE One-shot 0.5968), a variação relativa é cerca de 164%. A diferença pode ser arredondamento; o estudo não informa o cálculo.",
+        "localizador": "Resumo, p. 1 do PDF; Seção 5.1, p. 6; Tabela 2, p. 7"
+      },
+      {
+        "descricao": "Seção 5.2 diz que, no GPT3.5, o one-shot melhora a taxa de reparo em mais de 37% sobre o Simple; por cálculo próprio, One-shot (0.5968) contra Simple (0.4113) dá cerca de 45% de variação relativa (18,55 p.p.), enquanto cerca de 37% corresponde a Detail (0.5645) contra Simple. A afirmação não é contraditada em sentido estrito, mas sua base não é clara.",
+        "localizador": "Seção 5.2, p. 6 do PDF; Tabela 2, p. 7"
+      },
+      {
+        "descricao": "Aparente inconsistência com o denominador: a legenda da Tabela 2 define os valores como proporção sobre o total de amostras (124), mas 0.5284 (GPT3.5, CoT, Correct explanation) e 0.4272 (PaLM2, RLCE Simple, Correct repair) não correspondem, com quatro casas e considerando arredondamento ou truncamento, a nenhuma fração k/124 (cálculo próprio: 65/124 ≈ 0.5242, 66/124 ≈ 0.5323; 53/124 ≈ 0.4274). Os demais valores da tabela são compatíveis. O estudo não informa outro denominador.",
+        "localizador": "Tabela 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "Inversão de estratégia entre modelos: no PaLM2, a melhor variante do RLCE em Correct repair é Simple (0.4272), não One-shot (0.4032), ao contrário de GPT3.5 e GPT4.",
+        "localizador": "Tabela 2, p. 7 do PDF"
+      },
+      {
+        "descricao": "Na ablação, a linha sem Definitions of EIF também remove a informação semântica (Summarize marcado «-»), de modo que essa retirada não isola uma única fonte. Retirar Callers of EIF tem efeito pequeno no GPT3.5 (0.5806 contra 0.5968) e retirar Summarize no GPT4 mantém 0.7823 contra 0.8145; o texto conclui que a informação semântica não melhora visivelmente a taxa.",
+        "localizador": "Tabela 3 e Seção 5.4, p. 7-8 do PDF"
+      },
+      {
+        "descricao": "Narrativa contra figura: a Seção 5.6 diz classificar os resultados do método one-shot por tamanho de prompt, mas a Figura 5 tem seis subfiguras, uma para cada estratégia. Pela inspeção visual, sem estimar valores, várias subfiguras mostram taxa crescente até o terceiro quartil de tamanho e queda só no último, o que qualifica a afirmação de declínio com o aumento do prompt; os grupos por tamanho não são condições controladas.",
+        "localizador": "Seção 5.6, p. 8 do PDF; Figura 5, p. 9"
+      },
+      {
+        "descricao": "Por tipo de erro (Figura 4), pela inspeção visual e sem estimar valores, a barra do Preliminary em CRV fica no nível ou acima de algumas variantes do RLCE em ambos os modelos, e em OP e ORV não aparece barra do Preliminary no GPT3.5; o estudo não discute essas condições.",
+        "localizador": "Figura 4, p. 9 do PDF; Seção 5.5, p. 8"
+      },
+      {
+        "descricao": "O resumo atribui ao «preliminary method» um contexto de repositório redundante que excede o limite do prompt, mas a Seção 4.3 define o Preliminary como contexto só da função com erro.",
+        "localizador": "Resumo, p. 1 do PDF; Seção 4.3, p. 5"
+      },
+      {
+        "descricao": "A avaliação de correção é manual, sem execução de testes, e não há medida de concordância entre os dois avaliadores; número de execuções por condição não informado (temperatura 0).",
+        "localizador": "Seção 4.4, p. 6 do PDF; Seção 6, p. 8"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O recuperador de contexto é uma ferramenta de análise estática que constrói a árvore de estrutura do projeto (diretórios, arquivos, classes, funções, variáveis globais) e busca segmentos pela localização do erro; é a fonte do contexto inserido no prompt, por isso foi tratado como parte da técnica de contexto e não como componente fora do escopo.",
+        "localizador": "Seção 3.2, p. 3-4 do PDF"
+      },
+      {
+        "descricao": "A localização do erro (linha {bug_line}) é fornecida no prompt; o estudo não avalia localização de falhas.",
+        "localizador": "Figura 7, p. 10 do PDF; Seção 3.2, p. 4"
+      },
+      {
+        "descricao": "Os bugs do RepoBugs foram criados por perturbação manual de especialistas, não coletados de histórico real de correções; esforço manual também na avaliação, por dois especialistas.",
+        "localizador": "Seção 2.2, p. 3 do PDF; Seção 4.4, p. 6"
+      },
+      {
+        "descricao": "O exemplo do one-shot é um único exemplo fixo de reparo de outro repositório (Figura 7); não há seleção ou recuperação de exemplos.",
+        "localizador": "Seção 4.2, p. 5 do PDF; Figura 7, p. 10"
+      },
+      {
+        "descricao": "Não há link para dados ou código de replicação impresso no texto lido.",
+        "localizador": "texto completo, p. 1-13 do PDF"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper investigates the performance of popular LLMs in handling repository-level repair tasks.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "To solve the problem, we propose a simple and universal repository-level context extraction method (RLCE) designed to provide more precise context for repository-level code repair tasks.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "To demonstrate the effectiveness of our method, we implement a preliminary method as the baseline that only provides the function itself where the error is located as the context.",
+        "localizador": "Seção 4.3, p. 5 do PDF"
+      },
+      {
+        "trecho": "Finally, 5 segments with the highest similarity are selected as the context.",
+        "localizador": "Seção 4.3, p. 6 do PDF"
+      },
+      {
+        "trecho": "We use two types of instructions, Simple and Detail, in the experiment.",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "trecho": "We use the same instruction as the Detail method in the zero-shot strategy in the experiment and add a complete repair example.",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "trecho": "To investigate the efficacy of the CoT strategy in the field of repository-level APR, we propose a straightforward zero-shot-CoT [14] approach in this paper.",
+        "localizador": "Seção 4.2, p. 5 do PDF"
+      },
+      {
+        "trecho": "Detailed descriptions of the Preliminary and Slice-similarity methods can be found in Section 4.3, both employing the one-shot prompting strategy.",
+        "localizador": "Legenda da Tabela 2, p. 7 do PDF"
+      },
+      {
+        "trecho": "In these experiments, we remove three context sources and extra semantic information, excluding EF due to the inclusion of error localization.",
+        "localizador": "Seção 5.4, p. 7 do PDF"
+      },
+      {
+        "trecho": "Furthermore, datasets created too early may pose a potential risk of data leakage if used as training data for LLMs.",
+        "localizador": "Seção 1, p. 2 do PDF"
+      },
+      {
+        "trecho": "To minimize the risk of leakage due to the repositories being used as training data for LLMs, we set the search date condition to later than October 1, 2021.",
+        "localizador": "Seção 2.1, p. 3 do PDF"
+      },
+      {
+        "trecho": "From the analysis above, we hypothesize that in the CoT method, incorrect interpretations can introduce significant interference, leading to erroneous outcomes.",
+        "localizador": "Seção 5.3, p. 6-7 do PDF"
+      },
+      {
+        "trecho": "We posit that, for program repair tasks, a longer prompt may provide more information to the large language model, but simultaneously, it may also distract the model, increasing the difficulty of repair.",
+        "localizador": "Seção 5.6, p. 8 do PDF"
+      },
+      {
+        "trecho": "Additionally, in our experiments, we standardize the temperature parameter across all LLMs to 0, ensuring stable outputs when facing the same prompt.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "trecho": "Increasing the temperature parameter leads to unstable model outputs, potentially influencing the final results.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "trecho": "Secondly, an increase in the scale and complexity of repositories may escalate the cost and difficulty of context retrieval, affecting the reliability of the results.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "trecho": "However, the repository-level context offered by the preliminary method often proves redundant and imprecise and easily exceeds the prompt length limit of LLMs.",
+        "localizador": "Resumo, p. 1 do PDF"
+      },
+      {
+        "trecho": "In practical repair tasks, it is desirable for the model to exhibit low sensitivity to prompting strategies.",
+        "localizador": "Seção 5.2, p. 6 do PDF"
+      },
+      {
+        "trecho": "However, given that RepoBugs is the only dataset known to us specifically designed for repository-level error repair, the generalization of our approach to datasets involving other error types may vary.",
+        "localizador": "Seção 6, p. 8 do PDF"
+      },
+      {
+        "trecho": "Then, the two experts independently evaluated all the experimental results.",
+        "localizador": "Seção 4.4, p. 6 do PDF"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "repository-level context extraction method (RLCE) — One-shot",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "Preliminary method (one-shot, contexto só da função com erro)",
+      "modelo": "GPT3.5 (GPT-3.5 Turbo; snapshot nao_informado)",
+      "benchmark": "RepoBugs",
+      "metrica": "Correct repair (repair rate)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.2258,
+        "intervencao": 0.5968
+      },
+      "denominador": "proporção sobre o total de amostras segundo a legenda da Tabela 2; RepoBugs tem 124 amostras",
+      "condicoes": "RLCE na variante One-shot, a única comparável aos baselines, que também usam one-shot (legenda da Tabela 2); instrução Detail mais um exemplo fixo de reparo; temperatura 0; avaliação manual por dois especialistas com consenso, sem execução de testes; número de execuções nao_informado. Não há agregado impresso entre modelos; usado o primeiro modelo da Tabela 2. O ganho é do pacote de contexto do RLCE, não de uma fonte específica. conferido_pdf: valores conferidos na imagem da Tabela 2 (p. 7 do PDF).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo e as contribuições destacam uma técnica (RLCE), uma métrica (repair rate) e um comparador (preliminary method); a variante One-shot é a condição compatível com o comparador one-shot, e, sem agregado impresso entre modelos, usou-se o primeiro modelo da Tabela 2.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF; Resumo, p. 1; Seção 5.1, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT3.5 | Correct repair | 0.2258 | 0.3387 | 0.4113 | 0.5645 | 0.5968 | 0.5161",
+          "localizador": "Tabela 2, p. 7 do PDF; colunas Model, Metric, Preliminary, Slice-similarity, RLCE Simple, RLCE Detail, RLCE One-shot, RLCE CoT"
+        },
+        {
+          "trecho": "The improvement reaches a maximum of 160% compared to the preliminary method.",
+          "localizador": "Resumo, p. 1 do PDF"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "CoT (zero-shot-CoT) com contexto RLCE",
+      "mecanismos": [
+        "instrucao",
+        "raciocinio",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "raciocinio"
+      ],
+      "comparador": "Zero-shot (Detail) com contexto RLCE",
+      "modelo": "GPT3.5 (GPT-3.5 Turbo; snapshot nao_informado)",
+      "benchmark": "RepoBugs",
+      "metrica": "Correct repair (repair rate)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.5645,
+        "intervencao": 0.5161
+      },
+      "denominador": "proporção sobre o total de amostras segundo a legenda da Tabela 2; RepoBugs tem 124 amostras",
+      "condicoes": "Ambas as condições são zero-shot com o mesmo contexto RLCE; a instrução do CoT pede três passos (analisar a causa, propor solução, gerar o código) e muda também parte da redação (Figura 7, p. 10). Temperatura 0; avaliação manual; número de execuções nao_informado. Comparador escolhido porque o próprio estudo contrasta CoT com Detail (Seção 5.3, Figura 3); o primeiro baseline da tabela (Preliminary) difere também no contexto e no exemplo. conferido_pdf: valores conferidos na imagem da Tabela 2 (p. 7 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal (CoT, proposta pelo estudo) ainda não representada; primeira tabela com o contraste (Tabela 2), primeira métrica pertinente ao reparo, primeiro modelo listado.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2, p. 7 do PDF; Seção 5.3, p. 6",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT3.5 | Correct repair | 0.2258 | 0.3387 | 0.4113 | 0.5645 | 0.5968 | 0.5161",
+          "localizador": "Tabela 2, p. 7 do PDF; colunas Model, Metric, Preliminary, Slice-similarity, RLCE Simple, RLCE Detail, RLCE One-shot, RLCE CoT"
+        },
+        {
+          "trecho": "Analyzing the data in Table 2, we find that the repair rate of all models employing the CoT strategy did not meet our expectations, with a notable decrease in performance even on PaLM2.",
+          "localizador": "Seção 5.3, p. 6 do PDF"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Callers of EIF (fonte de contexto do RLCE)",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "contexto"
+      ],
+      "comparador": "RLCE One-shot sem Callers of EIF",
+      "modelo": "GPT3.5 (GPT-3.5 Turbo; snapshot nao_informado)",
+      "benchmark": "RepoBugs",
+      "metrica": "Correct repair",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {
+        "baseline": 0.5806,
+        "intervencao": 0.5968
+      },
+      "denominador": "nao_informado na Tabela 3; a Tabela 2 define os valores como proporção sobre o total de amostras (124), e a linha completa da Tabela 3 repete os valores do RLCE One-shot da Tabela 2",
+      "condicoes": "Ablação com estratégia one-shot; intervenção = RLCE com as quatro fontes de contexto e a informação semântica; comparador = mesma configuração sem Callers of EIF (primeira linha do GPT3.5 na Tabela 3). Temperatura 0; avaliação manual; número de execuções nao_informado. conferido_pdf: valores e marcas ✓/× conferidos na imagem da Tabela 3 (p. 7 do PDF).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente isolado para completar o alvo de três: primeiro componente da tabela de ablação pela ordem das linhas (Tabela 3), primeiro modelo listado.",
+      "derivacao": "direta",
+      "localizador": "Tabela 3, p. 7 do PDF; Seção 5.4, p. 7-8",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "GPT3.5 | ✓ | ✓ | ✓ | × | 1 | 0.9597 | 0.5806",
+          "localizador": "Tabela 3, p. 7 do PDF, primeira linha do GPT3.5; colunas Model, Summarize, Callers of EF, Definitions of EIF, Callers of EIF, Related reply, Correct format, Correct repair"
+        },
+        {
+          "trecho": "GPT3.5 | ✓ | ✓ | ✓ | ✓ | 1 | 0.9597 | 0.5968",
+          "localizador": "Tabela 3, p. 7 do PDF, quinta linha do GPT3.5; colunas Model, Summarize, Callers of EF, Definitions of EIF, Callers of EIF, Related reply, Correct format, Correct repair"
+        },
+        {
+          "trecho": "In terms of accuracy, the experimental groups utilizing the complete context sources achieve the highest repair accuracy.",
+          "localizador": "Seção 5.4, p. 7-8 do PDF"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito de investigar o desempenho de LLMs em reparo de nível de repositório e propor o RLCE, com contribuições enumeradas.",
+      "localizador": "Resumo, p. 1 do PDF; Seção 1, p. 2"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descreve a construção do benchmark, o recuperador, o compositor de prompt, as estratégias (instruções na Figura 7), os modelos e os baselines; faltam o modelo usado para gerar resumos e assinaturas, o número de execuções e detalhes da perturbação manual além das regras.",
+      "localizador": "Seções 2-4, p. 3-6 do PDF; Apêndice A.1, p. 10"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Dois baselines executados (Preliminary e Slice-similarity) nos mesmos modelos, benchmark e estratégia one-shot; ablação das fontes de contexto e comparação entre estratégias de prompt.",
+      "localizador": "Seção 4.3, p. 5-6 do PDF; Tabelas 2 e 3, p. 7"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas definidas e denominador indicado como total de amostras; mas a correção é julgada manualmente sem testes nem medida de concordância, o texto traz 41.43% contra 0.4113 na tabela, e dois valores da Tabela 2 (0.5284 e 0.4272) não são compatíveis com frações de 124. Os valores do RLCE One-shot coincidem entre as Tabelas 2 e 3.",
+      "localizador": "Seção 4.4, p. 6 do PDF; Seção 5.1, p. 6; Tabelas 2 e 3, p. 7"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças trata de diferenças entre modelos, temperatura, contaminação, escala dos repositórios e generalização para outros tipos de erro; não discute a subjetividade da avaliação manual nem o caráter artificial dos bugs criados por perturbação.",
+      "localizador": "Seção 6, p. 8 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa as versões de PaLM2 (text bison-001) e GPT4 (gpt-4-0613), temperatura 0, estrutura e instruções dos prompts; não informa o snapshot do GPT-3.5 Turbo nem o modelo de resumo, e não há link para dados ou código no texto.",
+      "localizador": "Seção 4.1, p. 5 do PDF; Seção 6, p. 8; Apêndice A.1, p. 10"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "atende",
+      "justificativa": "O estudo identifica o risco e restringe os repositórios a criados após 1 de outubro de 2021, posteriores aos cortes de treino informados dos modelos, e discute o risco nas ameaças; o controle não é verificado empiricamente.",
+      "localizador": "Seção 2.1 e Tabela 1, p. 3 do PDF; Seção 4.1, p. 5; Seção 6, p. 8"
+    }
+  ],
+  "leitura": "completa; texto extraído lido inteiro; páginas do PDF abertas visualmente: 1, 2, 3, 5, 6, 7, 8, 9, 10"
+}

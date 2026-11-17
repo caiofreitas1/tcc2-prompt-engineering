@@ -1,0 +1,513 @@
+{
+  "estudo_id": "S2085",
+  "texto_fonte": "fontes/textos/lote/S2085.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Khanshan, A.; Van Gorp, P.; Markopoulos, P. Evaluation of Code Generation for Simulating Participant Behavior in Experience Sampling Method by Iterative In-Context Learning of a Large Language Model. Proc. ACM Hum.-Comput. Interact. 8, EICS, Article 255, June 2024. DOI 10.1145/3661143 (conforme impresso na p. 1).",
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Zero-shot",
+        "mecanismos": [
+          "instrucao",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 8 (255:8), Seção 4.1; p. 18 (255:18), Table 1, linhas 1-6; p. 19 (255:19), Table 2, prompt A",
+        "observacao": "Condição base: prompt de usuário A (requisitos em linguagem natural) mais a system message padrão do Prompt4Code, que atribui papel ('helpful assistant') -> instrucao, e restringe a saída a código executável sem explicações -> restricoes. Sem exemplos. É a condição sem exemplo contra a qual as variantes one-shot e few-shot são comparadas; não há contrafactual dela própria."
+      },
+      {
+        "nome_original": "One-shot (full code generation)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 8-9 (255:8-9), Seção 4.2; p. 18 (255:18), Table 1, linhas 7-10; p. 19 (255:19), Table 2, prompts A e B",
+        "observacao": "Acrescenta ao zero-shot um par exemplo (prompt B + código SimPy feito à mão como mensagem assistant). Mantém o mesmo prompt de usuário A e a mesma system message (Table 1, linhas 7 e 9 usam o prompt A, como as linhas 1, 3 e 6 do zero-shot), por isso o contraste com o zero-shot difere apenas no exemplo; o exemplo de código é demonstração (exemplos) e insumo de código (contexto). Papel comparador: o estudo o apresenta como passo preliminar ('As a preliminary step'), não como sua proposta. O contraste é avaliado por julgamento qualitativo de erro de sintaxe e correção semântica em poucas iterações (2 gerações one-shot contra 3 zero-shot na Table 1)."
+      },
+      {
+        "nome_original": "One-shot (configuration generation)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 9-10 (255:9-10), Seção 4.3 e Listing 1; p. 18 (255:18), Table 1, linhas 11-13; p. 19 (255:19), Table 2, prompts C-F",
+        "observacao": "Deriva do one-shot de código completo, mas pede um dicionário de configuração (snippet) em vez de programa completo; o exemplo é o par prompt C + configuração do Listing 1, e o teste usa os prompts D, E e F. Em relação ao zero-shot acrescenta exemplos e contexto; em relação ao one-shot de código completo, o ingrediente novo é a restrição de formato/escopo (configuração estruturada, 'more constraints'), de categoria restricoes já presente na base. Os prompts E e F acrescentam, por refinamento manual iterativo, esclarecimentos sobre o formato do decision body (restricoes/instrucao); trata-se de contribuição cumulativa por rodada. Não há condição de geração de configuração sem exemplo nem a mesma tarefa no one-shot de código completo, logo não há contrafactual comparável. Classificado como comparador porque o estudo apresenta como sua proposta a aprendizagem em contexto automatizada (Prompt4Code); a variante é uma das 'prompt design alternatives' exploradas."
+      },
+      {
+        "nome_original": "Few-shot (automated in-context learning via Prompt4Code)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes",
+          "exemplos",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "contexto"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 5-6 (255:5-6), Seção 3.1 e Fig. 2; p. 7 (255:7), Seção 3.2; p. 10-11 (255:10-11), Seção 4.4; p. 13 (255:13), Seção 6; p. 18 (255:18), Table 1, linhas 14-15; p. 19 (255:19), Table 2, prompts G e H",
+        "observacao": "Proposta do estudo ('our proposed automated in-context learning'): o Prompt4Code percorre um diretório de código-fonte (7 arquivos Python, 727 linhas), extrai docstrings e comentários, converte-os em prompts por templates fixos em linguagem natural e os pareia com o código sem comentários, como exemplos resolvidos (exemplos + contexto), junto com a system message padrão (instrucao, restricoes) e o prompt de usuário G, que também pede saída sem comentários nem explicações (restricoes). A geração automática dos prompts a partir de docstrings é montagem de exemplos por template, não busca ou refinamento automático do prompt, por isso não foi classificada como otimizacao_prompt. Comparação existe só no nível do pacote (few-shot contra zero-shot e one-shot na Table 1), mas o prompt de usuário muda (G na linha 14 contra A no zero-shot/one-shot; G acrescenta 'Output executable code with no comments and no explanations' e omite 'framework'), há uma única geração few-shot com o prompt G na Table 1 e o julgamento é qualitativo; as condições não são plenamente comparáveis, por isso avaliada_isoladamente = nao. A linha 15 usa outro prompt (H, mais complexo), não é contrafactual. [D106, correção registrada] O contraste com zero-shot e one-shot (Table 1) avalia o pacote completo do Prompt4Code: exemplos gerados a partir de docstrings e instruções reformuladas (prompt G, que acrescenta saída sem comentários nem explicações e omite «framework», contra o prompt A); a tarefa é a mesma (simulação em SimPy para 50 professores, notificações a cada 2 horas, estimativa da taxa de resposta). O efeito do few-shot não fica isolado. Os resultados são qualitativos, e as falhas das iterações posteriores relatadas pelo estudo continuam registradas."
+      },
+      {
+        "nome_original": "System message (persona)",
+        "mecanismos": [
+          "instrucao",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao",
+          "restricoes"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 6-7 (255:6-7), Seção 3.2",
+        "observacao": "System message padrão do Prompt4Code, presente em todas as condições relatadas ('adopt a persona'; saída só com código executável). O estudo afirma ter explorado cenários sem a system message, com saída de qualidade inferior, mas não relata esses resultados; sem condição relatada, não há contrafactual extraível."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Limitação dos módulos built-in acessíveis via Prompt4Code (em vez de sandboxing)",
+        "natureza": "outro",
+        "descricao": "Controle do ambiente de execução do código gerado, não do prompt.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "nome_original": "Mending actions manuais (remoção manual de strings inexecutáveis)",
+        "natureza": "outro",
+        "descricao": "Edição humana do código gerado antes da reexecução (Table 1, linha 2, versão 1.1); não é prompting.",
+        "localizador": "p. 8 (255:8), Seção 4.1; p. 18 (255:18), Table 1, linha 2"
+      },
+      {
+        "nome_original": "Escolha do modelo GPT-3.5 turbo-16k",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelo único escolhido por acesso, API aberta e popularidade; a comparação entre LLMs é declarada fora do escopo do artigo.",
+        "localizador": "p. 2-3 (255:2-3), Seção 1; p. 12 (255:12), Seção 5"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5 turbo-16k (gpt-3.5-turbo-16k), OpenAI",
+        "versao": "nao_informado (snapshot e data de acesso não informados; limite de 16,384 tokens informado)",
+        "localizador": "p. 5 (255:5), Seção 3.1; p. 10 (255:10), Seção 4.4"
+      },
+      {
+        "nome": "ChatGPT (with GPT-3.5), usado nas mending actions para corrigir bugs",
+        "versao": "nao_informado",
+        "localizador": "p. 8 (255:8), Seção 4.1; p. 18 (255:18), Table 1, linhas 4, 5, 8 e 10"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "nao_aplicavel: estudo de caso próprio de simulação ESM (atividades de professores, notificações e taxa de resposta) com SimPy",
+        "quantidade": "15 linhas de iteração na Table 1 (8 versões de código gerado com estratégia indicada: linhas 1, 3, 6, 7, 9, 11, 14 e 15, mais versões corrigidas e refinadas); prompts A-H na Table 2; corpus de exemplos para o few-shot: 7 arquivos Python, 727 linhas de código (incluindo comentários e docstrings); nas entrevistas, 2 prompts formulados (P1 e P3)",
+        "observacao": "Não há denominador formal por métrica; o número de iterações por estratégia foi determinado pela regra de parada ('as soon as a similar output was generated in a successive iteration'). Contagem de versões entre parênteses é leitura da tabela, não valor impresso pelo estudo.",
+        "localizador": "p. 6 (255:6), Seção 3.2; p. 7 (255:7); p. 10 (255:10), Seção 4.4; p. 12 (255:12), Seção 4.5.1; p. 18-19 (255:18-19), Tables 1-2"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Syntax error (✓/✗ por iteração; ✓ indica presença de erro)",
+        "localizador": "p. 18 (255:18), Table 1, coluna 'Syntax error'"
+      },
+      {
+        "nome": "Semantic correctness (✓/✗ por iteração)",
+        "localizador": "p. 18 (255:18), Table 1, coluna 'Semantic correctness'"
+      },
+      {
+        "nome": "Avaliação qualitativa (positive remarks, explicação dos erros) e temas de entrevista (análise temática, N = 4)",
+        "localizador": "p. 18 (255:18), Table 1; p. 11-12 (255:11-12), Seção 4.5"
+      }
+    ],
+    "linguagens": [
+      "Python (framework SimPy)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código gerado com erros de sintaxe, de execução e semanticamente incorreto (taxa de resposta aleatória ou não calculada, menos de 50 professores simulados); mesmo código que executa pode ser semanticamente incorreto.",
+        "localizador": "p. 8-9 (255:8-9), Seções 4.1-4.2; p. 12 (255:12), Seção 5; p. 18 (255:18), Table 1"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Riscos de executar o código gerado como está, por possíveis vulnerabilidades de segurança; uma nova tentativa pode gerar código vulnerável.",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 12 (255:12), Seção 5"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "LLMs podem alucinar: a saída pode parecer plausível mas ser factualmente incorreta.",
+        "localizador": "p. 4 (255:4), Seção 2; p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "A saída varia a cada prompt; o mesmo prompt pode produzir código de qualidade contrastante (no few-shot, iterações posteriores do mesmo prompt geraram código falho).",
+        "localizador": "p. 10 (255:10), Seção 4.4; p. 12 (255:12), Seção 5; p. 13 (255:13), Seção 6"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "O estudo lista reusabilidade e manutenção entre as preocupações que exigem atenção no uso de LLMs, sem medi-las.",
+        "localizador": "p. 12 (255:12), Seção 5"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Limite de tokens e custo de modelos pagos motivam limitar o número de arquivos de exemplo e remover comentários e docstrings do código; preços por 1K tokens são informados, mas o custo dos experimentos não é quantificado.",
+        "localizador": "p. 5 (255:5), Seção 3.1; p. 10 (255:10), Seção 4.4"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Confiança e confiabilidade: participantes das entrevistas questionam a confiabilidade das saídas do LLM e pedem explicabilidade e validação por especialista; usuário não técnico não consegue confiar nas saídas nem corrigi-las facilmente.",
+        "localizador": "p. 11 (255:11), Seções 4.4-4.5"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Qualidade do prompt aumentado depende da qualidade da documentação (docstrings e comentários) do código de exemplo, por causa do template estático do Prompt4Code.",
+        "localizador": "p. 13 (255:13), Seção 5"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Dados subjacentes ao LLM podem estar desatualizados; o LLM carece de capacidade de raciocínio para cenários complexos (cálculos de teorias de domínio simplistas).",
+        "localizador": "p. 11 (255:11), Seção 4.4; p. 12 (255:12), Seção 5; p. 18 (255:18), Table 1, linha 15"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Limitar os módulos built-in acessíveis pelo código executado via Prompt4Code, em vez de sandboxing.",
+        "avaliada": "nao",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "descricao": "Repetir cada estratégia para observar a variação da saída, até que uma iteração sucessiva produza saída semelhante.",
+        "avaliada": "nao",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "descricao": "Revisão meticulosa do código gerado e uso do Prompt4Code em equipes com programadores.",
+        "avaliada": "nao",
+        "localizador": "p. 11 (255:11), Seção 4.4; p. 12 (255:12), Seção 5"
+      },
+      {
+        "descricao": "Remover comentários e docstrings do código de exemplo (passando-os ao prompt de usuário) e permitir limitar o número de arquivos de exemplo, para economizar tokens.",
+        "avaliada": "nao",
+        "localizador": "p. 5 (255:5), Seção 3.1; p. 10 (255:10), Seção 4.4"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Zero-shot (prompt A com system message padrão), executado no mesmo modelo e registrado na Table 1 (linhas 1-6).",
+    "so_classificadas": [
+      {
+        "tecnica": "Few-shot (automated in-context learning via Prompt4Code)",
+        "motivo": "Resultados apenas qualitativos (✓/✗ por iteração na Table 1); a extração 2 foi registrada com resultado null e os valores por linha em condicoes, sem valor numérico."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa e tabela divergem no número de iterações one-shot (código completo): a Seção 4.2 descreve três iterações (primeira com erro de Enum e, após correção, erros de execução com interrupções; seguinte com erro de Enum resolvido e taxa de resposta calculada; última com erro de atributo), enquanto a Table 1 registra duas gerações one-shot (linhas 7 e 9) e duas versões corrigidas (4.1 e 5.1). Além disso, a linha 8 (4.1) informa 'The response rate is calculated purely randomly', ao passo que o texto diz que, após a correção, o código ainda tinha erros de execução e era semanticamente incorreto; a Table 1 põe o erro de interrupções na linha 7.",
+        "localizador": "p. 8-9 (255:8-9), Seção 4.2; p. 18 (255:18), Table 1, linhas 7-10"
+      },
+      {
+        "descricao": "O texto do few-shot afirma que iterações posteriores do mesmo prompt produziram código falho semântica e sintaticamente, mas a Table 1, que se diz visão de todas as iterações, traz uma única linha com o prompt G (linha 14: Syntax error ✗, Semantic correctness ✓).",
+        "localizador": "p. 8 (255:8), Seção 4; p. 10 (255:10), Seção 4.4; p. 18 (255:18), Table 1, linha 14"
+      },
+      {
+        "descricao": "O texto diz que nas linhas 14 e 15 a saída foi mais precisa que nas outras abordagens em semântica e sintaxe, mas a linha 15 (prompt H) tem Semantic correctness ✗ e usa um prompt diferente e mais complexo; nas entrevistas, o código few-shot para P1 foi semanticamente falho e o de P3 teve erro de sintaxe não corrigido.",
+        "localizador": "p. 10 (255:10), Seção 4.4; p. 12 (255:12), Seção 4.5.1; p. 18 (255:18), Table 1, linha 15"
+      },
+      {
+        "descricao": "A Table 1 descreve os exemplos como passados 'as a system message' (linhas 7 e 11) e 'as system messages' (linha 14), enquanto as Seções 3.2, 4.2 e 4.4 descrevem o exemplo como mensagem assistant pareada com mensagem de usuário e as docstrings como parte do prompt de usuário.",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 8 (255:8), Seção 4.2; p. 10 (255:10), Seção 4.4; p. 18 (255:18), Table 1"
+      },
+      {
+        "descricao": "O prompt F da Table 2 pede que o decision body defina self.i_want_to 'to either true or false', enquanto o texto da Seção 4.3 cita o acréscimo 'In this case, it should always be True so self.i_want_to=True'; o prompt D pedia decision body aleatório. O prompt C também difere levemente entre texto ('considers') e Table 2 ('takes into account').",
+        "localizador": "p. 9-10 (255:9-10), Seção 4.3; p. 19 (255:19), Table 2, prompts C, D e F"
+      },
+      {
+        "descricao": "O prompt chamado de linha de base na Seção 3.2 ('Simulate teachers’ activities during a day...') não coincide com o prompt A da Table 2 usado no zero-shot, e o prompt G do few-shot difere do A (acrescenta instrução de saída sem comentários e explicações e omite 'framework'); a comparação few-shot × zero-shot não mantém o prompt de usuário constante.",
+        "localizador": "p. 6 (255:6), Seção 3.2; p. 19 (255:19), Table 2, prompts A e G"
+      },
+      {
+        "descricao": "Resultado não relatado: cenários sem a system message levaram, segundo os autores, a saída de qualidade inferior, mas não foram reportados.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "descricao": "Número desigual de iterações por estratégia (3 gerações zero-shot, 2 one-shot de código completo, 1 few-shot com prompt G na Table 1), fixado por regra de parada informal; correção semântica é julgada pelos autores sem critério operacional descrito.",
+        "localizador": "p. 7 (255:7), Seção 3.2; p. 18 (255:18), Table 1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Mending actions com ChatGPT: os autores pediram ao ChatGPT (GPT-3.5) que encontrasse e corrigisse bugs; na primeira tentativa ele afirmou não haver bug e só corrigiu após o bug ser apontado. São passos de reparo manual do processo, não condição de prompting avaliada; por isso depuração não foi listada como tarefa.",
+        "localizador": "p. 8 (255:8), Seção 4.1; p. 18 (255:18), Table 1, linhas 4, 5, 8 e 10"
+      },
+      {
+        "descricao": "O Prompt4Code permite limitar e embaralhar os arquivos de exemplo e executar o código gerado; esses recursos não foram avaliados como condições. O artigo declara que o Prompt4Code não decompõe o prompt de entrada em subtarefas.",
+        "localizador": "p. 5 (255:5), Seção 3.1; p. 13 (255:13), Seção 5"
+      },
+      {
+        "descricao": "Entrevistas estruturadas com N = 4 especialistas recrutados por conveniência; análise temática (confiança, confiabilidade, privacidade). Os autores reconhecem que a amostra não atinge saturação.",
+        "localizador": "p. 7-8 (255:7-8), Seção 3.3; p. 11-12 (255:11-12), Seção 4.5"
+      },
+      {
+        "descricao": "Produtividade não foi medida; o estudo indica que trabalhos futuros devem quantificar tempo de codificação para avaliar ganhos de produtividade.",
+        "localizador": "p. 13 (255:13), Seção 5"
+      },
+      {
+        "descricao": "Repositório com prompts e respostas é indicado (github.com/khnshn/prompt4code); não foi acessado nesta extração.",
+        "localizador": "p. 6 (255:6); p. 8 (255:8); p. 12 (255:12)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "We explored several prompt design alternatives to generate ESM simulation programs, evaluated the output code in terms of semantics and syntax, and interviewed ESM practitioners.",
+        "localizador": "p. 1 (255:1), Abstract"
+      },
+      {
+        "trecho": "To explore the capabilities of GPT-3.5 turbo-16k, first, we did a set of zero-shot prompts, which means no example was provided to generate the code.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "Then, we did one-shot prompts by providing one code sample.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "Then we explored the same approach but instead of prompting for a whole program, we requested a code snippet and a configuration dictionary.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "Lastly, we utilized Prompt4Code to automatically augment code samples with accompanying prompts to facilitate more comprehensive in-context learning.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "The tool traverses a directory of choice including source code files as examples, then extracts docstrings and comments from source files and turns them into instructive prompts using pre-defined templates in natural language.",
+        "localizador": "p. 5 (255:5), Seção 3.1"
+      },
+      {
+        "trecho": "We also explored scenarios where such system prompts were excluded but they led to inferior-quality output ergo not reported in this paper.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "We compared LLM outputs in terms of semantics and syntax and discovered that our proposed automated in-context learning, which involves augmenting a user prompt with complementing technical prompts generated from source codes as examples, achieves higher quality code compared to other explored alternatives.",
+        "localizador": "p. 13 (255:13), Seção 6"
+      },
+      {
+        "trecho": "As previously mentioned, models may hallucinate and previous research has also confirmed the risks of running generated code as-is since it might have security vulnerabilities.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "For simplicity and flexibility, instead of sandboxing, we limited the built-in modules that can be accessed via Prompt4Code although the user can add or remove modules based on their requirements.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "We stopped iterating over the same strategy as soon as a similar output was generated in a successive iteration.",
+        "localizador": "p. 7 (255:7), Seção 3.2"
+      },
+      {
+        "trecho": "A prompt that once yielded secure, robust, and syntactically and semantically correct code could, after a retry, generate vulnerable and semantically flawed code, if not inexecutable.",
+        "localizador": "p. 12 (255:12), Seção 5"
+      },
+      {
+        "trecho": "A meticulous review of the generated code, even when seemingly executing successfully, is essential to ensure semantic correctness and security.",
+        "localizador": "p. 12 (255:12), Seção 5"
+      },
+      {
+        "trecho": "Various concerns, including security, syntax, semantics, reusability, trust, consistency, and maintenance, warrant attention in the utilization of LLMs.",
+        "localizador": "p. 12 (255:12), Seção 5"
+      },
+      {
+        "trecho": "By specifying a limit, the user can control the size of the dataset used for learning, which can be beneficial for performance optimization and specifically useful considering token limitation and saving costs when using paid or commercial models.",
+        "localizador": "p. 5 (255:5), Seção 3.1"
+      },
+      {
+        "trecho": "Although promising, later iterations of the same prompt resulted in flawed code both semantically and syntactically.",
+        "localizador": "p. 10 (255:10), Seção 4.4"
+      },
+      {
+        "trecho": "Thus, the quality of code documentation directly influences the quality of the augmented prompt.",
+        "localizador": "p. 13 (255:13), Seção 5"
+      },
+      {
+        "trecho": "Participants expressed concerns regarding the trustworthiness of LLMs in generating data.",
+        "localizador": "p. 11 (255:11), Seção 4.5"
+      },
+      {
+        "trecho": "Rather than bugfixing manually as in the previous step, we asked ChatGPT [47] (with GPT-3.5) to find the bug in the code and fix it but it claimed that the code did not have a bug.",
+        "localizador": "p. 8 (255:8), Seção 4.1"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "One-shot (full code generation)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "exemplos",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "contexto"
+      ],
+      "comparador": "Zero-shot",
+      "modelo": "GPT-3.5 turbo-16k (gpt-3.5-turbo-16k); snapshot nao_informado",
+      "benchmark": "nao_aplicavel: estudo de caso próprio de simulação ESM de professores (prompt A da Table 2)",
+      "metrica": "Syntax error",
+      "sentido": "menor_melhor",
+      "unidade": "qualitativo",
+      "resultado": null,
+      "denominador": "nao_informado (sem denominador formal; a Table 1 registra 3 gerações zero-shot com estratégia indicada, linhas 1, 3 e 6, e 2 gerações one-shot, linhas 7 e 9; a Seção 4.2 descreve 3 iterações one-shot)",
+      "condicoes": "Valores por linha na Table 1 (✓ = erro de sintaxe presente, ✗ = ausente). Zero-shot, prompt A: linha 1 (versão 1) ✓; linha 3 (versão 2) ✓; linha 6 (versão 3) ✗. Versões corrigidas zero-shot (estratégia n/a): linha 2 (1.1, remoção manual) ✗; linha 4 (2.1, ChatGPT pedido para corrigir) ✓; linha 5 (2.2, bug apontado ao ChatGPT) ✗. One-shot, prompt A com exemplo B + código feito à mão: linha 7 (versão 4) ✓; linha 9 (versão 5) ✓. Versões corrigidas pelo ChatGPT: linha 8 (4.1) ✗; linha 10 (5.1) ✗. Semantic correctness foi ✗ em todas as linhas 1-10. Mesma system message padrão nas duas condições. Número de iterações definido por regra de parada informal; temperatura e demais parâmetros de decodificação nao_informado. Resultado qualitativo por iteração, sem agregado impresso: resultado = null para não calcular contagens. A narrativa (Seção 4.2) diverge da tabela no número de iterações one-shot (ver heterogeneidade). conferido_pdf: Table 1 aberta na imagem p-18; texto das Seções 4.1-4.2 conferido nas imagens p-08 e p-09.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: a conclusão destaca a técnica proposta contra 'other explored alternatives' (vários comparadores) e duas métricas (semantics and syntax). Primeira tabela com contraste de prompting elegível: Table 1; primeira métrica: 'Syntax error'; único modelo; primeira linha de base de prompting listada: Zero-shot (linhas 1-6); primeiro contraste na ordem da tabela: One-shot (linhas 7-10).",
+      "derivacao": "direta",
+      "localizador": "p. 18 (255:18), Table 1, linhas 1-10, colunas 'Prompting strategy' e 'Syntax error'; p. 19 (255:19), Table 2, prompts A e B; p. 8-9 (255:8-9), Seções 4.1-4.2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "1 | 1 | A | Zero-shot | n/a | The code uses SimPy | Includes inexecutable strings in the beginning and end of the file ```python ... ``` | ✓ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 1; colunas: # | Code version | Prompt | Prompting strategy | Meding action(s) | Positive remarks | Explanation of the error(s) | Syntax error | Semantic correctness"
+        },
+        {
+          "trecho": "3 | 2 | A | Zero-shot | n/a | The code uses SimPy | ‘None is not a generator’ error | ✓ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 3; mesmas colunas"
+        },
+        {
+          "trecho": "6 | 3 | A | Zero-shot | n/a | - The code uses SimPy - The code executes | - Simulates teachers with even index - The code does not calculate the response rate | ✗ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 6; mesmas colunas"
+        },
+        {
+          "trecho": "7 | 4 | A | One-shot | Prompted B as a system message and its corresponding handcrafted code for in-context learning | The code uses SimPy | - Name ‘Enum’ is not defined error - Runtime error in using interruptions | ✓ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 7; mesmas colunas"
+        },
+        {
+          "trecho": "9 | 5 | A | One-shot | n/a | The code uses SimPy | The ‘Timeout’ object has no attribute ‘response_counter’ error | ✓ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 9; mesmas colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Few-shot (automated in-context learning via Prompt4Code)",
+      "mecanismos": [
+        "instrucao",
+        "restricoes",
+        "exemplos",
+        "contexto"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "contexto"
+      ],
+      "comparador": "Zero-shot",
+      "modelo": "GPT-3.5 turbo-16k (gpt-3.5-turbo-16k); snapshot nao_informado",
+      "benchmark": "nao_aplicavel: estudo de caso próprio de simulação ESM de professores (prompt G para o few-shot; prompt A para o zero-shot)",
+      "metrica": "Syntax error",
+      "sentido": "menor_melhor",
+      "unidade": "qualitativo",
+      "resultado": null,
+      "denominador": "nao_informado (Table 1: 3 gerações zero-shot, linhas 1, 3 e 6; 1 geração few-shot com prompt G, linha 14; o texto menciona iterações posteriores do mesmo prompt não tabuladas)",
+      "condicoes": "Few-shot, linha 14 (versão 7, prompt G, 7 códigos de simulação como exemplos): Syntax error ✗, Semantic correctness ✓, 'The code executes as expected'. Linha 15 (versão 8, prompt H, estratégia '~', descrita no texto da Seção 4.4 como prompt mais complexo no few-shot): Syntax error ✗, Semantic correctness ✗; prompt diferente, não comparável. Zero-shot, prompt A: linha 1 ✓, linha 3 ✓, linha 6 ✗ (Syntax error); Semantic correctness ✗ nas três. Os prompts de usuário diferem (G contra A): o contraste não mantém o prompt constante. Exemplos: 7 arquivos Python, 727 linhas (incluindo comentários e docstrings), todos cabendo no limite de 16,384 tokens; docstrings convertidas em prompts por template e código passado sem comentários. Texto afirma que iterações posteriores do mesmo prompt produziram código com erros sintáticos e semânticos, não registradas na Table 1. Temperatura e demais parâmetros de decodificação nao_informado. O resultado é do pacote few-shot (exemplos + prompt G), não de um ingrediente. conferido_pdf: Table 1 aberta na imagem p-18; Seção 4.4 na p-10; prompts G e H na Table 2 (p-19).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal do estudo (aprendizagem em contexto automatizada via Prompt4Code) ainda não representada; mesma regra de ordem: Table 1, primeira métrica 'Syntax error', primeira linha de base de prompting listada (Zero-shot).",
+      "derivacao": "direta",
+      "localizador": "p. 18 (255:18), Table 1, linhas 1, 3, 6, 14 e 15, colunas 'Prompting strategy' e 'Syntax error'; p. 19 (255:19), Table 2, prompts A, G e H; p. 10-11 (255:10-11), Seção 4.4",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "14 | 7 | G | Few-shot | Passed multiple (in our case 7 simulation source codes) examples as system messages for in-context learning | The code executes as expected | n/a | ✗ | ✓",
+          "localizador": "p. 18 (255:18), Table 1, linha 14; colunas: # | Code version | Prompt | Prompting strategy | Meding action(s) | Positive remarks | Explanation of the error(s) | Syntax error | Semantic correctness"
+        },
+        {
+          "trecho": "15 | 8 | H | ~ | Crafted a more complex prompt | The code executes | The calculations of domain-specific theories are too simplistic and random | ✗ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 15; mesmas colunas"
+        },
+        {
+          "trecho": "Even in the first iteration, the generated code was clean, without any semantic or syntax error, ran as expected, and did output the response rate as requested in the prompt.",
+          "localizador": "p. 10 (255:10), Seção 4.4"
+        },
+        {
+          "trecho": "1 | 1 | A | Zero-shot | n/a | The code uses SimPy | Includes inexecutable strings in the beginning and end of the file ```python ... ``` | ✓ | ✗",
+          "localizador": "p. 18 (255:18), Table 1, linha 1; mesmas colunas"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo explícito: avaliar a viabilidade de usar o GPT-3.5 turbo-16k para gerar programas de simulação ESM, explorando alternativas de design de prompt e avaliando sintaxe e semântica do código.",
+      "localizador": "p. 1 (255:1), Abstract; p. 2 (255:2), Seção 1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Abordagem passo a passo (zero-shot, one-shot, configuração, few-shot) e prompts descritos (Table 2), mas o número de iterações segue regra de parada informal, há correções manuais e via ChatGPT intercaladas, e parâmetros de decodificação não são informados; texto e tabela divergem sobre as iterações.",
+      "localizador": "p. 7 (255:7), Seção 3.2; p. 8-10 (255:8-10), Seção 4; p. 18-19 (255:18-19), Tables 1-2"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Zero-shot e one-shot executados no mesmo modelo servem de comparação, mas com poucas iterações por condição e, no caso do few-shot, prompt de usuário diferente (G contra A); não há comparação controlada.",
+      "localizador": "p. 18-19 (255:18-19), Tables 1-2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Métricas binárias (erro de sintaxe, correção semântica) por iteração, sem critério operacional de correção semântica nem denominador explícito; a narrativa diverge da Table 1 no número de iterações one-shot e few-shot.",
+      "localizador": "p. 8-10 (255:8-10), Seções 4.2 e 4.4; p. 18 (255:18), Table 1"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Discute instabilidade e variabilidade dos LLMs, uso de um único modelo, tamanho da amostra das entrevistas e dependência da documentação; não há análise estruturada de ameaças à validade da avaliação do código.",
+      "localizador": "p. 3 (255:3), Seção 1; p. 7 (255:7), Seção 3.3; p. 12-13 (255:12-13), Seção 5"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompts impressos (Table 2), ferramenta e respostas indicadas em repositório (não acessado), mas sem snapshot do modelo, datas de execução ou parâmetros de decodificação, e com saídas não determinísticas.",
+      "localizador": "p. 6 (255:6), Seção 3.1; p. 8 (255:8), Seção 4; p. 19 (255:19), Table 2"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos códigos de exemplo ou da tarefa no pré-treinamento do modelo.",
+      "localizador": "texto completo (p. 1-19) sem menção"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (939 linhas, incluindo referências e apêndices). Páginas do PDF abertas visualmente: p-07, p-08, p-09, p-10, p-12, p-13, p-18 (Table 1) e p-19 (Table 2). Página do PDF coincide com a página impressa 255:N."
+  }
+}

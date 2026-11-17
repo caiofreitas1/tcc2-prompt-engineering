@@ -1,0 +1,614 @@
+{
+  "estudo": "S427",
+  "texto_fonte": "fontes/textos/lote/S427.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Prompt Template for the Original One (baseline setting: \"Please complete the code\")",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 10 (PDF e impressa), Fig. 2 e seção 3.3; p. 20, seção RQ2/Approach; p. 21, quadro «Prompt Template for the Original One»",
+        "observacao": "Prompt base de todas as condições: instrução curta («### Instruction: Please complete the code.») seguida do cenário sensível à segurança (trecho de código C/C++ incompleto a completar). A instrução foi classificada como `instrucao`; o trecho de código fornecido como insumo, como `contexto` (regra D102 de código fornecido no prompt). É a condição de referência (linha «Pretrained» da Tabela 6, modelo pré-treinado sem ajuste fino); não há condição sem ela."
+      },
+      {
+        "nome_original": "Generic Security (prompt)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 19–20 (PDF e impressa), RQ2/Approach; p. 21, quadro «Prompt Template for the Generic Security» e Tabela 6",
+        "observacao": "Acrescenta ao prompt base uma única frase de restrição de segurança («Make sure that the generated code is secure, meaning it does not contain any security vulnerabilities»), classificada como `restricoes` (restrição de segurança em linguagem natural; a categoria `instrucao` já está no prompt base). O estudo apresenta os prompts orientados à segurança como abordagens baseadas em prompt comparadas ao ajuste fino (objeto focal do estudo), por isso o papel é `comparador`. O contraste com o prompt original (linha «Pretrained» da Tabela 6) mantém modelo, cenários, 30 amostras por cenário e temperatura 0,8 (p. 20), diferindo só na frase acrescentada."
+      },
+      {
+        "nome_original": "Specific Security (prompt)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "restricoes",
+          "contexto"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 20 (PDF e impressa), RQ2/Approach; p. 21, quadro «Prompt Template for the Specific Security» e Tabela 6",
+        "observacao": "Acrescenta ao prompt base uma restrição de segurança dirigida à CWE do cenário («Make sure that the generated code is secure with respect to the CWE-<ID> vulnerability, meaning it does not contain the following security vulnerability: CWE-<ID>:<Description of the CWE>»), com o identificador e a descrição da CWE. A restrição foi classificada como `restricoes`; a descrição da CWE, como conhecimento externo inserido (`contexto`), categoria que no prompt base já aparece pelo código do cenário. Contraste com o prompt original na Tabela 6 = pacote (restrição dirigida + identificador/descrição da CWE); o resultado não pode ser atribuído isoladamente à descrição da CWE. O texto das descrições de CWE usadas não é reproduzido no artigo. Papel `comparador` pelo mesmo motivo da Generic Security."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Full fine-tuning",
+        "natureza": "ajuste_fino",
+        "descricao": "Atualização de todos os pesos dos quatro modelos com conjuntos de correções de vulnerabilidades (BigVul, CVEfixes, AndroidCVEfixes; 4.900 commits, 14.622 arquivos C/C++), em quatro granularidades (arquivo, função, bloco, linha); usado pelo estudo como linha de base do ajuste fino. Objeto focal do estudo, fora do escopo de prompting.",
+        "localizador": "p. 9 (Tabela 1), p. 11–12 (seção 4.1, Tabela 2), p. 22 (Tabela 7)"
+      },
+      {
+        "nome_original": "LoRA",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino eficiente em parâmetros com matrizes de baixo posto (r = 8, α = 16, dropout 0,05, taxa de aprendizado 3e-4, 2 épocas). Técnica focal do estudo; na RQ2 é comparada com os prompts orientados à segurança (linhas «LoRA-tuned» da Tabela 6, resultados reaproveitados da RQ1).",
+        "localizador": "p. 11–12 (seção 4.1, Tabela 2); p. 21 (Tabela 6)"
+      },
+      {
+        "nome_original": "IA3",
+        "natureza": "ajuste_fino",
+        "descricao": "Ajuste fino eficiente em parâmetros por vetores de escala treináveis nas saídas de atenção e feedforward (taxa 3e-4, batch 5, 2 épocas). Técnica focal do estudo; linhas «IA3-tuned» da Tabela 6.",
+        "localizador": "p. 12 (seção 4.1); p. 21 (Tabela 6)"
+      },
+      {
+        "nome_original": "Hiperparâmetros de geração (top-p, temperature, maximum length of generation)",
+        "natureza": "decodificacao",
+        "descricao": "top-p 0,9, temperatura 0,8 e no máximo 100 tokens gerados, seguindo estudo anterior; mantidos na RQ2.",
+        "localizador": "p. 12 (seção 4.2); p. 20 (RQ2/Approach)"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "CodeGen2-7B",
+        "versao": "7B (família CodeGen2, Nijkamp et al.); checkpoint/snapshot nao_informado",
+        "localizador": "p. 8–9, seção 3.1"
+      },
+      {
+        "nome": "CodeLlama-7B",
+        "versao": "7B; variante (base, Python ou Instruct) e snapshot nao_informado",
+        "localizador": "p. 8–9, seção 3.1"
+      },
+      {
+        "nome": "Magicoder-6.7B",
+        "versao": "6.7B, variante baseada em DeepSeek; snapshot nao_informado",
+        "localizador": "p. 9, seção 3.1"
+      },
+      {
+        "nome": "DeepSeek-Coder-7B",
+        "versao": "«7B version» como impresso; variante (base ou instruct) e snapshot nao_informado",
+        "localizador": "p. 9, seção 3.1"
+      },
+      {
+        "nome": "CodeLlama-13B",
+        "versao": "13B; usado só na extensão de ajuste fino (Tabela 12), não nas condições de prompting; snapshot nao_informado",
+        "localizador": "p. 28–29, seção 6 e Tabela 12"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Cenários sensíveis à segurança (security-sensitive prompts/scenarios) em C",
+        "quantidade": "26 cenários: 23 reutilizados de Pearce et al. e 3 criados (CWE-20, CWE-78, CWE-79); 30 amostras por cenário, denominador impresso de 780 gerações por modelo e condição",
+        "localizador": "p. 10, seção 3.3; p. 12, seção 4.2; p. 21, Tabela 6 (coluna C, «/780»)"
+      },
+      {
+        "nome": "Cenários sensíveis à segurança em C++",
+        "quantidade": "26 cenários traduzidos dos cenários em C; denominador impresso de 780 gerações por modelo e condição",
+        "localizador": "p. 10, seção 3.3; p. 21, Tabela 6 (coluna C++)"
+      },
+      {
+        "nome": "Total de cenários C/C++",
+        "quantidade": "52 (p. 1 e p. 4); o texto de ameaças cita 56 cenários (p. 29), ver heterogeneidade. Cobertura declarada: «top 10 CWE» da lista 2024 (p. 4) e «11 CWEs in the top 25» (p. 10)",
+        "localizador": "p. 1, resumo; p. 4; p. 10; p. 29"
+      },
+      {
+        "nome": "HumanEval CPP (tarefas C++ do HumanEval-X)",
+        "quantidade": "164 tarefas; 10 amostras por tarefa; usado só para os modelos pré-treinados e ajustados (RQ4), sem condições de prompting",
+        "localizador": "p. 24–25, RQ4; p. 26, Tabela 8"
+      },
+      {
+        "nome": "Cenários Java e Python de He et al.",
+        "quantidade": "5 cenários (5 CWEs) em Java e 34 cenários (19 CWEs) em Python; denominadores impressos 150 e 1020; só ajuste fino",
+        "localizador": "p. 26–27, seção 6, Tabela 11"
+      },
+      {
+        "nome": "Subconjunto CWE-119 (tamanho do conjunto de ajuste fino)",
+        "quantidade": "3 cenários, 30 amostras cada (90 por configuração); só ajuste fino",
+        "localizador": "p. 18–20, Tabelas 4 e 5"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Valid ratio (Valid code / Total)",
+        "definicao": "percentual do código gerado que compila; denominador = total gerado (780 por linguagem nas Tabelas 3 e 6)",
+        "localizador": "p. 13, RQ1/Approach; p. 21, Tabela 6"
+      },
+      {
+        "nome": "Secure ratio (Secure code / Valid code)",
+        "definicao": "percentual do código válido sem vulnerabilidades segundo o CodeQL; denominador = número de trechos válidos, que varia entre condições",
+        "localizador": "p. 13, RQ1/Approach; p. 21, Tabela 6"
+      },
+      {
+        "nome": "PASS@1 (HumanEval CPP)",
+        "definicao": "correção funcional; só para ajuste fino (RQ4)",
+        "localizador": "p. 25, RQ4; p. 26, Tabela 8"
+      },
+      {
+        "nome": "Avg. GPU Hours / Avg. GPU Memory / Params Trained",
+        "definicao": "custo do ajuste fino; não se aplica às condições de prompting",
+        "localizador": "p. 25–27, seção 6, Tabela 9"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "C",
+        "localizador": "p. 10, seção 3.3; Tabela 6"
+      },
+      {
+        "nome": "C++",
+        "localizador": "p. 10, seção 3.3; Tabela 6"
+      },
+      {
+        "nome": "Java",
+        "localizador": "p. 26–27, Tabela 11 (só ajuste fino)"
+      },
+      {
+        "nome": "Python",
+        "localizador": "p. 26–27, Tabela 11 (só ajuste fino)"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado por LLMs frequentemente contém vulnerabilidades (cibersegurança), herdadas de código humano usado no pré-treinamento; é a motivação do estudo e da comparação entre prompts orientados à segurança e ajuste fino.",
+        "localizador": "p. 1–2, resumo e introdução; p. 6, seção 2.3"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação atribuída pelo estudo às abordagens baseadas em prompt orientado à segurança: dependem da capacidade do usuário ou do LLM de identificar e descrever corretamente o problema de segurança; o aprendizado em contexto é descrito como muito sensível à qualidade das instruções.",
+        "localizador": "p. 6, seção 2.3; p. 7, seção 2.4"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Código rotulado como seguro pelo CodeQL pode não implementar a funcionalidade pedida (por exemplo, trecho que só retorna -1, rotulado «secure but functionally incorrect»); a divergência entre a funcionalidade esperada e a gerada não afeta a avaliação de vulnerabilidade. Vale também para as condições de prompting, cujo secure ratio não mede correção funcional.",
+        "localizador": "p. 27–28, seção 6 (Fig. 8); p. 29, seção 7.1 «Evaluation Process»"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No ajuste fino (fora do escopo de prompting), o ajuste completo reduz o número de trechos válidos (esquecimento catastrófico) e degrada PASS@1 no HumanEval CPP.",
+        "localizador": "p. 15, RQ1/Results; p. 23, RQ3/Results; p. 25, RQ4/Results"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade da medição: o CodeQL pode produzir falsos positivos e falsos negativos na detecção de vulnerabilidades.",
+        "localizador": "p. 27, seção 6; p. 29, seção 7.1 «False Positives by CodeQL»"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "LLMs têm aleatoriedade e podem gerar códigos diferentes para o mesmo prompt.",
+        "localizador": "p. 29, seção 7.1 «Reproducibility of Code Generation»; p. 12, seção 4.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação estatística declarada: 30 amostras por cenário podem ser insuficientes para conclusões concretas.",
+        "localizador": "p. 29, seção 7.1 «Statistical Limitation»"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Possível sobreposição entre o conjunto de ajuste fino e os cenários de avaliação; o estudo aplicou detecção de sobreposição de 10-gramas e relata ausência de sobreposição (controle registrado em mitigações). O estudo não discute contaminação do pré-treinamento pelos cenários reutilizados de Pearce et al., o que afetaria também as condições de prompting.",
+        "localizador": "p. 17, RQ1/Discussions (3)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O estudo trata o ajuste fino como computacionalmente intensivo e quantifica o custo em horas e memória de GPU (por exemplo, 1378,4 GPU-horas no total). Custo referente ao ajuste fino, não às condições de prompting; o custo dos prompts orientados à segurança não é quantificado.",
+        "localizador": "p. 7, seção 2.4; p. 25–27, seção 6, Tabela 9"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Validade externa: poucos modelos, linguagens (C/C++, com extensão a Java e Python) e 11 tipos de CWE; resultados podem não se generalizar.",
+        "localizador": "p. 29–30, seção 7.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Prompts orientados à segurança (Generic Security e Specific Security) como forma de reduzir código vulnerável, comparados com o prompt original sem a instrução de segurança.",
+        "avaliada": "sim",
+        "localizador": "p. 19–22, RQ2; Tabela 6, p. 21"
+      },
+      {
+        "descricao": "Ajuste fino (LoRA, IA3, completo) com correções de vulnerabilidades, comparado com o modelo pré-treinado (fora do escopo de prompting).",
+        "avaliada": "sim",
+        "localizador": "p. 13–15, RQ1; Tabela 3, p. 14"
+      },
+      {
+        "descricao": "Geração de 30 amostras por cenário para lidar com a aleatoriedade dos LLMs.",
+        "avaliada": "nao",
+        "localizador": "p. 12, seção 4.2; p. 29, seção 7.1"
+      },
+      {
+        "descricao": "Detecção de sobreposição de 10-gramas entre o conjunto de ajuste fino e os cenários de avaliação.",
+        "avaliada": "nao",
+        "localizador": "p. 17, RQ1/Discussions (3)"
+      },
+      {
+        "descricao": "Análise manual para falsos positivos do CodeQL (quatro cenários) e amostra de 378 trechos válidos (pré-treinado, LoRA e IA3, nível de arquivo) para segurança e funcionalidade; não inclui as condições de prompting.",
+        "avaliada": "nao",
+        "localizador": "p. 27–28, seção 6; p. 29, seção 7.1"
+      },
+      {
+        "descricao": "Descarte de trechos com erro de sintaxe ou que não compilam antes da análise pelo CodeQL.",
+        "avaliada": "nao",
+        "localizador": "p. 13, RQ1/Approach"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Prompt original («Please complete the code» + cenário) com o modelo pré-treinado (linha «Pretrained» da Tabela 6), executado nas mesmas condições de geração",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão (contagem própria sobre a Tabela 6, secure ratio): o prompt Specific Security fica abaixo do prompt original em 5 das 8 configurações (modelo × linguagem), por exemplo Magicoder-6.7B em C, 396/771 (51.4%) contra 455/768 (59.2%); o Generic Security fica abaixo do original em 2 das 8 (Magicoder-6.7B em C, 57.8% contra 59.2%, e em C++, 62.2% contra 64.6%).",
+        "localizador": "Tabela 6, p. 21 (PDF e impressa), colunas «Secure code / Valid code»"
+      },
+      {
+        "descricao": "A narrativa diz que os prompts de segurança obtêm o maior secure ratio em 3 de 8 configurações e o ajuste fino em 4 de 8. Contagem própria: a oitava configuração é vencida pelo prompt original com modelo pré-treinado (Magicoder-6.7B, C++, 64.6%), o que a narrativa não menciona; em Magicoder-6.7B/C, Pretrained e LoRA-tuned têm o mesmo percentual impresso (59.2%; 455/768 e 452/764), e a contagem de 4 para o ajuste fino parece incluir esse empate.",
+        "localizador": "p. 21, RQ2/Results; Tabela 6, p. 21"
+      },
+      {
+        "descricao": "Médias da RQ2 com estimador não informado (média dos percentuais ou razão agregada) e média do prompt original não impressa. Cálculo próprio a partir da Tabela 6: Generic 59.9% coincide com os dois estimadores (3487/5821; média dos oito percentuais 59.9); Specific impresso 57.5% coincide com a razão agregada (3384/5883 = 57.5%), mas a média dos percentuais dá 57.6; LoRA-tuned impresso 60.9% contra 60.8% pelos dois estimadores (3417/5617; média 60.8); IA3-tuned impresso 58.5% contra cerca de 59.0% pelos dois estimadores (3422/5800). Aparente inconsistência nas médias de ajuste fino, que sustentam a conclusão de que LoRA supera os prompts (60.9% contra 59.9%).",
+        "localizador": "p. 21–22, RQ2/Results e Summary of RQ2; Tabela 6, p. 21"
+      },
+      {
+        "descricao": "O secure ratio usa o número de trechos válidos como denominador, que varia entre condições: no CodeGen2-7B/C, o Generic Security passa de 403/720 (56.0%) para 404/703 (57.5%), com praticamente o mesmo número absoluto de trechos seguros e menos trechos válidos. O estudo discute esse efeito de denominador para o ajuste fino (RQ1), não para os prompts.",
+        "localizador": "Tabela 6, p. 21; p. 13 (definição); p. 15 (discussão de números absolutos no ajuste fino)"
+      },
+      {
+        "descricao": "A comparação entre prompts e entre prompts e ajuste fino na RQ2 não tem teste estatístico nem intervalo; o teste exato de Fisher do estudo refere-se apenas ao PASS@1 do HumanEval (RQ4). Diferenças entre condições são de poucos pontos percentuais.",
+        "localizador": "p. 21–22, RQ2; p. 25, RQ4/Results"
+      },
+      {
+        "descricao": "Contagem de cenários e cobertura de CWE divergentes: 52 cenários (resumo, p. 1; p. 4) contra «56 CWE scenarios in total» (p. 29); «top 10 CWE» da lista 2024 (p. 4) contra «11 CWEs in the top 25 CWEs [35]», com [35] referindo a lista de 2023 (p. 10).",
+        "localizador": "p. 1, p. 4, p. 10, p. 29; referência [35], p. 35"
+      },
+      {
+        "descricao": "Melhoria máxima do ajuste fino em C++ (fora do escopo de prompting) diverge entre resumo (5.0%), contribuições (5.9%) e conclusão (5.4%); em C, 6.4% nas três passagens. As diferenças são apresentadas com «%», mas correspondem a diferenças de secure ratio (por exemplo, 56.0% para 62.4%, p. 4), isto é, pontos percentuais.",
+        "localizador": "p. 2, resumo; p. 5, contribuições; p. 31, conclusão; p. 4, RQ1"
+      },
+      {
+        "descricao": "Não informado se a linha «Pretrained» da Tabela 6 (prompt original) foi reexecutada na RQ2 ou reaproveitada da RQ1; os valores coincidem com as linhas «Pre-trained» da Tabela 3, e o texto declara reaproveitamento apenas para LoRA-tuned e IA3-tuned.",
+        "localizador": "Tabela 3, p. 14; Tabela 6 e RQ2/Results, p. 21"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O estudo é essencialmente sobre ajuste fino para geração de código seguro; a parte de prompting restringe-se à RQ2, em que dois prompts orientados à segurança (adotados de He et al. [19]) são comparados com o prompt original e com os modelos ajustados por LoRA e IA3. Nenhuma técnica de prompting é focal.",
+        "localizador": "p. 1–5; p. 19–22, RQ2"
+      },
+      {
+        "descricao": "As tarefas avaliadas são completamento de trechos de código C/C++ incompletos (cenários), classificadas como `geracao`.",
+        "localizador": "p. 10, seção 3.3"
+      },
+      {
+        "descricao": "Avaliações de granularidade e tamanho do conjunto de ajuste fino (RQ3, Tabelas 4, 5 e 7), modelo maior (CodeLlama-13B, Tabela 12) e linguagens Java/Python (Tabela 11) referem-se apenas ao ajuste fino.",
+        "localizador": "p. 18–23; p. 26–29"
+      },
+      {
+        "descricao": "A Fig. 1 usa sugestões do GitHub Copilot (25 candidatos) apenas como exemplo ilustrativo, sem avaliação.",
+        "localizador": "p. 2–3, Fig. 1 e nota 2"
+      },
+      {
+        "descricao": "Pacote de replicação indicado (https://github.com/SecureLLM/Secure_LLM); não acessado nem validado nesta extração.",
+        "localizador": "p. 5, nota 4; p. 32"
+      },
+      {
+        "descricao": "Versão do texto: arXiv:2408.09078v2 [cs.SE], 26 Sep 2025 (manuscrito, «Noname manuscript»). As páginas impressas coincidem com a posição no PDF.",
+        "localizador": "p. 1"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this work, we present an exploratory study on whether fine-tuning pre-trained LLMs on datasets of vulnerability-fixing commits can promote secure code generation.",
+        "localizador": "p. 1, resumo"
+      },
+      {
+        "trecho": "Following the approach of the study [19], we introduced two additional security-oriented prompts, Generic Security and Specific Security, to assess their influence on secure code generation.",
+        "localizador": "p. 19–20, RQ2/Approach"
+      },
+      {
+        "trecho": "These were evaluated against the original prompts used in our experiments of RQ1.",
+        "localizador": "p. 20, RQ2/Approach"
+      },
+      {
+        "trecho": "In the baseline setting, the prompt simply instructed: “Please complete the code”.",
+        "localizador": "p. 20, RQ2/Approach"
+      },
+      {
+        "trecho": "For the Generic Security setting, we appended the instruction: “Make sure that the generated code is secure, meaning it does not contain any security vulnerabilities”, to enforce the model to generate secure code.",
+        "localizador": "p. 20, RQ2/Approach"
+      },
+      {
+        "trecho": "The Specific Security setting was further designed to target particular vulnerabilities by including the CWE ID and its description in the prompt template.",
+        "localizador": "p. 20, RQ2/Approach"
+      },
+      {
+        "trecho": "All code generation settings, including the generation of 30 samples per scenario and a temperature of 0.8, remained consistent with those used in RQ1.",
+        "localizador": "p. 20, RQ2/Approach"
+      },
+      {
+        "trecho": "As defined by Pearce et al. [40], a security-sensitive prompt contains small and incomplete code snippet and LLMs will be asked to generate code.",
+        "localizador": "p. 10, seção 3.3"
+      },
+      {
+        "trecho": "One of the most severe concerns is that automatically-generated code by LLMs often contains vulnerabilities.",
+        "localizador": "p. 2, introdução"
+      },
+      {
+        "trecho": "However, these approaches have limitations, as they heavily depend on the user’s ability or the LLM’s ability to identify and describe the security issues accurately.",
+        "localizador": "p. 6, seção 2.3"
+      },
+      {
+        "trecho": "Moreover, it is highly sensitive to the quality of the instructions (prompts).",
+        "localizador": "p. 7, seção 2.4"
+      },
+      {
+        "trecho": "Therefore, we label this example as secure but functionally incorrect code.",
+        "localizador": "p. 28, seção 6"
+      },
+      {
+        "trecho": "The mismatch between the provided and expected functionalities may not affect the vulnerability evaluation results from CodeQL.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "CodeQL is a static tool to detect vulnerabilities and may produce false positives.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "Although we used CodeQL to automatically evaluate the security for the generated code, the results may contain false negatives.",
+        "localizador": "p. 27, seção 6"
+      },
+      {
+        "trecho": "LLMs have randomness and may generate different code in multiple attempts using the same prompt.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "To mitigate this threat to validity, we generate 30 samples for each CWE scenario.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "The number of samples of each CWE scenario may be insufficient to yield concrete conclusions.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "To prevent the evaluation scenarios from appearing in our fine-tuning dataset, we conducted a 10-gram [59] overlap detection.",
+        "localizador": "p. 17, RQ1/Discussions (3)"
+      },
+      {
+        "trecho": "We found that there is no overlap between the fine-tuning dataset and the evaluation scenarios.",
+        "localizador": "p. 17, RQ1/Discussions (3)"
+      },
+      {
+        "trecho": "However, fine-tuning is computationally intensive.",
+        "localizador": "p. 7, seção 2.4"
+      },
+      {
+        "trecho": "Each round costs an average of 28.7 hours of GPU computation, leading to a cumulative requirement of 1378.4 GPU-hours for the entire set of experiments.",
+        "localizador": "p. 26, seção 6"
+      },
+      {
+        "trecho": "We discarded the generated code snippets that contain syntax errors and cannot be compiled.",
+        "localizador": "p. 13, RQ1/Approach"
+      },
+      {
+        "trecho": "The secure ratio is the percentage of valid generated code that does not contain vulnerabilities, as assessed by CodeQL.",
+        "localizador": "p. 13, RQ1/Approach"
+      },
+      {
+        "trecho": "Overall, the two security-oriented prompts (Generic Security and Specific Security prompts) achieved the highest secure ratio in three out of eight settings.",
+        "localizador": "p. 21, RQ2/Results"
+      },
+      {
+        "trecho": "On average, the Generic Security prompt attained a secure ratio of 59.9%, while the Specific Security prompt achieved 57.5%.",
+        "localizador": "p. 21–22, RQ2/Results"
+      },
+      {
+        "trecho": "Among the fine-tuned models, the LoRA-tuned models achieved the highest average secure ratio at 60.9%, and IA3-tuned models are 58.5%.",
+        "localizador": "p. 22, RQ2/Results"
+      },
+      {
+        "trecho": "In total, there are 52 security-sensitive scenarios.",
+        "localizador": "p. 4"
+      },
+      {
+        "trecho": "However, we select 56 CWE scenarios in total, and there are sub-scenarios for several scenarios, such as CWE-787 has three sub-scenarios, such as CWE-787-0 and CWE-787-1, for the C language.",
+        "localizador": "p. 29, seção 7.1"
+      },
+      {
+        "trecho": "Our security-sensitive prompt dataset for evaluating LLMs covers 11 CWEs in the top 25 CWEs [35].",
+        "localizador": "p. 10, seção 3.3"
+      },
+      {
+        "trecho": "We observe maximum improvements in security of 6.4% in C language and 5.0% in C++ language.",
+        "localizador": "p. 2, resumo"
+      },
+      {
+        "trecho": "We observe an improvement of up to 6.4% for C and 5.4% for C++ when measuring secure ratio using PEFT techniques.",
+        "localizador": "p. 31, conclusão"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Generic Security",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes"
+      ],
+      "comparador": "Prompt original («### Instruction: Please complete the code.» + cenário), linha «Pretrained» da Tabela 6",
+      "modelo": "CodeGen2-7B (pré-treinado, sem ajuste fino)",
+      "benchmark": "Cenários sensíveis à segurança em C (26 cenários; 23 de Pearce et al. e 3 criados pelos autores)",
+      "metrica": "Secure code / Valid code (secure ratio)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 56.0,
+        "intervencao": 57.5
+      },
+      "denominador": "Trechos válidos (compiláveis): 720 de 780 gerados no prompt original; 703 de 780 no Generic Security",
+      "condicoes": "30 amostras por cenário; temperatura 0,8, top-p 0,9 e no máximo 100 tokens (configuração da RQ1 mantida na RQ2); trechos que não compilam descartados; vulnerabilidades detectadas pelo CodeQL (versão e consultas nao_informado). Número de execuções repetidas além das 30 amostras: nao_informado. Sem teste estatístico para a RQ2. Valor conferido na imagem da p. 21 (resolução baixa, mas legível e coincidente com o texto extraído); valores da linha Pretrained conferidos também na Tabela 3, p. 14. O número absoluto de trechos seguros é 403 contra 404, com denominadores diferentes.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado para prompting: as declarações principais do estudo tratam do ajuste fino, e a RQ2 destaca dois prompts (Generic e Specific) sem que um prevaleça, comparados sobretudo ao LoRA-tuned. A Tabela 6 é a primeira tabela com contraste de prompting (prompt original contra prompts de segurança). Dentro dela: métrica secure ratio, por ser aquela em que a RQ2 formula a comparação dos prompts (a coluna valid ratio, que precede, mede compilabilidade e não é usada pelo estudo para comparar os prompts); primeira linguagem C; primeiro modelo CodeGen2-7B; primeira linha de base de prompting, «Pretrained» (prompt original); primeira técnica listada, Generic.",
+      "derivacao": "direta",
+      "localizador": "Tabela 6, p. 21 (PDF e impressa), bloco CodeGen2-7B, linhas «Pretrained» e «Generic», coluna C – «Secure code / Valid code»; método na p. 20",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Pretrained 720/780 (92.3%) 403/720 (56.0%) 674/780 (86.4%) 414/674 (61.4%)",
+          "localizador": "Tabela 6, p. 21, bloco CodeGen2-7B; colunas: C – Valid code / Total, C – Secure code / Valid code, C++ – Valid code / Total, C++ – Secure code / Valid code"
+        },
+        {
+          "trecho": "Generic 703/780 (90.1%) 404/703 (57.5%) 670/780 (85.9%) 415/670 (61.9%)",
+          "localizador": "Tabela 6, p. 21, bloco CodeGen2-7B; colunas: C – Valid code / Total, C – Secure code / Valid code, C++ – Valid code / Total, C++ – Secure code / Valid code"
+        },
+        {
+          "trecho": "For the Generic Security setting, we appended the instruction: “Make sure that the generated code is secure, meaning it does not contain any security vulnerabilities”, to enforce the model to generate secure code.",
+          "localizador": "p. 20, RQ2/Approach"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Specific Security",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "restricoes"
+      ],
+      "mecanismos_acrescentados": [
+        "restricoes",
+        "contexto"
+      ],
+      "comparador": "Prompt original («### Instruction: Please complete the code.» + cenário), linha «Pretrained» da Tabela 6",
+      "modelo": "CodeGen2-7B (pré-treinado, sem ajuste fino)",
+      "benchmark": "Cenários sensíveis à segurança em C (26 cenários; 23 de Pearce et al. e 3 criados pelos autores)",
+      "metrica": "Secure code / Valid code (secure ratio)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 56.0,
+        "intervencao": 59.2
+      },
+      "denominador": "Trechos válidos (compiláveis): 720 de 780 gerados no prompt original; 711 de 780 no Specific Security",
+      "condicoes": "Mesmas condições da extração anterior (30 amostras por cenário, temperatura 0,8, top-p 0,9, máximo de 100 tokens, CodeQL, descarte de código não compilável). O prompt inclui o identificador e a descrição da CWE do cenário; o texto das descrições não é reproduzido no artigo. Contraste de pacote (restrição dirigida + informação da CWE). Número de execuções repetidas: nao_informado. Sem teste estatístico. Valor conferido na imagem da p. 21.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Specific Security é tratada pelo estudo como técnica distinta da Generic Security (template e linha próprios na Tabela 6) e ainda não estava representada; aplicada a mesma ordem (Tabela 6, secure ratio, C, CodeGen2-7B, linha de base Pretrained).",
+      "derivacao": "direta",
+      "localizador": "Tabela 6, p. 21 (PDF e impressa), bloco CodeGen2-7B, linhas «Pretrained» e «Specific», coluna C – «Secure code / Valid code»; método na p. 20 e template na p. 21",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Pretrained 720/780 (92.3%) 403/720 (56.0%) 674/780 (86.4%) 414/674 (61.4%)",
+          "localizador": "Tabela 6, p. 21, bloco CodeGen2-7B; colunas: C – Valid code / Total, C – Secure code / Valid code, C++ – Valid code / Total, C++ – Secure code / Valid code"
+        },
+        {
+          "trecho": "Specific 711/780 (91.2%) 421/711 (59.2%) 682/780 (87.4%) 401/682 (58.8%)",
+          "localizador": "Tabela 6, p. 21, bloco CodeGen2-7B; colunas: C – Valid code / Total, C – Secure code / Valid code, C++ – Valid code / Total, C++ – Secure code / Valid code"
+        },
+        {
+          "trecho": "The Specific Security setting was further designed to target particular vulnerabilities by including the CWE ID and its description in the prompt template.",
+          "localizador": "p. 20, RQ2/Approach"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas; a RQ2 define a comparação entre ajuste fino e métodos baseados em prompt.",
+      "localizador": "p. 4–5, lista de RQs; p. 19, RQ2/Motivation"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Modelos, templates de prompt, hiperparâmetros de geração, número de amostras, métricas e ferramenta de detecção são descritos; faltam as descrições de CWE efetivamente inseridas no Specific Security, a configuração/versão do CodeQL e a indicação de que a linha do prompt original foi reexecutada na RQ2; há contagens de cenários divergentes (52 contra 56).",
+      "localizador": "p. 10, p. 12–13, p. 20–21, p. 29"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "O prompt original com o mesmo modelo, os mesmos cenários e as mesmas configurações de geração serve de linha de base executada para os prompts de segurança.",
+      "localizador": "p. 20, RQ2/Approach; Tabela 6, p. 21"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Valid ratio e secure ratio são definidos, com numeradores e denominadores impressos (valores da linha pré-treinada coincidem entre as Tabelas 3 e 6); porém o estimador das médias da RQ2 não é informado e as médias de LoRA-tuned e IA3-tuned não coincidem com cálculo próprio; o secure ratio depende de um denominador variável e de um detector estático com falsos positivos/negativos; a melhoria máxima diverge entre resumo, contribuições e conclusão.",
+      "localizador": "p. 13; Tabela 6, p. 21; p. 21–22; p. 2, p. 5, p. 31"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seção própria de ameaças internas (falsos positivos do CodeQL, aleatoriedade, limitação estatística, processo de avaliação) e externas (modelos, linguagens, CWEs).",
+      "localizador": "p. 29–30, seção 7"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Pacote de replicação indicado (não acessado), templates de prompt e hiperparâmetros informados; faltam snapshots/variantes dos modelos, versão e consultas do CodeQL e o texto das descrições de CWE do Specific Security.",
+      "localizador": "p. 5, nota 4; p. 8–9; p. 12; p. 21; p. 32"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo verifica sobreposição de 10-gramas entre o conjunto de ajuste fino e os cenários de avaliação, mas não discute contaminação do pré-treinamento pelos 23 cenários públicos de Pearce et al., que afeta também as condições de prompting.",
+      "localizador": "p. 17, RQ1/Discussions (3); p. 10, seção 3.3"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (1704 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [
+      2,
+      4,
+      5,
+      10,
+      12,
+      13,
+      14,
+      20,
+      21,
+      22,
+      29,
+      31
+    ]
+  }
+}

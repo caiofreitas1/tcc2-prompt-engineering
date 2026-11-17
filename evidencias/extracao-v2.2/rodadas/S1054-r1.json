@@ -1,0 +1,295 @@
+{
+  "estudo": "S1054",
+  "texto_fonte": "fontes/textos/lote/S1054.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["refatoracao"],
+    "tecnicas": [
+      {
+        "nome_original": "Recursive Criticism and Improvement (RCI)",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Seção III-A, p. 3 do PDF; Seção III-D e Fig. 3, p. 4 do PDF; Tabela II, p. 5 do PDF; Seção IV-A, p. 5–6 do PDF",
+        "observacao": "Prompt de sistema comum (persona de engenheiro Python, objetivo de extrair método preservando a funcionalidade → instrucao; saída apenas em código executável, sem explicações → restricoes), código-alvo fornecido no prompt (contexto) e laço de realimentação com mensagens de falha dos testes (feedback). A primeira tentativa do RCI é zero-shot, sem exemplo (p. 6). O contraste executado é RCI × one-shot (Tabela II): as duas condições diferem em mais de um ingrediente (o RCI não tem o exemplo resolvido do one-shot e acrescenta o laço de feedback), de modo que o ganho é do pacote e não pode ser atribuído só ao feedback. O contraste com a tentativa zero-shot inicial (p. 6) é por rodada, dentro das mesmas execuções do RCI (contribuição cumulativa das rodadas de feedback), e não uma condição executada separadamente. Número máximo de tentativas descrito de forma inconsistente (ver heterogeneidade)."
+      },
+      {
+        "nome_original": "One-Shot Prompting",
+        "mecanismos": ["instrucao", "restricoes", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "Seção III-D e Fig. 3, p. 4 do PDF; Tabela II, p. 5 do PDF; Seção IV-A, p. 6 do PDF",
+        "observacao": "Mesmo prompt de sistema do RCI, com um exemplo de Extract Method (código antes e depois) e o código-alvo. O estudo compara one-shot com a tentativa zero-shot inicial do RCI (sem exemplo, sem feedback), relatada em prosa na p. 6; as duas condições diferem essencialmente no exemplo, com pequenas diferenças de redação do prompt de usuário (Fig. 3). Ressalva: a condição zero-shot não é uma execução independente, e sim a primeira rodada do RCI. O exemplo usado (fixo ou variável por problema) não é informado."
+      },
+      {
+        "nome_original": "Zero-shot (initial attempt of RCI)",
+        "mecanismos": ["instrucao", "restricoes", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção IV-A, p. 6 do PDF; Fig. 3, p. 4 do PDF",
+        "observacao": "Condição base: prompt de sistema e prompt de usuário do RCI sem exemplos e sem feedback de testes. Resultados de TPP relatados só no texto (p. 6), não na Tabela II."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Model Selection (cinco LLMs de código aberto)",
+        "natureza": "selecao_modelo",
+        "descricao": "Comparação entre cinco modelos de 3B a 8B parâmetros (RQ1); diferenças entre modelos não são efeito de prompting.",
+        "localizador": "Seção III-C e Tabela I, p. 3 do PDF"
+      },
+      {
+        "nome_original": "Scope Wrapping",
+        "natureza": "outro",
+        "descricao": "Pré-processamento que envolve o código global numa função sintética (wrapped_artificially) para permitir métricas por método; altera o código de entrada, mas não é técnica de prompting.",
+        "localizador": "Seção III-B, Preprocessing Steps (i), p. 3 do PDF"
+      }
+    ],
+    "modelos": [
+      {"nome": "Qwen/CodeQwen1.5-7B-Chat (Alibaba)", "versao": "identificador do repositório informado; revisão/snapshot nao_informado", "parametros": "7.2B"},
+      {"nome": "deepseek-ai/deepseek-coder-6.7b-instruct (DeepSeek)", "versao": "identificador do repositório informado; revisão/snapshot nao_informado", "parametros": "6.7B"},
+      {"nome": "meta-llama/Llama-3.2-3B-Instruct (Meta)", "versao": "identificador do repositório informado; revisão/snapshot nao_informado", "parametros": "3.2B"},
+      {"nome": "Qwen/Qwen2.5-Coder-7B-Instruct (Alibaba)", "versao": "identificador do repositório informado; revisão/snapshot nao_informado", "parametros": "7.6B"},
+      {"nome": "microsoft/Phi-4-mini-instruct (Microsoft)", "versao": "identificador do repositório informado; revisão/snapshot nao_informado", "parametros": "3.8B"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "Subconjunto de Python do CodeNet (IBM Project CodeNet)",
+        "quantidade": "21 problemas × 40 submissões = 840 amostras de código (como impresso); 800 problemas Python no conjunto completo antes do filtro",
+        "observacao": "Seleção: problemas com 'CC of three' e comprimento suficiente, e pelo menos 40 submissões únicas; amostragem com suavização de Laplace (α = 5) por LOC. A deduplicação é descrita, mas não se informa se reduziu as 840 amostras. TPP é calculado sobre 840 amostras por modelo e estratégia (p. 5); LOC e CC são calculados para candidatos que passam nos testes (p. 3), sem denominador por condição informado. Versão do CodeNet nao_informado.",
+        "localizador": "Seção III-B, p. 3 do PDF; Seção IV-A, p. 5 do PDF"
+      },
+      {
+        "nome": "Pesquisa com desenvolvedores (survey)",
+        "quantidade": "9 desenvolvedores; 20 amostras de código de 5 problemas; original + saídas RCI de 3 modelos (Qwen2.5-Coder, DeepSeek-Coder, CodeQwen1.5)",
+        "observacao": "Descrição do número de amostras ambígua entre p. 4 e p. 6 (ver heterogeneidade). Avalia apenas saídas RCI, sem contraste de prompting.",
+        "localizador": "Seção III-E-2, p. 4–5 do PDF; Seção IV-B, p. 6 do PDF"
+      }
+    ],
+    "metricas": [
+      {"nome": "Test Pass Percentage (TPP / EM TPP)", "definicao": "proporção de refatorações que passam em todos os casos de teste originais; métrica primária", "denominador": "840 amostras por modelo e estratégia", "localizador": "Seção III-E-1, p. 4 do PDF; Seção IV-A, p. 5 do PDF; Tabela II, p. 5 do PDF"},
+      {"nome": "Lines of Code (LOC)", "definicao": "média de linhas por método no código refatorado", "denominador": "nao_informado (calculada para candidatos que passam nos testes, segundo p. 3)", "localizador": "Seção III-E-1, p. 4 do PDF; Seção III-A, p. 3 do PDF"},
+      {"nome": "Cyclomatic Complexity (CC)", "definicao": "CC máxima entre os métodos do código refatorado; a Tabela II reporta a média dessa máxima", "denominador": "nao_informado (calculada para candidatos que passam nos testes, segundo p. 3)", "localizador": "Seção III-E-1, p. 4 do PDF; Seção IV-A, p. 6 do PDF"},
+      {"nome": "Avaliações Likert (−2 a +2) para cinco afirmações; escore ponderado; taxa de aceitação", "definicao": "média e desvio-padrão por modelo e afirmação; taxa de aceitação para 'I would accept this refactoring if it was offered by an agent'", "denominador": "nao_informado para a taxa de aceitação", "localizador": "Seção III-E-2, p. 4–5 do PDF; Fig. 7, p. 8 do PDF"},
+      {"nome": "Cohen's κ quadrático ponderado", "definicao": "concordância entre pares de avaliadores", "denominador": "pares de avaliadores (número não informado explicitamente)", "localizador": "Seção IV-B, p. 6 do PDF"}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos de baixo TPP (notadamente Llama3.2) geram código incompleto ou trivial, curto e menos complexo, mas funcionalmente incorreto; reduções de LOC e CC podem decorrer da omissão de lógica.",
+        "localizador": "Seção IV-A, p. 6 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Métricas tradicionais (CC, LOC) divergem do julgamento humano; podem ser enganosas se usadas isoladamente (risco de avaliação).",
+        "localizador": "Resumo, p. 1 do PDF; Seção IV-C, p. 8 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à validade interna: o feedback do RCI usa só falhas de testes automáticos e pode não tratar alguns tipos de erro.",
+        "localizador": "Seção VI, Internal Validity, p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à validade externa: apenas Python, apenas Extract Method, programas pequenos (mediana de cerca de 30 linhas) e pesquisa com nove desenvolvedores e conjunto fixo de problemas; os resultados podem não se generalizar.",
+        "localizador": "Seção VI, External Validity, p. 9 do PDF"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Ameaça à validade de construto: métricas e itens do questionário podem não captar aspectos importantes da qualidade do código ou da preferência dos desenvolvedores.",
+        "localizador": "Seção VI, Construct Validity, p. 9 do PDF"
+      }
+    ],
+    "mitigacoes": [
+      {"descricao": "Casos de teste de cada amostra extraídos e verificados no código original para confirmar a correção de base.", "avaliada": "nao", "localizador": "Seção III-B, Preprocessing Steps (iii), p. 3 do PDF"},
+      {"descricao": "Deduplicação de amostras idênticas após remover comentários e espaços.", "avaliada": "nao", "localizador": "Seção III-B, Preprocessing Steps (ii), p. 3 do PDF"},
+      {"descricao": "Laço de feedback padronizado para reduzir viés e garantir consistência.", "avaliada": "nao", "localizador": "Seção VI, Internal Validity, p. 9 do PDF"},
+      {"descricao": "Seleção de problemas diversos do CodeNet e amostragem com suavização de Laplace para incluir soluções curtas e longas.", "avaliada": "nao", "localizador": "Seção III-B, p. 3 do PDF; Seção VI, External Validity, p. 9 do PDF"},
+      {"descricao": "Afirmações do questionário testadas em piloto e refinadas; todos os participantes avaliaram os mesmos problemas; concordância medida por κ.", "avaliada": "nao", "localizador": "Seção III-E-2, p. 4 do PDF; Seção IV-B, p. 6 do PDF; Seção VI, p. 9 do PDF"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Número máximo de tentativas do RCI descrito de forma inconsistente: 'up to two attempts' (p. 3), 'can repeat up to three times' (p. 4) e, na Fig. 1, 'If test cases fails and attempt < 3' (p. 2); os resultados mencionam correções 'after the second' (p. 5).",
+        "localizador": "Fig. 1, p. 2 do PDF; Seção III-A, p. 3 do PDF; Seção III-D, p. 4 do PDF; Seção IV-A, p. 5 do PDF"
+      },
+      {
+        "descricao": "Narrativa de ganhos do RCI contradiz a Tabela II. O texto afirma 'RCI delivered >10 percentage point improvements in TPP, showing robustness across models' e, na discussão, ganhos de '8–14 percentage points depending on the model'. Cálculo próprio a partir da Tabela II (RCI − one-shot): CodeQwen-1.5 13,5 p.p.; Qwen2.5-Coder 8,6 p.p.; DeepSeek-Coder 8,6 p.p.; Llama-3.2 3,0 p.p.; Phi-4 11,7 p.p. Em relação à tentativa zero-shot (p. 6), cálculo próprio: 16,6; 12,2; 12,3; 3,2; 15,2 p.p. Llama-3.2 fica abaixo de 10 p.p. e fora da faixa 8–14 em ambas as bases.",
+        "localizador": "Seção IV-A, p. 5–6 do PDF; Tabela II, p. 5 do PDF; Seção V, p. 8 do PDF"
+      },
+      {
+        "descricao": "O texto afirma 'Gains were largest for high-performing models', mas, por cálculo próprio a partir da Tabela II, os ganhos de TPP de CodeQwen-1.5 (0.503→0.638) e Phi-4 (0.462→0.579) superam os de Qwen2.5-Coder (0.722→0.808) e DeepSeek-Coder (0.743→0.829).",
+        "localizador": "Seção IV-A, p. 5 do PDF; Tabela II, p. 5 do PDF"
+      },
+      {
+        "descricao": "Aparente inconsistência na distribuição por iteração do RCI: Qwen2.5-Coder e DeepSeek-Coder teriam refatorado com sucesso cerca de 64% e 67% dos casos na primeira iteração, mas o TPP da tentativa zero-shot (primeira tentativa do RCI) é 0.686 e 0.706; somando os 25% e 30% corrigidos após a segunda (cálculo próprio: 89% e 97%), os valores excedem o TPP final (0.808 e 0.829). Os denominadores dessas porcentagens não são informados.",
+        "localizador": "Seção IV-A, p. 5–6 do PDF; Tabela II, p. 5 do PDF"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que Llama3.2-Oneshot e Phi-4-RCI têm os menores valores de CC (2.87 e 3.28), mas a Tabela II mostra Llama-3.2-RCI com 2.940, menor que Phi-4-RCI (3.278).",
+        "localizador": "Seção IV-A, p. 6 do PDF; Tabela II, p. 5 do PDF"
+      },
+      {
+        "descricao": "O texto afirma redução de LOC superior a 50% para Qwen2.5-Coder-RCI (5.58) e DeepSeek-Coder-RCI (6.19) em relação ao original (12.1); por cálculo próprio, a redução de DeepSeek-Coder-RCI é cerca de 48,8% (6.192/12.103), abaixo de 50%; a de Qwen2.5-Coder-RCI é cerca de 53,9%.",
+        "localizador": "Seção IV-A, p. 6 do PDF; Tabela II, p. 5 do PDF"
+      },
+      {
+        "descricao": "Inversões em LOC e CC: o resumo afirma que o RCI supera o one-shot 'in test pass rates and refactoring quality', mas na Tabela II o RCI tem LOC maior que o one-shot para CodeQwen-1.5 (7.337 vs 7.119), DeepSeek-Coder (6.192 vs 5.827) e Llama-3.2 (8.181 vs 5.801), e CC maior para DeepSeek-Coder (3.453 vs 3.411) e Llama-3.2 (2.940 vs 2.870). Além disso, LOC e CC são calculados só para candidatos que passam nos testes (p. 3), com denominadores diferentes entre condições não informados.",
+        "localizador": "Resumo, p. 1 do PDF; Seção III-A, p. 3 do PDF; Tabela II, p. 5 do PDF"
+      },
+      {
+        "descricao": "Narrativa contradiz a Fig. 5: o texto diz que nos problemas p02684, p02685 e p02686 'even the highest-performing models fail to achieve a 50% pass rate', mas na linha p02684 do heatmap aparecem 0.51 (deepseek oneshot), 0.61 (qwen25 rci) e 0.65 (deepseek rci).",
+        "localizador": "Seção IV-A, p. 5 do PDF; Fig. 5, p. 7 do PDF"
+      },
+      {
+        "descricao": "A aceitação 'over 70%' (resumo e contribuições) não aparece com valor, denominador ou forma de cálculo no corpo; o corpo relata apenas médias Likert para a afirmação de aceitação (0.93 Qwen2.5-Coder, 0.49 Qwen1.5, 0.29 DeepSeek-Coder).",
+        "localizador": "Resumo, p. 1 do PDF; Seção I, p. 2 do PDF; Seção III-E-2, p. 5 do PDF; Seção IV-B, p. 7 do PDF"
+      },
+      {
+        "descricao": "O estudo descreve o efeito do RCI como significativo ('significantly boosts', 'significant impact') sem relatar teste estatístico, intervalo de confiança ou número de execuções.",
+        "localizador": "Seção I, p. 2 do PDF; Seção V, p. 8 do PDF"
+      },
+      {
+        "descricao": "Aparente inconsistência na interpretação do κ: o estudo relata κ médio ≈ 0.30, com valores de 0.17 a 0.52, e afirma concordância 'fair-to-moderate' segundo Landis & Koch; o valor mínimo 0.17 ficaria abaixo da faixa 'fair' nessa escala, que a fonte não reproduz.",
+        "localizador": "Seção IV-B, p. 6 do PDF"
+      },
+      {
+        "descricao": "Descrição do desenho da pesquisa ambígua: na p. 4, cada desenvolvedor revisou 20 amostras de código de cinco problemas, com quatro versões por problema; na p. 6, para cada uma das 20 amostras foram avaliados o original e três versões RCI.",
+        "localizador": "Seção III-E-2, p. 4 do PDF; Seção IV-B, p. 6 do PDF"
+      },
+      {
+        "descricao": "Critério de seleção ambíguo: problemas filtrados por 'a CC of three', mas a CC média dos arquivos selecionados é 4.602; a fonte não esclarece se o critério é CC mínima.",
+        "localizador": "Seção III-B-2, p. 3 do PDF"
+      }
+    ],
+    "observacoes": [
+      {"descricao": "Todos os modelos executados numa única GPU NVIDIA Tesla V100 (16GB VRAM). Parâmetros de decodificação (temperatura, top-p, tamanho máximo) e número de execuções: nao_informado.", "localizador": "Seção III-C, p. 3 do PDF"},
+      {"descricao": "Templates de prompt mantidos consistentes entre modelos, com pequenos ajustes de sintaxe; o RCI mantém o histórico da conversa e acrescenta o feedback dos testes.", "localizador": "Seção III-A, p. 3 do PDF; Seção III-D, p. 4 do PDF"},
+      {"descricao": "A pesquisa com desenvolvedores avalia só saídas RCI de três modelos e o código original (sem contraste de prompting); cerca de 45 minutos por participante; experiência de 4 a 8 anos.", "localizador": "Seção III-E-2, p. 4–5 do PDF"},
+      {"descricao": "Fig. 6 apresenta retas de regressão de TPP versus CC e LOC por modelo; a Fig. 7 apresenta médias e desvios-padrão das avaliações, com rótulos ilegíveis na imagem; os valores da pesquisa foram tomados do texto.", "localizador": "Fig. 6 e Fig. 7, p. 8 do PDF"},
+      {"descricao": "Link de figshare impresso para o pipeline; o texto também diz que o material será liberado após a publicação. Pacote não acessado nem validado.", "localizador": "Nota 1, p. 2 do PDF; Seção VI, Reproducibility, p. 9 do PDF"}
+    ],
+    "citacoes": [
+      {"trecho": "In this work, we critically evaluate five state-of-the-art open-source LLMs, spanning 3B to 8B parameter sizes, on the EMR task for Python code.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "We systematically assess functional correctness and code quality using automated metrics and investigate the impact of prompting strategies by comparing one-shot prompting to a Recursive criticism and improvement (RCI) approach.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "You are an expert Python software engineer.", "localizador": "Fig. 3, System Prompt, p. 4 do PDF"},
+      {"trecho": "Only output valid, executable Python code and do not provide any explanations or comments.", "localizador": "Fig. 3, System Prompt, p. 4 do PDF"},
+      {"trecho": "One-Shot Prompting: A single EMR example is provided to guide the model's transformation, minimizing complexity and inference time.", "localizador": "Seção III-D (i), p. 4 do PDF"},
+      {"trecho": "If incorrect, targeted feedback based on test case errors is added to the prompt, and the model tries again.", "localizador": "Seção III-D (ii), p. 4 do PDF"},
+      {"trecho": "By design, initial attempt of RCI is a zero-shot attempt, the model is given only the task specification and target code (no examples, no test-failure feedback).", "localizador": "Seção IV-A, p. 6 do PDF"},
+      {"trecho": "Models were instructed to output only executable code, avoid explanations, and limit changes to the EMR.", "localizador": "Seção III-D, p. 4 do PDF"},
+      {"trecho": "TPP serves as the primary metric for comparing models and prompt strategies head-to-head.", "localizador": "Seção III-E-1, p. 4 do PDF"},
+      {"trecho": "We computed TPP for every model and both prompting strategies (one-shot and RCI) across all 840 code samples.", "localizador": "Seção IV-A, p. 5 do PDF"},
+      {"trecho": "One-shot logs the failure, while the RCI appends test feedback to the conversation and retries, up to two attempts.", "localizador": "Seção III-A, p. 3 do PDF"},
+      {"trecho": "This process can repeat up to three times, simulating iterative improvement.", "localizador": "Seção III-D (ii), p. 4 do PDF"},
+      {"trecho": "Candidates passing test cases are then analyzed using metrics like CC and LOC.", "localizador": "Seção III-A, p. 3 do PDF"},
+      {"trecho": "Importantly, even with this simple capped budget, RCI delivered >10 percentage point improvements in TPP, showing robustness across models.", "localizador": "Seção IV-A, p. 5–6 do PDF"},
+      {"trecho": "We observed that most improvements occurred early: for instance, Qwen2.5-Coder and DeepSeek-Coder, successfully refactored about 64% and 67% of cases, respectively, in the first iteration, with a further 25% and 30% corrected after the second.", "localizador": "Seção IV-A, p. 5 do PDF"},
+      {"trecho": "Zero-shot results were consistently lower than both one-shot and RCI conditions, TPP = 0.472 for CodeQwen-1.5, 0.686 for Qwen2.5-Coder, 0.706 for DeepSeek-Coder, 0.334 for Llama-3.2, and 0.427 for Phi-4.", "localizador": "Seção IV-A, p. 6 do PDF"},
+      {"trecho": "Interestingly, Llama3.2-Oneshot and Phi-4-RCI report the lowest CC values (2.87 and 3.28), but as with LOC, these models also produce many incomplete or incorrect outputs, as indicated by their low TPP.", "localizador": "Seção IV-A, p. 6 do PDF"},
+      {"trecho": "The best-performing approaches: Qwen2.5-Coder-RCI (5.58) and DeepSeek-Coder-RCI (6.19) achieve more than a 50% reduction in LOC compared to the original code.", "localizador": "Seção IV-A, p. 6 do PDF"},
+      {"trecho": "This is due to incomplete or trivial code generations that may be short, but do not produce functionally correct solutions.", "localizador": "Seção IV-A, p. 6 do PDF"},
+      {"trecho": "This detailed view shows that specific problems, such as p02684, p02685, and p02686, are complex for all models: even the highest-performing models fail to achieve a 50% pass rate on these tasks.", "localizador": "Seção IV-A, p. 5 do PDF"},
+      {"trecho": "Gains were largest for high-performing models.", "localizador": "Seção IV-A, p. 5 do PDF"},
+      {"trecho": "Across all models, RCI-based prompting consistently outperformed one-shot prompting, with average TPP improvements of 8–14 percentage points depending on the model.", "localizador": "Seção V, p. 8 do PDF"},
+      {"trecho": "RCI-based prompting consistently outperforms one-shot prompting in test pass rates and refactoring quality.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "A developer survey on RCI-generated refactorings shows over 70% acceptance, with Qwen2.5-Coder rated highest across all evaluation criteria.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "Prompting Strategies: Comparison of one-shot vs. RCI, showing RCI significantly boosts refactoring success.", "localizador": "Seção I, contribuições, p. 2 do PDF"},
+      {"trecho": "To assess the consistency of human judgments, we computed the quadratic-weighted Cohen's κ across all rater pairs, obtaining an average κ ≈ 0.30, with individual values ranging from 0.17 to 0.52 depending on the survey statement.", "localizador": "Seção IV-B, p. 6 do PDF"},
+      {"trecho": "To keep the survey manageable and avoid participant fatigue, each developer reviewed 20 code samples covering five distinct problems.", "localizador": "Seção III-E-2, p. 4 do PDF"},
+      {"trecho": "For every sample, developers rated the original code and three RCI-refactored versions.", "localizador": "Seção IV-B, p. 6 do PDF"},
+      {"trecho": "From the full set of Python problems (800), we filtered for those that: (a) have a CC of three and sufficient length for EMR.", "localizador": "Seção III-B-2, p. 3 do PDF"},
+      {"trecho": "While traditional metrics like CC and LOC provide useful signals, they often diverge from human judgments, emphasizing the need for human-in-the-loop evaluation.", "localizador": "Resumo, p. 1 do PDF"},
+      {"trecho": "The RCI prompting approach uses automated test failures as feedback for language models, but this may overlook nuanced or contextual guidance.", "localizador": "Seção VI, Internal Validity, p. 9 do PDF"},
+      {"trecho": "While the feedback loop is standardized to reduce bias and ensure consistency, some error types may not be effectively addressed.", "localizador": "Seção VI, Internal Validity, p. 9 do PDF"},
+      {"trecho": "Since language features vary, results may not generalize to other languages or refactoring types.", "localizador": "Seção VI, External Validity, p. 9 do PDF"},
+      {"trecho": "However, it is possible that our chosen metrics and survey items do not fully capture some important aspects of code quality or developer preference.", "localizador": "Seção VI, Construct Validity, p. 9 do PDF"},
+      {"trecho": "Each sample's test cases were extracted and checked on the original code to confirm baseline correctness.", "localizador": "Seção III-B, Preprocessing Steps (iii), p. 3 do PDF"},
+      {"trecho": "Samples with identical code after stripping comments and whitespace are deduplicated.", "localizador": "Seção III-B, Preprocessing Steps (ii), p. 3 do PDF"},
+      {"trecho": "Survey statements were pilot-tested and refined for clarity.", "localizador": "Seção VI, Construct Validity, p. 9 do PDF"},
+      {"trecho": "To facilitate replication and extension, we will release our full evaluation pipeline, code, data splits, and model configurations upon publication.", "localizador": "Seção VI, Reproducibility, p. 9 do PDF"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "refatoracao",
+      "tecnica": "Recursive Criticism and Improvement (RCI)",
+      "mecanismos": ["instrucao", "restricoes", "contexto", "feedback"],
+      "mecanismos_acrescentados": ["feedback"],
+      "comparador": "One-Shot Prompting (CodeQwen-1.5-Oneshot)",
+      "modelo": "Qwen/CodeQwen1.5-7B-Chat (CodeQwen-1.5); revisão nao_informado",
+      "benchmark": "Subconjunto de Python do CodeNet (21 problemas, 840 amostras de código)",
+      "metrica": "EM TPP (Test Pass Percentage): proporção de refatorações que passam em todos os casos de teste originais",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.503, "intervencao": 0.638},
+      "denominador": "840 amostras de código por modelo e estratégia (texto, p. 5)",
+      "condicoes": "Mesmo prompt de sistema nas duas condições. One-shot: um exemplo de Extract Method no prompt, uma única tentativa. RCI: primeira tentativa zero-shot (sem exemplo) e novas tentativas com feedback das falhas de teste; número máximo de tentativas descrito de forma inconsistente (até duas tentativas, p. 3; até três vezes, p. 4; attempt < 3, Fig. 1). O ganho é do pacote RCI e não pode ser atribuído só ao feedback, pois o comparador tem exemplo e o RCI não. Parâmetros de decodificação, número de execuções e testes estatísticos: nao_informado. GPU única V100 16GB. Sem agregado impresso entre modelos; usado o primeiro modelo da Tabela II. Valores conferidos visualmente na Tabela II (p. 5 do PDF) e no texto da p. 5.",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "Resumo e contribuições identificam uma técnica (RCI) contra um comparador (one-shot), e a seção de método declara TPP como métrica primária para comparar estratégias de prompt. Resultado abrange cinco modelos sem agregado impresso compatível; aplicado o primeiro modelo na ordem da Tabela II (CodeQwen-1.5).",
+      "derivacao": "direta",
+      "localizador": "Tabela II, linhas CodeQwen-1.5-RCI e CodeQwen-1.5-Oneshot, coluna EM TPP, p. 5 do PDF; Seção IV-A, p. 5 do PDF",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "CodeQwen-1.5-RCI 0.638 7.337 3.668", "localizador": "Tabela II (colunas Approach | EM TPP | LOC | CC), p. 5 do PDF"},
+        {"trecho": "CodeQwen-1.5-Oneshot 0.503 7.119 3.671", "localizador": "Tabela II (colunas Approach | EM TPP | LOC | CC), p. 5 do PDF"},
+        {"trecho": "CodeQwen1.5 improved from 50.3% to 63.8%, showing mid-tier models also benefit.", "localizador": "Seção IV-A, p. 5 do PDF"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo de avaliar cinco LLMs de código aberto em Extract Method para Python e o impacto do RCI frente ao one-shot, com quatro questões de pesquisa explícitas.",
+      "localizador": "Resumo, p. 1 do PDF; Seção IV, RQ1–RQ4, p. 5 do PDF"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, seleção de dados, pré-processamento e templates de prompt descritos (Fig. 1, Fig. 3), mas o número máximo de tentativas do RCI é inconsistente entre seções, o exemplo do one-shot não é especificado e parâmetros de decodificação e número de execuções não são informados.",
+      "localizador": "Seção III-A–D, p. 2–4 do PDF"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "One-shot executado nos mesmos modelos e nas mesmas 840 amostras, com tentativa zero-shot relatada; porém RCI e one-shot diferem em mais de um ingrediente (exemplo e feedback), e a condição zero-shot é apenas a primeira rodada do RCI, não execução independente.",
+      "localizador": "Seção III-D e Fig. 3, p. 4 do PDF; Tabela II, p. 5 do PDF; Seção IV-A, p. 6 do PDF"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "TPP, LOC e CC definidos, com denominador de 840 para TPP; porém LOC e CC são calculados só para candidatos aprovados, sem denominador por condição, a aceitação 'over 70%' não tem valor nem cálculo no corpo, percentuais por iteração não batem com o TPP zero-shot e há narrativas que contradizem a Tabela II e a Fig. 5.",
+      "localizador": "Seção III-A, p. 3 do PDF; Seção III-E, p. 4–5 do PDF; Seção IV-A, p. 5–6 do PDF"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção própria discute validade interna, externa, de construto e reprodutibilidade, mas não trata não determinismo, ausência de repetições ou testes estatísticos, nem possível contaminação do CodeNet.",
+      "localizador": "Seção VI, p. 9 do PDF"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Identificadores dos modelos, hardware e templates de prompt informados e link de figshare impresso, mas o texto diz que o material será liberado após a publicação e parâmetros de decodificação não são informados; o pacote não foi acessado.",
+      "localizador": "Tabela I, p. 3 do PDF; Fig. 3, p. 4 do PDF; Nota 1, p. 2 do PDF; Seção VI, p. 9 do PDF"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após busca no texto completo, o estudo não discute possível presença do CodeNet (conjunto público) nos dados de pré-treinamento dos modelos nem controle desse risco.",
+      "localizador": "Texto completo; Seção III-B, p. 3 do PDF; Seção VI, p. 9 do PDF"
+    }
+  ],
+  "leitura": "completa; texto extraído lido integralmente; páginas do PDF abertas visualmente: p-02 (Fig. 1), p-03 (Tabela I, seleção de dados), p-04 (Fig. 3), p-05 (Tabela II, Fig. 4), p-06 (resultados zero-shot, LOC, CC, κ), p-07 (Fig. 5), p-08 (Fig. 6, Fig. 7, discussão)."
+}

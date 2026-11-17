@@ -1,0 +1,437 @@
+{
+  "estudo": "S1155",
+  "texto_fonte": "fontes/textos/lote/S1155.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "InlineCoder",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "instrucao", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 4-9 (impressa FSE066:4-9), Seções 3.1-3.4, Fig. 2 e Fig. 5; PDF p. 11, Seção 4.4; PDF p. 12, Tabelas 1 e 2",
+        "observacao": "Pacote híbrido em três etapas encadeadas: (1) rascunho gerado com o prompt Vanilla do benchmark; (2) inlining do rascunho nos chamadores (upstream) e recuperação dos chamados (downstream) por AST e correspondência de substring; (3) prompt final com contexto inlined, funções downstream, rascunho, declaração de confiança em linguagem natural derivada da perplexidade e formato JSON com exemplo de formato. O contrafactual de pacote é a condição Vanilla (prompt do benchmark, também usado na etapa de rascunho), além de In-File e dos sistemas comparadores (Tabelas 1 e 2). Inclui componentes fora do escopo (estimador de perplexidade Qwen2.5-Coder-1.5B, análise estática com Tree-Sitter/Pydepcall), por isso o ganho é do pacote e não de um mecanismo isolado. Mecanismos acrescentados em relação ao prompt base da Fig. 2 (PDF p. 4): contexto de novos tipos (chamadores inlined, funções downstream), embora a categoria contexto já exista no base; instrução de inlining e declaração de confiança (instrucao); formato JSON (restricoes) e {JSON_example} (exemplos de formato); reapresentação do rascunho para revisão (feedback, autocorreção sem execução); rascunho que orienta a recuperação antes da geração final (decomposicao). A Fig. 2 mostra o prompt base abreviado; o texto integral do prompt Vanilla não é reproduzido no artigo."
+      },
+      {
+        "nome_original": "Upstream Inlining / upstream context retrieval (w/o upstream)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5-7 (impressa FSE066:5-7), Seção 3.3.1; PDF p. 13, Seção 5.2 e Tabela 3",
+        "observacao": "Ablação w/o upstream (remoção da recuperação de contexto upstream) em DevEval com DeepSeek-V3 apenas. O artigo não detalha se a remoção do upstream também elimina a instrução de inlining do template."
+      },
+      {
+        "nome_original": "usage-context inlining (w/o inline)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5-7, Seção 3.3.1 e Fig. 3; PDF p. 13, Seção 5.2 e Tabela 3",
+        "observacao": "Ablação w/o inline (remoção do inlining do contexto de uso) em DevEval com DeepSeek-V3. O inlining é uma transformação programática do código dos chamadores que altera a representação do contexto no prompt; classificado como contexto. O artigo não descreve como o contexto upstream é apresentado na variante sem inlining."
+      },
+      {
+        "nome_original": "Downstream Retrieval (w/o downstream)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 7-8, Seção 3.3.2 e Fig. 4; PDF p. 13, Seção 5.2 e Tabela 3",
+        "observacao": "Ablação w/o downstream em DevEval com DeepSeek-V3. A recuperação usa a união das chamadas extraídas da AST do rascunho e da lista de chamadas prevista pelo LLM."
+      },
+      {
+        "nome_original": "confidence statement (w/o confidence)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 8 (impressa FSE066:8), Seção 3.4; PDF p. 13, Seção 5.2 e Tabela 3",
+        "observacao": "A declaração de confiança é orientação em linguagem natural (três níveis) inserida no prompt final; o nível é escolhido por perplexidade calculada por um modelo auxiliar (componente fora do escopo). Ablação em DevEval com DeepSeek-V3."
+      },
+      {
+        "nome_original": "draft implementation (w/o draft)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5, Seção 3.2; PDF p. 8, Seção 3.4; PDF p. 13, Seção 5.2 e Tabela 3",
+        "observacao": "Ablação que remove o rascunho do prompt da geração final; classificado como feedback (o modelo revisa a própria saída anterior, sem execução ou testes). O artigo não informa se, em w/o draft, o rascunho continua a orientar a recuperação downstream nem se a declaração de confiança também é removida."
+      },
+      {
+        "nome_original": "Vanilla",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11 (impressa FSE066:11), Seção 4.3; PDF p. 4, Fig. 2 (a)",
+        "observacao": "Prompt básico dos benchmarks DevEval e RepoExec, com contexto do repositório (imports, dependências, contexto acima e abaixo) apenas anteposto. Prompt base sem base identificável anterior; é também o prompt da etapa de rascunho do InlineCoder."
+      },
+      {
+        "nome_original": "In-File",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11, Seção 4.3",
+        "observacao": "Usa todo o contexto do próprio arquivo, sem informação de outros arquivos. O texto do prompt não é reproduzido; instrucao atribuída por ser prompt de completamento."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11, Seção 4.3",
+        "observacao": "Sistema comparador de recuperação por similaridade iterada com geração (UniXcoder como modelo de embeddings, terceira iteração). A geração intermediária que orienta nova recuperação recebe decomposicao, como no InlineCoder. Mecanismos não isolados no estudo."
+      },
+      {
+        "nome_original": "GraphCoder",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11, Seção 4.3",
+        "observacao": "Sistema comparador com recuperação baseada em grafos de contexto de código; template adaptado pelos autores para completamento do corpo inteiro da função. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "DRACO",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 11, Seção 4.3",
+        "observacao": "Sistema comparador com recuperação guiada por fluxo de dados; template adaptado pelos autores para completamento do corpo inteiro da função. Mecanismos não isolados."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Perplexity-based confidence estimation (Qwen2.5-Coder-1.5B)",
+        "natureza": "outro",
+        "descricao": "Cálculo da perplexidade do rascunho por um modelo auxiliar e limiares (PPL>2; [1,3; 2]; <1,3) ajustados para distribuir cerca de 40%/40%/20% das amostras; só a frase de orientação resultante é prompting.",
+        "localizador": "PDF p. 8, Seção 3.4; PDF p. 11, Seção 4.4"
+      },
+      {
+        "nome_original": "AST parsing and call graph construction (Tree-Sitter, Pydepcall)",
+        "natureza": "outro",
+        "descricao": "Análise estática para identificar chamadores e chamados e transformação de inlining (substituição de parâmetros, normalização de retorno, redirecionamento de atribuição); ferramental que produz o conteúdo de contexto do prompt.",
+        "localizador": "PDF p. 5-7, Seção 3.3; PDF p. 11, Seção 4.4"
+      },
+      {
+        "nome_original": "UniXcoder embedding model (RepoCoder)",
+        "natureza": "selecao_modelo",
+        "descricao": "Modelo de embeddings usado pelos autores na implementação do comparador RepoCoder.",
+        "localizador": "PDF p. 11, Seção 4.3"
+      },
+      {
+        "nome_original": "Decoding configuration",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura 0,0 para todos os modelos e saída limitada a 10000 tokens.",
+        "localizador": "PDF p. 11, Seção 4.4"
+      },
+      {
+        "nome_original": "Context window configuration",
+        "natureza": "orcamento",
+        "descricao": "Limites de entrada configurados na janela nativa: 128000 tokens (DeepSeek-V3), 262144 (Qwen3-Coder) e 400000 (GPT-5-mini).",
+        "localizador": "PDF p. 11, Seção 4.4"
+      }
+    ],
+    "modelos": [
+      {"nome": "DeepSeek-V3", "versao": "DeepSeek-V3-0324 (nota de rodapé 4)", "uso": "backbone"},
+      {"nome": "Qwen3-Coder", "versao": "Qwen3-Coder-480B-A35B-Instruct (nota de rodapé 5)", "uso": "backbone"},
+      {"nome": "GPT-5-mini", "versao": "gpt-5-mini-2025-08-07 (nota de rodapé 6)", "uso": "backbone"},
+      {"nome": "Qwen2.5-Coder-1.5B", "versao": "Qwen2.5-Coder-1.5B (nota de rodapé 7)", "uso": "estimador de probabilidade para a confiança"},
+      {"nome": "UniXcoder", "versao": "unixcoder-base (nota de rodapé 1)", "uso": "modelo de embeddings do comparador RepoCoder"}
+    ],
+    "benchmarks": [
+      {"nome": "DevEval", "versao": "nao_informado", "quantidade": "1,825 annotated samples in Python from 115 repositories across 10 domains", "observacao": "Tamanho do corpus; o denominador de cada métrica nas Tabelas 1 e 3-5 não é ligado explicitamente a esse total. Na Fig. 9 o estudo estratifica em Upstream (16.38%), Downstream (15.29%), Up/Downstream (6.03%) e No Context (62.30%), sem contagens absolutas."},
+      {"nome": "RepoExec (REPOEXEC)", "versao": "nao_informado", "quantidade": "355 functions in Python with ground-truth annotations", "observacao": "Denominador das métricas na Tabela 2 não informado explicitamente."}
+    ],
+    "metricas": [
+      {"nome": "Exact Match (EM)", "observacao": "Binária por amostra; tabelas em escala 0-100 sem unidade impressa."},
+      {"nome": "Edit Similarity (ES)", "observacao": "Baseada na distância de Levenshtein."},
+      {"nome": "BLEU", "observacao": "Sobreposição de n-gramas."},
+      {"nome": "Identifier Match F1 (ID.F1)", "observacao": "F1 sobre conjuntos de identificadores."},
+      {"nome": "EM, Jaccard, F1, Coverage, Downstream Invocation Recall (DIR)", "observacao": "Usadas só na análise de chamadas (Tabela 5)."},
+      {"nome": "Pass@k", "observacao": "Não adotada pelo estudo, por flutuação das execuções."}
+    ],
+    "linguagens": ["Python"],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "O rascunho usado como âncora pode conter imprecisões ou lógica incompleta; sem orientação de confiança, o modelo pode repetir literalmente o rascunho errado (viés de ancoragem/autorrepetição, ilustrado em um caso).",
+        "localizador": "PDF p. 8, Seção 3.4; PDF p. 16-17, Seção 5.5 e Fig. 8"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Contexto apenas anteposto (abordagens convencionais) pode levar o modelo a chamar a utilidade errada e devolver tipo incorreto (exemplo motivador).",
+        "localizador": "PDF p. 3, Seção 2 e Fig. 1"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Métricas baseadas em execução flutuam consideravelmente entre execuções por problemas de ambiente alheios ao modelo, o que motivou não adotar Pass@k.",
+        "localizador": "PDF p. 10, Seção 4.2"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Vazamento de dados pela inclusão da própria função-alvo no conjunto recuperado de funções downstream. O estudo não discute contaminação dos benchmarks no pré-treinamento dos modelos.",
+        "localizador": "PDF p. 8, Seção 3.3.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada: avaliação somente em repositórios Python.",
+        "localizador": "PDF p. 18, Seção 6.2"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Exclusão da função-alvo do conjunto G de funções downstream recuperadas para evitar vazamento.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 8, Seção 3.3.2"
+      },
+      {
+        "descricao": "Declaração de confiança baseada em perplexidade para mitigar o viés de ancoragem no rascunho; a ablação w/o confidence compara com a condição sem ela, mas mede EM, ES, BLEU e ID.F1, não a taxa de autorrepetição.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 13, Tabela 3; PDF p. 16-17, Fig. 8"
+      },
+      {
+        "descricao": "Decodificação com temperatura 0,0 para decodificação determinística e reprodutível.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 11, Seção 4.4"
+      },
+      {
+        "descricao": "Não adoção de Pass@k por causa da flutuação das métricas de execução; uso de métricas de similaridade.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 10, Seção 4.2"
+      },
+      {
+        "descricao": "Para a ameaça de generalização: dois conjuntos de dados de múltiplos domínios e argumento de que o princípio baseado em AST é independente de linguagem.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 18, Seção 6.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Tabela 3, linha w/o upstream: EM 9.48 com diferença impressa (-2.12); cálculo próprio a partir dos valores impressos: 11.56 - 9.48 = 2.08. As demais diferenças da tabela coincidem com a subtração (cálculo próprio).",
+        "localizador": "PDF p. 13 (impressa FSE066:13), Tabela 3"
+      },
+      {
+        "descricao": "Resultado nulo na ablação: w/o inline mantém ID.F1 78.01 (0.00), igual ao InlineCoder completo, embora a narrativa afirme que eliminar qualquer componente degrada o desempenho.",
+        "localizador": "PDF p. 13, Tabela 3 e Seção 5.2"
+      },
+      {
+        "descricao": "RepoExec com GPT5-mini: EM 0.00 para todos os métodos, inclusive InlineCoder; o ganho relativo médio em EM declarado para RepoExec (29.73%) envolve um backbone em que a variação relativa é indefinida (divisão por zero), e o artigo não diz como o tratou.",
+        "localizador": "PDF p. 12, Tabela 2 e Seção 5.1; PDF p. 1, resumo"
+      },
+      {
+        "descricao": "Aparente inconsistência: as médias de ganho relativo sobre o baseline mais forte declaradas para DevEval (5.13% EM, 10.86% ES, 10.67% BLEU) não foram reproduzidas por cálculo próprio a partir da Tabela 1 com o procedimento descrito (baseline mais forte por backbone e métrica: cerca de 5,80% EM, 8,21% ES, 8,34% BLEU). O artigo não especifica se o baseline mais forte é escolhido por métrica ou por backbone, nem o arredondamento usado.",
+        "localizador": "PDF p. 12, Tabela 1 e Seção 5.1"
+      },
+      {
+        "descricao": "Aparente inconsistência: o texto afirma melhora de EM de 4.27% nas instruções de chamada; na Tabela 5, EM é 30.74 (InlineCoder), 29.86 (Vanilla) e 21.48 (RepoCoder); cálculo próprio da variação relativa: cerca de 2,95% sobre Vanilla e 43,1% sobre RepoCoder, nenhum igual a 4.27%. Em contraste, os 2.07% da Seção 5.3.1 coincidem com a variação relativa sobre RepoCoder na Tabela 4 (cálculo próprio).",
+        "localizador": "PDF p. 14, Tabela 5 e Seção 5.3.2"
+      },
+      {
+        "descricao": "Tabela 5: F1 do RepoCoder (63.01) é maior que o do InlineCoder (62.88), mas o valor do InlineCoder aparece em negrito; a narrativa fala em melhor desempenho geral.",
+        "localizador": "PDF p. 14, Tabela 5"
+      },
+      {
+        "descricao": "Condições discrepantes entre comparadores: GraphCoder e DRACO foram projetados para completamento de linha, tiveram o template adaptado pelos autores e descartam o contexto do arquivo; obtêm EM 0.00 ou próximo de zero em várias células. RepoCoder com Qwen3-Coder no DevEval tem EM 2.90, abaixo de Vanilla (9.86). Para RepoCoder foram adotados os resultados da terceira iteração de recuperação.",
+        "localizador": "PDF p. 11, Seção 4.3; PDF p. 12, Tabela 1 e Seção 5.1"
+      },
+      {
+        "descricao": "Ganhos pequenos em algumas células: DevEval DeepSeek-V3 EM 11.56 contra Vanilla 11.45; DevEval GPT5-mini EM 4.45 contra Vanilla 4.34; RepoExec GPT5-mini ID.F1 57.65 contra RepoCoder 57.63. Nenhum teste de significância ou repetição é relatado.",
+        "localizador": "PDF p. 12, Tabelas 1 e 2"
+      },
+      {
+        "descricao": "Desempenho relativamente mais fraco no domínio Scientific-Engineering (Fig. 6); o InlineCoder lidera em EM em 9 de 10 domínios, ES em 8, BLEU em 9 e ID.F1 em 10 (contagens do texto; valores da figura não extraídos).",
+        "localizador": "PDF p. 15, Seção 5.4 e Fig. 6"
+      },
+      {
+        "descricao": "Ablação, análises de retorno/chamadas, domínios e ambientes de contexto feitas apenas em DevEval com DeepSeek-V3; o título da Tabela 3 ('Ablation Study for Dataflow Analysis') não corresponde ao conteúdo (ablação dos componentes do InlineCoder).",
+        "localizador": "PDF p. 13-17, Seções 5.2-6.1"
+      },
+      {
+        "descricao": "Limiares de perplexidade ajustados para obter cerca de 40%/40%/20% das amostras; o artigo não informa em que dados o ajuste foi feito.",
+        "localizador": "PDF p. 8, Seção 3.4"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "A etapa de rascunho usa o mesmo prompt Vanilla do baseline; o contraste InlineCoder × Vanilla isola o pacote em relação ao prompt base.",
+        "localizador": "PDF p. 11, Seção 4.4; PDF p. 12, Seção 5.1"
+      },
+      {
+        "descricao": "Análises RQ3 (Tabelas 4 e 5) avaliam apenas a última linha (return) e as instruções de chamada, comparando InlineCoder, Vanilla e RepoCoder.",
+        "localizador": "PDF p. 13-14, Seção 5.3"
+      },
+      {
+        "descricao": "Análise por ambiente de contexto (Fig. 9): maior ganho declarado no grupo Upstream; o grupo No Context representa funções naturalmente sem relações chamador-chamado.",
+        "localizador": "PDF p. 17, Seção 6.1"
+      },
+      {
+        "descricao": "Número de execuções por condição não informado; temperatura 0,0. Pacote de código e dados indicado em https://github.com/ythere-y/InlineCoder (não acessado nem validado).",
+        "localizador": "PDF p. 11, Seção 4.4; PDF p. 19, Seção 9"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "In this paper, we introduce InlineCoder, a novel framework for repository-level code generation.", "localizador": "PDF p. 1, resumo"},
+      {"trecho": "As illustrated in Figure 2, InlineCoder follows a three-stage pipeline:", "localizador": "PDF p. 4, Seção 3.1"},
+      {"trecho": "InlineCoder integrates all relevant information into a context-enhanced prompt that consists of: (a) the base prompt (function signature + imports), (b) the retrieved upstream and downstream context, and (c) the initial draft.", "localizador": "PDF p. 5, Seção 3.1"},
+      {"trecho": "Each confidence level is mapped to a natural-language guidance integrated into the final prompt:", "localizador": "PDF p. 8, Seção 3.4"},
+      {"trecho": "The response should be a valid JSON object.", "localizador": "PDF p. 9, Fig. 5"},
+      {"trecho": "For the draft generation stage, we employed the identical Vanilla prompts used in the baseline methods for each dataset: the basic prompt construction methods provided by DevEval and REPOEXEC, respectively.", "localizador": "PDF p. 11, Seção 4.4"},
+      {"trecho": "Vanilla follows the basic prompt construction provided in existing benchmarks such as DevEval [27] and RepoExec [23], where related repository context is merely prepended to the target function without deep integration.", "localizador": "PDF p. 11, Seção 4.3"},
+      {"trecho": "In-File leverages the full in-file context without utilizing any cross-file information.", "localizador": "PDF p. 11, Seção 4.3"},
+      {"trecho": "We conduct an ablation study on the DevEval dataset using the DeepSeek-V3 backbone.", "localizador": "PDF p. 13, Seção 5.2"},
+      {"trecho": "The draft serves as a valuable starting point, but it may contain inaccuracies or incomplete logic.", "localizador": "PDF p. 8, Seção 3.4"},
+      {"trecho": "Without confidence guidance, the model exhibits strong self-repetition, replicating its initial erroneous draft verbatim despite the presence of the correct inlined context.", "localizador": "PDF p. 16, Seção 5.5"},
+      {"trecho": "Consequently, the model incorrectly calls the inappropriate utility extract_functions and produces a dict instead of the expected list[str].", "localizador": "PDF p. 3, Seção 2"},
+      {"trecho": "In our experiments, we also observed that execution-based scores fluctuate considerably across runs.", "localizador": "PDF p. 10, Seção 4.2"},
+      {"trecho": "To prevent data leakage, we exclude the target function itself from G.", "localizador": "PDF p. 8, Seção 3.3.2"},
+      {"trecho": "To ensure deterministic and reproducible decoding, all models used a temperature of 0.0, rendering the top-p sampling parameter ineffective.", "localizador": "PDF p. 11, Seção 4.4"},
+      {"trecho": "Like most existing repository-level code generation benchmarks [8, 20, 23, 26, 27, 61, 63], our empirical evaluation was conducted on Python repositories, which may limit the generalizability of our findings to other programming languages or different types of software projects.", "localizador": "PDF p. 18, Seção 6.2"},
+      {"trecho": "The thresholds are carefully tuned so that roughly 40% of the samples fall into the low-confidence group, 40% into the medium-confidence group, and 20% into the high-confidence group.", "localizador": "PDF p. 8, Seção 3.4"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "InlineCoder",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+      "mecanismos_acrescentados": ["contexto", "instrucao", "exemplos", "restricoes", "feedback", "decomposicao"],
+      "comparador": "In-File",
+      "modelo": "DeepSeek-V3 (DeepSeek-V3-0324)",
+      "benchmark": "DevEval",
+      "metrica": "EM (Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 7.56, "intervencao": 11.56},
+      "denominador": "nao_informado (corpus DevEval: 1,825 amostras; o estudo não liga explicitamente esse total ao denominador da métrica)",
+      "condicoes": "Completamento do corpo inteiro da função; temperatura 0,0; saída até 10000 tokens; entrada até 128000 tokens para DeepSeek-V3; número de execuções nao_informado; sem teste de significância. Unidade não impressa na tabela; valores em escala 0-100. In-File é a primeira linha de base listada na Tabela 1; a tabela sublinha Vanilla como melhor baseline em EM para DeepSeek-V3 (11.45). Ganho do pacote híbrido, não atribuível a um ingrediente. conferido_pdf: valores conferidos na imagem da PDF p. 12.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca três métricas (EM, ES, BLEU) e o comparador 'strongest baseline', que varia por backbone. Primeira tabela com o contraste (Tabela 1, DevEval), primeira métrica (EM), primeiro modelo (DeepSeek-V3) e primeira linha de base de prompting listada (In-File).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 12 (impressa FSE066:12), Tabela 1, colunas DeepSeek-V3/EM, linhas In-File e InlineCoder",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "In-File 7.56 59.81 43.58 71.54 7.95 56.15 40.07 68.75 0.85 40.87 19.93 51.56", "localizador": "PDF p. 12, Tabela 1, linha In-File; colunas DeepSeek-V3 (EM, ES, BLEU, ID.F1), Qwen3-Coder (EM, ES, BLEU, ID.F1), GPT5-mini (EM, ES, BLEU, ID.F1)"},
+        {"trecho": "InlineCoder 11.56 70.50 57.12 78.01 11.23 67.39 53.30 76.91 4.45 65.21 46.72 65.45", "localizador": "PDF p. 12, Tabela 1, linha InlineCoder; colunas DeepSeek-V3 (EM, ES, BLEU, ID.F1), Qwen3-Coder (EM, ES, BLEU, ID.F1), GPT5-mini (EM, ES, BLEU, ID.F1)"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "Upstream Inlining / upstream context retrieval",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "InlineCoder w/o upstream",
+      "modelo": "DeepSeek-V3 (DeepSeek-V3-0324)",
+      "benchmark": "DevEval",
+      "metrica": "EM (Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 9.48, "intervencao": 11.56},
+      "denominador": "nao_informado (corpus DevEval: 1,825 amostras)",
+      "condicoes": "Ablação em DevEval com DeepSeek-V3; demais componentes do InlineCoder mantidos. Diferença impressa (-2.12) não coincide com a subtração dos valores impressos (cálculo próprio: 2.08); ver heterogeneidade. Número de execuções nao_informado; temperatura 0,0. conferido_pdf: valores conferidos na imagem da PDF p. 13.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já representadas; componente da tabela de ablação incluído para completar o alvo de três, primeiro na ordem da Tabela 3.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 13 (impressa FSE066:13), Tabela 3, coluna DeepSeek-V3/EM, linhas InlineCoder e w/o upstream",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "InlineCoder 11.56 70.50 57.12 78.01", "localizador": "PDF p. 13, Tabela 3, linha InlineCoder; colunas DeepSeek-V3 EM, ES, BLEU, ID.F1"},
+        {"trecho": "w/o upstream 9.48 (-2.12) 65.12 (-5.38) 51.34 (-5.78) 77.43 (-0.58)", "localizador": "PDF p. 13, Tabela 3, linha w/o upstream; colunas DeepSeek-V3 EM, ES, BLEU, ID.F1"}
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "usage-context inlining",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "restricoes", "feedback", "decomposicao"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "InlineCoder w/o inline",
+      "modelo": "DeepSeek-V3 (DeepSeek-V3-0324)",
+      "benchmark": "DevEval",
+      "metrica": "EM (Exact Match)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 9.15, "intervencao": 11.56},
+      "denominador": "nao_informado (corpus DevEval: 1,825 amostras)",
+      "condicoes": "Ablação em DevEval com DeepSeek-V3; demais componentes mantidos. O artigo não descreve como o contexto upstream é apresentado sem inlining. Na mesma linha, ID.F1 não muda (78.01, 0.00). Número de execuções nao_informado; temperatura 0,0. conferido_pdf: valores conferidos na imagem da PDF p. 13.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Componente da tabela de ablação incluído para completar o alvo de três, segundo na ordem da Tabela 3.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 13 (impressa FSE066:13), Tabela 3, coluna DeepSeek-V3/EM, linhas InlineCoder e w/o inline",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "InlineCoder 11.56 70.50 57.12 78.01", "localizador": "PDF p. 13, Tabela 3, linha InlineCoder; colunas DeepSeek-V3 EM, ES, BLEU, ID.F1"},
+        {"trecho": "w/o inline 9.15 (-2.41) 65.95 (-4.55) 52.35 (-4.77) 78.01 (0.00)", "localizador": "PDF p. 13, Tabela 3, linha w/o inline; colunas DeepSeek-V3 EM, ES, BLEU, ID.F1"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e quatro questões de pesquisa explícitas (eficácia geral, ablação, análise qualitativa, generalização por domínio).",
+      "localizador": "PDF p. 9, Seção 4"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, transformação de inlining e template final descritos em detalhe; porém o ajuste dos limiares de perplexidade não informa os dados usados, as adaptações dos templates de GraphCoder e DRACO não são detalhadas e o prompt Vanilla aparece só abreviado.",
+      "localizador": "PDF p. 4-9, Seção 3 e Fig. 5; PDF p. 8, Seção 3.4; PDF p. 11, Seção 4.3"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "Cinco linhas de base executadas nos mesmos benchmarks, métricas e backbones, incluindo o prompt Vanilla usado na etapa de rascunho, e ablação por componente; ressalva de que GraphCoder e DRACO foram adaptados de completamento de linha.",
+      "localizador": "PDF p. 11, Seção 4.3; PDF p. 12, Tabelas 1 e 2; PDF p. 13, Tabela 3"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "EM, ES, BLEU e ID.F1 são definidas e a ausência de Pass@k é justificada; porém o denominador de cada métrica não é ligado ao tamanho dos corpora, a unidade não é impressa, uma diferença da Tabela 3 não confere com os valores, o ganho de 4.27% da Seção 5.3.2 e as médias relativas não são reproduzíveis a partir das tabelas, e não há métrica de correção funcional executada.",
+      "localizador": "PDF p. 10, Seção 4.2; PDF p. 12-14, Tabelas 1-5"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de ameaças trata apenas da generalização para outras linguagens; não discute execução única, significância, contaminação no pré-treinamento ou limitações das métricas de similaridade, embora o texto mencione flutuação de métricas de execução.",
+      "localizador": "PDF p. 18, Seção 6.2; PDF p. 10, Seção 4.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa versões dos modelos, temperatura, limites de tokens, hardware, ferramentas e link para código e dados (não validado); faltam o procedimento de ajuste dos limiares, o número de execuções e os templates adaptados dos comparadores.",
+      "localizador": "PDF p. 11, Seção 4.4 e notas 1-7; PDF p. 19, Seção 9"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "Controla o vazamento da função-alvo no contexto recuperado, mas não discute possível presença dos repositórios dos benchmarks (DevEval, RepoExec) no pré-treinamento dos modelos.",
+      "localizador": "PDF p. 8, Seção 3.3.2"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1-1178, incluindo referências). Figuras 6 e 9 não usadas para valores.",
+    "paginas_abertas": [4, 9, 10, 11, 12, 13, 14]
+  }
+}

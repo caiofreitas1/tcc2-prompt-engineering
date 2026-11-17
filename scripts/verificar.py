@@ -25,6 +25,7 @@ HEADERS = {
 CRITERIA={f'I{n}' for n in range(1,7)}|{f'X{n}' for n in range(1,8)}
 QUALITY={'objetivo','procedimento','comparador','metricas','ameacas','reprodutibilidade','contaminacao'}
 UNAVAILABLE = {'','nao_conferido','nao_informado','nao_aplicavel','fonte_indisponivel'}
+UNIDADES = {'percentual','proporcao','contagem','tempo','energia','temperatura','qualitativo','nao_informado'}  # D106
 EXTRACTION_FIELDS = {'id','estudo_id','tarefa','tecnica','modelo','benchmark','metrica','unidade','comparador','resultado','localizador','fonte','status','revisao_humana'}
 # Contrato 2: citação literal conferível e campos da QP2.
 EXTRACTION_FIELDS_V2 = {'citacoes','texto_fonte','riscos','mitigacoes','prompt_versao'}
@@ -131,7 +132,7 @@ def verify(root=ROOT, release=False):
             elif isinstance(value,(int,float)):
                 if e.get('unidade')=='percentual' and not 0<=value<=100: errors.append(f'{eid}: percentual fora de 0–100')
                 if e.get('unidade')=='proporcao' and not 0<=value<=1: errors.append(f'{eid}: proporção fora de 0–1')
-        if e.get('unidade') not in {'percentual','proporcao','contagem','tempo','qualitativo'}:
+        if e.get('unidade') not in UNIDADES:
             errors.append(f'{eid}: unidade inválida')
         if e.get('status')=='conferido_original':
             if not relative_file(root,e.get('fonte')): errors.append(f'{eid}: fonte primária não disponível localmente')

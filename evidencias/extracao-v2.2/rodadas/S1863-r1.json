@@ -1,0 +1,236 @@
+{
+  "estudo": "S1863",
+  "texto_fonte": "fontes/textos/lote/S1863.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "AgentRepair",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "exemplos", "raciocinio", "restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "Resumo, PDF p. 1 (impressa 121); seções 3–3.4, PDF p. 3–6 (impressas 123–126); Fig. 2, PDF p. 5 (impressa 125); seção 4.2, PDF p. 6–7 (impressas 126–127); Tabelas 2 e 3, PDF p. 7 (impressa 127)",
+        "observacao": "Pacote híbrido. Ingredientes de prompting: persona e conjunto de instruções com checklist (instrucao); trecho de código defeituoso, sinais estruturais da AST inseridos como anotações em linguagem natural e pedido de análise com projeto, arquivo, função e linhas defeituosas (contexto); exemplos de correções semelhantes recuperados por BM25 em formato lado a lado (contexto e exemplos); bloco <analysis> com causa raiz e plano antes do código (raciocinio); protocolo de saída estrito, cercas de código, mudança mínima, limite de 12 linhas (restricoes); até 10 candidatos com variação de ordem dos exemplos e da ênfase dos sinais estruturais, deduplicados e selecionados por testes (amostragem). O pacote também inclui componentes fora do escopo (decodificação variada, deduplicação por hash de AST, verificações de sintaxe, parada antecipada, limite de 2.048 tokens). Contrafactual: Qwen-ZeroShot recebe só o código defeituoso, com mesmo número de candidatos, semente, parâmetros de decodificação e validação; porém o artigo diz que o AgentRepair usa 'the Qwen [12] family' sem informar a versão, enquanto o comparador usa Qwen1.5-7B-Chat, de modo que a identidade do modelo não é declarada. O ganho é do pacote e não pode ser atribuído a um ingrediente. Não se classificou como multiagente: a 'arquitetura multiagente' é um pipeline de módulos (parser AST, BM25, execução de testes, orquestrador) em que só o Patch Generation Agent é descrito como chamando o LLM; não há interação descrita entre papéis de LLM. 'mecanismos_acrescentados' inclui contexto porque o pacote acrescenta novos ingredientes dessa categoria (sinais AST e casos recuperados) ao código defeituoso já presente no comparador."
+      },
+      {
+        "nome_original": "AST-based structural signals (Structural Analysis Agent)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seções 2.3, 3.2 e 3.3, PDF p. 2, 4 e 5 (impressas 122, 124 e 125)",
+        "observacao": "Sinais extraídos da AST (referências a atributos, acessos indexados, chamadas, instruções de controle) inseridos no prompt como anotações em linguagem natural. Só é avaliado dentro do pacote completo (por isso 'mecanismos' repete o pacote). Os autores reconhecem que as ablações não separam o efeito dos sinais AST; nenhuma ablação é relatada."
+      },
+      {
+        "nome_original": "BM25 retrieval of similar bug-fix exemplars (Retrieval Agent)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seções 3.2 e 3.3, PDF p. 4–5 (impressas 124–125); seção 4.1, PDF p. 6 (impressa 126)",
+        "observacao": "Recuperação BM25 (Rank-BM25, top-k = 5) de pares código defeituoso–correção, reponderados por similaridade estrutural, com política leave-one-bug-out. A origem do índice de recuperação ('past bug-fix examples') não é especificada. Só avaliado dentro do pacote."
+      },
+      {
+        "nome_original": "Instruction Set / OUTPUT PROTOCOL (analysis-then-code, checklist)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao", "raciocinio", "restricoes"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.3 e Fig. 2, PDF p. 5 (impressa 125)",
+        "observacao": "Persona 'senior Python bug-fix specialist', bloco <analysis> com causa raiz única, linhas defeituosas e uma mudança mínima (raciocinio), checklist de dez itens (instrucao) e saída somente da função ou classe corrigida em bloco de código Python (restricoes). O artigo afirma que o desenho reduziu erros de sintaxe e deriva de formato, sem medição relatada. Só avaliado dentro do pacote. 'instrucao' aparece como acrescentada por ser instrução específica ausente da descrição do comparador, cujo prompt não é relatado."
+      },
+      {
+        "nome_original": "Prompt variation strategies (reordering retrieved examples, altering emphasis of structural signals)",
+        "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 3.4, PDF p. 5 (impressa 125); seção 4.1, PDF p. 6 (impressa 126)",
+        "observacao": "Variação do prompt entre candidatos para diversidade, dentro da geração de múltiplos candidatos (amostragem). A categoria amostragem já está no comparador (10 candidatos validados), por isso nenhuma categoria acrescentada. Os autores dizem que as ablações não separam a diversificação de candidatos."
+      },
+      {
+        "nome_original": "Qwen-ZeroShot(Baseline)",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, PDF p. 6 (impressa 126); Tabelas 2 e 3, PDF p. 7 (impressa 127)",
+        "observacao": "Qwen1.5-7B-Chat; entrada só com o código defeituoso (contexto, D102), zero-shot (instrucao; texto do prompt não relatado); 10 candidatos com semente, decodificação e validação idênticas às do método (amostragem com seleção por testes)."
+      },
+      {
+        "nome_original": "Gemma-ZeroShot(Baseline)",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, PDF p. 7 (impressa 127); Tabelas 2 e 3, PDF p. 7",
+        "observacao": "Gemma-7B-IT nas mesmas condições zero-shot; entrada só com o código defeituoso. Modelo diferente do usado pelo AgentRepair: a comparação confunde modelo e prompting."
+      },
+      {
+        "nome_original": "DeepSeek-ZeroShot(Baseline)",
+        "mecanismos": ["instrucao", "contexto", "amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "Seção 4.2, PDF p. 7 (impressa 127); Tabelas 2 e 3, PDF p. 7",
+        "observacao": "DeepSeek-Coder-6.7B-Instruct; número de candidatos, semente e parâmetros alinhados aos do Qwen-ZeroShot. Modelo diferente do usado pelo AgentRepair: a comparação confunde modelo e prompting."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {"nome_original": "Greedy decoding for the first candidate; temperature/top-p sampling for subsequent candidates", "natureza": "decodificacao", "descricao": "Primeiro candidato por decodificação gulosa e os seguintes com variação de temperatura e top-p; valores não informados.", "localizador": "Seções 3.3 e 3.4, PDF p. 5 (impressa 125); seção 4.1, PDF p. 6 (impressa 126)"},
+      {"nome_original": "AST-based hashing deduplication, format and syntax checks (post-processing)", "natureza": "outro", "descricao": "Pós-processamento dos candidatos: verificação de cercas de código e de sintaxe, deduplicação por hash de AST e pós-processamento automático de erros de sintaxe; não altera o prompt.", "localizador": "Seção 3.4, PDF p. 5–6 (impressas 125–126); seção 2.5, PDF p. 3 (impressa 123)"},
+      {"nome_original": "Early stopping in validation", "natureza": "orcamento", "descricao": "Parada antecipada na validação para reduzir custo de validação desnecessário.", "localizador": "Seção 3, lista de agentes, PDF p. 3 (impressa 123); Fig. 1, PDF p. 4 (impressa 124)"},
+      {"nome_original": "Token budget (input capped at 2,048 tokens; windowing; AST path summarization)", "natureza": "orcamento", "descricao": "Limite de entrada de 2.048 tokens com poda de exemplos ou só resumos estruturais, janela centrada na linha defeituosa e resumo de caminhos da AST; afeta o conteúdo do prompt, mas é regra de alocação de tokens.", "localizador": "Seções 3.1 e 3.3, PDF p. 4–5 (impressas 124–125); seção 4.1, PDF p. 6 (impressa 126)"},
+      {"nome_original": "4-bit NF4 quantization and FlashAttention-2", "natureza": "outro", "descricao": "Configuração de inferência aplicada a todos os modelos; não é prompting.", "localizador": "Seção 4.4, PDF p. 9 (impressa 129)"},
+      {"nome_original": "Rule-based fallbacks (partial subtrees on parse failure, query expansion when retrieval quality is low)", "natureza": "outro", "descricao": "Estratégias de contingência do pipeline para falha de parsing e baixa qualidade de recuperação; os autores relatam 0/51 falhas de parsing no BugsInPy.", "localizador": "Seções 2.5 e 3.2, PDF p. 3–4 (impressas 123–124); seção RQ5, PDF p. 8 (impressa 128)"},
+      {"nome_original": "Test-suite validation in isolated sandbox", "natureza": "outro", "descricao": "Execução da suíte de testes do projeto em sandbox isolado; serve à seleção de candidatos e à medição (bug-level success, pass@k).", "localizador": "Seção 3.4, PDF p. 6 (impressa 126); seção 4.1, PDF p. 6"}
+    ],
+    "modelos": [
+      {"nome": "Qwen (família de LLMs de código, usada pelo AgentRepair)", "versao": "nao_informado", "observacao": "O texto diz 'the Qwen [12] family of code LLMs' para a geração de patches do AgentRepair, sem tamanho nem snapshot; a versão do baseline (Qwen1.5-7B-Chat) não se transfere."},
+      {"nome": "Qwen1.5-7B-Chat", "versao": "Qwen1.5-7B-Chat", "observacao": "Baseline Qwen-ZeroShot."},
+      {"nome": "Gemma-7B-IT", "versao": "Gemma-7B-IT", "observacao": "Baseline Gemma-ZeroShot."},
+      {"nome": "DeepSeek-Coder-6.7B-Instruct", "versao": "DeepSeek-Coder-6.7B-Instruct", "observacao": "Baseline DeepSeek-ZeroShot."}
+    ],
+    "benchmarks": [
+      {"nome": "BugsInPy (subconjunto canônico de linha única)", "quantidade": "51 bugs (de 68 bugs de linha única reproduzíveis por teste relatados pelo HAFix; BugsInPy completo: 493 bugs)", "observacao": "Critérios de retenção: compilar e executar ponta a ponta no ambiente, transição falha→sucesso entre versões e contexto local que caiba no orçamento de tokens do modelo. Tabela 1 distribui os 51 bugs por 11 projetos (sanic 1, luigi 9, youtube-dl 7, ansible 2, scrapy 4, pandas 15, thefuck 6, tornado 2, fastapi 1, black 1, tqdm 3).", "localizador": "Seção 4.1 e Tabela 1, PDF p. 6 (impressa 126)"},
+      {"nome": "Defects4J (piloto Java)", "quantidade": "118 bugs", "observacao": "Piloto entre linguagens só com o AgentRepair, sem baseline executado; critérios de seleção dos 118 bugs não informados.", "localizador": "Seção 4.3, PDF p. 7 (impressa 127)"}
+    ],
+    "metricas": [
+      {"nome": "Bug-level Success", "descricao": "Número de bugs com patch que passa em todos os testes; denominador 51 bugs (Tabela 2). Não se explicita que basta um dos até 10 candidatos passar, embora a definição de pass@k e os valores sugiram isso.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); Tabela 2, PDF p. 7 (impressa 127)"},
+      {"nome": "pass@k (pass@1, pass@5, pass@10)", "descricao": "pass@k = 1 − C(n−c, k)/C(n, k), com n = número de candidatos deduplicados, c = patches corretos, condição n ≥ k; valores em % na Tabela 3 e na Fig. 3 (k = 1 a 10).", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); Tabela 3, PDF p. 7; Fig. 3, PDF p. 8 (impressa 128)"},
+      {"nome": "Average tokens per candidate (input, output, total)", "descricao": "Custo em tokens por candidato (Figs. 4 e 6).", "localizador": "Seções RQ4 e 4.4, PDF p. 8–9 (impressas 128–129)"},
+      {"nome": "Runtime (average vs. median seconds)", "descricao": "Tempo de execução (Fig. 7); a média de 41 s do AgentRepair é dada no texto.", "localizador": "Fig. 7, PDF p. 9 (impressa 129); seção 5.1, PDF p. 10 (impressa 130)"},
+      {"nome": "VRAM usage (MB)", "descricao": "Memória de GPU medida por torch.cuda.memory_allocated() (Fig. 8).", "localizador": "Fig. 8 e seção 4.4, PDF p. 9 (impressa 129)"},
+      {"nome": "Project-wise bug-fix success rate", "descricao": "Proporção de bugs corrigidos por projeto e modelo (Fig. 5, mapa de calor com frações e %).", "localizador": "Fig. 5, PDF p. 8 (impressa 128)"}
+    ],
+    "linguagens": ["Python", "Java (piloto Defects4J)"],
+    "riscos": [
+      {"categoria": "alucinacao", "descricao": "Fornecer só o código defeituoso leva a correções alucinadas; LLMs produzem patches incorretos ou alucinados, erros de sintaxe, ausência de cercas de código, refatoração desnecessária e código irrelevante.", "localizador": "Resumo, PDF p. 1 (impressa 121); seções 2.1 e 2.4, PDF p. 2–3 (impressas 122–123)"},
+      {"categoria": "correcao_funcional", "descricao": "Métricas baseadas em testes supõem suítes razoavelmente completas e podem gerar falsos positivos ou negativos (patch aprovado incorreto).", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"categoria": "correcao_funcional", "descricao": "Ruído ocasional na recuperação BM25 e perda de contexto em defeitos longos ou multifunção por limites de tamanho do prompt; ganhos menores quando os exemplos recuperados são pouco relevantes ou o contexto não é localizado.", "localizador": "Seção 7, PDF p. 11 (impressa 131); seção 5.2, PDF p. 10 (impressa 130)"},
+      {"categoria": "nao_determinismo", "descricao": "Desempenho pode variar com hiperparâmetros do BM25 e configurações de decodificação; a suíte de testes do BugsInPy pode ter comportamento instável (flaky) por dependências de ambiente e variação de tempo.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"categoria": "contaminacao", "descricao": "Resultados podem depender de possível sobreposição com código aberto no pré-treinamento; o estudo também trata do vazamento pelo índice de recuperação (controlado por leave-one-bug-out). Não se afirma contaminação efetiva.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130); seção 3.1, PDF p. 4 (impressa 124)"},
+      {"categoria": "custo", "descricao": "Compromisso desempenho–custo: cerca de 2.400 tokens por candidato contra ~800–980 dos baselines, maior tempo de execução (média de 41 s) e crescimento quase linear de tokens, GPU e tempo de teste com o número de candidatos.", "localizador": "Seção 2.1, PDF p. 2 (impressa 122); seções RQ4 e 4.4, PDF p. 8–9 (impressas 128–129); seção 5.1, PDF p. 10 (impressa 130); seção 7, PDF p. 11"},
+      {"categoria": "outro", "descricao": "Fragilidade potencial do parsing AST com sintaxe não padrão ou malformada (0/51 falhas observadas no BugsInPy).", "localizador": "Seção RQ5, PDF p. 8 (impressa 128); seção 7, PDF p. 11 (impressa 131)"},
+      {"categoria": "outro", "descricao": "Validade externa limitada: só Python/BugsInPy; sistemas com edições em vários locais ou dependências entre módulos podem forçar os limites de prompt e custos de verificação; recuperação só com BM25.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"categoria": "outro", "descricao": "Ausência de teste de significância estatística, o que enfraquece as afirmações comparativas, e ablações que não separam os efeitos de sinais AST, recuperação BM25 e diversificação de candidatos.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Política leave-one-bug-out: correções do mesmo bug e pistas derivadas de seus testes excluídas do índice de recuperação, para evitar vazamento.", "avaliada": "nao", "localizador": "Seção 3.1, PDF p. 4 (impressa 124); seção 4.2, PDF p. 7 (impressa 127)"},
+      {"descricao": "Sementes fixas (42), geração largamente determinística (primeiro candidato guloso) e registro em JSON de saídas intermediárias, evidências e candidatos, contra variação e instabilidade.", "avaliada": "nao", "localizador": "Seção 5.2, PDF p. 10 (impressa 130); seção 4.1, PDF p. 6 (impressa 126)"},
+      {"descricao": "Validação em sandbox isolado para reduzir ruído de ambiente e conflitos de dependência.", "avaliada": "nao", "localizador": "Seção 3.4, PDF p. 6 (impressa 126)"},
+      {"descricao": "Prompt guiado por evidências, protocolo de saída e checklist para reduzir alucinações, erros de sintaxe e deriva de formato; o pacote é comparado com baselines zero-shot em bug-level success e pass@k, mas nenhuma medida de alucinação ou de erro de formato é relatada.", "avaliada": "nao", "localizador": "Seção 3.3 e Fig. 2, PDF p. 5 (impressa 125)"},
+      {"descricao": "Verificações de sintaxe, deduplicação por hash de AST e parada antecipada para reduzir candidatos inválidos e custo de validação.", "avaliada": "nao", "localizador": "Seções 3.4 e 4.1, PDF p. 5–6 (impressas 125–126)"},
+      {"descricao": "Janela em torno da linha defeituosa, resumo de caminhos da AST e limite de 2.048 tokens contra limites de tamanho do prompt.", "avaliada": "nao", "localizador": "Seções 3.1 e 4.1, PDF p. 4 e 6 (impressas 124 e 126)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "VRAM: o texto diz que o AgentRepair usa em média 5.2 GB, comparável ao Gemma-ZeroShot (5.3 GB) e ao Qwen-ZeroShot (5.5 GB), e a discussão repete 5.2 GB; a Fig. 8 rotula AgentRepair com 5,572 MB, o mesmo valor do Qwen-ZeroShot (5,572), acima do Gemma-ZeroShot (5,328) e do DeepSeek-ZeroShot (3,747). Texto e figura divergem para o AgentRepair.", "localizador": "Seção 4.4 e Fig. 8, PDF p. 9 (impressa 129); seção 5.1, PDF p. 10 (impressa 130)"},
+      {"descricao": "Narrativa por projeto contradiz a Fig. 5: o texto diz que o AgentRepair tem 100% em ansible, scrapy, tornado e black 'substantially outperforming Qwen, Gemma, and DeepSeek', mas na Fig. 5 todos os baselines têm 2/2 em ansible, Qwen e DeepSeek têm 4/4 em scrapy e Qwen tem 2/2 em tornado; a discussão cita scrapy entre os 'marked gains'. Em thefuck, AgentRepair, Qwen e DeepSeek têm 5/6.", "localizador": "Fig. 5 e texto, PDF p. 8 (impressa 128); seção 5.1, PDF p. 10 (impressa 130)"},
+      {"descricao": "O texto diz que Qwen e Gemma estabilizam após pass@5 e que o DeepSeek tem ganhos apenas marginais; pela Tabela 3, Gemma vai de 25.05% (pass@5) a 29.41% (pass@10) e DeepSeek de 34.86% a 39.22% (cálculo próprio: +4,36 p.p. em ambos), enquanto Qwen vai de 32.9% a 33.33%.", "localizador": "Tabela 3 e texto, PDF p. 7 (impressa 127); Fig. 3, PDF p. 8 (impressa 128)"},
+      {"descricao": "O texto afirma ganho de 'up to +17.65 percentage points' em pass@k (e 'up to 17 percentage points' na discussão), mas o próprio artigo relata +21.57 p.p. sobre o Gemma em pass@10.", "localizador": "Seção 4.4, PDF p. 9 (impressa 129); seção 5.1, PDF p. 10 (impressa 130); Tabela 3, PDF p. 7 (impressa 127)"},
+      {"descricao": "Custo em tokens descrito de formas diferentes: na RQ4, 'approximately 2,300–2,400 tokens per candidate, roughly doubling' o custo dos baselines; na seção 4.4, 'about 2,400 tokens', 'roughly 2-3× higher' que Qwen (~800), Gemma (~880) e DeepSeek (~980). A RQ4 também diz que os baselines ficam na faixa de 30–39% de pass@10, embora o Gemma tenha 29.41% na Tabela 3.", "localizador": "Seção RQ4 e Fig. 4, PDF p. 8 (impressa 128); seção 4.4 e Fig. 6, PDF p. 8–9; Tabela 3, PDF p. 7"},
+      {"descricao": "Definição de pass@k exige n ≥ k, com n = candidatos deduplicados; como até 10 candidatos são gerados e depois deduplicados, n pode ser menor que 5 ou 10, e o artigo não diz como pass@5 e pass@10 são calculados nesse caso. Cálculo próprio: os valores de pass@10 coincidem com bug-level success/51 para os quatro sistemas (26/51 = 50,98%; 17/51 = 33,33%; 15/51 = 29,41%; 20/51 = 39,22%).", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); Tabelas 2 e 3, PDF p. 7 (impressa 127)"},
+      {"descricao": "Identidade do modelo: o AgentRepair usa 'the Qwen [12] family of code LLMs' sem versão, e o baseline Qwen-ZeroShot usa Qwen1.5-7B-Chat; o artigo não declara que são o mesmo modelo. As comparações com Gemma-7B-IT e DeepSeek-Coder-6.7B-Instruct confundem modelo e prompting.", "localizador": "Seções 4.1 e 4.2, PDF p. 6–7 (impressas 126–127)"},
+      {"descricao": "Um dos critérios de retenção dos 51 bugs é caber no orçamento de tokens do modelo, o que condiciona o conjunto ao pipeline avaliado; o resumo descreve os mesmos casos como '51 difficult bugs'.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); resumo, PDF p. 1 (impressa 121)"},
+      {"descricao": "A seção 5.2 menciona 'our ablations', mas nenhum resultado de ablação é apresentado no artigo; a discussão atribui os ganhos a exemplos recuperados, protocolo analysis-then-code e deduplicação por hash de AST sem contrafactual desses componentes.", "localizador": "Seções 5.1 e 5.2, PDF p. 10 (impressa 130)"},
+      {"descricao": "A RQ3 (estabilidade e escalabilidade com o aumento da complexidade e do tamanho de entrada) não tem análise nem resultado dedicado.", "localizador": "Seções 4.2 e 4.3, PDF p. 7–8 (impressas 127–128)"},
+      {"descricao": "A seção 4.1 diz que a recuperação BM25 é 'optionally enhanced by query expansion, dense retrieval, or hybrid retrieval', enquanto a seção 5.2 diz que o módulo 'relies solely on BM25'; não se informa se expansão de consulta foi acionada nos experimentos.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); seção 5.2, PDF p. 10 (impressa 130)"},
+      {"descricao": "Piloto Java (Defects4J, 118 bugs) só com o AgentRepair: pass@1 = 3.05%, pass@5 = 8.73% e pass@10 = 11.86%, sem baseline executado; os autores reconhecem taxas absolutas menores que no BugsInPy.", "localizador": "Seção 4.3, PDF p. 7 (impressa 127)"},
+      {"descricao": "Sem teste de significância; todas as execuções com semente 42, número de execuções repetidas nao_informado. A comparação com HAFix, que usa a mesma origem do subconjunto, foi evitada pelos autores.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); seções 5.1 e 5.2, PDF p. 10 (impressa 130)"},
+      {"descricao": "A média de 41 s de execução do AgentRepair é dada só no texto; a Fig. 7 não tem rótulos numéricos, por isso o valor não pôde ser conferido na figura.", "localizador": "Seção 5.1, PDF p. 10 (impressa 130); Fig. 7, PDF p. 9 (impressa 129)"},
+      {"descricao": "Totais conferidos sem divergência (cálculo próprio): a soma por projeto da Fig. 5 dá 26 (AgentRepair), 17 (Qwen), 15 (Gemma) e 20 (DeepSeek), igual à Tabela 2; os bugs por projeto da Tabela 1 somam 51; os valores de pass@1/5/10 da Fig. 3 coincidem com a Tabela 3.", "localizador": "Tabela 1, PDF p. 6 (impressa 126); Tabela 2 e 3, PDF p. 7 (impressa 127); Figs. 3 e 5, PDF p. 8 (impressa 128)"}
+    ],
+    "observacoes": [
+      {"descricao": "A 'arquitetura multiagente' (Control, Structural Analysis, Retrieval, Prompt & Patch Generation, Validation) é descrita como pipeline de módulos; a legenda da Fig. 1 distingue 'Model Agent' e 'Logical Agent'. Só a geração de patches é descrita como chamando o LLM.", "localizador": "Seção 3 e Fig. 1, PDF p. 3–4 (impressas 123–124)"},
+      {"descricao": "A legenda da Fig. 1 diz que a validação devolve resultados ao Control Agent para parada antecipada e reexecuções ('reruns'); não se descreve envio de mensagens de erro ou resultados de testes ao LLM, por isso não se classificou feedback.", "localizador": "Fig. 1, PDF p. 4 (impressa 124)"},
+      {"descricao": "A seção 3.2 atribui ao Control Agent a construção da AST, enquanto a lista de agentes atribui a conversão ao Structural Analysis Agent.", "localizador": "Seções 3 e 3.2, PDF p. 3–4 (impressas 123–124)"},
+      {"descricao": "Parâmetros não informados: valores de temperatura e top-p, número de candidatos após deduplicação, origem do índice de recuperação, limiar de qualidade da recuperação, texto do prompt dos baselines e versão do modelo do AgentRepair.", "localizador": "Seções 3.2–4.2, PDF p. 4–7 (impressas 124–127)"},
+      {"descricao": "Repositório do código citado (GitHub) na referência [26]; não foi acessado nem validado nesta extração.", "localizador": "Referência [26], PDF p. 11 (impressa 131)"},
+      {"descricao": "Ambiente: Ubuntu 22.04, NVIDIA RTX 5090 (32 GB), 128 GB RAM, Intel Core i9-13900K; quantização 4-bit NF4 e FlashAttention-2 em todos os modelos.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); seção 4.4, PDF p. 9 (impressa 129)"},
+      {"descricao": "Não se classificou decomposicao: as etapas do pipeline constroem o contexto do prompt (AST, recuperação) e selecionam candidatos por testes; o LLM recebe a tarefa em uma única chamada por candidato.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126)"}
+    ],
+    "citacoes": [
+      {"trecho": "These clues and examples are combined into a detailed, evidence-filled prompt.", "localizador": "Resumo, PDF p. 1 (impressa 121)"},
+      {"trecho": "This prompt tells the LLM to create possible fixes, with strict rules to make only small, necessary changes.", "localizador": "Resumo, PDF p. 1 (impressa 121)"},
+      {"trecho": "In LLM-based automated program repair, providing only the buggy code as input often leads to hallucinated fixes, which are recognized as a major obstacle to practical applicability.", "localizador": "Seção 2.4, PDF p. 3 (impressa 123)"},
+      {"trecho": "Any fixes for the same bug or clues directly derived from its associated tests were excluded from the retrieval index, thereby preventing data leakage.", "localizador": "Seção 3.1, PDF p. 4 (impressa 124)"},
+      {"trecho": "Third, similar bug-fix exemplars retrieved by the Retrieval Agent pair real code with their corresponding patches, anchoring the model’s outputs in empirical evidence [10], [14].", "localizador": "Seção 3.3, PDF p. 5 (impressa 125)"},
+      {"trecho": "The buggy snippet delineates the edit boundary; structural signals are inserted as natural-language annotations that emphasize specific failure modes, and retrieved bug-fix exemplars are supplied in a compact, side-by-side format so that the model can reference concrete precedents.", "localizador": "Seção 3.3, PDF p. 5 (impressa 125)"},
+      {"trecho": "As shown in Figure 2, the instruction set forces the model to first articulate the bug cause and fix plan within the <analysis> block, then emit the corrected code as a complete function.", "localizador": "Seção 3.3, PDF p. 5 (impressa 125)"},
+      {"trecho": "You are a senior Python bug-fix specialist.", "localizador": "Fig. 2, PDF p. 5 (impressa 125)"},
+      {"trecho": "In addition, prompt variation strategies such as reordering retrieved examples or altering the emphasis of structural signals are employed to provide multiple exploration paths.", "localizador": "Seção 3.4, PDF p. 5 (impressa 125)"},
+      {"trecho": "The first candidate is always produced using greedy decoding to ensure reproducibility, while subsequent candidates are generated through probabilistic sampling to expand the search space.", "localizador": "Seção 3.4, PDF p. 5 (impressa 125)"},
+      {"trecho": "Deduplication is performed using an AST-based hashing method [6], preventing identical patches from appearing across multiple candidates.", "localizador": "Seção 3.4, PDF p. 6 (impressa 126)"},
+      {"trecho": "Following HAFix [8], we focus on the canonical single-line subset: from the 68 single-line, test-reproducible bugs reported by HAFix, we retain 51 cases that build and run end-to-end in our environment, exhibit the expected failing-to-passing transition between buggy and fixed revisions, and provide enough local context to fit within the model’s token budget without altering program semantics.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126)"},
+      {"trecho": "Patch generation uses the Qwen [12] family of code LLMs, producing up to 10 candidates per bug.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126)"},
+      {"trecho": "A patch was considered a bug-level success if all tests passed.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126)"},
+      {"trecho": "This model is built on Alibaba Cloud’s Qwen1.5-7B-Chat [12].", "localizador": "Seção 4.2, PDF p. 6 (impressa 126)"},
+      {"trecho": "The input includes only the buggy code, excluding additional context such as repository history, retrieval evidence, or structural signals.", "localizador": "Seção 4.2, PDF p. 6 (impressa 126)"},
+      {"trecho": "The number of candidate patches was limited to 10, and the random seed (42), decoding parameters, and validation procedures were configured identically to those used in our method.", "localizador": "Seção 4.2, PDF p. 6 (impressa 126)"},
+      {"trecho": "We evaluated Google’s Gemma-7B-IT [20] under the same zero-shot conditions.", "localizador": "Seção 4.2, PDF p. 7 (impressa 127)"},
+      {"trecho": "As shown in Table 2, AgentRepair successfully fixed 26 bugs, outperforming Qwen-ZeroShot ,Gemma-ZeroShot and DeepSeek-ZeroShot by +9 , +11, and +6 cases, respectively.", "localizador": "Seção 4.3, PDF p. 7 (impressa 127)"},
+      {"trecho": "As shown in Figure 6, AgentRepair consumes on average about 2,400 tokens per candidate, which is roughly 2-3× higher than Qwen-ZeroShot (~800), Gemma-ZeroShot (~880), and DeepSeek-ZeroShot (~980).", "localizador": "Seção 4.4, PDF p. 8 (impressa 128)"},
+      {"trecho": "AgentRepair averages 5.2 GB, comparable to Gemma-ZeroShot (5.3 GB) and Qwen-ZeroShot (5.5 GB), with DeepSeek-ZeroShot lower at 3.7 GB.", "localizador": "Seção 4.4, PDF p. 9 (impressa 129)"},
+      {"trecho": "Internally, performance may vary with BM25 hyperparameters and LLM decoding settings, and the BugsInPy test suite [18] can exhibit flaky behavior due to environmental dependencies and timing variance.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"trecho": "We mitigated these issues by fixing random seeds, using a largely deterministic generation strategy, and logging all intermediate JSON outputs, retrieval evidence, and candidate patches, but individual repair outcomes may still depend on infrastructure conditions and potential pretraining overlap with open-source code.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"trecho": "Construct threats arise from our choice of pass@k and bug-level success [18] as primary metrics, which assume reasonably complete test suites and can yield false positives or negatives when that assumption is violated.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"trecho": "We did not perform statistical significance testing, which weakens the strength of our comparative claims, and our ablations do not fully disentangle the effects of AST signals [6], BM25 retrieval [10], and candidate diversification.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+      {"trecho": "Limitations include occasional BM25 retrieval noise, context loss on long or multi-function defects due to prompt length constraints, potential AST parsing fragility on non-standard syntax, and a clear accuracy-cost trade-off as candidate counts grow.", "localizador": "Seção 7, PDF p. 11 (impressa 131)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "AgentRepair",
+      "mecanismos": ["instrucao", "contexto", "exemplos", "raciocinio", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto", "exemplos", "raciocinio", "restricoes"],
+      "comparador": "Qwen-ZeroShot(Baseline)",
+      "modelo": "AgentRepair: família Qwen [12] (versão nao_informado); comparador: Qwen1.5-7B-Chat. O artigo não declara que o modelo do AgentRepair é o mesmo do comparador.",
+      "benchmark": "BugsInPy, subconjunto canônico de linha única (51 bugs)",
+      "metrica": "Bug-level Success",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 17, "intervencao": 26},
+      "denominador": "51 bugs",
+      "condicoes": "Até 10 candidatos por bug em ambos; semente 42; decodificação e validação declaradas idênticas; primeiro candidato guloso e demais com variação de temperatura e top-p (valores não informados); AgentRepair com recuperação BM25 top-k = 5, leave-one-bug-out, entrada limitada a 2.048 tokens, variação de ordem dos exemplos e ênfase estrutural, verificação de sintaxe e deduplicação por hash de AST; baseline com entrada só do código defeituoso. Número de execuções repetidas nao_informado; sem teste de significância. Ganho do pacote híbrido (inclui componentes fora do escopo), não atribuível a um ingrediente. Valores conferidos na Tabela 2 (PDF p. 7), que se estende do fim da coluna esquerda ao topo da coluna direita; soma por projeto da Fig. 5 coincide (cálculo próprio).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: resumo, contribuições e conclusão destacam uma técnica, mas três comparadores (Qwen, Gemma, DeepSeek) sem que um prevaleça e várias métricas (bug-level success e pass@k) como primárias. Primeira tabela com o contraste (Tabela 2), primeira métrica (Bug-level Success) e primeira linha de base listada (Qwen-ZeroShot). Única técnica focal e única tarefa; não há ablação nem matriz de ingredientes para cobertura.",
+      "derivacao": "direta",
+      "localizador": "Tabela 2 ('Bug-level Success on BugsInPy (51 bugs)'), PDF p. 7 (impressa 127); seção 4.3, PDF p. 7",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Qwen-ZeroShot(Baseline) 17", "localizador": "Tabela 2, colunas Model | Bug-level Success, PDF p. 7 (impressa 127)"},
+        {"trecho": "AgentRepair 26", "localizador": "Tabela 2, colunas Model | Bug-level Success, PDF p. 7 (impressa 127)"},
+        {"trecho": "As shown in Table 2, AgentRepair successfully fixed 26 bugs, outperforming Qwen-ZeroShot ,Gemma-ZeroShot and DeepSeek-ZeroShot by +9 , +11, and +6 cases, respectively.", "localizador": "Seção 4.3, PDF p. 7 (impressa 127)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Proposta e cinco questões de pesquisa explícitas (RQ1–RQ5); a RQ3 não recebe análise dedicada.", "localizador": "Seção 1, PDF p. 1–2 (impressas 121–122); seção 4.2, PDF p. 7 (impressa 127)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Pipeline, conjunto de instruções (Fig. 2), parâmetros de recuperação e de candidatos descritos; faltam versão do modelo do AgentRepair, valores de temperatura e top-p, origem do índice de recuperação, texto do prompt dos baselines e uso efetivo de expansão de consulta.", "localizador": "Seções 3.3–4.2, PDF p. 5–7 (impressas 125–127)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Três baselines zero-shot executados no mesmo conjunto e configuração; porém só um usa Qwen e a identidade do modelo com o AgentRepair não é declarada, os outros dois mudam o modelo, não há ablação dos componentes nem comparação executada com outro método de APR (HAFix evitado).", "localizador": "Seção 4.2, PDF p. 6–7 (impressas 126–127); seção 5.1, PDF p. 10 (impressa 130)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Bug-level success e pass@k definidos, com denominador de 51 bugs e valores coincidentes entre Tabela 2/Fig. 5 e Tabela 3/Fig. 3; mas não se explica o cálculo de pass@k quando n < k após deduplicação, VRAM do AgentRepair diverge entre texto e Fig. 8, e não há teste de significância.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); Tabelas 2–3, PDF p. 7; Figs. 3, 5 e 8, PDF p. 8–9; seção 5.2, PDF p. 10"},
+    {"criterio": "ameacas", "julgamento": "atende", "justificativa": "Seção de ameaças à validade interna, externa e de construto, com limitações de significância, ablação e testes instáveis.", "localizador": "Seção 5.2, PDF p. 10 (impressa 130)"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Semente, hardware, top-k do BM25, número de candidatos e repositório GitHub informados; versão do modelo do AgentRepair, parâmetros de decodificação e origem do índice não informados; repositório não verificado.", "localizador": "Seção 4.1, PDF p. 6 (impressa 126); referência [26], PDF p. 11 (impressa 131)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "Vazamento pelo índice de recuperação controlado por leave-one-bug-out; possível sobreposição com o pré-treinamento reconhecida, mas não controlada nem analisada.", "localizador": "Seção 3.1, PDF p. 4 (impressa 124); seção 5.2, PDF p. 10 (impressa 130)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido por inteiro (12 páginas, incluindo referências). Páginas do PDF abertas visualmente: p-01, p-04, p-05, p-06, p-07, p-08, p-09 e p-10. A Fig. 7 não tem rótulos numéricos."
+  }
+}

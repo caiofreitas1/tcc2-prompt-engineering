@@ -1,0 +1,511 @@
+{
+  "ficha": {
+    "estudo": "S1624",
+    "tarefas": ["depuracao", "geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "careful prompt engineering / (a suitable chain of) prompts for G-code manipulation",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "feedback", "outro"],
+        "mecanismos_acrescentados": [],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1, Resumo e seção I (contribuição i); p. 2, seção II (Prompt Engineering) e Fig. 1; p. 3, seção III",
+        "observacao": "Pacote de diálogo usado em todas as avaliações: prompt inicial com definições de comandos G-code (Fig. 1; `instrucao`, `exemplos`, `contexto`), envio do G-code inteiro ou em chunks (`contexto`; chunking como `outro`, ver técnica própria), prompts de tarefa (`instrucao`) e feedback do usuário a soluções incompletas ou dica adicional na depuração (`feedback`). O texto diz que os diálogos têm «atleast one of the following traits», de modo que a composição do pacote em cada diálogo, tarefa e modelo não é informada; os mecanismos listados são os do pacote descrito, não necessariamente os de cada diálogo. Não há condição sem o pacote nem prompt alternativo executado: as tabelas comparam modelos (seleção de modelo, fora do escopo), e o próprio estudo reconhece o uso ocasional de prompts diferentes entre modelos. Por isso `avaliada_isoladamente` = nao e `tipo_contrafactual` = nenhum. A afirmação de que os prompts são «effective» não é testada contra outra condição de prompting."
+      },
+      {
+        "nome_original": "Initial prompt to each LLM (Fig. 1): «Use these definitions for in-context learning» — chamado pelo estudo de «chain-of-thought» reasoning",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2, seção II (Prompt Engineering) e Fig. 1; p. 3, seção III, traço (i)",
+        "observacao": "O prompt traz uma instrução («Use these definitions for in-context learning») e 13 comandos G-code de exemplo, cada um com sua descrição (por exemplo, «G28 homes all axes»), o que leva a `instrucao`, `exemplos` (exemplos ilustrativos de comandos) e `contexto` (documentação dos comandos). O estudo chama a técnica de «chain-of-thought» reasoning, «a form of in-context learning», mas o prompt impresso não pede raciocínio passo a passo nem explicação antes da resposta; por isso não se registrou `raciocinio`. Não há base identificável nem condição sem esse prompt."
+      },
+      {
+        "nome_original": "chunks of G-code (strategies for feeding large G-code files to context-length-limited LLMs)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "outro"],
+        "mecanismos_acrescentados": ["outro"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1, seção I (contribuição i); p. 3, seção III, traço (ii) e parágrafo sobre compreensão",
+        "observacao": "`outro`: particionamento do G-code de entrada em chunks enviados ao longo do diálogo (500 linhas para GPT-3.5 e GPT-4), pedindo, na compreensão, que o modelo combine os chunks; não é decomposição da tarefa em subtarefas. Os demais mecanismos são herdados do pacote (prompt da Fig. 1, quando usado, e prompt de tarefa). Embora a contribuição (i) mencione «effective strategies» para alimentar arquivos grandes, o chunking é aplicado só aos modelos de contexto menor (GPT-3.5 e GPT-4), enquanto Claude-2, Llama-2-70b e Starcoder recebem o arquivo inteiro: a diferença coincide com a troca de modelo, e não há condição comparável com e sem chunking. Classificado como `componente` do pacote focal."
+      },
+      {
+        "nome_original": "user feedback to solutions that are incomplete or omit key parts of the g-code",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, seção III, traço (iv)",
+        "observacao": "Feedback humano no diálogo quando a solução é incompleta ou omite partes do G-code. Herda os mecanismos do pacote (Fig. 1, quando usada). O estudo não informa em quais diálogos, tarefas ou modelos o feedback foi dado nem quantas rodadas houve, e não relata resultado antes e depois do feedback."
+      },
+      {
+        "nome_original": "additional prompt saying that we are looking for an invalid command (additional hint)",
+        "mecanismos": ["instrucao", "contexto", "feedback"],
+        "mecanismos_acrescentados": ["feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "p. 3, seção IV.A",
+        "observacao": "Na depuração, o modelo recebe primeiro só o arquivo G-code com o pedido de procurar um erro; se entende a tarefa mas não acha a causa, recebe a dica de que se procura um comando inválido. É uma rodada adicional condicionada à falha, sem condição paralela sem a dica: só contribuição cumulativa (Claude-2 acerta após a dica). Se o prompt da Fig. 1 foi usado no diálogo de depuração não é informado (a Fig. 2 não o indica), por isso `exemplos` não foi listado. Não se informa se GPT-3.5 recebeu a dica."
+      },
+      {
+        "nome_original": "G-code for a single layer (G-code for the first layer on a conditional basis)",
+        "mecanismos": ["instrucao", "exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3, seção III, traço (iii); p. 4, seção IV.B",
+        "observacao": "Fornecimento apenas do G-code de uma camada em vez do arquivo inteiro, para avaliar o gargalo do tamanho de contexto. O texto relata, só em prosa e sem valores nem detalhe por modelo, que isso «led to more engaging and positive results» do que pedir a avaliação no G-code inteiro. As condições não são comparáveis: a camada única muda o próprio objeto da tarefa (transformar ou compreender uma camada em vez do objeto inteiro), e não se informa quais células das Tabelas I e II correspondem a cada condição. Por isso `avaliada_isoladamente` = nao e `tipo_contrafactual` = nenhum. Mecanismos acrescentados vazios porque o ingrediente muda o conteúdo do `contexto`, sem acrescentar categoria."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "comparação entre LLMs (GPT-3.5, GPT-4, Claude-2, Llama-2-70b, Starcoder)",
+        "natureza": "selecao_modelo",
+        "descricao": "As Tabelas I e II e a Fig. 3 contrastam modelos sob o mesmo pacote de prompting (com uso ocasional de prompts diferentes entre modelos, segundo o estudo); a diferença entre células é de modelo, não de técnica de prompting.",
+        "localizador": "p. 2, Tabela I; p. 3, Tabela II e seção III; p. 4, Fig. 3"
+      },
+      {
+        "nome_original": "maximum new tokens set to 1024 (Starcoder’s Starchat); default settings for all other LLMs",
+        "natureza": "decodificacao",
+        "descricao": "Parâmetro de geração alterado só para o Starchat, para permitir gerar sequências de G-code sem limite de tokens; demais modelos com configurações padrão (valores não informados).",
+        "localizador": "p. 2–3, seção III"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "GPT-3.5 (OpenAI)",
+        "versao": "nao_informado",
+        "observacao": "Selecionado entre os melhores modelos disponíveis «as of late 2023»; snapshot e data de uso não informados.",
+        "localizador": "p. 2, seção III"
+      },
+      {
+        "nome": "GPT-4 (OpenAI)",
+        "versao": "nao_informado",
+        "observacao": "Snapshot e data de uso não informados.",
+        "localizador": "p. 2, seção III"
+      },
+      {
+        "nome": "Claude-2 (Anthropic)",
+        "versao": "nao_informado",
+        "observacao": "A referência [13] é a página do produto «Claude», datada de agosto de 2023; versão exata não informada.",
+        "localizador": "p. 2, seção III; p. 5, referência [13]"
+      },
+      {
+        "nome": "Llama-2-70b (Meta), ajustado para chat (Llama-2-70b-chat-hf) por Huggingface",
+        "versao": "Llama-2-70b-chat-hf (checkpoint ou data não informados)",
+        "observacao": "Configurações padrão.",
+        "localizador": "p. 2, seção III"
+      },
+      {
+        "nome": "Starcoder (BigCode), Starcoder-Starchat-Beta ajustado para chat e hospedado no Huggingface",
+        "versao": "Starchat-Beta (checkpoint ou data não informados)",
+        "observacao": "maximum new tokens = 1024.",
+        "localizador": "p. 2–3, seção III"
+      },
+      {
+        "nome": "Bard (Google)",
+        "versao": "nao_informado",
+        "observacao": "Avaliado, mas resultados não incluídos «since its incorporation into Gemini» (notas de rodapé 1 e 2).",
+        "localizador": "p. 2, nota 1; p. 3, nota 2"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Três formas canônicas (cube, cylinder, S-shape) geradas no Solidworks, fatiadas no PrusaSlicer e visualizadas no Ultimaker Cura",
+        "versao": "nao_aplicavel",
+        "quantidade": "3 formas; tamanho em linhas informado só para o S-shape (204 lines); cubo e cilindro: nao_informado",
+        "observacao": "Não é benchmark público. Depuração avaliada só no S-shape, com um único erro injetado (G1 substituído por G13 em uma linha). Transformações avaliadas nas três formas (translação de 10 mm em X e 20 mm em Y; escala uniforme 2; cisalhamento 0.5; rotação de 45 graus anti-horária em torno de Z). Compreensão usa G-code em chunks e um arquivo de configuração do PrusaSlicer. Número de diálogos ou execuções por célula não informado.",
+        "localizador": "p. 2, seção III; p. 3, seção III e seção IV.A; p. 2, Tabela I (nota)"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Color coding: success / partial success / failure",
+        "definicao": "Classificação qualitativa em três níveis por capacidade e modelo (Tabela I, cor como «average of performance across the shapes») e por forma, capacidade e modelo (Tabela II). Critérios para cada nível, avaliador e modo de média entre formas não informados.",
+        "denominador": "nao_aplicavel (classificação qualitativa por célula; número de tentativas por célula nao_informado)",
+        "localizador": "p. 2, Tabela I (legenda); p. 3, Tabela II (legenda)"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "G-code (impressão 3D de 3 eixos por extrusão; gerado pelo PrusaSlicer)",
+        "observacao": "Dialeto ou firmware específico não informado.",
+        "localizador": "p. 1, Resumo e seção I; p. 2, seção III"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A maioria dos LLMs testados não consegue processar um arquivo G-code inteiro de uma vez, o que, segundo as observações empíricas dos autores, prejudica o raciocínio sobre a geometria; os modelos de código aberto têm desempenho fraco, e Starcoder e Llama-2-70b não reconhecem o arquivo como G-code na depuração. A atribuição ao limite de contexto é apresentada pelos autores como plausível, não demonstrada.",
+        "localizador": "p. 3, seção IV.A; p. 4, seções IV.C e V"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "Segurança operacional, não cibersegurança: erros em G-code podem causar dano ao equipamento ou a pessoas. O estudo apresenta o risco como motivação para erros de G-code em geral; não o mede nem o atribui a saídas dos LLMs.",
+        "localizador": "p. 1, seção I"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Diferenças de arquitetura, atenção, dados de treinamento e tamanho de contexto fazem os modelos responderem de modo diferente a prompts idênticos, exigindo ocasionalmente prompts diferentes para a mesma tarefa, o que limita a comparabilidade entre modelos.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limite de janela de contexto: os modelos lidam melhor com camadas isoladas (2D) do que com o G-code inteiro (3D); o estudo aponta a deficiência na compreensão de geometrias complexas a partir do G-code.",
+        "localizador": "p. 4, seções IV.B, IV.C e V"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Envio do G-code em chunks de 500 linhas para GPT-3.5 e GPT-4, por causa do tamanho de contexto; sem comparação com condição sem chunking no mesmo modelo.",
+        "avaliada": "nao",
+        "localizador": "p. 3, seção III, traço (ii)"
+      },
+      {
+        "descricao": "Teste em G-code de uma única camada para avaliar o gargalo do contexto; o resultado é descrito só qualitativamente («more engaging and positive results») e a condição muda o objeto da tarefa, sem medida comparável contra o arquivo inteiro.",
+        "avaliada": "nao",
+        "localizador": "p. 4, seção IV.B"
+      },
+      {
+        "descricao": "Uso, tanto quanto possível, dos mesmos prompts para todos os LLMs e uniformidade entre tarefas e modelos; procedimento de controle sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "descricao": "maximum new tokens = 1024 no Starchat para permitir gerar G-code sem limite de tokens (parâmetro de decodificação, fora do escopo de prompting).",
+        "avaliada": "nao",
+        "localizador": "p. 2–3, seção III"
+      }
+    ],
+    "sem_comparador": "sim",
+    "baseline": null,
+    "so_classificadas": [
+      {
+        "tecnica": "careful prompt engineering / (a suitable chain of) prompts for G-code manipulation",
+        "motivo": "Técnica focal sem extração numérica: o estudo só relata classificações qualitativas por cor (sucesso, sucesso parcial, falha), sem valores numéricos; as duas extrações são descritivas e qualitativas, com `resultado` null e o nível registrado em `condicoes`."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Na depuração, GPT-4 acha o erro imediatamente e Claude-2 só após a dica adicional, mas ambos aparecem com a mesma cor de sucesso na Tabela I; a categoria não distingue sucesso com e sem dica.",
+        "localizador": "p. 2, Tabela I, linha Debugging; p. 3, seção IV.A"
+      },
+      {
+        "descricao": "A Tabela I representa por cor a «average of performance across the shapes» de categorias qualitativas, sem informar como níveis categóricos são promediados nem quais células da Tabela II compõem cada linha além da definição de Simple (translation, scaling) e Complex (shearing, rotation) Transformations. A coerência entre as duas tabelas não pode ser verificada sem essa regra.",
+        "localizador": "p. 2, Tabela I (legenda); p. 3, Tabela II e seção IV"
+      },
+      {
+        "descricao": "Os diálogos têm «atleast one of the following traits» (prompt inicial da Fig. 1, chunks, G-code da primeira camada, feedback do usuário) e o estudo usa ocasionalmente prompts diferentes entre modelos; a combinação usada em cada célula das Tabelas I e II não é informada, de modo que as diferenças entre modelos não ocorrem necessariamente sob o mesmo prompt.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "descricao": "O texto diz que o teste em camada única produziu resultados «more engaging and positive» do que no G-code inteiro, mas não informa se a Tabela II reporta a condição de camada única, a de arquivo inteiro ou uma combinação.",
+        "localizador": "p. 3, Tabela II; p. 4, seção IV.B"
+      },
+      {
+        "descricao": "A legenda da Fig. 4 diz «Prompting Claude-2 to translate G-Code for a cube», mas a transcrição mostra o pedido «can you tell me what shape is being represented by this gcode?» (compreensão), e a resposta do modelo descreve «a square shape with some infill» para o G-code de um cubo; o estudo não comenta a correção dessa resposta.",
+        "localizador": "p. 4, Fig. 4 e seção IV.B"
+      },
+      {
+        "descricao": "Resumo e contribuições afirmam que os prompts projetados são «effective» e que a engenharia de prompt cuidadosa permite aos LLMs entender G-code, mas nenhuma condição alternativa de prompting é executada; a afirmação não é testada contra comparador.",
+        "localizador": "p. 1, Resumo e seção I"
+      },
+      {
+        "descricao": "A observação de que um contexto maior melhora significativamente a saída vem da «interaction with Claude-2», sem condição controlada; os próprios autores dizem ser prematuro afirmar que o limite de contexto prejudica o raciocínio espacial.",
+        "localizador": "p. 4, seção IV.C"
+      },
+      {
+        "descricao": "Número de diálogos, repetições ou execuções por célula não informado; a avaliação é qualitativa, sem denominador nem critério explícito de sucesso.",
+        "localizador": "p. 2–4, seções III e IV"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Classificação de tarefas (julgamento do extrator): a depuração (localizar e corrigir um comando inválido) é `depuracao`; as transformações geométricas (translação, escala, cisalhamento, rotação), em que o LLM produz G-code modificado conforme especificação, foram classificadas como `geracao`, por mudarem o comportamento do programa (não são refatoração nem tradução entre linguagens). A compreensão (identificar forma e dimensões) não é tarefa do escopo e não recebeu extração.",
+        "localizador": "p. 2, seção III; p. 3, seções III e IV"
+      },
+      {
+        "descricao": "As formas foram geradas no Solidworks, fatiadas no PrusaSlicer e visualizadas no Ultimaker Cura; ferramentas de preparação dos insumos, não intervenções.",
+        "localizador": "p. 2, seção III"
+      },
+      {
+        "descricao": "A Fig. 3 visualiza o G-code de translação gerado por cada modelo para as três formas; Llama-2-70b (cubo) e Starcoder (três formas) aparecem com X. É ilustração qualitativa, sem contagem.",
+        "localizador": "p. 4, Fig. 3"
+      },
+      {
+        "descricao": "O artigo remete a uma versão completa no ArXiv e a resultados no GitHub; não foram acessados nem validados nesta extração.",
+        "localizador": "p. 4, seção V"
+      },
+      {
+        "descricao": "Artigo curto de workshop (IEEE LLM Aided Design Workshop, LAD 2024; DOI 10.1109/LAD62341.2024.10691700), 4 páginas de texto e 1 de referências, sem seção própria de ameaças à validade.",
+        "localizador": "p. 1, margem esquerda; p. 1–5"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this paper, we present the first extensive evaluation of numerous large language models (LLMs) for debugging G-code files for 3-axis 3D printing.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "We design effective prompts to enable pre-trained LLMs to understand and manipulate G-code and test their performance on various aspects of G-code debugging and manipulation, including detection and correction of common errors and the ability to perform geometric transformations.",
+        "localizador": "p. 1, Resumo"
+      },
+      {
+        "trecho": "We present the first comprehensive evaluation of the state-of-the-art pre-trained LLMs for debugging and modifying G-code files for extrusion-based additive manufacturing (AM) without requiring fine-tuning or domain adaptation; our main technical challenge is demonstrating their generalization abilities by framing (a suitable chain of) prompts for G-code manipulation.",
+        "localizador": "p. 1, seção I"
+      },
+      {
+        "trecho": "(i) We show how careful prompt engineering can enable pre-trained large language models (LLMs) to understand G-codes for AM.",
+        "localizador": "p. 1, seção I"
+      },
+      {
+        "trecho": "We develop effective strategies for feeding large G-code files to context-length-limited LLMs.",
+        "localizador": "p. 1, seção I"
+      },
+      {
+        "trecho": "In our evaluations below, we leverage the technique of “chain-of-thought” [27] reasoning, a form of in-context learning used to precondition an LLM for G-code-related tasks.",
+        "localizador": "p. 2, seção II (Prompt Engineering)"
+      },
+      {
+        "trecho": "Use these definitions for in-context learning. For context, I have provided example commands for a 3D printer.",
+        "localizador": "p. 2, Fig. 1"
+      },
+      {
+        "trecho": "All our dialogues are performed with atleast one of the following traits: (i) We begin each conversation with the same prompt (Fig. 1).",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "(ii) We provide chunks of G-code, owing to the varying token lengths.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "Empirically, we have found that a chunk length of 500 lines works for GPT-3.5 and GPT-4.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "For Claude-2, Llama-2-70b, and Starcoder, we were able to provide the entire G-code as input.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "(iii) Depending on the evaluation metric, we provide G-code for the first layer on a conditional basis.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "(iv) We provide user feedback to solutions that are incomplete or omit key parts of the g-code.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "Furthermore, we make a concerted effort to use the same prompts for evaluation across all LLMs.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "However, owing to inherently different model architectures, attention mechanisms, different training datasets, and varying token lengths of the LLMs, such variance inherently affects the LLM’s response to identical prompts, necessitating the occasional use of different prompts to achieve the same task across different models.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "We adhere to default settings for all LLMs except for Starcoder’s Starchat, where we set the maximum new tokens to 1024 to allow us to generate G-code sequences without token length limits.",
+        "localizador": "p. 2–3, seção III"
+      },
+      {
+        "trecho": "We utilize three canonical shapes for experimentation: a cube, a cylinder, and an S-shape.",
+        "localizador": "p. 2, seção III"
+      },
+      {
+        "trecho": "Translation transformation moves the object by a fixed distance (10mm in X and 20mm in Y) without changing its orientation or size.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "For Scaling, we applied a uniform scaling factor of 2 and ask the LLM to scale the coordinates accordingly.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "Shearing transformations were aimed at skewing the object by a factor of 0.5, and Rotation involved turning the objects 45 degrees (counter-clockwise) with respect to the Z axis.",
+        "localizador": "p. 3, seção III"
+      },
+      {
+        "trecho": "We test various LLM chatbots on a simple 2D S-Shape (204 lines; suitable for all context lengths) for line-by-line debugging and replace the “G1” command in one line with “G13”, an invalid G-code command.",
+        "localizador": "p. 3, seção IV.A"
+      },
+      {
+        "trecho": "If the model understands the task but is unable to determine the cause of the error, we then provide an additional prompt saying that we are looking for an invalid command.",
+        "localizador": "p. 3, seção IV.A"
+      },
+      {
+        "trecho": "Claude-2 also performs well, getting the correct answer after receiving the additional hint.",
+        "localizador": "p. 3, seção IV.A"
+      },
+      {
+        "trecho": "Neither Starcoder nor Llama-2-70b are able to process the input and recognize that it is a G-Code file.",
+        "localizador": "p. 3, seção IV.A"
+      },
+      {
+        "trecho": "To assess the effect of this potential bottleneck we also test their performance on G-code for a single layer.",
+        "localizador": "p. 4, seção IV.B"
+      },
+      {
+        "trecho": "This led to more engaging and positive results than prompts asking for evaluation on the entire G-code.",
+        "localizador": "p. 4, seção IV.B"
+      },
+      {
+        "trecho": "A pervasive issue across most of the LLMs we tested is their inability to completely parse an entire G-code file in a single-shot manner.",
+        "localizador": "p. 4, seção IV.C"
+      },
+      {
+        "trecho": "Our empirical observations suggest that this shortcoming adversely affects the models’ capability to reason about the geometric intricacies represented in the G-code.",
+        "localizador": "p. 4, seção IV.C"
+      },
+      {
+        "trecho": "It would be premature to definitively claim that context length limitations impede an LLM’s spatial reasoning capability of the underlying geometry; it is plausible that this is a contributing factor and makes for an interesting direction for future research.",
+        "localizador": "p. 4, seção IV.C"
+      },
+      {
+        "trecho": "Debugging and modifying G-code for 3D printing involves complex syntactic, semantic, and geometric challenges, with errors potentially leading to equipment damage or human harm.",
+        "localizador": "p. 1, seção I"
+      },
+      {
+        "trecho": "We also evaluated Bard [12], but the results are not included here since its incorporation into Gemini.",
+        "localizador": "p. 2, nota de rodapé 1"
+      },
+      {
+        "trecho": "A full length version of our paper is on ArXiv and our results can be found on GitHub.",
+        "localizador": "p. 4, seção V"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "careful prompt engineering / (a suitable chain of) prompts for G-code manipulation (diálogo de depuração: arquivo G-code com pedido de localizar o erro e, se necessário, dica adicional de comando inválido)",
+      "mecanismos": ["instrucao", "contexto", "feedback"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "GPT-3.5 (versão não informada)",
+      "benchmark": "S-shape (G-code de 204 linhas) com um comando G1 substituído por G13",
+      "metrica": "Color coding (success / partial success / failure), linha «Debugging» da Tabela I",
+      "sentido": "maior_melhor",
+      "unidade": "qualitativo",
+      "resultado": {
+        "baseline": null,
+        "intervencao": null
+      },
+      "denominador": "1 arquivo G-code (S-shape) com 1 erro injetado; número de diálogos ou execuções nao_informado",
+      "condicoes": "Extração descritiva e qualitativa, sem comparador executado; não descreve efeito da técnica. Nível impresso para GPT-3.5: falha (célula em vermelho/rosa na Tabela I), coerente com o texto («GPT-3.5 is unable to solve the problem»). Valor numérico inexistente; por isso `resultado` null. Debugging avaliado só no S-shape. Procedimento: primeiro só o arquivo G-code com pedido de procurar o erro; dica adicional («we are looking for an invalid command») quando o modelo entende a tarefa mas não acha a causa; não se informa se GPT-3.5 recebeu a dica nem se o prompt da Fig. 1 foi usado nesse diálogo. Configurações padrão do modelo (valores não informados). Critério de sucesso e número de execuções não informados. GPT-3.5 escolhido por ser o primeiro modelo da Tabela I; não há agregado entre modelos (GPT-4 e Claude-2: sucesso; Llama-2-70b e Starcoder: falha). Conferido visualmente na Tabela I da p. 2 e no texto da p. 3.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Estudo sem comparador executado de prompting. Não há principal declarado: o estudo destaca várias capacidades (depuração, transformações, compreensão) e várias estratégias (engenharia de prompt, alimentação de arquivos grandes) sem métrica principal declarada. Pela ordem: primeira tabela com resultado da condição avaliada (Tabela I), primeira linha pertinente a tarefa do escopo (Debugging), primeiro modelo (GPT-3.5).",
+      "derivacao": "direta",
+      "localizador": "p. 2, Tabela I «Overview of capabilities we evaluate on for various LLMs», linha Debugging, coluna GPT-3.5; p. 3, seção IV.A",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Color coding represents the average of performance across the shapes.",
+          "localizador": "p. 2, legenda da Tabela I"
+        },
+        {
+          "trecho": "Note: Debugging was only evaluated for the S-shape.",
+          "localizador": "p. 2, legenda da Tabela I"
+        },
+        {
+          "trecho": "GPT-3.5 is unable to solve the problem.",
+          "localizador": "p. 3, seção IV.A"
+        },
+        {
+          "trecho": "For each model, we first give it only the G-code file and ask it to look for an error.",
+          "localizador": "p. 3, seção IV.A"
+        }
+      ]
+    },
+    {
+      "tarefa": "geracao",
+      "tecnica": "careful prompt engineering / (a suitable chain of) prompts for G-code manipulation (diálogos de transformação geométrica do G-code)",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "feedback", "outro"],
+      "mecanismos_acrescentados": [],
+      "comparador": null,
+      "modelo": "GPT-3.5 (versão não informada)",
+      "benchmark": "Três formas canônicas (cube, cylinder, S-shape)",
+      "metrica": "Color coding (success / partial success / failure), linha «Simple Transformations» (translation e scaling) da Tabela I, cor como média do desempenho entre as formas",
+      "sentido": "maior_melhor",
+      "unidade": "qualitativo",
+      "resultado": {
+        "baseline": null,
+        "intervencao": null
+      },
+      "denominador": "nao_informado (3 formas × 2 transformações; número de diálogos ou execuções não informado)",
+      "condicoes": "Extração descritiva e qualitativa, sem comparador executado; não descreve efeito da técnica. Nível impresso para GPT-3.5: sucesso parcial (célula amarela na Tabela I). Valor numérico inexistente; por isso `resultado` null. A linha agrega, segundo a legenda, a média do desempenho nas três formas para translação (10 mm em X e 20 mm em Y) e escala (fator 2); o modo de média entre categorias não é informado. Para GPT-3.5 o G-code foi enviado em chunks de 500 linhas (`outro`); o pacote pode incluir o prompt da Fig. 1, G-code da primeira camada e feedback do usuário, mas a combinação usada em cada diálogo não é informada («atleast one of the following traits»), e o estudo usa ocasionalmente prompts diferentes entre modelos. Não se informa se a tabela reporta a condição de camada única ou de arquivo inteiro. Configurações padrão do modelo. Critério de sucesso e número de execuções não informados. GPT-3.5 escolhido por ser o primeiro modelo da Tabela I. Conferido visualmente na Tabela I da p. 2; a Tabela II (p. 3) foi aberta para conferir a composição por forma, sem extração própria.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Cobertura da tarefa `geracao` (transformações geométricas de G-code), ainda não representada. Pela ordem: primeira tabela com o resultado (Tabela I, que traz o agregado impresso entre formas), primeira linha de transformação (Simple Transformations), primeiro modelo (GPT-3.5). Não há outra técnica focal nem tabela de ablação ou matriz de ingredientes para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "p. 2, Tabela I «Overview of capabilities we evaluate on for various LLMs», linha Simple Transformations, coluna GPT-3.5; p. 3, seção IV",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Color coding represents the average of performance across the shapes.",
+          "localizador": "p. 2, legenda da Tabela I"
+        },
+        {
+          "trecho": "Our results for the LLMs capabilities are summarized in Table I. Simple Transformations include translation and scaling, Complex Transformations include shearing and rotation, and Comprehension is about the LLM’s ability to understand the underlying geometry.",
+          "localizador": "p. 3, seção IV"
+        },
+        {
+          "trecho": "Empirically, we have found that a chunk length of 500 lines works for GPT-3.5 and GPT-4.",
+          "localizador": "p. 3, seção III"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo de avaliar LLMs pré-treinados em depuração, transformação geométrica e compreensão de G-code, com prompts projetados para isso, é declarado no Resumo, nas contribuições e na seção III.",
+      "localizador": "p. 1, Resumo e seção I; p. 2, seção III"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Descrevem-se formas, parâmetros das transformações, erro injetado, prompt inicial (Fig. 1), tamanho dos chunks e o procedimento de dica na depuração; não se reproduzem os prompts de tarefa, a combinação de traços usada em cada diálogo («atleast one»), os prompts alternativos usados em alguns modelos, o número de diálogos nem o critério de classificação dos resultados.",
+      "localizador": "p. 2, Fig. 1 e seção III; p. 3, seções III e IV.A"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "nao_atende",
+      "justificativa": "Não há condição comparadora de prompting: as tabelas contrastam modelos, e o estudo reconhece prompts ocasionalmente diferentes entre eles. A afirmação de que os prompts são eficazes não é contrastada com outra condição; o contraste camada única versus arquivo inteiro é qualitativo, só em prosa e com objeto de tarefa diferente.",
+      "localizador": "p. 1, Resumo; p. 2–3, Tabelas I e II e seção III; p. 4, seção IV.B"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "nao_atende",
+      "justificativa": "A única medida é uma classificação por cor em três níveis sem critério definido para cada nível, sem avaliador identificado, sem denominador e com média entre formas de categorias qualitativas sem regra informada; a categoria de sucesso não distingue acerto imediato de acerto após dica.",
+      "localizador": "p. 2, Tabela I; p. 3, Tabela II e seção IV.A"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O estudo discute limitações de arquitetura, dados de treinamento, tokenização e janela de contexto, e a necessidade de prompts diferentes entre modelos, mas não trata da subjetividade da classificação, do número pequeno de formas e de erros injetados, da ausência de repetições nem da variação de prompts como ameaça aos resultados.",
+      "localizador": "p. 3, seção III; p. 4, seções IV.C e V"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informam-se modelos (com checkpoints de Llama-2-70b-chat-hf e Starchat-Beta), configurações padrão, max new tokens do Starchat, prompt inicial, parâmetros das transformações e ferramentas de geração das formas; faltam versões ou datas de GPT-3.5, GPT-4 e Claude-2, os prompts de tarefa e os arquivos G-code. Há menção a versão no ArXiv e resultados no GitHub, não acessados.",
+      "localizador": "p. 2, Fig. 1 e seção III; p. 3, seção III; p. 4, seção V"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, o estudo não menciona contaminação de dados de avaliação no pré-treinamento ou no prompt; os G-codes foram gerados pelos autores, mas o estudo não discute esse aspecto.",
+      "localizador": "p. 1–5, texto completo"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "motivo": "Texto extraído lido integralmente (5 páginas, incluindo referências).",
+    "paginas_pdf_abertas_visualmente": [1, 2, 3, 4, 5]
+  }
+}

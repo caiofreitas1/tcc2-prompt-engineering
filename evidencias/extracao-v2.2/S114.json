@@ -1,0 +1,650 @@
+{
+  "estudo": "S114",
+  "texto_fonte": "fontes/textos/lote/S114.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao",
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "FRANC (Filter, Rank, And model-agNostic Configurable)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "amostragem",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "amostragem",
+          "feedback"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 1 do PDF (sem paginação impressa), Resumo e Introdução; p. 3, Seção III e Fig. 1",
+        "observacao": "Pacote híbrido: inclui filtro estático heurístico (fora do escopo), ranqueamento por qualidade das 10 sugestões (amostragem com seleção) e reparo por Generated Knowledge Prompting com mensagens de analisadores estáticos (feedback). O prompt base (assinatura, imports e docstring/JavaDoc) dá instrucao e contexto. O estudo avalia cada fase separadamente (Tab. I, Tab. II, Fig. 2, Tab. III); não há comparação do pacote completo contra a saída do modelo sem FRANC."
+      },
+      {
+        "nome_original": "Quality-based Ranking (Phase 4; FRANC's ranking)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "amostragem"
+        ],
+        "mecanismos_acrescentados": [
+          "amostragem"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 do PDF, Seção III-D; p. 5, RQ2; p. 8, Tab. II",
+        "observacao": "Reordena as 10 sugestões geradas pelo mesmo prompt segundo o escore de qualidade Q(ci) (Eq. 2: compilável e sem smells, via Bandit/SpotBugs). Comparado com a ordem original do modelo (Tab. II). Classificado como amostragem por seleção/ranqueamento de várias respostas, conforme o dicionário; o prompt em si não muda. O ranqueamento opera sobre trechos que passaram pelo filtro estático (p. 5) e o estudo não informa se a ordem original foi avaliada sobre trechos filtrados; por isso o contraste é tratado como pacote possivelmente híbrido (filtro + ranqueamento)."
+      },
+      {
+        "nome_original": "Model's original ranking",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 8 do PDF, Tab. II (linhas Model's # prompts e Model's NDCG)",
+        "observacao": "Ordem das 10 sugestões produzida pelo próprio modelo para o prompt base; a ordenação por decodificação não é prompting."
+      },
+      {
+        "nome_original": "P1 (prompt repair structure; Generated Knowledge Prompting)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4 do PDF, Seção III-E; p. 5, Listing 4; p. 9, Fig. 2",
+        "observacao": "Código a reparar (que contém o prompt original) seguido de comentários «Fix: At line « # », « error msg »» e «Fixed Code:» gerados a partir da descrição e da localização do problema dadas pelo analisador estático (feedback). Não há condição sem reparo; P1 serve de base para P2 e P3. Uma única tentativa de reparo."
+      },
+      {
+        "nome_original": "P2 (prompt repair structure; Generated Knowledge Prompting)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 do PDF, Seção III-E; p. 9, Fig. 2",
+        "observacao": "P2 = prompt de P1 (linhas 1–11 do Listing 4) seguido do prompt original (linhas 1–5); difere de P1 só pela repetição do prompt original ao final, sem nova categoria de mecanismo. O contraste P2 × P1 isola esse ingrediente; não há condição sem reparo, logo o efeito do reparo em si não é isolado. Mecanismos_acrescentados contados em relação ao prompt de geração original, como em P1 e P3."
+      },
+      {
+        "nome_original": "P3 (prompt repair structure; Generated Knowledge Prompting)",
+        "mecanismos": [
+          "instrucao",
+          "contexto",
+          "feedback"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4–5 do PDF, Seção III-E e Listing 4; p. 9, Fig. 2",
+        "observacao": "P3 = código a reparar truncado antes da primeira linha com problema, seguido da mesma mensagem de correção (no exemplo, linhas 1–6 e 10–11, contra 1–11 em P1); difere de P1 só pela truncagem do código. O contraste P3 × P1 isola a truncagem; não há condição sem reparo."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Static Filtering (Phase 3; regras R1–R7)",
+        "natureza": "outro",
+        "descricao": "Pós-processamento heurístico baseado em regras que remove texto e código desnecessários, completa assinaturas, fecha chaves em Java e verifica a sintaxe (AST do Python / Java Parser); R7 substitui o código problemático pelo código reparado. Avaliado em RQ1 (Tab. I), sem alteração do prompt.",
+        "localizador": "p. 4 do PDF, Seção III-C; p. 6, Seção IV-C; p. 7, Tab. I"
+      },
+      {
+        "nome_original": "Token limits / default hyperparameters",
+        "natureza": "decodificacao",
+        "descricao": "Configuração de geração: 128 tokens para os modelos abertos e 512 para o GPT-3.5-Turbo, com hiperparâmetros padrão; não é condição comparada.",
+        "localizador": "p. 6 do PDF, Suggestion Inventory Creation e Token Limits Rationale; p. 10, Seção VII"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "CodeParrot-small",
+        "versao": "110M parâmetros"
+      },
+      {
+        "nome": "CodeParrot (regular)",
+        "versao": "1,5B parâmetros"
+      },
+      {
+        "nome": "InCoder",
+        "versao": "1,3B parâmetros no texto (rotulado «1B» nas tabelas e figuras)"
+      },
+      {
+        "nome": "CodeGen",
+        "versao": "350M-mono, 350M-multi, 2B-mono, 2B-multi"
+      },
+      {
+        "nome": "PolyCoder",
+        "versao": "160M, 400M (0.4B), 2.7B"
+      },
+      {
+        "nome": "GPT-3.5-Turbo",
+        "versao": "«version released in May 2023»; snapshot não informado"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "AixBench",
+        "quantidade": "175 prompts Java (descrições em inglês)",
+        "linguagem": "Java"
+      },
+      {
+        "nome": "CoderEval",
+        "quantidade": "460 prompts (230 para Java e Python, segundo o texto)",
+        "linguagem": "Java e Python"
+      },
+      {
+        "nome": "HumanEval (Multilingual HumanEval Java + HumanEval original Python)",
+        "quantidade": "325 prompts (161 Java e 164 Python)",
+        "linguagem": "Java e Python"
+      },
+      {
+        "nome": "SecurityEval",
+        "quantidade": "121 prompts cobrindo 69 CWEs",
+        "linguagem": "Python"
+      },
+      {
+        "nome": "SOEval (chamado «FRANC» no resumo e nas ameaças)",
+        "quantidade": "70 prompts (28 Java, 42 Python)",
+        "linguagem": "Java e Python"
+      },
+      {
+        "nome": "Total",
+        "quantidade": "1.151 prompts (594 Java, 557 Python); inventário de 102.100 sugestões (41.010 Java, 61.090 Python)",
+        "linguagem": "Java e Python"
+      },
+      {
+        "nome": "Subconjunto de análise manual (RQ2)",
+        "quantidade": "326 prompts amostrados aleatoriamente de 2.271 prompts com pelo menos um problema de qualidade",
+        "linguagem": "Java e Python"
+      },
+      {
+        "nome": "Prompts de reparo (RQ3)",
+        "quantidade": "1.023 prompts de reparo (341 por estrutura); distribuição por modelo e linguagem não informada",
+        "linguagem": "Java e Python"
+      }
+    ],
+    "metricas": [
+      "Percentual de sugestões compiláveis antes e depois do filtro (Tab. I)",
+      "Percentual de prompts com pelo menos uma sugestão compilável",
+      "NDCG@10 (relevância 0–3; 2 e 3 atribuídos manualmente por dois pesquisadores)",
+      "# prompts (rel1 = 3): prompts cuja primeira sugestão é compilável, funcionalmente correta e sem smells (Tab. II)",
+      "% Good Prompts: percentual de prompts de reparo com pelo menos uma sugestão com Q(ci) = 1 (Fig. 2)",
+      "Tempo de cada fase em segundos (Tab. III)",
+      "Kappa de Cohen da concordância entre avaliadores; teste t pareado do NDCG@10"
+    ],
+    "linguagens": [
+      "Java",
+      "Python"
+    ],
+    "riscos": [
+      {
+        "categoria": "seguranca",
+        "descricao": "Código gerado pode conter vulnerabilidades e security smells (exemplo de injeção de SQL na sugestão top-1 do Copilot); desenvolvedores tendem a adotar a primeira sugestão.",
+        "localizador": "p. 1 do PDF, Introdução; p. 2–3, Seção II-C e Listing 2"
+      },
+      {
+        "categoria": "manutenibilidade",
+        "descricao": "Code smells no código gerado podem introduzir problemas de manutenção.",
+        "localizador": "p. 2 do PDF, Seção II-B"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Nem todas as sugestões são compiláveis; podem conter erros de sintaxe e código extra que não corresponde à intenção do prompt.",
+        "localizador": "p. 4 do PDF, Seção III-C; p. 5, RQ1"
+      },
+      {
+        "categoria": "seguranca",
+        "descricao": "O reparo por LLM foi menos capaz de corrigir problemas ligados a CWE-327, CWE-22 e CWE-732, de modo que vulnerabilidades podem persistir após o reparo.",
+        "localizador": "p. 9 do PDF, Seção VI, Code Repairing using LLM"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Em Java, o reparo por LLM dificilmente corrige laços infinitos, acesso fora dos limites de arrays e fluxo de controle inútil.",
+        "localizador": "p. 9 do PDF, Seção VI, Code Repairing using LLM"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O framework acrescenta sobrecarga de tempo de execução: em média 1,984502 s para Java (σ = 0,06) e 0,084635 s para Python (σ = 0,003); a fase de ranqueamento é a mais demorada. O estudo não informa se o tempo de regeneração pelo LLM no reparo está incluído.",
+        "localizador": "p. 5 do PDF, RQ4; p. 9, Tab. III e Seção V-D"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Filtro estático heurístico para remover código desnecessário e trechos não compiláveis (comparado antes e depois na Tab. I).",
+        "avaliada": "sim",
+        "localizador": "p. 7 do PDF, Tab. I e Seção V-A"
+      },
+      {
+        "descricao": "Ranqueamento por qualidade para colocar no topo uma sugestão compilável e sem smells (comparado com a ordem original do modelo na Tab. II, teste t pareado do NDCG@10).",
+        "avaliada": "sim",
+        "localizador": "p. 8 do PDF, Tab. II e Seção V-B"
+      },
+      {
+        "descricao": "Reparo da sugestão top-1 com problema por Generated Knowledge Prompting (P1–P3), usando metadados do Bandit e do SpotBugs; as estruturas são comparadas entre si, sem condição sem reparo.",
+        "avaliada": "nao",
+        "localizador": "p. 7 do PDF, Seção IV-E; p. 8–9, Seção V-C e Fig. 2"
+      },
+      {
+        "descricao": "Revisão por pares da atribuição manual de relevância por dois avaliadores, com kappa de Cohen de 0,815 e resolução de discordâncias por discussão.",
+        "avaliada": "nao",
+        "localizador": "p. 8 do PDF, Seção V-B; p. 10, Seção VII"
+      },
+      {
+        "descricao": "Mesma máquina (Apple M1, 8 GB RAM) em todas as medições de tempo.",
+        "avaliada": "nao",
+        "localizador": "p. 8–9 do PDF, Seção V-D"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [
+      {
+        "tecnica": "FRANC (pacote focal)",
+        "motivo": "Não há comparação do pacote completo contra a saída do modelo sem FRANC; o estudo avalia as fases separadamente. As extrações cobrem o ranqueamento (Tab. II) e as estruturas de reparo P2 e P3 contra P1 (Fig. 2)."
+      }
+    ],
+    "heterogeneidade": [
+      {
+        "descricao": "Aparente deslocamento de colunas na Tab. II: para Java, os valores estão sob CodeGen (350M-mono) e há «-» sob CodeGen (350M-multi), enquanto a Tab. I e a Tab. III trazem valores Java sob 350M-multi e «-» sob 350M-mono, e o texto da RQ1 cita CodeGen-350M-multi para Java. A fonte não permite saber qual rótulo está correto.",
+        "localizador": "p. 7 do PDF, Tab. I; p. 8, Tab. II; p. 9, Tab. III; p. 7, Seção V-A"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto atribui o aumento de 0,3630 para 0,4671 (Python) a CodeGen 350M-mono, mas na Tab. II esses valores estão na coluna CodeGen (350M-multi); a coluna 350M-mono traz 0,3944 e 0,4581.",
+        "localizador": "p. 8 do PDF, Seção V-B e Tab. II"
+      },
+      {
+        "descricao": "Rótulos «% increase» parecem expressar diferença absoluta e não variação relativa: na Tab. I, «% Increase» coincide com a diferença em p.p. entre After e Before (por exemplo, 63,69% − 22,22% = 41,47%, cálculo próprio); no texto, «11% increase» para 0,3019 → 0,4143 corresponde a uma diferença de 0,1124 em NDCG (cálculo próprio), não a 11% relativos. O estudo não define o termo.",
+        "localizador": "p. 7 do PDF, Tab. I; p. 8, Seção V-B"
+      },
+      {
+        "descricao": "O resumo informa melhora média de 0,0763 no NDCG@10, e o corpo informa aumento percentual médio de 9,6% (Java) e 7% (Python); o estudo não liga os dois valores nem explica a agregação.",
+        "localizador": "p. 1 do PDF, Resumo; p. 8, Seção V-B"
+      },
+      {
+        "descricao": "A Discussão afirma que, sem o filtro estático, o InCoder não produziu sugestões compiláveis, mas a Tab. I registra 0,15% (Java) e 55,91% (Python) de sugestões compiláveis do InCoder antes do filtro.",
+        "localizador": "p. 9 do PDF, Seção VI; p. 7, Tab. I"
+      },
+      {
+        "descricao": "O texto da RQ3 diz que, em Python, a diferença entre P2 e P1 é muito pequena, mas os rótulos da Fig. 2 mostram P1 muito abaixo de P2 na maioria dos modelos (por exemplo, CodeGen-350M-mono: 4,2% em P1 e 79,2% em P2; CodeParrot-small: 2,4% e 71,4%; leitura dos rótulos impressos, em baixa resolução).",
+        "localizador": "p. 9 do PDF, Fig. 2 (painel Python); p. 8, Seção V-C"
+      },
+      {
+        "descricao": "O texto diz que P2 produz good prompts de 35,71% a 79,2% em Python, mas a Fig. 2 mostra 0,0% para InCoder-1B nas três estruturas; a faixa omite esse modelo sem dizer.",
+        "localizador": "p. 8 do PDF, Seção V-C; p. 9, Fig. 2 (painel Python)"
+      },
+      {
+        "descricao": "O texto afirma que P3 é a melhor estrutura para Java, mas os rótulos da Fig. 2 mostram P1 acima de P3 em PolyCoder-160M (41,3% e 31,0%) e PolyCoder-2.7B (26,2% e 21,4%) (leitura dos rótulos impressos, em baixa resolução).",
+        "localizador": "p. 8 do PDF, Seção V-C; p. 9, Fig. 2 (painel Java)"
+      },
+      {
+        "descricao": "A Fig. 2 não informa o denominador por modelo; o estudo informa apenas 1.023 prompts de reparo (341 por estrutura) e não liga esse total aos 2.271 prompts com problema nem à amostra de 326 prompts da RQ2.",
+        "localizador": "p. 7 do PDF, Seção IV-E; p. 8, Seção V-B; p. 9, Fig. 2"
+      },
+      {
+        "descricao": "Na Tab. III, a fase de reparo leva da ordem de 10^-5 s; o estudo não informa se a regeneração pelo LLM está incluída, de modo que a afirmação de sobrecarga inferior a 2 s pode não abranger a geração do reparo (aparente inconsistência; falta a definição do que foi cronometrado).",
+        "localizador": "p. 9 do PDF, Tab. III e Seção V-D"
+      },
+      {
+        "descricao": "O novo conjunto de prompts é chamado «FRANC» no resumo e nas ameaças à validade, e «SOEval» no corpo.",
+        "localizador": "p. 1 do PDF, Resumo; p. 5, Seção IV-A; p. 10, Seção VII"
+      },
+      {
+        "descricao": "Limitação declarada: hiperparâmetros padrão e limites de 128/512 tokens; os resultados podem não se generalizar para outros hiperparâmetros de inferência. Apenas LLMs baseados em transformers foram estudados.",
+        "localizador": "p. 10 do PDF, Seção VII"
+      }
+    ],
+    "observacoes": [
+      {
+        "nota": "Classificação do ranqueamento por qualidade como amostragem (seleção entre várias respostas), conforme o dicionário de mecanismos; o estudo apresenta apenas a fase de reparo como prompt engineering.",
+        "localizador": "p. 4 do PDF, Seções III-D e III-E"
+      },
+      {
+        "nota": "As regras do filtro estático são descritas superficialmente; os detalhes estão em material suplementar, não acessado.",
+        "localizador": "p. 6 do PDF, Seção IV-C, nota de rodapé 1"
+      },
+      {
+        "nota": "Esforço manual descrito pelo estudo: atribuição manual das relevâncias 2 e 3 por dois pesquisadores sobre 326 prompts (22.710 trechos seria o total sem amostragem).",
+        "localizador": "p. 8 do PDF, Seção V-B"
+      },
+      {
+        "nota": "Pacote de replicação indicado (https://github.com/s2e-lab/FRANC), não acessado nem validado.",
+        "localizador": "p. 2 do PDF, Introdução"
+      },
+      {
+        "nota": "Limiar τ = 1: o reparo é acionado quando a sugestão top-1 tem pelo menos um smell; cada prompt de reparo gera 10 novas sugestões com o mesmo modelo, uma única tentativa de reparo.",
+        "localizador": "p. 7 do PDF, Seção IV-E; p. 5, Seção III-E"
+      },
+      {
+        "nota": "Número de execuções e parâmetros de amostragem (temperatura, top-p) não informados; apenas «default hyperparameters».",
+        "localizador": "p. 6 do PDF, Seção IV-B; p. 10, Seção VII"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "In this experiment, we generated code from 1,081 prompts collected from existing code generation benchmarks [2], [19]–[22] and 70 prompts we created from questions posted on StackOverflow.",
+        "localizador": "p. 2 do PDF, Seção I"
+      },
+      {
+        "trecho": "In light of this need, this paper describes FRANC, a lightweight, configurable, and model-agnostic framework to filter, rank, and repair code automatically generated by LLMs.",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "FRANC repairs code samples via Generated Knowledge Prompting (i.e., prompting for a task by incorporating knowledge or information [48]).",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "In this case, FRANC uses knowledge from the static analyzers to create the prompts.",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "FRANC uses the issue’s description and location detected by a static analyzer to craft a repair prompt using three different structures (P1, P2, and P3) and send it back to the code generation model to generate code again.",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "The prompt structure P1 adds source code comments after the code to be repaired in the format “Fix: At line « # », « error msg »\\n Fixed Code:\\n”, as shown in Listing 4 (lines 10-11).",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "The second prompt structure (P2) appends to the code to be repaired a comment followed by the original prompt.",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "For example, the repair prompt for the code in Listing 4 would include the lines 1–11 followed by lines 1-5 (i.e., the original prompt).",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "The third prompt repair structure (P3) only includes the code to be repaired up to the first line that has an issue, followed by the fix message.",
+        "localizador": "p. 4 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "For instance, while repairing the code in Listing 4, this prompt would only include lines 1–6 followed by lines 10–11.",
+        "localizador": "p. 4–5 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "Lastly, it is important to highlight that FRANC attempts to repair the output only once.",
+        "localizador": "p. 5 do PDF, Seção III-E"
+      },
+      {
+        "trecho": "FRANC ranks all code snippets based on their quality score Q(ci) and presents the best one to the developer.",
+        "localizador": "p. 4 do PDF, Seção III-D"
+      },
+      {
+        "trecho": "Thus, we investigate whether FRANC’s quality-based ranking performs better than the model’s original ranking.",
+        "localizador": "p. 5 do PDF, Seção IV (RQ2)"
+      },
+      {
+        "trecho": "We instructed each model to generate 10 suggestions for each prompt.",
+        "localizador": "p. 6 do PDF, Seção IV-B, Suggestion Inventory Creation"
+      },
+      {
+        "trecho": "Therefore, in this third phase, our framework inspects each snippet from the Suggestion Inventory and applies a set of rules to (a) remove unnecessary code from the snippet, and (b) check whether it is syntactically correct.",
+        "localizador": "p. 4 do PDF, Seção III-C"
+      },
+      {
+        "trecho": "Although LLM-based code generation techniques may produce functionally correct code, they can contain code smells and vulnerabilities [7]–[9].",
+        "localizador": "p. 1 do PDF, Seção I"
+      },
+      {
+        "trecho": "These code smells can introduce software maintenance problems.",
+        "localizador": "p. 2 do PDF, Seção II-B"
+      },
+      {
+        "trecho": "Code generation models can output multiple suggestions for a single prompt, but not all suggestions are compilable [53].",
+        "localizador": "p. 5 do PDF, Seção IV (RQ1)"
+      },
+      {
+        "trecho": "Since this suggestion is not the top one recommended generated by the model as developers are biased towards the first suggestion they see [47], we need a lightweight ranking system to address the quality issues of the generated suggestions.",
+        "localizador": "p. 3 do PDF, Seção II-C"
+      },
+      {
+        "trecho": "Conversely, LLMs were less capable of solving issues related to the Use of a Broken or Risky Cryptographic Algorithm (CWE-327), Path Traversal (CWE-22), and Incorrect Permission Assignment for Critical Resource (CWE-732).",
+        "localizador": "p. 9 do PDF, Seção VI"
+      },
+      {
+        "trecho": "However, LLMs can hardly repair infinite loops, array indexing out of bounds, and useless control flow to next line.",
+        "localizador": "p. 9 do PDF, Seção VI"
+      },
+      {
+        "trecho": "Although FRANC adds an overhead, the extra time needed is less than 2 seconds (on average).",
+        "localizador": "p. 9 do PDF, quadro RQ4 Findings"
+      },
+      {
+        "trecho": "The Cohen’s kappa score of the inter-raters’ agreement is 0.815, which indicates a strong agreement between the raters [66].",
+        "localizador": "p. 8 do PDF, Seção V-B"
+      },
+      {
+        "trecho": "A paired t-test comparing the NDCG@10 shows a statistically significant difference for both languages (p<0.0001).",
+        "localizador": "p. 8 do PDF, Seção V-B"
+      },
+      {
+        "trecho": "In the end, we have 1,023 repair prompts (341 for each prompt repair structure).",
+        "localizador": "p. 7 do PDF, Seção IV-E"
+      },
+      {
+        "trecho": "For example, our results showed that without a static filter, no compilable suggestions were produced by InCoder (§ V-A).",
+        "localizador": "p. 9 do PDF, Seção VI"
+      },
+      {
+        "trecho": "For Python, the highest increase was from 0.3630 to 0.4671 for CodeGen 350M-mono (10% increase).",
+        "localizador": "p. 8 do PDF, Seção V-B"
+      },
+      {
+        "trecho": "For Python, P2 is performing better except for GPT-3.5, though the difference between P2 and P1 is very close.",
+        "localizador": "p. 8 do PDF, Seção V-C"
+      },
+      {
+        "trecho": "Thus, we acknowledge that our results may not generalize for other inference hyperparameters.",
+        "localizador": "p. 10 do PDF, Seção VII"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Quality-based Ranking (FRANC's ranking)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "amostragem"
+      ],
+      "mecanismos_acrescentados": [
+        "amostragem"
+      ],
+      "comparador": "Model's original ranking",
+      "modelo": "CodeParrot (small), 110M",
+      "benchmark": "Subconjunto aleatório da análise manual, prompts Python (conjuntos de origem por modelo não informados)",
+      "metrica": "# prompts (rel1 = 3) (Model's # prompts × FRANC's # prompts)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 1,
+        "intervencao": 1
+      },
+      "denominador": "13 prompts (linha # Prompts, Python, CodeParrot (small))",
+      "condicoes": "10 sugestões por prompt; 128 tokens; hiperparâmetros padrão; Q(ci) da Eq. 2 com Bandit para Python; relevâncias 0 e 1 automáticas e 2 e 3 atribuídas manualmente por dois pesquisadores (kappa 0,815); amostra total de 326 prompts proporcional aos 2.271 prompts com problema. O estudo não informa se a ordem original do modelo foi avaliada sobre trechos filtrados, logo o contraste pode abranger filtro + ranqueamento. Número de execuções não informado. O teste t pareado (p<0,0001) refere-se ao NDCG@10, não a esta contagem. Conferido na imagem da p. 8 (Tab. II).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca várias fases e métricas (compilabilidade, NDCG@10, percentual de reparo, tempo). A Tab. I avalia o filtro estático (fora do escopo); a Tab. II é a primeira tabela com contraste de prompting (ranqueamento de várias respostas, amostragem). Primeira métrica pertinente: # prompts (rel1 = 3) (a linha # Prompts é descritiva). Primeiro modelo listado: CodeParrot (small), que só tem valores no bloco Python (Java «-»).",
+      "derivacao": "direta",
+      "localizador": "p. 8 do PDF (sem paginação impressa), Tab. II, bloco Python, coluna CodeParrot (small), linhas # Prompts, Model's # prompts (rel1 = 3) e FRANC's # prompts (rel1 = 3)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "# Prompts 13 14 3 17 18 21 19 17 18 20 11",
+          "localizador": "p. 8 do PDF, Tab. II, bloco Python, linha # Prompts; colunas CodeParrot (small), CodeParrot (regular), InCoder (1B), CodeGen (350M-mono), CodeGen (350M-multi), CodeGen (2B-mono), CodeGen (2B-multi), PolyCoder (160M), PolyCoder (0.4B), PolyCoder (2.7B), GPT3.5"
+        },
+        {
+          "trecho": "Model’s # prompts (rel1 = 3) 1 0 1 0 2 6 4 1 2 2 1",
+          "localizador": "p. 8 do PDF, Tab. II, bloco Python, mesma ordem de colunas"
+        },
+        {
+          "trecho": "FRANC’s # prompts (rel1 = 3) 1 0 2 5 3 8 6 1 4 3 6",
+          "localizador": "p. 8 do PDF, Tab. II, bloco Python, mesma ordem de colunas"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "P2 (prompt repair structure)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "P1 (prompt repair structure)",
+      "modelo": "InCoder (1B; 1,3B segundo o texto)",
+      "benchmark": "Prompts de reparo Java (conjuntos de origem por modelo não informados)",
+      "metrica": "% Good Prompts (percentual de prompts com pelo menos uma sugestão reparada com Q(ci) = 1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 0.0,
+        "intervencao": 0.0
+      },
+      "denominador": "nao_informado (o estudo informa 341 prompts de reparo por estrutura no total, sem distribuição por modelo ou linguagem)",
+      "condicoes": "Reparo da sugestão top-1 com Q(c1) < τ = 1; metadados do SpotBugs (Java); 10 sugestões regeneradas por prompt de reparo com o mesmo modelo; uma única tentativa de reparo; P2 difere de P1 só pela repetição do prompt original ao final. Não há condição sem reparo. Número de execuções não informado. Valores lidos nos rótulos impressos da Fig. 2 (painel Java, InCoder-1B: 0.0%, 0.0%, 2.2%); a resolução da imagem é baixa, mas os rótulos são legíveis, e o texto confirma que P2 não gera good prompts para o InCoder em Java.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Tarefa de depuração (reparo) ainda não representada e P2 é variante com formulação própria avaliada em série separada. Sem tabela com o contraste, usa-se a Fig. 2, primeira figura: primeiro painel (Java), métrica % Good Prompts, primeiro modelo listado (InCoder-1B), comparador P1 (primeira estrutura da legenda, da qual P2 difere só por um ingrediente).",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (sem paginação impressa), Fig. 2, painel «% Good Prompts vs. Model (Java)», grupo InCoder-1B, barras P1 e P2",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "It is not generating any good prompts for InCoder and PolyCoder models.",
+          "localizador": "p. 8 do PDF, Seção V-C (sobre P2 em Java)"
+        },
+        {
+          "trecho": "Prompts with at least one snippet ci in which Q(ci) = 1 are referred to as “good prompts”.",
+          "localizador": "p. 8 do PDF, Seção V-C"
+        },
+        {
+          "trecho": "InCoder-1B 0.0% 0.0% 2.2%",
+          "localizador": "p. 9 do PDF, Fig. 2, painel Java, rótulos das barras P1, P2 e P3 do grupo InCoder-1B"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "P3 (prompt repair structure)",
+      "mecanismos": [
+        "instrucao",
+        "contexto",
+        "feedback"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "P1 (prompt repair structure)",
+      "modelo": "InCoder (1B; 1,3B segundo o texto)",
+      "benchmark": "Prompts de reparo Java (conjuntos de origem por modelo não informados)",
+      "metrica": "% Good Prompts (percentual de prompts com pelo menos uma sugestão reparada com Q(ci) = 1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 0.0,
+        "intervencao": 2.2
+      },
+      "denominador": "nao_informado (o estudo informa 341 prompts de reparo por estrutura no total, sem distribuição por modelo ou linguagem)",
+      "condicoes": "Mesmas condições da extração de P2; P3 difere de P1 só pela truncagem do código antes da primeira linha com problema. Não há condição sem reparo. Número de execuções não informado. Valores lidos nos rótulos impressos da Fig. 2 (painel Java, InCoder-1B); o texto confirma 2,2% como o menor valor de P3 em Java.",
+      "selecao": "cobertura",
+      "selecao_motivo": "P3 é variante com formulação própria avaliada em série separada (regra D102 de cobertura de variantes); completa o alvo de três. Mesma ordem: Fig. 2, painel Java, % Good Prompts, primeiro modelo (InCoder-1B), comparador P1.",
+      "derivacao": "direta",
+      "localizador": "p. 9 do PDF (sem paginação impressa), Fig. 2, painel «% Good Prompts vs. Model (Java)», grupo InCoder-1B, barras P1 e P3",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "It can generate good prompts from 2.2% to 56.1% of the time.",
+          "localizador": "p. 8 do PDF, Seção V-C (sobre P3 em Java)"
+        },
+        {
+          "trecho": "InCoder-1B 0.0% 0.0% 2.2%",
+          "localizador": "p. 9 do PDF, Fig. 2, painel Java, rótulos das barras P1, P2 e P3 do grupo InCoder-1B"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Quatro questões de pesquisa explícitas (filtro, ranqueamento, reparo e sobrecarga), ligadas às fases do framework.",
+      "localizador": "p. 5 do PDF, Seção IV (RQ1–RQ4)"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Fases, conjuntos, modelos, limiar e estruturas de reparo descritos; mas as regras do filtro ficam no material suplementar, a relação entre os 1.023 prompts de reparo, os 2.271 prompts com problema e a amostra de 326 não é explicada, e a composição por conjunto em cada análise não é informada.",
+      "localizador": "p. 6 do PDF, Seção IV-C; p. 7, Seção IV-E; p. 8, Seção V-B"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Filtro comparado antes e depois e ranqueamento comparado com a ordem original do modelo; o reparo só compara P1, P2 e P3 entre si, sem condição sem reparo nem comparação com outras abordagens, e o FRANC completo não é comparado ponta a ponta.",
+      "localizador": "p. 7 do PDF, Tab. I; p. 8, Tab. II; p. 9, Fig. 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "NDCG@10, relevância e good prompts são definidos, mas o denominador da Fig. 2 por modelo não é informado, as colunas CodeGen-350M da Tab. II divergem das Tab. I e III e da narrativa, e «% increase» não é definido (aparenta diferença absoluta).",
+      "localizador": "p. 7 do PDF, Tab. I; p. 8, Tab. II e Seção V-B; p. 9, Fig. 2 e Tab. III"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "Seção de ameaças discute validade externa (só transformers, hiperparâmetros padrão) e interna (viés da análise manual, curadoria do novo conjunto), mas não trata variação entre execuções, contaminação nem a tentativa única de reparo.",
+      "localizador": "p. 10 do PDF, Seção VII"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Pacote de replicação indicado (não acessado), modelos e tamanhos e limites de tokens informados; parâmetros de amostragem («default hyperparameters»), número de execuções e snapshot exato do GPT-3.5-Turbo não informados; regras detalhadas só no material suplementar.",
+      "localizador": "p. 2 do PDF, Seção I; p. 6, Seção IV-B; p. 10, Seção VII"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após busca no texto completo, o estudo não discute vazamento de benchmarks públicos (HumanEval, CoderEval etc.) nem das perguntas do StackOverflow no pré-treinamento dos modelos.",
+      "localizador": "Texto completo; p. 5 do PDF, Seção IV-A; p. 10, Seção VII"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (linhas 1–970, incluindo referências).",
+    "paginas_pdf_abertas": [
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  }
+}

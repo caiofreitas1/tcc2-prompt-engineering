@@ -1,0 +1,589 @@
+{
+  "estudo": "S62",
+  "texto_fonte": "fontes/textos/lote/S62.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-15",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "depuracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Automated Scientific Debugging (AutoSD)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "contexto",
+          "feedback",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "feedback",
+          "restricoes"
+        ],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1 (resumo); p. 3, seções 3 e 3.1; p. 4, Figura 1 e seção 3.2; p. 5, seções 3.2 (Conclude) e 3.3; apêndice impresso p. 3-4 (PDF p. 15-16), seção 4 (prompt)",
+        "observacao": "Pacote: descrição detalhada do Scientific Debugging em linguagem natural (instrucao) com vários exemplos por categoria (hipótese, predição, experimento, observação, conclusão; exemplos ilustrativos → exemplos), geração de hipótese/predição antes do experimento (raciocinio), laço hipotetizar-observar-concluir seguido de etapa de sugestão do patch (decomposicao), resultados reais de depurador/execução de teste devolvidos ao LLM (feedback), código da função defeituosa, teste, mensagem de erro e relatório de bug quando disponível (contexto), DSL de comandos REPLACE/ADD/DEL/RUN, script entre crases e sufixo de formato «full method, without comments» (restricoes). Contrafactual: AutoSD contra LLM-Base (prompt que pede o patch imediatamente) nas Tabelas 1 e 2. O sim vale para o pacote; o ganho não pode ser atribuído a um único mecanismo. Instrucao e contexto foram tratados como presentes também no LLM-Base (o LLM precisa receber o código defeituoso para corrigi-lo), por isso não constam como acrescentados; o estudo não detalha o conteúdo exato do prompt do LLM-Base (por exemplo, se inclui teste, mensagem de erro ou relatório de bug). Parâmetros de orçamento (s = 3 iterações; 10 patches por bug) estão em componentes_fora_escopo; o número de patches do LLM-Base não é declarado explicitamente."
+      },
+      {
+        "nome_original": "LLM-Base",
+        "mecanismos": [
+          "instrucao",
+          "contexto"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5, seção 4.1 (RQ1); p. 6, Tabela 1; p. 7, Tabela 2 e Figura 4",
+        "observacao": "Linha de base de prompting: «prompting an LLM to immediately predict a fix». O estudo não descreve o prompt do LLM-Base; contexto registrado porque o código defeituoso precisa ser fornecido para a correção, sem confirmação de quais demais informações (teste, erro, relatório de bug) entram no prompt (nao_informado)."
+      },
+      {
+        "nome_original": "debugger/code execution results (Observe step; ablado em 'debugger hallucination')",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "contexto",
+          "feedback",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "feedback"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 4, seção 3.2 (Observe); p. 5, seção 4.1 (RQ2); p. 7, seção 5.2",
+        "observacao": "Ablação relatada só em prosa: AutoSD com observações obtidas por execução real (pdb/jdb ou execução do teste) contra AutoSD em que as observações são previstas ('hallucinated') pelo próprio LLM, no ARHE. A condição ablada mantém o laço hipotetizar-observar-concluir; o que muda é o retorno externo da execução, categorizado como feedback. Componente do sistema proposto, por isso papel componente."
+      },
+      {
+        "nome_original": "removal of rejected hypotheses from the prompt prior to patch generation",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "contexto",
+          "feedback",
+          "restricoes",
+          "outro"
+        ],
+        "mecanismos_acrescentados": [
+          "outro"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5, seção 3.3",
+        "observacao": "Mecanismo outro: poda automática das hipóteses rejeitadas do contexto do prompt antes da geração do patch. O estudo afirma que isso «empirically improved program repair performance in our experiments», mas não relata a condição sem a poda nem números; sem contrafactual relatado, avaliada_isoladamente = nao."
+      },
+      {
+        "nome_original": "<DEBUGGING DONE> token (<DONE>)",
+        "mecanismos": [
+          "instrucao",
+          "exemplos",
+          "raciocinio",
+          "decomposicao",
+          "contexto",
+          "feedback",
+          "restricoes"
+        ],
+        "mecanismos_acrescentados": [
+          "instrucao"
+        ],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3, seção 3.1; p. 5, seção 3.2 (Conclude); p. 7, seção 5.2 e Figura 3",
+        "observacao": "Instrução no prompt para emitir o token quando houver informação suficiente; serve de critério de parada do laço e de indicador de confiança. A Figura 3 estratifica a precisão das saídas com e sem <DONE> previsto, o que não é condição com e sem o componente; por isso não há contrafactual do ingrediente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "maximum iteration limit s",
+        "natureza": "orcamento",
+        "descricao": "Limite máximo de iterações do laço hipotetizar-observar-concluir, fixado em 3.",
+        "localizador": "PDF p. 5, seção 3.2 (Conclude); p. 6, seção 4.2.1"
+      },
+      {
+        "nome_original": "generate 10 patches",
+        "natureza": "orcamento",
+        "descricao": "Número de patches gerados por bug (10), escolhido para igualar o cenário de Jiang et al.; decodificação (temperatura etc.) não informada.",
+        "localizador": "PDF p. 6, seção 4.2.1"
+      },
+      {
+        "nome_original": "Varying LLM (CodeGen-6B, Codex, ChatGPT)",
+        "natureza": "selecao_modelo",
+        "descricao": "RQ3 varia o LLM subjacente sem alterar o prompt; não é efeito de prompting.",
+        "localizador": "PDF p. 5, seção 4.1 (RQ3); p. 7, seção 5.3 e Figura 4"
+      },
+      {
+        "nome_original": "Template-based APR baseline",
+        "natureza": "outro",
+        "descricao": "Linha de base de APR por templates com os mutadores reversos dos usados para construir o ARHE, aplicados aleatoriamente; executada 100 vezes; não usa LLM nem prompting.",
+        "localizador": "PDF p. 6, seção 4.2.1 e Tabela 1"
+      },
+      {
+        "nome_original": "Recoder",
+        "natureza": "outro",
+        "descricao": "Técnica de APR baseada em aprendizado profundo; resultados copiados de Jiang et al. [11], não executados pelo estudo.",
+        "localizador": "PDF p. 7, Tabela 2"
+      },
+      {
+        "nome_original": "finetuned InCoder",
+        "natureza": "ajuste_fino",
+        "descricao": "Modelo InCoder ajustado com localização perfeita no nível de instrução; resultados copiados de Jiang et al. [11].",
+        "localizador": "PDF p. 7, Tabela 2 e texto adjacente"
+      },
+      {
+        "nome_original": "explanations shown to human participants (human study)",
+        "natureza": "outro",
+        "descricao": "Apresentação, ao revisor humano, do traço de raciocínio do AutoSD em metade dos casos; avalia o efeito da explicação sobre a decisão humana de aceitar o patch, não o efeito de uma técnica de prompting sobre o código gerado.",
+        "localizador": "PDF p. 6, seção 4.2.2 e Figura 2; p. 8, Figura 5 e seção 5.4"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "ChatGPT (OpenAI)",
+        "versao": "nao_informado",
+        "observacao": "Modelo padrão; descrito como «a sibling model to InstructGPT»; snapshot ou data não informados (PDF p. 6, seção 4.2.1)."
+      },
+      {
+        "nome": "Codex",
+        "versao": "code-davinci-002",
+        "observacao": "Usado na RQ3 (PDF p. 6; p. 7, Figura 4)."
+      },
+      {
+        "nome": "CodeGen",
+        "versao": "6B (rotulado CodeGen-6B na Figura 4); variante não informada",
+        "observacao": "Usado na RQ3; em zero-shot devolvia o código original (PDF p. 7)."
+      },
+      {
+        "nome": "Recoder e InCoder ajustado",
+        "versao": "nao_informado",
+        "observacao": "Resultados de Jiang et al. [11], não executados pelo estudo (PDF p. 7, Tabela 2)."
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "Almost-Right HumanEval (ARHE)",
+        "versao": "construído pelos autores a partir do HumanEval",
+        "quantidade": "200 bugs, sete mutadores (apêndice, Tabela 1: 45 + 24 + 63 + 40 + 24 + 3 + 1); 90 bugs não reversíveis pela linha de base de templates",
+        "localizador": "PDF p. 6, seção 4.2.1; apêndice impresso p. 2 (PDF p. 14), Tabela 1"
+      },
+      {
+        "nome": "Defects4J",
+        "versao": "v1.2 e v2.0",
+        "quantidade": "nao_informado (número de bugs de cada versão não informado); 1045 patches plausíveis gerados, dos quais 100 amostrados para a Figura 3",
+        "localizador": "PDF p. 5, seção 4.2.1; p. 7, Tabela 2 e seção 5.2"
+      },
+      {
+        "nome": "BugsInPy (BIP)",
+        "versao": "nao_informado",
+        "quantidade": "seis bugs usados só no estudo com humanos; desempenho de reparo não relatado",
+        "localizador": "PDF p. 5, seção 4.2.1; p. 6, seção 4.2.2"
+      },
+      {
+        "nome": "Estudo com humanos (revisão de patches)",
+        "versao": "nao_aplicavel",
+        "quantidade": "12 bugs (6 ARHE, 6 BIP) divididos em dois grupos de seis; 20 participantes (8 graduandos, 6 pós-graduandos, 6 desenvolvedores profissionais)",
+        "localizador": "PDF p. 6, seção 4.2.2"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Plausible",
+        "definicao": "patch que faz passar todos os testes do conjunto de dados",
+        "denominador": "nao_informado nas tabelas (ARHE tem 200 bugs; Defects4J sem número de bugs)",
+        "localizador": "PDF p. 6, seção 4.2.1 e Tabela 1"
+      },
+      {
+        "nome": "Correct",
+        "definicao": "patch plausível semanticamente equivalente ao patch do desenvolvedor, por inspeção manual",
+        "denominador": "nao_informado nas tabelas",
+        "localizador": "PDF p. 6, seção 4.2.1; Tabelas 1 e 2"
+      },
+      {
+        "nome": "Proporção de patches plausíveis/corretos com e sem <DONE>",
+        "definicao": "precisão estratificada pela previsão de <DONE>",
+        "denominador": "Defects4J: amostra de 100 patches dos 1045 plausíveis; ARHE: nao_informado",
+        "localizador": "PDF p. 7, seção 5.2 e Figura 3"
+      },
+      {
+        "nome": "Proporção de execuções individuais que geram patch plausível",
+        "definicao": "nao_informado além da frase do texto",
+        "denominador": "nao_informado",
+        "localizador": "PDF p. 7, seção 5.2"
+      },
+      {
+        "nome": "Tempo e acurácia da revisão humana; avaliação de utilidade da explicação; questionário de satisfação (escala 0-5)",
+        "definicao": "medidas do estudo com humanos",
+        "denominador": "participantes por bug e condição não impressos",
+        "localizador": "PDF p. 5, RQ4 e RQ5; p. 8, Figuras 5 e 6"
+      }
+    ],
+    "linguagens": [
+      "Python (ARHE, BugsInPy)",
+      "Java (Defects4J)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Patches plausíveis podem ser incorretos e a explicação pode não ter relação com o patch: em BIP002 as hipóteses falharam (breakpoints não cobertos) e o patch gerado foi plausível mas incorreto.",
+        "localizador": "PDF p. 9, seção 5.6; p. 10, Figura 7"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "A explicação gerada pode dar credibilidade a patches incorretos (raciocínio enganoso); em ARHE105, participantes aceitaram o raciocínio do AutoSD sem escrutínio e erraram. Risco de confiança indevida na revisão humana.",
+        "localizador": "PDF p. 8, seção 5.4; p. 10, seção 6.2"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "Quando as observações são previstas pelo LLM em vez de obtidas por execução real ('debugger hallucination'), o <DONE> deixa de indicar bom desempenho e menos execuções geram patch plausível.",
+        "localizador": "PDF p. 7, seção 5.2"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "Os dados de treinamento dos LLMs podem incluir partes dos dados de avaliação; o estudo constrói o ARHE para mitigar. Não há análise de contaminação para o Defects4J.",
+        "localizador": "PDF p. 5, seções 4.1 e 4.2.1; p. 10, seção 6.1 (External Validity)"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Invocações múltiplas do LLM e do depurador aumentam o tempo de reparo: o AutoSD pode levar cerca de cinco vezes mais tempo que o LLM-Base para gerar um patch; o estudo chama isso de custo adicional. Custo monetário ou em tokens não quantificado.",
+        "localizador": "PDF p. 10, seção 6.2"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Falhas do processo de raciocínio: em 13 de 25 casos com todas as hipóteses rejeitadas, os breakpoints sugeridos nunca foram atingidos; outras falhas foram expressões de experimento inválidas (2/25) e múltiplos comandos print que causaram rejeição imprecisa de hipóteses (2/25).",
+        "localizador": "PDF p. 9, seção 5.6"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Fundamentar as observações em execução real (depurador/execução de testes) em vez de observações geradas pelo LLM.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 7, seção 5.2 (comparação com o depurador ablado)"
+      },
+      {
+        "descricao": "Token <DONE> como indicador de confiança, para sinalizar quando o patch tende a estar correto e reduzir a credibilidade indevida de explicações.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 7, seção 5.2 e Figura 3; p. 10, seção 6.2"
+      },
+      {
+        "descricao": "Construção do benchmark ARHE para mitigar contaminação.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 10, seção 6.1"
+      },
+      {
+        "descricao": "Inspeção manual de patches plausíveis quanto à equivalência semântica com o patch do desenvolvedor.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6, seção 4.2.1"
+      },
+      {
+        "descricao": "Intenção de disponibilizar implementação e resultados de reparo para escrutínio (ameaças de implementação e de avaliação de correção).",
+        "avaliada": "nao",
+        "localizador": "PDF p. 9, seção 6.1"
+      },
+      {
+        "descricao": "Pergunta Q2 de justificativa para filtrar respostas de má-fé no estudo com humanos.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 6, seção 4.2.2"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão: no Defects4J v1.2, LLM-Base tem 87 correções corretas e AutoSD 76; no v2.0, 110 e 113. A narrativa descreve o desempenho como competitivo.",
+        "localizador": "PDF p. 7, Tabela 2 e Answer to RQ1"
+      },
+      {
+        "descricao": "Recoder e InCoder vêm de Jiang et al. [11], com localização perfeita no nível de instrução, enquanto o AutoSD usa localização no nível de método e relatório de bug; condições diferentes. O contraste com o Codex de Xia et al. [37] (200 candidatos contra 10) é citado sem números impressos.",
+        "localizador": "PDF p. 6, seção 4.2.1; p. 7, Tabela 2 e texto adjacente"
+      },
+      {
+        "descricao": "Na Figura 4 o desempenho do AutoSD só se aproxima do LLM-Base com o ChatGPT; com o CodeGen-6B o reparo falha em zero-shot (devolve o código original), e em few-shot corrige 44 bugs (condição diferente; técnica a que se refere o few-shot não explicitada). Valores da figura não impressos, não estimados.",
+        "localizador": "PDF p. 7, seção 5.3 e Figura 4"
+      },
+      {
+        "descricao": "No cenário 'debugger hallucination', soluções com <DONE> foram 11 p.p. menos prováveis de serem plausíveis, contra 12,4 p.p. mais prováveis com execução real (inversão do sinal do indicador). Denominadores não informados.",
+        "localizador": "PDF p. 7, seção 5.2"
+      },
+      {
+        "descricao": "A Figura 3 do Defects4J usa amostra de 100 patches dos 1045 plausíveis; a frase «we sampled 100 patches with and without <DONE>» não esclarece se são 100 no total ou por grupo. Os percentuais 89% e 82% de correção com e sem <DONE> não indicam o conjunto de dados.",
+        "localizador": "PDF p. 7, seção 5.2 e Figura 3"
+      },
+      {
+        "descricao": "Estudo com humanos: a acurácia caiu com explicação em ARHE105 e BIP003; a diferença de tempo não foi estatisticamente significativa em nenhum caso, sem teste estatístico nomeado; número de participantes por bug e condição não impresso.",
+        "localizador": "PDF p. 7-8, seção 5.4 e Figura 5"
+      },
+      {
+        "descricao": "Discrepância de satisfação: mais da metade dos estudantes ficou satisfeita com o AutoSD, mas só um dos seis desenvolvedores profissionais.",
+        "localizador": "PDF p. 8, seção 5.5 e Figura 6"
+      },
+      {
+        "descricao": "Quatro benchmarks usados, mas o desempenho de reparo no BugsInPy não é relatado (problemas de ambiente); as conclusões de desempenho se apoiam em ARHE e Defects4J v1.2/v2.0.",
+        "localizador": "PDF p. 5, seção 4.2.1"
+      },
+      {
+        "descricao": "A linha de base de templates não pode corrigir 90 dos 200 bugs do ARHE por construção, e sua correção não foi avaliada ('-' na Tabela 1).",
+        "localizador": "PDF p. 6, seção 4.2.1 e Tabela 1"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O prompt completo impresso no apêndice é o usado para o Defects4J; o prompt do ARHE não é mostrado.",
+        "localizador": "Apêndice impresso p. 3-4 (PDF p. 15-16), seção 4"
+      },
+      {
+        "descricao": "Depuradores usados: jdb para Java e pdb para Python; em laços o depurador coleta até 100 valores.",
+        "localizador": "PDF p. 4, seção 3.2; p. 6, seção 4.2.1"
+      },
+      {
+        "descricao": "A linha de base de templates foi executada 100 vezes (média e desvio padrão); para o AutoSD e o LLM-Base o número de execuções repetidas não é informado (nao_informado); os 10 patches por bug são parâmetro de geração, não repetições.",
+        "localizador": "PDF p. 6, seção 4.2.1 e Tabela 1"
+      },
+      {
+        "descricao": "O estudo com humanos recebeu isenção de revisão de IRB (IRB-23-054) e incluiu entrevistas de cerca de 5 minutos.",
+        "localizador": "PDF p. 6, seção 4.2.2"
+      },
+      {
+        "descricao": "Limitações declaradas: só bugs de um único método; localização no nível de método assumida como perfeita.",
+        "localizador": "PDF p. 10, seção 6.2"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Inspired by the way developers interact with code when debugging, we propose Automated Scientific Debugging (AutoSD), a technique that given buggy code and a bug-revealing test, prompts large language models to automatically generate hypotheses, uses debuggers to actively interact with buggy code, and thus automatically reach conclusions prior to patch generation.",
+        "localizador": "PDF p. 1, Abstract"
+      },
+      {
+        "trecho": "Our empirical analysis on three program repair benchmarks shows that AutoSD performs competitively with other program repair baselines, and that it can indicate when it is confident in its results.",
+        "localizador": "PDF p. 1, Abstract"
+      },
+      {
+        "trecho": "To construct the initial prompt, as in the example presented in Figure 1 A, we first manually wrote a detailed description of Scientific Debugging that explains what hypotheses, predictions, experiments, observations, and conclusions are, along with multiple examples for each category, so that the LLM can generate an intelligible reasoning trace.",
+        "localizador": "PDF p. 3, seção 3.1"
+      },
+      {
+        "trecho": "Regarding the DSL, the prompt specifies that the following commands are available: REPLACE(line, old_expr, new_expr) that changes an expression at line, ADD(line, new_expr) that adds a new statement above line, and DEL(line, old_expr) that allows deletion of an expression in a line.",
+        "localizador": "PDF p. 3, seção 3.1"
+      },
+      {
+        "trecho": "On this description of scientific debugging, we add the bug-specific information: concretely, the buggy function/method, the test that reveals the bug, the error message when the bug is executed, and if available a bug report.",
+        "localizador": "PDF p. 3, seção 3.1"
+      },
+      {
+        "trecho": "In addition to experiment commands, the prompt instructs to predict the <DEBUGGING DONE> token (<DONE> for short in the rest of the paper) if enough information to discern the patch has been gathered, so that we can gauge how confident AutoSD is in its patch.",
+        "localizador": "PDF p. 3, seção 3.1"
+      },
+      {
+        "trecho": "The generated experiment script is passed to a background process based on traditional software engineering tools that provides real execution results back to the language model, so that we can ground the generation process of AutoSD on real results, and also build credibility for developer presentation.",
+        "localizador": "PDF p. 4, seção 3.2 (Observe)"
+      },
+      {
+        "trecho": "When AutoSD has completed its interaction with the code, the conclusions to each of the hypotheses are assessed, and rejected hypotheses are automatically removed from the prompt prior to patch generation, as this empirically improved program repair performance in our experiments.",
+        "localizador": "PDF p. 5, seção 3.3"
+      },
+      {
+        "trecho": "We thus seek to answer whether AutoSD achieves performance competitive to prior APR techniques, and when compared to prompting an LLM to immediately predict a fix (this baseline is referred to as LLM-Base in the rest of the paper).",
+        "localizador": "PDF p. 5, seção 4.1 (RQ1)"
+      },
+      {
+        "trecho": "The maximum iteration limit, s, is set to 3.",
+        "localizador": "PDF p. 6, seção 4.2.1"
+      },
+      {
+        "trecho": "Furthermore, individual runs became much less likely to be plausible: while 73% of the individual AutoSD runs would yield a plausible patch, only 63% would when the debugger was ablated.",
+        "localizador": "PDF p. 7, seção 5.2"
+      },
+      {
+        "trecho": "Finally, the generated explanation may occasionally lend credibility to incorrect patches; by allowing our technique to indicate its confidence in its output and demonstrating that confidence is correlated with correctness, we take the first steps to address this issue.",
+        "localizador": "PDF p. 10, seção 6.2"
+      },
+      {
+        "trecho": "Meanwhile, for ARHE105 the participants who answered incorrectly accepted the reasoning of AutoSD without significant scrutiny.",
+        "localizador": "PDF p. 8, seção 5.4"
+      },
+      {
+        "trecho": "Ultimately, while a fix is generated, the explanation has little connection to the patch, and as a result the human study participants rated the explanation as unhelpful; the patch itself is plausible but incorrect as well.",
+        "localizador": "PDF p. 9, seção 5.6"
+      },
+      {
+        "trecho": "This is one of the most common failure causes - our analysis on 25 cases where all hypotheses were rejected revealed that in 13 of the 25 cases, breakpoints suggested by AutoSD were never hit, and consequently AutoSD could not get results for generated experiments.",
+        "localizador": "PDF p. 9, seção 5.6"
+      },
+      {
+        "trecho": "First, to enable multi-step interaction with code, both the language model and debugger must be invoked multiple times, which increases the repair time of the technique; in our experiments, AutoSD could take about five times longer to generate a patch when compared to LLM-Base.",
+        "localizador": "PDF p. 10, seção 6.2"
+      },
+      {
+        "trecho": "A particular concern when using large language models is that their training data may include segments of the evaluation data. To mitigate this issue, we newly constructed the ARHE dataset for repair and evaluated AutoSD on that benchmark.",
+        "localizador": "PDF p. 10, seção 6.1 (External Validity)"
+      },
+      {
+        "trecho": "To mitigate the impact of the first two concerns, we plan to make our implementation and repair results publicly available for scrutiny.",
+        "localizador": "PDF p. 9, seção 6.1 (Internal Validity)"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Automated Scientific Debugging (AutoSD)",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "contexto",
+        "feedback",
+        "restricoes"
+      ],
+      "mecanismos_acrescentados": [
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "feedback",
+        "restricoes"
+      ],
+      "comparador": "LLM-Base (prompting an LLM to immediately predict a fix)",
+      "modelo": "ChatGPT (versão nao_informado); a Tabela 1 não nomeia o modelo, mas o estudo declara o ChatGPT como configuração padrão no restante do artigo (PDF p. 5, RQ3; p. 6, seção 4.2.1)",
+      "benchmark": "Almost-Right HumanEval (ARHE)",
+      "metrica": "Plausible",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {
+        "baseline": 179,
+        "intervencao": 189
+      },
+      "denominador": "nao_informado na Tabela 1 (a tabela não declara unidade nem denominador); o corpus ARHE tem 200 bugs (PDF p. 6), sem ligação explícita com a contagem",
+      "condicoes": "10 patches gerados por bug; plausível = patch que faz passar todos os testes; limite de iterações s = 3; localização perfeita no nível de método; número de execuções repetidas do AutoSD e do LLM-Base nao_informado; decodificação nao_informado; número de patches do LLM-Base não declarado explicitamente; prompt do LLM-Base não descrito. A linha de base de templates (85.77 ± 4.20, 100 execuções) não é prompting e não foi usada como comparador. Conferido visualmente na página 6 do PDF (Tabela 1).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: o resumo afirma desempenho competitivo contra vários baselines («other program repair baselines») em três benchmarks e com duas métricas (plausible e correct), sem uma métrica ou comparador prevalente. A primeira tabela com contraste de prompting é a Tabela 1; primeira métrica: Plausible; primeira linha de base de prompting listada: LLM-Base (Template-based não é prompting).",
+      "derivacao": "direta",
+      "localizador": "PDF p. 6, Tabela 1 (colunas Result | Template-based | LLM-Base | AutoSD); seção 4.2.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Plausible 85.77 ± 4.20 179 189",
+          "localizador": "PDF p. 6, Tabela 1, linha Plausible; colunas Result | Template-based | LLM-Base | AutoSD"
+        },
+        {
+          "trecho": "Table 1: Repair results on the ARHE benchmark.",
+          "localizador": "PDF p. 6, legenda da Tabela 1"
+        },
+        {
+          "trecho": "Regarding specific APR parameters, for each dataset we provide AutoSD with the buggy method and generate 10 patches, to match the settings in the large-scale empirical work by Jiang et al. [11], who evaluate the repair performance of multiple large language models and more traditional learning-based APR techniques.",
+          "localizador": "PDF p. 6, seção 4.2.1"
+        },
+        {
+          "trecho": "When evaluating the generated patches, we run the tests provided by each dataset for each bug; a fix that makes all tests pass is deemed a plausible patch, and plausible patches are manually inspected to see if they are semantically equivalent with the developer patch.",
+          "localizador": "PDF p. 6, seção 4.2.1"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "debugger/code execution results (Observe step) no AutoSD",
+      "mecanismos": [
+        "instrucao",
+        "exemplos",
+        "raciocinio",
+        "decomposicao",
+        "contexto",
+        "feedback",
+        "restricoes"
+      ],
+      "mecanismos_acrescentados": [
+        "feedback"
+      ],
+      "comparador": "AutoSD com o depurador ablado (observações previstas pelo LLM, 'debugger hallucination')",
+      "modelo": "ChatGPT (versão nao_informado); o modelo não é nomeado na frase da ablação, mas o estudo declara o ChatGPT como padrão no restante do artigo (PDF p. 5, RQ3)",
+      "benchmark": "Almost-Right HumanEval (ARHE)",
+      "metrica": "individual AutoSD runs [that] would yield a plausible patch (proporção de execuções individuais que geram patch plausível)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 63,
+        "intervencao": 73
+      },
+      "denominador": "nao_informado (número de execuções individuais não informado; não equivale ao tamanho do corpus)",
+      "condicoes": "Ablação relatada só em prosa, sem tabela ou figura; cenário restrito ao ARHE («for the ARHE dataset»); demais componentes do AutoSD mantidos, com observações geradas pelo LLM em vez de execução real; número de execuções e decodificação nao_informado. Conferido visualmente na página 7 do PDF (seção 5.2).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas pela primeira extração; componente isolado incluído para completar o alvo de três. Não há tabela de ablação nem matriz de ingredientes para contraste pareado; a ablação do depurador é o único contraste de componente de prompting relatado, e está só em prosa.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 7, seção 5.2 (RQ2: Debugger Ablation)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Furthermore, individual runs became much less likely to be plausible: while 73% of the individual AutoSD runs would yield a plausible patch, only 63% would when the debugger was ablated.",
+          "localizador": "PDF p. 7, seção 5.2"
+        },
+        {
+          "trecho": "We also investigate the performance when the debugger/code execution results are also predicted by the LLM, instead of being obtained via concrete execution, for the ARHE dataset; would the <DONE> token still predict good performance?",
+          "localizador": "PDF p. 7, seção 5.2"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Objetivo e seis questões de pesquisa (viabilidade, ablação do depurador, variação do LLM, benefício e aceitação pelos desenvolvedores, análise qualitativa) explicitamente formulados.",
+      "localizador": "PDF p. 1-2, Introdução; p. 5, seção 4.1"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Pipeline, construção do prompt, DSL, limite de iterações e número de patches descritos, e o prompt do Defects4J está no apêndice; faltam o prompt do LLM-Base e do ARHE, parâmetros de decodificação, número de execuções repetidas e versão do ChatGPT.",
+      "localizador": "PDF p. 3-6, seções 3 e 4.2; apêndice PDF p. 15-16"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há comparador de prompting executado (LLM-Base) no mesmo modelo e benchmarks, mas seu prompt e o número de patches não são descritos; Recoder e InCoder são copiados de outro estudo com localização mais precisa; a linha de base de templates não é prompting.",
+      "localizador": "PDF p. 5, RQ1; p. 6, Tabela 1; p. 7, Tabela 2"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Plausible e correct definidos, mas as tabelas não declaram denominadores, o número de bugs do Defects4J não é informado, os percentuais da ablação e de <DONE> não têm denominador e a amostragem da Figura 3 é ambígua.",
+      "localizador": "PDF p. 6, seção 4.2.1; p. 7, Tabelas 1-2, Figura 3 e seção 5.2"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "atende",
+      "justificativa": "Seções de validade interna e externa e de limitações discutem implementação, avaliação de correção, viés nas respostas, contaminação, custo de tempo, escopo de método único e credibilidade de patches incorretos.",
+      "localizador": "PDF p. 9-10, seções 6.1 e 6.2"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Prompt do Defects4J e composição do ARHE publicados no apêndice; implementação e resultados apenas prometidos («we plan to make ... publicly available»), sem link; versão do ChatGPT e decodificação não informadas.",
+      "localizador": "PDF p. 9, seção 6.1; apêndice PDF p. 14-16"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo reconhece o risco e constrói o ARHE para mitigá-lo, mas não analisa contaminação no Defects4J, cujos resultados também sustentam as conclusões.",
+      "localizador": "PDF p. 5, seções 4.1 e 4.2.1; p. 10, seção 6.1"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (artigo, referências e apêndice). Páginas do PDF abertas visualmente: 3, 5, 6, 7, 8, 10 e 15."
+  }
+}

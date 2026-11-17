@@ -1,0 +1,294 @@
+{
+  "ficha": {
+    "tarefas": ["geracao"],
+    "tecnicas": [
+      {
+        "nome_original": "CECoder",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 1-5 (impressas 89-93), Resumo; Sec. III-A a III-C; Fig. 1 (PDF p. 3); Tabela I (PDF p. 5)",
+        "observacao": "Pacote completo: prompt com instrução da tarefa (nome da função), contexto recuperado do repositório e requisito da tarefa (assinatura e docstring) -> instrucao e contexto; geração de um rascunho que serve de consulta para a segunda recuperação e geração final -> decomposicao (etapas encadeadas sem retorno de erros, portanto não feedback). Mecanismos acrescentados calculados em relação ao Direct Generation, tomado como prompt base (instrução e requisito sem contexto recuperado). O contrafactual é de pacote: CECoder contra Direct Generation com os mesmos modelos (Tabela I); contra Vanilla RAG e RepoCoder a diferença envolve vários ingredientes (consulta por blocos de invocação, fusão RRF, segunda geração). Não há ablação dos componentes; o ganho não pode ser atribuído à recuperação de granularidade fina isoladamente. A recuperação usa infraestrutura de busca (janela deslizante, Bag-of-Words, Jaccard, análise por AST, RRF) que seleciona o contexto do prompt; foi tratada como parte do mecanismo contexto. Os trechos recuperados são janelas de código do repositório; o artigo diz que eles demonstram usos de elementos de código, mas não são exemplos resolvidos da tarefa, por isso não se atribuiu exemplos (aplicado igualmente aos comparadores com recuperação)."
+      },
+      {
+        "nome_original": "Initial Retrieval (com Draft Code Generation)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 3 (impressa 91), Sec. III-A, Eq. 3",
+        "observacao": "Primeira etapa do CECoder: recuperação pelo requisito da tarefa e geração do rascunho. Não há condição do estudo que isole este componente dentro do CECoder; Vanilla RAG é descrito de forma semelhante, mas o artigo não informa que use o mesmo template de prompt, então não se registrou contraste pareado."
+      },
+      {
+        "nome_original": "Code Elements-Aware Retrieval",
+        "mecanismos": ["contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (impressa 92), Sec. III-B, Eq. 4",
+        "observacao": "O rascunho é dividido em blocos de chamada e blocos normais por AST; cada bloco de contexto é usado como consulta para recuperar trechos de uso dos elementos de código. Sem ablação no estudo."
+      },
+      {
+        "nome_original": "Merge and Generate (Reciprocal Rank Fusion)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (impressa 92), Sec. III-C, Eq. 5",
+        "observacao": "Fusão dos conjuntos recuperados por RRF (a = 60) e seleção dos top-K trechos para o prompt final, com o mesmo template da Eq. 3. Sem ablação no estudo."
+      },
+      {
+        "nome_original": "Direct Generation (Direct)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines; Tabela I",
+        "observacao": "Linha de base sem recuperação: o requisito da tarefa é fornecido ao LLM sem contexto recuperado (zero-shot -> instrucao). O template exato não é descrito; tomado como prompt base."
+      },
+      {
+        "nome_original": "ReACC",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines; Tabela I",
+        "observacao": "Sistema comparador de recuperação em rodada única que combina recuperação esparsa (BM25) e densa; o recuperador denso e o template de prompt não são descritos neste artigo; mecanismos não isolados."
+      },
+      {
+        "nome_original": "Vanilla RAG",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines; Tabela I",
+        "observacao": "Recuperação em rodada única pelo requisito da tarefa. Template de prompt não descrito; comparador sem isolamento de mecanismos."
+      },
+      {
+        "nome_original": "RepoCoder",
+        "mecanismos": ["instrucao", "contexto", "decomposicao"],
+        "mecanismos_acrescentados": ["contexto", "decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 2 (impressa 90), Sec. II; PDF p. 5 (impressa 93), Sec. IV, Baselines e Implementation Details; Tabela I",
+        "observacao": "Recuperação iterativa que usa o código gerado na iteração anterior como consulta (etapas encadeadas -> decomposicao, como no CECoder). O número de iterações e o template não são informados neste artigo. O estudo afirma que a configuração de recuperação (janela de 500 linhas, passo de 50, Bag-of-Words, Jaccard, top-10) garante comparação justa com RepoCoder. Comparador sem isolamento de mecanismos."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "Greedy decoding / Nucleus sampling",
+        "natureza": "decodificacao",
+        "descricao": "Duas estratégias de decodificação seguindo DevEval: gulosa (temperatura 0, uma solução) e amostragem por núcleo (temperatura 0,4, top-p 0,95, 20 candidatos por tarefa). Os 20 candidatos servem à estimativa de Pass@k, sem seleção por prompting.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+      },
+      {
+        "nome_original": "Maximum length of each generated code",
+        "natureza": "decodificacao",
+        "descricao": "Tamanho máximo de 500 tokens por código gerado.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT-3.5-Turbo", "versao": "gpt-3.5-turbo-1106"},
+      {"nome": "Code Llama (7B)", "versao": "nao_informado (o estudo informa só o tamanho 7B; variante base, Python ou Instruct não informada)"}
+    ],
+    "benchmarks": [
+      {
+        "nome": "DevEval",
+        "versao": "nao_informado",
+        "quantidade": "1825 tarefas de geração de código em nível de repositório, de 117 repositórios em 10 domínios",
+        "observacao": "O denominador de cada métrica na Tabela I não é ligado explicitamente às 1825 tarefas. Na RQ2 os 117 repositórios são divididos em quatro intervalos por LOC e por taxa de duplicação; o número de repositórios ou tarefas por intervalo não é informado.",
+        "localizador": "PDF p. 4-5 (impressas 92-93), Sec. IV, Datasets; Sec. V-B"
+      }
+    ],
+    "metricas": [
+      {"nome": "ExactMatch (EM)", "descricao": "se a função gerada coincide exatamente com a implementação de referência", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Evaluation Metrics"},
+      {"nome": "EditSimilarity (ES)", "descricao": "similaridade lexical por distância de edição normalizada", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Evaluation Metrics"},
+      {"nome": "Pass@k (k = 1, 5, 10)", "descricao": "proporção de gerações que passam nos casos de teste em k amostras", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Evaluation Metrics"},
+      {"nome": "Recall@k (k = 1, 5, 10)", "descricao": "cobertura de dependências comparando as referências invocadas com a referência", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Evaluation Metrics"}
+    ],
+    "linguagens": [
+      {"nome": "Python", "observacao": "O texto não declara a linguagem; o exemplo de prompt da Fig. 1 diz «in the given Python code» (PDF p. 3, impressa 91)."}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Recuperação baseada na semântica da função inteira traz contexto irrelevante e leva ao uso incorreto de elementos de código, com erros de lógica, incompatibilidade de tipos e outros erros.",
+        "localizador": "PDF p. 1 (impressa 89), Resumo; PDF p. 4 (impressa 92), Sec. III-B"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A recuperação de RepoCoder pode introduzir trechos irrelevantes que prejudicam o desempenho em LLMs menores (CodeLlama-7B), ficando abaixo de Vanilla RAG.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. V-A"
+      },
+      {
+        "categoria": "contaminacao",
+        "descricao": "O estudo menciona vazamento de dados (data leakage) entre os motivos da escolha dos modelos, sem descrever como a escolha controla o risco nem afirmar contaminação efetiva.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Recuperação de granularidade fina por blocos de invocação e fusão RRF (CECoder) para reduzir o uso incorreto de elementos de código. O estudo compara o pacote com condições sem ele (Direct Generation, Vanilla RAG, ReACC, RepoCoder) em EM, ES, Pass@k e Recall@k; o uso incorreto de elementos em si não é medido diretamente e não há ablação.",
+        "avaliada": "sim",
+        "localizador": "PDF p. 5 (impressa 93), Tabela I; PDF p. 6 (impressa 94), Sec. VI"
+      },
+      {
+        "descricao": "Escolha de GPT-3.5-Turbo e Code Llama (7B) declarada como forma de lidar com desempenho e vazamento de dados, sem comparação com condição sem essa escolha.",
+        "avaliada": "nao",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+      }
+    ],
+    "sem_comparador": "nao",
+    "baseline": "Direct Generation, ReACC, Vanilla RAG e RepoCoder, apresentados na Tabela I com os mesmos dois modelos e o mesmo benchmark. O artigo não declara explicitamente se os valores das linhas de base foram reexecutados pelos autores; afirma que a configuração de recuperação garante comparação justa com RepoCoder.",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Inversão: com Code Llama, RepoCoder fica abaixo de Vanilla RAG nas oito colunas da Tabela I (por exemplo, Pass@1 16.44 contra 16.66; EM 2.75 contra 3.04); com GPT-3.5-Turbo, RepoCoder supera Vanilla RAG em todas as colunas exceto EM (1.90 contra 2.26). O próprio texto reconhece o resultado para CodeLlama-7B.",
+        "localizador": "PDF p. 5 (impressa 93), Tabela I e Sec. V-A"
+      },
+      {
+        "descricao": "Narrativa parcialmente contraditória com a tabela: o texto afirma que paradigmas iterativos como RepoCoder e CECoder superam métodos de rodada única, mas com Code Llama RepoCoder fica abaixo de Vanilla RAG em todas as métricas, e com GPT-3.5-Turbo RepoCoder tem EM menor que Vanilla RAG (1.90 contra 2.26).",
+        "localizador": "PDF p. 5 (impressa 93), Sec. V-A; Tabela I"
+      },
+      {
+        "descricao": "Os valores destacados no resumo, na introdução e na conclusão (4.39, 41.97, 27.01 e 39.25) correspondem só à linha de CECoder com GPT-3.5-Turbo; o resumo não indica o modelo. Com Code Llama, CECoder obtém EM 3.43, ES 38.19, Pass@1 17.37 e Recall@1 26.31. Os valores de GPT-3.5-Turbo coincidem entre resumo, texto e tabela.",
+        "localizador": "PDF p. 1 (impressa 89), Resumo; PDF p. 2 (impressa 90), Sec. I; PDF p. 5 (impressa 93), Tabela I; PDF p. 6 (impressa 94), Sec. VI"
+      },
+      {
+        "descricao": "A afirmação de superioridade consistente apoia-se em estimativas pontuais, sem testes estatísticos, variância ou número de execuções informados; algumas diferenças impressas são pequenas (por exemplo, Code Llama Recall@10: CECoder 39.91, Vanilla RAG 39.90; GPT-3.5-Turbo Pass@5: CECoder 31.41, RepoCoder 31.11).",
+        "localizador": "PDF p. 5 (impressa 93), Tabela I"
+      },
+      {
+        "descricao": "Narrativa contra figura: o texto afirma que CECoder tem desempenho superior em todos os intervalos de tamanho de repositório, mas na Fig. 2 o ponto de ReACC aparece visualmente acima do de CECoder no intervalo [401, 2631]. A figura não imprime valores; nenhum valor foi estimado.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. V-B-1; PDF p. 6 (impressa 94), Fig. 2"
+      },
+      {
+        "descricao": "O texto diz que, para cada intervalo, são relatados os Pass@1 de todas as linhas de base, mas as Fig. 2 e 3 mostram só ReACC, Vanilla RAG, RepoCoder e CECoder, sem Direct Generation. A RQ2 usa apenas GPT-3.5-Turbo e não informa o número de repositórios por intervalo.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. V-B; PDF p. 6 (impressa 94), Fig. 2 e Fig. 3"
+      },
+      {
+        "descricao": "Duas estratégias de decodificação são descritas (gulosa com uma solução e amostragem por núcleo com 20 candidatos), mas a Tabela I não indica qual estratégia produziu cada métrica (EM, ES, Pass@1, Recall@1).",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details; Tabela I"
+      },
+      {
+        "descricao": "Na Fig. 3 a relação entre taxa de duplicação e Pass@1 não é monotônica; o estudo levanta a hipótese de influência do tamanho do repositório, sem teste.",
+        "localizador": "PDF p. 5-6 (impressas 93-94), Sec. V-B-2; Fig. 3"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Configuração da recuperação: corpus por janela deslizante de 500 linhas com passo de 50, representação Bag-of-Words, similaridade de Jaccard, top-10 trechos e RRF com a = 60; o estudo diz que a configuração garante comparação justa com RepoCoder.",
+        "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+      },
+      {
+        "descricao": "A limitação de tamanho de entrada dos LLMs motiva a fusão e seleção dos trechos recuperados; o estudo não a trata como custo nem a quantifica.",
+        "localizador": "PDF p. 4 (impressa 92), Sec. III-C"
+      },
+      {
+        "descricao": "As unidades da Tabela I não são impressas; o texto apresenta os mesmos valores com sinal de porcentagem (por exemplo, 27.01% Pass@1).",
+        "localizador": "PDF p. 5 (impressa 93), Tabela I e Sec. V-A"
+      },
+      {
+        "descricao": "Não há pacote de replicação nem link para código impresso no artigo; o template completo do prompt aparece só de forma esquemática na Fig. 1.",
+        "localizador": "PDF p. 1-6 (impressas 89-94)"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "To this end, we propose CECoder, a novel framework that performs fine-grained and accurate retrieval of concrete code element usage, demonstrating how elements are invoked and composed.", "localizador": "PDF p. 1 (impressa 89), Resumo"},
+      {"trecho": "All snippets are finally re-ranked and selectively integrated into a prompt template.", "localizador": "PDF p. 1 (impressa 89), Resumo"},
+      {"trecho": "However, this often leads to irrelevant context and subsequent code element misuse, resulting in logic errors, type mismatch, and other errors.", "localizador": "PDF p. 1 (impressa 89), Resumo"},
+      {"trecho": "The prompt consists of three essential components: task instruction, retrieved context, and task requirement.", "localizador": "PDF p. 3 (impressa 91), Sec. III-A, Draft Code Generation"},
+      {"trecho": "Although the draft code incorporates a set of code elements, the semantic gap between natural language and code may still lead to irrelevant code snippet retrieval, causing LLMs to misuse code elements.", "localizador": "PDF p. 4 (impressa 92), Sec. III-B"},
+      {"trecho": "In addition, we include Direct Generation as a non-retrieval baseline, which inputs the task requirement into the LLM without any retrieved context.", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines"},
+      {"trecho": "RepoCoder iteratively retrieves code based on the code generated in the previous iteration.", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines"},
+      {"trecho": "In this paper, we select GPT-3.5-Turbo (gpt-3.5-turbo-1106) and Code Llama (7B) as base models for evaluation, due to their frequent use in code generation benchmarks and to address performance and data leakage.", "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"},
+      {"trecho": "However, RepoCoder’s whole-function semantic retrieval may introduce irrelevant code snippets, particularly harming performance on smaller LLMs such as CodeLlama-7B, where it underperforms even single-round methods like Vanilla RAG.", "localizador": "PDF p. 5 (impressa 93), Sec. V-A"},
+      {"trecho": "The integration of both retrieval results via reciprocal rank fusion enhances generation accuracy and reduces misuse of code elements.", "localizador": "PDF p. 6 (impressa 94), Sec. VI"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "CECoder",
+      "mecanismos": ["instrucao", "contexto", "decomposicao"],
+      "mecanismos_acrescentados": ["contexto", "decomposicao"],
+      "comparador": "Direct (Direct Generation)",
+      "modelo": "GPT-3.5-Turbo (gpt-3.5-turbo-1106)",
+      "benchmark": "DevEval",
+      "metrica": "ExactMatch (EM)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 0.33, "intervencao": 4.39},
+      "denominador": "nao_informado (o benchmark tem 1825 tarefas, mas o denominador de EM não é declarado)",
+      "condicoes": "Tabela I, bloco LLM: GPT-3.5-Turbo. Recuperação do CECoder com janela de 500 linhas, passo de 50, Bag-of-Words, Jaccard, top-10 e RRF com a = 60. A estratégia de decodificação usada para EM (gulosa ou amostragem por núcleo com 20 candidatos) não é informada; número de execuções nao_informado; sem testes estatísticos. Unidade percentual pelo texto (4.39% ExactMatch); a tabela não imprime unidade. Contraste de pacote: o resultado não isola nenhum componente do CECoder. Conferido visualmente na imagem da página 5 do PDF (Tabela I), coincidente com o texto extraído.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo destaca uma técnica (CECoder) e um comparador (RepoCoder), mas quatro métricas (EM, ES, Pass@1, Recall@1) sem que uma prevaleça, e há dois modelos. Pela ordem: primeira tabela com o contraste (Tabela I), primeira métrica (EM), primeiro modelo (GPT-3.5-Turbo), primeira linha de base de prompting listada (Direct). Não há outra técnica focal, outra tarefa, tabela de ablação nem matriz de ingredientes que permita cobertura ou contraste pareado.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 5 (impressa 93), Tabela I, bloco LLM: GPT-3.5-Turbo, linhas Direct e CECoder, coluna EM",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Direct 0.33 31.26 14.19 17.76 19.31 15.27 17.37 18.27", "localizador": "PDF p. 5 (impressa 93), Tabela I (TABLE I: PERFORMANCE COMPARISON OF METHODS), bloco LLM: GPT-3.5-Turbo; colunas Method, EM, ES, Pass@1, Pass@5, Pass@10, Recall@1, Recall@5, Recall@10"},
+        {"trecho": "CECoder 4.39 41.97 27.01 31.41 33.20 39.25 43.02 44.08", "localizador": "PDF p. 5 (impressa 93), Tabela I (TABLE I: PERFORMANCE COMPARISON OF METHODS), bloco LLM: GPT-3.5-Turbo; colunas Method, EM, ES, Pass@1, Pass@5, Pass@10, Recall@1, Recall@5, Recall@10"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Problema (uso incorreto de elementos de código na geração em nível de repositório), proposta e duas questões de pesquisa (RQ1 desempenho geral, RQ2 generalização) estão explícitos.",
+      "localizador": "PDF p. 1-2 (impressas 89-90), Resumo e Sec. I; PDF p. 4 (impressa 92), Sec. IV"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O método é descrito com equações e parâmetros (janela, passo, top-10, RRF a = 60, decodificação), mas o template das linhas de base, o número de iterações de RepoCoder, a configuração do recuperador denso de ReACC, a variante do Code Llama e a decodificação associada a cada métrica não são informados.",
+      "localizador": "PDF p. 3-5 (impressas 91-93), Sec. III e IV"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Quatro linhas de base executadas com os mesmos modelos e benchmark, incluindo uma sem recuperação (Direct Generation) e paradigmas de rodada única e iterativos; porém não há ablação dos componentes do CECoder e a configuração das linhas de base, salvo o alinhamento declarado com RepoCoder, não é detalhada.",
+      "localizador": "PDF p. 5 (impressa 93), Sec. IV, Baselines e Implementation Details; Tabela I"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Quatro métricas definidas com referências e valores de k; os valores destacados coincidem entre resumo, texto e Tabela I. Faltam o denominador de cada métrica, a ligação entre estratégia de decodificação e métrica, a unidade na tabela e medidas de variação ou testes estatísticos.",
+      "localizador": "PDF p. 5 (impressa 93), Sec. IV, Evaluation Metrics; Tabela I"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "O único aspecto de validade mencionado é o vazamento de dados como motivo da escolha dos modelos; não há discussão de ameaças ou limitações (não determinismo, significância, generalização a outras linguagens ou benchmarks).",
+      "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details; PDF p. 1-6 (busca no texto completo)"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Snapshot do GPT-3.5-Turbo e hiperparâmetros de recuperação e decodificação são informados; não há código ou pacote de replicação, o template completo do prompt aparece só esquematicamente na Fig. 1 e a variante do Code Llama não é informada.",
+      "localizador": "PDF p. 3 (impressa 91), Fig. 1; PDF p. 5 (impressa 93), Implementation Details"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "parcial",
+      "justificativa": "O estudo menciona vazamento de dados ao justificar a escolha dos modelos, mas não descreve controle nem análise de sobreposição entre os repositórios do DevEval e o pré-treinamento dos modelos.",
+      "localizador": "PDF p. 5 (impressa 93), Sec. IV, Implementation Details"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas_visualmente": [1, 2, 3, 4, 5, 6],
+    "observacao": "Texto extraído lido inteiro. Tabela I conferida na imagem da p. 5; Fig. 1 na p. 3; Fig. 2 e Fig. 3 na p. 6 (sem valores impressos, nenhum valor estimado)."
+  }
+}

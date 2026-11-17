@@ -1,0 +1,414 @@
+{
+  "estudo": "S810",
+  "texto_fonte": "fontes/textos/lote/S810.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "referencia": "Liu, Bu, Yan, Li. T3: Multi-level Tree-based Automatic Program Repair with Large Language Models. arXiv:2506.21211v1 [cs.SE], 26 jun. 2025. O PDF não traz paginação impressa; os localizadores usam a página do PDF.",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "T3 (Multi-level Tree-based Automatic Program Repair)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "amostragem"],
+        "mecanismos_acrescentados": ["decomposicao", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 2 (Introdução); p. 3-5 (Seção III); p. 5, Tabela I; p. 6, Tabela III",
+        "observacao": "Pacote de quatro etapas: recuperação de exemplos por BM25 (exemplos resolvidos e código-alvo com localização do erro → exemplos e contexto), análise de causas e geração de plano com 'Forest of Thinking' (várias árvores com CoT e seleção top-n por frequência/self-consistency → raciocinio, decomposicao, amostragem) e geração do patch com CoT; o template de prompt não é reproduzido (instrucao). Comparado com CoT, que usa o mesmo módulo de recuperação (p. 6: 'the retrieval module is consistently used across all control groups'); por isso exemplos e contexto não são contados como acrescentados. O ganho sobre CoT é do pacote, não de um mecanismo isolado. Pacote apenas de prompting, salvo a temperatura 0,7 comum a todas as condições (decodificação, fora do escopo)."
+      },
+      {
+        "nome_original": "CoT",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seção IV.D e Tabela I; p. 6, Tabela III",
+        "observacao": "Linha de base de prompting executada com gpt-3.5-turbo e gpt-4o-mini. O estudo diz ter desenhado templates próprios para quatro variantes de CoT (p. 3), mas não os reproduz. Exemplos e contexto atribuídos porque o módulo de recuperação é usado em todos os grupos de controle (p. 6, RQ3) e a linha CoT da Tabela III repete os valores da Tabela I. Sem condição sem CoT."
+      },
+      {
+        "nome_original": "Tree-of-Thought",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seção IV.D e Tabela I; p. 6, Tabela II; p. 7, Fig. 3",
+        "observacao": "Descrita como variante de CoT que 'introduces hierarchical reasoning' (p. 3); o template não é reproduzido, de modo que nenhum ingrediente além do raciocínio estruturado pode ser identificado; acrescentados vazio em relação a CoT por falta de descrição. O resumo apresenta a avaliação de técnicas comuns de CoT como objetivo, mas a Seção IV.D as trata como baselines; classificada como comparador. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "Plan-and-Solve",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Seção II.C); p. 5, Tabela I; p. 6, Tabela II; p. 7, Fig. 3",
+        "observacao": "Descrita como 'problem decomposition followed by strategic resolution' (p. 3). Template não reproduzido. Comparador sem isolamento do mecanismo; difere de CoT em template não descrito, não apenas em um ingrediente documentado."
+      },
+      {
+        "nome_original": "Analogical Reasoning (Analogical-Reasoning)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Seção II.C); p. 5, Tabela I; p. 6, Tabela II; p. 7 (Estudo de caso)",
+        "observacao": "Na Seção II.C, gera exemplos análogos ao problema; nas pp. 6-7, é descrita como dependente de recuperação de código semelhante. Em ambos os casos o ingrediente é da categoria exemplos, já presente na base CoT (recuperação comum), por isso acrescentados fica vazio. Template não reproduzido; mecanismos não isolados."
+      },
+      {
+        "nome_original": "S-C",
+        "mecanismos": ["amostragem"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seção IV.D e Tabela I; p. 4 (Seção III.B)",
+        "observacao": "Método de self-consistency para seleção de patch de [31]; valores na Tabela I 'sourced from [31]', não executados pelos autores, com o modelo code-davinci-002 de [31] (p. 5). Demais ingredientes do prompt não descritos neste estudo (nao_informado)."
+      },
+      {
+        "nome_original": "S-C+BM25",
+        "mecanismos": ["amostragem", "exemplos", "contexto"],
+        "mecanismos_acrescentados": ["exemplos", "contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5, Seção IV.D e Tabela I; p. 3 (Seção III.A)",
+        "observacao": "Variante de [31] com recuperação BM25 de exemplos ('As described in [31], BM25 effectively identifies relevant examples', p. 3). Valores copiados de [31], com code-davinci-002; S-C e S-C+BM25 diferem na recuperação, mas os valores não foram produzidos neste estudo e o contraste não é analisado aqui."
+      },
+      {
+        "nome_original": "Cause Analysis (Forest of Thinking; ablação 'w/o cause')",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "amostragem"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (Seção III.B); p. 6, Tabela III",
+        "observacao": "A ablação retira a etapa inteira de análise de causas (com suas árvores CoT e a seleção por frequência), mantendo recuperação, plano e geração; a etapa acrescentada é uma subtarefa encadeada (decomposicao). Modelo da Tabela III não declarado."
+      },
+      {
+        "nome_original": "Repair Plan Generation (Forest of Thinking; ablação 'w/o plan')",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "amostragem"],
+        "mecanismos_acrescentados": ["decomposicao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 4 (Seção III.C); p. 6, Tabela III",
+        "observacao": "A ablação retira a etapa de geração de plano (com suas árvores e seleção top-n). Modelo da Tabela III não declarado."
+      },
+      {
+        "nome_original": "Self-consistency / result selection method (seleção top-n por frequência entre árvores)",
+        "mecanismos": ["amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 2 (Contribuições); p. 4, Eqs. (5)-(8) e (11)-(13)",
+        "observacao": "Apresentado como contribuição ('novel result selection method'), mas é parte do sistema T3; nenhuma condição com e sem a seleção por frequência é relatada."
+      },
+      {
+        "nome_original": "Sample Retrieval (BM25)",
+        "mecanismos": ["exemplos", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (Seção III.A); p. 6 (RQ3); p. 7, Fig. 3",
+        "observacao": "Não ablacionada porque é usada em todos os grupos de controle (p. 6). A Fig. 3 varia o número de exemplos (shots) para T3, Plan-and-Solve e Tree-of-Thought, sem condição sem exemplos nem identificação de modelo e conjunto."
+      },
+      {
+        "nome_original": "Patch Generation (CoT)",
+        "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 5 (Seção III.D); p. 6 (RQ3)",
+        "observacao": "Não ablacionada: 'ablation was not conducted on the retrieval and patch generation stages' (p. 6)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "temperature parameter 0.7",
+        "natureza": "decodificacao",
+        "descricao": "Temperatura fixada em 0,7 em todos os grupos, com 30 amostras geradas por programa.",
+        "localizador": "p. 5, Seção IV.B"
+      },
+      {
+        "nome_original": "NatGen",
+        "natureza": "ajuste_fino",
+        "descricao": "Baseline de modelo pré-treinado ('generative pre-training by naturalizing source code', ref. [33]); valores da Tabela I obtidos de [33], não executados neste estudo.",
+        "localizador": "p. 5, Seção IV.D e Tabela I"
+      }
+    ],
+    "modelos": [
+      {"nome": "gpt-3.5-turbo", "versao": "gpt-3.5-turbo-0125", "localizador": "p. 5, Seção IV.B e nota de rodapé 1"},
+      {"nome": "gpt-4o-mini", "versao": "gpt-4o-mini-2024-07-18", "localizador": "p. 5, Seção IV.B e nota de rodapé 1"},
+      {"nome": "code-davinci-002", "versao": "nao_informado", "localizador": "p. 5, Seção IV.B", "observacao": "Modelo dos experimentos de [31], de onde vêm os valores de S-C e S-C+BM25; a Tabela I registra '—' na coluna Models para essas linhas."},
+      {"nome": "NatGen", "versao": "nao_informado", "localizador": "p. 5, Tabela I", "observacao": "Valores obtidos de [33]."}
+    ],
+    "benchmarks": [
+      {"nome": "MODIT dataset, subconjunto B2Fs", "quantidade": "nao_informado", "localizador": "p. 5, Seção IV.A", "observacao": "Descrito como 'with smaller code sequences'; commits de correção do GitHub. Tamanho do conjunto e da partição avaliada não informados."},
+      {"nome": "MODIT dataset, subconjunto B2Fm", "quantidade": "nao_informado", "localizador": "p. 5, Seção IV.A", "observacao": "Tamanho não informado; o estudo não descreve sobreposição entre B2Fs e B2Fm."}
+    ],
+    "metricas": [
+      {"nome": "Repair Rate (R = Ncorrect/Ntotal); também chamada 'repair accuracy' e 'repair success rates' no texto", "denominador": "nao_informado", "localizador": "p. 5, Seção IV.C, Eq. (15)", "observacao": "Ntotal = número total de programas, sem valor numérico. Não se informa como as 30 amostras por programa entram no cálculo (por exemplo, se basta uma correta) nem o critério de correção do patch."},
+      {"nome": "SC accuracy (Nselected-correct/Ntotal-correct)", "denominador": "nao_informado", "localizador": "p. 5, Seção IV.C, Eq. (16); p. 6, Tabela II", "observacao": "Proporção em que o patch mais frequente é correto entre os casos reparados; Ntotal-correct sem valor numérico."}
+    ],
+    "linguagens": [
+      {"nome": "nao_informado", "observacao": "O estudo não declara a linguagem dos conjuntos; o único exemplo apresentado (Tabela IV) é código Java.", "localizador": "p. 7, Tabela IV"}
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "No estudo de caso, CoT não corrige o erro principal e altera partes corretas do programa; Plan-and-Solve e Analogical-Reasoning introduzem modificações desnecessárias em partes não relacionadas. Evidência de um único exemplo.",
+        "localizador": "p. 7, Seção V.E e Tabela IV"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Exemplos recuperados inadequados podem prejudicar o reparo: o estudo atribui o desempenho mais baixo de Analogical Reasoning a recuperações de exemplos possivelmente incompatíveis e diz que a técnica pode ser ineficaz quando não há correspondência adequada.",
+        "localizador": "p. 6, RQ1 item (2); p. 7, Seção V.E"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "O estudo menciona a influência da aleatoriedade na geração e relata menor consistência dos patches de T3 no B2Fm (SC accuracy de 44,68%, a menor da Tabela II), descrita como 'compromise in consistency during patch generation'.",
+        "localizador": "p. 5, Seção IV.B; p. 6, RQ2 e Tabela II"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Para métodos de reparo conversacionais (por exemplo, ChatRepair), o estudo aponta o risco de laços de feedback infinitos; refere-se a métodos de trabalhos relacionados, não às condições avaliadas.",
+        "localizador": "p. 2, Introdução"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "30 amostras geradas por programa em cada grupo experimental e temperatura 0,7, declaradas para mitigar a influência da aleatoriedade; sem comparação com condição sem esse procedimento.",
+        "avaliada": "nao",
+        "localizador": "p. 5, Seção IV.B"
+      },
+      {
+        "descricao": "Uso uniforme de gpt-3.5-turbo e gpt-4o-mini para eliminar o efeito de diferenças do modelo base (o trabalho [31] usou code-davinci-002); não se aplica às linhas S-C, S-C+BM25 e NatGen copiadas de outros artigos.",
+        "avaliada": "nao",
+        "localizador": "p. 5, Seção IV.B e Tabela I"
+      },
+      {
+        "descricao": "Versões fixas dos modelos (gpt-3.5-turbo-0125 e gpt-4o-mini-2024-07-18) declaradas para reprodutibilidade.",
+        "avaliada": "nao",
+        "localizador": "p. 5, nota de rodapé 1"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Narrativa contradiz a tabela: o texto diz que GPT-3.5-turbo é ligeiramente melhor que GPT-4o-mini no B2Fs '(46.70% vs 48.20%)', mas na Tabela I o T3 com gpt-4o-mini tem 48.20 e com gpt-3.5 turbo 46.70 no B2Fs.",
+        "localizador": "p. 6, RQ1 item (3); p. 5, Tabela I"
+      },
+      {
+        "descricao": "As melhorias de '11.20%' e '9.90%' sobre CoT são apresentadas em '%' sem indicar se são p.p. ou variação relativa; por cálculo próprio, coincidem com as diferenças em p.p. na Tabela I (gpt-3.5 turbo: 46,70 − 35,50 e 28,20 − 18,30). As contribuições falam em 'methods based on CoT reasoning' (plural).",
+        "localizador": "p. 2, Contribuições; p. 5, RQ1 item (1) e Tabela I"
+      },
+      {
+        "descricao": "A 'average improvement of 14.90% over baseline methods' não tem definição: não se informa quais baselines, modelos e conjuntos entram na média nem se a diferença é em p.p. ou relativa.",
+        "localizador": "p. 6, RQ1 item (4)"
+      },
+      {
+        "descricao": "Inversão entre métricas: T3 tem a maior taxa de reparo no B2Fm (Tabela I), mas a menor SC accuracy no B2Fm (44.68, contra 49.29 a 55.16 dos demais métodos na Tabela II). A Tabela II não identifica o modelo usado.",
+        "localizador": "p. 6, Tabela II e RQ2"
+      },
+      {
+        "descricao": "Diferença de arredondamento entre texto e tabela: o texto dá SC accuracy de 48.60% para T3 no B2Fs; a Tabela II imprime 48.61.",
+        "localizador": "p. 6, RQ2 e Tabela II"
+      },
+      {
+        "descricao": "Interpretação da ablação não segue a direção dos dados: 'w/o cause' tem B2Fm de 21.00, maior que 'w/o plan' (19.90), ou seja, retirar a análise de causas prejudica menos no B2Fm que retirar o plano; o texto usa essa comparação para afirmar que a análise de causas ajuda a gerar correções mais precisas. Além disso, a Tabela III não informa o modelo; seus valores de CoT e T3 coincidem com as linhas gpt-3.5 turbo da Tabela I.",
+        "localizador": "p. 6, RQ3 itens (1)-(2) e Tabela III"
+      },
+      {
+        "descricao": "Linhas de base de outros artigos na mesma tabela: S-C (13.50/15.50) e S-C+BM25 (31.80/21.60) vêm de [31], com code-davinci-002, e NatGen (23.43/14.93) de [33]; diferem em modelo e possivelmente em amostragem e protocolo, de modo que não são comparáveis às condições executadas.",
+        "localizador": "p. 5, Seção IV.B e Tabela I; RQ1"
+      },
+      {
+        "descricao": "Descrição inconsistente de Analogical Reasoning: na Seção II.C a técnica gera exemplos análogos ao problema; nas pp. 6-7 é descrita como dependente de recuperação de código semelhante de uma base de conhecimento.",
+        "localizador": "p. 3, Seção II.C; p. 6, RQ1 item (2); p. 7, Seção V.E"
+      },
+      {
+        "descricao": "Parâmetros das condições principais não informados: número de exemplos recuperados (k) na Tabela I, número de árvores M, candidatos Ni e top-n; a Fig. 3 varia o número de shots (1 a 7) sem indicar modelo nem conjunto.",
+        "localizador": "p. 3-4, Eqs. (1)-(13); p. 5, Seção IV.B; p. 7, Fig. 3"
+      },
+      {
+        "descricao": "A Tree-of-Thought é dita adotada como 'core reasoning framework for subtask inference', enquanto a Seção III descreve a expansão de cada árvore com CoT; a introdução cita CoT como '[4]', referência que corresponde a RAP-GEN.",
+        "localizador": "p. 6, RQ2; p. 4, Eqs. (4) e (10); p. 2, Introdução; p. 8, Referências"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "As ablações da Tabela III retiram etapas inteiras (análise de causas; geração de plano); recuperação e geração de patch não foram ablacionadas. Não há ablação da seleção por frequência nem do número de árvores.",
+        "localizador": "p. 6, RQ3"
+      },
+      {
+        "descricao": "RQ4 (Fig. 3) avalia o efeito do número de exemplos em T3, Plan-and-Solve e Tree-of-Thought; o gráfico não traz valores impressos e não identifica modelo e conjunto, por isso não foi extraído.",
+        "localizador": "p. 7, Fig. 3 e Seção V.D"
+      },
+      {
+        "descricao": "O estudo de caso (Tabela IV) usa um único programa com bug para comparar qualitativamente os métodos.",
+        "localizador": "p. 7, Tabela IV e Seção V.E"
+      },
+      {
+        "descricao": "Não há menção a pacote de replicação, código ou templates de prompt publicados.",
+        "localizador": "texto completo, pp. 1-8"
+      }
+    ],
+    "citacoes": [
+      {"trecho": "This study systematically evaluates the performance of several common CoT techniques in APR tasks and proposes an innovative framework T3, which integrates the powerful reasoning capabilities of LLMs with tree search, effectively improving the precision of generating candidate repair solutions.", "localizador": "p. 1, Resumo"},
+      {"trecho": "T3 decomposes the reasoning process for generating candidate patches into four stages: sample retrieval, cause analysis, repair plan generation, and patch generation.", "localizador": "p. 2, Introdução"},
+      {"trecho": "The top-n results, selected based on cross-tree consistency and voting mechanisms, are then used for further processing.", "localizador": "p. 2, Introdução"},
+      {"trecho": "This paper introduces a novel repair method that achieves substantial improvements over previous approaches; specifically, it improves repair accuracy by 11.20% and 9.90% compared to methods based on CoT reasoning.", "localizador": "p. 2, Contribuições"},
+      {"trecho": "These limitations hinder the generation of innovative solutions, increase the risk of entering infinite feedback loops, and ultimately constrain further advancements in repair efficiency.", "localizador": "p. 2, Introdução"},
+      {"trecho": "Custom prompt templates based on four common CoT variants were designed, and experiments were conducted to comparatively analyze their effectiveness in this domain.", "localizador": "p. 3, Seção II.C"},
+      {"trecho": "“Analogical Reasoning” [14] encourages the generation of examples analogous to the original problem, solving these examples first to inform the final solution.", "localizador": "p. 3, Seção II.C"},
+      {"trecho": "To retrieve code examples similar to the target program snippet Ptarget, we employ the BM25 algorithm.", "localizador": "p. 3, Seção III.A"},
+      {"trecho": "To improve the reliability of error cause selection, we introduce a self-consistency mechanism.", "localizador": "p. 4, Seção III.B"},
+      {"trecho": "Unlike prior work [31], which applies self-consistency for patch selection, we leverage this mechanism to filter and rank error causes.", "localizador": "p. 4, Seção III.B"},
+      {"trecho": "To ensure the reliability of our results, each program in every experimental group is tested with 30 generated samples, and the temperature parameter is set to 0.7 to mitigate the influence of randomness.", "localizador": "p. 5, Seção IV.B"},
+      {"trecho": "Given that previous experiments conducted by Toufique Ahmed [31] were based on the deprecated code-davinci-002 model, we uniformly select the widely used gpt-3.5-turbo and gpt-4o-mini to eliminate the impact of foundational model discrepancies on repair performance.", "localizador": "p. 5, Seção IV.B"},
+      {"trecho": "To ensure reproducibility, we use the version gpt-3.5-turbo-0125 and gpt-4o-mini-2024-07-18", "localizador": "p. 5, nota de rodapé 1"},
+      {"trecho": "Additionally, we compare our approach with several advanced techniques, including CoT [28], Tree-of-Thought prompt [12], Plan-and-Solve [13], and Analogical Reasoning [14], to provide a comprehensive evaluation.", "localizador": "p. 5, Seção IV.D"},
+      {"trecho": "Specifically, the data for S-C and S-C+BM25 are sourced from [31], while the data for NatGen are obtained from [33].", "localizador": "p. 5, Seção V.A (RQ1)"},
+      {"trecho": "In contrast, Analogical Reasoning shows markedly lower performance (31.40% on B2Fs, 15.70% on B2Fm), likely due to its dependence on potentially mismatched example retrievals.", "localizador": "p. 6, RQ1 item (2)"},
+      {"trecho": "This implies that, for complex tasks, the T3 model employs a variety of reasoning pathways to augment overall repair efficacy, notwithstanding a compromise in consistency during patch generation.", "localizador": "p. 6, RQ2"},
+      {"trecho": "Since the retrieval module is consistently used across all control groups, we do not perform ablation on it.", "localizador": "p. 6, RQ3"},
+      {"trecho": "CoT performs even less satisfactorily, as it not only fails to fix the primary error but also modifies correct parts of the target program.", "localizador": "p. 7, Seção V.E"},
+      {"trecho": "Both methods generate repair patches in a single step, sometimes resolving the issue but often introducing unnecessary modifications to unrelated parts of the program.", "localizador": "p. 7, Seção V.E"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "T3",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["decomposicao", "amostragem"],
+      "comparador": "CoT",
+      "modelo": "gpt-3.5-turbo (gpt-3.5-turbo-0125)",
+      "benchmark": "MODIT B2Fs",
+      "metrica": "Repair rate (coluna 'B2Fs(%)' da Tabela I 'Repair results'; chamada 'repair accuracy' nas contribuições e 'repair rate' no texto da RQ1)",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 35.50, "intervencao": 46.70},
+      "denominador": "nao_informado (Ntotal = número total de programas do B2Fs, sem valor impresso)",
+      "condicoes": "30 amostras geradas por programa, temperatura 0,7; mesmo módulo de recuperação BM25 nas duas condições; número de exemplos recuperados, número de árvores M, candidatos Ni e top-n não informados; não se informa como as 30 amostras compõem a taxa de reparo nem o critério de correção. Conferido no PDF, p. 5, Tabela I (cabeçalhos Models, Methods, B2Fs(%), B2Fm(%)). O ganho é do pacote T3, não de um mecanismo isolado.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado único: as contribuições citam melhoria de repair accuracy sobre 'methods based on CoT reasoning' (plural), e a seção de métricas declara duas métricas principais (repair rate e SC accuracy). Primeira tabela com o contraste (Tabela I), primeira métrica (repair rate, primeira coluna B2Fs), primeiro modelo do bloco executado (gpt-3.5 turbo) e primeira linha de base de prompting desse modelo (CoT). As linhas S-C e S-C+BM25 vêm de outro artigo e outro modelo (code-davinci-002), condição incompatível.",
+      "derivacao": "direta",
+      "localizador": "p. 5 (PDF; sem paginação impressa), Tabela I, linhas gpt-3.5 turbo/CoT e gpt-3.5 turbo/T3, coluna B2Fs(%)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "CoT 35.50 18.30", "localizador": "p. 5, Tabela I, bloco gpt-3.5 turbo, linha CoT; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "T3 46.70 28.20", "localizador": "p. 5, Tabela I, bloco gpt-3.5 turbo, linha T3; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "On the B2Fs dataset, T3 achieves a repair rate of 46.70%, outperforming the CoT baseline by 11.20%.", "localizador": "p. 5, Seção V.A (RQ1), item (1)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Repair Plan Generation (T3 completo vs. 'w/o plan')",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "w/o plan",
+      "modelo": "nao_informado (a Tabela III não identifica o modelo; os valores de CoT e T3 coincidem com as linhas gpt-3.5 turbo da Tabela I)",
+      "benchmark": "MODIT B2Fs",
+      "metrica": "Repair rate (Tabela III 'Impact of T3 components on repair rate', coluna B2Fs(%))",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 37.60, "intervencao": 46.70},
+      "denominador": "nao_informado",
+      "condicoes": "Ablação que retira a etapa de geração de plano (incluindo suas árvores e seleção top-n); recuperação e geração de patch mantidas. Demais parâmetros (amostras, temperatura) não reiterados para a Tabela III; modelo não informado. Conferido no PDF, p. 6, Tabela III (cabeçalhos Methods, B2Fs(%), B2Fm(%)).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Única técnica focal e única tarefa já cobertas; componente isolado para completar o alvo de três, primeiro da tabela de ablação (Tabela III), primeira coluna (B2Fs).",
+      "derivacao": "direta",
+      "localizador": "p. 6 (PDF), Tabela III, linhas 'w/o plan' e T3, coluna B2Fs(%)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w/o plan 37.60 19.90", "localizador": "p. 6, Tabela III, linha w/o plan; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "T3 46.70 28.20", "localizador": "p. 6, Tabela III, linha T3; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "In the “w/o plan” setting, the repair rate improves compared to the baseline CoT method, with B2Fs increasing from 35.50% to 37.60% and B2Fm rising from 18.30% to 19.90%.", "localizador": "p. 6, RQ3, item (1)"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Cause Analysis (T3 completo vs. 'w/o cause')",
+      "mecanismos": ["instrucao", "exemplos", "contexto", "raciocinio", "decomposicao", "amostragem"],
+      "mecanismos_acrescentados": ["decomposicao"],
+      "comparador": "w/o cause",
+      "modelo": "nao_informado (a Tabela III não identifica o modelo; os valores de CoT e T3 coincidem com as linhas gpt-3.5 turbo da Tabela I)",
+      "benchmark": "MODIT B2Fs",
+      "metrica": "Repair rate (Tabela III 'Impact of T3 components on repair rate', coluna B2Fs(%))",
+      "sentido": "maior_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 37.30, "intervencao": 46.70},
+      "denominador": "nao_informado",
+      "condicoes": "Ablação que retira a etapa de análise de causas (incluindo suas árvores CoT e seleção por frequência); recuperação, plano e geração de patch mantidos. Modelo não informado. Conferido no PDF, p. 6, Tabela III.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação, na ordem da Tabela III, para completar o alvo de três; primeira coluna (B2Fs).",
+      "derivacao": "direta",
+      "localizador": "p. 6 (PDF), Tabela III, linhas 'w/o cause' e T3, coluna B2Fs(%)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "w/o cause 37.30 21.00", "localizador": "p. 6, Tabela III, linha w/o cause; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "T3 46.70 28.20", "localizador": "p. 6, Tabela III, linha T3; colunas Methods, B2Fs(%), B2Fm(%)"},
+        {"trecho": "Compared to “w/o plan,” it achieves a slightly lower B2Fs (37.30%) but a higher B2Fm (21.00%), demonstrating that identifying and analyzing potential causes helps the model generate more precise fixes, particularly in terms of improving correctness.", "localizador": "p. 6, RQ3, item (2)"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O resumo e as contribuições definem a proposta (T3) e a avaliação de variantes de CoT em APR; quatro questões de pesquisa (RQ1-RQ4) organizam os resultados.",
+      "localizador": "p. 1, Resumo; p. 2, Contribuições; pp. 5-7, Seções V.A-V.D"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "As etapas de T3 são descritas com equações, mas os templates de prompt não são reproduzidos, e não se informam k (exemplos recuperados) nas condições principais, M, Ni, top-n, o critério de correção dos patches nem a partição avaliada.",
+      "localizador": "pp. 3-5, Seções III e IV"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "CoT, Tree-of-Thought, Plan-and-Solve e Analogical Reasoning são executados com os mesmos modelos e há ablação de duas etapas; porém os templates das baselines não são descritos e S-C, S-C+BM25 e NatGen são copiados de outros artigos, com outro modelo.",
+      "localizador": "p. 5, Seção IV.D e Tabela I; p. 6, Tabela III"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Repair rate e SC accuracy são definidas por fórmulas, mas os denominadores não têm valor numérico, não se explica como as 30 amostras compõem a taxa de reparo, a Tabela II e a Tabela III não indicam o modelo, e o texto inverte valores da Tabela I (46.70% vs 48.20%) e arredonda 48.61 como 48.60%.",
+      "localizador": "p. 5, Seção IV.C, Eqs. (15)-(16); p. 6, RQ1 item (3), RQ2 e Tabelas II-III"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura do texto completo, não há discussão de ameaças à validade ou limitações do próprio estudo.",
+      "localizador": "texto completo, pp. 1-8"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Informa snapshots dos modelos, temperatura e número de amostras, mas não fornece prompts, hiperparâmetros da recuperação e das árvores, tamanhos dos conjuntos nem código ou pacote de replicação.",
+      "localizador": "p. 5, Seção IV.B e nota de rodapé 1; texto completo"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não discute possível presença dos commits do MODIT (GitHub) no pré-treinamento dos modelos nem a separação entre o repositório de recuperação e os casos de teste.",
+      "localizador": "texto completo; p. 3, Seção III.A; p. 5, Seção IV.A"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_pdf_abertas": ["p-02", "p-03", "p-04", "p-05", "p-06", "p-07"],
+    "observacao": "Texto extraído lido integralmente (481 linhas, incluindo referências). Tabelas I, II e III e Fig. 3 conferidas nas imagens das pp. 5-7; contribuições conferidas na p. 2."
+  }
+}

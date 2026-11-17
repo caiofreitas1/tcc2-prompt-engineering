@@ -1,0 +1,382 @@
+{
+  "estudo_id": "S1304",
+  "ficha": {
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "TraceRepair (TraceRepairDSV3.2 e TraceRepairGPT3.5)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "PDF p. 2 (Introdução), p. 4-6 (Seção 3, Algoritmo 1), p. 9 (Tabela 6), p. 10 (Tabela 8); páginas impressas não numeradas",
+        "observacao": "Pacote híbrido em três fases encadeadas (decomposicao): Probe Agent gera instrumentação e os traços de execução entram no prompt (contexto, junto com código defeituoso, informação de falha e, em PFL, a linha defeituosa); agentes de reparo com estratégias Defensive, Causal e Semantic (instrucao) produzem patches com lógica de reparo e justificativa (rationale → raciocinio); Best of N com pré-avaliação em sandbox (amostragem); laço Generate-Critique-Update com críticas de pares e retorno de execução (feedback, multiagente); Judge Agent sintetiza o método final (multiagente); restrições por etapa (Probe Agent só registra, com template try-catch fixo; reescrita do método completo sob a mesma estratégia → restricoes). O contrafactual de pacote é a condição 'DeepSeek-V3.2 Baseline' (Tabela 6, composição do prompt não descrita) e o modelo vanilla de geração direta (Tabela 8). A lista de mecanismos acrescentados é relativa à geração direta, cuja composição de prompt não é informada; categorias já presentes na base (por exemplo, código defeituoso como contexto) não podem ser descontadas. Inclui componentes fora do escopo (execução instrumentada, sandbox, temperatura, orçamento), portanto o ganho do pacote não é efeito isolado de prompting nem de um mecanismo único."
+      },
+      {
+        "nome_original": "Runtime traces / Diagnostic Probing (Probe Agent)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 4-5 (Seção 3.2); p. 9 (Tabela 6, linha TraceRepairNT 'w/o Trace (Static Debate Only)')",
+        "observacao": "Mecanismos listados são os da condição com o componente (framework completo). O ingrediente acrescentado é o traço de execução inserido no prompt (contexto; a categoria já existe na condição sem traço por causa do código defeituoso). A ablação retira os traços mantendo o debate ('Static Debate Only'); a composição exata da variante não é detalhada além do rótulo. A geração e a execução da instrumentação no programa são infraestrutura fora do escopo."
+      },
+      {
+        "nome_original": "Multi-agent debate (Trace-Guided Debate Loop: Generate, Critique and Update)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["multiagente", "feedback"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5-6 (Seção 3.3); p. 9 (Tabela 6, linha TraceRepairND 'w/o Debate (Trace Only)'); p. 9 (Figura 4, contribuição por rodada)",
+        "observacao": "A ablação 'w/o Debate (Trace Only)' corresponde, segundo o texto, a 'trace-guided single-pass generation'; não é informado se as três estratégias, o Best of N e o Judge Agent permanecem nessa variante. A Figura 4 traz também a contribuição cumulativa por rodada (Directly 326, Round 1 359, Round 2 380, Round 3 388, Final 392), que é só cumulativa."
+      },
+      {
+        "nome_original": "Defensive Strategy",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5 (Seção 3.3, Strategy Initialization); p. 9 (Tabela 6, linha TraceRepairNDS 'w/o Defensive Strategy')",
+        "observacao": "Perspectiva de reparo dada ao agente (diretriz em linguagem natural → instrucao)."
+      },
+      {
+        "nome_original": "Causal Strategy",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5 (Seção 3.3); p. 9 (Tabela 6, linha TraceRepairNCS 'w/o Causal Strategy')",
+        "observacao": "Perspectiva de reparo dada ao agente (instrucao)."
+      },
+      {
+        "nome_original": "Semantic Strategy",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["instrucao"],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "PDF p. 5 (Seção 3.3); p. 9 (Tabela 6, linha TraceRepairNSS 'w/o Semantic Strategy')",
+        "observacao": "Perspectiva de reparo dada ao agente (instrucao); examina contratos de API, comentários e informação de falha."
+      },
+      {
+        "nome_original": "Best of N Selection",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["amostragem"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 4 (Algoritmo 1, linha 12); p. 5 (Seção 3.3)",
+        "observacao": "Candidatos pontuados 0/1/2 por compilação e testes no sandbox; desempate por tamanho da justificativa e ordem de geração. Sem ablação própria."
+      },
+      {
+        "nome_original": "Judge Agent (Arbitration and Synthesis)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["multiagente"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "cumulativo",
+        "localizador": "PDF p. 6 (Seção 3.4); p. 8 (texto de RQ2); p. 9 (Figura 4, estágio 'Final (Arbitration)')",
+        "observacao": "Só há contribuição cumulativa do estágio de arbitragem (+4 correções segundo o texto da p. 8), sem condição sem o Judge Agent."
+      },
+      {
+        "nome_original": "Tail-Biased Truncation (Trace Volume Management)",
+        "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "componente",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 5 (Seção 3.2, Trace Volume Management)",
+        "observacao": "Regra de construção do prompt que mantém só os últimos 2.000 bytes do traço; sem avaliação própria. A guarda de 10 MB no arquivo de log é infraestrutura (fora do escopo)."
+      },
+      {
+        "nome_original": "REINFIX (REINFIXGPT4o e REINFIXGPT3.5)",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1 (Introdução), p. 7 (Seção 4.3 e 5.1), p. 8 (Tabela 3)",
+        "observacao": "Sistema comparador descrito como retrieval-augmented, que recupera 'repair ingredients'/'fix patterns'; o estudo não informa se os padrões recuperados são exemplos resolvidos. Mecanismos não isolados no estudo."
+      },
+      {
+        "nome_original": "ChatRepair",
+        "mecanismos": ["feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1, p. 7 (Seção 4.3), p. 8 (Tabelas 3 e 4), p. 10 (Tabelas 8 e 9)",
+        "observacao": "Reparo conversacional com retorno de testes; reexecutado no Recent-Java (Tabela 8), valores do Defects4J e de custo de origem não descrita na Tabela 3 e de resultados relatados na Tabela 9. Mecanismos não isolados."
+      },
+      {
+        "nome_original": "RepairAgent",
+        "mecanismos": ["feedback", "contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1-2, p. 7 (Seção 4.3), p. 8 (Tabelas 3 e 4), p. 10 (Tabela 9)",
+        "observacao": "Agente que invoca ferramentas externas; mecanismos não isolados."
+      },
+      {
+        "nome_original": "ThinkRepair",
+        "mecanismos": ["raciocinio"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1 (Introdução), p. 8 (Tabelas 3 e 5)",
+        "observacao": "Descrito como reparo via chain-of-thought; mecanismos não isolados."
+      },
+      {
+        "nome_original": "AdverIntent-Agent",
+        "mecanismos": ["feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 1-2, p. 8 (Tabela 3, só total), p. 10 (Tabela 9)",
+        "observacao": "Descrito como framework agêntico com 'adversarial feedback'; mecanismos não isolados."
+      },
+      {
+        "nome_original": "D4C",
+        "mecanismos": ["feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 7 (Seção 4.3), p. 8 (Tabela 5)",
+        "observacao": "Classificado pelo estudo como feedback-driven; só aparece na Tabela 5 (MFL)."
+      },
+      {
+        "nome_original": "Vanilla GPT-3.5 / DeepSeek-Coder (direct generation)",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 10 (Tabela 8 e texto)",
+        "observacao": "Linha de base de geração direta reexecutada no Recent-Java; a composição do prompt não é informada."
+      },
+      {
+        "nome_original": "DeepSeek-V3.2 Baseline",
+        "mecanismos": [],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 9 (Tabela 6, linha 'DeepSeek-V3.2 | Baseline')",
+        "observacao": "Condição de referência da ablação; o estudo não descreve o prompt nem o procedimento dessa linha de base."
+      },
+      {
+        "nome_original": "TracePrompt",
+        "mecanismos": ["contexto"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 10 (Tabela 8 e texto)",
+        "observacao": "Estratégia de prompting aumentada com traços (Haque et al.), adaptada e reexecutada pelos autores."
+      },
+      {
+        "nome_original": "InspectCoder",
+        "mecanismos": ["contexto", "feedback"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "PDF p. 10 (Tabela 8 e texto)",
+        "observacao": "Inspeção de estado em tempo de execução guiada por LLM via depurador interativo; adaptada e reexecutada pelos autores."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {"nome_original": "temperature of 1.0", "natureza": "decodificacao", "descricao": "Temperatura dos agentes de geração para diversidade do espaço de busca.", "localizador": "PDF p. 7 (Seção 4.5)"},
+      {"nome_original": "maximum budget of 40 LLM invocations per bug, early-stopping", "natureza": "orcamento", "descricao": "Limite de 40 chamadas ao LLM por defeito, com parada ao encontrar patch plausível; Tabela 3 registra 'Sample Times' 40.", "localizador": "PDF p. 7 (Seção 4.5); p. 8 (Tabela 3)"},
+      {"nome_original": "multi-agent debate is limited to 3 rounds", "natureza": "orcamento", "descricao": "Número máximo de rodadas de debate (Rmax = 3).", "localizador": "PDF p. 7 (Seção 4.5)"},
+      {"nome_original": "300-second timeout for all test executions", "natureza": "outro", "descricao": "Limite de tempo da execução de testes no sandbox, para evitar execuções sem término.", "localizador": "PDF p. 7 (Seção 4.5)"},
+      {"nome_original": "Universal Execution Sandbox / instrumentation execution", "natureza": "outro", "descricao": "Infraestrutura que compila, executa testes, roda o programa instrumentado e coleta logs; não é prompting.", "localizador": "PDF p. 3 (Figura 2); p. 4-5 (Seção 3.2)"},
+      {"nome_original": "guard clause (10 MB)", "natureza": "outro", "descricao": "Guarda no código de instrumentação que interrompe a escrita do log acima de 10 MB.", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"nome_original": "Backbones DeepSeek-V3.2, GPT-3.5-Turbo e DeepSeek-Coder", "natureza": "selecao_modelo", "descricao": "Instanciação do framework com diferentes modelos, sem alterar o prompt.", "localizador": "PDF p. 7 (Seção 4.5); p. 10 (Tabela 8)"}
+    ],
+    "modelos": [
+      {"nome": "DeepSeek-V3.2", "versao": "DeepSeek-V3.2 (snapshot nao_informado)", "uso": "backbone de TraceRepairDSV3.2 e linha de base da ablação"},
+      {"nome": "GPT-3.5-Turbo", "versao": "nao_informado (snapshot)", "uso": "backbone de TraceRepairGPT3.5 e das linhas de base reexecutadas no Recent-Java"},
+      {"nome": "DeepSeek-Coder", "versao": "nao_informado", "uso": "backbone no Recent-Java (Tabela 8)"},
+      {"nome": "GPT-4o, GPT-4, Code-T5, UniXcoder", "versao": "nao_informado", "uso": "backbones das linhas de base listados na Tabela 3, não executados pelos autores segundo o texto disponível"}
+    ],
+    "benchmarks": [
+      {"nome": "Defects4J v1.2 e v2.0", "quantidade": "673 single-file bugs avaliados (texto); Tabela 1: v1.2 136 MF / 255 SF / 154 SH / 80 SL; v2.0 210 MF / 228 SF / 159 SH / 78 SL", "observacao": "O estudo não liga as 673 falhas às contagens da Tabela 1 nem informa o denominador por versão ou por subconjunto (SF de v1.2 usado na ablação e na Tabela 5). SH e SL são subconjuntos de categorização; a sobreposição com SF não é descrita.", "localizador": "PDF p. 6 (Seção 4.2, Tabela 1)"},
+      {"nome": "Recent-Java", "quantidade": "21 bugs", "observacao": "Construído pelos autores com commits de setembro de 2023 a dezembro de 2025 de Jsoup, Commons-Lang e Commons-Compress.", "localizador": "PDF p. 6 (Seção 4.2); p. 7 (Tabela 2)"}
+    ],
+    "metricas": [
+      {"nome": "correct patches (Correct)", "definicao": "patches semanticamente equivalentes aos do desenvolvedor, por verificação manual de dois autores", "localizador": "PDF p. 7 (Seção 4.4)"},
+      {"nome": "plausible patches (Plausible)", "definicao": "patches que passam toda a suíte (Tfail e Treg)", "localizador": "PDF p. 7 (Seção 4.4)"},
+      {"nome": "Drop Rate (PFL → MFL)", "localizador": "PDF p. 8 (Tabela 5)"},
+      {"nome": "#Fixed (Recent-Java)", "localizador": "PDF p. 10 (Tabela 8)"},
+      {"nome": "Instrumentation Success Rate", "localizador": "PDF p. 9 (Tabela 7)"},
+      {"nome": "Tokens, Cost, Time (média por bug)", "localizador": "PDF p. 10 (Tabela 9); p. 11 (Tabela 10)"}
+    ],
+    "linguagens": ["Java"],
+    "riscos": [
+      {"categoria": "correcao_funcional", "descricao": "Sobreajuste aos testes: patches plausíveis que passam nos testes sem corrigir a lógica; um único LLM tende a se comprometer com uma hipótese e gerar patches que satisfazem testes por coincidência.", "localizador": "PDF p. 1 (Resumo); p. 7 (Seção 4.4)"},
+      {"categoria": "correcao_funcional", "descricao": "Falso consenso entre agentes em patches incorretos em frameworks multiagente tradicionais.", "localizador": "PDF p. 5 (Seção 3.3)"},
+      {"categoria": "alucinacao", "descricao": "LLMs isolados são propensos a alucinação e têm dificuldade de autocorrigir raciocínio errado (afirmação apoiada em literatura citada).", "localizador": "PDF p. 2 (Introdução)"},
+      {"categoria": "contaminacao", "descricao": "Vazamento de dados: o modelo pode recordar correções do treinamento em vez de raciocinar sobre o defeito.", "localizador": "PDF p. 6 (Seção 4.2); p. 11 (Seção 6, Internal Validity)"},
+      {"categoria": "custo", "descricao": "Amostragem em larga escala incorre em alto custo computacional; métodos com uso excessivo de tokens ou longo tempo de execução são difíceis de implantar. Custo medido em tokens, dólares e tempo (Tabela 9); execuções sem sucesso chegam a 898,3 s ao esgotar o orçamento de iterações.", "localizador": "PDF p. 2 (Introdução); p. 10 (Seção 5.4, Tabela 9)"},
+      {"categoria": "outro", "descricao": "Traços de execução podem exceder a janela de contexto dos LLMs.", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"categoria": "outro", "descricao": "Falha da instrumentação (código que não compila) faz o pipeline perder a base de evidência; taxa de sucesso medida em 79,3% (GPT-3.5) e 93,8% (DeepSeek-V3.2) sob PFL.", "localizador": "PDF p. 9 (Seção 5.3, Tabela 7)"},
+      {"categoria": "outro", "descricao": "Cobertura de testes fraca ou testes instáveis podem impedir a captura do estado relevante, deixando o debate sem evidência ancorada (validade de construto).", "localizador": "PDF p. 11 (Seção 6, Construct Validity)"},
+      {"categoria": "seguranca", "descricao": "Segurança operacional da execução, não cibersegurança: alteração da lógica do programa pela instrumentação, esgotamento de armazenamento em laços infinitos e execuções sem término causadas por patches defeituosos.", "localizador": "PDF p. 5 (Seção 3.2); p. 7 (Seção 4.5)"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Verificação manual independente de todo patch plausível por dois autores, com discussão em caso de discordância e exclusão se a discordância persistir.", "avaliada": "nao", "localizador": "PDF p. 7 (Seção 4.4)"},
+      {"descricao": "Benchmark Recent-Java com defeitos posteriores aos cortes de treinamento relatados de GPT-3.5 e DeepSeek-Coder (controle de contaminação; não há comparação com e sem o controle).", "avaliada": "nao", "localizador": "PDF p. 6 (Seção 4.2); p. 10 (Tabela 8)"},
+      {"descricao": "Debate guiado por traços e críticas de pares para reduzir falso consenso e sobreajuste; a ablação mede correções corretas, não o falso consenso nem a alucinação.", "avaliada": "nao", "localizador": "PDF p. 5 (Seção 3.3); p. 9 (Tabela 6)"},
+      {"descricao": "Tail-Biased Truncation (últimos 2.000 bytes) para caber na janela de contexto.", "avaliada": "nao", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"descricao": "Instrumentação só com logging em template try-catch fixo, compilação prévia com rollback e regeneração; recurso a raciocínio estático quando a instrumentação falha.", "avaliada": "nao", "localizador": "PDF p. 4 (Algoritmo 1, Seção 3.1); p. 5 (Seção 3.2)"},
+      {"descricao": "Guarda de 10 MB no log e timeout de 300 s nas execuções de teste.", "avaliada": "nao", "localizador": "PDF p. 5 (Seção 3.2); p. 7 (Seção 4.5)"},
+      {"descricao": "Avaliação com backbone GPT-3.5 para controlar diferenças de capacidade do modelo na comparação com linhas de base.", "avaliada": "nao", "localizador": "PDF p. 7 (Seção 5.1)"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Os valores das linhas de base na Tabela 3 (Defects4J, PFL) usam backbones (GPT-4o, GPT-4, Code-T5, UniXcoder) e números de amostras (45 a 4000) diferentes dos de TraceRepair (40); a origem desses números (reexecução ou resultados relatados) não é informada para a Tabela 3. O próprio estudo reconhece que a comparação pode refletir capacidade do backbone.", "localizador": "PDF p. 7 (Seção 5.1); p. 8 (Tabela 3)"},
+      {"descricao": "Inversão: sob o mesmo GPT-3.5, TraceRepairGPT3.5 corrige 224 contra 241 do REINFIXGPT3.5 (Tabela 3, Total); o resumo afirma superar as abordagens existentes com base no resultado de TraceRepairDSV3.2 (392).", "localizador": "PDF p. 1 (Resumo); p. 7 (Seção 5.1); p. 8 (Tabela 3)"},
+      {"descricao": "Valor diferente entre tabela e figura: GiantRepair tem total 171 na Tabela 3 e 170 na Figura 3.", "localizador": "PDF p. 8 (Tabela 3, linha Total); p. 9 (Figura 3, barras laterais)"},
+      {"descricao": "Aparente inconsistência: a Tabela 5 declara 'Defects4J v1.2 SF bugs', mas o valor PFL de GiantRepair (87) e de ThinkRepair (98) coincide com os totais de v1.2 da Tabela 3, que incluem MF; o estudo não informa se essas linhas de base foram avaliadas só em SF nem a origem dos valores além de 'reported results'.", "localizador": "PDF p. 8 (Tabela 3, linha D4J v1.2 Total; Tabela 5)"},
+      {"descricao": "A linha de base da ablação ('DeepSeek-V3.2 | Baseline', 102 corretas) não é descrita; as porcentagens de 'Improv.' da Tabela 6 são relativas a ela.", "localizador": "PDF p. 9 (Tabela 6)"},
+      {"descricao": "Denominadores diferentes entre análises: a ablação (Tabela 6, 177 no framework completo) usa Defects4J v1.2 SF, enquanto a Figura 4 (Directly 326 → Final 392) usa o total do Defects4J; o texto diz que a ablação é feita 'primarily' em v1.2 SF. O tamanho do subconjunto v1.2 SF usado não é informado (Tabela 1 lista 255 SF em v1.2, mas o corpus avaliado é de 673 falhas single-file com exclusões).", "localizador": "PDF p. 6 (Tabela 1); p. 8 (Seção 5.2); p. 9 (Figura 4, Tabela 6)"},
+      {"descricao": "Na Tabela 7, a taxa de sucesso de instrumentação de TraceRepairGPT3.5 é maior em MFL (546/673, 81,1%) que em PFL (534/673, 79,3%), sem explicação no texto.", "localizador": "PDF p. 9 (Tabela 7)"},
+      {"descricao": "Recent-Java tem só 21 bugs e não foi avaliado com o backbone principal DeepSeek-V3.2 (usa GPT-3.5 e DeepSeek-Coder); ainda assim a seção de ameaças e a conclusão afirmam que o desempenho não se deve a memorização. Contagens absolutas pequenas (por exemplo, 10 contra 8 de ChatRepair).", "localizador": "PDF p. 6 (Seção 4.2); p. 10 (Tabela 8); p. 11 (Seções 6 e 8)"},
+      {"descricao": "Comparação de eficiência (Tabela 9) usa resultados relatados nos artigos originais de ChatRepair, RepairAgent e AdverIntent-Agent, não reexecuções; o próprio estudo diz que o tempo é indicativo e depende de latência de API e ambiente.", "localizador": "PDF p. 10 (Seção 5.4, Tabela 9)"},
+      {"descricao": "A conclusão afirma que o debate reduz alucinação, mas nenhuma métrica de alucinação é relatada; a ablação mede só correções corretas.", "localizador": "PDF p. 11 (Seção 8); p. 9 (Tabela 6)"},
+      {"descricao": "No Recent-Java, as linhas de base baseadas em traço (TracePrompt 1, InspectCoder 3) ficam abaixo da geração direta vanilla (4) com GPT-3.5.", "localizador": "PDF p. 10 (Tabela 8)"},
+      {"descricao": "O número de execuções independentes por configuração não é informado, apesar da temperatura 1,0.", "localizador": "PDF p. 7 (Seção 4.5)"}
+    ],
+    "observacoes": [
+      {"descricao": "Linhas de base GiantRepair e FitRepair (template-based/hybrid), GAMMA e Codex (direct generative) aparecem nas Tabelas 3 e 5; o estudo não descreve mecanismos de prompting nelas, por isso não entram em 'tecnicas'.", "localizador": "PDF p. 7 (Seção 4.3); p. 8 (Tabelas 3 e 5)"},
+      {"descricao": "Análise de sobreposição (Figura 3): 56 defeitos resolvidos por todos os métodos e 107 exclusivos de TraceRepairDSV3.2 em relação a quatro linhas de base.", "localizador": "PDF p. 7 (Seção 5.1); p. 9 (Figura 3)"},
+      {"descricao": "Distribuição de tokens por agente: Repair Agents consomem mais de 90%; Probe 4,9% (GPT-3.5) e 6,7% (DeepSeek-V3.2); Judge 2,2%.", "localizador": "PDF p. 11 (Tabela 10)"},
+      {"descricao": "Avaliação restrita ao estágio de reparo com teste que dispara a falha e ambiente executável; PFL fornece a linha defeituosa como entrada; MFL avaliado em Defects4J v1.2 SF.", "localizador": "PDF p. 2 (Introdução); p. 7 (Seção 5.1); p. 8 (Tabela 5)"},
+      {"descricao": "Pacote de replicação indicado por DOI do Zenodo; não acessado nem validado nesta extração.", "localizador": "PDF p. 2 (Contribuições); p. 11 (Data Availability)"},
+      {"descricao": "Ablação feita só com DeepSeek-V3.2 em Defects4J v1.2 SF, justificada por restrições econômicas.", "localizador": "PDF p. 8 (Seção 5.2)"}
+    ],
+    "citacoes": [
+      {"trecho": "Automated Program Repair (APR) aims to resolve software bugs without human intervention.", "localizador": "PDF p. 1 (Resumo)"},
+      {"trecho": "Building on this insight, we propose TraceRepair, a multi-agent framework that leverages runtime facts as shared constraints for patch validation.", "localizador": "PDF p. 1 (Resumo)"},
+      {"trecho": "Guided by these traces, TraceRepair initializes the repair agents with defensive, causal, and semantic reasoning perspectives, enabling the generation of diverse fix candidates.", "localizador": "PDF p. 2 (Introdução)"},
+      {"trecho": "The Probe Agent does not generate runtime facts or repair the program in this phase.", "localizador": "PDF p. 4 (Seção 3.2)"},
+      {"trecho": "It only inserts logging statements around suspicious locations while keeping the original program logic unchanged.", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"trecho": "If a trace log exceeds 2,000 bytes, the system discards the initial entries and retains only the last 2,000 bytes.", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"trecho": "Runtime execution traces, particularly those emerging from loops or deep recursion, can rapidly exceed the context window limits of LLMs.", "localizador": "PDF p. 5 (Seção 3.2)"},
+      {"trecho": "In traditional multi-agent frameworks, agents often reach a false consensus on incorrect patches.", "localizador": "PDF p. 5 (Seção 3.3)"},
+      {"trecho": "The critique is produced by an LLM-based reviewer rather than a formal consistency checker.", "localizador": "PDF p. 5 (Seção 3.3)"},
+      {"trecho": "Based on these inputs, the Judge generates a new complete method rather than directly selecting or merging the candidate implementations.", "localizador": "PDF p. 6 (Seção 3.4)"},
+      {"trecho": "However, even with such runtime evidence, a single LLM interpreting it in isolation tends to commit to a specific repair hypothesis, leading to test overfitting and producing patches that satisfy the observed traces and test suite by coincidence rather than correct logic.", "localizador": "PDF p. 1 (Resumo)"},
+      {"trecho": "Research indicates that LLMs operating in isolation are prone to hallucination and struggle to self-correct erroneous reasoning [14, 15].", "localizador": "PDF p. 2 (Introdução)"},
+      {"trecho": "However, this approach prioritizes quantity over quality, incurring high computational costs while increasing the risk of test-overfitting.", "localizador": "PDF p. 2 (Introdução)"},
+      {"trecho": "Data leakage poses a critical threat to the validity of LLM-based repair evaluation, while constructing post-cutoff benchmarks is inherently challenging due to the scarcity of recent, high-quality defects.", "localizador": "PDF p. 6 (Seção 4.2)"},
+      {"trecho": "Mere test passage does not guarantee correctness due to the overfitting phenomenon, where patches exploit weak test specifications without fixing the underlying logic [40].", "localizador": "PDF p. 7 (Seção 4.4)"},
+      {"trecho": "If disagreement remained after discussion, the patch was not counted as correct.", "localizador": "PDF p. 7 (Seção 4.4)"},
+      {"trecho": "We enforced a strict 300-second timeout for all test executions to prevent non-terminating executions caused by faulty patches.", "localizador": "PDF p. 7 (Seção 4.5)"},
+      {"trecho": "If the Probe Agent generates instrumentation code that fails to compile, the trace-guided pipeline loses its evidential basis.", "localizador": "PDF p. 9 (Seção 5.3)"},
+      {"trecho": "Methods that incur excessive token usage or long execution time are difficult to deploy in real-world development workflows.", "localizador": "PDF p. 10 (Seção 5.4)"},
+      {"trecho": "Under weak test coverage or flaky test conditions, the Probe Agent may fail to capture relevant runtime state, leaving the debate agents without grounded evidence.", "localizador": "PDF p. 11 (Seção 6)"},
+      {"trecho": "We address this issue through the Recent-Java benchmark, which contains defects after the training cutoff of our backbone models.", "localizador": "PDF p. 11 (Seção 6)"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "TraceRepair (TraceRepairDSV3.2)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+      "comparador": "REINFIXGPT4o",
+      "modelo": "DeepSeek-V3.2 (intervenção); GPT-4o (comparador)",
+      "benchmark": "Defects4J v1.2 + v2.0, Perfect Fault Localization",
+      "metrica": "Correct (correct patches)",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 291, "intervencao": 392},
+      "denominador": "nao_informado na Tabela 3; o texto informa 673 falhas single-file avaliadas, sem ligar esse número a cada coluna da tabela",
+      "condicoes": "Linha 'Total' (agregado impresso de D4J v1.2 Total e D4J v2.0 Total). Sample Times: 40 (TraceRepairDSV3.2) e 45 (REINFIXGPT4o); backbones diferentes. Origem dos valores de REINFIX na Tabela 3 não informada (reexecução ou relato). Temperatura 1,0, até 40 chamadas ao LLM por bug com parada antecipada, até 3 rodadas de debate. Número de execuções independentes nao_informado. Corretude por verificação manual de dois autores para os patches de TraceRepair; procedimento para as linhas de base nao_informado. Plausíveis: 452 contra 397. conferido_pdf = sim (Tabela 3 aberta na p. 8).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "O resumo e as contribuições destacam 392 correções e superioridade sobre várias abordagens, sem um comparador único; usada a primeira tabela com o contraste (Tabela 3), primeira métrica (Correct), primeiro modelo listado (TraceRepairDSV3.2) e primeira linha de base listada (REINFIXGPT4o), na linha de agregado impresso Total.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 8, Tabela 3 (página impressa não numerada); texto PDF p. 7, Seção 5.1",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Total | 392/452 | 224/264 | 291 / 397", "localizador": "PDF p. 8, Tabela 3, linha Total; colunas TraceRepairDSV3.2, TraceRepairGPT3.5, REINFIXGPT4o (Correct / Plausible)"},
+        {"trecho": "As shown in Table 3, TraceRepairDSV3.2 correctly resolves 392 defects (217 on v1.2 and 175 on v2.0), outperforming all compared methods in terms of the number of correctly fixed defects.", "localizador": "PDF p. 7, Seção 5.1"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Runtime traces / Diagnostic Probing (Probe Agent)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "TraceRepairNT — w/o Trace (Static Debate Only)",
+      "modelo": "DeepSeek-V3.2",
+      "benchmark": "Defects4J v1.2 (SF bugs)",
+      "metrica": "Correct",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 154, "intervencao": 177},
+      "denominador": "nao_informado (Tabela 1 lista 255 SF bugs em v1.2, mas o estudo não informa o tamanho do subconjunto usado na ablação)",
+      "condicoes": "Ablação com TraceRepairDSV3.2; intervenção = Full Framework. Mesmos parâmetros gerais (temperatura 1,0, até 40 chamadas, até 3 rodadas), sem detalhamento específico por variante. Número de execuções nao_informado. conferido_pdf = sim (Tabela 6 aberta na p. 9).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Só há uma técnica focal e uma tarefa; para completar o alvo de três, componentes da tabela de ablação na ordem da tabela: primeiro, retirada dos traços.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9, Tabela 6 (página impressa não numerada)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "TraceRepairNT | w/o Trace (Static Debate Only) | 154 | +50.9%", "localizador": "PDF p. 9, Tabela 6; colunas Variant, Configuration, Correct, Improv."},
+        {"trecho": "TraceRepairDSV3.2 | Full Framework | 177 | +73.5%", "localizador": "PDF p. 9, Tabela 6; colunas Variant, Configuration, Correct, Improv."},
+        {"trecho": "Removing runtime traces (TraceRepairNT) reduces performance to 154 correct fixes, yet still yields a 50.9% improvement over the baseline, indicating that the debate mechanism alone provides substantial gains.", "localizador": "PDF p. 9, Seção 5.2"}
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Multi-agent debate (Trace-Guided Debate Loop)",
+      "mecanismos": ["instrucao", "raciocinio", "decomposicao", "contexto", "feedback", "multiagente", "restricoes", "amostragem"],
+      "mecanismos_acrescentados": ["multiagente", "feedback"],
+      "comparador": "TraceRepairND — w/o Debate (Trace Only)",
+      "modelo": "DeepSeek-V3.2",
+      "benchmark": "Defects4J v1.2 (SF bugs)",
+      "metrica": "Correct",
+      "sentido": "maior_melhor",
+      "unidade": "contagem",
+      "resultado": {"baseline": 158, "intervencao": 177},
+      "denominador": "nao_informado (tamanho do subconjunto da ablação não informado)",
+      "condicoes": "Ablação com TraceRepairDSV3.2; intervenção = Full Framework; comparador descrito como 'trace-guided single-pass generation'. Não é informado se as estratégias, o Best of N e o Judge Agent permanecem na variante sem debate. Número de execuções nao_informado. conferido_pdf = sim (Tabela 6 aberta na p. 9).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segundo componente da tabela de ablação, na ordem da tabela, para completar o alvo de três.",
+      "derivacao": "direta",
+      "localizador": "PDF p. 9, Tabela 6 (página impressa não numerada)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "TraceRepairND | w/o Debate (Trace Only) | 158 | +54.9%", "localizador": "PDF p. 9, Tabela 6; colunas Variant, Configuration, Correct, Improv."},
+        {"trecho": "In contrast, removing the debate mechanism (TraceRepairND) results in 158 correct fixes, suggesting that trace-guided single-pass generation is slightly more effective than static debate alone.", "localizador": "PDF p. 9, Seção 5.2"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Quatro questões de pesquisa explícitas (eficácia, componentes, generalização, eficiência).", "localizador": "PDF p. 6, Seção 4.1"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Algoritmo e fases descritos, com parâmetros (temperatura, orçamento, rodadas, timeout); porém os critérios de exclusão que levam às 673 falhas são genéricos, a linha de base da ablação não é descrita, os prompts não são apresentados no texto e o número de execuções não é informado.", "localizador": "PDF p. 4-7 (Seções 3 e 4); p. 9 (Tabela 6)"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparação com dez linhas de base, controle por backbone GPT-3.5, ablação e linhas de base reexecutadas no Recent-Java; mas a Tabela 3 mistura backbones e orçamentos diferentes sem informar a origem dos valores, e a eficiência usa resultados relatados.", "localizador": "PDF p. 7 (Seções 4.3, 5.1); p. 8 (Tabela 3); p. 10 (Tabelas 8 e 9)"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "Plausible e Correct são definidas, com protocolo de verificação manual por dois autores; porém os denominadores por tabela não são informados, GiantRepair aparece com 171 na Tabela 3 e 170 na Figura 3, e a Tabela 5 tem valores PFL que coincidem com totais de v1.2 apesar de declarar só SF.", "localizador": "PDF p. 7 (Seção 4.4); p. 8 (Tabelas 3 e 5); p. 9 (Figura 3)"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de ameaças cobre vazamento de dados, generalização para outras linguagens e cobertura de testes; não discute não determinismo (temperatura 1,0 sem execuções repetidas informadas), concordância entre avaliadores nem heterogeneidade das linhas de base.", "localizador": "PDF p. 11, Seção 6"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Pacote de replicação indicado por DOI (não acessado) e parâmetros principais informados; snapshot do GPT-3.5-Turbo, versão do DeepSeek-Coder, número de execuções e textos dos prompts não informados no artigo.", "localizador": "PDF p. 7 (Seção 4.5); p. 11 (Data Availability)"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo trata o risco e constrói o Recent-Java pós-corte para GPT-3.5 e DeepSeek-Coder; mas o benchmark tem 21 bugs, não é avaliado com o backbone principal DeepSeek-V3.2, e o corte deste não é informado.", "localizador": "PDF p. 6 (Seção 4.2); p. 10 (Tabela 8); p. 11 (Seção 6)"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "paginas_abertas_visualmente": [6, 7, 8, 9, 10, 11],
+    "observacao": "Texto extraído lido integralmente (13 páginas, incluindo referências). Páginas impressas não numeradas no PDF; localizadores usam a posição no arquivo."
+  }
+}

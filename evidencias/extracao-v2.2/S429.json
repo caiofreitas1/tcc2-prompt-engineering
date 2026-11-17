@@ -1,0 +1,508 @@
+{
+  "estudo": "S429",
+  "texto_fonte": "fontes/textos/lote/S429.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": [
+      "geracao"
+    ],
+    "tecnicas": [
+      {
+        "nome_original": "Original Prompt (Orig.) / Baseline 1. Original Prompt (Directly Querying LLMs)",
+        "mecanismos": [
+          "instrucao"
+        ],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 do PDF, seção IV.A; p. 4, Fig. 2(a) «Original Prompt (Orig.)»; p. 5, Tabela III, colunas Orig.",
+        "observacao": "Linha de base de consulta direta, zero-shot, com a instrução «Provide answers in Python for the following programming question:» seguida do enunciado traduzido (Fig. 2a). Não há condição sem instrução; serve de comparador para CoT, BFT e LP. É a única condição executada com GPT-4 (Skyline)."
+      },
+      {
+        "nome_original": "Chain-of-Thought with Back-Translation (CoT; na legenda da Tabela III: Chain of Thought with Translation; na Fig. 2a: Modified Prompt Pipeline (CoT))",
+        "mecanismos": [
+          "instrucao",
+          "decomposicao"
+        ],
+        "mecanismos_acrescentados": [
+          "decomposicao"
+        ],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "pp. 4-5 do PDF, seção IV.B; p. 4, Fig. 2(a) «Modified Prompt Pipeline (CoT)»; p. 5, Tabela III, colunas CoT",
+        "observacao": "Apesar do nome, o prompt não pede raciocínio explícito: é um pipeline de duas etapas encadeadas (traduzir o enunciado para o inglês com «Translate the sentence $PROBLEM from $TARGET-LANG to English» e depois gerar código a partir do enunciado traduzido com a mesma instrução do Orig.), classificado como `decomposicao` pelo dicionário; a instrução herdada do Orig. é `instrucao` nas duas condições. O estudo a apresenta como linha de base («strong baselines»), não como proposta, por isso `comparador`. Contrafactual: Orig. versus CoT no mesmo modelo e idioma (Tabela III), para os três modelos abertos e cinco idiomas não ingleses; CoT não foi executado para o inglês nem com GPT-4. O texto (p. 6) diz que CoT não depende de dados ou modelos externos, o que sugere tradução pelo próprio LLM, mas o estudo não declara explicitamente qual modelo traduz. Pacote composto só de prompting (não híbrido)."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "LP (Our approach): Fine tuning on Multilingual Projection with LASER Encoders / Projection-Based Zero-Shot Transfer",
+        "natureza": "embeddings_aprendidos",
+        "descricao": "Abordagem proposta (focal do estudo): codificador multilíngue LASER pré-treinado gera embeddings das palavras; um projetor com parâmetros treináveis (W_llm, b_llm; o texto fala em duas camadas lineares e a conclusão em projetor de camada única) mapeia esses embeddings para o espaço de entrada do LLM, treinado por MSE com tokens ingleses de 120 exemplos do MBPP por 200 épocas; na inferência, o LLM recebe os embeddings projetados concatenados com embeddings de um system prompt. Altera a entrada por embeddings aprendidos, não por texto de prompt; por isso não entra em `tecnicas` nem em `extracoes`.",
+        "localizador": "p. 6 do PDF, seção V; p. 4, Fig. 2(b); p. 5, legenda da Tabela III"
+      },
+      {
+        "nome_original": "Bootstrapping + Fine-tuning Pipeline (BFT) / Fine tuning on Bootstrapped Multilingual Data",
+        "natureza": "ajuste_fino",
+        "descricao": "Geração de problemas e soluções em inglês por um LLM (ChatGPT no texto; GPT-4 na Fig. 2a), tradução e retrotradução com filtro BLEU (Algoritmo 1) e ajuste fino LoRA dos modelos com quantização FP16, duas épocas, em uma GPU A100. Os prompts de geração de dados servem ao ajuste fino de pesos; a intervenção avaliada é o ajuste fino.",
+        "localizador": "pp. 5-6 do PDF, seção IV.C e Algoritmo 1; p. 4, Fig. 2(a)"
+      },
+      {
+        "nome_original": "temperature 0.8",
+        "natureza": "decodificacao",
+        "descricao": "«We set the temperature to 0.8 for consistency and use two epochs» aparece no parágrafo do ajuste fino do BFT; o estudo não esclarece se a temperatura se aplica à geração nas condições Orig., CoT e LP.",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      }
+    ],
+    "modelos": [
+      {
+        "nome": "CodeLLaMa-7B (Instruct)",
+        "versao": "codellama/CodeLlama-7b-Instruct-hf (HuggingFace)",
+        "uso": "Orig., CoT, BFT, LP"
+      },
+      {
+        "nome": "CodeGemma-7B",
+        "versao": "google/codegemma-7b-it (HuggingFace)",
+        "uso": "Orig., CoT, BFT, LP"
+      },
+      {
+        "nome": "Mistral-7B-v0.3",
+        "versao": "mistralai/Mistral-7B-Instruct-v0.3 (HuggingFace)",
+        "uso": "Orig., CoT, BFT, LP"
+      },
+      {
+        "nome": "GPT-4",
+        "versao": "nao_informado",
+        "uso": "sistema de referência (Skyline), só Orig.; também avaliador da qualidade das traduções (escala 1-5)"
+      },
+      {
+        "nome": "ChatGPT (texto) / GPT-4 (Fig. 2a)",
+        "versao": "nao_informado",
+        "uso": "geração dos dados de bootstrapping do BFT; o texto e a figura divergem quanto ao modelo"
+      },
+      {
+        "nome": "LASER (codificador multilíngue)",
+        "versao": "nao_informado (a conclusão menciona o LASER original baseado em LSTM e a variante LASER3 como possível extensão)",
+        "uso": "componente do LP (fora do escopo)"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "MBPP sanitizado, split \"test\", traduzido (MBPP-Translated)",
+        "quantidade": "257 problemas com soluções e três casos de teste cada",
+        "observacao": "Enunciados traduzidos do inglês para zh-cn, es, ja, ru e hi com a Google Translate API; seis idiomas no total. Qualidade da tradução avaliada por dois falantes bilíngues do MTurk (Tabela I) e por GPT-4 (Tabela II); o número de traduções avaliadas não é informado. As métricas são razões sobre o «total number of samples», sem que o estudo declare se o denominador é 257 por idioma (denominador nao_informado)."
+      },
+      {
+        "nome": "MBPP (exemplos ingleses para treino do projetor LP)",
+        "quantidade": "120 exemplos",
+        "observacao": "O estudo não informa de qual split vêm os 120 exemplos nem sua relação com os 257 problemas de teste (nao_informado). Usado só pelo LP, fora do escopo."
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "Total Error Rate (TotalER)",
+        "definicao": "razão de amostras de código que falham em pelo menos um caso de teste sobre o total de amostras; menor é melhor",
+        "localizador": "p. 3 do PDF, seção III.C"
+      },
+      {
+        "nome": "Logical Error Rate (LER)",
+        "definicao": "razão de amostras que executam com sucesso mas produzem resultados incorretos sobre o total; menor é melhor. Na p. 6 o estudo amplia a definição: erro lógico também quando nenhum código válido é gerado ou qualquer teste falha",
+        "localizador": "p. 3 e p. 6 do PDF"
+      },
+      {
+        "nome": "Syntax Error Rate (SER)",
+        "definicao": "razão de amostras com erros de sintaxe sobre o total; menor é melhor",
+        "localizador": "p. 3 do PDF"
+      },
+      {
+        "nome": "All Tests Passed Rate (ATPR)",
+        "definicao": "razão de amostras que passam em todos os casos de teste sobre o total; maior é melhor",
+        "localizador": "p. 3 do PDF"
+      },
+      {
+        "nome": "Code Completion Rate (CCR)",
+        "definicao": "métrica suplementar: proporção de códigos completos nas respostas; o critério de completude não é informado; resultados só em gráfico radar (Fig. 3)",
+        "localizador": "p. 3 e p. 7 do PDF, Fig. 3"
+      },
+      {
+        "nome": "Qualidade da tradução",
+        "definicao": "aceitabilidade binária por dois avaliadores humanos (médias A1, A2 e concordância %) e nota de 1 a 5 por GPT-4 (média e desvio-padrão)",
+        "localizador": "p. 3 do PDF, Tabelas I e II"
+      }
+    ],
+    "linguagens": [
+      "Python (única linguagem de programação)",
+      "Linguagens naturais dos prompts: inglês (en), chinês simplificado (zh-cn; «zh» na Tabela III), espanhol (es), japonês (ja), russo (ru) e hindi (hi)"
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Disparidade de qualidade do código gerado quando o mesmo problema é dado em idiomas não ingleses (maiores taxas de erro e menor ATPR nos modelos abertos).",
+        "localizador": "p. 1 do PDF, introdução; p. 4, seção IV.A; p. 5, Tabela III"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A tradução para o inglês antes da geração (CoT) não melhora significativamente e, em alguns casos, reduz o ATPR; a análise qualitativa aponta representações não canônicas e deriva de tópico. O estudo não relata teste estatístico para «significantly».",
+        "localizador": "p. 5 do PDF, seção IV.B"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "O ajuste fino com dados de bootstrapping (BFT, fora do escopo) reduz erros de sintaxe mas aumenta alucinações, com menor taxa de aprovação e mais erros totais.",
+        "localizador": "p. 6 do PDF, seção IV.C (continuação)"
+      },
+      {
+        "categoria": "alucinacao",
+        "descricao": "No LP (fora do escopo), a ordem dos embeddings projetados pode diferir da ordem canônica do inglês, o que pode contribuir para saídas alucinatórias e errôneas.",
+        "localizador": "p. 8 do PDF, seção VIII"
+      },
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "Modelos que produzem código com mais frequência, como o LP, ficam mais sujeitos a erros de sintaxe.",
+        "localizador": "p. 7 do PDF, seção VI.C"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "O ajuste fino (BFT) é descrito como intensivo em recursos, com dados rotulados custosos e demorados; o custo do BFT não é quantificado no estudo (não quantificado). O tempo de treino do projetor LP (menos de uma hora em RTX-4060) é apresentado como vantagem frente a «several GPU hours or even days», sem medição do BFT.",
+        "localizador": "p. 5 do PDF, seção IV.C; p. 6, seção V"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Vieses culturais e raciais podem ocorrer ao expor os modelos a prompts multilíngues, e há possível comportamento errático dos modelos em idiomas de poucos recursos.",
+        "localizador": "p. 8 do PDF, Acknowledgment"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Limitação do LP: dependência de tokenização por palavras e embeddings agregados, que pode não escalar para idiomas de recursos muito escassos sem tokenizadores disponíveis.",
+        "localizador": "p. 8 do PDF, seção VIII"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Tradução para o inglês antes da geração (CoT) como tentativa de reduzir a disparidade entre idiomas; comparada com Orig. na Tabela III, sem ganho consistente segundo o estudo.",
+        "avaliada": "sim",
+        "localizador": "pp. 4-5 do PDF, seção IV.B; p. 5, Tabela III"
+      },
+      {
+        "descricao": "Projeção LP (fora do escopo de prompting) como proposta para reduzir a disparidade entre idiomas; comparada com Orig., CoT e BFT na Tabela III.",
+        "avaliada": "sim",
+        "localizador": "p. 6 do PDF, seções V e VI; p. 5, Tabela III"
+      },
+      {
+        "descricao": "Controle de qualidade das traduções do benchmark por avaliadores humanos bilíngues (MTurk) e por GPT-4; procedimento de controle sem comparação com condição sem ele.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF, seção III.A, Tabelas I e II"
+      },
+      {
+        "descricao": "Substituição dos nomes de função nas asserções de teste do MBPP pelos nomes gerados pelo modelo, para que o nome não afete o resultado dos testes; procedimento de avaliação sem comparação.",
+        "avaliada": "nao",
+        "localizador": "p. 3 do PDF, seção III.C"
+      },
+      {
+        "descricao": "Filtro BLEU entre tradução e retrotradução na geração dos dados do BFT (fora do escopo); limiar divergente entre texto, algoritmo e figura.",
+        "avaliada": "nao",
+        "localizador": "p. 5 do PDF, seção IV.C e Algoritmo 1; p. 4, Fig. 2(a)"
+      },
+      {
+        "descricao": "Recomendação de um protocolo de comunicação para esclarecer comportamento errático dos modelos, sobretudo em idiomas de poucos recursos; apenas proposta.",
+        "avaliada": "nao",
+        "localizador": "p. 8 do PDF, Acknowledgment"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "Resultado nulo ou inverso de CoT frente a Orig. (Tabela III, ATPR): para CodeLLaMa-7B, ATPR cai em es (20.23 → 8.17), hi (3.5 → 2.34), ru (17.9 → 13.62) e zh (6.23 → 3.5) e sobe em ja (10.51 → 15.18); para CodeGemma-7B, ATPR de CoT é menor que o de Orig. nos cinco idiomas não ingleses; para Mistral-7B-v0.3, maior em es, hi, ja, ru e zh. O estudo resume como ausência de melhora significativa, sem teste estatístico.",
+        "localizador": "p. 5 do PDF, Tabela III (colunas ATPR Orig. e CoT) e seção IV.B"
+      },
+      {
+        "descricao": "Divergência na definição de LER: na seção III.C, amostras que executam com sucesso mas produzem resultado incorreto; na seção VI.B, o estudo diz classificar como erro lógico também quando nenhum código válido é gerado ou qualquer teste falha.",
+        "localizador": "p. 3 do PDF, seção III.C; p. 6, seção VI.B"
+      },
+      {
+        "descricao": "Narrativa contradiz a tabela quanto ao LER: a seção VI.C afirma que LP alcança o menor LER «across all languages and models», mas na Tabela III, para Mistral-7B-v0.3, BFT tem LER menor que LP em hi (24.12 contra 30.74) e zh (26.07 contra 26.85); a própria seção VI.B admite «a few exceptions».",
+        "localizador": "p. 5 do PDF, Tabela III (LER, Mistral-7B-v0.3, linhas hi e zh); p. 6, seção VI.B; p. 7, seção VI.C"
+      },
+      {
+        "descricao": "Narrativa interna inconsistente sobre BFT: a seção VI.A diz que BFT tende a aumentar o TotalER «despite slightly improving the all test cases passed metric», enquanto a seção IV.C diz que BFT leva a menor taxa de aprovação e mais erros totais. Pelas definições, e nas células verificadas da Tabela III (cálculo próprio: ATPR = 100 − TotalER e TotalER = LER + SER em todas as células conferidas, por exemplo CodeLLaMa-7B es Orig. 28.8 + 50.97 = 79.77 e 100 − 79.77 = 20.23), aumento de TotalER implica redução de ATPR na mesma célula.",
+        "localizador": "p. 6 do PDF, seção VI.A e seção IV.C (continuação); p. 5, Tabela III"
+      },
+      {
+        "descricao": "A afirmação de que LP reduz o TotalER «by over 10% in some cases» em hi e ru não informa se é p.p. ou variação relativa. Na Tabela III (cálculo próprio), as maiores reduções Orig. → LP em hi e ru são 7.78 p.p. (CodeGemma hi, 89.49 → 81.71) e 8.95 p.p. (CodeGemma ru, 85.99 → 77.04), esta última ≈10,4% em termos relativos; em CodeLLaMa ru (82.1 → 82.88) e Mistral hi (91.44 → 92.22) o TotalER do LP é maior que o do Orig. Aparente inconsistência se a unidade for p.p.",
+        "localizador": "p. 6 do PDF, seção VI.A; p. 5, Tabela III (TotalER)"
+      },
+      {
+        "descricao": "A conclusão afirma que um projetor de camada única reduz a maior parte da lacuna entre idiomas a menos de 2 p.p. e que arquiteturas mais complexas são desnecessárias, mas (a) a seção V descreve duas camadas lineares de projeção; (b) não há resultados de projetores de outras arquiteturas; (c) na Tabela III, para CodeLLaMa-7B com LP, o ATPR é 24.51 em en e 4.28 em hi (diferença de 20.23 p.p., cálculo próprio). A medida de «cross-lingual gap» não é definida.",
+        "localizador": "p. 7 do PDF, seção VII; p. 6, seção V; p. 5, Tabela III (ATPR LP, CodeLLaMa-7B)"
+      },
+      {
+        "descricao": "Limiar BLEU divergente no bootstrapping do BFT: «e.g., 0.8» no texto, «threshold ← 0.9» no Algoritmo 1 e «BLEU score less than 0.8» na Fig. 2(a). Além disso, o Algoritmo 1 calcula BLEU entre tradução e retrotradução (BLEU(t, bt)), enquanto a figura descreve a comparação com as perguntas originais.",
+        "localizador": "p. 5 do PDF, seção IV.C e Algoritmo 1 (linhas 3 e 21); p. 4, Fig. 2(a)"
+      },
+      {
+        "descricao": "Modelo gerador dos dados de bootstrapping divergente: «ChatGPT» no texto e «using GPT-4» na Fig. 2(a). A Fig. 3 rotula a condição como «FT», enquanto a Tabela III usa «BFT».",
+        "localizador": "p. 5 do PDF, seção IV.C; p. 4, Fig. 2(a); p. 7, Fig. 3"
+      },
+      {
+        "descricao": "A legenda da Tabela III descreve LP como «Fine tuning on Multilingual Projection with LASER Encoders», enquanto a introdução afirma que a abordagem não requer pré-treinamento nem ajuste fino custosos.",
+        "localizador": "p. 5 do PDF, legenda da Tabela III; p. 1, introdução"
+      },
+      {
+        "descricao": "Asteriscos sem explicação na Tabela III (SER de CodeLLaMa-7B: «24.12∗» em en/Orig. e «35.02∗» em es/CoT) e valores de GPT-4 em itálico sem explicação na legenda.",
+        "localizador": "p. 5 do PDF, Tabela III"
+      },
+      {
+        "descricao": "A legenda da Fig. 3 afirma CCR do LP «always above 90%», mas os valores de CCR só aparecem em gráfico radar, sem números; não foram estimados pela posição dos pontos.",
+        "localizador": "p. 7 do PDF, Fig. 3"
+      },
+      {
+        "descricao": "Condições discrepantes: GPT-4 só foi executado na condição Orig.; CoT não foi executado para o inglês; o resumo cita a avaliação de CodeLLaMa e CodeGemma, e a introdução cita CodeLLaMa e GPT-4. Ausência de testes estatísticos apesar do uso de «significantly» na narrativa.",
+        "localizador": "p. 5 do PDF, Tabela III; p. 1, resumo e introdução"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "Parâmetros de decodificação na inferência (temperatura, top-p, tamanho máximo) e número de execuções por problema não são informados para Orig., CoT e LP (nao_informado). A única temperatura citada (0.8) está no parágrafo do ajuste fino do BFT.",
+        "localizador": "p. 3 do PDF, seção III.C; p. 5, seção IV.C"
+      },
+      {
+        "descricao": "Pipeline de avaliação: extração do código Python por expressões regulares, substituição dos nomes de função nas asserções do MBPP e execução por scripts bash gerados automaticamente; configuração zero-shot de geração do zero.",
+        "localizador": "p. 3 do PDF, seção III.C"
+      },
+      {
+        "descricao": "O estudo disponibiliza links de código (GitHub) e de dados (HuggingFace); o pacote não foi acessado nem validado nesta extração.",
+        "localizador": "p. 2 do PDF, notas de rodapé 2 e 3"
+      },
+      {
+        "descricao": "Treino do projetor LP: 120 exemplos ingleses do MBPP, 200 épocas, uma GPU RTX-4060, menos de uma hora. O split de origem dos 120 exemplos não é informado.",
+        "localizador": "p. 6 do PDF, seção V"
+      },
+      {
+        "descricao": "Os autores declaram uso do ChatGPT-4 para auxiliar a redação (LaTeX, concisão e depuração de erros).",
+        "localizador": "p. 8 do PDF, Acknowledgment"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "Our focus is on Python code generation from multilingual prompts, though the methods and insights are applicable to other languages and contexts.",
+        "localizador": "p. 2 do PDF, seção III"
+      },
+      {
+        "trecho": "Thus, we choose to report our results on from-scratch code generation tasks in the zero-shot setting.",
+        "localizador": "p. 3 do PDF, seção III.C"
+      },
+      {
+        "trecho": "Here, each query in the dataset is passed through the pipeline, where the model generates response code, filtered from extraneous information such as code explanations, and executed using an automatically constructed bash script.",
+        "localizador": "p. 3 do PDF, seção IV.A"
+      },
+      {
+        "trecho": "Provide answers in Python for the following programming question:",
+        "localizador": "p. 4 do PDF, Fig. 2(a), caixa «Original Prompt (Orig.)»"
+      },
+      {
+        "trecho": "This CoT approach involves translating the problem statement with the prompt: Translate the sentence $PROBLEM from $TARGET-LANG to English, then generating code outputs from the translated prompt.",
+        "localizador": "pp. 4-5 do PDF, seção IV.B"
+      },
+      {
+        "trecho": "Our experiments, detailed in the second column of Table III, show that back-translation does not significantly improve results.",
+        "localizador": "p. 5 do PDF, seção IV.B"
+      },
+      {
+        "trecho": "In some cases, it even reduce performance, as indicated by lower ATPR scores.",
+        "localizador": "p. 5 do PDF, seção IV.B"
+      },
+      {
+        "trecho": "Qualitative analysis suggests that models struggle with non-canonical language representations and topic drift, despite the translations not being of poor quality.",
+        "localizador": "p. 5 do PDF, seção IV.B"
+      },
+      {
+        "trecho": "Therefore, we compared it with methods like bootstrapping from the model itself followed by finetuning (BFT) and Chain-of-Thought (CoT), which also do not rely on external data or models.",
+        "localizador": "p. 6 do PDF, seção VI"
+      },
+      {
+        "trecho": "In this setup, the LASER encoder preprocesses and embeds input tokens before passing them to the LLM, which then operates on these embeddings rather than raw input IDs.",
+        "localizador": "p. 6 do PDF, seção V"
+      },
+      {
+        "trecho": "To enhance performance and align with baselines, we also concatenate system prompt embeddings with the original programming prompt embeddings.",
+        "localizador": "p. 6 do PDF, seção V"
+      },
+      {
+        "trecho": "Models are quantized to FP16 and fine-tuned using parameter-efficient techniques, including low-rank adaptation [42].",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      },
+      {
+        "trecho": "Significant disparities in code quality across languages are observed, even when using the same problem statements.",
+        "localizador": "p. 1 do PDF, introdução"
+      },
+      {
+        "trecho": "As shown in the third column of Table III, while bootstrapping with ChatGPT reduces syntax errors, it also increases hallucinations, leading to lower test pass rates and higher total errors.",
+        "localizador": "p. 6 do PDF, seção IV.C (continuação)"
+      },
+      {
+        "trecho": "This misalignment could contribute to the generation of hallucinatory and erroneous outputs.",
+        "localizador": "p. 8 do PDF, seção VIII"
+      },
+      {
+        "trecho": "Our overall observations with respect to this metric is models like ours that often produce code than omitting it (which is indicated by the higher code completion rate) are more prone to syntax error due to the high recall.",
+        "localizador": "p. 7 do PDF, seção VI.C"
+      },
+      {
+        "trecho": "Fine-tuning pre-trained models is effective for many NLP tasks but is often resource-intensive, requiring costly and time-consuming task-specific labeled data.",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      },
+      {
+        "trecho": "Although we are focusing on a objective task with little to no opinion sourcing from the models, cultural and racial biases can occur given we are exposing the models to multi-lingual prompts.",
+        "localizador": "p. 8 do PDF, Acknowledgment"
+      },
+      {
+        "trecho": "A major limitation of this work lies in the reliance on word tokenization and pooled token embeddings, which introduces external dependencies and may not scale effectively to extremely low-resource languages where tokenizers are not readily available.",
+        "localizador": "p. 8 do PDF, seção VIII"
+      },
+      {
+        "trecho": "Human-evaluated results in table I show superior translation quality.",
+        "localizador": "p. 3 do PDF, seção III.A"
+      },
+      {
+        "trecho": "We then automatically identify function names in the code, replacing the function names in the MBPP test assertions with those from the model outputs, ensuring any function names would not affect the test results.",
+        "localizador": "p. 3 do PDF, seção III.C"
+      },
+      {
+        "trecho": "Since the applications we are focusing on are essentially user-centric in nature, a proper communication protocol should be established that can help clarify potential erratic behaviour of models, especially for low-resource languages.",
+        "localizador": "p. 8 do PDF, Acknowledgment"
+      },
+      {
+        "trecho": "It’s important to note that we classify a logical error not only when no valid code is generated but also when any of the test cases fail.",
+        "localizador": "p. 6 do PDF, seção VI.B"
+      },
+      {
+        "trecho": "Thus, given that LP consistently achieves the lowest LER across all languages and models, we consider this demonstrates the LP’s proficiency in helping with generating error-free code, particularly in linguistically diverse contexts.",
+        "localizador": "p. 7 do PDF, seção VI.C"
+      },
+      {
+        "trecho": "In contrast, BFT, a strong trivial baseline, tends to increase the TotalER due to hallucinations, as observed in our data analysis, despite slightly improving the all test cases passed metric.",
+        "localizador": "p. 6 do PDF, seção VI.A"
+      },
+      {
+        "trecho": "This improvement is especially pronounced in languages with complex syntax and morphology, such as Hindi (hi) and Russian (ru), where LP reduces the TotalER by over 10% in some cases compared to the original model.",
+        "localizador": "p. 6 do PDF, seção VI.A"
+      },
+      {
+        "trecho": "We achieve this using two linear projection layers as outlined in the above equations.",
+        "localizador": "p. 6 do PDF, seção V"
+      },
+      {
+        "trecho": "A single-layer projector already narrows most of the cross-lingual gap to within a 2-percentage-point range; this suggests that more complex projector architectures are unnecessary, as their potential accuracy gains are marginal while their memory and compute overheads would grow substantially.",
+        "localizador": "p. 7 do PDF, seção VII"
+      },
+      {
+        "trecho": "We assess the similarity of translations using the BLEU score [41], retaining translations that meet a quality threshold (e.g., 0.8) to create new training data.",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      },
+      {
+        "trecho": "In this method, we utilize a powerful LLM like ChatGPT to generate English programming problems and their answers.",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      },
+      {
+        "trecho": "We set the temperature to 0.8 for consistency and use two epochs.",
+        "localizador": "p. 5 do PDF, seção IV.C"
+      },
+      {
+        "trecho": "We showcase the limited effectiveness of traditional Chain-of-Thought method, as well as bootstrapping multilingual training data and fine-tuning LLMs to enhance code generation quality across multiple languages.",
+        "localizador": "p. 7 do PDF, seção VII"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "geracao",
+      "tecnica": "Chain-of-Thought with Back-Translation (CoT)",
+      "mecanismos": [
+        "instrucao",
+        "decomposicao"
+      ],
+      "mecanismos_acrescentados": [
+        "decomposicao"
+      ],
+      "comparador": "Original Prompt (Orig.)",
+      "modelo": "CodeLLaMa-7B (codellama/CodeLlama-7b-Instruct-hf)",
+      "benchmark": "MBPP sanitizado, split \"test\", enunciados traduzidos para espanhol (es)",
+      "metrica": "Total Error Rate (TotalER)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {
+        "baseline": 79.77,
+        "intervencao": 91.83
+      },
+      "denominador": "nao_informado (definido como «total number of samples»; o corpus tem 257 problemas, mas o estudo não liga explicitamente o denominador a esse número)",
+      "condicoes": "Geração de Python do zero, zero-shot; prompts das condições na Fig. 2(a). A métrica é definida como razão; a Tabela III imprime valores na escala 0-100 sem o símbolo %. Parâmetros de decodificação na inferência e número de execuções nao_informado. Qual modelo realiza a etapa de tradução do CoT não é declarado explicitamente (a p. 6 diz que CoT não depende de modelos externos). CoT não foi executado para en nem com GPT-4. Sem teste estatístico nem intervalo de confiança. conferido_pdf = sim: valores conferidos na imagem da p. 5 (Tabela III, linha Code LLaMa-7B / es, colunas TotalER Orig. e CoT; cabeçalho TotalER↓ e legenda conferidos).",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Não há principal declarado de prompting: a proposta do estudo (LP) é intervenção por embeddings aprendidos, fora do escopo, e CoT é apresentado como linha de base. Primeira tabela com contraste elegível de prompting: Tabela III (Orig. versus CoT); primeira métrica: TotalER; primeiro modelo listado (GPT-4) não tem a condição CoT, logo o primeiro modelo com o contraste é CodeLLaMa-7B; primeira linha de idioma com as duas condições: es (en não tem CoT). Não há agregado impresso. Sem outra técnica focal de prompting nem outra tarefa, ablação de prompting ou matriz de ingredientes para cobertura; por isso uma única extração.",
+      "derivacao": "direta",
+      "localizador": "p. 5 do PDF, Tabela III, bloco Code LLaMa-7B, linha es, colunas TotalER↓ Orig. e CoT; prompts na p. 4, Fig. 2(a); descrição na seção IV.B (pp. 4-5)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "es 79.77 91.83 81.71 81.71 28.8 56.81 26.07 24.9 50.97 35.02∗ 55.64 56.81 20.23 8.17 18.29 18.29",
+          "localizador": "p. 5 do PDF, Tabela III, bloco Code LLaMa-7B, linha es; colunas na ordem TotalER↓ (Orig., CoT, BFT, LP), LER↓ (Orig., CoT, BFT, LP), SER↓ (Orig., CoT, BFT, LP), ATPR↑ (Orig., CoT, BFT, LP)"
+        },
+        {
+          "trecho": "Our experiments, detailed in the second column of Table III, show that back-translation does not significantly improve results.",
+          "localizador": "p. 5 do PDF, seção IV.B"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "O objetivo (investigar a geração de código a partir de prompts multilíngues e reduzir a disparidade entre idiomas) e as contribuições estão explícitos no resumo e na introdução.",
+      "localizador": "p. 1 do PDF, resumo e introdução; p. 2, lista de contribuições"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "O pipeline de avaliação, o conjunto de dados, os modelos e os prompts de Orig. e CoT são descritos; faltam parâmetros de decodificação na inferência, número de execuções e o modelo que traduz no CoT, e há divergências de procedimento no BFT (limiar BLEU 0.8 versus 0.9; ChatGPT versus GPT-4) e no projetor (duas camadas versus camada única).",
+      "localizador": "p. 3 do PDF, seção III; pp. 4-5, seção IV e Fig. 2; p. 5, Algoritmo 1; pp. 6-7, seções V e VII"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "atende",
+      "justificativa": "A linha de base de prompt direto (Orig.) é executada nos mesmos modelos, idiomas e problemas que CoT, BFT e LP (Tabela III); GPT-4 é usado só como referência e CoT não é executado em inglês, o que o estudo deixa visível na tabela.",
+      "localizador": "p. 5 do PDF, Tabela III; p. 3, seção IV.A"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "TotalER, LER, SER e ATPR são definidos, mas a definição de LER muda entre as seções III.C e VI.B, o denominador («total number of samples») não é quantificado, CCR só aparece em gráfico sem critério de completude e várias afirmações narrativas não coincidem com a Tabela III; não há testes estatísticos.",
+      "localizador": "p. 3 do PDF, seção III.C; p. 6, seção VI.B; p. 7, Fig. 3 e seção VI.C; p. 5, Tabela III"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de limitações discute dependência de tokenizadores, desalinhamento dos embeddings, restrição a Python e à geração do zero, e o texto final aborda vieses; não discute não determinismo, contaminação, uso de um único benchmark nem efeito da tradução automática dos enunciados.",
+      "localizador": "p. 8 do PDF, seção VIII e Acknowledgment"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Há links para código e dados e identificadores HuggingFace dos modelos abertos; a versão do GPT-4, os parâmetros de decodificação, o número de execuções e detalhes do bootstrapping (número de tentativas) não são informados. O pacote não foi acessado nem validado.",
+      "localizador": "p. 2 do PDF, notas 2 e 3; p. 3, seção III.B e notas 5-7; p. 5, Algoritmo 1"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "Após leitura completa, o estudo não menciona possível presença do MBPP no pré-treinamento dos modelos nem a relação entre os 120 exemplos usados no treino do projetor e os 257 problemas de teste.",
+      "localizador": "texto completo; p. 2, seção III.A; p. 6, seção V"
+    }
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (resumo, seções I-VIII, agradecimentos e referências). Páginas do PDF abertas visualmente: p-02, p-03, p-04, p-05, p-06, p-07 e p-08. O PDF não traz numeração impressa de páginas; os localizadores usam a posição no arquivo."
+  }
+}

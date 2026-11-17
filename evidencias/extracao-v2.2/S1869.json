@@ -1,0 +1,481 @@
+{
+  "ficha": {
+    "estudo": "S1869",
+    "tarefas": ["depuracao"],
+    "tecnicas": [
+      {
+        "nome_original": "No Information (no-information baseline / no-info baseline)",
+        "mecanismos": ["instrucao"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 3 (impressa 819), seções III.D e IV.A; p. 4 (impressa 820), Tabela I (linha Baseline) e Tabela II (Baselines)",
+        "observacao": "Prompt de reparo sem nenhum componente de informação do ESLint, em configuração zero-shot com GPT-4 Turbo; `instrucao` corresponde ao cenário zero-shot declarado. O texto do prompt base não é reproduzido no artigo; o artigo não descreve explicitamente se e como o código defeituoso é inserido no prompt, por isso não se registrou `contexto` para a condição base. É a linha de base a partir da qual se calcula a eficiência 'Isolated' (ganho por token)."
+      },
+      {
+        "nome_original": "Isolated Use (cada um dos 12 componentes de informação do ESLint usado sozinho no prompt)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ1, item 1) e seção IV.A; p. 4 (impressa 820), Tabela I (colunas Isolated Use)",
+        "observacao": "Os 12 componentes (Rule ID, Rule Description, Rule Details, Error Messages, Rule Background, Linter Message, Fix Examples, ESLint URL, Rule Source link, Test Source link, Code Block, Node Type) são informação do relatório de análise estática fornecida ao modelo num único passo, sem retorno iterativo, por isso `contexto` e não `feedback`. `exemplos` está presente só na condição Fix Examples (padrões de reparo específicos); nas demais 11 condições os mecanismos são `instrucao` e `contexto`, e o acrescentado é só `contexto`. Contrafactual: cada condição com um componente contra a condição No Information, mantido o restante do prompt (ingrediente). O estudo não detalha o conteúdo de cada componente: afirma que «Each component is summarized in Table I», mas a Tabela I traz apenas nomes, tokens médios e resultados."
+      },
+      {
+        "nome_original": "All Information (full-information prompt / all-info baseline, com os 12 componentes)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ2, item 1); p. 4 (impressa 820), Tabela I (linha Baseline) e Tabela II (Baselines)",
+        "observacao": "Pacote com todos os 12 componentes (inclui Fix Examples, daí `exemplos`). Comparado com No Information na mesma tabela (pacote contra a condição sem ele); o ganho é do pacote e não de um componente. O valor da condição difere entre tabelas (0.526 na Tabela I e no texto como 0.5260; 0.5305 na Tabela II e no texto); ver heterogeneidade."
+      },
+      {
+        "nome_original": "Ablation (componentes de informação do ESLint retirados um a um do prompt completo)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": [],
+        "papel": "componente",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ2, item 1); p. 4 (impressa 820), Tabela I (colunas Ablation)",
+        "observacao": "Cada condição de ablação é o prompt All Information menos um componente; o contraste com All Information isola o componente no contexto dos demais (ingrediente). As condições sem Fix Examples não contêm `exemplos`. Não recebeu extração porque o alvo de três comparações foi atingido com técnicas focais."
+      },
+      {
+        "nome_original": "Synergy-based Optimal (Top 2 Ablation Importance: Node Type, Fix Examples)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ2, item 3); p. 4 (impressa 820), Tabela II e seção IV.B.2",
+        "observacao": "Combinação de dois componentes escolhidos pelo topo do ranking de importância na ablação; é a 'synergy-based combination' que o estudo propõe para validar a análise de sinergia. Comparada na Tabela II com No Information, All Information, componentes isolados e Naive Optimal. O contraste com No Information é de pacote (dois componentes juntos); o ganho não se atribui a um componente isolado."
+      },
+      {
+        "nome_original": "High-Synergy Pair (Rank Gap +: Fix Examples, Code Block)",
+        "mecanismos": ["instrucao", "contexto", "exemplos"],
+        "mecanismos_acrescentados": ["contexto", "exemplos"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 (impressa 820), Tabela II e seção IV.B.2",
+        "observacao": "Formulação própria avaliada em linha separada da Tabela II, apresentada como pareamento estratégico baseado em informação complementar; sustenta a afirmação do resumo de desempenho comparável a todos os componentes. O critério 'Rank Gap +' não é detalhado além do rótulo da tabela. Contraste com No Information é de pacote."
+      },
+      {
+        "nome_original": "Naive Optimal (Toxicity) (Top 2 Isolated Use: Linter Message, Rule Description)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ2, item 3); p. 4 (impressa 820), Tabela II e seção IV.B.2",
+        "observacao": "Combinação ingênua dos dois melhores componentes isolados, usada como comparador da combinação baseada em sinergia. Contraste com No Information na mesma tabela é de pacote."
+      },
+      {
+        "nome_original": "Redundant Pair (Toxicity) (Rank Gap -: Rule ID, Linter Message)",
+        "mecanismos": ["instrucao", "contexto"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "comparador",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 4 (impressa 820), Tabela II e seção IV.B.2",
+        "observacao": "Par apresentado como exemplo de interferência ('toxicity'); contraste com No Information na mesma tabela é de pacote."
+      }
+    ],
+    "componentes_fora_escopo": [],
+    "modelos": [
+      {
+        "nome": "GPT-4 Turbo (OpenAI)",
+        "versao": "nao_informado",
+        "observacao": "Snapshot, data de acesso e parâmetros de decodificação (temperatura, top-p, tamanho máximo) não informados; usado em zero-shot, sem ajuste fino.",
+        "localizador": "p. 2 (impressa 818), seção III.B"
+      }
+    ],
+    "benchmarks": [
+      {
+        "nome": "TFix (conjunto de teste)",
+        "versao": "nao_informado",
+        "quantidade": "10,504 casos de teste, cobrindo 52 tipos de erro do ESLint; o conjunto TFix completo contém «over 100K» pares bug-correção em JavaScript",
+        "observacao": "O estudo declara o uso do conjunto de teste completo, sem amostragem. A versão do ESLint usada para gerar os relatórios não é informada.",
+        "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seção III.D"
+      }
+    ],
+    "metricas": [
+      {
+        "nome": "CodeBLEU ('Score' na Tabela I; 'CodeBLEU' na Tabela II)",
+        "definicao": "similaridade que combina correspondência de n-gramas, n-gramas ponderados, AST e fluxo de dados; o estudo reconhece que não mede executabilidade nem aprovação em testes",
+        "denominador": "10,504 casos de teste declarados para o Isolated Use (seção III.D) e para as estratégias da Tabela II (seção IV.B.2); para as linhas de base No Information e All Information e para a ablação, o denominador não é afirmado explicitamente; não se informa se o CodeBLEU é calculado no nível do corpus ou como média por caso, nem como as 3 execuções são agregadas",
+        "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seção III.D; p. 4 (impressa 820), Tabelas I e II"
+      },
+      {
+        "nome": "Isolated Efficiency",
+        "definicao": "ganho de desempenho por token em relação à linha de base sem informação (ganho dividido pelo número médio de tokens do componente)",
+        "denominador": "Avg. Tokens do componente",
+        "localizador": "p. 3 (impressa 819), seção III.D (Experiments for RQ1, item 2); p. 4 (impressa 820), Tabela I"
+      },
+      {
+        "nome": "Ablation Efficiency",
+        "definicao": "queda de desempenho por token em relação à linha de base com toda a informação",
+        "denominador": "Avg. Tokens do componente",
+        "localizador": "p. 4 (impressa 820), legenda e colunas da Tabela I"
+      },
+      {
+        "nome": "Avg. Tokens",
+        "definicao": "número médio de tokens de cada componente; o tokenizador não é informado",
+        "denominador": "nao_informado",
+        "localizador": "p. 4 (impressa 820), Tabela I"
+      },
+      {
+        "nome": "Rank (Isolated Use e Ablation)",
+        "definicao": "posição do componente no ranking de desempenho isolado e de importância na ablação",
+        "denominador": "12 componentes",
+        "localizador": "p. 4 (impressa 820), Tabela I"
+      },
+      {
+        "nome": "Wilcoxon signed-rank test (p < 0.05, impresso com glifo corrompido)",
+        "definicao": "teste de significância declarado; nenhum valor-p ou resultado de teste é relatado para as comparações",
+        "denominador": "nao_informado",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      }
+    ],
+    "linguagens": [
+      {
+        "nome": "JavaScript",
+        "localizador": "p. 2 (impressa 818), seção III.B; p. 5 (impressa 821), seção V.D"
+      }
+    ],
+    "riscos": [
+      {
+        "categoria": "correcao_funcional",
+        "descricao": "A métrica CodeBLEU mede similaridade sintática e estrutural, não executabilidade nem aprovação em testes; os resultados não garantem que os reparos corrijam de fato os problemas, e o estudo propõe validação por testes como trabalho futuro.",
+        "localizador": "p. 2 (impressa 818), seção III.B; p. 5 (impressa 821), seções V.D e VI"
+      },
+      {
+        "categoria": "custo",
+        "descricao": "Uso de tokens e custo de API: relatórios completos do ESLint têm em média 2,300 tokens, com possível custo substancial de API em escala. O número médio de tokens por componente é quantificado (Tabela I), mas o custo monetário não é quantificado e os tokens das combinações da Tabela II não são informados.",
+        "localizador": "p. 1 (impressa 817), seção I; p. 4 (impressa 820), Tabela I; p. 5 (impressa 821), seção V.C"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Sobrecarga de informação e 'information toxicity': componentes úteis isoladamente podem degradar o desempenho (CodeBLEU) quando combinados com outros.",
+        "localizador": "p. 1 (impressa 817), seção I; p. 4 (impressa 820), seção IV.B"
+      },
+      {
+        "categoria": "nao_determinismo",
+        "descricao": "Geração estocástica do GPT-4, tratada pela repetição de cada experimento 3 vezes com sementes aleatórias diferentes.",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "categoria": "outro",
+        "descricao": "Generalização limitada: um único modelo (GPT-4 Turbo), uma linguagem (JavaScript), um analisador (ESLint) e um conjunto (TFix); o estudo afirma que a generalização requer validação adicional.",
+        "localizador": "p. 5 (impressa 821), seções V.B, V.D e VI"
+      }
+    ],
+    "mitigacoes": [
+      {
+        "descricao": "Repetição de cada experimento 3 vezes com sementes aleatórias diferentes para lidar com a geração estocástica; não se informa como as execuções são agregadas nem a variabilidade entre elas.",
+        "avaliada": "nao",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "descricao": "Uso do conjunto de teste completo do TFix (10,504 casos) para evitar viés de amostragem.",
+        "avaliada": "nao",
+        "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "descricao": "Teste de Wilcoxon signed-rank declarado para avaliar significância; nenhum resultado de teste é relatado.",
+        "avaliada": "nao",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "descricao": "Seleção de componentes baseada na análise de interação (Synergy-based Optimal, High-Synergy Pair) para evitar a interferência observada na combinação ingênua dos melhores componentes isolados; o desempenho em CodeBLEU é comparado com a combinação ingênua (Naive Optimal) na Tabela II.",
+        "avaliada": "sim",
+        "localizador": "p. 4 (impressa 820), Tabela II e seção IV.B.2"
+      },
+      {
+        "descricao": "Seleção estratégica de componentes como forma de reduzir o uso de tokens (custo) mantendo desempenho comparável a todos os componentes; a redução de tokens das combinações não é medida nem relatada.",
+        "avaliada": "nao",
+        "localizador": "p. 1 (impressa 817), Resumo; p. 4 (impressa 820), seção IV.B.2; p. 5 (impressa 821), seções V.C e VII"
+      }
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {
+        "descricao": "O valor da condição All Information diverge entre tabelas e texto: 0.526 na linha Baseline da Tabela I e 0.5260 no texto (seção IV.B.1), contra 0.5305 na Tabela II e no texto da seção IV.B.2 («full 12-component performance (0.5305)»). A diferença não é explicada.",
+        "localizador": "p. 4 (impressa 820), Tabela I (linha Baseline), Tabela II (Baselines), seções IV.B.1 e IV.B.2"
+      },
+      {
+        "descricao": "O valor da condição No Information é impresso como 0.444 (Tabela I e texto da seção IV.A) e 0.4436 (Tabela II); a diferença é compatível com arredondamento, mas a precisão difere entre tabelas.",
+        "localizador": "p. 3 (impressa 819), seção IV.A; p. 4 (impressa 820), Tabelas I e II"
+      },
+      {
+        "descricao": "Aparente inconsistência na ablação: 8 dos 12 escores de ablação (por exemplo, Rule Description 0.5282, Rule Background 0.5281, Code Block 0.5280) superam o All Information de 0.526 da Tabela I, o que corresponderia a aumento ao retirar o componente, embora a Ablation Efficiency seja definida como «performance drop per token vs. all-info baseline» e impressa sempre não negativa. Cálculo próprio: as eficiências de ablação são compatíveis com a base de 0.5305 (por exemplo, Rule ID (0.5305 − 0.5268)/13.6 ≈ 0.0003; Linter Message (0.5305 − 0.5248)/29.2 ≈ 0.0002), não com 0.526. O estudo não informa qual valor de base usou; não se escolhe um como verdadeiro.",
+        "localizador": "p. 4 (impressa 820), Tabela I (legenda, colunas Ablation e Efficiency, linha Baseline)"
+      },
+      {
+        "descricao": "Número de execuções da ablação ambíguo: o procedimento diz que cada experimento foi repetido 3 vezes, mas a contagem de chamadas da ablação (126,048 = 10,504 × 12, cálculo próprio) corresponde a uma chamada por ablação por caso. A soma das contagens declaradas (378,144 + 126,048 = 504,192, cálculo próprio) é compatível com «over 500,000», mas o artigo não especifica as chamadas das linhas de base nem das combinações da Tabela II.",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "descricao": "O teste de Wilcoxon signed-rank é declarado, mas nenhum valor-p, estatística ou indicação de significância é relatado para qualquer contraste; não há medidas de variabilidade entre as 3 execuções.",
+        "localizador": "p. 3 (impressa 819), seção III.D; p. 4 (impressa 820), Tabelas I e II"
+      },
+      {
+        "descricao": "Inversões relatadas pelo estudo: a combinação Naive Optimal (Linter Message, Rule Description) obteve 0.5003 e o Redundant Pair (Rule ID, Linter Message) 0.5010, ambos abaixo de Linter Message isolado (0.5053).",
+        "localizador": "p. 4 (impressa 820), Tabela II e seção IV.B.2"
+      },
+      {
+        "descricao": "O título da subseção fala em «Superiority of Synergy-based Combination», mas a Synergy-based Optimal (0.5134) fica abaixo de All Information (0.5305) e do High-Synergy Pair (0.5279) na mesma tabela; a afirmação do resumo de desempenho comparável a todos os componentes se apoia no High-Synergy Pair.",
+        "localizador": "p. 1 (impressa 817), Resumo; p. 4 (impressa 820), Tabela II e seção IV.B.2"
+      },
+      {
+        "descricao": "As afirmações de redução de tokens das combinações («substantially fewer tokens», «reducing token usage») não são acompanhadas do número de tokens das combinações; só a Tabela I traz tokens médios por componente.",
+        "localizador": "p. 1 (impressa 817), Resumo; p. 4 (impressa 820), seção IV.B.2 e Tabelas I e II"
+      },
+      {
+        "descricao": "O estudo qualifica os próprios achados como preliminares e usa apenas CodeBLEU, que não mede correção funcional.",
+        "localizador": "p. 1-2 (impressas 817-818), seção I; p. 5 (impressa 821), seção V.D"
+      }
+    ],
+    "observacoes": [
+      {
+        "descricao": "O texto do prompt (instrução de reparo, formato e posição dos componentes e do código) não é reproduzido; o conteúdo de cada componente não é descrito além do nome.",
+        "localizador": "p. 3 (impressa 819), seção III.C; p. 4 (impressa 820), Tabela I"
+      },
+      {
+        "descricao": "O TFix original (T5 ajustado em 52 tipos de erro) é citado só como trabalho relacionado; não é executado como comparador.",
+        "localizador": "p. 2 (impressa 818), seção II.B"
+      },
+      {
+        "descricao": "Recomendações práticas do estudo: priorizar componentes de alta eficiência (Linter Message, Rule ID), combinar informação estrutural abstrata com exemplos concretos e avaliar componentes verbosos contra restrições de orçamento.",
+        "localizador": "p. 5 (impressa 821), seção V.C"
+      },
+      {
+        "descricao": "Não há menção a pacote de replicação, código ou prompts disponibilizados.",
+        "localizador": "texto completo (p. 1-5, impressas 817-821)"
+      }
+    ],
+    "citacoes": [
+      {
+        "trecho": "This paper presents an empirical analysis of 12 ESLint information components’ impact on GPT-4 Turbo’s repair performance.",
+        "localizador": "p. 1 (impressa 817), Resumo"
+      },
+      {
+        "trecho": "We measure the repair performance (CodeBLEU) of each of the 12 information components when used alone in the prompt across all 10,504 test cases.",
+        "localizador": "p. 3 (impressa 819), seção III.D, Experiments for RQ1, item 1"
+      },
+      {
+        "trecho": "We measure the change in performance when a single component is removed from a full prompt containing all 12 components.",
+        "localizador": "p. 3 (impressa 819), seção III.D, Experiments for RQ2, item 1"
+      },
+      {
+        "trecho": "We compare the actual performance of a combination of the best individual components (naive optimal combination) against a combination of components predicted to have the highest synergy (synergy-based combination) to validate our synergy analysis.",
+        "localizador": "p. 3 (impressa 819), seção III.D, Experiments for RQ2, item 3"
+      },
+      {
+        "trecho": "All experiments were conducted in a zero-shot setting without any additional fine-tuning.",
+        "localizador": "p. 2 (impressa 818), seção III.B"
+      },
+      {
+        "trecho": "It was followed by Rule Description (0.5013) and Fix Examples (0.4997), indicating that both general explanations and specific repair patterns contribute to performance.",
+        "localizador": "p. 3 (impressa 819), seção IV.A.1"
+      },
+      {
+        "trecho": "The ’High-Synergy Pair’ combining Fix Examples with Code Block achieved 0.5279, reaching 99.5% of the full 12-component performance (0.5305) while using substantially fewer tokens.",
+        "localizador": "p. 4 (impressa 820), seção IV.B.2"
+      },
+      {
+        "trecho": "While CodeBLEU provides comprehensive syntactic and structural assessment, we acknowledge it does not measure actual executability or test-passing rates.",
+        "localizador": "p. 2 (impressa 818), seção III.B"
+      },
+      {
+        "trecho": "Third, beyond syntactic similarity, future research should integrate test-based validation to ensure repairs actually fix the underlying issues.",
+        "localizador": "p. 5 (impressa 821), seção VI"
+      },
+      {
+        "trecho": "This leads to three critical problems: inefficiency (full ESLint reports average 2,300 tokens, potentially incurring substantial API costs at scale), information overload (prior work shows excessive information can degrade LLM performance in certain scenarios [11]), and missed optimization opportunities through ’information toxicity,’ where useful components degrade performance when combined.",
+        "localizador": "p. 1 (impressa 817), seção I"
+      },
+      {
+        "trecho": "Each experiment was repeated 3 times with different random seeds to account for GPT-4’s stochastic generation.",
+        "localizador": "p. 3 (impressa 819), seção III.D"
+      },
+      {
+        "trecho": "The dataset is divided into training and test sets, with our experiments conducted on the complete test set of 10,504 cases to ensure comprehensive evaluation without sampling bias.",
+        "localizador": "p. 2 (impressa 818), seção III.B"
+      },
+      {
+        "trecho": "Our experiments were conducted on GPT-4 Turbo with JavaScript code from the TFix dataset, focusing on ESLint violations.",
+        "localizador": "p. 5 (impressa 821), seção V.D"
+      },
+      {
+        "trecho": "The generalizability to other contexts requires further validation.",
+        "localizador": "p. 5 (impressa 821), seção V.D"
+      },
+      {
+        "trecho": "This requires 12 additional API calls per test case (one for each ablation), totaling 126,048 calls for the complete test dataset.",
+        "localizador": "p. 3 (impressa 819), seção III.D, Experiments for RQ2, item 1"
+      },
+      {
+        "trecho": "While useful in isolation (ranked 2nd), it showed minimal impact when removed from the full context (ranked 12th in ablation importance), with ablation score (0.5282) nearly identical to the full-information baseline (0.5260).",
+        "localizador": "p. 3-4 (impressas 819-820), seção IV.B.1"
+      },
+      {
+        "trecho": "The ’Naive Optimal’ strategy, combining the top two isolated components—Linter Message and Rule Description—achieved a CodeBLEU score of 0.5003, which is 0.005 lower than Linter Message alone (0.5053).",
+        "localizador": "p. 4 (impressa 820), seção IV.B.2"
+      },
+      {
+        "trecho": "(3) Strategic component selection based on interaction analysis can achieve comparable performance to using all components while reducing token usage.",
+        "localizador": "p. 1 (impressa 817), Resumo"
+      }
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Isolated Use (componente Rule ID)",
+      "mecanismos": ["instrucao", "contexto"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "No Information",
+      "modelo": "GPT-4 Turbo (OpenAI; versão nao_informado)",
+      "benchmark": "TFix, conjunto de teste (10,504 casos, 52 tipos de erro do ESLint, JavaScript)",
+      "metrica": "CodeBLEU ('Score' da coluna Isolated Use na Tabela I)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.444, "intervencao": 0.4956},
+      "denominador": "10,504 casos de teste declarados para o Isolated Use; para a linha de base No Information o denominador não é afirmado explicitamente",
+      "condicoes": "Zero-shot, sem ajuste fino; cada experimento repetido 3 vezes com sementes diferentes (agregação das execuções não informada); temperatura e demais parâmetros de decodificação não informados; Rule ID usa em média 13.6 tokens. O valor de No Information aparece como 0.444 na Tabela I e 0.4436 na Tabela II. Teste de Wilcoxon declarado, sem valor-p relatado para este contraste. CodeBLEU não mede correção funcional. conferido_pdf: valores, cabeçalhos e legenda conferidos na imagem da p. 4.",
+      "selecao": "desempate_ordem",
+      "selecao_motivo": "Sem principal declarado: o resumo e as contribuições destacam vários achados e técnicas (componentes isolados, interações, seleção estratégica de componentes) sem que uma técnica e um comparador prevaleçam. A primeira tabela com contraste elegível de prompting é a Tabela I; primeira métrica pertinente: Score (CodeBLEU) do Isolated Use; único modelo, GPT-4 Turbo; primeira linha de base listada na linha Baseline: No Information; primeira linha da tabela: Rule ID.",
+      "derivacao": "direta",
+      "localizador": "p. 4 (impressa 820), Tabela I, linha Rule ID (colunas Isolated Use Score) e linha Baseline (CodeBLEU)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "Rule ID 13.6 0.4956 5 0.5268 6 0.0038 0.0003",
+          "localizador": "p. 4 (impressa 820), Tabela I, linha Rule ID; colunas Component, Avg. Tokens, Isolated Use Score, Isolated Use Rank, Ablation Score, Ablation Rank, Efficiency Isolated, Efficiency Ablation"
+        },
+        {
+          "trecho": "Baseline (CodeBLEU) No Information: 0.444 All Information: 0.526",
+          "localizador": "p. 4 (impressa 820), Tabela I, linha Baseline"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "Synergy-based Optimal (Top 2 Ablation Importance: Node Type, Fix Examples)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "No Information",
+      "modelo": "GPT-4 Turbo (OpenAI; versão nao_informado)",
+      "benchmark": "TFix, conjunto de teste (10,504 casos, 52 tipos de erro do ESLint, JavaScript)",
+      "metrica": "CodeBLEU (Tabela II)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.4436, "intervencao": 0.5134},
+      "denominador": "10,504 casos de teste («across all 10,504 test cases», seção IV.B.2)",
+      "condicoes": "Zero-shot, sem ajuste fino; número de execuções para as combinações da Tabela II não informado especificamente (o procedimento geral fala em 3 repetições); tokens da combinação não informados. Comparador escolhido como a primeira linha de base de prompting listada na Tabela II; o estudo, na narrativa, contrasta a combinação com Naive Optimal (0.5003), com os componentes isolados (Node Type 0.4624, Fix Examples 0.4997) e com All Information (0.5305, valor que difere de 0.526 na Tabela I). Contraste de pacote: o resultado é da combinação de dois componentes, não de um componente isolado. Sem valor-p relatado. conferido_pdf: valores e rótulos conferidos na imagem da p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Técnica focal de prompting ainda não representada (combinação baseada em sinergia proposta pelo estudo); pela regra de ordem, primeira tabela com o contraste (Tabela II), métrica CodeBLEU, único modelo e primeira linha de base listada (No Information).",
+      "derivacao": "direta",
+      "localizador": "p. 4 (impressa 820), Tabela II, linhas No Information e Synergy-based Optimal",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "No Information 0.4436",
+          "localizador": "p. 4 (impressa 820), Tabela II, bloco Baselines; colunas Components, CodeBLEU"
+        },
+        {
+          "trecho": "Synergy-based Optimal (Top 2 Ablation Importance) Node Type, Fix Examples 0.5134",
+          "localizador": "p. 4 (impressa 820), Tabela II, bloco Combination Strategy Analysis; colunas Combination Strategy, Components, CodeBLEU"
+        },
+        {
+          "trecho": "The ’Synergy-based Optimal’ combination of Node Type and Fix Examples—the top two components by ablation importance—achieved a score of 0.5134.",
+          "localizador": "p. 4 (impressa 820), seção IV.B.2"
+        }
+      ]
+    },
+    {
+      "tarefa": "depuracao",
+      "tecnica": "High-Synergy Pair (Rank Gap +: Fix Examples, Code Block)",
+      "mecanismos": ["instrucao", "contexto", "exemplos"],
+      "mecanismos_acrescentados": ["contexto", "exemplos"],
+      "comparador": "No Information",
+      "modelo": "GPT-4 Turbo (OpenAI; versão nao_informado)",
+      "benchmark": "TFix, conjunto de teste (10,504 casos, 52 tipos de erro do ESLint, JavaScript)",
+      "metrica": "CodeBLEU (Tabela II)",
+      "sentido": "maior_melhor",
+      "unidade": "proporcao",
+      "resultado": {"baseline": 0.4436, "intervencao": 0.5279},
+      "denominador": "10,504 casos de teste («across all 10,504 test cases», seção IV.B.2)",
+      "condicoes": "Zero-shot, sem ajuste fino; número de execuções para as combinações não informado especificamente; tokens da combinação não informados, apesar da afirmação de «substantially fewer tokens». O estudo relata que o par atinge 99.5% do desempenho com os 12 componentes (0.5305). Critério 'Rank Gap +' não detalhado. Contraste de pacote. Sem valor-p relatado. conferido_pdf: valores e rótulos conferidos na imagem da p. 4.",
+      "selecao": "cobertura",
+      "selecao_motivo": "Variante que o estudo apresenta como formulação própria e avalia em linha separada da Tabela II, tratada como técnica focal distinta ainda não representada; mesma regra de ordem (Tabela II, CodeBLEU, único modelo, primeira linha de base listada: No Information).",
+      "derivacao": "direta",
+      "localizador": "p. 4 (impressa 820), Tabela II, linhas No Information e High-Synergy Pair",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {
+          "trecho": "No Information 0.4436",
+          "localizador": "p. 4 (impressa 820), Tabela II, bloco Baselines; colunas Components, CodeBLEU"
+        },
+        {
+          "trecho": "High-Synergy Pair (Rank Gap +) Fix Examples, Code Block 0.5279",
+          "localizador": "p. 4 (impressa 820), Tabela II, bloco Combination Strategy Analysis; colunas Combination Strategy, Components, CodeBLEU"
+        },
+        {
+          "trecho": "The ’High-Synergy Pair’ combining Fix Examples with Code Block achieved 0.5279, reaching 99.5% of the full 12-component performance (0.5305) while using substantially fewer tokens.",
+          "localizador": "p. 4 (impressa 820), seção IV.B.2"
+        }
+      ]
+    }
+  ],
+  "qualidade": [
+    {
+      "criterio": "objetivo",
+      "julgamento": "atende",
+      "justificativa": "Duas questões de pesquisa explícitas sobre a contribuição individual e a eficiência por token de cada componente (RQ1) e sobre as interações entre componentes (RQ2).",
+      "localizador": "p. 1 (impressa 817), seção I; p. 2 (impressa 818), seção III.A"
+    },
+    {
+      "criterio": "procedimento",
+      "julgamento": "parcial",
+      "justificativa": "Os experimentos (uso isolado, ablação, comparação de combinações), o conjunto, o modelo e as 3 repetições são descritos, mas o texto do prompt e o conteúdo dos componentes não são apresentados, os parâmetros de decodificação não são informados e o número de execuções da ablação é ambíguo (126,048 chamadas correspondem a uma execução).",
+      "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seções III.C e III.D"
+    },
+    {
+      "criterio": "comparador",
+      "julgamento": "parcial",
+      "justificativa": "Há linhas de base executadas (No Information, All Information) e comparador para a combinação proposta (Naive Optimal), mas o valor de All Information diverge entre tabelas (0.526 e 0.5305) e não há comparação com outras abordagens de reparo.",
+      "localizador": "p. 4 (impressa 820), Tabelas I e II"
+    },
+    {
+      "criterio": "metricas",
+      "julgamento": "parcial",
+      "justificativa": "Uma única métrica de similaridade (CodeBLEU), que o próprio estudo reconhece não medir correção funcional; denominador de 10,504 casos declarado para uso isolado e combinações, mas não para as linhas de base e a ablação; valores da mesma condição diferem entre tabelas (All Information 0.526 e 0.5305); teste de Wilcoxon declarado sem resultados.",
+      "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seção III.D; p. 4 (impressa 820), Tabelas I e II"
+    },
+    {
+      "criterio": "ameacas",
+      "julgamento": "parcial",
+      "justificativa": "A seção de ameaças trata da generalização (um modelo, JavaScript, ESLint, TFix) e da limitação do CodeBLEU, mas não discute contaminação, variabilidade entre execuções, versão do modelo nem a divergência de valores entre tabelas.",
+      "localizador": "p. 5 (impressa 821), seção V.D"
+    },
+    {
+      "criterio": "reprodutibilidade",
+      "julgamento": "parcial",
+      "justificativa": "Conjunto público, modelo nomeado, número de repetições e métrica informados; faltam o texto dos prompts, a versão do modelo, os parâmetros de decodificação, a versão do ESLint e qualquer pacote de replicação.",
+      "localizador": "p. 2 (impressa 818), seção III.B; p. 3 (impressa 819), seção III.D; texto completo (p. 1-5)"
+    },
+    {
+      "criterio": "contaminacao",
+      "julgamento": "nao_informado",
+      "justificativa": "O estudo não menciona o risco de o conjunto TFix (público, de 2021) estar presente no pré-treinamento do GPT-4 Turbo nem qualquer controle.",
+      "localizador": "texto completo (p. 1-5, impressas 817-821)"
+    }
+  ],
+  "leitura": "completa; texto extraído lido inteiro; páginas do PDF abertas visualmente: p-01, p-02, p-03, p-04 (Tabelas I e II) e p-05"
+}

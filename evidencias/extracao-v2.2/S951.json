@@ -1,0 +1,202 @@
+{
+  "estudo": "S951",
+  "texto_fonte": "fontes/textos/lote/S951.txt",
+  "executor": "Claude Code (subagente)",
+  "modelo_executor": "Claude Opus 5.5",
+  "data": "2026-11-16",
+  "prompt_versao": "ex-v2.2",
+  "ficha": {
+    "tarefas": ["traducao"],
+    "tecnicas": [
+      {
+        "nome_original": "baseline prompt template without any enhancements (Baseline)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": [],
+        "papel": "comparador",
+        "avaliada_isoladamente": "nao",
+        "tipo_contrafactual": "nenhum",
+        "localizador": "p. 4, seção IV.A (Translation Setup); p. 11, Tabela VII (linha Baseline)",
+        "observacao": "Prompt zero-shot com instruções em linguagem natural, linguagem de origem, linguagem de destino, código-fonte completo e «necessary constraints» para qualidade básica. É a única condição executada nas RQ1–RQ3 (sem comparador nessas questões) e é o comparador das estratégias de mitigação na RQ4 (Tabela VII). O texto das restrições e do prompt não é reproduzido no artigo."
+      },
+      {
+        "nome_original": "naive security-aware approach (Naive Prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["restricoes"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "ingrediente",
+        "localizador": "p. 10, seção V.D; p. 11, Tabela VII (linhas Naive Prompt e Change)",
+        "observacao": "Uma das duas estratégias de mitigação que a RQ4 investiga («prompt-engineering techniques»); o estudo a descreve como prompt padrão de tradução acrescido de requisitos explícitos de segurança (genéricos), comparada com o Baseline na Tabela VII. O ingrediente acrescentado (requisitos de segurança, instruindo a preservar a correção funcional e evitar padrões comuns de vulnerabilidade) foi classificado como restricoes de segurança; também tem caráter de diretriz (instrucao), categoria já presente no prompt base. O texto do prompt não é reproduzido."
+      },
+      {
+        "nome_original": "Retrieval-Augmented Generation (RAG)-based mitigation strategy (RAG Prompt)",
+        "mecanismos": ["instrucao", "contexto", "restricoes"],
+        "mecanismos_acrescentados": ["contexto"],
+        "papel": "focal",
+        "avaliada_isoladamente": "sim",
+        "tipo_contrafactual": "pacote",
+        "localizador": "p. 10–11, seção V.D e Fig. 8; p. 11, Tabela VII (linhas RAG Prompt e Change)",
+        "observacao": "Proposta de mitigação do estudo. Recupera, por similaridade de cosseno entre embeddings (all-MiniLM-L6-v2), os três casos de código vulnerável mais semelhantes (limiar 0,5) de uma base de relatórios de análise de vulnerabilidade escritos manualmente e insere no prompt uma seção «Security Considerations» com tipos de vulnerabilidade, avaliação de severidade e relatórios, junto com o código-fonte e os requisitos de tradução. O contraste com o Baseline isola o pacote (recuperação + seção de segurança), não um ingrediente. O artigo não diz se o código dos casos recuperados entra no prompt (por isso exemplos não foi marcado) nem se os requisitos do Naive Prompt são mantidos. RAG e Naive diferem em mais de um ingrediente."
+      }
+    ],
+    "componentes_fora_escopo": [
+      {
+        "nome_original": "unified configuration (Temperature 0, Max tokens 8,192, Top-p 1)",
+        "natureza": "decodificacao",
+        "descricao": "Configuração de decodificação fixa para todas as tarefas de tradução executadas pelas APIs oficiais; não é comparada entre condições. O artigo não diz explicitamente se a mesma configuração foi usada na RQ4.",
+        "localizador": "p. 4, seção IV.A (Translation Setup)"
+      }
+    ],
+    "modelos": [
+      {"nome": "GPT4omini", "versao": "nao_informado (Tabela II informa release 2024-07, ~80B, MoE, fechado)", "localizador": "p. 4, Tabela II"},
+      {"nome": "GPT4o", "versao": "nao_informado (Tabela II informa release 2024-05, ~200B, Dense, fechado)", "localizador": "p. 4, Tabela II"},
+      {"nome": "DeepSeekV3-0324", "versao": "0324 (release 2025-03, 671B, MoE, aberto); na Tabela VII aparece como «DeepseekV3», sem sufixo", "localizador": "p. 4, Tabela II; p. 11, Tabela VII"},
+      {"nome": "Qwen2.5MaX-0125", "versao": "0125 (release 2025-01, ~670B, MoE, fechado)", "localizador": "p. 4, Tabela II"},
+      {"nome": "Qwen2.5Coder", "versao": "nao_informado (Tabela II informa release 2024-11, 32B, Code, aberto)", "localizador": "p. 4, Tabela II"},
+      {"nome": "DeepSeek-R1", "versao": "nao_informado", "papel_no_estudo": "árbitro do sistema LLM-as-a-judge exploratório, não usado nos resultados principais", "localizador": "p. 5, seção IV.B"},
+      {"nome": "all-MiniLM-L6-v2", "versao": "nao_informado", "papel_no_estudo": "sentence transformer pré-treinado usado para gerar embeddings na recuperação da RAG", "localizador": "p. 10–11, seção V.D"}
+    ],
+    "benchmarks": [
+      {"nome": "STED dataset (corpus próprio de amostras de código relacionadas a segurança)", "quantidade": "720 amostras (480 patched, 240 vulnerable); 1,200 tarefas de tradução por LLM; 6,000 instâncias de tradução no total", "observacao": "88,9% de repositórios reais e 11,1% construídas por pesquisadores; nove CWEs; cinco pares de tradução (Java→Python, Java→Go, PHP→Python, PHP→Go, C/C++→Rust). Denominadores: VIR sobre amostras patched (N_p) e VPR sobre amostras vulneráveis (N_v), conforme Eq. 2–3.", "localizador": "p. 3–4, seção III.B e Tabela I; p. 4, seção IV.A; p. 5, seção IV.C"},
+      {"nome": "conjunto da RQ4 (avaliação de VIR das estratégias de mitigação)", "quantidade": "67 security-centric code samples", "observacao": "Critério de seleção, pares de linguagem e relação com o corpus de 720 amostras e com a base de conhecimento da RAG: nao_informado.", "localizador": "p. 11, seção V.D"},
+      {"nome": "conjunto separado da RQ4 para FCR", "quantidade": "67 samples", "observacao": "Conjunto distinto do usado para VIR; critério de seleção nao_informado.", "localizador": "p. 11, seção V.D"},
+      {"nome": "conjunto de teste das ferramentas automáticas", "quantidade": "60 Python samples", "localizador": "p. 4, seção IV.B, Tabela III"},
+      {"nome": "casos de erro analisados na RQ2", "quantidade": "1,549 error cases", "localizador": "p. 8, seção V.B"},
+      {"nome": "estudo com desenvolvedores (RQ3)", "quantidade": "30 participantes; oito amostras de tradução", "localizador": "p. 9–10, seção V.C"}
+    ],
+    "metricas": [
+      {"nome": "Functional Correctness Rate (FCR)", "localizador": "p. 5, Eq. 1"},
+      {"nome": "Vulnerability Introduction Rate (VIR)", "localizador": "p. 5, Eq. 2"},
+      {"nome": "Vulnerability Preservation Rate (VPR)", "localizador": "p. 5, Eq. 3"},
+      {"nome": "Precision, Recall, F1 Score (avaliação de ferramentas de detecção)", "localizador": "p. 4, Tabela III"},
+      {"nome": "Detection Accuracy e Average Time (estudo com desenvolvedores)", "localizador": "p. 10, Fig. 7"},
+      {"nome": "frequência percentual de padrões de tradução vulnerável por CWE", "localizador": "p. 8, Tabela VI"}
+    ],
+    "linguagens": [
+      {"origem": ["Java", "PHP", "C", "C++ (analisadas como C/C++)"], "destino": ["Python", "Go", "Rust"], "localizador": "p. 3, seção III.A; p. 4, seção IV.A"}
+    ],
+    "riscos": [
+      {"categoria": "seguranca", "descricao": "Tradução por LLM introduz novas vulnerabilidades: VIR total de 28,6% a 45,0% entre os cinco modelos (Tabela IV).", "localizador": "p. 1, Abstract; p. 6, Tabela IV"},
+      {"categoria": "seguranca", "descricao": "Vulnerabilidades do código de origem são preservadas na tradução: VPR total de 61,4% a 71,9% (Tabela IV).", "localizador": "p. 6, Tabela IV"},
+      {"categoria": "correcao_funcional", "descricao": "Parte das traduções não preserva equivalência funcional (FCR total de 57,1% a 68,0%, Tabela IV); na RQ4, as estratégias de mitigação reduzem a FCR em relação ao Baseline (Tabela VII), que o estudo descreve como trade-off.", "localizador": "p. 6, Tabela IV; p. 11, Tabela VII e seção V.D"},
+      {"categoria": "contaminacao", "descricao": "Possível vazamento de dados: alguns LLMs podem ter sido treinados com o código-fonte das amostras coletadas. O estudo argumenta que os modelos não teriam acesso às traduções corretas; o argumento não é testado.", "localizador": "p. 11, seção VI.A"},
+      {"categoria": "outro", "descricao": "Vulnerabilidades em código traduzido são difíceis de detectar por desenvolvedores: acurácia de detecção de 31,3% (junior) a 67,2% (senior) na Fig. 7; 90% dos participantes as apontam como as mais difíceis de verificar.", "localizador": "p. 10, seção V.C, Fig. 7 e Finding 5"}
+    ],
+    "mitigacoes": [
+      {"descricao": "Naive security-aware prompt (requisitos explícitos de segurança no prompt), comparado ao Baseline na Tabela VII.", "avaliada": "sim", "localizador": "p. 10–11, seção V.D, Tabela VII"},
+      {"descricao": "Prompt com RAG sobre base de relatórios de vulnerabilidade escritos manualmente, comparado ao Baseline e ao Naive Prompt na Tabela VII.", "avaliada": "sim", "localizador": "p. 10–11, seção V.D, Tabela VII"},
+      {"descricao": "Temperatura fixa em 0 para eliminar aleatoriedade da saída (controle de não determinismo, sem comparação).", "avaliada": "nao", "localizador": "p. 4, seção IV.A"},
+      {"descricao": "Avaliação humana por dois pesquisadores independentes, terceiro pesquisador em caso de discordância e reexame de 10% dos casos (controle de qualidade da avaliação, sem comparação).", "avaliada": "nao", "localizador": "p. 5, seção IV.B"},
+      {"descricao": "Argumento contra efeito de vazamento de dados (modelos sem acesso às traduções corretas; erros frequentes em APIs de segurança), sem teste.", "avaliada": "nao", "localizador": "p. 11, seção VI.A"}
+    ],
+    "sem_comparador": "nao",
+    "so_classificadas": [],
+    "heterogeneidade": [
+      {"descricao": "Na Tabela VII, o Baseline tem VIR = 100.0% e FCR = 100.0% para os dois modelos, e as linhas «Change» equivalem a 100 menos o valor da estratégia. O artigo não explica se os conjuntos de 67 amostras foram selecionados entre casos em que o Baseline introduziu vulnerabilidade (VIR) ou foi funcionalmente correto (FCR), ou se os valores estão normalizados. Por isso a redução de «32.8%» não pode ser classificada como p.p. ou variação relativa sobre uma VIR comparável à da Tabela IV (VIR total de GPT4omini = 45.0%).", "localizador": "p. 11, Tabela VII; p. 6, Tabela IV"},
+      {"descricao": "VIR e FCR da Tabela VII vêm de dois conjuntos diferentes de 67 amostras («a separate set of 67 samples»), de modo que o trade-off segurança–funcionalidade compara populações distintas.", "localizador": "p. 11, seção V.D"},
+      {"descricao": "Convenção de sinal da linha «Change» da Tabela VII: queda de VIR aparece como positiva (+25.4%, +32.8%) e queda de FCR como negativa (-10.4%, -14.9%). A prosa diz que a RAG resultou em «a further decline in FCR to 14.9% and 11.9%», enquanto a tabela traz FCR de 85.1% e 88.1% (14.9 e 11.9 são as variações).", "localizador": "p. 11, Tabela VII e texto da seção V.D"},
+      {"descricao": "O resumo e as contribuições citam a redução de 32.8% sem indicar que ela é de GPT4omini; para DeepseekV3 a Tabela VII traz +33.3%. A RQ4 usa só dois modelos.", "localizador": "p. 1, Abstract; p. 2, contribuições; p. 11, Tabela VII"},
+      {"descricao": "Narrativa da RQ1 informa média de VIR = 30.5% para Qwen2.5Max, DeepseekV3 e GPT4o; cálculo próprio com os totais da Tabela IV (28.6, 34.2, 34.8) dá cerca de 32.5%. As médias de FCR (66.6%) e VPR (62.1%) coincidem com o cálculo próprio. Aparente inconsistência.", "localizador": "p. 6, seção V.A e Tabela IV"},
+      {"descricao": "A narrativa diz que CWE-79 tem «the lowest FCR (48.3–61.7%)», mas na Tabela V a FCR de CWE-79 para Qwen2.5Coder é 43.3, fora do intervalo citado.", "localizador": "p. 6, seção V.A; p. 7, Tabela V"},
+      {"descricao": "Na Tabela VI, subtotais de categoria não batem com a soma das subcategorias (cálculo próprio): CWE-20, categoria 1 = 51.8 vs. 50.8 (25.4+7.0+17.5+0.9); CWE-79, categoria 1 = 27.2 vs. 28.9; coluna Total, categoria 1 = 34.9 vs. 34.3; CWE-416, categoria 4 = 77.4 vs. 78.2. As diferenças excedem o esperado por arredondamento de uma casa decimal.", "localizador": "p. 8, Tabela VI"},
+      {"descricao": "A RQ3 afirma que «16.7% of translated cases introduced vulnerabilities (shown in Table V)» na migração C para Rust, mas a Tabela V é organizada por CWE e modelo, sem coluna C/C++→Rust; na Tabela IV a VIR média de C/C++→Rust é 18.2 (16.7 aparece para GPT4o). Os 58.3% de traduções que não aplicaram mecanismos de segurança do Rust e a VIR de 0% para código só seguro não têm tabela de origem.", "localizador": "p. 9, seção V.C; p. 6, Tabela IV; p. 7, Tabela V"},
+      {"descricao": "A narrativa diz que todos os modelos exibem correlação positiva entre frequência de erros e complexidade, mas na Fig. 3 GPT4omini tem 14.6 (simple) e 14.4 (complex) e Qwen2.5Max tem 9.0 (simple), 8.8 (medium) e 10.0 (complex). A métrica da Fig. 3 é rotulada «Vulnerability Files (%)», descrita no texto como fração dos erros do modelo e no Finding 3 como «VIR of Complex Files».", "localizador": "p. 7, Fig. 3, texto e Finding 3"},
+      {"descricao": "Número de linguagens e pares inconsistente: o resumo fala em quatro linguagens (Java, PHP, C, C++), a conclusão e as ameaças à validade em cinco linguagens, e a seção IV.A lista cinco pares e depois menciona «six language pairs».", "localizador": "p. 1, Abstract; p. 4, seção IV.A; p. 11, seção VI.A; p. 12, seção VII"},
+      {"descricao": "As RQ1–RQ3 avaliam apenas o prompt Baseline, sem comparação entre técnicas de prompting; só a RQ4 compara técnicas, em 67 amostras e dois modelos.", "localizador": "p. 4, seção IV.A; p. 10–11, seção V.D"}
+    ],
+    "observacoes": [
+      {"descricao": "Avaliação principal por especialistas humanos (dois avaliadores independentes, terceiro em discordância, reexame de 10%). O artigo não diz explicitamente se a avaliação da RQ4 seguiu o mesmo procedimento.", "localizador": "p. 5, seção IV.B; p. 11, seção V.D"},
+      {"descricao": "Sistema LLM-as-a-judge exploratório (vários LLMs, árbitro DeepSeek-R1, prompting one-shot com demonstrações por CWE), F1 = 82.6% na Tabela III; o estudo declara que não é usado nos resultados principais. Não é técnica de prompting para tarefa do escopo.", "localizador": "p. 4–5, seção IV.B, Tabela III"},
+      {"descricao": "Ferramentas de análise estática (CodeQL, Semgrep, Bandit, VulnHunter) com F1 abaixo de 60% em 60 amostras Python, o que motivou a avaliação humana.", "localizador": "p. 4–5, Tabela III"},
+      {"descricao": "Esforço manual descrito: 180 pessoas-hora para curadoria do corpus e 500 pessoas-hora para análise de falhas; relatórios de análise da base da RAG escritos manualmente.", "localizador": "p. 1, Introdução; p. 4, seção III.B; p. 10, seção V.D"},
+      {"descricao": "Base de conhecimento da RAG: amostragem estratificada por CWE de código identificado como vulnerável em análise humana; chunks de até 1,500 palavras com sobreposição de 300, 128 chunks; embeddings all-MiniLM-L6-v2 com normalização L2. A recuperação por embeddings foi tratada como parte do mecanismo contexto, não como componente fora do escopo. A disjunção entre a base e as 67 amostras de teste não é descrita.", "localizador": "p. 10–11, seção V.D"},
+      {"descricao": "Desenvolvedores seniores levam 161% mais tempo que juniores (639s vs 245s); o estudo trata isso como trade-off eficiência–acurácia, sem chamá-lo de custo.", "localizador": "p. 10, seção V.C e Fig. 7"}
+    ],
+    "citacoes": [
+      {"trecho": "To bridge this gap, we conduct a security-centric empirical study to investigate the risks of vulnerabilities being introduced or preserved during LLM-based translation.", "localizador": "p. 1, Abstract"},
+      {"trecho": "Building upon our collected security-centric code corpus of 720 samples, we design 1,200 translation tasks for each subject LLM using a baseline prompt template without any enhancements.", "localizador": "p. 4, seção IV.A"},
+      {"trecho": "Each prompt contains: (1) natural language instructions for the translation task; (2) source language; (3) target language and (4) the complete source code to be translated.", "localizador": "p. 4, seção IV.A"},
+      {"trecho": "For file-level code translation in security contexts, we incorporate necessary constraints in the prompts to ensure basic translation quality while avoiding task-specific guidance.", "localizador": "p. 4, seção IV.A"},
+      {"trecho": "All other hyperparameters are kept by default, and all evaluations are performed in a zero-shot setting.", "localizador": "p. 4, seção IV.A"},
+      {"trecho": "RQ4 (Mitigation Effectiveness): To what extent do the prompt-engineering techniques reduce the risks?", "localizador": "p. 6, seção V"},
+      {"trecho": "To address security vulnerabilities in LLM-based code translation, we implement and evaluate two mitigation strategies: a naive security-aware approach and a Retrieval-Augmented Generation (RAG) method [40].", "localizador": "p. 10, seção V.D"},
+      {"trecho": "The naive security-aware approach enhances standard translation prompts by integrating explicit security requirements, instructing models to preserve functional correctness while avoiding common vulnerability patterns.", "localizador": "p. 10, seção V.D"},
+      {"trecho": "This query embedding then undergoes a sophisticated similarity assessment against the entire stored vector database through cosine similarity calculations, efficiently identifying the three most semantically analogous code cases that exceed a predetermined similarity threshold of 0.5.", "localizador": "p. 11, seção V.D"},
+      {"trecho": "This meticulously crafted prompt synthesizes the source code, fundamental translation requirements, and a specialized Security Considerations section that enumerates specific vulnerability types, severity assessments, and detailed human-authored analysis reports corresponding to the retrieved cases.", "localizador": "p. 11, seção V.D"},
+      {"trecho": "The results reveal significant security degradation, with 28.6% to 45% of translations introducing new vulnerabilities.", "localizador": "p. 1, Abstract"},
+      {"trecho": "The results reveal a trade-off: while mitigation strategies enhanced security, they incurred a cost to functional correctness.", "localizador": "p. 11, seção V.D"},
+      {"trecho": "Although some LLMs may have been trained on source code from our collected samples, they lack access to the corresponding correct translations, ruling out task-specific fine-tuning or reinforcement.", "localizador": "p. 11, seção VI.A"},
+      {"trecho": "The data demonstrates that security vulnerabilities in translated code present significant detection challenges, with 90% of developers identifying them as the most difficult issues to verify – far surpassing syntactic errors (93.3% agreement on being easiest).", "localizador": "p. 10, seção V.C"},
+      {"trecho": "Temperature: Fixed at 0 to eliminate output randomness", "localizador": "p. 4, seção IV.A"},
+      {"trecho": "The multi-level review mechanism operates as follows: each translated code sample is independently evaluated by two security researchers.", "localizador": "p. 5, seção IV.B"},
+      {"trecho": "To assess functional correctness, we conducted an additional evaluation on a separate set of 67 samples, as the VIR test samples were inherently ill-suited for this metric.", "localizador": "p. 11, seção V.D"}
+    ]
+  },
+  "extracoes": [
+    {
+      "tarefa": "traducao",
+      "tecnica": "Retrieval-Augmented Generation (RAG)-based mitigation strategy (RAG Prompt)",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["contexto"],
+      "comparador": "Baseline (baseline prompt template without any enhancements)",
+      "modelo": "GPT4omini",
+      "benchmark": "conjunto de 67 security-centric code samples da RQ4 (derivado do corpus do estudo; seleção nao_informado)",
+      "metrica": "VIR (Vulnerability Introduction Rate)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 100.0, "intervencao": 67.2},
+      "denominador": "67 amostras (conjunto de avaliação de VIR); número de amostras por modelo e por par de linguagens nao_informado",
+      "condicoes": "Tabela VII, coluna GPT4omini/VIR; linha Change = +32.8%. O Baseline aparece com VIR = 100.0%, sem explicação de seleção ou normalização (ver heterogeneidade); o valor não é comparável à VIR da Tabela IV (45.0% para GPT4omini). RAG: top-3 casos com similaridade de cosseno > 0,5, base de 128 chunks (até 1,500 palavras, sobreposição de 300), embeddings all-MiniLM-L6-v2. Decodificação da RQ4 e número de execuções: nao_informado (o artigo declara temperatura 0 para as tarefas de tradução da seção IV.A). Ganho do pacote RAG (recuperação + seção Security Considerations), não atribuível a um ingrediente. Conferido visualmente na p. 11 (Tabela VII).",
+      "selecao": "principal_declarado",
+      "selecao_motivo": "O resumo e as contribuições destacam uma técnica (RAG), uma métrica (taxa de introdução de vulnerabilidades) e um valor (32.8%) que corresponde à linha Change contra o Baseline na Tabela VII. Não há agregado impresso entre os dois modelos; usou-se o primeiro modelo da tabela (GPT4omini), que é também o do valor declarado.",
+      "derivacao": "direta",
+      "localizador": "p. 11, Tabela VII (colunas GPT4omini VIR; linhas Baseline, RAG Prompt, Change); p. 1, Abstract",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Based on our findings, we develop and evaluate a Retrieval-Augmented Generation (RAG)-based mitigation strategy, which successfully reduces the vulnerability introduction rate by 32.8%.", "localizador": "p. 1, Abstract"},
+        {"trecho": "Baseline 100.0% 100.0% 100.0% 100.0%", "localizador": "p. 11, Tabela VII, linha Baseline; colunas GPT4omini VIR, GPT4omini FCR, DeepseekV3 VIR, DeepseekV3 FCR"},
+        {"trecho": "RAG Prompt 67.2% 85.1% 66.7% 88.1%", "localizador": "p. 11, Tabela VII, linha RAG Prompt; colunas GPT4omini VIR, GPT4omini FCR, DeepseekV3 VIR, DeepseekV3 FCR"},
+        {"trecho": "Notably, both models exhibit comparable sensitivity to RAG-based mitigation, with GPT4omini showing a 32.8% improvement and Deepseek a 33.3% improvement, suggesting that external contextual guidance can effectively compensate for varying model capabilities.", "localizador": "p. 11, seção V.D"}
+      ]
+    },
+    {
+      "tarefa": "traducao",
+      "tecnica": "naive security-aware approach (Naive Prompt)",
+      "mecanismos": ["instrucao", "contexto", "restricoes"],
+      "mecanismos_acrescentados": ["restricoes"],
+      "comparador": "Baseline (baseline prompt template without any enhancements)",
+      "modelo": "GPT4omini",
+      "benchmark": "conjunto de 67 security-centric code samples da RQ4 (derivado do corpus do estudo; seleção nao_informado)",
+      "metrica": "VIR (Vulnerability Introduction Rate)",
+      "sentido": "menor_melhor",
+      "unidade": "percentual",
+      "resultado": {"baseline": 100.0, "intervencao": 74.6},
+      "denominador": "67 amostras (conjunto de avaliação de VIR); número por modelo e por par de linguagens nao_informado",
+      "condicoes": "Tabela VII, coluna GPT4omini/VIR; linha Change = +25.4%. Mesmas ressalvas sobre o Baseline com VIR = 100.0% (seleção ou normalização não explicada). Texto do prompt com requisitos de segurança não reproduzido. Decodificação da RQ4 e número de execuções: nao_informado. Conferido visualmente na p. 11 (Tabela VII).",
+      "selecao": "cobertura",
+      "selecao_motivo": "Segunda técnica focal de prompting da RQ4. Pela ordem: primeira tabela com o contraste (Tabela VII), primeira métrica (VIR), primeiro modelo (GPT4omini), primeira linha de base de prompting (Baseline).",
+      "derivacao": "direta",
+      "localizador": "p. 11, Tabela VII (colunas GPT4omini VIR; linhas Baseline, Naive Prompt, Change)",
+      "conferido_pdf": "sim",
+      "citacoes": [
+        {"trecho": "Naive Prompt 74.6% 89.6% 88.8% 92.5%", "localizador": "p. 11, Tabela VII, linha Naive Prompt; colunas GPT4omini VIR, GPT4omini FCR, DeepseekV3 VIR, DeepseekV3 FCR"},
+        {"trecho": "Baseline 100.0% 100.0% 100.0% 100.0%", "localizador": "p. 11, Tabela VII, linha Baseline; colunas GPT4omini VIR, GPT4omini FCR, DeepseekV3 VIR, DeepseekV3 FCR"},
+        {"trecho": "The naive prompt reduces VIR by 25.4% for GPT4omini and 11.2% for Deepseek compared to baseline, confirming that explicit security constraints in prompts provide moderate protection.", "localizador": "p. 11, seção V.D"}
+      ]
+    }
+  ],
+  "qualidade": [
+    {"criterio": "objetivo", "julgamento": "atende", "justificativa": "Objetivo de avaliar riscos de segurança na tradução de código por LLM e quatro questões de pesquisa explícitas, incluindo a eficácia de técnicas de prompting (RQ4).", "localizador": "p. 1, Abstract; p. 5–6, seção V (RQ1–RQ4)"},
+    {"criterio": "procedimento", "julgamento": "parcial", "justificativa": "Construção do corpus, configuração de tradução e avaliação humana descritas com detalhe nas RQ1–RQ3. Na RQ4 faltam o texto dos prompts, o critério de seleção dos dois conjuntos de 67 amostras, o motivo do Baseline = 100% e a relação entre a base de conhecimento e as amostras de teste.", "localizador": "p. 3–5, seções III–IV; p. 10–11, seção V.D"},
+    {"criterio": "comparador", "julgamento": "parcial", "justificativa": "Há comparador executado (Baseline) para as estratégias de mitigação, mas apenas dois modelos, 67 amostras e um Baseline com VIR e FCR = 100% não explicado; VIR e FCR medidas em conjuntos distintos. As RQ1–RQ3 não comparam técnicas.", "localizador": "p. 11, Tabela VII e seção V.D"},
+    {"criterio": "metricas", "julgamento": "parcial", "justificativa": "FCR, VIR e VPR definidas formalmente com denominadores (N_s, N_p, N_v). Porém o denominador e a escala dos valores da Tabela VII não ficam claros, a prosa diverge da Tabela VII sobre FCR, há subtotais da Tabela VI que não batem com as subcategorias e uma média de VIR na narrativa (30.5%) que não coincide com a Tabela IV.", "localizador": "p. 5, Eq. 1–3; p. 6, Tabela IV; p. 8, Tabela VI; p. 11, Tabela VII"},
+    {"criterio": "ameacas", "julgamento": "parcial", "justificativa": "Seção de ameaças trata vazamento de dados, processos manuais e generalização, mas conclui que as ameaças externas são mínimas e não discute as limitações da RQ4 (amostra pequena, dois modelos, conjuntos distintos).", "localizador": "p. 11, seção VI.A"},
+    {"criterio": "reprodutibilidade", "julgamento": "parcial", "justificativa": "Configuração de decodificação, modelos (com algumas versões), parâmetros da RAG e link anônimo para artefatos impressos; os artefatos são descritos como a serem disponibilizados («will be made publicly available») e não foram acessados nesta extração; os prompts não aparecem no texto e snapshots de GPT4omini, GPT4o e Qwen2.5Coder não são informados.", "localizador": "p. 2, contribuições; p. 4, Tabela II e seção IV.A; p. 10–11, seção V.D"},
+    {"criterio": "contaminacao", "julgamento": "parcial", "justificativa": "O estudo reconhece possível vazamento de dados de pré-treinamento e argumenta impacto mínimo, sem teste. Não descreve a disjunção entre a base de conhecimento da RAG e as amostras de avaliação da RQ4.", "localizador": "p. 11, seção VI.A; p. 10, seção V.D"}
+  ],
+  "leitura": {
+    "status": "completa",
+    "observacao": "Texto extraído lido integralmente (867 linhas, incluindo referências).",
+    "paginas_pdf_abertas": [1, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  }
+}
