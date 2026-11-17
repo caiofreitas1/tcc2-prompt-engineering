@@ -14,7 +14,7 @@ Benchmarks (estudos): HumanEval (e variantes): 82; MBPP (e variantes): 49; APPS:
 
 Linguagens (estudos): Python: 148; Java: 65; C++: 36; C: 20; JavaScript: 18; Go: 15; C#: 10; PHP: 10; nao_informado: 9; HTML: 8.
 
-Sem comparador: 35; com técnica só classificada (sem número): 56; sem nenhuma comparação extraída: 16.
+Sem comparador: 35; com técnica só classificada (sem número): 55; sem nenhuma comparação extraída: 16.
 
 ## Mecanismos (técnicas focais; estudos distintos)
 
@@ -29,7 +29,7 @@ Sem comparador: 35; com técnica só classificada (sem número): 56; sem nenhuma
 
 ## Contrafactual das técnicas focais (técnicas, não estudos)
 
-Total: pacote: 372; ingrediente: 212; contraste_pareado: 3; cumulativo: 13; nenhum: 111.
+Total: pacote: 373; ingrediente: 212; contraste_pareado: 3; cumulativo: 13; nenhum: 111.
 
 Componentes (ingredientes registrados das técnicas focais): pacote: 15; ingrediente: 328; contraste_pareado: 9; cumulativo: 30; nenhum: 326.
 
@@ -37,7 +37,7 @@ Estudos (técnica focal ou componente; um estudo pode ter vários tipos): geraca
 
 ## Comparações extraídas (unidade: comparação)
 
-Total: melhora: 512; igual: 28; piora: 145; sem_direcao: 95; descritiva: 25. «sem_direcao»: sem sentido definido ou sem dois números; «descritiva»: sem comparador.
+Total: melhora: 516; igual: 28; piora: 145; sem_direcao: 91; descritiva: 25. «sem_direcao»: sem sentido definido ou sem dois números; «descritiva»: sem comparador.
 
 Seleção: desempate_ordem: 271; cobertura: 489; principal_declarado: 45. Derivação: direta: 801; contraste_pareado: 4.
 
