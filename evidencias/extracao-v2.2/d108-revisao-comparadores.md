@@ -16,14 +16,14 @@ A aplicação não foi conferida pelo autor.
 - 291 ficaram `nao` / `nenhum`: a própria condição de base, ou sem condição de base
   comparável (outro modelo, outra amostra, valores citados de outro artigo, só comparação
   com a técnica focal).
-- 1 proposta retida para o autor: S760, «Iterative regeneration without complexity…»,
-  comparada com a Iteração 0 do mesmo ciclo. É contribuição por rodada, que o prompt
-  classifica como `cumulativo`, não `pacote`; a ficha continua `nao` / `nenhum`.
+- S760, «Iterative regeneration without complexity…»: proposta como `pacote`, mas comparada
+  com a Iteração 0 do mesmo ciclo. É contribuição por rodada; o autor decidiu `nao` /
+  `cumulativo` (17/11/2026), aplicado como correção registrada.
 - 10 propostas vieram com o índice da técnica deslocado (S597, S1023, S1155); foram aplicadas
   pelo nome exato, único na ficha.
 - Somados S6, S216, S724, S1415 e S1977 (17 técnicas), os comparadores das 302 fichas do
   corpus ficam: 190 `sim` / `pacote`, 32 `sim` / `ingrediente`, 15 `sim` /
-  `contraste_pareado`, 427 `nao` / `nenhum` e 1 `nao` / `cumulativo`.
+  `contraste_pareado`, 426 `nao` / `nenhum` e 2 `nao` / `cumulativo`.
 
 ## Limites
 
