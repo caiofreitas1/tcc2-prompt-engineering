@@ -415,3 +415,6 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 
 ## T12 — formulário de conferência das afirmações (17/11/2026)
 - Executor: Claude Code (Claude Opus 5.5). Gerador `scripts/gerar_formulario_afirmacoes.py` e formulário publicado como artifact privado (coleção `afirmacoes_autor`), com 113 afirmações, seus trechos no texto e as comparações que as sustentam. A conferência é do autor e ainda não começou.
+
+## T09 — julgamento do exame (17/11/2026, D118)
+- O julgamento é do autor (formulário). Claude Code (Claude Opus 5.5) exportou os julgamentos, comparou-os com a proposta e redigiu a seção do exame, a discussão e a conclusão a partir deles.
