@@ -9,7 +9,9 @@ Essa ordenação distribui a amostra entre os estratos na proporção da popula�
 
 Complemento (D114): quando o corpus cresce depois do sorteio, a amostra gravada fica fixa
 e só se sorteiam os estudos que faltam para o novo tamanho, pelo mesmo método, sobre as
-fichas que não estavam no quadro original (`conferencia/quadro-original.txt`, 292 fichas).
+fichas que não estavam no quadro original (`conferencia/quadro-original.txt`, 292 fichas) e
+ainda não estão na amostra. Um estudo excluído do corpus sai da amostra gravada antes do
+complemento, que repõe a vaga pelo mesmo método (D115).
 O sorteio original se reproduz com as correções manuais vigentes no commit adeb97b; depois
 dele, D110 registrou correções em S2056 e S2059, o que muda a ordenação do quadro atual.
 
@@ -74,7 +76,8 @@ def complementar(linhas, n_corpus):
     campos = ['estudo_id', 'executor', 'modelo_executor', 'tarefas', 'correcoes_vigentes', 'motivo']
     fixa = list(csv.DictReader(open(SAIDA, encoding='utf-8')))
     original = set(QUADRO_ORIGINAL.read_text(encoding='utf-8').split())
-    novas = [l for l in linhas if l['estudo_id'] not in original]
+    ja = {r['estudo_id'] for r in fixa}
+    novas = [l for l in linhas if l['estudo_id'] not in original and l['estudo_id'] not in ja]
     k = n - len(fixa)
     rng = random.Random(SEMENTE)
     for l in novas:
@@ -86,7 +89,7 @@ def complementar(linhas, n_corpus):
         inicio = rng.random() * passo
         escolhidos = [novas[int(inicio + i * passo)] for i in range(k)]
     amostra = [{c: r[c] for c in campos} for r in fixa]
-    amostra += [dict({c: l[c] for c in campos[:-1]}, motivo='complemento sistemático (D114)') for l in escolhidos]
+    amostra += [dict({c: l[c] for c in campos[:-1]}, motivo='complemento sistemático (D115)') for l in escolhidos]
     amostra.sort(key=lambda l: int(l['estudo_id'][1:]))
     print(f'amostra fixa: {len(fixa)}; quadro do complemento: {len(novas)}; sorteados: {len(escolhidos)}')
     return n, amostra

@@ -34,6 +34,9 @@ ainda não começou; nada aqui é revisão humana.
   (`quadro-original.txt`): S1682, S1721, S1735, S1869, S1875 e S1926. No formulário, os 6
   vêm depois dos 61, para não mudar a posição dos estudos já em conferência; os dados dos
   61 ficaram idênticos.
+- Reposição (D115): S1721, do complemento, foi excluído do corpus (X4); saiu da amostra, e
+  S1935 entrou pelo mesmo método, sobre as fichas posteriores ao sorteio ainda fora da
+  amostra (26). Com o corpus em 332, o tamanho continua 67.
 - Reproduzir: o sorteio original se reproduz com as correções manuais vigentes no commit
   adeb97b (D110 registrou depois correções em S2056 e S2059, o que muda a ordenação); o
   complemento, com `python3 scripts/sortear_conferencia.py --complemento --gravar`.
