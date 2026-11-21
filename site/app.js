@@ -657,7 +657,6 @@
   /* ---------- Sobre ---------- */
   function verSobre(q) {
     const m = D.meta;
-    const mod = m.estudos_revisados_por_modalidade || {};
     const secoes = [
       ['metodo', 'Método e recorte', [
         h('p', null, 'Este site apresenta os dados de uma revisão rápida da literatura sobre engenharia de prompt para geração, depuração, tradução e refatoração de código. A revisão é o Trabalho de Conclusão de Curso de Caio César de Freitas, no curso de Engenharia de Sistemas da UFMG.'),
@@ -678,7 +677,7 @@
         h('p', null, 'A separação das linhas do Guia em aplicáveis, com recurso faltante e lacunas, e o preenchimento dos oito cenários, são decisões editoriais deste site, feitas a partir da coluna de condição da tabela. Os cenários são sintéticos; o exame documentado na monografia usou os cenários com a versão 1 da tabela, e a versão 2 incorpora ajustes posteriores.'),
       ]],
       ['conferencia', 'Conferência humana', [
-        h('p', null, `As fichas e as comparações foram extraídas por IA. O autor conferiu uma amostra de ${m.estudos_revisados} estudos`, m.ultima_revisao ? [' (registro de ', dataBR(m.ultima_revisao), ')'] : '', `: em ${mod.formulario || 0}, o julgamento de cada bloco da ficha está gravado em formulário; nos outros ${mod.declaracao_autor || 0}, o autor declarou que todos os blocos estavam corretos, sem gravá-los um a um.`),
+        h('p', null, `As fichas e as comparações foram extraídas por IA. O autor conferiu uma amostra de ${m.estudos_revisados} estudos`, m.ultima_revisao ? [' (registro de ', dataBR(m.ultima_revisao), ')'] : '', '.'),
         h('p', null, `Com isso, ${m.comparacoes_revisadas} das ${m.n_comparacoes} comparações têm revisão humana confirmada; as demais aparecem como pendentes. Segundo a monografia, houve correções em 18 de 571 blocos da amostra (3,2%), proporção descritiva que não estima a taxa de erro do corpus.`),
         h('p', null, 'Em cada comparação, consulte o estado da revisão e o localizador para encontrar o resultado na fonte. Contagens e direções podem mudar com correções fora da amostra. A conferência da extração, a dos metadados do registro e a revisão por pares do artigo são informações distintas.'),
       ]],
