@@ -45,6 +45,8 @@ O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
 - `make check`: integridade dos registros e testes das barreiras científicas.
 - `make pdf`: compilar o artigo em formato IEEE Conference em build/main.pdf
   (requer latexmk, TeX Live e IEEEtran). Origem e pendências em monografia/TEMPLATE.md.
+- `make pdf-monografia`: compilar o mesmo texto em formato de monografia (ABNT, classe
+  abntex2) em build/monografia.pdf. Origem e pendências em monografia/TEMPLATE-MONOGRAFIA.md.
 - `make release-check`: verificar pré-condições mínimas da versão para entrega.
   Deve falhar nesta estrutura inicial, pois há etapas e revisão humana pendentes.
 - `git clone https://github.com/caiofreitas1/tcc2-prompt-engineering.git`: obter a cópia
@@ -59,6 +61,10 @@ monografia/main.tex usa o IEEE Conference Template, escolhido pelo autor em
 artigo com redação pendente. O orientador informado pelo autor é Prof. Dr. Eduardo
 Magno Lages Figueiredo; o autor confirmou a entrega somente como artigo IEEE,
 sem capa ou folha de aprovação separadas. Ver monografia/TEMPLATE.md.
+Em 18/11/2026, depois de aviso de professora da banca de que o curso exige monografia,
+o autor pediu um segundo documento nesse formato (D127): monografia/monografia.tex reúne
+os mesmos capítulos com capa, folha de rosto, folha de aprovação, resumo, abstract, listas
+e sumário. O artigo IEEE foi mantido. Ver monografia/TEMPLATE-MONOGRAFIA.md.
 Os textos anteriores foram preservados sem reescrita; os números
 do piloto continuam sujeitos à conferência no artigo original. As referências acadêmicas
 de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão
