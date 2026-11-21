@@ -47,6 +47,9 @@ O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
   (requer latexmk, TeX Live e IEEEtran). Origem e pendências em monografia/TEMPLATE.md.
 - `make pdf-monografia`: compilar o mesmo texto em formato de monografia (ABNT, classe
   abntex2) em build/monografia.pdf. Origem e pendências em monografia/TEMPLATE-MONOGRAFIA.md.
+- `make site`: gerar `site/dados.json`, a base do site «Prompt em Código» (guia de escolha e explorador
+  das comparações), a partir da tabela de apoio v2, das fichas e das comparações. `make site-servir`
+  abre o site em http://localhost:8765. Design em site/DESIGN.md; decisão em D131.
 - `make release-check`: verificar pré-condições mínimas da versão para entrega.
   Deve falhar nesta estrutura inicial, pois há etapas e revisão humana pendentes.
 - `git clone https://github.com/caiofreitas1/tcc2-prompt-engineering.git`: obter a cópia

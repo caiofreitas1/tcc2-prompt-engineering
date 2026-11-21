@@ -1,0 +1,40 @@
+# Publica a pasta site/ no GitHub Pages. O site é estático; o fluxo só confere se
+# dados.json corresponde às fontes e registra a revisão publicada em versao.json.
+name: Publicar o site
+
+on:
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.implantar.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Conferir dados.json com as fontes
+        run: python3 scripts/gerar_site.py --conferir
+      - name: Registrar a revisão publicada
+        run: printf '{"commit":"%s","data":"%s"}\n' "$GITHUB_SHA" "$(date -u +%F)" > site/versao.json
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: implantar
+        uses: actions/deploy-pages@v4
