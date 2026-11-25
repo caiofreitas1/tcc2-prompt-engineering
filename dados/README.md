@@ -46,6 +46,14 @@ estudo_id, url, tipo (fonte no OpenAlex), versao, origem e data. Gerado por
 `scripts/versoes_abertas.py`, que preserva as respostas do OpenAlex em `dados/brutos/`.
 Registros do arXiv e da ACM (aberta desde 01/01/2026) contam como abertos sem consulta.
 
+## publicacoes.csv
+Publicação em periódico ou em anais dos estudos do corpus definitivo registrados pelo arXiv (D135):
+estudo_id, arxiv, tipo (doi, url ou nao_localizada), identificador, local, ano, titulo_publicado (só
+quando difere do título do arXiv), fonte, observacao, responsavel, natureza e data. Não altera
+`estudos.csv`: o identificador e a versão lida continuam sendo os do arXiv. Só metadados foram
+comparados (título e autores); o texto da publicação não foi lido. O registro que sustenta cada
+linha está em `dados/brutos/publicacoes-2026-11-21/`. Usado por `scripts/gerar_apendice_estudos.py`.
+
 ## resumos.csv
 Um resumo por estudo para a triagem de título e resumo: estudo_id, registro_id (registro
 de onde veio o texto), fonte (arxiv, ieee_xplore, openalex, crossref, semanticscholar ou
