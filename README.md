@@ -43,8 +43,9 @@ O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
 - `python3 scripts/obter_s1.py`: obter a cópia arXiv v5 usada em T02 e conferir o
   SHA-256, sem sobrescrever arquivo divergente. Requer rede; ver evidencias/S1.md.
 - `make check`: integridade dos registros e testes das barreiras científicas.
-- `make pdf`: compilar o artigo em formato IEEE Conference em build/main.pdf
-  (requer latexmk, TeX Live e IEEEtran). Origem e pendências em monografia/TEMPLATE.md.
+- `make pdf`: compilar o artigo em português no formato da revista SBC Reviews em build/main.pdf
+  (requer latexmk e TeX Live com LuaLaTeX). `make pdf-en` compila a versão em inglês em
+  build/main-en.pdf. Origem, requisitos da revista e pendências em monografia/TEMPLATE-SBC-REVIEWS.md.
 - `make pdf-monografia`: compilar o mesmo texto em formato de monografia (ABNT, classe
   abntex2) em build/monografia.pdf. Origem e pendências em monografia/TEMPLATE-MONOGRAFIA.md.
 - `make site`: gerar `site/dados.json`, a base do site «Prompt em Código» (guia de escolha e explorador
@@ -60,16 +61,19 @@ O repositório e as issues já foram publicados. scripts/publicar_github.py foi 
 como utilitário da preparação inicial; não é necessário executá-lo para começar.
 
 ## Documento e pendências
-monografia/main.tex usa o IEEE Conference Template, escolhido pelo autor em
-27/10/2026, com a classe IEEEtran em modo conference e A4. É uma estrutura de
-artigo com redação pendente. O orientador informado pelo autor é Prof. Dr. Eduardo
-Magno Lages Figueiredo, e o coorientador, informado em 21/11/2026 (D136), é Pedro Saint
-Clair Garcia; o autor confirmou a entrega somente como artigo IEEE,
-sem capa ou folha de aprovação separadas. Ver monografia/TEMPLATE.md.
+monografia/main.tex usa, desde 24/11/2026, o template da revista SBC Reviews (classe
+sbcreviews-2025, LuaLaTeX), a pedido do orientador (D140); monografia/main-en.tex é a versão
+em inglês, com os capítulos traduzidos por IA em monografia/capitulos-en/, ainda sem revisão
+do autor (D141). Não há submissão à revista. Ver monografia/TEMPLATE-SBC-REVIEWS.md.
+De 27/10 a 24/11/2026 o artigo usou o IEEE Conference Template, escolhido pelo autor, que
+confirmou então a entrega somente como artigo, sem capa ou folha de aprovação separadas
+(registro histórico em monografia/TEMPLATE.md). O orientador informado pelo autor é Prof. Dr.
+Eduardo Magno Lages Figueiredo, e o coorientador, informado em 21/11/2026 (D136), é Pedro Saint
+Clair Garcia.
 Em 18/11/2026, depois de aviso de professora da banca de que o curso exige monografia,
 o autor pediu um segundo documento nesse formato (D127): monografia/monografia.tex reúne
 os mesmos capítulos com capa, folha de rosto, folha de aprovação, resumo, abstract, listas
-e sumário. O artigo IEEE foi mantido. Ver monografia/TEMPLATE-MONOGRAFIA.md.
+e sumário. O artigo foi mantido. Ver monografia/TEMPLATE-MONOGRAFIA.md.
 Os textos anteriores foram preservados sem reescrita; os números
 do piloto continuam sujeitos à conferência no artigo original. As referências acadêmicas
 de S1 foram conferidas na versão arXiv v5 e cadastradas no .bib em T02, com revisão

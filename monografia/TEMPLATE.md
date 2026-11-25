@@ -1,5 +1,9 @@
 # IEEE Conference Template — adoção em T03
 
+> **Atualização de 24/11/2026 (D140).** A pedido do orientador, o artigo deixou o formato IEEE e passou ao
+> formato da revista SBC Reviews, em português e em inglês: ver [TEMPLATE-SBC-REVIEWS.md](TEMPLATE-SBC-REVIEWS.md).
+> O texto abaixo é o registro histórico da adoção do IEEE Conference Template e não descreve o `main.tex` atual.
+
 ## Escolha e origem
 
 O autor escolheu o **IEEE Conference Template** neste chat em **27/10/2026**.
