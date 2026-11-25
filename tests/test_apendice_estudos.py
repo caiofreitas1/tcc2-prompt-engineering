@@ -27,6 +27,14 @@ class ApendiceEstudos(unittest.TestCase):
         self.assertEqual((RAIZ / 'monografia/capitulos/08-apendice-estudos.tex').read_text(encoding='utf-8'), self.texto,
                          'apêndice desatualizado: execute python3 scripts/gerar_apendice_estudos.py')
 
+    def test_versao_em_ingles_corresponde_aos_dados_e_tem_a_mesma_lista(self):
+        ingles = g.montar('en')[0]
+        self.assertEqual((RAIZ / 'monografia/capitulos-en/08-apendice-estudos.tex').read_text(encoding='utf-8'), ingles,
+                         'apêndice em inglês desatualizado: execute python3 scripts/gerar_apendice_estudos.py')
+        itens = lambda texto: [linha for linha in texto.splitlines() if linha.startswith('\\item[')]
+        self.assertEqual(itens(ingles), itens(self.texto))
+        self.assertIn('\\section{Included studies}\\label{ap:estudos}', ingles)
+
     def test_publicacoes_cobrem_so_os_estudos_do_arxiv_no_corpus(self):
         do_arxiv = {i for i, r in self.estudos.items() if r['corpus'] == 'definitivo' and r['identificador'].startswith('arXiv')}
         self.assertEqual({p['estudo_id'] for p in self.pub}, do_arxiv)

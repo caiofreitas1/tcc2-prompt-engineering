@@ -1,0 +1,153 @@
+% English translation of capitulos/04c-qp3.tex, made by Claude Code (Claude Fable 5.2) on 24 November 2026.
+% Pending review by the author. When the Portuguese file changes, update this one (scripts/verificar_traducao.py).
+\subsection{RQ3: taxonomy and decision-support table}\label{sec:qp3}
+
+This subsection brings together the practical contribution of the work: a taxonomy of the techniques
+extracted and a decision-support table, in the version revised after the examination in the scenarios. Both are based on 332 records
+and 805 comparisons extracted by AI and checked by the author in a sample (Section~\ref{sec:conferencia}). The counts come from
+\texttt{scripts/sintetizar.py}, and the rows of the table, from the partial syntheses.
+
+\subsubsection{Taxonomy}
+
+The taxonomy is multi-label: a study may have more than one task, and a technique, more
+than one mechanism. The records register five dimensions:
+\begin{itemize}
+  \item \textit{Task}: generation (247 studies), debugging (62), translation (27) and
+    refactoring (20); 22 studies have more than one task.
+  \item \textit{Mechanism}: eleven labels (instruction, context, constraints, examples,
+    decomposition, reasoning, feedback, sampling, multi-agent, prompt optimization and
+    other). The record separates the complete package, with all the mechanisms present in the prompt
+    of the technique, from the mechanisms that the technique adds to the base prompt;
+    Table~\ref{tab:mecanismos} counts only those added.
+  \item \textit{Role}: focal, when the technique is the object of the study, or comparator, when
+    it serves as a base or as an alternative to another technique.
+  \item \textit{Type of counterfactual}: package (whole technique against the condition without
+    it), ingredient (an isolated component), paired contrast, cumulative (successive
+    rounds, without a parallel condition) or none. Among the focal techniques, there are 373 of
+    package, 212 of ingredient, 3 of paired contrast, 13 cumulative and 111 without a
+    counterfactual (unit: technique). Counting also the components of the techniques, 191 of the
+    332 studies have at least one isolated ingredient or paired contrast.
+  \item \textit{Conditions}: factors on which the results depend, according to the syntheses.
+\end{itemize}
+
+The syntheses point to the following recurring conditions:
+\begin{itemize}
+  \item available executor, tests or compiler, on which feedback and
+    candidate selection depend;
+  \item number of calls and of candidates, rarely equalized between the conditions;
+  \item size and family of the model, with sign reversals within the same study;
+  \item level of the task: function, class or repository;
+  \item oracle information, such as perfect localization of the defect or APIs and solutions
+    taken from the reference;
+  \item components outside the scope of prompting (fine-tuning, trained retrievers,
+    model selection), recorded in 303 of 332 studies;
+  \item metric (textual similarity, tests or scanners) and domain, such as hardware and
+    domain languages, in general with their own sets.
+\end{itemize}
+
+\subsubsection{Decision-support table}
+
+Version 1 of the table consolidated the rows of the partial syntheses into 22, one per grouping
+and task, and was frozen for the examination in the scenarios (Section~\ref{sec:exame}). After the
+examination, the author decided to revise it. Version 2 (Tables~\ref{tab:apoio} and~\ref{tab:apoiob})
+uses the same syntheses and has 31 rows, with five changes:
+\begin{itemize}
+  \item feedback was separated by type of verification, tests or compiler and
+  analyser, in generation (G1 and G2) and in translation (T1 and T2);
+  \item each row states the measured result, such as compilation, passing the tests,
+  correctness of the repair or complexity;
+  \item the condition makes explicit when the evidence assumes perfect localization or a test that
+  reproduces the defect (D1, D3 and D6);
+  \item the refactoring row was divided into specified type, API knowledge and
+  examples (R1 to R3);
+  \item each indication is marked as favourable, contrary, mixed, indirect or
+  insufficient. Five new rows declare insufficient evidence: the distribution of a
+  fixed budget of calls (G13), domain languages and small models (G14), repair
+  without reproduction (D7), legacy language (T5) and repository scale (R5). The separations
+  created G2, with indirect evidence, T2, insufficient, and R1 to R3.
+\end{itemize}
+In the mixed, contrary or insufficient rows, the guidance is not to recommend the technique
+as a default. The strength is descriptive, without a score, and repeats the count of v1 when a row was
+divided. v1 and v2 are in the repository (\path{evidencias/sinteses/}). The findings
+below support the central rows.
+
+In execution feedback in generation, the budget matters.
+% AFIRMACAO: A91
+With the number of attempts equalized, the multi-turn variants with feedback stayed at
+2.4\% and 2.8\% of pass 1@3, against 2.9\% without iteration (Llama 3.0 8B), and at 6.9\% against
+7.7\% (Llama 3.1 8B); SEIDR solved on average 11.5 problems of PSB2, against 12.2 for
+sampling without repair (S479-C2; S479-C3; S479-C4; S645-C1).
+% AFIRMACAO: A92
+Without this equalization, five comparisons that isolate the loop and have absolute
+values recorded a more favourable outcome with it, in the sense of each metric, and removing the iterative verification from CG-CG
+reduced Pass@1 from 80.3\% to 70.1\% (S878-C1; S1047-C3; S1053-C3; S1077-C1;
+S1086-C6; S1977-C2).
+% AFIRMACAO: A93
+In multi-agent systems, the gain comes with more calls: MapCoder and
+LLMDebugger obtained 64.02\% and 67.07\% pass@1, against 39.63\% for \textit{zero-shot}, with 8.1
+and 3.4 calls on average, against 1.0 (S1747-C3; S1747-C4).
+
+% AFIRMACAO: A94
+The reasoning instruction added to the generation prompt had a mixed result: in
+12 comparisons from 12 studies, under heterogeneous conditions and metrics, 5 record an improvement and 7, a deterioration, a
+descriptive count that is not equivalent to 12 isolated effects of the instruction (S124-C2; S207-C1; S309-C2; S319-C1; S491-C3; S508-C1;
+S560-C2; S569-C1; S1024-C4; S1121-C1; S1229-C2; S1606-C4).
+% AFIRMACAO: A95
+Self-correction without execution, with Qwen2.5-1.5B, stayed below Simple-prompting: 38.2\%
+(Self-Refine) and 38.8\% (SETS), against 44.6\% Accuracy@t2 (S759-C1; S759-C3).
+% AFIRMACAO: A96
+In the security instructions, 13 variants without iteration raised the vulnerable samples
+of GPT-3.5-turbo from 5.74\% to values between 5.99\% and 7.82\% (S604-C1 to S604-C10;
+S604-C13 to S604-C15), whereas, with GPT-3, the instructional variants reduced the
+weaknesses counted by Bandit from 78 to values between 47 and 72 (S397-C2 to S397-C6).
+Since model, metric and set differ, the two studies do not form a direct contrast.
+% AFIRMACAO: A97
+Oracle information produced the largest gains among the contrasts cited, without representing real use: the file
+context added to the APIs taken from the reference raised the Pass@1 of GPT-4o Mini on RepoExec from 16.62\% to 37.75\%
+(S670-C5), and the official solution raised the pass@1 of DeepSeek-Coder-V2 on MuPA from 11.84 to 38.79, the highest value among the conditions cited, whereas the self-generated hints stayed between 11.92 and 13.21 (S2145-C1; S2145-C3;
+S2145-C5; S2145-C6).
+
+% AFIRMACAO: A98
+In repair, explicit reasoning worsened the result in 5 of 6 comparisons from 5
+studies; the exception, the \textit{few-shot} CoT of ThinkRepair, also changes the selection of examples
+(S275-C2; S354-C2; S1429-C1; S1429-C2; S1598-C2; S412-C2).
+% AFIRMACAO: A99
+Structural or bulky diagnostic information also made things worse: with Qwen2.5-Coder:7B on
+QuixBugs, PDG and test file reduced the repair rate from 62.5\% to 55\% and
+57.5\%, and, on Defects4J v1.2, prompts with stack trace localized 32 and 41 bugs, against 47
+without it (S1674-C3; S1674-C4; S1678-C1; S1678-C2).
+% AFIRMACAO: A100
+Three repair comparisons with fixed examples recorded no improvement: the
+overall\_score fell from 0.783 to 0.643, the plausible patches fell from 205 to 200, and
+the failures fixed stayed at 11 against 11 (S1598-C1; S2057-C1; S1565-C4).
+
+% AFIRMACAO: A101
+In translation, explaining before translating reduced pass@1 from Python to JavaScript with
+GPT-3.5 from 85.5\% to 84.8\%, 84.3\% and 83.2\%, and the two-step approaches reduced
+the success rate on CodeNet from 28.6\% to values between 2.6\% and 11.2\% (S193-C1;
+S193-C2; S193-C3; S836-C2; S836-C3; S836-C5; S836-C6).
+% AFIRMACAO: A102
+In refactoring, specifying the type of refactoring raised the recall of GPT-4 from 15.6\% to
+52.2\%, and the TerraMod package raised the Pass@1 of Mistral-Large from 4\% to 76\%, both
+from low baselines (S511-C2; S2122-C1).
+
+\input{capitulos-en/04c2-tabela-apoio-v2}
+
+\subsubsection{How to read the table and what it does not do}
+
+The table is read by row: given the task and the condition of use, it summarizes the direction of the
+extracted comparisons, the strength with which they were obtained and the caveats that prevent
+generalization. ``Favourable'' indicates that most comparisons of the grouping recorded an
+improvement on the metric of each study, and not that the technique will work in another project.
+When the row is favourable to the package, the gain cannot be attributed to a single mechanism. The
+table does not rank techniques: benchmarks, metrics and models differ between the rows, and
+no average was computed. It also does not measure effectiveness in real use, since benchmarks do not
+demonstrate productivity, security or cost reduction. The proportion of improvements among
+the 805 comparisons (516 improvements, 145 deteriorations, 28 equal, 91 without direction and 25
+descriptive) reflects the choice of the main comparison by the authors and publication
+bias, and does not estimate an effect. Groupings with a single study, such as prompt
+optimization and security requirements in translation (S650, S951), were left out of the table and
+count as insufficient evidence. The two versions use the syntheses of 302 records; S1610, S1617, S667 and the studies of the last
+batch of stage 3, extracted later, do not enter its rows. S433, cited in a row of v1, was later grouped
+with S2053 for being a version of the same work (X1), and v2 cites S2053. Finally, the table reflects extraction by AI checked only by
+sample: counts and directions may change with corrections outside it.

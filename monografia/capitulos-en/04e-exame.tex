@@ -1,0 +1,101 @@
+% English translation of capitulos/04e-exame.tex, made by Claude Code (Claude Fable 5.2) on 24 November 2026.
+% Pending review by the author. When the Portuguese file changes, update this one (scripts/verificar_traducao.py).
+\subsection{Examination of the table in the scenarios}\label{sec:exame}
+Table~\ref{tab:cenarios} summarizes the eight synthetic scenarios, two per task. Each one fixes language and domain,
+model, verification resources and call budget. The evidence expectations are hypotheses to be confronted. The
+scenarios and decision-support table v1 were frozen with SHA-256 before the examination. For each scenario, the examination applies the
+rows of the table, checks the studies cited in the records and registers limitations and ambiguities. Claude Code drafted the examination and a proposed judgement, and the author made the final judgement. The examination does not measure effectiveness.
+
+\begin{table}[!t]
+\caption{Scenarios used in the examination of version 1 of the decision-support table}\label{tab:cenarios}
+\centering\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.55cm}p{3.2cm}p{2.4cm}p{1.3cm}@{}}
+\hline
+ID & Situation & Verification & Budget\\
+\hline
+G1 & Python functions from a docstring; large model & Public unit tests & 5 calls\\
+G2 & Solidity 0.8 contracts; local model up to 8B & \texttt{solc} and static analyser & 3 calls\\
+D1 & Defect in a Python function & Failing test and suite & 10 calls\\
+D2 & Defect in a Java repository from a report & Compilation; suite does not reproduce & 20 calls\\
+T1 & C99 module to safe Rust & \texttt{rustc} and ported tests & 5 rounds\\
+T2 & Batch COBOL to Java 17 & Java compiler only & 3 calls\\
+R1 & Long Python methods, lower complexity & Tests and complexity meter & 3 calls\\
+R2 & API migration in about 200 Java files & Compilation, tests, benchmarks, changelog & 2 per file\\
+\hline
+\end{tabular}
+\end{table}
+
+The author judged the eight scenarios on 17 November 2026 (Table~\ref{tab:julgamento}). On the three criteria, the result was:
+\begin{itemize}
+  \item clarity: 1 meets and 7 partial;
+  \item grounding in the sources: 2 meet, 5 partial and 1 does not meet;
+  \item concrete guidance: 1 meets, 6 partial and 1 does not meet.
+\end{itemize}
+The author agreed with 22 of the 24 judgements proposed by Claude Code and downgraded to partial the grounding of
+T1 and R1. In T1, the result cited (S732-C1) comes from a package with several repair steps and limits per step, which
+is not equivalent to five total rounds per function. In R1, the highlighted results do not support at the same time the
+reduction of complexity and that of smells.
+
+\begin{table}[!t]
+\caption{Author's judgement per scenario and criterion}\label{tab:julgamento}
+\centering\scriptsize
+\begin{tabular}{@{}lccc@{}}
+\hline
+Scenario & Clarity & Grounding & Guidance\\
+\hline
+G1 & partial & meets & partial\\
+G2 & partial & partial & partial\\
+D1 & partial & meets & meets\\
+D2 & partial & partial & does not meet\\
+T1 & meets & partial & partial\\
+T2 & partial & does not meet & partial\\
+R1 & partial & partial & partial\\
+R2 & partial & partial & partial\\
+\hline
+\end{tabular}
+\end{table}
+
+D1 is the only scenario in which grounding and guidance meet the criteria: the table leads to an executable script, with the
+function, the test and the error message in the prompt and verification by the suite. The guidance fails in D2, in which the
+suite does not reproduce the defect and the localization is unknown, and the grounding fails in T2, in which there is only a compiler
+for a COBOL migration that requires equivalence of behaviour. In both cases, the table does not declare that the
+evidence is insufficient. The ambiguities that the author recorded recur across the scenarios:
+\begin{itemize}
+  \item the table does not say how to split a fixed budget of calls between repair and new candidates (G1, G2 and T1);
+  \item the feedback condition puts together compiler, tests and static analyser and does not distinguish the result
+  measured, such as compilation, passing the tests or fixing the defect (G2, T1 and T2);
+  \item passing the suite does not guarantee that the change fixes the intended defect or that it preserves the behaviour
+  (D1, D2 and T2);
+  \item the dependence on known localization or on a test that reproduces the defect only appears in the caveats (D2);
+  \item the refactoring row puts together specification, domain knowledge and examples, which have different foundations
+  (R1 and R2).
+\end{itemize}
+The author also corrected the derived guidance in some scenarios. In G2, the appropriate wording is not to recommend
+self-critique without execution as a default, since one deterioration with a 1.5B model does not establish the behaviour of all
+models up to 8B. In D2, compilation and existing tests still give feedback on the change, although they do not verify
+the reported defect. In T1, the study cited does not have a budget equal to that of the scenario. In R1, from one to three examples is not
+a range established by the evidence.
+
+The author decided to apply the revisions in a version 2 of the table:
+\begin{itemize}
+  \item distinguish the types of feedback and make explicit the result measured (compilation, passing the tests,
+  correctness of the repair, complexity or performance);
+  \item make explicit the dependences on localization and on reproduction of the defect;
+  \item declare the conditions without sufficient evidence and the cases in which the corpus does not guide the distribution of the
+  calls;
+  \item separate the ingredients grouped in the refactoring row;
+  \item differentiate absence of evidence, contrary result and indirect evidence.
+\end{itemize}
+In the first proposal, the eight hypotheses of the scenarios were given as confirmed, H-G1 only in part. The author asked
+that each hypothesis be judged separately, admitting partial confirmation or an inconclusive result. The examination assesses the
+guidance offered by the table, and not the effectiveness of the techniques. The complete examination is in
+\path{evidencias/sinteses/exame-cenarios-v1.md}, and the author's judgements, in
+\path{evidencias/sinteses/exame/julgamentos-autor.json}.
+Version 2 of the table, revised after the examination, is in Section~\ref{sec:qp3}. In the separate judgement, the author confirmed six hypotheses and confirmed two in part
+(\path{evidencias/sinteses/exame/hipoteses-proposta.md}). H-G1 is confirmed in part because there is evidence to
+consider tests, feedback and planning, but not to choose between them with five calls. H-T1 is
+confirmed in part because the result cited comes from a package with its own steps and limits and does not cover the requirement
+of safe Rust. No hypothesis was inconclusive. The six confirmed include the four that predicted insufficient
+evidence (H-G2, H-D2, H-T2 and H-R2): in these scenarios, not recommending a technique as a default is the appropriate
+answer.

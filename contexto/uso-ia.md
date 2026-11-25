@@ -428,3 +428,9 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - D124: o autor conferiu S1935 e as 120 afirmações; Claude Code (Claude Opus 5.5) aplicou as correções, registrou os julgamentos e revisou visualmente as 31 páginas do PDF.
 - D125: Claude Code (Claude Opus 5.5) analisou a revisão pré-envio do autor e o parecer do Codex (fora do repositório), conferiu nos originais os pontos factuais (S62, S1880, contagens nos dados) e aplicou as correções no texto, na tabela v2 e nos dados.
 - D126: Claude Code registrou a nota correta de A106 informada pelo autor e retirou a pendência do texto.
+
+## T16 — artigo no formato SBC Reviews e versão em inglês (24/11/2026, D140–D143)
+- Executor: Claude Code (Claude Fable 5.2), a pedido do autor, que relatou o pedido do orientador e tomou as quatro decisões de D140. Leitura da página de submissões, das *Author Guidelines* e do repositório do template da revista; cópia sem alteração de `sbcreviews-2025.cls` e `apalike-sol.bst`; reescrita de `monografia/main.tex`, `sbc-comum.tex` e das declarações; troca das citações dos capítulos por macros que servem ao artigo e à monografia.
+- Tradução dos capítulos para o inglês por Claude Code (Claude Fable 5.2), em `monografia/capitulos-en/`, sem revisão humana. A barreira `scripts/verificar_traducao.py` é mecânica e não substitui essa revisão.
+- Busca de ORCID e e-mail em fontes públicas (registro do ORCID, Crossref e sítio do DCC/UFMG), por decisão do autor; dados a confirmar.
+- Verificação: `make check`, `make pdf`, `make pdf-en` e `make pdf-monografia`; texto extraído do PDF da monografia comparado com o de antes da mudança (idêntico); páginas das duas versões do artigo inspecionadas em imagem. Nada aqui é revisão humana, e não houve submissão à revista.
