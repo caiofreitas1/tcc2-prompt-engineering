@@ -50,6 +50,7 @@ O GitHub organiza as tarefas; criar issues não inicia agentes automaticamente.
 - `make site`: gerar `site/dados.json`, a base do site «Prompt em Código» (guia de escolha e explorador
   das comparações), a partir da tabela de apoio v2, das fichas e das comparações. `make site-servir`
   abre o site em http://localhost:8765. Design em site/DESIGN.md; decisão em D131.
+  O site está descrito na seção 5.3 da monografia, «Aplicação: o sistema Prompt em Código» (D137).
 - `make release-check`: verificar pré-condições mínimas da versão para entrega.
   Deve falhar nesta estrutura inicial, pois há etapas e revisão humana pendentes.
 - `git clone https://github.com/caiofreitas1/tcc2-prompt-engineering.git`: obter a cópia
@@ -62,7 +63,8 @@ como utilitário da preparação inicial; não é necessário executá-lo para c
 monografia/main.tex usa o IEEE Conference Template, escolhido pelo autor em
 27/10/2026, com a classe IEEEtran em modo conference e A4. É uma estrutura de
 artigo com redação pendente. O orientador informado pelo autor é Prof. Dr. Eduardo
-Magno Lages Figueiredo; o autor confirmou a entrega somente como artigo IEEE,
+Magno Lages Figueiredo, e o coorientador, informado em 21/11/2026 (D136), é Pedro Saint
+Clair Garcia; o autor confirmou a entrega somente como artigo IEEE,
 sem capa ou folha de aprovação separadas. Ver monografia/TEMPLATE.md.
 Em 18/11/2026, depois de aviso de professora da banca de que o curso exige monografia,
 o autor pediu um segundo documento nesse formato (D127): monografia/monografia.tex reúne
