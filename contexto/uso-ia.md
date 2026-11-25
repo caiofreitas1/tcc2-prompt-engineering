@@ -434,3 +434,4 @@ da flag do template, preservando as barreiras acadêmicas restantes.
 - Tradução dos capítulos para o inglês por Claude Code (Claude Fable 5.2), em `monografia/capitulos-en/`, sem revisão humana. A barreira `scripts/verificar_traducao.py` é mecânica e não substitui essa revisão.
 - Busca de ORCID e e-mail em fontes públicas (registro do ORCID, Crossref e sítio do DCC/UFMG), por decisão do autor; dados a confirmar.
 - Verificação: `make check`, `make pdf`, `make pdf-en` e `make pdf-monografia`; texto extraído do PDF da monografia comparado com o de antes da mudança (idêntico); páginas das duas versões do artigo inspecionadas em imagem. Nada aqui é revisão humana, e não houve submissão à revista.
+- D144: a pedido do autor, Claude Code (Claude Fable 5.2) corrigiu no gerador a composição do parágrafo de abertura do Apêndice B, regenerou os dois apêndices, recompilou os três documentos e inspecionou a página em imagem.

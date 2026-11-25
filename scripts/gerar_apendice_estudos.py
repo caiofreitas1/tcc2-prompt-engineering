@@ -58,7 +58,9 @@ def montar(idioma='pt'):
                      r'os do registro do arXiv.' if pub else '')
                   + (rf' Outros {so_arxiv} continuam identificados pelo arXiv, sem publicação localizada.' if pub and so_arxiv else '')
                   + (r' Estudos marcados com $\dagger$ ainda não têm ficha de extração.' if sem_ficha else '')]
-    linhas += [r'{\scriptsize\raggedright', r'\begin{description}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}']
+    # A linha em branco encerra o parágrafo de abertura antes do grupo em corpo menor; sem ela, o parágrafo
+    # saía alinhado à esquerda e com a entrelinha da lista (D144).
+    linhas += ['', r'{\scriptsize\raggedright', r'\begin{description}\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}']
     for r in est:
         marca = ('' if r['id'] in fichas else r'$^\dagger$') + (r'$^\ast$' if r['id'] in pub else '')
         ident = publicado(pub[r['id']]) if r['id'] in pub else rf'\texttt{{{tex(r["identificador"])}}}'

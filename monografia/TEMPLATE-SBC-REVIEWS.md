@@ -55,7 +55,8 @@ de escopo e mapeamentos) é avaliação do orientador e dos editores, não deste
   documentos. As citações passaram de `\cite` a `\citep` (entre parênteses) e a
   `\citetexto{autores}{chave}` (no texto). No artigo, a segunda imprime os autores como estão no texto e
   o ano entre colchetes; na monografia, as duas voltam à citação numérica. O texto extraído do PDF da
-  monografia ficou idêntico ao anterior (81 páginas).
+  monografia ficou idêntico ao anterior (81 páginas); a única mudança posterior na monografia é a de D144,
+  descrita em «Compilação e conferência».
 - **Referências.** `referencias.bib` continua único. As notas «Versão consultada: arXiv:…» passaram a
   `\versaoconsultada{…}`, definida em cada documento no seu idioma. Nas três entradas que só existem no
   arXiv, `howpublished = {\soartigo{…}}` leva o identificador e o endereço ao artigo, porque o estilo
@@ -138,9 +139,10 @@ Conferência local em 24/11/2026 com TeX Live 2026 (LuaHBTeX) e latexmk; são ne
   `\headheight` do `fancyhdr` na primeira página.
 - Páginas inspecionadas em imagem (Ghostscript, 110 dpi): primeira página, tabelas de coluna, as duas
   partes da tabela de apoio, figura do sistema, declarações, referências e início dos apêndices.
-- Pendência cosmética herdada: o parágrafo de abertura do Apêndice B sai alinhado à esquerda e com
-  entrelinha reduzida, porque o arquivo gerado abre o grupo `\scriptsize\raggedright` sem linha em
-  branco antes. Ocorre igualmente na monografia; não foi corrigido para não alterar a monografia.
+- O parágrafo de abertura do Apêndice B saía alinhado à esquerda e com entrelinha reduzida, porque o
+  arquivo gerado abria o grupo `\scriptsize\raggedright` sem linha em branco antes. Corrigido no
+  gerador a pedido do autor (D144), também na monografia: ela continua com 81 páginas, e o parágrafo
+  passou de seis para cinco linhas, o que desloca os itens da lista em uma linha.
 - A figura do sistema mostra a interface em português também na versão em inglês.
 
 ## Pendências antes de uma submissão
